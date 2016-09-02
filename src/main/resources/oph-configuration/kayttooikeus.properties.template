@@ -1,0 +1,128 @@
+#
+# TÄHÄN TIEDOSTOON EI SAA TALLENTAA YMPÄRISTÖKOHTAISIA ARVOJA MUUTOIN KUIN MUUTTUJINA!!!
+#
+# Tämä tiedosto toimii pohjana oph-configuration/common.properties tiedostolle,
+# joka asettaa tomcatin ympäristökohtaiset arvot.
+#
+
+# Aseta vähintään nämä ympäristökohtaiset arvot
+activemq.brokerurl={{activemq_brokerurl}}
+activemq.jmxurl={{activemq_jmxurl}}
+auth.cryptoservice.static.salt={{auth_cryptoservice_static_salt}}
+auth.cryptoservice.salt={{auth_cryptoservice_salt}}
+auth.cryptoservice.passphrase={{auth_cryptoservice_passphrase}}
+auth.mode={{auth_mode}}
+authentication.app.username.to.viestinta={{authentication_app_username_to_viestinta}}
+authentication.app.password.to.viestinta={{authentication_app_password_to_viestinta}}
+cas.service.vtj-service={{cas_service_vtj_service}}
+env.loglevel={{env_loglevel}}
+host.cas={{host_cas}}
+host.ilb={{host_ilb}}
+host.ldap={{host_ldap}}
+host.virkailija={{host_virkailija}}
+keystore.password={{keystore_password}}
+ldap.manager.password={{ldap_manager_password}}
+ldap.manager-password={{ldap_manager_password}}
+ldap.manager.userdn={{ldap_manager_userdn}}
+mail.url={{mail_url}}
+registration.app.username.to.usermanagement={{registration_app_username_to_usermanagement}}
+registration.app.password.to.usermanagement={{registration_app_password_to_usermanagement}}
+server.name={{ansible_hostname}}
+vtj.service.url={{vtj_service_url}}
+vtj.production.env={{vtj_production_env}}
+registration-ui.url.anomus={{registration_ui_url_anomus}}
+authentication-service.postgresql.url=jdbc:postgresql://{{host_postgresql_authentication}}:{{port_postgresql}}/authentication
+authentication-service.postgresql.user={{host_postgresql_authentication_user}}
+authentication-service.postgresql.password={{host_postgresql_authentication_password}}
+authentication-service.postgresql.maxactive={{host_postgresql_authentication_max_active}}
+authentication-service.postgresql.maxwait={{host_postgresql_authentication_max_wait}}
+authentication-service.postgresql.maxlifetimemillis=60000
+
+# Oletusarvoja
+accessRight.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/accessRightService
+accessRightAdmin.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/accessRightAdminService
+accessRightHistory.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/accessRightHistoryService
+activemq.queue.name.log.error=Sade.Log_Error
+activemq.queue.name.log=Sade.Log
+activemq.queue.name.mail=Sade.Email
+activeMq.queueName.organisaatio=fi.vm.sade.organisaatio.service
+activeMq.queueNameHaku=fi.vm.sade.tarjonta.haku.service
+activeMq.queueNameTarjontaAdmin=fi.vm.sade.tarjonta.admin.service
+activeMq.queueNameTarjontaPublic=fi.vm.sade.tarjonta.public.service
+activeMq.targetDestination.learningopportunityprovider.public=fi.vm.sade.learningopportunityprovider.public.service
+activeMq.targetDestination.organisaatio=fi.vm.sade.organisaatio.service
+activeMq.targetDestinationAdmin.tarjonta=fi.vm.sade.tarjonta.admin.service
+activeMq.targetDestinationPublic.tarjonta=fi.vm.sade.tarjonta.public.service
+auth.emailinvitation.send.senderemail=noreply@oph.fi
+auth.emailinvitation.send.link=https://{{host_henkilo | default("${host.virkailija}") }}/registration-ui/html/index.html#/emailregister/
+auth.ldap.daytime.batch.size=250
+auth.ldap.nighttime.batch.size=500
+auth.ldap.daytime.interval=1
+auth.ldap.nighttime.interval=9
+auth.ldap.daytime.load.threshold=15
+auth.ldap.night.starts=22
+auth.ldap.night.ends=5
+auth.ldap.statistics.size=25
+auth.ldap.url=${ldap.url}
+auth.ldap.manager.userdn=${ldap.manager.userdn}
+auth.ldap.manager.password=${ldap.manager.password}
+auth.password.reset.senderEmail=noreply@oph.fi
+auth.password.reset.template=salasanareset_email
+auth.password.reset.subject=Unohtuneen salasanan resetointi
+auth.password.reset.link=https://{{host_henkilo | default("${host.virkailija}") }}/registration-ui/html/index.html#/passwordReset/
+auth.accessright.expirationreminder.personurl=https://{{host_henkilo | default("${host.virkailija}") }}/authentication-henkiloui/html/index.html#/omattiedot/
+auth.yksilointi.service.firstname.threshold=0.85
+auth.yksilointi.service.lastname.threshold=0.85
+auth.identification.expiration.months=24
+auth.identification.loop.size=200
+auth.identification.wait.time=500
+authentication-service.rest.url=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/resources/
+authentication.hostedsp=https\://{{host_authentication | default("${host.virkailija}") }}/service-provider-app/saml/metadata/alias/hakasp
+authentication.logout.redirect=https\://${host.cas}/cas/logout?service\=https%3A%2F%2F${host.virkailija}
+authentication.redirect=https\://${host.cas}/cas/login?service\=https%3A%2F%2F${host.virkailija}%2Fregistration-ui%2Fregister
+authentication.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/authenticationService
+cas.callback.authentication-service=http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-service
+cas.callback.authentication-ui=http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-henkiloui
+cas.callback.authentication-groups=http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-groups
+cas.callback.registration-ui=http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/registration-ui
+cas.group-role-attribute=cn
+cas.group-search-base=ou\=groups
+cas.group-search-filter=(uniqueMember\={0})
+cas.sendRenew=false
+cas.user-search-base=ou\=people
+cas.user-search-filter=(|(mail\={0})(uid\={0}))
+cas.service.ryhmasahkoposti=https://{{host_viestintapalvelu | default("${host.virkailija}") }}/ryhmasahkoposti-service
+customAttribute.webservice.url.backend=https://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/customAttributeService
+flyway.initOnMigrate=true
+grantedAccessRight.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/grantedAccessRightService
+grantedAccessRightAdmin.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/grantedAccessRightAdminService
+jpa.schemaUpdate=validate
+jpa.showSql=false
+ldap.cache.size=10000
+ldap.data.dir=${user.home}/data
+ldap.filter.people=uid\=%u
+ldap.index.cache.size=10000
+ldap.manager-dn=${ldap.manager.userdn}
+ldap.search.base.people=ou=People,dc=opintopolku,dc=fi
+ldap.url=ldap://${host.ldap}
+ldap.url.with.base=ldap\://${host.ldap}/dc\=opintopolku,dc\=fi
+log4j.properties.file=${user.home.conf}/log4j.properties
+oid.rest.url.backend=${host.ilb}/oid-service/rest/oid
+oid.webservice.url.backend=${host.ilb}/services/oidService
+personalInformation.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/personalInformationService
+registration-ui.reset.password.home.url=https\://${host.virkailija}/
+requisition.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/requisitionService
+requisitionAdmin.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/requisitionAdminService
+root.organisaatio.oid=1.2.246.562.10.00000000001
+ryhmasahkoposti.rest.url=https://{{host_viestintapalvelu | default("${host.virkailija}") }}/ryhmasahkoposti-service/email
+serviceProvider.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/serviceProviderService
+user.home.conf=${user.home}/oph-configuration
+user.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/userService
+userData.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/userDataService
+userManagement.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/userManagementService
+web.url.cas=https\://${host.cas}/cas
+external.permission.check.HAKU_APP=https://${host.virkailija}/haku-app/permission/checkpermission
+external.permission.check.SURE=https://${host.virkailija}/suoritusrekisteri/permission/checkpermission
+external.permission.check.OIKEUSTULKKIREKISTERI=https://${host.virkailija}/oikeustulkkirekisteri-service/api/permission/henkilo
+haku-app.applications.rest.endpoint=https://${host.virkailija}/haku-app/applications/byPersonOid
+cas.service.haku=https://${host.virkailija}/haku-app
