@@ -37,24 +37,24 @@
         <project.build.fileEncoding>UTF-8</project.build.fileEncoding>
         <java.version>1.8</java.version>
 
-        <!--&lt;!&ndash; Sade utils &ndash;&gt;-->
-        <!--<generic.version>9.4-SNAPSHOT</generic.version>-->
-        <!--<java.utils.version>0.1.0-SNAPSHOT</java.utils.version>-->
-        <!--<auditlog.api.version>5.0.0-SNAPSHOT</auditlog.api.version>-->
-        <!---->
+        <!-- Sade utils -->
+        <generic.version>9.4-SNAPSHOT</generic.version>
+        <java.utils.version>0.1.0-SNAPSHOT</java.utils.version>
+        <auditlog.api.version>5.0.0-SNAPSHOT</auditlog.api.version>
+
         <!--&lt;!&ndash; Container &ndash;&gt;-->
         <!--<tomcat.version>7.0.47</tomcat.version>-->
-        <!--<servlet.api.version>3.1.0</servlet.api.version>-->
+        <servlet.api.version>3.1.0</servlet.api.version>
         <!--<jetty.version>9.2.11.v20150529</jetty.version>-->
         <!---->
         <!-- Spring -->
         <spring.version>4.2.7.RELEASE</spring.version>
         <spring.security.version>3.2.7.RELEASE</spring.security.version>
         <spring.data.jpa.version>1.7.2.RELEASE</spring.data.jpa.version>
-        <!---->
-        <!--&lt;!&ndash; MVC &ndash;&gt;-->
-        <!--<fasterxml.jackson.version>2.4.2</fasterxml.jackson.version>-->
-        <!--<swagger.version>1.0.2</swagger.version>-->
+
+        <!-- MVC -->
+        <fasterxml.jackson.version>2.4.2</fasterxml.jackson.version>
+        <swagger.version>1.0.2</swagger.version>
 
         <!--&lt;!&ndash; Hibernate &ndash;&gt;-->
         <!--<hibernate.version>4.3.5.Final</hibernate.version>-->
@@ -137,6 +137,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-actuator</artifactId>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+            </dependency>
+
 
             <!-- SADE -->
             <dependency>
@@ -154,11 +159,24 @@
                 <artifactId>auditlogger</artifactId>
                 <version>${auditlog.api.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>javax.servlet</groupId>-->
-                <!--<artifactId>javax.servlet-api</artifactId>-->
-                <!--<version>${servlet.api.version}</version>-->
-            <!--</dependency>-->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet.api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-cxf</artifactId>
+                <version>${java.utils.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.cxf</groupId>
+                        <artifactId>cxf-bundle</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
 
 
             <dependency>
@@ -221,6 +239,30 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
+
+
+
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-core</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-aspects</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-config</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-web</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>
