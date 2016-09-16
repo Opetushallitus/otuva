@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-//import fi.vm.sade.kayttooikeus.dao.DbTestDao;
 import fi.vm.sade.kayttooikeus.dao.DbTestDao;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ public class HenkiloServiceImpl implements HenkiloService {
     @Override
     @Transactional(readOnly = true)
     public Long countHenkilos() {
-//        return Long.valueOf(55);
         return dbTestDao.countHenkilos();
     }
 }
