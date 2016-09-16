@@ -47,10 +47,10 @@
         <!--<servlet.api.version>3.1.0</servlet.api.version>-->
         <!--<jetty.version>9.2.11.v20150529</jetty.version>-->
         <!---->
-        <!--&lt;!&ndash; Spring &ndash;&gt;-->
-        <!--<spring.version>4.1.6.RELEASE</spring.version>-->
-        <!--<spring.security.version>3.2.7.RELEASE</spring.security.version>-->
-        <!--<spring.data.jpa.version>1.7.2.RELEASE</spring.data.jpa.version>-->
+        <!-- Spring -->
+        <spring.version>4.2.7.RELEASE</spring.version>
+        <spring.security.version>3.2.7.RELEASE</spring.security.version>
+        <spring.data.jpa.version>1.7.2.RELEASE</spring.data.jpa.version>
         <!---->
         <!--&lt;!&ndash; MVC &ndash;&gt;-->
         <!--<fasterxml.jackson.version>2.4.2</fasterxml.jackson.version>-->
@@ -69,8 +69,8 @@
         <!--&lt;!&ndash; Cache &ndash;&gt;-->
         <!--<ehcache.version>2.5.0</ehcache.version>-->
 
-        <!--&lt;!&ndash; QueryDSL &ndash;&gt;-->
-        <!--<querydsl.version>3.7.4</querydsl.version>-->
+        <!-- QueryDSL -->
+        <querydsl.version>3.7.4</querydsl.version>
 
         <!--&lt;!&ndash; DB &ndash;&gt;-->
         <!--<postgresql.version>9.4.1209</postgresql.version>-->
@@ -80,10 +80,10 @@
         <!--<hsqldb.version>2.3.2</hsqldb.version>-->
         <!--<nosql-junit.version>0.7.6</nosql-junit.version>-->
 
-        <!--&lt;!&ndash; Utils &ndash;&gt;-->
-        <!--<guava.version>18.0</guava.version>-->
-        <!--<joda.version>2.5</joda.version>-->
-        <!--<commons-lang.version>2.6</commons-lang.version>-->
+        <!-- Utils -->
+        <guava.version>18.0</guava.version>
+        <joda.version>2.5</joda.version>
+        <commons-lang.version>2.6</commons-lang.version>
 
         <!--&lt;!&ndash; Logging &ndash;&gt;-->
         <!--<slf4j.version>1.7.5</slf4j.version>-->
@@ -161,7 +161,27 @@
             <!--</dependency>-->
 
 
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-apt</artifactId>
+                <version>${querydsl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-jpa</artifactId>
+                <version>${querydsl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysema.querydsl</groupId>
+                <artifactId>querydsl-sql</artifactId>
+                <version>${querydsl.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
