@@ -45,8 +45,8 @@ public class ErrorHandlerAdvice {
     @Autowired
     private MessageSource messageSource;
 
-    @InitBinder
-    public void dataBinding(WebDataBinder binder) {
+//    @InitBinder
+//    public void dataBinding(WebDataBinder binder) {
 //        binder.addValidators(new org.springframework.validation.Validator() {
 //            @Override
 //            public boolean supports(Class<?> clazz) {
@@ -61,8 +61,8 @@ public class ErrorHandlerAdvice {
 //                }
 //            }
 //        });
-        binder.setIgnoreUnknownFields(true);
-    }
+//        binder.setIgnoreUnknownFields(true);
+//    }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND) // 404 Entity not found by primary key.
     @ExceptionHandler(NotFoundException.class) @ResponseBody
@@ -80,7 +80,7 @@ public class ErrorHandlerAdvice {
 //                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
 //    }
 
-    //    @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
+//        @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
 //    @ExceptionHandler(AccessDeniedException.class) @ResponseBody
 //    public Map<String,Object> notAuthorized(HttpServletRequest req, AccessDeniedException exception) {
 //        return handleException(req, exception, "error_NotAuthorizedException",

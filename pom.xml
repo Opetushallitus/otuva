@@ -143,6 +143,28 @@
             </dependency>
 
 
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-core</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-aspects</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-config</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-web</artifactId>
+                <version>${spring.security.version}</version>
+            </dependency>
+
+
             <!-- SADE -->
             <dependency>
                 <groupId>fi.vm.sade.generic</groupId>
@@ -233,6 +255,31 @@
                 <artifactId>hibernate-ehcache</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-ehcache</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>jta</artifactId>
+                <version>${jta.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -266,25 +313,25 @@
 
         </dependencies>
     </dependencyManagement>
-    
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<id>oph-sade-artifactory-snapshots</id>-->
-            <!--<url>https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local</url>-->
-            <!--<snapshots>-->
-                <!--<enabled>true</enabled>-->
-            <!--</snapshots>-->
-        <!--</repository>-->
-        <!--<repository>-->
-            <!--<id>oph-sade-artifactory-releases</id>-->
-            <!--<url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>-->
-        <!--</repository>-->
-        <!--<repository>-->
-            <!--<id>repository.jboss.org</id>-->
-            <!--<name>JBoss Repository</name>-->
-            <!--<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>-->
-        <!--</repository>-->
-    <!--</repositories>-->
+
+    <repositories>
+        <repository>
+            <id>oph-sade-artifactory-snapshots</id>
+            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>oph-sade-artifactory-releases</id>
+            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>
+        </repository>
+        <repository>
+            <id>repository.jboss.org</id>
+            <name>JBoss Repository</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+    </repositories>
     
     <dependencies>
     </dependencies>
@@ -295,12 +342,12 @@
             </plugins>
         </pluginManagement>
 
-        <!--<plugins>-->
+        <plugins>
             <!--<plugin>-->
                 <!--<groupId>org.springframework.boot</groupId>-->
                 <!--<artifactId>spring-boot-maven-plugin</artifactId>-->
             <!--</plugin>-->
-        <!--</plugins>-->
+        </plugins>
     </build>
 
     <profiles>
