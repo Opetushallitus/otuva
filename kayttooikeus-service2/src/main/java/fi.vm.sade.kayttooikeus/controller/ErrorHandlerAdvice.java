@@ -11,14 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.Errors;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
@@ -80,12 +81,12 @@ public class ErrorHandlerAdvice {
 //                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
 //    }
 
-//        @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
-//    @ExceptionHandler(AccessDeniedException.class) @ResponseBody
-//    public Map<String,Object> notAuthorized(HttpServletRequest req, AccessDeniedException exception) {
-//        return handleException(req, exception, "error_NotAuthorizedException",
-//                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
-//    }
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
+    @ExceptionHandler(AccessDeniedException.class) @ResponseBody
+    public Map<String,Object> notAuthorized(HttpServletRequest req, AccessDeniedException exception) {
+        return handleException(req, exception, "error_NotAuthorizedException",
+                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
+    }
     
     private Locale getLocale(HttpServletRequest req) {
         Locale locale;

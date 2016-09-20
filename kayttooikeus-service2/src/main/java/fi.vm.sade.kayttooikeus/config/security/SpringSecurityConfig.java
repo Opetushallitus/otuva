@@ -3,12 +3,11 @@ package fi.vm.sade.kayttooikeus.config.security;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+
 /**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 12.58
+ * Created by autio on 19.9.2016.
  */
 @Configuration
-@Import({SpringSecurityEnvConfig.class, SpringSecurityTestConfig.class})
+@Import({SecurityConfigTest.class, SecurityConfigDefault.class})
 public class SpringSecurityConfig{
 }
