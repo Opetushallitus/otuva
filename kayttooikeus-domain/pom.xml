@@ -11,7 +11,7 @@
 
     <artifactId>kayttooikeus-domain</artifactId>
     <name>Käyttöoikeuspalvelu :: Domain</name>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -61,12 +61,18 @@
         </dependency>
     </dependencies>
 
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.springframework.boot</groupId>-->
+                <!--<artifactId>spring-boot-maven-plugin</artifactId>-->
+            <!--</plugin>-->
+
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--</plugin>-->
             <!-- Generate Q-classes -->
             <plugin>
                 <groupId>com.mysema.maven</groupId>
@@ -84,7 +90,8 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
         </plugins>
     </build>
+
 </project>

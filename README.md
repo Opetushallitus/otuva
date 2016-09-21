@@ -7,7 +7,7 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 ### Palvelin
 * Tomcat 7
 * Java 8
-* Spring 4
+* Spring Boot
 * QueryDSL
 * PostgreSQL
 * JPA / Hibernate 4
@@ -23,9 +23,9 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 
 ### kayttooikeus-service
 
-Backend-palvelun voi käynnistää Tomcatilla:
+Backend-palvelun käynnistäminen dev-profiililla:
 
-    mvn tomcat7-run
+    java -jar -Dspring.profiles.active=dev kayttooikeus-service/target/kayttooikeus-service-1.0.0-SNAPSHOT.jar
 
 ## Kääntäminen
 
