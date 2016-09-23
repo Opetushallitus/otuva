@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.ehcache.EhCacheFactoryBean;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.cas.ServiceProperties;
@@ -102,6 +104,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
 
         DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
+        source.afterPropertiesSet();
         source.setUserDn(ldapManagerDn);
         source.setPassword(ldapManagerPassword);
 
@@ -119,45 +122,42 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     private EhCacheBasedTicketCache ehCacheBasedTicketCache(){
         EhCacheBasedTicketCache eh = new EhCacheBasedTicketCache();
-//        eh.setCache(casTicketsCacheBean().getObject());
+        eh.setCache(casTicketsCacheBean().getObject());
         return eh;
     }
 
-//    @Bean
-//    public EhCacheFactoryBean casTicketsCacheBean() {
-//        EhCacheFactoryBean ehCache = new EhCacheFactoryBean();
-//
-//        ehCache.setCacheManager(casTicketCache().getObject());
-//        ehCache.setDiskExpiryThreadIntervalSeconds(120);
-//        ehCache.setDiskPersistent(false);
-//        ehCache.setMaxElementsOnDisk(10000000);
-//        ehCache.setMemoryStoreEvictionPolicy("LRU");
-//        ehCache.setOverflowToDisk(true);
-//        ehCache.setName("casTickets");
-//        ehCache.setTimeToLive(7200);
-//        ehCache.setTimeToIdle(7200);
-//        ehCache.setEternal(false);
-//
-//        return ehCache;
-//    }
-//
-//    @Bean
-//    public EhCacheManagerFactoryBean casTicketCache() {
-//        EhCacheManagerFactoryBean casTicketCache = new EhCacheManagerFactoryBean();
-//
-////        casTicketCache.setConfigLocation(ehCache);
-//        casTicketCache.setShared(false);
-//        casTicketCache.setCacheManagerName("casTicketCache");
-//
-//        return casTicketCache;
-//    }
+    @Bean
+    public EhCacheFactoryBean casTicketsCacheBean() {
+        EhCacheFactoryBean ehCache = new EhCacheFactoryBean();
+
+        ehCache.setCacheManager(casTicketCache().getObject());
+        ehCache.setDiskExpiryThreadIntervalSeconds(120);
+        ehCache.setDiskPersistent(false);
+        ehCache.setMaxElementsOnDisk(10000000);
+        ehCache.setMemoryStoreEvictionPolicy("LRU");
+        ehCache.setOverflowToDisk(true);
+        ehCache.setName("casTickets");
+        ehCache.setTimeToLive(7200);
+        ehCache.setTimeToIdle(7200);
+        ehCache.setEternal(false);
+
+        return ehCache;
+    }
+
+    @Bean
+    public EhCacheManagerFactoryBean casTicketCache() {
+        EhCacheManagerFactoryBean casTicketCache = new EhCacheManagerFactoryBean();
+
+        casTicketCache.setShared(false);
+        casTicketCache.setCacheManagerName("casTicketCache");
+
+        return casTicketCache;
+    }
 
     @Bean
     public CasAuthenticationProvider casAuthenticationProvider() {
 
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
-
-//        casAuthenticationProvider.setAuthenticationUserDetailsService(userDetailsService());
 
         UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
         casAuthenticationProvider.setAuthenticationUserDetailsService(details);
