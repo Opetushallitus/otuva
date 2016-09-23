@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
+
 import fi.vm.sade.security.CustomUserDetailsMapper;
+import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
+import org.springframework.security.cas.authentication.CasAuthenticationProvider;
+import org.springframework.security.cas.authentication.EhCacheBasedTicketCache;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
@@ -32,6 +39,9 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Value("${cas_service}")
     private String casService;
+
+    @Value("${cas_key}")
+    private String casKey;
 
     @Value("${web.url.cas}")
     private String webUrlCas;
@@ -61,17 +71,14 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     private String ldapManagerPassword;
 
 
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        CustomCasAuthenticationFilter casFilter = new CustomCasAuthenticationFilter();
-//
-//        http
-//                .addFilter(casFilter)
-//                .authorizeRequests()
-//                .anyRequest().authenticated()
-//                .and()
-//                .httpBasic();
-//    }
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+                .httpBasic();
+    }
 
     @Bean
     public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
@@ -93,19 +100,80 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
+
         DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
         source.setUserDn(ldapManagerDn);
         source.setPassword(ldapManagerPassword);
 
         auth.ldapAuthentication()
                 .contextSource(source)
-                .rolePrefix("Role_")
+                .rolePrefix("ROLE_")
                 .userSearchBase(userSearchBase)
                 .userSearchFilter(userSearchFilter)
                 .groupSearchBase(groupSearchBase)
                 .groupRoleAttribute(groupRoleAttribute)
                 .userDetailsContextMapper(mapper);
 
+    }
+
+
+    private EhCacheBasedTicketCache ehCacheBasedTicketCache(){
+        EhCacheBasedTicketCache eh = new EhCacheBasedTicketCache();
+//        eh.setCache(casTicketsCacheBean().getObject());
+        return eh;
+    }
+
+//    @Bean
+//    public EhCacheFactoryBean casTicketsCacheBean() {
+//        EhCacheFactoryBean ehCache = new EhCacheFactoryBean();
+//
+//        ehCache.setCacheManager(casTicketCache().getObject());
+//        ehCache.setDiskExpiryThreadIntervalSeconds(120);
+//        ehCache.setDiskPersistent(false);
+//        ehCache.setMaxElementsOnDisk(10000000);
+//        ehCache.setMemoryStoreEvictionPolicy("LRU");
+//        ehCache.setOverflowToDisk(true);
+//        ehCache.setName("casTickets");
+//        ehCache.setTimeToLive(7200);
+//        ehCache.setTimeToIdle(7200);
+//        ehCache.setEternal(false);
+//
+//        return ehCache;
+//    }
+//
+//    @Bean
+//    public EhCacheManagerFactoryBean casTicketCache() {
+//        EhCacheManagerFactoryBean casTicketCache = new EhCacheManagerFactoryBean();
+//
+////        casTicketCache.setConfigLocation(ehCache);
+//        casTicketCache.setShared(false);
+//        casTicketCache.setCacheManagerName("casTicketCache");
+//
+//        return casTicketCache;
+//    }
+
+    @Bean
+    public CasAuthenticationProvider casAuthenticationProvider() {
+
+        CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
+
+//        casAuthenticationProvider.setAuthenticationUserDetailsService(userDetailsService());
+
+        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
+        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
+        casAuthenticationProvider.setServiceProperties(serviceProperties());
+        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
+        casAuthenticationProvider.setKey(casKey);
+        casAuthenticationProvider.setStatelessTicketCache(ehCacheBasedTicketCache());
+        return casAuthenticationProvider;
+    }
+
+    private Cas20ProxyTicketValidator casServiceTicketValidator() {
+        Cas20ProxyTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
+        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
+//        validator.setProxyGrantingTicketStorage(ticketStorage());
+        validator.setAcceptAnyProxy(true);
+        return validator;
     }
 
 }
