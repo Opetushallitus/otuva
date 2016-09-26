@@ -21,11 +21,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
-import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 
 /**
@@ -163,8 +160,9 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
 
         UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
-
         casAuthenticationProvider.setAuthenticationUserDetailsService(details);
+//        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
+
         casAuthenticationProvider.setServiceProperties(serviceProperties());
         casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
         casAuthenticationProvider.setKey(casKey);
@@ -185,6 +183,23 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 //        LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch);
 //        ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
 //        return ldapUserDetailsService;
+//    }
+//
+//    @Bean
+//    public LdapContextSource ldapContextSource() {
+//        LdapContextSource ldapContextSource = new LdapContextSource();
+//        ldapContextSource.setUrl("${ldap.url.with.base}");
+//        ldapContextSource.setUserDn("${ldap.manager-dn}"); // Correct?
+//        ldapContextSource.setPassword("${ldap.manager-password}");
+//        return ldapContextSource;
+//    }
+//
+//    @Bean
+//    public UserDetailsContextMapper userDetailsContextMapper() {
+//        LdapUserDetailsMapper ldapUserDetailsMapper = new LdapUserDetailsMapper();
+//        ldapUserDetailsMapper.setRolePrefix("ROLE_");
+//        ldapUserDetailsMapper.setConvertToUpperCase(true);
+//        return  ldapUserDetailsMapper;
 //    }
 
     private Cas20ProxyTicketValidator casServiceTicketValidator() {

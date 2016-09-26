@@ -15,11 +15,6 @@
 
     <dependencies>
 
-        <!--<dependency>-->
-            <!--<groupId>fi.vm.sade.kayttooikeus</groupId>-->
-            <!--<artifactId>kayttooikeus-api</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>fi.vm.sade.kayttooikeus</groupId>
             <artifactId>kayttooikeus-domain</artifactId>
@@ -121,10 +116,6 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
     </dependencies>
 

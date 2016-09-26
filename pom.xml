@@ -91,6 +91,9 @@
         <spring.ldap.core.version>2.1.0.RELEASE</spring.ldap.core.version>
 
 
+        <!-- buildversion.txt generation plugin -->
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+
         <!--&lt;!&ndash; Logging &ndash;&gt;-->
         <!--<slf4j.version>1.7.5</slf4j.version>-->
         <!--<log4j.version>1.2.17</log4j.version>-->
@@ -344,12 +347,6 @@
                 <artifactId>springfox-swagger2</artifactId>
                 <version>${springfox.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox.version}</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -385,7 +382,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <version>${maven-antrun-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>write buildversion.txt</id>
@@ -395,18 +392,18 @@
                         </goals>
                         <configuration>
                             <target>
-                                <echo message="writing target/${project.build.finalName}/${buildversion_prefix}buildversion.txt"/>
-                                <echo file="target/${project.build.finalName}/${buildversion_prefix}buildversion.txt">
+                                <echo message="writing ${project.build.directory}/classes/static/buildversion.txt"/>
+                                <echo file="${project.build.directory}/classes/static/buildversion.txt">
                                     <![CDATA[artifactId=${project.artifactId}
             version=${project.version}
             buildNumber=${project.build}
-            branchName=${branch}
-            vcsRevision=${revision}
+            branchName=${git.branch}
+            vcsRevision=${git.commit.id}
             buildTtime=${maven.build.timestamp}
             ]]>
                                 </echo>
                                 <loadfile property="buildversiontxt"
-                                          srcFile="target/${project.build.finalName}/${buildversion_prefix}buildversion.txt"/>
+                                          srcFile="${project.build.directory}/classes/static/buildversion.txt"/>
                                 <echo message="${buildversiontxt}"/>
                                 <echo file="target/mavenversion.txt">${project.version}</echo>
                             </target>
@@ -415,10 +412,10 @@
                 </executions>
             </plugin>
 
-            <!--<plugin>-->
-                <!--<groupId>org.springframework.boot</groupId>-->
-                <!--<artifactId>spring-boot-maven-plugin</artifactId>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
