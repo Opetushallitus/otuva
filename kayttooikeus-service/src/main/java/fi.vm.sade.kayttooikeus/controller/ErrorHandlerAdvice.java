@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
+import fi.vm.sade.generic.common.ValidationException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.ldap.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -74,12 +76,12 @@ public class ErrorHandlerAdvice {
                         messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
     }
     
-//    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-//    @ExceptionHandler(AuthenticationException.class) @ResponseBody
-//    public Map<String,Object> unauthorized(HttpServletRequest req, AuthenticationException exception) {
-//        return handleException(req, exception, "error_NotAuthorizedException",
-//                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
-//    }
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationException.class) @ResponseBody
+    public Map<String,Object> unauthorized(HttpServletRequest req, AuthenticationException exception) {
+        return handleException(req, exception, "error_NotAuthorizedException",
+                messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
+    }
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
     @ExceptionHandler(AccessDeniedException.class) @ResponseBody
@@ -112,18 +114,18 @@ public class ErrorHandlerAdvice {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());
     }
     
-//    @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-//    @ExceptionHandler(ValidationException.class) @ResponseBody
-//    public Map<String,Object> badRequest(HttpServletRequest req, ValidationException exception) {
-//        Collection<ViolationDto> violations = exception.getViolations() != null ? Collections2.transform(exception.getViolations(), VIOLATIONS_TRANSFORMER::apply) : new ArrayList<>();
-//        Collection<String> violationsMsgs = exception.getValidationMessages();
-//        Map<String,Object> result = handleException(req, exception, exception.getKey(),
-//                exception.getKey() != null ? messageSource.getMessage(exception.getKey(), new Object[0], getLocale(req)) + (violations.isEmpty() ? "" : ": ") : ""
-//                + StringHelper.join(", ", violationsMsgs.iterator()));
-//        result.put("errors", violationsMsgs);
-//        result.put("violations", violations);
-//        return result;
-//    }
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
+    @ExceptionHandler(ValidationException.class) @ResponseBody
+    public Map<String,Object> badRequest(HttpServletRequest req, ValidationException exception) {
+        Collection<ViolationDto> violations = exception.getViolations() != null ? Collections2.transform(exception.getViolations(), VIOLATIONS_TRANSFORMER::apply) : new ArrayList<>();
+        Collection<String> violationsMsgs = exception.getValidationMessages();
+        Map<String,Object> result = handleException(req, exception, exception.getKey(),
+                exception.getKey() != null ? messageSource.getMessage(exception.getKey(), new Object[0], getLocale(req)) + (violations.isEmpty() ? "" : ": ") : ""
+                + StringHelper.join(", ", violationsMsgs.iterator()));
+        result.put("errors", violationsMsgs);
+        result.put("violations", violations);
+        return result;
+    }
     
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad Request
     @ExceptionHandler(IllegalArgumentException.class) @ResponseBody
