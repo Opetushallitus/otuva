@@ -13,6 +13,15 @@ String zipFileName = ""
 
 // Create release zip (wars and configs)
 task(zipIt, type: Zip) {
+
+    doFirst {
+        // Renames abc-x.y-SOMETHING.jar to abc.jar
+        fileTree(from: '.', include: '**/target/*.jar').files.each { oneFile ->
+            String replaced = oneFile.path.replaceFirst('-\\d+(\\.\\d+)*([^./]+|).jar','.jar')
+            oneFile.renameTo(file(replaced))
+        }
+    }
+
     zipFileName = serviceName + "_" + branchName + "_" + new Date().format("yyyyMMddHHmmss") + ".zip"
 
     destinationDir new File(buildDir, "distributions")
