@@ -14,7 +14,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @PropertySource(value = {
         "classpath:/default-props.properties",
         "file:///${user.home:''}/oph-configuration/common.properties",
-        "file:///${user.home:''}/oph-configuration/authentication-ui.properties",
         "file:///${user.home:''}/oph-configuration/override.properties"
 }, ignoreResourceNotFound = false)
 public class PropertiesConfig {
