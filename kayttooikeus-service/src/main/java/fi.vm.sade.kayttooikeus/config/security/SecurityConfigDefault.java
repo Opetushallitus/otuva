@@ -78,7 +78,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/kayttooikeus-service/test").permitAll()
+//                .antMatchers("/kayttooikeus-service/test").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

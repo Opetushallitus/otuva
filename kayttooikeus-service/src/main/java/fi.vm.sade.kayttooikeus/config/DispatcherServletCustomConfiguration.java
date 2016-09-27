@@ -18,11 +18,11 @@ public class DispatcherServletCustomConfiguration {
         return new DispatcherServlet();
     }
 
-    @Bean
-    public ServletRegistrationBean dispatcherServletRegistration() {
-        ServletRegistrationBean registration = new ServletRegistrationBean(
-                dispatcherServlet(), "/kayttooikeus-service/*");
-        registration.setName(DispatcherServletAutoConfiguration.DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME);
-        return registration;
-    }
+//    @Bean
+//    public ServletRegistrationBean dispatcherServletRegistration() {
+//        ServletRegistrationBean registration = new ServletRegistrationBean(
+//                dispatcherServlet(), "/kayttooikeus-service/*");
+//        registration.setName(DispatcherServletAutoConfiguration.DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME);
+//        return registration;
+//    }
 }
