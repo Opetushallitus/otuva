@@ -78,139 +78,139 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-//                .antMatchers("**/buildversion.txt").permitAll()
-//                .antMatchers("**/test").permitAll()
                 .antMatchers("/kayttooikeus-service/test").permitAll()
-                .antMatchers("/kayttooikeus-service/test2").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and()
+                .httpBasic();
+    }
+
+    @Bean
+    public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
+        CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
+        casAuthenticationEntryPoint.setLoginUrl(webUrlCas + "/login");
+        casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
+        return casAuthenticationEntryPoint;
+    }
+
+    @Bean
+    public ServiceProperties serviceProperties(){
+        ServiceProperties serviceProperties = new ServiceProperties();
+        serviceProperties.setService(casService + "/j_spring_cas_security_check");
+        serviceProperties.setSendRenew(sendRenew);
+        serviceProperties.setAuthenticateAllArtifacts(true);
+        return serviceProperties;
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        logger.info("configure global AuthenticationManagerBuilder");
+        UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
+
+        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
+        source.afterPropertiesSet();
+        source.setUserDn(ldapManagerDn);
+        source.setPassword(ldapManagerPassword);
+
+        auth.ldapAuthentication()
+                .contextSource(source)
+                .rolePrefix("ROLE_")
+                .userSearchBase(userSearchBase)
+                .userSearchFilter(userSearchFilter)
+                .groupSearchBase(groupSearchBase)
+                .groupRoleAttribute(groupRoleAttribute)
+                .userDetailsContextMapper(mapper);
+
+    }
+
+
+    private EhCacheBasedTicketCache ehCacheBasedTicketCache(){
+        EhCacheBasedTicketCache eh = new EhCacheBasedTicketCache();
+        eh.setCache(casTicketsCacheBean().getObject());
+        return eh;
+    }
+
+    @Bean
+    public EhCacheFactoryBean casTicketsCacheBean() {
+        EhCacheFactoryBean ehCache = new EhCacheFactoryBean();
+
+        ehCache.setCacheManager(casTicketCache().getObject());
+        ehCache.setDiskExpiryThreadIntervalSeconds(120);
+        ehCache.setDiskPersistent(false);
+        ehCache.setMaxElementsOnDisk(10000000);
+        ehCache.setMemoryStoreEvictionPolicy("LRU");
+        ehCache.setOverflowToDisk(true);
+        ehCache.setName("casTickets");
+        ehCache.setTimeToLive(7200);
+        ehCache.setTimeToIdle(7200);
+        ehCache.setEternal(false);
+
+        return ehCache;
+    }
+
+    @Bean
+    public EhCacheManagerFactoryBean casTicketCache() {
+        EhCacheManagerFactoryBean casTicketCache = new EhCacheManagerFactoryBean();
+
+        casTicketCache.setShared(false);
+        casTicketCache.setCacheManagerName("casTicketCache");
+
+        return casTicketCache;
+    }
+
+    @Bean
+    public CasAuthenticationProvider casAuthenticationProvider() {
+
+        CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
+
+        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
+        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
+//        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
+
+        casAuthenticationProvider.setServiceProperties(serviceProperties());
+        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
+        casAuthenticationProvider.setKey(casKey);
+        casAuthenticationProvider.setStatelessTicketCache(ehCacheBasedTicketCache());
+        return casAuthenticationProvider;
     }
 
 //    @Bean
-//    public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
-//        CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-//        casAuthenticationEntryPoint.setLoginUrl(webUrlCas + "/login");
-//        casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
-//        return casAuthenticationEntryPoint;
+//    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
+//        return ((CasAssertionAuthenticationToken casAssertionAuthenticationToken)
+//                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName()));
 //    }
 //
 //    @Bean
-//    public ServiceProperties serviceProperties(){
-//        ServiceProperties serviceProperties = new ServiceProperties();
-//        serviceProperties.setService(casService + "/j_spring_cas_security_check");
-//        serviceProperties.setSendRenew(sendRenew);
-//        serviceProperties.setAuthenticateAllArtifacts(true);
-//        return serviceProperties;
+//    public LdapUserDetailsService ldapUserDetailsService() {
+//        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch("${cas.user-search-base}",
+//                "${cas.user-search-filter}", ldapContextSource());
+//        LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch);
+//        ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
+//        return ldapUserDetailsService;
 //    }
 //
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
+//    @Bean
+//    public LdapContextSource ldapContextSource() {
+//        LdapContextSource ldapContextSource = new LdapContextSource();
+//        ldapContextSource.setUrl("${ldap.url.with.base}");
+//        ldapContextSource.setUserDn("${ldap.manager-dn}"); // Correct?
+//        ldapContextSource.setPassword("${ldap.manager-password}");
+//        return ldapContextSource;
+//    }
 //
-//        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
-//        source.afterPropertiesSet();
-//        source.setUserDn(ldapManagerDn);
-//        source.setPassword(ldapManagerPassword);
-//
-//        auth.ldapAuthentication()
-//                .contextSource(source)
-//                .rolePrefix("ROLE_")
-//                .userSearchBase(userSearchBase)
-//                .userSearchFilter(userSearchFilter)
-//                .groupSearchBase(groupSearchBase)
-//                .groupRoleAttribute(groupRoleAttribute)
-//                .userDetailsContextMapper(mapper);
-//
+//    @Bean
+//    public UserDetailsContextMapper userDetailsContextMapper() {
+//        LdapUserDetailsMapper ldapUserDetailsMapper = new LdapUserDetailsMapper();
+//        ldapUserDetailsMapper.setRolePrefix("ROLE_");
+//        ldapUserDetailsMapper.setConvertToUpperCase(true);
+//        return  ldapUserDetailsMapper;
 //    }
 
-//
-//    private EhCacheBasedTicketCache ehCacheBasedTicketCache(){
-//        EhCacheBasedTicketCache eh = new EhCacheBasedTicketCache();
-//        eh.setCache(casTicketsCacheBean().getObject());
-//        return eh;
-//    }
-//
-//    @Bean
-//    public EhCacheFactoryBean casTicketsCacheBean() {
-//        EhCacheFactoryBean ehCache = new EhCacheFactoryBean();
-//
-//        ehCache.setCacheManager(casTicketCache().getObject());
-//        ehCache.setDiskExpiryThreadIntervalSeconds(120);
-//        ehCache.setDiskPersistent(false);
-//        ehCache.setMaxElementsOnDisk(10000000);
-//        ehCache.setMemoryStoreEvictionPolicy("LRU");
-//        ehCache.setOverflowToDisk(true);
-//        ehCache.setName("casTickets");
-//        ehCache.setTimeToLive(7200);
-//        ehCache.setTimeToIdle(7200);
-//        ehCache.setEternal(false);
-//
-//        return ehCache;
-//    }
-//
-//    @Bean
-//    public EhCacheManagerFactoryBean casTicketCache() {
-//        EhCacheManagerFactoryBean casTicketCache = new EhCacheManagerFactoryBean();
-//
-//        casTicketCache.setShared(false);
-//        casTicketCache.setCacheManagerName("casTicketCache");
-//
-//        return casTicketCache;
-//    }
-//
-//    @Bean
-//    public CasAuthenticationProvider casAuthenticationProvider() {
-//
-//        CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
-//
-//        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
-//        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
-////        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
-//
-//        casAuthenticationProvider.setServiceProperties(serviceProperties());
-//        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
-//        casAuthenticationProvider.setKey(casKey);
-//        casAuthenticationProvider.setStatelessTicketCache(ehCacheBasedTicketCache());
-//        return casAuthenticationProvider;
-//    }
-//
-////    @Bean
-////    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
-////        return ((CasAssertionAuthenticationToken casAssertionAuthenticationToken)
-////                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName()));
-////    }
-////
-////    @Bean
-////    public LdapUserDetailsService ldapUserDetailsService() {
-////        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch("${cas.user-search-base}",
-////                "${cas.user-search-filter}", ldapContextSource());
-////        LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch);
-////        ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
-////        return ldapUserDetailsService;
-////    }
-////
-////    @Bean
-////    public LdapContextSource ldapContextSource() {
-////        LdapContextSource ldapContextSource = new LdapContextSource();
-////        ldapContextSource.setUrl("${ldap.url.with.base}");
-////        ldapContextSource.setUserDn("${ldap.manager-dn}"); // Correct?
-////        ldapContextSource.setPassword("${ldap.manager-password}");
-////        return ldapContextSource;
-////    }
-////
-////    @Bean
-////    public UserDetailsContextMapper userDetailsContextMapper() {
-////        LdapUserDetailsMapper ldapUserDetailsMapper = new LdapUserDetailsMapper();
-////        ldapUserDetailsMapper.setRolePrefix("ROLE_");
-////        ldapUserDetailsMapper.setConvertToUpperCase(true);
-////        return  ldapUserDetailsMapper;
-////    }
-//
-//    private Cas20ProxyTicketValidator casServiceTicketValidator() {
-//        Cas20ProxyTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
-//        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
-////        validator.setProxyGrantingTicketStorage(ticketStorage());
-//        validator.setAcceptAnyProxy(true);
-//        return validator;
-//    }
+    private Cas20ProxyTicketValidator casServiceTicketValidator() {
+        Cas20ProxyTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
+        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
+//        validator.setProxyGrantingTicketStorage(ticketStorage());
+        validator.setAcceptAnyProxy(true);
+        return validator;
+    }
 
 }
