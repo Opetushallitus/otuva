@@ -77,6 +77,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/buildversion.txt").permitAll()
+                .antMatchers("/test").permitAll()
                 .anyRequest().authenticated();
     }
 

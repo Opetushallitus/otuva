@@ -32,6 +32,8 @@ public class SecurityConfigDev extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("/buildversion.txt").permitAll()
+                .antMatchers("/test2").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
