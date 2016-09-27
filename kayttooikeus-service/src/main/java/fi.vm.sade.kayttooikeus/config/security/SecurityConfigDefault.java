@@ -101,21 +101,21 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
-
-        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
-        source.afterPropertiesSet();
-        source.setUserDn(ldapManagerDn);
-        source.setPassword(ldapManagerPassword);
-
-        auth.ldapAuthentication()
-                .contextSource(source)
-                .rolePrefix("ROLE_")
-                .userSearchBase(userSearchBase)
-                .userSearchFilter(userSearchFilter)
-                .groupSearchBase(groupSearchBase)
-                .groupRoleAttribute(groupRoleAttribute)
-                .userDetailsContextMapper(mapper);
+//        UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
+//
+//        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
+//        source.afterPropertiesSet();
+//        source.setUserDn(ldapManagerDn);
+//        source.setPassword(ldapManagerPassword);
+//
+//        auth.ldapAuthentication()
+//                .contextSource(source)
+//                .rolePrefix("ROLE_")
+//                .userSearchBase(userSearchBase)
+//                .userSearchFilter(userSearchFilter)
+//                .groupSearchBase(groupSearchBase)
+//                .groupRoleAttribute(groupRoleAttribute)
+//                .userDetailsContextMapper(mapper);
 
     }
 
