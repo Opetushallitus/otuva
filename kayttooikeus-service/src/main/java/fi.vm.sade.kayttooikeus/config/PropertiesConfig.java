@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
@@ -13,8 +14,11 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySource(value = {
         "classpath:/default-props.properties",
-        "file:///${user.home:''}/oph-configuration/common.properties"
-}, ignoreResourceNotFound = false)
+        "file:///${user.home:''}/oph-configuration/common.properties"})
+@PropertySource(value = {
+        "file:///${user.home:''}/oph-configuration/authentication-ui.properties",
+        "file:///${user.home:''}/oph-configuration/override.properties"
+}, ignoreResourceNotFound = true)
 public class PropertiesConfig {
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
