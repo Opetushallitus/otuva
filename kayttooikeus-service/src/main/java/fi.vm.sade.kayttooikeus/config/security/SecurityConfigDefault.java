@@ -75,13 +75,14 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         logger.info("configure HttpSecurity");
-//        http
-//                .csrf().disable()
-//                .authorizeRequests()
-//                .antMatchers("/buildversion.txt").permitAll()
-//                .antMatchers("/test").permitAll()
-//                .anyRequest().authenticated();
-
+        http
+                .csrf().disable()
+                .authorizeRequests()
+//                .antMatchers("**/buildversion.txt").permitAll()
+//                .antMatchers("**/test").permitAll()
+                .antMatchers("/kayttooikeus-service/test").permitAll()
+                .antMatchers("/kayttooikeus-service/test2").permitAll()
+                .anyRequest().authenticated();
     }
 
 //    @Bean
