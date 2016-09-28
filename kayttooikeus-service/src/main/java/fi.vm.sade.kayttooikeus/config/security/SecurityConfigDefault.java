@@ -342,6 +342,21 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        logger.info("configure auth");
+
+        logger.info("sendRenew: " + sendRenew);
+        logger.info("casService: " + casService);
+        logger.info("casKey: " + casKey);
+        logger.info("webUrlCas: " + webUrlCas);
+        logger.info("userSearchBase: " + userSearchBase);
+        logger.info("userSearchFilter: " + userSearchFilter);
+        logger.info("groupSearchBase: " + groupSearchBase);
+        logger.info("groupSearchFilter: " + groupSearchFilter);
+        logger.info("groupRoleAttribute: " + groupRoleAttribute);
+        logger.info("ldapUrlWithBase: " + ldapUrlWithBase);
+        logger.info("ldapManagerDn: " + ldapManagerDn);
+        logger.info("ldapManagerPassword: " + ldapManagerPassword);
+
         auth
                 .authenticationProvider(casAuthenticationProvider());
     }
