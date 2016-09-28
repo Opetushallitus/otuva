@@ -242,7 +242,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
         casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
         casAuthenticationProvider.setServiceProperties(serviceProperties());
-        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
+        casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
         casAuthenticationProvider.setKey(casKey);
         return casAuthenticationProvider;
     }
@@ -283,25 +283,25 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName()));
     }
 
-//    @Bean
-//    public Cas20ServiceTicketValidator cas20ServiceTicketValidator() {
-//
-//        Cas20ServiceTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
-//        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
-//////        validator.setProxyGrantingTicketStorage(ticketStorage());
-//        return validator;
-//
-//
-////        return new Cas20ServiceTicketValidator(webUrlCas);
-//    }
+    @Bean
+    public Cas20ServiceTicketValidator cas20ServiceTicketValidator() {
 
-        private Cas20ProxyTicketValidator casServiceTicketValidator() {
-        Cas20ProxyTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
+        Cas20ServiceTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
         validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
-//        validator.setProxyGrantingTicketStorage(ticketStorage());
-        validator.setAcceptAnyProxy(true);
+////        validator.setProxyGrantingTicketStorage(ticketStorage());
         return validator;
+
+
+//        return new Cas20ServiceTicketValidator(webUrlCas);
     }
+
+//        private Cas20ProxyTicketValidator casServiceTicketValidator() {
+//        Cas20ProxyTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
+//        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
+////        validator.setProxyGrantingTicketStorage(ticketStorage());
+//        validator.setAcceptAnyProxy(true);
+//        return validator;
+//    }
 
     //
     // CAS filter
