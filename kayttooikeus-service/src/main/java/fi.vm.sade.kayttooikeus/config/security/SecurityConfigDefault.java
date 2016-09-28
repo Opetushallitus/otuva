@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
@@ -169,6 +170,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
 //        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
 //        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
+
         casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
         casAuthenticationProvider.setServiceProperties(serviceProperties());
 
@@ -181,8 +183,15 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
-        return ((CasAssertionAuthenticationToken casAssertionAuthenticationToken)
-                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName()));
+        return (CasAssertionAuthenticationToken casAssertionAuthenticationToken)
+                -> {
+            logger.info("token " + casAssertionAuthenticationToken);
+            if (casAssertionAuthenticationToken != null) {
+                logger.info("name " + casAssertionAuthenticationToken.getName());
+            }
+            logger.info("ldapservice " + ldapUserDetailsService());
+            return ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
+        };
     }
 
     @Bean
