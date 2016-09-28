@@ -37,7 +37,8 @@ authentication-service.postgresql.password={{host_postgresql_authentication_pass
 authentication-service.postgresql.maxactive={{host_postgresql_authentication_max_active}}
 authentication-service.postgresql.maxwait={{host_postgresql_authentication_max_wait}}
 authentication-service.postgresql.maxlifetimemillis=60000
-cas.service.authentication-groups=https://${host.virkailija}/authentication-groups
+
+cas.service.kayttooikeus-service=https://${host.virkailija}/kayttooikeus-service
 
 # Oletusarvoja
 accessRight.webservice.url.backend=https\://{{host_henkilo | default("${host.virkailija}") }}/authentication-service/services/accessRightService
