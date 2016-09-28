@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
@@ -169,10 +170,11 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public CasAuthenticationProvider casAuthenticationProvider() {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
 
-//        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details = new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
-//        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
+        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details =
+                new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
+        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
 
-        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
+//        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
         casAuthenticationProvider.setServiceProperties(serviceProperties());
 
 //        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
