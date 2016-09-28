@@ -171,7 +171,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
 
         UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details =
-                new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(userDetailsService());
+                new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(ldapUserDetailsService());
         casAuthenticationProvider.setAuthenticationUserDetailsService(details);
 
 //        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
