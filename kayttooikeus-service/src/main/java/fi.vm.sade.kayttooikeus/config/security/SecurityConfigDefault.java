@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
@@ -189,8 +190,16 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
             if (casAssertionAuthenticationToken != null) {
                 logger.info("name " + casAssertionAuthenticationToken.getName());
             }
+            LdapUserDetailsService service = ldapUserDetailsService();
+
             logger.info("ldapservice " + ldapUserDetailsService());
-            return ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
+            logger.info("name " + casAssertionAuthenticationToken.getName());
+            logger.info("cred " + casAssertionAuthenticationToken.getCredentials().toString());
+            UserDetails details = service.loadUserByUsername(casAssertionAuthenticationToken.getName());
+            logger.info("details: " + details);
+
+            return details;
+//            return ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
         };
     }
 
