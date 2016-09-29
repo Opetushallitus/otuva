@@ -23,25 +23,13 @@ jpa:
 
 
 cas:
-  key: authentication-groups
-  service: https://${host.virkailija}/authentication-groups
-  web.url: https\://${host.cas}/cas
-  sendRenew: false
-  user-search-base: ou\=people
-  user-search-filter: (|(mail\={0})(uid\={0}))
-  callback:
-    authentication-service: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-service
-    authentication-ui: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-henkiloui
-    authentication-groups: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-groups
-    registration-ui: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/registration-ui
-  sendRenvew: false
-  group:
-    role-attribute: cn
-    search-base: ou\=groups
-    search-filter: (uniqueMember\={0})
-
-ldap:
-  manager-dn: ${ldap.manager.userdn}
-  url.with.base: ldap\://${host.ldap}/dc\=opintopolku,dc\=fi
-  manager-password: {{ldap_manager_password}}
-
+  ldap:
+    url: ldap://{{host_ldap}}/dc\=opintopolku,dc\=fi
+    managed-dn: {{ldap_manager_userdn}}
+    password: {{ldap_manager_password}}
+    user-search-base: ou\=people
+    user-search-filter: (|(mail\={0})(uid\={0}))
+  service: https://{{host_virkailija}}/kayttooikeus-service
+  send-renew: false
+  key: caskey
+  url: https://{{host_cas}}/cas
