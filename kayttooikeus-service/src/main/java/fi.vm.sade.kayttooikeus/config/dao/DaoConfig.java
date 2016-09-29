@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,9 +77,9 @@ public class DaoConfig {
         }
         config.setDataSourceClassName(daoConfigurations.isUseInMemoryDb() ? "org.hsqldb.jdbc.JDBCDataSource" : "org.postgresql.ds.PGSimpleDataSource");
         config.setDataSourceProperties(daoConfigurations.isUseInMemoryDb() ? daoConfigurations.getMemoryDataSourceProperties() : daoConfigurations.getMainDataSourceProperties());
-        config.setMaximumPoolSize(environment.getProperty("postgresql.maxactive", Integer.class, 15));
-        config.setConnectionTimeout(environment.getProperty("postgresql.maxwait", Integer.class, 10000));
-        config.setMaxLifetime(environment.getProperty("postgresql.maxlifetimemillis", Integer.class));
+        config.setMaximumPoolSize(environment.getProperty("datasource.max-active", Integer.class, 15));
+        config.setConnectionTimeout(environment.getProperty("datasource.max-wait", Integer.class, 10000));
+        config.setMaxLifetime(environment.getProperty("datasource.max-lifetime-millis", Integer.class));
         return config;
     }
 
@@ -123,7 +122,7 @@ public class DaoConfig {
             return null;
         }
         Flyway flyway = new Flyway();
-        flyway.setInitOnMigrate(environment.getProperty("flyway.initOnMigrate", Boolean.class));
+        flyway.setInitOnMigrate(environment.getProperty("flyway.init-on-migrate", Boolean.class));
         flyway.setDataSource(new LazyConnectionDataSourceProxy(dbDataSource()));
         return flyway;
     }

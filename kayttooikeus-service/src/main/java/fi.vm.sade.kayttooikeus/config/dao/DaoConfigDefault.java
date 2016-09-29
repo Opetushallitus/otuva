@@ -23,6 +23,8 @@ public class DaoConfigDefault {
     @Autowired
     private Environment environment;
 
+    //TODO could not autowire DatasourceProperties
+
     @Bean
     public DaoConfigurations daoConfigurations() {
         return DaoConfigurations.builder()
@@ -30,12 +32,12 @@ public class DaoConfigDefault {
                 .useFlyway(useInMemoryDb)
                 .jpaProperties(builder()
                         .put("hibernate.show_sql", environment.getProperty("jpa.showSql", Boolean.class, false))
-                        .put("hibernate.hbm2ddl.auto", environment.getProperty("jpa.schemaUpdate"))
+                        .put("hibernate.hbm2ddl.auto", environment.getProperty("jpa.schema-update"))
                     .build())
                 .mainDataSourceProperties(builder()
-                        .put("url", environment.getProperty("postgresql.url"))
-                        .put("user", environment.getProperty("postgresql.user"))
-                        .put("password", environment.getProperty("postgresql.password"))
+                        .put("url", environment.getProperty("datasource.url"))
+                        .put("user", environment.getProperty("datasource.user"))
+                        .put("password", environment.getProperty("datasource.password"))
                     .build())
                 .memoryDataSourceProperties(builder()
                         .put("database", "jdbc:hsqldb:file:auth")

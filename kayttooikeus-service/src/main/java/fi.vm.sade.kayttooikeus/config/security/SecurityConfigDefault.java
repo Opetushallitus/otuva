@@ -10,7 +10,6 @@ import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
@@ -58,7 +57,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Bean
     public ServiceProperties serviceProperties(){
         ServiceProperties serviceProperties = new ServiceProperties();
-        logger.debug("cas service " + casProperties.getService());
+        logger.info("cas service " + casProperties.getService());
         serviceProperties.setService(casProperties.getService() + "/j_spring_cas_security_check");
         serviceProperties.setSendRenew(casProperties.getSendRenew());
         serviceProperties.setAuthenticateAllArtifacts(true);
@@ -138,8 +137,10 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
-        return (CasAssertionAuthenticationToken casAssertionAuthenticationToken)
-                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
+        return (CasAssertionAuthenticationToken casAssertionAuthenticationToken) -> {
+            logger.info("load user by username: " + casAssertionAuthenticationToken.getName());
+            return ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
+        };
     }
 
     @Bean

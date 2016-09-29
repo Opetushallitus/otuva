@@ -8,18 +8,18 @@
 # Aseta vähintään nämä ympäristökohtaiset arvot
 
 
-flyway.initOnMigrate: true
-postgresql:
+flyway.init-on-migrate: true
+datasource:
   url: jdbc:postgresql://{{host_postgresql_authentication}}:{{port_postgresql}}/authentication
   user: {{host_postgresql_authentication_user}}
   password: {{host_postgresql_authentication_password}}
-  maxactive: {{host_postgresql_authentication_max_active}}
-  maxwait: {{host_postgresql_authentication_max_wait}}
-  maxlifetimemillis: 60000
+  max-active: {{host_postgresql_authentication_max_active}}
+  max-wait: {{host_postgresql_authentication_max_wait}}
+  max-lifetime-millis: 60000
 
 jpa:
-  showSql: false
-  schemaUpdate: validate
+  show-sql: false
+  schema-update: validate
 
 
 cas:
