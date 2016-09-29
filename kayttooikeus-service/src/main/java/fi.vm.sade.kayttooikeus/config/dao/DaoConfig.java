@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.config.dao;
 import com.googlecode.flyway.core.Flyway;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import fi.vm.sade.kayttooikeus.config.properties.DatasourceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class DaoConfig {
 
     @Autowired
     private DaoConfigurations daoConfigurations;
+
+    @Autowired
+    private DatasourceProperties datasourceProperties;
 
     private Object inMemoryDatabaseServer;
 
@@ -77,9 +81,9 @@ public class DaoConfig {
         }
         config.setDataSourceClassName(daoConfigurations.isUseInMemoryDb() ? "org.hsqldb.jdbc.JDBCDataSource" : "org.postgresql.ds.PGSimpleDataSource");
         config.setDataSourceProperties(daoConfigurations.isUseInMemoryDb() ? daoConfigurations.getMemoryDataSourceProperties() : daoConfigurations.getMainDataSourceProperties());
-        config.setMaximumPoolSize(environment.getProperty("datasource.max-active", Integer.class, 15));
-        config.setConnectionTimeout(environment.getProperty("datasource.max-wait", Integer.class, 10000));
-        config.setMaxLifetime(environment.getProperty("datasource.max-lifetime-millis", Integer.class));
+        config.setMaximumPoolSize(datasourceProperties.getMaxActive());
+        config.setConnectionTimeout(datasourceProperties.getMaxWait());
+        config.setMaxLifetime(datasourceProperties.getMaxLifetimeMillis());
         return config;
     }
 

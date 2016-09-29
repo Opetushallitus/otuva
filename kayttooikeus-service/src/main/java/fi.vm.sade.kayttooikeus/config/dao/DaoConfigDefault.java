@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.dao;
 
+import fi.vm.sade.kayttooikeus.config.properties.DatasourceProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,8 @@ public class DaoConfigDefault {
     @Autowired
     private Environment environment;
 
-    //TODO could not autowire DatasourceProperties
+    @Autowired
+    private DatasourceProperties datasourceProperties;
 
     @Bean
     public DaoConfigurations daoConfigurations() {
@@ -35,9 +37,9 @@ public class DaoConfigDefault {
                         .put("hibernate.hbm2ddl.auto", environment.getProperty("jpa.schema-update"))
                     .build())
                 .mainDataSourceProperties(builder()
-                        .put("url", environment.getProperty("datasource.url"))
-                        .put("user", environment.getProperty("datasource.user"))
-                        .put("password", environment.getProperty("datasource.password"))
+                        .put("url", datasourceProperties.getUrl())
+                        .put("user", datasourceProperties.getUser())
+                        .put("password", datasourceProperties.getPassword())
                     .build())
                 .memoryDataSourceProperties(builder()
                         .put("database", "jdbc:hsqldb:file:auth")
