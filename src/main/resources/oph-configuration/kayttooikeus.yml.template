@@ -1,0 +1,47 @@
+#
+# TÄHÄN TIEDOSTOON EI SAA TALLENTAA YMPÄRISTÖKOHTAISIA ARVOJA MUUTOIN KUIN MUUTTUJINA!!!
+#
+# Tämä tiedosto toimii pohjana oph-configuration/common.properties tiedostolle,
+# joka asettaa tomcatin ympäristökohtaiset arvot.
+#
+
+# Aseta vähintään nämä ympäristökohtaiset arvot
+
+
+flyway.initOnMigrate: true
+postgresql:
+  url: jdbc:postgresql://{{host_postgresql_authentication}}:{{port_postgresql}}/authentication
+  user: {{host_postgresql_authentication_user}}
+  password: {{host_postgresql_authentication_password}}
+  maxactive: {{host_postgresql_authentication_max_active}}
+  maxwait: {{host_postgresql_authentication_max_wait}}
+  maxlifetimemillis: 60000
+
+jpa:
+  showSql: false
+  schemaUpdate: validate
+
+
+cas:
+  key: authentication-groups
+  service: https://${host.virkailija}/authentication-groups
+  web.url: https\://${host.cas}/cas
+  sendRenew: false
+  user-search-base: ou\=people
+  user-search-filter: (|(mail\={0})(uid\={0}))
+  callback:
+    authentication-service: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-service
+    authentication-ui: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-henkiloui
+    authentication-groups: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/authentication-groups
+    registration-ui: http://{{ cluster_authentication_host | default("${server.name}") }}:{{ cluster_authentication_port | default("8308") }}/registration-ui
+  sendRenvew: false
+  group:
+    role-attribute: cn
+    search-base: ou\=groups
+    search-filter: (uniqueMember\={0})
+
+ldap:
+  manager-dn: ${ldap.manager.userdn}
+  url.with.base: ldap\://${host.ldap}/dc\=opintopolku,dc\=fi
+  manager-password: {{ldap_manager_password}}
+

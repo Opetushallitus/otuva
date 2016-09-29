@@ -1,14 +1,17 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
 
+import fi.vm.sade.security.CustomUserDetailsMapper;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
@@ -25,6 +28,7 @@ import org.springframework.security.core.userdetails.AuthenticationUserDetailsSe
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
@@ -41,61 +45,28 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfigDefault.class);
 
-    @Value("${cas.sendRenew}")
-    private boolean sendRenew;
+    @Autowired
+    private Environment environment;
 
-    @Value("${cas_service}")
-    private String casService;
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .addFilter(casAuthenticationFilter())
+                .authenticationProvider(casAuthenticationProvider())
+                .exceptionHandling()
+                .authenticationEntryPoint(casAuthenticationEntryPoint())
+                .and()
+                .csrf().disable()
+                .authorizeRequests()
+                .anyRequest()
+                .authenticated();
 
-    @Value("${cas_key}")
-    private String casKey;
+    }
 
-//    @Value("${cas_callback_url}")
-//    private String casCallbackUrl;
-
-    @Value("${web.url.cas}")
-    private String webUrlCas;
-
-    @Value("${cas.user-search-base}")
-    private String userSearchBase;
-
-    @Value("${cas.user-search-filter}")
-    private String userSearchFilter;
-
-    @Value("${cas.group-search-base}")
-    private String groupSearchBase;
-
-    @Value("${cas.group-search-filter}")
-    private String groupSearchFilter;
-
-    @Value("${cas.group-role-attribute}")
-    private String groupRoleAttribute;
-
-    @Value("${ldap.url.with.base}")
-    private String ldapUrlWithBase;
-
-    @Value("${ldap.manager-dn}")
-    private String ldapManagerDn;
-
-    @Value("${ldap.manager-password}")
-    private String ldapManagerPassword;
-
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        logger.info("configure HttpSecurity");
-//        http
-//                .csrf().disable()
-//                .authorizeRequests()
-////                .antMatchers("/kayttooikeus-service/test").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .httpBasic();
-//    }
-//
     @Bean
     public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
         CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-        casAuthenticationEntryPoint.setLoginUrl(webUrlCas + "/login");
+        casAuthenticationEntryPoint.setLoginUrl(environment.getProperty("cas.web.url") + "/login");
         casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
         return casAuthenticationEntryPoint;
     }
@@ -103,34 +74,35 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Bean
     public ServiceProperties serviceProperties(){
         ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService(casService + "/j_spring_cas_security_check");
-        serviceProperties.setSendRenew(sendRenew);
+        serviceProperties.setService(environment.getProperty("cas.service") + "/j_spring_cas_security_check");
+        serviceProperties.setSendRenew(environment.getProperty("cas.sendRenew", Boolean.class));
         serviceProperties.setAuthenticateAllArtifacts(true);
         return serviceProperties;
     }
-//
+
+
 //    @Autowired
 //    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 //        logger.info("configure global AuthenticationManagerBuilder");
 //        UserDetailsContextMapper mapper = new CustomUserDetailsMapper();
 //
-//        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(ldapUrlWithBase);
+//        DefaultSpringSecurityContextSource source = new DefaultSpringSecurityContextSource(environment.getProperty("ldap.url.with.base"));
 //        source.afterPropertiesSet();
-//        source.setUserDn(ldapManagerDn);
-//        source.setPassword(ldapManagerPassword);
+//        source.setUserDn(environment.getProperty("ldap.manager-dn"));
+//        source.setPassword(environment.getProperty("ldap.manager-password"));
 //
 //        auth.ldapAuthentication()
 //                .contextSource(source)
 //                .rolePrefix("ROLE_")
-//                .userSearchBase(userSearchBase)
-//                .userSearchFilter(userSearchFilter)
-//                .groupSearchBase(groupSearchBase)
-//                .groupRoleAttribute(groupRoleAttribute)
+//                .userSearchBase(environment.getProperty("cas.user-search-base"))
+//                .userSearchFilter(environment.getProperty("cas.user-search-filter"))
+//                .groupSearchBase(environment.getProperty("cas.group.search-base"))
+//                .groupRoleAttribute(environment.getProperty("cas.group.role-attribute"))
 //                .userDetailsContextMapper(mapper);
 //
 //    }
-//
-//
+
+
     private EhCacheBasedTicketCache ehCacheBasedTicketCache(){
         EhCacheBasedTicketCache eh = new EhCacheBasedTicketCache();
         eh.setCache(casTicketsCacheBean().getObject());
@@ -169,17 +141,11 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Bean
     public CasAuthenticationProvider casAuthenticationProvider() {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
-
-        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> details =
-                new UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken>(ldapUserDetailsService());
-        casAuthenticationProvider.setAuthenticationUserDetailsService(details);
-
-//        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
+        casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService());
         casAuthenticationProvider.setServiceProperties(serviceProperties());
-
 //        casAuthenticationProvider.setTicketValidator(casServiceTicketValidator());
         casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
-        casAuthenticationProvider.setKey(casKey);
+        casAuthenticationProvider.setKey(environment.getProperty("cas.key"));
         casAuthenticationProvider.setStatelessTicketCache(ehCacheBasedTicketCache());
         return casAuthenticationProvider;
     }
@@ -207,8 +173,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Bean
     public LdapUserDetailsService ldapUserDetailsService() {
-        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(userSearchBase,
-                userSearchFilter, ldapContextSource());
+        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(environment.getProperty("cas.user-search-base"),
+                environment.getProperty("cas.user-search-filter"), ldapContextSource());
         LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch);
         ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
         return ldapUserDetailsService;
@@ -217,9 +183,9 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     @Bean
     public LdapContextSource ldapContextSource() {
         LdapContextSource ldapContextSource = new LdapContextSource();
-        ldapContextSource.setUrl(ldapUrlWithBase);
-        ldapContextSource.setUserDn(ldapManagerDn);
-        ldapContextSource.setPassword(ldapManagerPassword);
+        ldapContextSource.setUrl(environment.getProperty("ldap.url.with.base"));
+        ldapContextSource.setUserDn(environment.getProperty("ldap.manager-dn"));
+        ldapContextSource.setPassword(environment.getProperty("ldap.manager-password"));
         return ldapContextSource;
     }
 
@@ -246,7 +212,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 //        Cas20ServiceTicketValidator validator = new Cas20ProxyTicketValidator(webUrlCas);
 //        validator.setProxyCallbackUrl(casService+"j_spring_cas_security_proxyreceptor");
 //        return validator;
-        return new Cas20ServiceTicketValidator(webUrlCas);
+        return new Cas20ServiceTicketValidator(environment.getProperty("cas.web.url"));
     }
 
 
@@ -258,21 +224,21 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     }
 
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.addFilter(casAuthenticationFilter())
-                .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint())
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .anyRequest().authenticated();
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        logger.info("configure auth");
-        auth
-                .authenticationProvider(casAuthenticationProvider());
-    }
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.addFilter(casAuthenticationFilter())
+//                .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint())
+//                .and()
+//                .csrf().disable()
+//                .authorizeRequests()
+//                .anyRequest().authenticated();
+//    }
+//
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        logger.info("configure auth");
+//        auth
+//                .authenticationProvider(casAuthenticationProvider());
+//    }
 
 }

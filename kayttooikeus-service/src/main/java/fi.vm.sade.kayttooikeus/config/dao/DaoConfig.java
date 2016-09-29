@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -35,15 +36,10 @@ public class DaoConfig {
     private static final Logger logger = LoggerFactory.getLogger(DaoConfig.class);
 
     @Autowired
+    private Environment environment;
+
+    @Autowired
     private DaoConfigurations daoConfigurations;
-    @Value("${flyway.initOnMigrate:false}")
-    private boolean initOnMigrate;
-    @Value("${authentication-service.postgresql.maxactive:15}")
-    private Integer maximumPoolSize;
-    @Value("${authentication-service.postgresql.maxwait:10000}")
-    private Integer connectionTimeout;
-    @Value("${authentication-service.postgresql.maxlifetimemillis:60000}")
-    private Integer maxLifetime;
 
     private Object inMemoryDatabaseServer;
 
@@ -82,9 +78,9 @@ public class DaoConfig {
         }
         config.setDataSourceClassName(daoConfigurations.isUseInMemoryDb() ? "org.hsqldb.jdbc.JDBCDataSource" : "org.postgresql.ds.PGSimpleDataSource");
         config.setDataSourceProperties(daoConfigurations.isUseInMemoryDb() ? daoConfigurations.getMemoryDataSourceProperties() : daoConfigurations.getMainDataSourceProperties());
-        config.setMaximumPoolSize(maximumPoolSize);
-        config.setConnectionTimeout(connectionTimeout);
-        config.setMaxLifetime(maxLifetime);
+        config.setMaximumPoolSize(environment.getProperty("postgresql.maxactive", Integer.class, 15));
+        config.setConnectionTimeout(environment.getProperty("postgresql.maxwait", Integer.class, 10000));
+        config.setMaxLifetime(environment.getProperty("postgresql.maxlifetimemillis", Integer.class));
         return config;
     }
 
@@ -127,7 +123,7 @@ public class DaoConfig {
             return null;
         }
         Flyway flyway = new Flyway();
-        flyway.setInitOnMigrate(initOnMigrate);
+        flyway.setInitOnMigrate(environment.getProperty("flyway.initOnMigrate", Boolean.class));
         flyway.setDataSource(new LazyConnectionDataSourceProxy(dbDataSource()));
         return flyway;
     }
