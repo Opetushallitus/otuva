@@ -49,6 +49,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public ServiceProperties serviceProperties() {
         ServiceProperties serviceProperties = new ServiceProperties();
         serviceProperties.setService(casProperties.getService() + "/j_spring_cas_security_check");
+        logger.info("casproperties service " + casProperties.getService() );
         serviceProperties.setSendRenew(casProperties.getSendRenew());
         serviceProperties.setAuthenticateAllArtifacts(true);
         return serviceProperties;
@@ -61,6 +62,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         casAuthenticationProvider.setServiceProperties(serviceProperties());
         casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
         casAuthenticationProvider.setKey(casProperties.getKey());
+        logger.info("casproperties key" + casProperties.getKey() );
         return casAuthenticationProvider;
     }
 
@@ -68,6 +70,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public LdapContextSource ldapContextSource() {
         LdapContextSource ldapContextSource = new LdapContextSource();
         ldapContextSource.setUrl(casProperties.getLdap().getUrl());
+        logger.info("casproperties ldap url: " + casProperties.getLdap() );
         ldapContextSource.setAuthenticationSource(authenticationSource());
         return ldapContextSource;
     }

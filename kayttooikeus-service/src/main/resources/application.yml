@@ -6,9 +6,11 @@ spring:
   mandatory-file-encoding: UTF-8
   profiles.active: default
 
-server.session:
-  tracking-modes: cookie
-  timeout: 30
+server:
+  context-path: /kayttooikeus-service
+  session:
+    tracking-modes: cookie
+    timeout: 30
 
 management.info.git.mode: full
 
