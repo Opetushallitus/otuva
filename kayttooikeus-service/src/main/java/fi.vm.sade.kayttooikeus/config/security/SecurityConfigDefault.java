@@ -59,7 +59,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         casAuthenticationProvider.setServiceProperties(serviceProperties());
         casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
         casAuthenticationProvider.setKey(casProperties.getKey());
-        logger.info("casproperties key" + casProperties.getKey() );
+        logger.info("casproperties key " + casProperties.getKey() );
         return casAuthenticationProvider;
     }
 

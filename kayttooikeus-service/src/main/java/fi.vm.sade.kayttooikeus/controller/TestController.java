@@ -37,7 +37,7 @@ public class TestController extends AbstractApiController{
 
     @RequestMapping(value = "/test2", method = RequestMethod.GET)
 //    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ')")
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public Map<String,Object> test2() {
         logger.debug("Sample Debug Message");
         Map<String,Object> jsonStatus = new HashMap<>();
