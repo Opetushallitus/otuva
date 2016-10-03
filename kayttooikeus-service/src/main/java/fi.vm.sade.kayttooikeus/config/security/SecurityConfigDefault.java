@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.ldap.authentication.DefaultValuesAuthenticationSourceDecorator;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -32,8 +33,8 @@ import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
  */
 @EnableWebSecurity
 @Profile("default")
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true,
-        proxyTargetClass = true, jsr250Enabled = true)
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfigDefault.class);
@@ -70,7 +71,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public LdapContextSource ldapContextSource() {
         LdapContextSource ldapContextSource = new LdapContextSource();
         ldapContextSource.setUrl(casProperties.getLdap().getUrl());
-        logger.info("casproperties ldap url: " + casProperties.getLdap() );
+        logger.info("casproperties ldap url: " + casProperties.getLdap().getUrl() );
         ldapContextSource.setAuthenticationSource(authenticationSource());
         return ldapContextSource;
     }
@@ -108,8 +109,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
-        return ((CasAssertionAuthenticationToken casAssertionAuthenticationToken)
-                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName()));
+        return (CasAssertionAuthenticationToken casAssertionAuthenticationToken)
+                -> ldapUserDetailsService().loadUserByUsername(casAssertionAuthenticationToken.getName());
     }
 
     @Bean
@@ -139,8 +140,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/buildversion.txt").permitAll()
-                .anyRequest().authenticated()
+                    .antMatchers("/buildversion.txt").permitAll()
+                    .anyRequest().authenticated()
                 .and()
                 .addFilter(casAuthenticationFilter())
                 .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint());
