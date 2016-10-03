@@ -39,12 +39,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfigDefault.class);
 
-    private CasProperties casProperties;
-
     @Autowired
-    public SecurityConfigDefault(CasProperties casProperties) {
-        this.casProperties = casProperties;
-    }
+    private CasProperties casProperties;
 
     @Bean
     public ServiceProperties serviceProperties() {
