@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Entity
 @Getter @Setter
 @Table(name = "henkilo", schema = "public")
-public class Henkilo {
+public class Henkilo extends IdentifiableAndVersionedEntity {
     
     @Column(nullable = false)
     private String oidHenkilo;

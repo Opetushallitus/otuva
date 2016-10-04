@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import javax.persistence.*;
@@ -50,8 +51,8 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private AnomuksenTila anomuksenTila;
 
     @Column(name = "anottuPvm")
-    @Type(type="localDate")
-    private LocalDate anottuPvm;
+    @Type(type="dateTime")
+    private DateTime anottuPvm;
 
     @Column(name = "anomusTilaTapahtumaPvm")
     private Date anomusTilaTapahtumaPvm;

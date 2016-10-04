@@ -4,6 +4,7 @@ import com.googlecode.flyway.core.Flyway;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import fi.vm.sade.kayttooikeus.config.properties.DatasourceProperties;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,8 @@ public class DaoConfig {
         emf.setLoadTimeWeaver(loadTimeWeaver());
         emf.setJpaProperties(daoConfigurations.getJpaProperties());
         emf.setDataSource(dbDataSource());
+        emf.setPackagesToScan("fi.vm.sade.kayttooikeus.domain");
+        emf.setPersistenceProvider(new HibernatePersistenceProvider());
         return emf;
     }
     

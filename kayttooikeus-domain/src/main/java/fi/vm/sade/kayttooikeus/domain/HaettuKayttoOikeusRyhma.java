@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import javax.persistence.*;
@@ -28,8 +29,8 @@ public class HaettuKayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     private KayttoOikeusRyhma kayttoOikeusRyhma;
 
     @Column(name = "kasittelypvm")
-    @Type(type = "localDate")
-    private LocalDate kasittelyPvm;
+    @Type(type = "dateTime")
+    private DateTime kasittelyPvm;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tyyppi")
