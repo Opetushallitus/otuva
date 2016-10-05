@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.dao.impl;
 
+import com.mysema.query.types.OrderSpecifier;
 import fi.vm.sade.kayttooikeus.dao.KayttoOikeusRyhmaDao;
 import fi.vm.sade.kayttooikeus.domain.KayttoOikeusRyhma;
 import org.springframework.stereotype.Repository;
@@ -16,11 +17,10 @@ public class KayttoOikeusRyhmaDaoImpl extends AbstractDao  implements KayttoOike
 
     @Override
     public List<KayttoOikeusRyhma> listAll() {
-        List<KayttoOikeusRyhma> all = from(kayttoOikeusRyhma)
+        return from(kayttoOikeusRyhma)
                 .where(kayttoOikeusRyhma.hidden.eq(false))
+                .orderBy(kayttoOikeusRyhma.id.asc())
                 .distinct()
                 .list(kayttoOikeusRyhma);
-
-        return all;
     }
 }
