@@ -27,7 +27,7 @@ public class TestController extends AbstractApiController{
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public Map<String,Object> test() {
         logger.debug("Sample Debug Message");
         Map<String,Object> jsonStatus = new HashMap<>();
@@ -36,8 +36,7 @@ public class TestController extends AbstractApiController{
     }
 
     @RequestMapping(value = "/test2", method = RequestMethod.GET)
-//    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ')")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ')")
     public Map<String,Object> test2() {
         logger.debug("Sample Debug Message");
         Map<String,Object> jsonStatus = new HashMap<>();

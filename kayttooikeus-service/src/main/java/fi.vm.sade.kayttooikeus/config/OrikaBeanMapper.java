@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.config;
 
-import fi.vm.sade.kayttooikeus.domain.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFactory;
