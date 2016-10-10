@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "datasource", ignoreUnknownFields = false)
 public class DatasourceProperties {
     private String url;
+    private String testUrl;
     private String user;
     private String password;
     private Integer maxActive;

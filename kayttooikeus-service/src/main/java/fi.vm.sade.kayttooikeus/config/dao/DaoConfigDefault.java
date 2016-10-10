@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
 import static fi.vm.sade.kayttooikeus.config.dao.DaoConfigurations.PropertiesBuilder.builder;
+import static java.util.Optional.ofNullable;
 
 /**
  * User: tommiratamaa
@@ -42,7 +43,7 @@ public class DaoConfigDefault {
                         .put("password", datasourceProperties.getPassword())
                     .build())
                 .memoryDataSourceProperties(builder()
-                        .put("database", "jdbc:hsqldb:file:auth")
+                        .put("database", ofNullable(datasourceProperties.getTestUrl()).orElse("jdbc:hsqldb:file:auth"))
                         .put("user", "SA")
                     .build())
                 .build();

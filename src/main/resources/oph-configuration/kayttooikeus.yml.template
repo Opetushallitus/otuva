@@ -11,6 +11,7 @@
 flyway.init-on-migrate: true
 datasource:
   url: jdbc:postgresql://{{host_postgresql_authentication}}:{{port_postgresql}}/authentication
+  testUrl: jdbc:hsqldb:file:auth
   user: {{host_postgresql_authentication_user}}
   password: {{host_postgresql_authentication_password}}
   max-active: {{host_postgresql_authentication_max_active}}

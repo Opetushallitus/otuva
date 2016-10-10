@@ -5,7 +5,10 @@ import lombok.experimental.Builder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * User: tommiratamaa
@@ -35,7 +38,8 @@ public class DaoConfigurations {
         
         public Properties build() {
             Properties p = new Properties();
-            p.putAll(this.values);
+            p.putAll(this.values.entrySet().stream().filter(e -> e.getValue() != null)
+                    .collect(toMap(Entry::getKey, Entry::getValue)));
             return p;
         }
     }

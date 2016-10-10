@@ -5,7 +5,6 @@ target
 .settings
 .classpath
 .DS_store
-target
 overlays
 node_modules
 
@@ -14,4 +13,4 @@ node_modules
 /.gradle
 
 rebel.xml
-derby.log
+*.log

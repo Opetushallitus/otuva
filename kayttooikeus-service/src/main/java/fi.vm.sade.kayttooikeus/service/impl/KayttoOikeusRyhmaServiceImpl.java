@@ -26,10 +26,6 @@ public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements Kay
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas() {
-        return kayttoOikeusRyhmaDao
-                .listAll()
-                .stream()
-                .map(kayttoOikeusRyhma -> mapper.map(kayttoOikeusRyhma, KayttoOikeusRyhmaDto.class))
-                .collect(Collectors.toList());
+        return mapper.mapAsList(kayttoOikeusRyhmaDao.listAll(), KayttoOikeusRyhmaDto.class);
     }
 }
