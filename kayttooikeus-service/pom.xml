@@ -134,6 +134,10 @@
             <artifactId>java-ldap</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.java-utils</groupId>
+            <artifactId>opintopolku-cas-servlet-filter</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>ma.glasnost.orika</groupId>
