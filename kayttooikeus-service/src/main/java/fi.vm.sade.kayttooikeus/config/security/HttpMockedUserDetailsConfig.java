@@ -14,9 +14,13 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 @Configuration
 @Conditional(value = HttpMockedUserDetailsConfig.UseCondition.class)
 public class HttpMockedUserDetailsConfig {
-    @Autowired
     private CasProperties casProperties;
-    
+
+    @Autowired
+    public HttpMockedUserDetailsConfig(CasProperties casProperties) {
+        this.casProperties = casProperties;
+    }
+
     @Bean
     public HttpMockedUserDetailsProvider httpMockedUserDetailsProvider() {
         return new HttpMockedUserDetailsProvider(casProperties.getFallbackUserDetailsProviderUrl(), new ObjectMapper());

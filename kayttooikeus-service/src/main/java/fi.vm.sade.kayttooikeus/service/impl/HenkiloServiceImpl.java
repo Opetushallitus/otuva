@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dao.DbTestDao;
+import fi.vm.sade.kayttooikeus.repositories.DbTestDao;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

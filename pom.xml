@@ -23,10 +23,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.3.7.RELEASE</version>
+        <version>1.4.1.RELEASE</version>
     </parent>
 
     <modules>
+        <module>kayttooikeus-api</module>
         <module>kayttooikeus-domain</module>
         <module>kayttooikeus-service</module>
     </modules>
@@ -40,21 +41,10 @@
         <generic.version>9.4-SNAPSHOT</generic.version>
         <java.utils.version>0.1.0-SNAPSHOT</java.utils.version>
         <auditlog.api.version>5.0.0-SNAPSHOT</auditlog.api.version>
-
-        <!--&lt;!&ndash; Container &ndash;&gt;-->
-        <!--<tomcat.version>7.0.47</tomcat.version>-->
         <servlet.api.version>3.1.0</servlet.api.version>
-        <!--<jetty.version>9.2.11.v20150529</jetty.version>-->
-
-        <!-- Spring -->
-        <spring.boot.version>1.3.7.RELEASE</spring.boot.version>
-        <spring.version>4.2.7.RELEASE</spring.version>
-        <spring.security.version>3.2.7.RELEASE</spring.security.version>
-        <spring.data.jpa.version>1.7.2.RELEASE</spring.data.jpa.version>
 
         <!-- MVC -->
         <fasterxml.jackson.version>2.4.2</fasterxml.jackson.version>
-        <!--<swagger.version>1.0.2</swagger.version>-->
 
         <!-- Hibernate -->
         <hibernate.version>4.3.5.Final</hibernate.version>
@@ -86,7 +76,6 @@
         <commons-lang.version>2.6</commons-lang.version>
 
         <springfox.version>2.5.0</springfox.version>
-        <spring.context.support.version>4.1.6.RELEASE</spring.context.support.version>
         <xml.apis.version>1.4.01</xml.apis.version>
         <spring.ldap.core.version>2.1.0.RELEASE</spring.ldap.core.version>
 
@@ -94,15 +83,6 @@
         <!-- buildversion.txt generation plugin -->
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
-        <!--&lt;!&ndash; Logging &ndash;&gt;-->
-        <!--<slf4j.version>1.7.5</slf4j.version>-->
-        <!--<log4j.version>1.2.17</log4j.version>-->
-        <!---->
-        <!--&lt;!&ndash; Test &ndash;&gt;-->
-        <!--<junit.version>4.10</junit.version>-->
-        <!--<mockito.version>1.9.0</mockito.version>-->
-        <!--<surefire.plugin.version>2.12</surefire.plugin.version>-->
-        <!---->
         <!-- QA -->
         <findbugs.version>1.3.2</findbugs.version>
         <ant-contrib.version>1.0b3</ant-contrib.version>
@@ -120,56 +100,6 @@
 
     <dependencyManagement>
         <dependencies>
-
-            <dependency>
-                <groupId>io.spring.platform</groupId>
-                <artifactId>platform-bom</artifactId>
-                <version>2.0.7.RELEASE</version>
-            </dependency>
-
-            <!-- Spring Boot dependencies -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-jpa</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring.boot.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-actuator</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-security</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-devtools</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-ldap</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
 
             <!-- SADE -->
             <dependency>
@@ -206,40 +136,6 @@
             </dependency>
 
 
-            <!--test security-->
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-aspects</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-config</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-web</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-cas</artifactId>
-                <version>${spring.security.version}</version>
-                <!--<exclusions>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.slf4j</groupId>-->
-                        <!--<artifactId>log4j-over-slf4j</artifactId>-->
-                    <!--</exclusion>-->
-                <!--</exclusions>-->
-            </dependency>
-
-
 
             <dependency>
                 <groupId>com.googlecode.flyway</groupId>
@@ -252,11 +148,6 @@
                 <version>${hikari.cp.verision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-tx</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.mysema.querydsl</groupId>
@@ -296,32 +187,6 @@
                 <version>${hibernate.version}</version>
             </dependency>
 
-            <!--<dependency>-->
-                <!--<groupId>org.hibernate</groupId>-->
-                <!--<artifactId>hibernate-core</artifactId>-->
-                <!--<version>${hibernate.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.hibernate</groupId>-->
-                <!--<artifactId>hibernate-validator</artifactId>-->
-                <!--<version>${hibernate-validator.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.hibernate</groupId>-->
-                <!--<artifactId>hibernate-entitymanager</artifactId>-->
-                <!--<version>${hibernate.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.hibernate</groupId>-->
-                <!--<artifactId>hibernate-ehcache</artifactId>-->
-                <!--<version>${hibernate.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>javax.transaction</groupId>-->
-                <!--<artifactId>jta</artifactId>-->
-                <!--<version>${jta.version}</version>-->
-            <!--</dependency>-->
-
             <dependency>
                 <groupId>xml-apis</groupId>
                 <artifactId>xml-apis</artifactId>
@@ -331,11 +196,6 @@
                 <groupId>org.springframework.ldap</groupId>
                 <artifactId>spring-ldap-core</artifactId>
                 <version>${spring.ldap.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.context.support.version}</version>
             </dependency>
 
             <dependency>

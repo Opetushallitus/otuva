@@ -23,10 +23,14 @@ import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 @Conditional(value = LdapUserDetailsConfig.UseCondition.class)
 public class LdapUserDetailsConfig {
     private static final Logger logger = LoggerFactory.getLogger(LdapUserDetailsConfig.class);
-    
-    @Autowired
+
     private CasProperties casProperties;
-    
+
+    @Autowired
+    public LdapUserDetailsConfig(CasProperties casProperties) {
+        this.casProperties = casProperties;
+    }
+
     @Bean
     public UserDetailsContextMapper userDetailsContextMapper() {
         CustomUserDetailsMapper ldapUserDetailsMapper = new CustomUserDetailsMapper();

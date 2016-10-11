@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dao.PalveluDao;
+import fi.vm.sade.kayttooikeus.repositories.PalveluDao;
 import fi.vm.sade.kayttooikeus.service.PalveluService;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluDto;
 import org.springframework.beans.factory.annotation.Autowired;

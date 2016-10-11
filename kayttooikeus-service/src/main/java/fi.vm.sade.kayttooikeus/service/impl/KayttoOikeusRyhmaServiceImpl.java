@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dao.KayttoOikeusRyhmaDao;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaDao;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusRyhmaService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by autio on 4.10.2016.
