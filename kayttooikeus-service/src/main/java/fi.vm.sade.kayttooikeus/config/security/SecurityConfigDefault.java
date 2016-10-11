@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
 
+import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
 import org.slf4j.Logger;
@@ -84,9 +85,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-        CasAuthenticationFilter casAuthenticationFilter = new CasAuthenticationFilter();
+        OpintopolkuCasAuthenticationFilter casAuthenticationFilter = new OpintopolkuCasAuthenticationFilter(serviceProperties());
         casAuthenticationFilter.setAuthenticationManager(authenticationManager());
-        casAuthenticationFilter.setServiceProperties(serviceProperties());
         casAuthenticationFilter.setFilterProcessesUrl("/j_spring_cas_security_check");
         return casAuthenticationFilter;
     }
