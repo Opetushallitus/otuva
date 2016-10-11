@@ -13,13 +13,6 @@ import javax.annotation.PostConstruct;
 @SpringBootApplication(exclude = VelocityAutoConfiguration.class)
 public class Application extends SpringBootServletInitializer{
 
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
-    @PostConstruct
-    public void logSomething() {
-        logger.info("Sample Info Message");
-    }
-
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(Application.class);
