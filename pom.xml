@@ -37,6 +37,8 @@
         <project.build.fileEncoding>UTF-8</project.build.fileEncoding>
         <java.version>1.8</java.version>
 
+        <organisaatio.version>2015-09</organisaatio.version>
+
         <!-- Sade utils -->
         <generic.version>9.4-SNAPSHOT</generic.version>
         <java.utils.version>0.1.0-SNAPSHOT</java.utils.version>
@@ -58,9 +60,6 @@
 
         <!-- Cache -->
         <ehcache.version>2.5.0</ehcache.version>
-
-        <!-- QueryDSL -->
-        <querydsl.version>3.7.4</querydsl.version>
 
         <!-- DB -->
         <postgresql.version>9.4.1209</postgresql.version>

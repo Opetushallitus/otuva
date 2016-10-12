@@ -20,6 +20,6 @@ public class KayttoOikeusRyhmaDaoImpl extends AbstractDao  implements KayttoOike
                 .where(kayttoOikeusRyhma.hidden.eq(false))
                 .orderBy(kayttoOikeusRyhma.id.asc())
                 .distinct()
-                .list(kayttoOikeusRyhma);
+                .select(kayttoOikeusRyhma).fetch();
     }
 }

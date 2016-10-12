@@ -15,6 +15,6 @@ public class DbTestDaoImpl extends AbstractDao implements DbTestDao {
     
     @Override
     public Long countHenkilos() {
-        return from(henkilo).where(henkilo.passivoitu.eq(false)).count();
+        return from(henkilo).where(henkilo.passivoitu.eq(false)).fetchCount();
     }
 }

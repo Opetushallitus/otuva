@@ -1,9 +1,9 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import com.mysema.query.jpa.impl.JPAQuery;
-import com.mysema.query.jpa.sql.JPASQLQuery;
-import com.mysema.query.sql.PostgresTemplates;
-import com.mysema.query.types.EntityPath;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.sql.JPASQLQuery;
+import com.querydsl.sql.PostgreSQLTemplates;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,16 +16,24 @@ import javax.persistence.PersistenceContext;
 public abstract class AbstractDao {
     @PersistenceContext
     protected EntityManager em;
-
-    protected JPAQuery jpa() {
-        return new JPAQuery(em);
+    
+    protected<T> JPAQuery<T> jpa() {
+        return new JPAQuery<>(em);
     }
 
-    protected JPASQLQuery sql() {
-        return new JPASQLQuery(em, PostgresTemplates.DEFAULT);
+    protected<T> JPASQLQuery<T> sql() {
+        return new JPASQLQuery<>(em, PostgreSQLTemplates.DEFAULT);
     }
 
-    protected JPASQLQuery from(EntityPath<?>... o) {
+    protected JPASQLQuery<Object> from(EntityPath<?>... o) {
         return sql().from(o);
+    }
+
+    protected boolean exists(JPAQuery<?> q) {
+        return q.limit(1).fetchCount() > 0;
+    }
+    
+    protected boolean exists(JPASQLQuery<?> q) {
+        return q.limit(1).fetchCount() > 0;
     }
 }

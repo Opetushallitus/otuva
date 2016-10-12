@@ -27,13 +27,11 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
-
 /**
  * Created by autio on 19.9.2016.
  */
 @EnableWebSecurity
-@Profile("default")
+@Profile("!dev")
 @Configuration
 @Import({LdapUserDetailsConfig.class, HttpMockedUserDetailsConfig.class})
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)

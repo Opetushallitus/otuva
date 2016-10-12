@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import fi.vm.sade.kayttooikeus.repositories.PalveluDao;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
+import fi.vm.sade.kayttooikeus.repositories.PalveluDao;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,6 +15,6 @@ import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 public class PalveluDaoImpl extends AbstractDao implements PalveluDao {
     @Override
     public List<Palvelu> findAll() {
-        return from(palvelu).list(palvelu);
+        return from(palvelu).select(palvelu).fetch();
     }
 }
