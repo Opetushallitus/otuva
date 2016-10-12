@@ -47,3 +47,6 @@ cas:
   send-renew: false
   key: kayttooikeus-service
   url: https://{{host_cas}}/cas
+
+host:
+  host-virkailija: {{host_virkailija}}

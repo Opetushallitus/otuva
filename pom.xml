@@ -139,8 +139,11 @@
                 <artifactId>opintopolku-cas-servlet-filter</artifactId>
                 <version>0.1.0-SNAPSHOT</version>
             </dependency>
-
-
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-properties</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.googlecode.flyway</groupId>
@@ -251,50 +254,45 @@
     </dependencies>
     
     <build>
+
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>write buildversion.txt</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <echo message="writing ${project.build.directory}/classes/static/buildversion.txt"/>
+                                    <echo file="${project.build.directory}/classes/static/buildversion.txt">
+                                        <![CDATA[artifactId=${project.artifactId}
+            version=${project.version}
+            buildNumber=${project.build}
+            branchName=${branch}
+            vcsRevision=${revision}
+            buildTtime=${maven.build.timestamp}
+            ]]>
+                                    </echo>
+                                    <loadfile property="buildversiontxt"
+                                              srcFile="${project.build.directory}/classes/static/buildversion.txt"/>
+                                    <echo message="${buildversiontxt}"/>
+                                    <echo file="target/mavenversion.txt">${project.version}</echo>
+                                </target>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${maven-antrun-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>write buildversion.txt</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <echo message="writing ${project.build.directory}/classes/static/buildversion.txt"/>
-                                <echo file="${project.build.directory}/classes/static/buildversion.txt">
-                                    <![CDATA[artifactId=${project.artifactId}
-            version=${project.version}
-            buildNumber=${project.build}
-            branchName=${git.branch}
-            vcsRevision=${git.commit.id}
-            buildTtime=${maven.build.timestamp}
-            ]]>
-                                </echo>
-                                <loadfile property="buildversiontxt"
-                                          srcFile="${project.build.directory}/classes/static/buildversion.txt"/>
-                                <echo message="${buildversiontxt}"/>
-                                <echo file="target/mavenversion.txt">${project.version}</echo>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

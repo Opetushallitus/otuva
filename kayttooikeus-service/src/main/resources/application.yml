@@ -12,6 +12,4 @@ server:
     tracking-modes: cookie
     timeout: 30
 
-management.info.git.mode: full
-
 
