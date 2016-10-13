@@ -4,8 +4,6 @@ package fi.vm.sade.kayttooikeus.config.security;
 import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,36 +25,37 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
 import java.util.Optional;
 
-/**
- * Created by autio on 19.9.2016.
- */
-@EnableWebSecurity
 @Profile("!dev")
 @Configuration
 @Import({LdapUserDetailsConfig.class, HttpMockedUserDetailsConfig.class})
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@EnableGlobalMethodSecurity(jsr250Enabled = false, prePostEnabled = true, securedEnabled = true)
+@EnableWebSecurity
 public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
-
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfigDefault.class);
-
-    @Autowired
     private CasProperties casProperties;
 
     @Autowired(required = false)
     private LdapUserDetailsService ldapUserDetailsService;
-    
+
     @Autowired(required = false)
     private HttpMockedUserDetailsProvider fallbackUserDetailsService;
+
+    @Autowired
+    public SecurityConfigDefault(CasProperties casProperties) {
+        this.casProperties = casProperties;
+    }
 
     @Bean
     public ServiceProperties serviceProperties() {
         ServiceProperties serviceProperties = new ServiceProperties();
         serviceProperties.setService(casProperties.getService() + "/j_spring_cas_security_check");
-        logger.info("casproperties service " + casProperties.getService() );
         serviceProperties.setSendRenew(casProperties.getSendRenew());
         serviceProperties.setAuthenticateAllArtifacts(true);
         return serviceProperties;
     }
+
+    //
+    // CAS authentication provider (authentication manager)
+    //
 
     @Bean
     public CasAuthenticationProvider casAuthenticationProvider() {
@@ -65,7 +64,6 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         casAuthenticationProvider.setServiceProperties(serviceProperties());
         casAuthenticationProvider.setTicketValidator(cas20ServiceTicketValidator());
         casAuthenticationProvider.setKey(casProperties.getKey());
-        logger.info("casproperties key " + casProperties.getKey() );
         return casAuthenticationProvider;
     }
 
@@ -73,13 +71,17 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
         return (CasAssertionAuthenticationToken casAssertionAuthenticationToken)
                 -> Optional.<UserDetailsService>ofNullable(ldapUserDetailsService)
-                    .orElse(fallbackUserDetailsService).loadUserByUsername(casAssertionAuthenticationToken.getName());
+                .orElse(fallbackUserDetailsService).loadUserByUsername(casAssertionAuthenticationToken.getName());
     }
 
     @Bean
     public Cas20ServiceTicketValidator cas20ServiceTicketValidator() {
         return new Cas20ServiceTicketValidator(casProperties.getUrl());
     }
+
+    //
+    // CAS filter
+    //
 
     @Bean
     public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
@@ -88,6 +90,10 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         casAuthenticationFilter.setFilterProcessesUrl("/j_spring_cas_security_check");
         return casAuthenticationFilter;
     }
+
+    //
+    // CAS entry point
+    //
 
     @Bean
     public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
@@ -102,8 +108,12 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/buildversion.txt").permitAll()
-                    .anyRequest().authenticated()
+                .antMatchers("/buildversion.txt").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .addFilter(casAuthenticationFilter())
                 .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint());
@@ -114,5 +124,4 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
         auth
                 .authenticationProvider(casAuthenticationProvider());
     }
-
 }

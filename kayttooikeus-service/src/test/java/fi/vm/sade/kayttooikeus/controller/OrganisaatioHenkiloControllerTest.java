@@ -1,11 +1,11 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.config.TestApplication;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(OrganisaatioHenkiloController.class)
+@TestApplication
+@AutoConfigureMockMvc
 public class OrganisaatioHenkiloControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -31,8 +32,7 @@ public class OrganisaatioHenkiloControllerTest {
     private OrganisaatioHenkiloService service;
 
     @Test
-    @Ignore // TODO
-    @WithMockUser(username = "1.2.3.4.5", roles = "APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void listOrganisaatioPerustiedotForCurrentUserTest() throws Exception {
         given(this.service.listOrganisaatioPerustiedotForCurrentUser()).willReturn(new ArrayList<>());
         this.mvc.perform(get("/organisaatiohenkilo/current/organisaatio").accept(MediaType.APPLICATION_JSON_UTF8))
@@ -42,11 +42,10 @@ public class OrganisaatioHenkiloControllerTest {
     @Test
     public void listOrganisaatioPerustiedotForCurrentUserIsSecuredTest() throws Exception {
         this.mvc.perform(get("/organisaatiohenkilo/current/organisaatio").accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection()); // redirect to CAS login
     }
     
     @Test
-    @Ignore // TODO
     @WithMockUser(roles = "APP_HENKILONHALLINTA_CRUD")
     public void listPossibleHenkiloTypesByCurrentHenkiloTest() throws Exception {
         given(this.service.listPossibleHenkiloTypesAccessibleForCurrentUser()).willReturn(singletonList(VIRKAILIJA));
@@ -57,6 +56,6 @@ public class OrganisaatioHenkiloControllerTest {
     @Test
     public void listPossibleHenkiloTypesByCurrentHenkiloIsSecuredTest() throws Exception {
         this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection()); // redirect to CAS login
     }
 }

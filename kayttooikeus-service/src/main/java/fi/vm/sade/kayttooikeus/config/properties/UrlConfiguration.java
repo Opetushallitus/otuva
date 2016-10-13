@@ -13,6 +13,7 @@ public class UrlConfiguration extends OphProperties{
 
     @Autowired
     public UrlConfiguration(Environment environment) {
-        addFiles("/kayttooikeus-service-oph.properties", environment.getProperty("spring.config.location"));
+        addFiles("/kayttooikeus-service-oph.properties");
+        addOptionalFiles(environment.getProperty("spring.config.location"));
     }
 }

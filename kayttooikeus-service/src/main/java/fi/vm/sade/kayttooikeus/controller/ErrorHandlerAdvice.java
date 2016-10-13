@@ -42,30 +42,8 @@ public class ErrorHandlerAdvice {
                 Iterators.getLast(violation.getPropertyPath().iterator()).toString(), violation.getMessage(),
                     violation.getInvalidValue());
     
-//    @Autowired
-//    protected Validator validator;
-    
     @Autowired
     private MessageSource messageSource;
-
-//    @InitBinder
-//    public void dataBinding(WebDataBinder binder) {
-//        binder.addValidators(new org.springframework.validation.Validator() {
-//            @Override
-//            public boolean supports(Class<?> clazz) {
-//                return true;
-//            }
-//
-//            @Override
-//            public void validate(Object target, Errors errors) {
-//                Set<ConstraintViolation<Object>> violations = validator.validate(target);
-//                if (!violations.isEmpty()) {
-//                    throw new ConstraintViolationException((Set) violations);
-//                }
-//            }
-//        });
-//        binder.setIgnoreUnknownFields(true);
-//    }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND) // 404 Entity not found by primary key.
     @ExceptionHandler(NotFoundException.class) @ResponseBody
