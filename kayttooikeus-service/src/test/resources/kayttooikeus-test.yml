@@ -20,8 +20,8 @@ hikari:
     maximum-pool-size: 5
     connection-timeout: 10000
     max-lifetime: 60000
-    # NOTE: do not use connection-test-query here since it will cause unexpected end of statement error.
 
+# TODO: proper mock for these in tests
 cas:
   ldap: {}
   service: https://localhost:8183/kayttooikeus-service
@@ -29,14 +29,3 @@ cas:
   key: kayttooikeus-service
   url: http://localhost:9292/cas
   fallback-user-details-provider-url: http://localhost:9292/userDetails/
-
-server:
-  port: 8183
-
-loader:
-  path: lib/hsqldb.jar
-  
-# too bad can not change https -> http
-host:
-  host-virkailija: localhost:9292
-  organisaatio-service: http://localhost:9292/organisaatio-service
