@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.config.TestApplication;
+import fi.vm.sade.kayttooikeus.config.ApplicationTest;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@TestApplication
+@ApplicationTest
 @AutoConfigureMockMvc
 public class OrganisaatioHenkiloControllerTest {
     @Autowired

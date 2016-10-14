@@ -3,7 +3,7 @@ spring:
     hibernate:
       dialect: org.hibernate.dialect.HSQLDialect
       implicit-naming-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
-      ddl-auto: update
+      ddl-auto: create
     connection:
       charset: utf-8
     archive:
@@ -29,3 +29,9 @@ cas:
   key: kayttooikeus-service
   url: http://localhost:9292/cas
   fallback-user-details-provider-url: http://localhost:9292/userDetails/
+
+host:
+  host-virkailija: localhost:9292
+  url-virkailija: http://localhost:9292
+  organisaatio-service: http://localhost:9292/organisaatio-service
+  

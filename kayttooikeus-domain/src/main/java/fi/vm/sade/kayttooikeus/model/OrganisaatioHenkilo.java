@@ -24,12 +24,12 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "organisaatio_oid", nullable = false)
     private String organisaatioOid;
 
-    @Column(name = "tyyppi", nullable = true) 
+    @Column(name = "tyyppi") 
     @Enumerated(EnumType.STRING)
     private OrganisaatioHenkiloTyyppi organisaatioHenkiloTyyppi;
 
-    @OneToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisaatio_oid", insertable = false, updatable = false, nullable = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organisaatio_oid", insertable = false, updatable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private OrganisaatioCache organisaatioCache;
 
