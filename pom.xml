@@ -274,7 +274,7 @@
                                     <echo file="${project.build.directory}/classes/static/buildversion.txt">
                                         <![CDATA[artifactId=${project.artifactId}
             version=${project.version}
-            buildNumber=${project.build}
+            buildNumber=${buildNumber}
             branchName=${branch}
             vcsRevision=${revision}
             buildTtime=${maven.build.timestamp}
