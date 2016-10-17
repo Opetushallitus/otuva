@@ -7,6 +7,6 @@ import java.util.List;
  * Date: 12/10/2016
  * Time: 14.44
  */
-public interface OrganisaatioHenkiloDao {
+public interface OrganisaatioHenkiloRepository {
     List<String> findDistinctOrganisaatiosForHenkiloOid(String henkiloOid);
 }

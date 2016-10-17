@@ -21,7 +21,7 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "kayttooikeusryhma_kayttooikeus", inverseJoinColumns = @JoinColumn(name = "kayttooikeus_id",
                 referencedColumnName = "id"), joinColumns = @JoinColumn(name = "kayttooikeusryhma_id",
                 referencedColumnName = "id"))

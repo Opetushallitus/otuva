@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaDao;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +12,7 @@ import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma
  * Created by autio on 4.10.2016.
  */
 @Repository
-public class KayttoOikeusRyhmaDaoImpl extends AbstractDao  implements KayttoOikeusRyhmaDao {
+public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implements KayttoOikeusRyhmaRepository {
 
     @Override
     public List<KayttoOikeusRyhma> listAll() {

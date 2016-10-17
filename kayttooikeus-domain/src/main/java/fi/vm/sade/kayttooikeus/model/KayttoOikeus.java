@@ -21,7 +21,7 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
     @Column(name = "rooli", nullable = false)
     private String rooli;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "textgroup_id", nullable = false)
     private TextGroup textGroup;
 

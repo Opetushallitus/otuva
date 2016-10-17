@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDao;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 
@@ -17,8 +17,8 @@ import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHen
  * Time: 14.47
  */
 @Repository
-public class OrganisaatioHenkiloDaoImpl extends AbstractDao implements OrganisaatioHenkiloDao {
-    private static BooleanExpression voimassa(QOrganisaatioHenkilo oh, LocalDate at) {
+public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implements OrganisaatioHenkiloRepository {
+    public static BooleanExpression voimassa(QOrganisaatioHenkilo oh, LocalDate at) {
         return oh.passivoitu.eq(false)
             .and(oh.voimassaAlkuPvm.isNull().or(oh.voimassaAlkuPvm.loe(at)))
             .and(oh.voimassaLoppuPvm.isNull().or(oh.voimassaLoppuPvm.goe(at)));

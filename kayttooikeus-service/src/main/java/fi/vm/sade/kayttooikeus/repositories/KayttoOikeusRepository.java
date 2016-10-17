@@ -5,6 +5,6 @@ package fi.vm.sade.kayttooikeus.repositories;
  * Date: 12/10/2016
  * Time: 15.47
  */
-public interface KayttoOikeusDao {
+public interface KayttoOikeusRepository {
     boolean isHenkiloMyonnettyKayttoOikeusToPalveluInRole(String henkiloOid, String palvelu, String role);
 }

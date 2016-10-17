@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.model.TextGroup;
 
 import javax.persistence.EntityManager;
 
-import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.constant;
+import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 
 public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
     private final Populator<Palvelu> palvelu;
@@ -18,7 +18,7 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
     }
 
     public KayttoOikeusPopulator(String palveluName, String rooli) {
-        this.palvelu = new PalveluPopulator(palveluName);
+        this.palvelu = palvelu(palveluName);
         this.rooli = rooli;
     }
     
@@ -32,12 +32,17 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
 
     @Override
     public KayttoOikeus apply(EntityManager entityManager) {
-        KayttoOikeus oikeus = new KayttoOikeus();
-        oikeus.setRooli(rooli);
-        oikeus.setPalvelu(palvelu.apply(entityManager));
-        oikeus.setTextGroup(new TextGroup());
-        entityManager.persist(oikeus);
-        
-        return oikeus;
+        Palvelu palvelu = this.palvelu.apply(entityManager);
+        return Populator.<KayttoOikeus>firstOptional(entityManager.createQuery("select ko from KayttoOikeus ko " +
+                "where ko.palvelu.name = :palveluName and ko.rooli = :rooli")
+                    .setParameter("palveluName", palvelu.getName())
+                    .setParameter("rooli", rooli)).orElseGet(() -> {
+            KayttoOikeus oikeus = new KayttoOikeus();
+            oikeus.setRooli(rooli);
+            oikeus.setPalvelu(palvelu);
+            oikeus.setTextGroup(new TextGroup());
+            entityManager.persist(oikeus);
+            return oikeus;
+        });
     }
 }

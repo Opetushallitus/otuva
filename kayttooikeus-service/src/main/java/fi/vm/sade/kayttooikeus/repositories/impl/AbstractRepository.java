@@ -13,7 +13,7 @@ import javax.persistence.PersistenceContext;
  * Date: 2.9.2016
  * Time: 16.59
  */
-public abstract class AbstractDao {
+public abstract class AbstractRepository {
     @PersistenceContext
     protected EntityManager em;
     

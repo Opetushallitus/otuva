@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusDao;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDao;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
@@ -30,10 +30,10 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final String ROOLI_CRUD = "CRUD";
     
     @Autowired
-    private OrganisaatioHenkiloDao organisaatioHenkiloDao;
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Autowired
-    private KayttoOikeusDao kayttoOikeusDao;
+    private KayttoOikeusRepository kayttoOikeusRepository;
 
     @Autowired
     private OrganisaatioClient organisaatioClient;
@@ -42,17 +42,17 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatioPerustiedotForCurrentUser() {
         return organisaatioClient.listOganisaatioPerustiedot(
-                organisaatioHenkiloDao.findDistinctOrganisaatiosForHenkiloOid(getCurrentUserOid()));
+                organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(getCurrentUserOid()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<HenkiloTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser() {
-        if (kayttoOikeusDao.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
+        if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
                 HENKILOHALLINTA_PALVELUNAME, ROOLI_OPH_REKISTERINPITAJA)) {
             return asList(VIRKAILIJA, PALVELU);
         }
-        if (kayttoOikeusDao.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
+        if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
                 HENKILOHALLINTA_PALVELUNAME, ROOLI_CRUD)) {
             return singletonList(VIRKAILIJA);
         }

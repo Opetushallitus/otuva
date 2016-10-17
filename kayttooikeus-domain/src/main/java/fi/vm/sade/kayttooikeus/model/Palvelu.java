@@ -19,7 +19,7 @@ public class Palvelu extends IdentifiableAndVersionedEntity {
     @Column(name = "palvelutyyppi")
     private PalveluTyyppi palveluTyyppi;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "textgroup_id")
     private TextGroup description;
 

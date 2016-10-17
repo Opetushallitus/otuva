@@ -27,15 +27,21 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
 
     @Override
     public KayttoOikeusRyhma apply(EntityManager entityManager) {
-        KayttoOikeusRyhma ryhma = new KayttoOikeusRyhma();
-        ryhma.setDescription(new TextGroup());
-        ryhma.setHidden(false);
-        ryhma.setName(name);
-        entityManager.persist(ryhma);
+        KayttoOikeusRyhma ryhma = Populator.<KayttoOikeusRyhma>firstOptional(entityManager
+                .createQuery("select kor from KayttoOikeusRyhma kor " +
+                    "where kor.name = :name").setParameter("name", name)).orElseGet(() -> {
+            KayttoOikeusRyhma r = new KayttoOikeusRyhma();
+            r.setDescription(new TextGroup());
+            r.setHidden(false);
+            r.setName(name);
+            entityManager.persist(r);
+            return r;
+        });
         
         oikeus.forEach(o -> {
-            o.apply(entityManager).getKayttooikeusRyhmas().add(ryhma);
+            ryhma.getKayttoOikeus().add(o.apply(entityManager));
         });
+        entityManager.merge(ryhma);
         
         return ryhma;
     }

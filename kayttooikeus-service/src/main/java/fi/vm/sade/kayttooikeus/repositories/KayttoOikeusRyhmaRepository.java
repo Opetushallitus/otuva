@@ -7,6 +7,6 @@ import java.util.List;
 /**
  * Created by autio on 4.10.2016.
  */
-public interface KayttoOikeusRyhmaDao{
+public interface KayttoOikeusRyhmaRepository {
     List<KayttoOikeusRyhma> listAll();
 }

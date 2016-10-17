@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.config.ApplicationTest;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusDao;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDao;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import org.junit.Test;
@@ -35,10 +35,10 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     private OrganisaatioClient organisaatioClient;
 
     @MockBean
-    private OrganisaatioHenkiloDao organisaatioHenkiloDao;
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @MockBean
-    private KayttoOikeusDao kayttoOikeusDao;
+    private KayttoOikeusRepository kayttoOikeusRepository;
     
     @Autowired
     private OrganisaatioHenkiloService organisaatioHenkiloService;
@@ -46,7 +46,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listOrganisaatioPerustiedotForCurrentUserTest() {
-        given(this.organisaatioHenkiloDao.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
                 .willReturn(singletonList("2.3.4.5.6"));
         given(this.organisaatioClient.listOganisaatioPerustiedot(singletonList("2.3.4.5.6")))
                 .willReturn(singletonList(readJson(jsonResource("classpath:organisaatio/organisaatioPerustiedot.json"), OrganisaatioPerustieto.class)));
@@ -59,7 +59,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserRekisterinpitajaTest() {
-        given(this.kayttoOikeusDao.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(true);
+        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA, HenkiloTyyppi.PALVELU)), new HashSet<>(list));
@@ -68,8 +68,8 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserCrudTest() {
-        given(this.kayttoOikeusDao.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(false);
-        given(this.kayttoOikeusDao.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "CRUD")).willReturn(true);
+        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(false);
+        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "CRUD")).willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA)), new HashSet<>(list));

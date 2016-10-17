@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.repositories.PalveluDao;
+import fi.vm.sade.kayttooikeus.repositories.PalveluRepository;
 import fi.vm.sade.kayttooikeus.service.PalveluService;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class PalveluServiceImpl implements PalveluService {
 
     @Autowired
-    private PalveluDao palveluDao;
+    private PalveluRepository palveluRepository;
 
     @Autowired
     private OrikaBeanMapper mapper;
@@ -26,7 +26,7 @@ public class PalveluServiceImpl implements PalveluService {
     @Override
     @Transactional(readOnly = true)
     public List<PalveluDto> listPalvelus() {
-        return palveluDao
+        return palveluRepository
                 .findAll()
                 .stream()
                 .map(palvelu -> mapper.map(palvelu, PalveluDto.class))

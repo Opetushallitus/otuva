@@ -1,17 +1,12 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import fi.vm.sade.kayttooikeus.repositories.DbTestDao;
+import fi.vm.sade.kayttooikeus.repositories.DbTestRepository;
 import org.springframework.stereotype.Repository;
 
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 16.58
- */
 @Repository
-public class DbTestDaoImpl extends AbstractDao implements DbTestDao {
+public class DbTestRepositoryImpl extends AbstractRepository implements DbTestRepository {
     
     @Override
     public Long countHenkilos() {

@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaDao;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusRyhmaService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements KayttoOikeusRyhmaService {
 
     @Autowired
-    private KayttoOikeusRyhmaDao kayttoOikeusRyhmaDao;
+    private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
 
     @Autowired
     private OrikaBeanMapper mapper;
@@ -25,6 +25,6 @@ public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements Kay
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas() {
-        return mapper.mapAsList(kayttoOikeusRyhmaDao.listAll(), KayttoOikeusRyhmaDto.class);
+        return mapper.mapAsList(kayttoOikeusRyhmaRepository.listAll(), KayttoOikeusRyhmaDto.class);
     }
 }

@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<MyonnettyKayttoOikeusRyhmaTapahtuma> {
     private final Populator<OrganisaatioHenkilo> henkilo;
     private final Populator<KayttoOikeusRyhma> kayttoOikeusRyhma;
+    private LocalDate voimassaAlkaen = new LocalDate();
 
     public OrganisaatioHenkiloKayttoOikeusPopulator(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         this.henkilo = henkilo;
@@ -20,6 +21,11 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
     
     public static OrganisaatioHenkiloKayttoOikeusPopulator myonnettyKayttoOikeus(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         return new OrganisaatioHenkiloKayttoOikeusPopulator(henkilo, kayttoOikeusRyhma);
+    }
+    
+    public OrganisaatioHenkiloKayttoOikeusPopulator voimassaAlkaen(LocalDate alkaen) {
+        voimassaAlkaen = alkaen;
+        return this;
     }
 
     @Override
@@ -31,7 +37,7 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
         tapahtuma.setSyy("syy");
         tapahtuma.setKasittelija(organisaatioHenkilo.getHenkilo());
         tapahtuma.setTila(KayttoOikeudenTila.MYONNETTY);
-        tapahtuma.setVoimassaAlkuPvm(new LocalDate());
+        tapahtuma.setVoimassaAlkuPvm(voimassaAlkaen);
         tapahtuma.setKayttoOikeusRyhma(kayttoOikeusRyhma.apply(entityManager));
         entityManager.persist(tapahtuma);
         
