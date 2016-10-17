@@ -13,11 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: tommiratamaa
- * Date: 10/10/2016
- * Time: 18.26
- */
+
 public class JsonUtil {
     private JsonUtil() {
     }

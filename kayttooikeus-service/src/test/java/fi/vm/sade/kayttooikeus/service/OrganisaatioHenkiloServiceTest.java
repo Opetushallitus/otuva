@@ -22,11 +22,6 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
-/**
- * User: tommiratamaa
- * Date: 14/10/2016
- * Time: 13.34
- */
 @RunWith(SpringRunner.class)
 @ApplicationTest
 public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {

@@ -24,14 +24,6 @@ hikari:
 # TODO: proper mock for these in tests
 cas:
   ldap: {}
-  service: https://localhost:8183/kayttooikeus-service
+  service: http://localhost/kayttooikeus-service
   send-renew: false
   key: kayttooikeus-service
-  url: http://localhost:9292/cas
-  fallback-user-details-provider-url: http://localhost:9292/userDetails/
-
-host:
-  host-virkailija: localhost:9292
-  url-virkailija: http://localhost:9292
-  organisaatio-service: http://localhost:9292/organisaatio-service
-  
