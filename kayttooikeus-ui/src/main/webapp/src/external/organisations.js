@@ -47,8 +47,7 @@ const fetchFromUrl = url => {
 }
 
 const orgsRequestS = Bacon.later(0, ORGS_URL)
-const orgsResponseS = orgsRequestS
-  .flatMap(fetchFromUrl)
+const orgsResponseS = orgsRequestS.flatMap(fetchFromUrl)
 
 export const orgsResponsePendingP = orgsRequestS.awaiting(orgsResponseS)
 export default orgsResponseS

@@ -16,7 +16,8 @@ fetchMock.get(L10N_URL,
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO': 'Organisaatio',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA': 'Myönnä käyttöoikeuksia',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_LISAA': 'Lisää organisaatio...',
-      'VIRKAILIJAN_LISAYS_TALLENNA': 'Tallenna ja lähetä itserekisteröitymissähköposti'
+      'VIRKAILIJAN_LISAYS_TALLENNA': 'Tallenna ja lähetä itserekisteröitymissähköposti',
+      'VIRKAILIJAN_LISAYS_LAHETETTY': 'Lähetetty'
     }
   })
 ))
@@ -31,8 +32,7 @@ const fetchFromUrl = url => {
 }
 
 const l10nRequestS = Bacon.later(0, L10N_URL)
-const l10nResponseS = l10nRequestS
-  .flatMap(fetchFromUrl)
+const l10nResponseS = l10nRequestS.flatMap(fetchFromUrl)
 
 export const l10nResponsePendingP = l10nRequestS.awaiting(l10nResponseS)
 export default l10nResponseS
