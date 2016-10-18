@@ -1,6 +1,6 @@
 import React from 'react'
 
-import basicInfo from '../../basicInfo'
+import basicInfo from '../../logic/basicInfo'
 
 const VirkailijanTiedot = React.createClass({
 

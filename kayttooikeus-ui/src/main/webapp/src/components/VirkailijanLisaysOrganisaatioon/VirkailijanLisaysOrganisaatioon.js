@@ -1,6 +1,6 @@
 import React from 'react'
 
-import organisations from '../../organisations'
+import organisations from '../../logic/organisations'
 import LisatytOrganisaatiot from '../LisatytOrganisaatiot/LisatytOrganisaatiot'
 
 const VirjailijanLisaysOrganisaatioon = React.createClass({

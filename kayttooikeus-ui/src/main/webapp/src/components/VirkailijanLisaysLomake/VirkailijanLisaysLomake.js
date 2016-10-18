@@ -3,6 +3,7 @@ import React from 'react'
 import VirkailijanTiedot from '../VirkailijanTiedot/VirkailijanTiedot'
 import VirkailijanLisaysOrganisaatioon from 
   '../VirkailijanLisaysOrganisaatioon/VirkailijanLisaysOrganisaatioon'
+
 import './VirkailijanLisaysLomake.css'
 
 const VirkailijanLisaysLomake = React.createClass({
@@ -18,7 +19,7 @@ const VirkailijanLisaysLomake = React.createClass({
           l10n={l10n}
           uiLang={uiLang} />
         <VirkailijanLisaysOrganisaatioon
-          organisaatiot={this.props.organisations}
+          organisaatiot={this.props.organisaatiot}
           addedOrgs={this.props.addedOrgs}
           l10n={l10n}
           uiLang={uiLang} />

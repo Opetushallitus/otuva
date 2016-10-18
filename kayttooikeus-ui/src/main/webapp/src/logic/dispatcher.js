@@ -2,7 +2,7 @@ import Bacon from 'baconjs'
 import R from 'ramda'
 
 export default function Dispatcher () {
-  var bus = R.memoize(name => {
+  const bus = R.memoize(name => {
     return new Bacon.Bus()
   })
 

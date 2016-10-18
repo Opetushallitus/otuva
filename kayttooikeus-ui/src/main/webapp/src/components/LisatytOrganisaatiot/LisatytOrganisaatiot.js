@@ -1,6 +1,7 @@
 import React from 'react'
 
-import organisations from '../../organisations'
+import organisations from '../../logic/organisations'
+
 import './LisatytOrganisaatiot.css'
 
 const LisatytOrganisaatiot = React.createClass({
