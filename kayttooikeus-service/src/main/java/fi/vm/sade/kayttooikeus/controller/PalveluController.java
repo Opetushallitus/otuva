@@ -16,9 +16,12 @@ import java.util.List;
 @RequestMapping("/palvelu")
 @Api(value = "/palvelu")
 public class PalveluController {
+    private PalveluService palveluService;
 
     @Autowired
-    private PalveluService palveluService;
+    public PalveluController(PalveluService palveluService) {
+        this.palveluService = palveluService;
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"

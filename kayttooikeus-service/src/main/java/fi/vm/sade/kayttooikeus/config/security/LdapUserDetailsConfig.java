@@ -32,31 +32,15 @@ public class LdapUserDetailsConfig {
         this.casProperties = casProperties;
     }
 
-    @Bean
-    public UserDetailsContextMapper userDetailsContextMapper() {
-        CustomUserDetailsMapper ldapUserDetailsMapper = new CustomUserDetailsMapper();
-        ldapUserDetailsMapper.setRolePrefix("ROLE_");
-        ldapUserDetailsMapper.setConvertToUpperCase(true);
-        return ldapUserDetailsMapper;
-    }
-    
-    @Bean
-    public LdapUserDetailsService ldapUserDetailsService(LdapContextSource ldapContextSource) {
-        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(casProperties.getLdap().getUserSearchBase(),
-                casProperties.getLdap().getUserSearchFilter(), ldapContextSource);
-        DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource, casProperties.getLdap().getGroupSearchBase());
-        ldapAuthoritiesPopulator.setGroupSearchFilter(casProperties.getLdap().getGroupSearchFilter());
-        ldapAuthoritiesPopulator.setGroupRoleAttribute(casProperties.getLdap().getGroupRoleAttribute());
-        LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch, ldapAuthoritiesPopulator);
-        ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
-        return ldapUserDetailsService;
-    }
-    
+
+    //
+    // LDAP
+    //
+
     @Bean
     public LdapContextSource ldapContextSource() {
         LdapContextSource ldapContextSource = new LdapContextSource();
         ldapContextSource.setUrl(casProperties.getLdap().getUrl());
-        logger.info("casproperties ldap url: " + casProperties.getLdap().getUrl() );
         ldapContextSource.setAuthenticationSource(authenticationSource());
         return ldapContextSource;
     }
@@ -74,6 +58,27 @@ public class LdapUserDetailsConfig {
     SpringSecurityAuthenticationSource springSecurityAuthenticationSource() {
         return new SpringSecurityAuthenticationSource();
     }
+
+    @Bean
+    public UserDetailsContextMapper userDetailsContextMapper() {
+        CustomUserDetailsMapper ldapUserDetailsMapper = new CustomUserDetailsMapper();
+        ldapUserDetailsMapper.setRolePrefix("ROLE_");
+        ldapUserDetailsMapper.setConvertToUpperCase(true);
+        return ldapUserDetailsMapper;
+    }
+
+    @Bean
+    public LdapUserDetailsService ldapUserDetailsService(LdapContextSource ldapContextSource) {
+        FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(casProperties.getLdap().getUserSearchBase(),
+                casProperties.getLdap().getUserSearchFilter(), ldapContextSource);
+        DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator = new DefaultLdapAuthoritiesPopulator(ldapContextSource, casProperties.getLdap().getGroupSearchBase());
+        ldapAuthoritiesPopulator.setGroupSearchFilter(casProperties.getLdap().getGroupSearchFilter());
+        ldapAuthoritiesPopulator.setGroupRoleAttribute(casProperties.getLdap().getGroupRoleAttribute());
+        LdapUserDetailsService ldapUserDetailsService = new LdapUserDetailsService(userSearch, ldapAuthoritiesPopulator);
+        ldapUserDetailsService.setUserDetailsMapper(userDetailsContextMapper());
+        return ldapUserDetailsService;
+    }
+
 
     public static class UseCondition implements Condition {
         @Override

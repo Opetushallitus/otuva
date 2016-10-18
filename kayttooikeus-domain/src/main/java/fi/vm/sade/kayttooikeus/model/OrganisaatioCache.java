@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,7 @@ import java.io.Serializable;
  * Time: 2:53 PM
  */
 @Entity
+@Builder
 @Getter @Setter
 @Table(name = "organisaatio_cache")
 public class OrganisaatioCache implements Serializable {

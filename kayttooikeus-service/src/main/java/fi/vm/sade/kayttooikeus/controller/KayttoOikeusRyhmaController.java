@@ -10,22 +10,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-/**
- * Created by autio on 4.10.2016.
- */
 @RestController
 @RequestMapping("/kayttooikeusryhma")
 @Api(value = "/kayttooikeusryhma", description = "Käyttöoikeusryhmien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusRyhmaController {
+    private KayttoOikeusRyhmaService kayttoOikeusRyhmaService;
 
     @Autowired
-    private KayttoOikeusRyhmaService kayttoOikeusRyhmaService;
-    
-    @Produces(MediaType.APPLICATION_JSON)
+    public KayttoOikeusRyhmaController(KayttoOikeusRyhmaService kayttoOikeusRyhmaService) {
+        this.kayttoOikeusRyhmaService = kayttoOikeusRyhmaService;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "Listaa kaikki käyttöoikeusryhmät.",
