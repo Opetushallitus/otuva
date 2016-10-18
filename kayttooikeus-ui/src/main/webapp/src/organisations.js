@@ -6,28 +6,23 @@ import Dispatcher from './dispatcher'
 const dispatcher = new Dispatcher()
 
 const organisations = {
-  toProperty: function(initialOrgs) {
-    const orgsP = Bacon.update(initialOrgs,
-      [dispatcher.stream('add')], addOrg,
-      [dispatcher.stream('remove')], removeOrg,
-    )
-    return orgsP;
-
-    function addOrg(orgs, newOrg) {
+  toProperty: initialOrgs => {
+    const addOrg = (orgs, newOrg) => {
       return R.find(R.propEq('id', newOrg.id))(orgs) ? 
         orgs : orgs.concat([newOrg])
     }
 
-    function removeOrg(orgs, orgIdToRemove) {
+    const removeOrg = (orgs, orgIdToRemove) => {
       return R.reject(org => org.id === orgIdToRemove, orgs)
     }
+
+    return Bacon.update(initialOrgs,
+      [dispatcher.stream('add')], addOrg,
+      [dispatcher.stream('remove')], removeOrg,
+    )
   },
-  add: function(org) {
-    dispatcher.push('add', org)
-  },
-  removeById: function(orgId) {
-    dispatcher.push('remove', orgId)
-  }
+  add: org => dispatcher.push('add', org),
+  removeById: orgId => dispatcher.push('remove', orgId),
 }
 
 export default organisations

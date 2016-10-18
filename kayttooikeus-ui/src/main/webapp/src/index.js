@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom'
 import Bacon from 'baconjs'
 
 import organisations from './organisations'
+import basicInfo from './basicInfo'
 
 import VirkailijanLisaysLomake from './components/VirkailijanLisaysLomake/VirkailijanLisaysLomake'
 import './index.css'
 
 const appState = Bacon.combineTemplate({
-  addedOrgs: organisations.toProperty([])
+  addedOrgs: organisations.toProperty([]),
+  basicInfo: basicInfo.toProperty({})
 })
 
 const mockData = {

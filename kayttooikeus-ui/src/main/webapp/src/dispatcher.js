@@ -1,19 +1,12 @@
 import Bacon from 'baconjs'
+import R from 'ramda'
 
 export default function Dispatcher () {
-  const busCache = {}
+  var bus = R.memoize(name => {
+    return new Bacon.Bus()
+  })
 
-  this.stream = function(name) {
-    return bus(name)
-  }
-  this.push = function(name, value) {
-    bus(name).push(value)
-  }
-  this.plug = function(name, value) {
-    bus(name).plug(value)
-  }
-
-  function bus(name) {
-    return busCache[name] = busCache[name] || new Bacon.Bus()
-  }
+  this.stream = name => bus(name)
+  this.push = (name, value) => bus(name).push(value)
+  this.plug = (name, value) => bus(name).plug(value)
 }
