@@ -11,17 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by autio on 6.10.2016.
- */
 @Service
 public class PalveluServiceImpl implements PalveluService {
-
-    @Autowired
     private PalveluRepository palveluRepository;
+    private OrikaBeanMapper mapper;
 
     @Autowired
-    private OrikaBeanMapper mapper;
+    public PalveluServiceImpl(PalveluRepository palveluRepository, OrikaBeanMapper mapper) {
+        this.palveluRepository = palveluRepository;
+        this.mapper = mapper;
+    }
 
     @Override
     @Transactional(readOnly = true)

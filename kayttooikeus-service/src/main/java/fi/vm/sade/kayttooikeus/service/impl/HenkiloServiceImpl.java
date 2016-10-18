@@ -6,15 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 17.05
- */
 @Service
 public class HenkiloServiceImpl implements HenkiloService {
-    @Autowired
     private DbTestRepository dbTestRepository;
+
+    @Autowired
+    public HenkiloServiceImpl(DbTestRepository dbTestRepository) {
+        this.dbTestRepository = dbTestRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)

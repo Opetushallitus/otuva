@@ -11,11 +11,6 @@ import java.util.List;
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
-/**
- * User: tommiratamaa
- * Date: 12/10/2016
- * Time: 14.47
- */
 @Repository
 public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implements OrganisaatioHenkiloRepository {
     public static BooleanExpression voimassa(QOrganisaatioHenkilo oh, LocalDate at) {

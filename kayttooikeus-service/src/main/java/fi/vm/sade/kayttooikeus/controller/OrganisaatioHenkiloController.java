@@ -11,18 +11,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @RestController
 @RequestMapping("/organisaatiohenkilo")
 @Api(value = "/organisaatiohenkilo", description = "Organisaatiohenkilön käsittelyyn liittyvät operaatiot.")
 public class OrganisaatioHenkiloController {
-    @Autowired
     private OrganisaatioHenkiloService organisaatioHenkiloService;
     
-    @Produces(MediaType.APPLICATION_JSON)
+    @Autowired
+    public OrganisaatioHenkiloController(OrganisaatioHenkiloService organisaatioHenkiloService) {
+        this.organisaatioHenkiloService = organisaatioHenkiloService;
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
@@ -35,7 +36,6 @@ public class OrganisaatioHenkiloController {
         return organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();
     }
 
-    @Produces(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"

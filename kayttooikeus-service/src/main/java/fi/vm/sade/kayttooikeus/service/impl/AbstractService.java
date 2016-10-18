@@ -4,11 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 17.06
- */
 public abstract class AbstractService {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     

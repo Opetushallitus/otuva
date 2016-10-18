@@ -8,9 +8,6 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
-/**
- * Created by autio on 6.10.2016.
- */
 @Repository
 public class PalveluRepositoryImpl extends AbstractRepository implements PalveluRepository {
     @Override

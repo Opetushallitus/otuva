@@ -26,11 +26,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * User: tommiratamaa
- * Date: 15.1.2016
- * Time: 15.57
- */
 @ControllerAdvice(basePackageClasses = ErrorHandlerAdvice.class)
 public class ErrorHandlerAdvice {
     public static final Locale FI = new Locale("fi", "FI");
@@ -42,8 +37,12 @@ public class ErrorHandlerAdvice {
                 Iterators.getLast(violation.getPropertyPath().iterator()).toString(), violation.getMessage(),
                     violation.getInvalidValue());
     
-    @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    public ErrorHandlerAdvice(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND) // 404 Entity not found by primary key.
     @ExceptionHandler(NotFoundException.class) @ResponseBody

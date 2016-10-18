@@ -18,25 +18,24 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-/**
- * User: tommiratamaa
- * Date: 12/10/2016
- * Time: 14.38
- */
 @Service
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
     private final String HENKILOHALLINTA_PALVELUNAME = "HENKILONHALLINTA";
     private final String ROOLI_OPH_REKISTERINPITAJA = "OPHREKISTERI";
     private final String ROOLI_CRUD = "CRUD";
     
-    @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
-    @Autowired
     private KayttoOikeusRepository kayttoOikeusRepository;
+    private OrganisaatioClient organisaatioClient;
 
     @Autowired
-    private OrganisaatioClient organisaatioClient;
+    public OrganisaatioHenkiloServiceImpl(OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
+                                          KayttoOikeusRepository kayttoOikeusRepository,
+                                          OrganisaatioClient organisaatioClient) {
+        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
+        this.kayttoOikeusRepository = kayttoOikeusRepository;
+        this.organisaatioClient = organisaatioClient;
+    }
 
     @Override
     @Transactional(readOnly = true)

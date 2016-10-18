@@ -10,18 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Created by autio on 4.10.2016.
- */
 @Service
 public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements KayttoOikeusRyhmaService {
-
-    @Autowired
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+    private OrikaBeanMapper mapper;
 
     @Autowired
-    private OrikaBeanMapper mapper;
-    
+    public KayttoOikeusRyhmaServiceImpl(KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository, OrikaBeanMapper mapper) {
+        this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
+        this.mapper = mapper;
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas() {

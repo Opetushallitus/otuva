@@ -8,9 +8,6 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
 
-/**
- * Created by autio on 4.10.2016.
- */
 @Repository
 public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implements KayttoOikeusRyhmaRepository {
 
