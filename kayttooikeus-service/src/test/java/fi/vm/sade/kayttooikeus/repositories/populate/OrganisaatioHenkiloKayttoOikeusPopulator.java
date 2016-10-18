@@ -40,7 +40,6 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
         tapahtuma.setVoimassaAlkuPvm(voimassaAlkaen);
         tapahtuma.setKayttoOikeusRyhma(kayttoOikeusRyhma.apply(entityManager));
         entityManager.persist(tapahtuma);
-        
         return tapahtuma;
     }
 }

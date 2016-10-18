@@ -7,11 +7,6 @@ import org.joda.time.DateTime;
 
 import javax.persistence.*;
 
-/**
- * 
- * @author kkammone
- * 
- */
 @Entity
 @Getter @Setter
 @Table(name = "haettu_kayttooikeusryhma")

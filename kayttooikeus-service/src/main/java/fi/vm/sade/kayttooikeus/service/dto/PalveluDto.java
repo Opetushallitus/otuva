@@ -4,9 +4,6 @@ import fi.vm.sade.kayttooikeus.model.PalveluTyyppi;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Created by autio on 6.10.2016.
- */
 @Getter
 @Setter
 public class PalveluDto {

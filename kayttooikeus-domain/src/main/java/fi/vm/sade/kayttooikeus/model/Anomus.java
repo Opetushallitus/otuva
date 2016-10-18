@@ -12,11 +12,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 13.57
- */
 @Entity
 @Getter @Setter
 @Table(name = "anomus", schema = "public")

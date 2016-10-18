@@ -1,15 +1,24 @@
 package fi.vm.sade.kayttooikeus.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Created by autio on 4.10.2016.
- */
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class TextDto {
+public class TextDto implements Serializable {
+    @JsonIgnore
     private Long id;
     private String text;
     private String lang;
+
+    public TextDto() {
+    }
+
+    public TextDto(String lang, String text) {
+        this.lang = lang;
+        this.text = text;
+    }
 }

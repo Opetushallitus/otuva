@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusRyhmaService;
+import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,11 +16,11 @@ import java.util.List;
 @RequestMapping("/kayttooikeusryhma")
 @Api(value = "/kayttooikeusryhma", description = "Käyttöoikeusryhmien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusRyhmaController {
-    private KayttoOikeusRyhmaService kayttoOikeusRyhmaService;
+    private KayttoOikeusService kayttoOikeusService;
 
     @Autowired
-    public KayttoOikeusRyhmaController(KayttoOikeusRyhmaService kayttoOikeusRyhmaService) {
-        this.kayttoOikeusRyhmaService = kayttoOikeusRyhmaService;
+    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService) {
+        this.kayttoOikeusService = kayttoOikeusService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -28,6 +28,6 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Listaa kaikki käyttöoikeusryhmät.",
             notes = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan.")
     public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma() {
-        return kayttoOikeusRyhmaService.listAllKayttoOikeusRyhmas();
+        return kayttoOikeusService.listAllKayttoOikeusRyhmas();
     }
 }

@@ -36,7 +36,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
     @Type(type = "dateTime")
-    private DateTime aikaleima;
+    private DateTime aikaleima = new DateTime();
 
     @Temporal(TemporalType.DATE)
     @Column(name = "voimassaalkupvm", nullable = false)

@@ -9,10 +9,7 @@ import javax.persistence.*;
 
 /**
  * Class that contains {@link Henkilo}'s password hash and salt. Only on may
- * exist per {@link Henkilo}
- * 
- * @author kkammone
- * 
+ * exist per {@link Henkilo}* 
  */
 @Entity
 @Getter @Setter

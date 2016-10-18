@@ -7,10 +7,12 @@ import fi.vm.sade.kayttooikeus.model.TextGroup;
 import javax.persistence.EntityManager;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
+import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.constant;
 
 public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
     private final Populator<Palvelu> palvelu;
     private final String rooli;
+    private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
 
     public KayttoOikeusPopulator(Populator<Palvelu> palvelu, String rooli) {
         this.palvelu = palvelu;
@@ -29,6 +31,11 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
     public static KayttoOikeusPopulator oikeus(String palveluName, String rooli) {
         return new KayttoOikeusPopulator(palveluName, rooli);
     }
+    
+    public KayttoOikeusPopulator kuvaus(Populator<TextGroup> textGroup) {
+        this.kuvaus = textGroup;
+        return this;
+    }
 
     @Override
     public KayttoOikeus apply(EntityManager entityManager) {
@@ -40,7 +47,7 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
             KayttoOikeus oikeus = new KayttoOikeus();
             oikeus.setRooli(rooli);
             oikeus.setPalvelu(palvelu);
-            oikeus.setTextGroup(new TextGroup());
+            oikeus.setTextGroup(kuvaus.apply(entityManager));
             entityManager.persist(oikeus);
             return oikeus;
         });
