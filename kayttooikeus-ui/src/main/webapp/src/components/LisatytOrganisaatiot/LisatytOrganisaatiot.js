@@ -1,23 +1,24 @@
 import React from 'react'
 
+import organisations from '../../organisations'
 import './LisatytOrganisaatiot.css'
 
-import organisations from '../../organisations'
+const LisatytOrganisaatiot = React.createClass({
 
-class LisatytOrganisaatiot extends React.Component {
-  render() {
+  render: function() {
     return (
       <div>
-        {this.props.addedOrgs.map(this.renderAddedOrganisaatio.bind(this))}
+        {this.props.addedOrgs.map(this.renderAddedOrganisaatio)}
       </div>
     )
-  }
+  },
 
-  renderAddedOrganisaatio(addedOrg) {
+  renderAddedOrganisaatio: function(addedOrg) {
     return (
       <div className="added-org" key={addedOrg.id}>
         <h3>{addedOrg.id} 
-          <a href="" onClick={this.removeAddedOrg.bind(this, addedOrg.id)}>X</a>
+          <a href="" 
+            onClick={this.removeAddedOrg.bind(null, addedOrg.id)}>X</a>
         </h3>
         <ul> 
           {addedOrg.permissions.map(permission => {
@@ -26,13 +27,13 @@ class LisatytOrganisaatiot extends React.Component {
         </ul>
       </div>
     )
-  }
+  },
 
-  removeAddedOrg(id, e) {
+  removeAddedOrg: function(id, e) {
     e.preventDefault()
     organisations.removeById(id)
-  }
+  },
 
-}
+})
 
 export default LisatytOrganisaatiot

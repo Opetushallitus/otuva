@@ -1,12 +1,8 @@
 import React from 'react'
 
-class VirkailijanTiedot extends React.Component {
-  constructor() {
-    super()
-    this.renderKieli = this.renderKieli.bind(this)
-  }
+const VirkailijanTiedot = React.createClass({
 
-  render() {
+  render: function() {
     const L = this.props.l10n 
     return (
       <fieldset>
@@ -22,14 +18,18 @@ class VirkailijanTiedot extends React.Component {
           </select>
         </div>
       </fieldset>
-    );
-  }
-
-  renderKieli(kieli) {
-    return (
-      <option key={kieli.code} value={kieli.code}>{kieli['name-' + this.props.uiLang]}</option>  
     )
-  }
-}
+  },
 
-export default VirkailijanTiedot;
+  renderKieli: function(kieli) {
+    return (
+      <option 
+        key={kieli.code} 
+        value={kieli.code}>{kieli['name-' + this.props.uiLang]}
+      </option>  
+    )
+  },
+
+})
+
+export default VirkailijanTiedot

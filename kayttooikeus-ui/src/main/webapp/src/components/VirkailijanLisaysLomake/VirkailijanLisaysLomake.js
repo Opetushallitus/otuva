@@ -1,12 +1,13 @@
 import React from 'react'
-import './VirkailijanLisaysLomake.css'
 
 import VirkailijanTiedot from '../VirkailijanTiedot/VirkailijanTiedot'
 import VirkailijanLisaysOrganisaatioon from 
   '../VirkailijanLisaysOrganisaatioon/VirkailijanLisaysOrganisaatioon'
+import './VirkailijanLisaysLomake.css'
 
-class VirkailijanLisaysLomake extends React.Component {
-  render() {
+const VirkailijanLisaysLomake = React.createClass({
+
+  render: function() {
     const uiLang = 'fi'
     const l10n = this.props.l10n[uiLang]
     return (
@@ -26,11 +27,12 @@ class VirkailijanLisaysLomake extends React.Component {
         </button>
       </form>
     );
-  }
+  },
 
-  handleSubmit(e) {
+  handleSubmit: function(e) {
     e.preventDefault()
-  }
-}
+  },
+  
+})
 
 export default VirkailijanLisaysLomake
