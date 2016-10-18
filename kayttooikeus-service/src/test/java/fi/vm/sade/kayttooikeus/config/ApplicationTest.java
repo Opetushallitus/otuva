@@ -27,8 +27,8 @@ public @interface ApplicationTest {
             int port = portNumberBySystemPropertyOrFree("test.port");
             System.setProperty("host-virkailija", "localhost:"+port);
             System.setProperty("url-virkailija", "http://localhost:"+port);
-            System.setProperty("cas.fallback-user-details-provider-url", "http://localhost:9292/userDetails/");
-            System.setProperty("organisaatio-service", "http://localhost:9292/organisaatio-service");
+            System.setProperty("cas.fallback-user-details-provider-url", "http://localhost:"+port+"/userDetails/");
+            System.setProperty("organisaatio-service.baseUrl", "http://localhost:"+port);
             System.setProperty("cas.url", "http://localhost:"+port+"/cas");
         }
     }
