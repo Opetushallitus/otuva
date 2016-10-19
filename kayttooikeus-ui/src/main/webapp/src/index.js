@@ -8,8 +8,9 @@ import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
-import VirkailijanLisaysLomake from './components/VirkailijanLisaysLomake/VirkailijanLisaysLomake'
+import VirkailijanLisaysLomake from './components/VirkailijanLisaysLomake'
 
+import './reset.css'
 import './index.css'
 
 const appState = Bacon.combineTemplate({

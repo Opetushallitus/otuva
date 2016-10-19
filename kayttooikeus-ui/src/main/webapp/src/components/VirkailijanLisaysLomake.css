@@ -1,0 +1,23 @@
+.wrapper {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.header,
+.footer {
+  flex: 100%;
+}
+
+.virkailijan-tiedot, 
+.virkailijan-lisays-organisaatioon {
+  flex: 0px;
+}
+
+.confirmation-modal {
+  width: 75%;
+  position: relative;
+  margin: 2em auto;
+  padding: .5em;
+  background: #ffffff;
+}

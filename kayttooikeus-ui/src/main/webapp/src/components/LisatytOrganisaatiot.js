@@ -1,6 +1,6 @@
 import React from 'react'
 
-import organisations from '../../logic/organisations'
+import organisations from '../logic/organisations'
 
 import './LisatytOrganisaatiot.css'
 

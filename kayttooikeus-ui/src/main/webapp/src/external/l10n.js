@@ -8,8 +8,8 @@ const MOCK_DELAY = 800
 fetchMock.get(L10N_URL, 
   new Promise(res => setTimeout(res, MOCK_DELAY)).then(() => ({
     "fi": {
-      'VIRKAILIJAN_LISAYS_OTSIKKO': 'Virkalijan lisäys',
-      'VIRKAILIJAN_TIEDOT_OTSIKKO': 'Virkalijan tiedot',
+      'VIRKAILIJAN_LISAYS_OTSIKKO': 'Virkailijan lisäys',
+      'VIRKAILIJAN_TIEDOT_OTSIKKO': 'Virkailijan tiedot',
       'VIRKAILIJAN_TIEDOT_SPOSTI': 'Sähköposti',
       'VIRKAILIJAN_TIEDOT_KIELI': 'Kieli',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO': 'Virkalijan lisäys organisaatioon',
@@ -17,7 +17,11 @@ fetchMock.get(L10N_URL,
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA': 'Myönnä käyttöoikeuksia',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_LISAA': 'Lisää organisaatio...',
       'VIRKAILIJAN_LISAYS_TALLENNA': 'Tallenna ja lähetä itserekisteröitymissähköposti',
-      'VIRKAILIJAN_LISAYS_LAHETETTY': 'Lähetetty'
+      'VIRKAILIJAN_LISAYS_LAHETETTY': 'Lähetetty',
+      'VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO': 'Kutsu Virkailijan Opintopolkuun',
+      'VIRKAILIJAN_LISAYS_ESIKATSELU_TEKSTI': 'Lähetetäänkö itserekisteröitymissähköposti osoitteeseen',
+      'VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO': 'Sähköpostiin liitetyt organisaatiot, ryhmät ja käyttöoikeudet',
+      'VIRKAILIJAN_LISAYS_ESIKATSELU_SULJE': 'Sulje',
     }
   })
 ))

@@ -3,22 +3,27 @@ import Bacon from 'baconjs'
 import fetchMock from 'fetch-mock'
 
 const INVITATION_URL = 'http://invitation'
-const MOCK_DELAY = 3000
-
-fetchMock.post(INVITATION_URL, 
-  new Promise(res => setTimeout(res, MOCK_DELAY)).then(() => 201)
-)
+const MOCK_DELAY = 1600
 
 const fetchFromUrl = ({url, payload}) => {
   return Bacon.fromPromise(
     fetch(url, {
       method: 'POST',
-      body: payload
+      body: JSON.stringify(payload)
     })
+      .then(response => response.json())
   )
 }
 
 export default function invite(payload) {
+  fetchMock.post(INVITATION_URL, 
+    new Promise(res => setTimeout(res, MOCK_DELAY))
+      .then((res) => ({
+        status: 201,
+        body: payload
+      }))
+  )
+
   const invitationRequestS = Bacon.later(0, { 
     url: INVITATION_URL, payload
   })

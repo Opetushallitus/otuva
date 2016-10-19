@@ -1,7 +1,8 @@
 import React from 'react'
+import R from 'ramda'
 
-import organisations from '../../logic/organisations'
-import LisatytOrganisaatiot from '../LisatytOrganisaatiot/LisatytOrganisaatiot'
+import organisations from '../logic/organisations'
+import LisatytOrganisaatiot from './LisatytOrganisaatiot'
 
 const VirjailijanLisaysOrganisaatioon = React.createClass({
 
@@ -19,47 +20,57 @@ const VirjailijanLisaysOrganisaatioon = React.createClass({
   },
 
   render: function() {
-    const L = this.props.l10n 
+    const L = this.props.l10n
+    const organisaatiot = this.props.organisaatiot
+    const selectedOrganisaatio = this.state.selectedOrganisaatio
 
-    const activeOrg = this.props.organisaatiot
-      .filter(org => org.id === this.state.selectedOrganisaatio)
-    const kayttooikeudet = activeOrg.length === 1 ? 
-      activeOrg[0].permissions : this.props.organisaatiot[0].permissions
+    const activeOrg = 
+      R.find(R.propEq('id', selectedOrganisaatio))(organisaatiot)
+    const kayttooikeudet = activeOrg.permissions
 
     return (
-      <fieldset>
+      <fieldset className="virkailijan-lisays-organisaatioon">
+      
         <h2>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h2>
+
         <div>
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
           </label>
           <select id="org" onChange={this.selectOrganisaatio}>
-            {this.props.organisaatiot.map(this.renderOrganisaatio)}
+            {organisaatiot.map(this.renderOrganisaatio)}
           </select>
         </div>
+
         <div>
           <label htmlFor="kayttooikeudet">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']}
           </label>
-          <select 
-            onChange={this.selectKayttooikeudet} multiple id="kayttooikeudet">
+          <select onChange={this.selectKayttooikeudet} multiple 
+            id="kayttooikeudet">
             {kayttooikeudet.map(this.renderKayttooikeus)}
           </select>
         </div>
+
         <a href="" onClick={this.addOrganisaatio}>
           {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_LISAA']}
         </a>
+
         <LisatytOrganisaatiot addedOrgs={this.props.addedOrgs} />
+
       </fieldset>
     )
   },
 
   addOrganisaatio: function(e) {
     e.preventDefault()
-    organisations.add({
-      id: this.state.selectedOrganisaatio,
-      permissions: this.state.selectedKayttooikeuses
-    })
+
+    if (this.state.selectedKayttooikeuses.length > 0) {
+      organisations.add({
+        id: this.state.selectedOrganisaatio,
+        permissions: this.state.selectedKayttooikeuses
+      })
+    }
   },
 
   selectOrganisaatio: function(e) {
