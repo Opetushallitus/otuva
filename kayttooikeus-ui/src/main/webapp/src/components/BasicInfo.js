@@ -2,7 +2,7 @@ import React from 'react'
 
 import basicInfo from '../logic/basicInfo'
 
-const VirkailijanTiedot = React.createClass({
+const BasicInfo = React.createClass({
 
   componentDidMount: function() {
     basicInfo.setLanguage(this.props.languages[0].code)
@@ -13,7 +13,7 @@ const VirkailijanTiedot = React.createClass({
     const kielet = this.props.languages
 
     return (
-      <fieldset className="virkailijan-tiedot">
+      <fieldset className="basic-info">
         <h2>{L['VIRKAILIJAN_TIEDOT_OTSIKKO']}</h2>
         <div>
           <label htmlFor="email">{L['VIRKAILIJAN_TIEDOT_SPOSTI']}</label>
@@ -47,4 +47,4 @@ const VirkailijanTiedot = React.createClass({
 
 })
 
-export default VirkailijanTiedot
+export default BasicInfo

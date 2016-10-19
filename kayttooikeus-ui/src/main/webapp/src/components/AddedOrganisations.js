@@ -2,19 +2,19 @@ import React from 'react'
 
 import organisations from '../logic/organisations'
 
-import './LisatytOrganisaatiot.css'
+import './AddedOrganisations.css'
 
-const LisatytOrganisaatiot = React.createClass({
+const AddedOrganisations = React.createClass({
 
   render: function() {
     return (
       <div>
-        {this.props.addedOrgs.map(this.renderAddedOrganisaatio)}
+        {this.props.addedOrgs.map(this.renderAddedOrganisation)}
       </div>
     )
   },
 
-  renderAddedOrganisaatio: function(addedOrg) {
+  renderAddedOrganisation: function(addedOrg) {
     return (
       <div className="added-org" key={addedOrg.id}>
         <h3>{addedOrg.id} 
@@ -37,4 +37,4 @@ const LisatytOrganisaatiot = React.createClass({
 
 })
 
-export default LisatytOrganisaatiot
+export default AddedOrganisations

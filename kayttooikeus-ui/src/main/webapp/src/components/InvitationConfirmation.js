@@ -38,7 +38,7 @@ const InvitationConfirmation = React.createClass({
   },
 
   renderAddedOrg: function(org) {
-    const allOrgs = this.props.organisaatiot
+    const allOrgs = this.props.orgs
     const nameKey = `name-${this.props.uiLang}`
     const orgName = R.find(R.propEq('id', org.id))(allOrgs)[nameKey]
 
@@ -52,7 +52,7 @@ const InvitationConfirmation = React.createClass({
 
   renderAddedOrgPermission: function(permissionId) {
     const allPermissions = 
-      R.flatten(R.pluck('permissions')(this.props.organisaatiot))
+      R.flatten(R.pluck('permissions')(this.props.orgs))
     const nameKey = `name-${this.props.uiLang}`
     const permissionName = 
       R.find(R.propEq('id', permissionId))(allPermissions)[nameKey]

@@ -8,7 +8,7 @@ import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
-import VirkailijanLisaysLomake from './components/VirkailijanLisaysLomake'
+import InvitationForm from './components/InvitationForm'
 
 import './reset.css'
 import './index.css'
@@ -17,7 +17,7 @@ const appState = Bacon.combineTemplate({
   addedOrgs: organisations.toProperty([]),
   basicInfo: basicInfo.toProperty({}),
   l10n: l10nResponseS.toProperty(),
-  organisaatiot: orgsResponseS.toProperty(),
+  orgs: orgsResponseS.toProperty(),
 })
 
 const staticData = {
@@ -34,7 +34,7 @@ appState
   .onValue(appState => {
     console.log(appState)
     ReactDOM.render(
-      <VirkailijanLisaysLomake {...staticData} {...appState} />,
+      <InvitationForm {...staticData} {...appState} />,
       document.getElementById('root')
     )
   })

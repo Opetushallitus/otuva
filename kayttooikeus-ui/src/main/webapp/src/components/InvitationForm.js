@@ -1,12 +1,12 @@
 import React from 'react'
 
-import VirkailijanTiedot from './VirkailijanTiedot'
-import VirkailijanLisaysOrganisaatioon from './VirkailijanLisaysOrganisaatioon'
+import BasicInfo from './BasicInfo'
+import AddToOrganisation from './AddToOrganisation'
 import InvitationConfirmation from './InvitationConfirmation'
 
-import './VirkailijanLisaysLomake.css'
+import './InvitationForm.css'
 
-const VirkailijanLisaysLomake = React.createClass({
+const InvitationForm = React.createClass({
 
   getInitialState: function() {
     return {
@@ -31,8 +31,8 @@ const VirkailijanLisaysLomake = React.createClass({
           <h1>{L['VIRKAILIJAN_LISAYS_OTSIKKO']}</h1>
         </div>
 
-        <VirkailijanTiedot {...props} />
-        <VirkailijanLisaysOrganisaatioon {...props} />
+        <BasicInfo {...props} />
+        <AddToOrganisation {...props} />
 
         <div className="footer">
           <button onClick={this.openConfirmationModal}>
@@ -64,4 +64,4 @@ const VirkailijanLisaysLomake = React.createClass({
   
 })
 
-export default VirkailijanLisaysLomake
+export default InvitationForm

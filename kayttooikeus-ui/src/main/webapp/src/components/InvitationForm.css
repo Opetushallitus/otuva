@@ -9,8 +9,8 @@
   flex: 100%;
 }
 
-.virkailijan-tiedot, 
-.virkailijan-lisays-organisaatioon {
+.basic-info, 
+.add-to-organisation {
   flex: 0px;
 }
 
