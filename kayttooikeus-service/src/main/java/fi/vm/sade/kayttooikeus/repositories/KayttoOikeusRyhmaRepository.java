@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface KayttoOikeusRyhmaRepository {
     List<KayttoOikeusRyhma> listAll();
+
+    List<KayttoOikeusRyhma> findByIdList(List<Long> idList);
 }
