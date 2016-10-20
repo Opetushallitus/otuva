@@ -10,7 +10,7 @@ const BasicInfo = React.createClass({
 
   render: function() {
     const L = this.props.l10n 
-    const kielet = this.props.languages
+    const langs = this.props.languages
 
     return (
       <fieldset className="basic-info">
@@ -22,17 +22,17 @@ const BasicInfo = React.createClass({
         <div>
           <label htmlFor="lang">{L['VIRKAILIJAN_TIEDOT_KIELI']}</label>
           <select id="lang" onChange={this.selectLanguage}>
-            {kielet.map(this.renderKieli)}
+            {langs.map(this.renderLang)}
           </select>
         </div>
       </fieldset>
     )
   },
 
-  renderKieli: function(kieli) {
+  renderLang: function(lang) {
     return (
-      <option key={kieli.code} value={kieli.code}>
-        {kieli['name-' + this.props.uiLang]}
+      <option key={lang.code} value={lang.code}>
+        {lang['name-' + this.props.uiLang]}
       </option>  
     )
   },
