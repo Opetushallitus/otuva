@@ -1,13 +1,12 @@
 package fi.vm.sade.kayttooikeus.util;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
-import fi.vm.sade.kayttooikeus.model.Text;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
+import fi.vm.sade.kayttooikeus.service.dto.LocaleTextDto;
 import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
+import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import fi.vm.sade.kayttooikeus.service.dto.TextDto;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
@@ -170,12 +169,23 @@ public class AccessRightManagementUtils{
     }
 
     private void copyTexts(MyonnettyKayttoOikeusDTO mkDTO, KayttoOikeusRyhma kor) {
-        for (Text t : kor.getDescription().getTexts()) {
-            TextDto ryhmaText = new TextDto();
-            ryhmaText.setLang(t.getLang());
-            ryhmaText.setText(t.getText());
-            mkDTO.getRyhmaNames().add(ryhmaText);
-        }
+        kor.getDescription().getTexts().forEach(text -> mkDTO.getRyhmaNames().add(new LocaleTextDto(text.getText(), text.getLang())));
     }
 
+    public List<PalveluRoooliDto> createPalveluRooliDTO(List<Palvelu> palvelus) {
+        List<PalveluRoooliDto> prDTOt = new ArrayList<PalveluRoooliDto>();
+
+        for (Palvelu p : palvelus) {
+            for (KayttoOikeus ko : p.getKayttoOikeus()) {
+                PalveluRoooliDto prdto = new PalveluRoooliDto();
+                prdto.setPalveluName(p.getName());
+                p.getDescription().getTexts().forEach(text -> prdto.getPalveluTexts().add(new LocaleTextDto(text.getText(), text.getLang())));
+                prdto.setRooli(ko.getRooli());
+                ko.getTextGroup().getTexts().forEach(text -> prdto.getRooliTexts().add(new LocaleTextDto(text.getText(), text.getLang())));
+                prDTOt.add(prdto);
+            }
+        }
+
+        return prDTOt;
+    }
 }

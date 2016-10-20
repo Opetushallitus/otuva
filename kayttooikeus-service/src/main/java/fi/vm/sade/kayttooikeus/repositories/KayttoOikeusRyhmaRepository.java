@@ -8,4 +8,6 @@ public interface KayttoOikeusRyhmaRepository {
     List<KayttoOikeusRyhma> listAll();
 
     List<KayttoOikeusRyhma> findByIdList(List<Long> idList);
+
+    KayttoOikeusRyhma findById(Long id);
 }

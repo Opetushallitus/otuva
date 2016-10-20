@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface PalveluRepository {
     List<Palvelu> findAll();
+
+    List<Palvelu> findByKayttoOikeusIds(List<Long> koIds);
 }

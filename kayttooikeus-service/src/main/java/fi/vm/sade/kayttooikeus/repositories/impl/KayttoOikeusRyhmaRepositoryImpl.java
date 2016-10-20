@@ -27,9 +27,19 @@ public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implemen
     @Override
     public List<KayttoOikeusRyhma> findByIdList(List<Long> idList) {
         return from(kayttoOikeusRyhma)
-                .where(kayttoOikeusRyhma.hidden.eq(false))
-                .where(kayttoOikeusRyhma.id.in(idList))
+                .where(kayttoOikeusRyhma.hidden.eq(false).and(
+                        kayttoOikeusRyhma.id.in(idList)))
                 .distinct()
                 .select(kayttoOikeusRyhma).fetch();
+    }
+
+    @Override
+    public KayttoOikeusRyhma findById(Long id) {
+        return from(kayttoOikeusRyhma)
+                .where(kayttoOikeusRyhma.hidden.eq(false)
+                        .and(kayttoOikeusRyhma.id.eq(id)))
+                .distinct()
+                .select(kayttoOikeusRyhma).fetchFirst();
+
     }
 }
