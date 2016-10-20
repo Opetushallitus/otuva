@@ -1,11 +1,11 @@
 import Bacon from 'baconjs'
 
-import Dispatcher from './dispatcher'
+import dispatcher from './dispatcher'
 
-const dispatcher = new Dispatcher()
+const d = dispatcher()
 
 const basicInfo = {
-  toProperty: initialBasicInfo => {
+  toProperty: (initialBasicInfo={}) => {
     const assignLanguage = (basicInfo, languageCode) => {
       return {...basicInfo, languageCode}
     }
@@ -15,12 +15,12 @@ const basicInfo = {
     }
     
     return Bacon.update(initialBasicInfo,
-      [dispatcher.stream('language')], assignLanguage,
-      [dispatcher.stream('email')], assignEmail,
+      [d.stream('language')], assignLanguage,
+      [d.stream('email')], assignEmail,
     )
   },
-  setLanguage: code => dispatcher.push('language', code),
-  setEmail: address => dispatcher.push('email', address),
+  setLanguage: code => d.push('language', code),
+  setEmail: address => d.push('email', address),
 }
 
 export default basicInfo

@@ -8,33 +8,26 @@ import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
+import langResponseS, { langResponsePendingP } from './external/languages'
 import InvitationForm from './components/InvitationForm'
 
 import './reset.css'
 import './index.css'
 
-const appState = Bacon.combineTemplate({
-  addedOrgs: organisations.toProperty([]),
-  basicInfo: basicInfo.toProperty({}),
+const appStateS = Bacon.combineTemplate({
+  addedOrgs: organisations.toProperty(),
+  basicInfo: basicInfo.toProperty(),
   l10n: l10nResponseS.toProperty(),
   orgs: orgsResponseS.toProperty(),
-})
+  languages: langResponseS.toProperty(),
+}).changes()
 
-const staticData = {
-  languages: [
-    { code: 'fi', "name-fi": 'suomi' },
-    { code: 'sv', "name-fi": 'ruomi' },
-    { code: 'en', "name-fi": 'englanti' }
-  ],
-} 
-
-appState
-  .changes()
-  .skipWhile(orgsResponsePendingP.or(l10nResponsePendingP))
+appStateS
+  .skipWhile(orgsResponsePendingP
+    .or(l10nResponsePendingP)
+    .or(langResponsePendingP))
   .onValue(appState => {
-    console.log(appState)
     ReactDOM.render(
-      <InvitationForm {...staticData} {...appState} />,
-      document.getElementById('root')
+      <InvitationForm {...appState} />, document.getElementById('root')
     )
   })

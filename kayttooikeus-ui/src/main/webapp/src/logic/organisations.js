@@ -1,15 +1,14 @@
 import Bacon from 'baconjs'
 import R from 'ramda'
 
-import Dispatcher from './dispatcher'
+import dispatcher from './dispatcher'
 
-const dispatcher = new Dispatcher()
+const d = dispatcher()
 
 const organisations = {
-  toProperty: initialOrgs => {
-    const addOrg = (orgs, newOrg) => {
-      return R.find(R.propEq('id', newOrg.id))(orgs) ? 
-        orgs : orgs.concat([newOrg])
+  toProperty: (initialOrgs=[]) => {
+    const addOrgIfUnique = (orgs, newOrg) => {
+      return R.find(R.propEq('id', newOrg.id))(orgs) ? orgs : [...orgs, newOrg]
     }
 
     const removeOrg = (orgs, orgIdToRemove) => {
@@ -17,12 +16,12 @@ const organisations = {
     }
 
     return Bacon.update(initialOrgs,
-      [dispatcher.stream('add')], addOrg,
-      [dispatcher.stream('remove')], removeOrg,
+      [d.stream('add')], addOrgIfUnique,
+      [d.stream('remove')], removeOrg,
     )
   },
-  add: org => dispatcher.push('add', org),
-  removeById: orgId => dispatcher.push('remove', orgId),
+  add: org => d.push('add', org),
+  removeById: orgId => d.push('remove', orgId),
 }
 
 export default organisations
