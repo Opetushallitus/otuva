@@ -1,8 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Bacon from 'baconjs'
-// enable polyfill when ready eject from create-react-app (https://github.com/github/fetch)
-// import fetch from 'whatwg-fetch'
 
 import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'
