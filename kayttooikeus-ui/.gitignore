@@ -3,6 +3,9 @@
 # dependencies
 node_modules
 
+# maven might install a local copy of node
+node
+
 # testing
 coverage
 
