@@ -19,6 +19,8 @@ function ensureSlash(path, needsSlash) {
   }
 }
 
+console.log(path.join(path.resolve(__dirname, '..', '..'), 'kayttooikeus-ui-common'))
+
 // We use "homepage" field to infer "public path" at which the app is served.
 // Webpack needs to know it to put the right <script> hrefs into HTML even in
 // single-page apps that may serve index.html for nested URLs like /todos/42.
@@ -33,6 +35,7 @@ var publicPath = ensureSlash(homepagePathname, true);
 // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
 // Omit trailing shlash as %PUBLIC_PATH%/xyz looks better than %PUBLIC_PATH%xyz.
 var publicUrl = ensureSlash(homepagePathname, false);
+
 // Get enrivonment variables to inject into our app.
 var env = getClientEnvironment(publicUrl);
 
@@ -93,16 +96,17 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         loader: 'eslint',
-        include: paths.appSrc
+//        include: [paths.appSrc, path.join(path.resolve(__dirname, '..', '..'), 'kayttooikeus-ui-common')]
+        include: [paths.appSrc]
       }
     ],
     loaders: [
       // Process JS with Babel.
       {
         test: /\.(js|jsx)$/,
-        include: paths.appSrc,
+//        include: [paths.appSrc, path.join(path.resolve(__dirname, '..', '..'), 'kayttooikeus-ui-common')],
+        include: [paths.appSrc],
         loader: 'babel',
-        
       },
       // The notation here is somewhat confusing.
       // "postcss" loader applies autoprefixer to our CSS.

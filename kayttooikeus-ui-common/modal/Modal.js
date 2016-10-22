@@ -18,13 +18,13 @@ const Modal = React.createClass({
     onClose: React.PropTypes.func.isRequired,
     closeOnOuterClick: React.PropTypes.bool.isRequired,
   },
-  
+
   render: function() {
     if (this.props.show) {
       return (
-        <div 
-          style={wrapperStyles} 
-          onClick={this.hideOnOuterClick} 
+        <div
+          style={wrapperStyles}
+          onClick={this.hideOnOuterClick}
           data-modal="true">
           {this.props.children}
         </div>
@@ -33,7 +33,7 @@ const Modal = React.createClass({
       return null
     }
   },
-  
+
   hideOnOuterClick: function(e) {
     if (e.target.dataset.modal && this.props.closeOnOuterClick) {
       this.props.onClose(e)

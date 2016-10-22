@@ -1,3 +1,4 @@
+var packageJSON = require('../package.json');
 var path = require('path');
 var fs = require('fs');
 
@@ -26,7 +27,9 @@ var nodePaths = (process.env.NODE_PATH || '')
 
 // config after eject: we're in ./config/
 module.exports = {
-  appBuild: resolveApp('build'),
+  // appBuild: resolveApp('build'),
+  appBuild: path.join(path.resolve(__dirname, '..'), 'target', 'classes', 'META-INF', 'resources', 
+    'webjars', packageJSON.name),
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveApp('src/index.js'),

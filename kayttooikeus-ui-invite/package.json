@@ -1,6 +1,7 @@
 {
-  "name": "webapp",
-  "version": "0.1.0",
+  "name": "kayttooikeus-ui-invite",
+  "version": "0.0.1-SNAPSHOT",
+  "homepage": "/kayttooikeus-service/invite",
   "private": true,
   "devDependencies": {
     "autoprefixer": "6.4.1",
@@ -53,7 +54,7 @@
     "ramda": "^0.22.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "whatwg-fetch": "^1.0.0"
+    "modal": "file:../kayttooikeus-ui-common/modal"
   },
   "scripts": {
     "start": "node scripts/start.js",

@@ -7,6 +7,7 @@ import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
 import langResponseS, { langResponsePendingP } from './external/languages'
+import buildVersionResponseS from './external/buildversion'
 import InvitationForm from './components/InvitationForm'
 
 import './reset.css'
@@ -28,4 +29,13 @@ appStateS
     ReactDOM.render(
       <InvitationForm {...appState} />, document.getElementById('root')
     )
+  })
+
+buildVersionResponseS
+  .onValue(res => {
+    console.log(res)
+  })
+buildVersionResponseS
+  .onError(err => {
+    console.log(err)
   })

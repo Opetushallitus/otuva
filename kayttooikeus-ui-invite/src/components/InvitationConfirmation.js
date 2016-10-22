@@ -1,8 +1,8 @@
 import React from 'react'
 import R from 'ramda'
+import Modal from 'modal'
 
 import invite from '../external/invitation'
-import Modal from './Modal'
 
 const InvitationConfirmation = React.createClass({
 

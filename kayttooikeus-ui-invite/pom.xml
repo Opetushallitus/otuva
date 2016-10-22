@@ -6,8 +6,10 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>kayttooikeus-ui</artifactId>
-    <name>Käyttöoikeuspalvelu :: UI</name>
+    <!--<packaging>jar</packaging>-->
+
+    <artifactId>kayttooikeus-ui-invite</artifactId>
+    <name>Käyttöoikeuspalvelu :: UI (invite)</name>
 
     <modelVersion>4.0.0</modelVersion>
 
