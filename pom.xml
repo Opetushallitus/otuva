@@ -30,7 +30,7 @@
         <module>kayttooikeus-api</module>
         <module>kayttooikeus-domain</module>
         <module>kayttooikeus-service</module>
-        <module>kayttooikeus-ui</module>
+        <module>kayttooikeus-ui-invite</module>
     </modules>
     
     <properties>
