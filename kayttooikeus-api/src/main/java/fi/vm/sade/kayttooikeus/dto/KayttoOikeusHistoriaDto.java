@@ -1,10 +1,5 @@
-package fi.vm.sade.kayttooikeus.repositories.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeus.KayttoOikeusTyyppi;
-import fi.vm.sade.kayttooikeus.service.dto.Localizable;
-import fi.vm.sade.kayttooikeus.service.dto.LocalizableDto;
-import fi.vm.sade.kayttooikeus.service.dto.TextGroupListDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.DateTime;
@@ -13,7 +8,7 @@ import org.joda.time.LocalDate;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.kayttooikeus.service.dto.TextGroupListDto.localizeAsListLaterById;
+import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterById;
 
 @Getter
 @Setter
@@ -35,6 +30,6 @@ public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
 
     @Override
     public Stream<Localizable> localizableTexts() {
-        return Stream.of(kuvaus);
+        return LocalizableDto.of(kuvaus).localizableTexts();
     }
 }

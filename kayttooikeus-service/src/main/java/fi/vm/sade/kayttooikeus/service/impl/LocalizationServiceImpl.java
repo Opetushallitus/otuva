@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.repositories.TextGroupRepository;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import fi.vm.sade.kayttooikeus.service.dto.Localizable;
-import fi.vm.sade.kayttooikeus.service.dto.LocalizableDto;
+import fi.vm.sade.kayttooikeus.dto.Localizable;
+import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class LocalizationServiceImpl implements LocalizationService {
-    private TextGroupRepository textGroupRepository;
+    private final TextGroupRepository textGroupRepository;
     
     @Autowired
     public LocalizationServiceImpl(TextGroupRepository textGroupRepository) {

@@ -18,9 +18,6 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 
-/**
- * Created by autio on 19.9.2016.
- */
 @EnableWebSecurity
 @Profile("dev")
 @EnableGlobalMethodSecurity(prePostEnabled = true,

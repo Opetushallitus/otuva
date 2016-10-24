@@ -1,17 +1,14 @@
-package fi.vm.sade.kayttooikeus.service.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import fi.vm.sade.kayttooikeus.model.Text;
-import fi.vm.sade.kayttooikeus.model.TextGroup;
 import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.Optional;
 
 public class TextGroupMapDto implements Serializable, Localizable {
     @Getter
@@ -32,21 +29,25 @@ public class TextGroupMapDto implements Serializable, Localizable {
     
     @JsonIgnore
     public String get(String lang) {
-        return texts.get(lang);
+        return texts.get(lang.toLowerCase());
     }
 
     @Override
-    public void put(String lang, String value) {
+    public Optional<String> getOrAny(String lang) {
+        Optional<String> opt = Optional.ofNullable(get(lang));
+        if (opt.isPresent()) {
+            return opt;
+        }
+        return texts.values().stream().filter(t -> t != null).findFirst();
+    }
+
+    @Override
+    public TextGroupMapDto put(String lang, String value) {
         this.texts.put(lang, value);
+        return this;
     }
 
     public static TextGroupMapDto localizeAsMapLaterById(Long id) {
         return id == null ? null : new TextGroupMapDto(id, new HashMap<>());
-    }
-
-    @SuppressWarnings("DtoClassesNotContainEntities")
-    public static TextGroupMapDto localized(TextGroup grp) {
-        return grp == null ? null : new TextGroupMapDto(grp.getId(), grp.getTexts().stream()
-                .collect(toMap(Text::getLang, Text::getText)));
     }
 }

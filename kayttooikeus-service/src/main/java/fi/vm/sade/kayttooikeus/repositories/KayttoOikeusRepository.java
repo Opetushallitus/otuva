@@ -1,7 +1,10 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.repositories.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.repositories.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 
 import java.util.List;
 
@@ -11,4 +14,6 @@ public interface KayttoOikeusRepository {
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
     List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForHenkilo(String henkiloOid);
+    
+    List<ExpiringKayttoOikeusDto> findSoonToBeExpiredTapahtumas(LocalDate now, Period...expireThresholds);
 }

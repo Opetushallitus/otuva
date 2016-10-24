@@ -1,15 +1,12 @@
-package fi.vm.sade.kayttooikeus.repositories.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
-import fi.vm.sade.kayttooikeus.service.dto.Localizable;
-import fi.vm.sade.kayttooikeus.service.dto.LocalizableDto;
-import fi.vm.sade.kayttooikeus.service.dto.TextGroupDto;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.kayttooikeus.service.dto.TextGroupDto.localizeLaterById;
+import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
 
 @Getter
 @Setter
@@ -24,6 +21,6 @@ public class PalveluKayttoOikeusDto implements Serializable, LocalizableDto {
 
     @Override
     public Stream<Localizable> localizableTexts() {
-        return Stream.of(oikeusLangs);
+        return LocalizableDto.of(oikeusLangs).localizableTexts();
     }
 }

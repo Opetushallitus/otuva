@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.service.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;

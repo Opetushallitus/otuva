@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.service.dto.LocalizableDto;
+import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 
 import java.util.Collection;
 

@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
@@ -13,6 +13,7 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
     private final Populator<OrganisaatioHenkilo> henkilo;
     private final Populator<KayttoOikeusRyhma> kayttoOikeusRyhma;
     private LocalDate voimassaAlkaen = new LocalDate();
+    private LocalDate voimassaPaattyen;
 
     public OrganisaatioHenkiloKayttoOikeusPopulator(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         this.henkilo = henkilo;
@@ -24,7 +25,12 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
     }
     
     public OrganisaatioHenkiloKayttoOikeusPopulator voimassaAlkaen(LocalDate alkaen) {
-        voimassaAlkaen = alkaen;
+        this.voimassaAlkaen = alkaen;
+        return this;
+    }
+    
+    public OrganisaatioHenkiloKayttoOikeusPopulator voimassaPaattyen(LocalDate voimassaPaattyen) {
+        this.voimassaPaattyen = voimassaPaattyen;
         return this;
     }
 
@@ -38,6 +44,7 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
         tapahtuma.setKasittelija(organisaatioHenkilo.getHenkilo());
         tapahtuma.setTila(KayttoOikeudenTila.MYONNETTY);
         tapahtuma.setVoimassaAlkuPvm(voimassaAlkaen);
+        tapahtuma.setVoimassaLoppuPvm(voimassaPaattyen);
         tapahtuma.setKayttoOikeusRyhma(kayttoOikeusRyhma.apply(entityManager));
         entityManager.persist(tapahtuma);
         return tapahtuma;

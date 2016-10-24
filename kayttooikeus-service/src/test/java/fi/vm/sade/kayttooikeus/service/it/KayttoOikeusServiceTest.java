@@ -1,12 +1,11 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeus.KayttoOikeusTyyppi;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.repositories.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.repositories.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,8 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static org.joda.time.LocalDate.now;
+import static org.joda.time.Period.months;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -88,5 +89,22 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals(tapahtuma2.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
                 list.get(0).getKayttoOikeusId());
         assertEquals("Koodistonhallinta", list.get(0).getKuvaus().get("FI"));
+    }
+
+    @Test
+    public void findToBeExpiringMyonnettyKayttoOikeusTest() {
+        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "kuvaus"))
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ"))
+            ).voimassaPaattyen(now().plusMonths(1)));
+        List<ExpiringKayttoOikeusDto> oikeus = kayttoOikeusService.findToBeExpiringMyonnettyKayttoOikeus(now(), months(1));
+        assertEquals(1, oikeus.size());
+        assertEquals(tapahtuma.getId(), oikeus.get(0).getMyonnettyTapahtumaId());
+        assertEquals("1.2.3.4.5", oikeus.get(0).getHenkiloOid());
+        assertEquals(now().plusMonths(1), oikeus.get(0).getVoimassaLoppuPvm());
+        assertEquals("kuvaus", oikeus.get(0).getRyhmaDescription().get("FI"));
+        assertEquals("RYHMA", oikeus.get(0).getRyhmaName());
     }
 }

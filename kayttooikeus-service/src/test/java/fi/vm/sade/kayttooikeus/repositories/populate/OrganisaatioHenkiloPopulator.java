@@ -15,6 +15,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
     private final Populator<Henkilo> henkilo;
     private final String organisaatioOid;
     private LocalDate voimassaAlku = new LocalDate();
+    private String tehtavanimike;
 
     public OrganisaatioHenkiloPopulator(String henkiloOid, String organisaatioOid) {
         this.henkilo = new HenkiloPopulator(henkiloOid);
@@ -39,6 +40,11 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         return this;
     }
     
+    public OrganisaatioHenkiloPopulator tehtavanimike(String tehtavanimike) {
+        this.tehtavanimike = tehtavanimike;
+        return this;
+    }
+    
     @Override
     public OrganisaatioHenkilo apply(EntityManager entityManager) {
         Henkilo henkilo = this.henkilo.apply(entityManager);
@@ -57,6 +63,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
                     .organisaatioOidPath(organisaatioOid)
                 .build()));
         organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
+        organisaatioHenkilo.setTehtavanimike(tehtavanimike);
         organisaatioHenkilo.setPassivoitu(false);
         organisaatioHenkilo.setVoimassaAlkuPvm(voimassaAlku);
         organisaatioHenkilo.setOrganisaatioHenkiloTyyppi(OrganisaatioHenkiloTyyppi.VIRKAILIJA);

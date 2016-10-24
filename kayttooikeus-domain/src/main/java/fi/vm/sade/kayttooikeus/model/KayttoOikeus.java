@@ -28,9 +28,5 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "palvelu_id", nullable = false)
     private Palvelu palvelu;
-    
-    public enum KayttoOikeusTyyppi {
-        @Deprecated KAYTTOOIKEUS,
-        KOOSTEROOLI
-    }
+
 }

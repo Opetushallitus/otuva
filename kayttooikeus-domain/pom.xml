@@ -14,6 +14,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>fi.vm.sade.kayttooikeus</groupId>
+            <artifactId>kayttooikeus-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -37,7 +43,6 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>${joda.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jadira.usertype</groupId>

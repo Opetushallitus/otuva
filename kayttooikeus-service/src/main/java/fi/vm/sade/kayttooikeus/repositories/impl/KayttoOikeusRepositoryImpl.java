@@ -4,15 +4,21 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
-import fi.vm.sade.kayttooikeus.repositories.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.repositories.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import static com.querydsl.core.types.dsl.Expressions.FALSE;
+import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
 @Repository
@@ -45,12 +51,12 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
                 .select(Projections.constructor(PalveluKayttoOikeusDto.class,
                     kayttoOikeus.rooli,
                     kayttoOikeus.textGroup.id
-                )).fetch();
+                )).orderBy(kayttoOikeus.rooli.asc()).fetch();
     }
 
     @Override
     public List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForHenkilo(String henkiloOid) {
-        QMyonnettyKayttoOikeusRyhmaTapahtuma mkort = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma mkort = myonnettyKayttoOikeusRyhmaTapahtuma;
         QOrganisaatioHenkilo oh = QOrganisaatioHenkilo.organisaatioHenkilo;
         QKayttoOikeusRyhma kor = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         QKayttoOikeus ko = QKayttoOikeus.kayttoOikeus;
@@ -76,5 +82,24 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
                 ))
                 .where(oh.henkilo.oidHenkilo.eq(henkiloOid)).distinct()
                 .orderBy(mkort.aikaleima.desc()).fetch();
+    }
+
+    @Override
+    public List<ExpiringKayttoOikeusDto> findSoonToBeExpiredTapahtumas(LocalDate now, Period... expireThresholds) {
+        BooleanExpression expireConditions = Stream.of(expireThresholds).map(now::plus)
+                .map(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm::eq).reduce(FALSE.eq(true), BooleanExpression::or);
+        return jpa().from(myonnettyKayttoOikeusRyhmaTapahtuma)
+                    .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
+                    .innerJoin(organisaatioHenkilo.henkilo, henkilo)
+                .select(Projections.bean(ExpiringKayttoOikeusDto.class,
+                        henkilo.oidHenkilo.as("henkiloOid"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.id.as("myonnettyTapahtumaId"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.as("voimassaLoppuPvm"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.name.as("ryhmaName"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.description.id.as("ryhmaDescriptionId")
+                ))
+                .where(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.goe(now)
+                        .and(expireConditions))
+                .orderBy(henkilo.oidHenkilo.asc()).fetch();
     }
 }

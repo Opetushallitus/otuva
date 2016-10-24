@@ -12,9 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * Created by autio on 5.10.2016.
- */
 // example from https://github.com/dlizarra/orika-spring-integration
 @Component
 public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationContextAware {

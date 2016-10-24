@@ -21,9 +21,17 @@ hikari:
     connection-timeout: 10000
     max-lifetime: 60000
 
-# TODO: proper mock for these in tests
 cas:
   ldap: {}
   service: http://localhost/kayttooikeus-service
   send-renew: false
   key: kayttooikeus-service
+
+service-users:
+  viestinta:
+    username: test
+    password: test
+
+tasks:
+  email-invitation:
+    sender-email: noreply@oph.fi

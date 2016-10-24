@@ -3,15 +3,15 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
-import fi.vm.sade.kayttooikeus.repositories.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.repositories.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,10 +20,12 @@ import java.util.List;
 @Api(value = "/kayttooikeus", description = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusController {
     private KayttoOikeusService kayttoOikeusService;
+    private TaskExecutorService taskExecutorService;
 
     @Autowired
-    public KayttoOikeusController(KayttoOikeusService kayttoOikeusService) {
+    public KayttoOikeusController(KayttoOikeusService kayttoOikeusService, TaskExecutorService taskExecutorService) {
         this.kayttoOikeusService = kayttoOikeusService;
+        this.taskExecutorService = taskExecutorService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
@@ -50,5 +52,17 @@ public class KayttoOikeusController {
     @RequestMapping(value = "/kayttaja/current", method = RequestMethod.GET)
     public List<KayttoOikeusHistoriaDto> listKayttoOikeusCurrentUser() {
         return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
+            notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
+            authorizations = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST)
+    public int sendExpirationReminders(@ApiParam("Vuosi") @RequestParam("year") int year,
+                                       @ApiParam("Kuukausi") @RequestParam("month") int month,
+                                       @ApiParam("Päivä") @RequestParam("day") int day) {
+        Period expireThreshold = new Period(LocalDate.now(), new LocalDate(year, month, day));
+        return taskExecutorService.sendExpirationReminders(expireThreshold);
     }
 }

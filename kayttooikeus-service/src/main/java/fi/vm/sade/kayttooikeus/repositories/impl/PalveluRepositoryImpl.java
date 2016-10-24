@@ -12,6 +12,6 @@ import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 public class PalveluRepositoryImpl extends AbstractRepository implements PalveluRepository {
     @Override
     public List<Palvelu> findAll() {
-        return from(palvelu).select(palvelu).fetch();
+        return from(palvelu).select(palvelu).orderBy(palvelu.name.asc()).fetch();
     }
 }
