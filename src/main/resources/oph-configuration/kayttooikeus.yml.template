@@ -50,6 +50,7 @@ cas:
 
 host:
   host-virkailija: {{host_virkailija}}
+  host-cas: {{host_cas}}
 
 service-users:
 	viestinta:
