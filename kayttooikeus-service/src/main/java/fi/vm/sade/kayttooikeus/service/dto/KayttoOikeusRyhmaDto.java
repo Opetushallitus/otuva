@@ -6,9 +6,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by autio on 4.10.2016.
- */
 @Getter
 @Setter
 public class KayttoOikeusRyhmaDto {

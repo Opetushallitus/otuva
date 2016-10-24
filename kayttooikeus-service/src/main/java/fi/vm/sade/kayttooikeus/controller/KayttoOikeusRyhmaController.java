@@ -1,9 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusRyhmaService;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
+import fi.vm.sade.kayttooikeus.service.dto.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -11,12 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @RestController
@@ -35,7 +31,7 @@ public class KayttoOikeusRyhmaController {
 
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    @ApiOperation(value = "Listaa kaikki käyttöoikeusryhmät.2",
+    @ApiOperation(value = "Listaa kaikki käyttöoikeusryhmät.",
             notes = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan.")
     public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma() {
         return kayttoOikeusRyhmaService.listAllKayttoOikeusRyhmas();
@@ -60,16 +56,13 @@ public class KayttoOikeusRyhmaController {
                     + "käyttöoikeusryhmät DTO:n avulla.")
     public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmasIncludingHenkilos(
             @PathVariable("oid") String oid, @PathVariable("organisaatioOid") String organisaatioOid) {
-        List<MyonnettyKayttoOikeusDTO> results = null;
         try {
-            results = kayttoOikeusRyhmaService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(
+            return kayttoOikeusRyhmaService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(
                     oid, organisaatioOid, getCurrentUserOid());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Error getting access right groups", e);
+            return null;
         }
-
-        return results;
     }
 
     @RequestMapping(value = "/henkilo/{oid}", method = RequestMethod.GET)
@@ -130,8 +123,57 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa kaikki annettuun käyttöoikeusryhmään kuuluvat "
                     + "palvelut ja roolit yhdistelmäpareina DTO:n avulla.")
     public List<PalveluRoooliDto> getKayttoOikeusByKayttoOikeusRyhma(@PathVariable("id") Long id) {
-        return kayttoOikeusRyhmaService.findKayttoOikeusByKayttoOikeusRyhma(id);
+        return kayttoOikeusRyhmaService.findPalveluRoolisByKayttoOikeusRyhma(id);
     }
+
+
+    @RequestMapping(method = RequestMethod.POST)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Luo uuden käyttöoikeusryhmän.",
+            notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
+    public Response createKayttoOikeusRyhma(@RequestBody KayttoOikeusRyhmaModifyDto uusiRyhma) {
+        try {
+            KayttoOikeusRyhmaDto created = kayttoOikeusRyhmaService.createKayttoOikeusRyhma(uusiRyhma);
+//            henkiloAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), "NEW", true);
+            return Response.ok(created.getId()).build();
+        } catch (IllegalArgumentException iae) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Missing mandatory parameters: " + iae.getMessage()).build();
+        } catch (Exception e) {
+            logger.error("Error creating new access right group", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unknown internal error").build();
+        }
+    }
+
+
+    @RequestMapping(value = "/kayttooikeus", method = RequestMethod.POST)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Luo uuden käyttöoikeuden.",
+            notes = "Luo uuden käyttöoikeuden annetun käyttöoikeus modelin pohjalta.")
+    public KayttoOikeusDto createNewKayttoOikeus(@RequestBody KayttoOikeusDto kayttoOikeus) {
+        return kayttoOikeusRyhmaService.createKayttoOikeus(kayttoOikeus);
+    }
+
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Päivittää käyttöoikeusryhmän.",
+            notes = "Päivittää käyttöoikeusryhmän tiedot annetun DTO:n avulla.")
+    public Response updateKayttoOikeusRyhma(@PathVariable("id") Long id, @RequestBody KayttoOikeusRyhmaModifyDto ryhmaData) {
+        try {
+            KayttoOikeusRyhmaDto koryhma = kayttoOikeusRyhmaService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
+//            henkiloAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), Long.toString(id), false);
+            return Response.ok(koryhma).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            logger.error("Error updating access right group", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unknown internal error").build();
+        }
+    }
+
 
     private String getCurrentUserOid() {
         String oid = SecurityContextHolder.getContext().getAuthentication().getName();

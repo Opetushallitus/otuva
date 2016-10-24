@@ -25,4 +25,12 @@ public class PalveluRepositoryImpl extends AbstractRepository implements Palvelu
                 .select(palvelu)
                 .fetch();
     }
+
+    @Override
+    public List<Palvelu> findByName(String name) {
+        return jpa().from(palvelu)
+                .where(palvelu.name.eq(name))
+                .select(palvelu)
+                .fetch();
+    }
 }

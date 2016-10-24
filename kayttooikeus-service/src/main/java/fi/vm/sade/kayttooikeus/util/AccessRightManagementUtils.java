@@ -1,13 +1,12 @@
 package fi.vm.sade.kayttooikeus.util;
 
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.dto.LocaleTextDto;
 import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
-import fi.vm.sade.kayttooikeus.service.dto.TextDto;
+import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import org.apache.commons.lang.StringUtils;
@@ -15,10 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import javax.persistence.NoResultException;
+import java.util.*;
 
 
 @Service
@@ -32,6 +29,10 @@ public class AccessRightManagementUtils{
 
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
+    private KayttoOikeusRepository kayttoOikeusRepository;
+
+    private PalveluRepository palveluRepository;
+
     private static final String OPH_ORGANIZATION_OID = "1.2.246.562.10.00000000001";
 
     private static final String GROUP_ORGANIZATION_ID = "1.2.246.562.28";
@@ -40,11 +41,15 @@ public class AccessRightManagementUtils{
     public AccessRightManagementUtils(OrganisaatioViiteRepository organisaatioViiteRepository,
                                       OrganisaatioClient organisaatioClient,
                                       MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
-                                      KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository){
+                                      KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
+                                      KayttoOikeusRepository kayttoOikeusRepository,
+                                      PalveluRepository palveluRepository){
         this.organisaatioViiteRepository = organisaatioViiteRepository;
         this.organisaatioClient = organisaatioClient;
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
+        this.kayttoOikeusRepository = kayttoOikeusRepository;
+        this.palveluRepository = palveluRepository;
     }
 
     /*
@@ -187,5 +192,34 @@ public class AccessRightManagementUtils{
         }
 
         return prDTOt;
+    }
+
+    public HashSet<KayttoOikeus> bindToNonTransientInstances(KayttoOikeusRyhma kayttoOikeusRyhma) {
+        HashSet<KayttoOikeus> kayttoOikeusHashSet = new HashSet<KayttoOikeus>();
+        for (KayttoOikeus kayttoOikeus : kayttoOikeusRyhma.getKayttoOikeus()) {
+            if (kayttoOikeus.getRooli() == null) {
+                throw new InvalidKayttoOikeusException("Rooli may not be null");
+            }
+            KayttoOikeus byRooliAndPalvelu;
+            byRooliAndPalvelu = kayttoOikeusRepository.findByRooliAndPalvelu(kayttoOikeus);
+            if (byRooliAndPalvelu == null) {
+                byRooliAndPalvelu = createKayttoOikeus(kayttoOikeus);
+            }
+
+            kayttoOikeusHashSet.add(byRooliAndPalvelu);
+        }
+        return kayttoOikeusHashSet;
+    }
+
+    public KayttoOikeus createKayttoOikeus(KayttoOikeus kayttoOikeus) {
+        List<Palvelu> palvelus = palveluRepository.findByName(kayttoOikeus.getPalvelu().getName());
+        if (palvelus.isEmpty()) {
+            throw new NotFoundException("palvelu not found by name : " + kayttoOikeus.getPalvelu().getName());
+        }
+
+        final Palvelu palvelu = palvelus.get(0);
+        kayttoOikeus.setPalvelu(palvelu);
+        palvelu.getKayttoOikeus().add(kayttoOikeus);
+        return kayttoOikeusRepository.insert(kayttoOikeus);
     }
 }

@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 
 import java.util.List;
 
@@ -10,4 +11,8 @@ public interface KayttoOikeusRyhmaRepository {
     List<KayttoOikeusRyhma> findByIdList(List<Long> idList);
 
     KayttoOikeusRyhma findById(Long id);
+
+    Boolean ryhmaNameFiExists(String ryhmaNameFi);
+
+    KayttoOikeusRyhma insert(KayttoOikeusRyhma kor);
 }

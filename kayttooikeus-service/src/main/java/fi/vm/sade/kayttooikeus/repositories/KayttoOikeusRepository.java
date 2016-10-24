@@ -10,4 +10,8 @@ public interface KayttoOikeusRepository {
     List<KayttoOikeus> findByKayttoOikeusRyhma(Long id);
 
     List<Long> findByKayttoOikeusRyhmaIds(Long id);
+
+    KayttoOikeus findByRooliAndPalvelu(KayttoOikeus kayttoOikeus);
+
+    KayttoOikeus insert(KayttoOikeus kayttoOikeus);
 }

@@ -8,4 +8,6 @@ public interface PalveluRepository {
     List<Palvelu> findAll();
 
     List<Palvelu> findByKayttoOikeusIds(List<Long> koIds);
+
+    List<Palvelu> findByName(String name);
 }

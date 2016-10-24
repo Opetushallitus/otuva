@@ -18,4 +18,14 @@ public class OrganisaatioViiteRepositoryImpl extends AbstractRepository implemen
                 .select(organisaatioViite).fetch();
     }
 
+    @Override
+    public OrganisaatioViite insert(OrganisaatioViite organisaatioViite) {
+        return persist(organisaatioViite);
+    }
+
+    @Override
+    public void delete(OrganisaatioViite viite) {
+        remove(viite);
+    }
+
 }

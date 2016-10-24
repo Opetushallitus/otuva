@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface OrganisaatioViiteRepository {
     List<OrganisaatioViite> findByKayttoOikeusRyhmaId(Long id);
+
+    OrganisaatioViite insert(OrganisaatioViite organisaatioViite);
+
+    void delete(OrganisaatioViite viite);
 }

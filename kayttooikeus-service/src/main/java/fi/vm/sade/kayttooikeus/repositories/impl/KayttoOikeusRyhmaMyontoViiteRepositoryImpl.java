@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaMyontoViite;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,39 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl extends AbstractReposito
 
         return slaveIds;
     }
+
+    @Override
+    public KayttoOikeusRyhmaMyontoViite insert(KayttoOikeusRyhmaMyontoViite myontoViite) {
+        return persist(myontoViite);
+    }
+
+    @Override
+    public boolean checkCyclicMyontoViite(Long masterId, List<Long> slaveIds) {
+        QKayttoOikeusRyhmaMyontoViite myontoViite = QKayttoOikeusRyhmaMyontoViite.kayttoOikeusRyhmaMyontoViite;
+        // If the given master ID - slave ID combo is found even once from the references,
+        // that would create cyclic master-slave relationship which MUST NO be allowed!!
+        Long count = jpa().from(myontoViite)
+                .where(
+                        myontoViite.masterId.in(slaveIds),
+                        myontoViite.slaveId.eq(masterId)
+                )
+                .fetchCount();
+
+        return count > 0;
+    }
+
+    @Override
+    public List<KayttoOikeusRyhmaMyontoViite> getMyontoViites(Long masterId) {
+        QKayttoOikeusRyhmaMyontoViite myontoViite = QKayttoOikeusRyhmaMyontoViite.kayttoOikeusRyhmaMyontoViite;
+        return jpa().from(myontoViite)
+                .where(myontoViite.masterId.eq(masterId))
+                .select(myontoViite)
+                .fetch();
+    }
+
+    @Override
+    public void delete(KayttoOikeusRyhmaMyontoViite viite) {
+        remove(viite);
+    }
+
 }

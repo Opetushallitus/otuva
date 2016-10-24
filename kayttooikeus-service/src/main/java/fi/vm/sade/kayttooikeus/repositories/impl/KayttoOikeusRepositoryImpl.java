@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
 
 @Repository
@@ -35,7 +36,7 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
     @Override
     public List<KayttoOikeus> findByKayttoOikeusRyhma(Long id) {
         QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        QKayttoOikeus qKayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QKayttoOikeus qKayttoOikeus = kayttoOikeus;
 
         return jpa().from(qKayttoOikeus)
                 .innerJoin(qKayttoOikeus.kayttooikeusRyhmas, qKayttoOikeusRyhma)
@@ -47,7 +48,7 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
     @Override
     public List<Long> findByKayttoOikeusRyhmaIds(Long id) {
         QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        QKayttoOikeus qKayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QKayttoOikeus qKayttoOikeus = kayttoOikeus;
 
         return jpa().from(qKayttoOikeus)
                 .innerJoin(qKayttoOikeus.kayttooikeusRyhmas, qKayttoOikeusRyhma)
@@ -56,4 +57,18 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
                 .distinct()
                 .fetch();
     }
+
+    @Override
+    public KayttoOikeus findByRooliAndPalvelu(KayttoOikeus ko) {
+        return jpa().from(kayttoOikeus)
+                .where(kayttoOikeus.palvelu.name.eq(ko.getPalvelu().getName()),
+                        kayttoOikeus.rooli.eq(ko.getRooli()))
+                .select(kayttoOikeus).fetchFirst();
+    }
+
+    @Override
+    public KayttoOikeus insert(KayttoOikeus kayttoOikeus) {
+        return persist(kayttoOikeus);
+    }
+
 }

@@ -9,6 +9,8 @@ public class LocaleTextDto {
     private String text;
     private String lang;
 
+    public LocaleTextDto(){}
+
     public LocaleTextDto(String text, String lang){
         this.text = text;
         this.lang = lang;

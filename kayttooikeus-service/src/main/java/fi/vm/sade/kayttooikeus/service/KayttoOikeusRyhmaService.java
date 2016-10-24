@@ -1,14 +1,9 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
+import fi.vm.sade.kayttooikeus.service.dto.*;
 
 import java.util.List;
 
-/**
- * Created by autio on 4.10.2016.
- */
 public interface KayttoOikeusRyhmaService {
     List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas();
 
@@ -22,5 +17,11 @@ public interface KayttoOikeusRyhmaService {
 
     List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(Long id);
 
-    List<PalveluRoooliDto> findKayttoOikeusByKayttoOikeusRyhma(Long id);
+    List<PalveluRoooliDto> findPalveluRoolisByKayttoOikeusRyhma(Long id);
+
+    KayttoOikeusRyhmaDto createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma);
+
+    KayttoOikeusDto createKayttoOikeus(KayttoOikeusDto kayttoOikeus);
+
+    KayttoOikeusRyhmaDto updateKayttoOikeusForKayttoOikeusRyhma(Long id, KayttoOikeusRyhmaModifyDto ryhmaData);
 }
