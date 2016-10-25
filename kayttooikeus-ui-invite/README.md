@@ -32,6 +32,9 @@ To produce a JAR:
 
 ## TODO
 
+- [ ] laod oph/urls props client (when supplied as npm package) 
+- [ ] load common styles (when supplied as npm package)
+- [ ] remove initial ajax request pendingP's as they seem unneeded 
 - [ ] remove favicon
 - [ ] set up proxying to ONR and other backends
 - [ ] Enhance backend mocks (koodisto, lokalisaatio, etc.)
@@ -40,4 +43,3 @@ To produce a JAR:
 - [x] Impl confirmation modal
 - [x] Impl basic layout positioning with flexbox
 - [x] Eject out of crete-react-app
-
