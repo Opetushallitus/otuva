@@ -16,7 +16,9 @@ To enable calls to kayttooikeus backend, start it as well. See [README](../READM
 
 ## Tests
 
-`npm run test`
+`npm run test` (starts watcher)
+
+`npm run testci` (runs all tests once)
 
 ## Build
 
@@ -30,6 +32,7 @@ To produce a JAR:
 
 ## TODO
 
+- [ ] remove favicon
 - [ ] set up proxying to ONR and other backends
 - [ ] Enhance backend mocks (koodisto, lokalisaatio, etc.)
 - [ ] improve test coverage
