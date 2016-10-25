@@ -8,7 +8,6 @@
     "build": "./node_modules/.bin/babel Modal.js -o index.js"
   },
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "react": "^15.3.2"
   },
