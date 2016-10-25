@@ -34,7 +34,11 @@ public class SecurityConfigDev extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/buildversion.txt").permitAll()
-                .antMatchers("/test2").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/invite/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
