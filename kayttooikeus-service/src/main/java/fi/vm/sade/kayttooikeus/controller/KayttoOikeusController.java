@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+
 @RestController
 @RequestMapping("/kayttooikeus")
 @Api(value = "/kayttooikeus", description = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
@@ -57,12 +59,13 @@ public class KayttoOikeusController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
-            authorizations = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
-    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST)
-    public int sendExpirationReminders(@ApiParam("Vuosi") @RequestParam("year") int year,
+            authorizations = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI",
+            produces = TEXT_PLAIN, response = Integer.class)
+    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST, produces = TEXT_PLAIN)
+    public String sendExpirationReminders(@ApiParam("Vuosi") @RequestParam("year") int year,
                                        @ApiParam("Kuukausi") @RequestParam("month") int month,
                                        @ApiParam("Päivä") @RequestParam("day") int day) {
         Period expireThreshold = new Period(LocalDate.now(), new LocalDate(year, month, day));
-        return taskExecutorService.sendExpirationReminders(expireThreshold);
+        return String.format("%d", taskExecutorService.sendExpirationReminders(expireThreshold));
     }
 }

@@ -3,17 +3,22 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class KayttoOikeusControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttoOikeusService kayttoOikeusService;
+    @MockBean
+    private TaskExecutorService taskExecutorService;
     
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_READ")
@@ -54,5 +61,14 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
         this.mvc.perform(get("/kayttooikeus/kayttaja/current").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeus/currentUserHistoria.json")));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void sendExpirationRemindersTest() throws Exception {
+        given(this.taskExecutorService.sendExpirationReminders(Matchers.any(Period.class))).willReturn(1);
+        this.mvc.perform(post("/kayttooikeus/expirationReminders")
+                .param("year", "2015").param("month", "1").param("day", "1"))
+            .andExpect(status().isOk()).andExpect(content().string(is("1")));
     }
 }
