@@ -52,6 +52,7 @@
     "baconjs": "^0.7.88",
     "fetch-mock": "^5.5.0",
     "modal": "file:../kayttooikeus-ui-common/modal",
+    "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "ramda": "^0.22.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2"
