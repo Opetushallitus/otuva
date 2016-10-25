@@ -1,0 +1,18 @@
+[
+  {
+    "rooli": "ROLE",
+    "oikeusLangs": {
+      "id": 1,
+      "texts": [
+        {
+          "lang": "FI",
+          "text": "Nimi"
+        },
+        {
+          "lang": "EN",
+          "text": "Name"
+        }
+      ]
+    }
+  }
+]

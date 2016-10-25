@@ -1,16 +1,12 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.config.ApplicationTest;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
@@ -22,12 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@ApplicationTest
-@AutoConfigureMockMvc
-public class OrganisaatioHenkiloControllerTest {
-    @Autowired
-    private MockMvc mvc;
-
+public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     @MockBean
     private OrganisaatioHenkiloService service;
 

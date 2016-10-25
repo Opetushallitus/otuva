@@ -17,6 +17,12 @@ public class TextGroupListDto extends TextGroupDto {
         return getTexts();
     }
 
+    @Override
+    public TextGroupListDto put(String lang, String value) {
+        super.put(lang, value);
+        return this;
+    }
+
     public static TextGroupListDto localizeAsListLaterById(Long id) {
         return id == null ? null : new TextGroupListDto(id);
     }

@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -12,6 +11,9 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterBy
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
     private String organisaatioOid;
     private long kayttoOikeusId;
