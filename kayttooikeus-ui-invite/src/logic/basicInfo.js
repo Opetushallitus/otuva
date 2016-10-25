@@ -9,7 +9,6 @@ const basicInfo = {
     const assignLanguage = (basicInfo, languageCode) => {
       return {...basicInfo, languageCode}
     }
-
     const assignEmail = (basicInfo, email) => {
       return {...basicInfo, email}
     }

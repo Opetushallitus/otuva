@@ -31,11 +31,5 @@ appStateS
     )
   })
 
-buildVersionResponseS
-  .onValue(res => {
-    console.log(res)
-  })
-buildVersionResponseS
-  .onError(err => {
-    console.log(err)
-  })
+buildVersionResponseS.onValue(res => { console.log(res) })
+buildVersionResponseS.onError(err => { console.log(err) })

@@ -10,11 +10,10 @@ const organisations = {
     const addOrgIfUnique = (orgs, newOrg) => {
       return R.find(R.propEq('id', newOrg.id))(orgs) ? orgs : [...orgs, newOrg]
     }
-
     const removeOrg = (orgs, orgIdToRemove) => {
       return R.reject(org => org.id === orgIdToRemove, orgs)
     }
-
+    
     return Bacon.update(initialOrgs,
       [d.stream('add')], addOrgIfUnique,
       [d.stream('remove')], removeOrg,
