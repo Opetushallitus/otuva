@@ -215,6 +215,11 @@
             <artifactId>jackson-datatype-joda</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>fi.vm.sade</groupId>
+            <artifactId>auditlogger</artifactId>
+        </dependency>
+
     </dependencies>
 
 

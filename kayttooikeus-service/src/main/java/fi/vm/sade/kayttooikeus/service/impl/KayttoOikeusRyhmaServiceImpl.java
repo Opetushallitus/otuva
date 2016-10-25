@@ -61,7 +61,7 @@ public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements Kay
     public List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid) {
         List<KayttoOikeusRyhma> allRyhmas = kayttoOikeusRyhmaRepository.listAll();
         accessRightManagementUtils.parseRyhmaLimitationsBasedOnOrgOid(organisaatioOid, allRyhmas);
-        return mapper.mapAsList(kayttoOikeusRyhmaRepository.listAll(), KayttoOikeusRyhmaDto.class);
+        return mapper.mapAsList(allRyhmas, KayttoOikeusRyhmaDto.class);
     }
 
     @Override

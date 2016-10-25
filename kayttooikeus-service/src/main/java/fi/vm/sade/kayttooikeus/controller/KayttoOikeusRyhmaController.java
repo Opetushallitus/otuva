@@ -22,11 +22,15 @@ public class KayttoOikeusRyhmaController {
 
     private KayttoOikeusRyhmaService kayttoOikeusRyhmaService;
 
+    private AccessRightAuditLogger accessRightAuditLogger;
+
     private static final Logger logger = LoggerFactory.getLogger(KayttoOikeusRyhmaController.class);
 
     @Autowired
-    public KayttoOikeusRyhmaController(KayttoOikeusRyhmaService kayttoOikeusRyhmaService) {
+    public KayttoOikeusRyhmaController(KayttoOikeusRyhmaService kayttoOikeusRyhmaService,
+                                       AccessRightAuditLogger accessRightAuditLogger) {
         this.kayttoOikeusRyhmaService = kayttoOikeusRyhmaService;
+        this.accessRightAuditLogger = accessRightAuditLogger;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -135,7 +139,7 @@ public class KayttoOikeusRyhmaController {
     public Response createKayttoOikeusRyhma(@RequestBody KayttoOikeusRyhmaModifyDto uusiRyhma) {
         try {
             KayttoOikeusRyhmaDto created = kayttoOikeusRyhmaService.createKayttoOikeusRyhma(uusiRyhma);
-//            henkiloAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), "NEW", true);
+            accessRightAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), "NEW", true);
             return Response.ok(created.getId()).build();
         } catch (IllegalArgumentException iae) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing mandatory parameters: " + iae.getMessage()).build();
@@ -164,7 +168,7 @@ public class KayttoOikeusRyhmaController {
     public Response updateKayttoOikeusRyhma(@PathVariable("id") Long id, @RequestBody KayttoOikeusRyhmaModifyDto ryhmaData) {
         try {
             KayttoOikeusRyhmaDto koryhma = kayttoOikeusRyhmaService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
-//            henkiloAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), Long.toString(id), false);
+            accessRightAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), Long.toString(id), false);
             return Response.ok(koryhma).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
