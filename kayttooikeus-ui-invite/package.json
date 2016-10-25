@@ -51,10 +51,10 @@
   "dependencies": {
     "baconjs": "^0.7.88",
     "fetch-mock": "^5.5.0",
+    "modal": "file:../kayttooikeus-ui-common/modal",
     "ramda": "^0.22.1",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2",
-    "modal": "file:../kayttooikeus-ui-common/modal"
+    "react-dom": "^15.3.2"
   },
   "scripts": {
     "start": "node scripts/start.js",

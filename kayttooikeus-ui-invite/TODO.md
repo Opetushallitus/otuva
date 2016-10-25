@@ -1,6 +1,6 @@
-- [ ] Package as JAR and serve with Tomcat?
+- [x] Package as JAR and serve with Tomcat?
 - [x] Impl confirmation modal
 - [ ] Enhance backend mocks (koodisto, lokalisaatio, etc.)
 - [x] Impl basic layout positioning with flexbox
-- [ ] Eject out of crete-react-app
-- [ ] Choose UI widget lib (or decide on custom impls)
+- [X] Eject out of crete-react-app
+
