@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.List;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+
 public class TextGroupListDto extends TextGroupDto {
     public TextGroupListDto() {
     }
@@ -14,7 +17,7 @@ public class TextGroupListDto extends TextGroupDto {
 
     @JsonValue
     public List<TextDto> asList() {
-        return getTexts();
+        return getTexts().stream().sorted(comparing(TextDto::getLang)).collect(toList());
     }
 
     @Override

@@ -34,7 +34,7 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     public void listKayttoOikeusByPalveluTest() throws Exception {
         given(this.kayttoOikeusService.listKayttoOikeusByPalvelu("HENKILOHALLINTA"))
             .willReturn(singletonList(PalveluKayttoOikeusDto.builder()
-                    .rooli("ROLE").oikeusLangs(new TextGroupDto(1L).put("FI", "Nimi")
+                    .rooli("ROLE").oikeusLangs(new TextGroupListDto(1L).put("FI", "Nimi")
                         .put("EN", "Name"))
                     .build()));
         this.mvc.perform(get("/kayttooikeus/HENKILOHALLINTA").accept(MediaType.APPLICATION_JSON_UTF8))

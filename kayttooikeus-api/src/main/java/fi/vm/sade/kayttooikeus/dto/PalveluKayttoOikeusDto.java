@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
+import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterById;
 
 @Getter
 @Setter
@@ -16,11 +16,11 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
 @AllArgsConstructor
 public class PalveluKayttoOikeusDto implements Serializable, LocalizableDto {
     private String rooli;
-    private TextGroupDto oikeusLangs;
+    private TextGroupListDto oikeusLangs;
 
     public PalveluKayttoOikeusDto(String rooli, Long textGroupId) {
         this.rooli = rooli;
-        this.oikeusLangs = localizeLaterById(textGroupId);
+        this.oikeusLangs = localizeAsListLaterById(textGroupId);
     }
 
     @Override
