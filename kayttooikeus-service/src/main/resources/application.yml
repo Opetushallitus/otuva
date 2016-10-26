@@ -5,10 +5,6 @@ logging.level.org:
 spring:
   mandatory-file-encoding: UTF-8
   profiles.active: default
-# TODO: should we use?
-#  jackson:
-#    serialization:
-#      write_dates_as_timestamps: false
 
 server:
   context-path: /kayttooikeus-service

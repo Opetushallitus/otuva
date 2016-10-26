@@ -13,7 +13,7 @@
     "tehtavanimike": "nimike",
     "tila": "HYLATTY",
     "tyyppi": "KOOSTEROOLI",
-    "voimassaAlkuPvm": [2015,1,1],
-    "voimassaLoppuPvm": [2015,12,31]
+    "voimassaAlkuPvm": "2015-01-01",
+    "voimassaLoppuPvm": "2015-12-31"
   }
 ]
