@@ -40,13 +40,16 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
         Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
         bean.afterPropertiesSet();
         ObjectMapper objectMapper = bean.getObject();
-        JodaModule jodaModule = new JodaModule();
-        jodaModule.addSerializer(LocalDate.class, new LocalDateSerializer() {
+        LocalDateSerializer localDateAsStringSerilizer = new LocalDateSerializer() {
             @Override
             public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
                 gen.writeString(_format.createFormatter(provider).print(value));
             }
-        });
+        };
+        JodaModule jodaModule = new JodaModule() {{
+            // Need to be added here since won't effect if added after initialization:
+            addSerializer(LocalDate.class, localDateAsStringSerilizer);
+        }};
         objectMapper.registerModule(jodaModule);
         return objectMapper;
     }
