@@ -14,15 +14,15 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaMapper extends CustomMapper<Myon
     public void mapAtoB(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, MyonnettyKayttoOikeusDTO myonnettyKayttoOikeusDTO, MappingContext context) {
         myonnettyKayttoOikeusDTO.setRyhmaId(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId());
         myonnettyKayttoOikeusDTO.setMyonnettyTapahtumaId(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
-        myonnettyKayttoOikeusDTO.setTehtavanimike("N/A");
         myonnettyKayttoOikeusDTO.setTila(myonnettyKayttoOikeusRyhmaTapahtuma.getTila());
         myonnettyKayttoOikeusDTO.setKasittelijaOid(myonnettyKayttoOikeusRyhmaTapahtuma.getKasittelija().getOidHenkilo());
         myonnettyKayttoOikeusDTO.setKasittelijaNimi("N/A");
         myonnettyKayttoOikeusDTO.setMuutosSyy(myonnettyKayttoOikeusRyhmaTapahtuma.getSyy());
 
-//        if( myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo() != null ){
-//            myonnettyKayttoOikeusDTO.setTehtavanimike(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getTehtavanimike());
-//        }
+        if( myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo() != null ){
+            myonnettyKayttoOikeusDTO.setTehtavanimike(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getTehtavanimike());
+            myonnettyKayttoOikeusDTO.setOrganisaatioOid(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid());
+        }
 
         myonnettyKayttoOikeusDTO.setTyyppi("KORyhma");
         myonnettyKayttoOikeusDTO.setAlkuPvm(myonnettyKayttoOikeusRyhmaTapahtuma.getVoimassaAlkuPvm());

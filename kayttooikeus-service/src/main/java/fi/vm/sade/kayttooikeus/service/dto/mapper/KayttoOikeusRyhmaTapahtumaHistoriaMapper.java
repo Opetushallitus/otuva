@@ -14,7 +14,11 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaMapper extends CustomMapper<Kaytt
     public void mapAtoB(KayttoOikeusRyhmaTapahtumaHistoria kayttoOikeusRyhmaTapahtumaHistoria, MyonnettyKayttoOikeusDTO myonnettyKayttoOikeusDTO, MappingContext context) {
         myonnettyKayttoOikeusDTO.setRyhmaId(kayttoOikeusRyhmaTapahtumaHistoria.getKayttoOikeusRyhma().getId());
         myonnettyKayttoOikeusDTO.setMyonnettyTapahtumaId(kayttoOikeusRyhmaTapahtumaHistoria.getId());
-        myonnettyKayttoOikeusDTO.setTehtavanimike("N/A");
+
+        if( kayttoOikeusRyhmaTapahtumaHistoria.getOrganisaatioHenkilo() != null ){
+            myonnettyKayttoOikeusDTO.setTehtavanimike(kayttoOikeusRyhmaTapahtumaHistoria.getOrganisaatioHenkilo().getTehtavanimike());
+            myonnettyKayttoOikeusDTO.setOrganisaatioOid(kayttoOikeusRyhmaTapahtumaHistoria.getOrganisaatioHenkilo().getOrganisaatioOid());
+        }
         myonnettyKayttoOikeusDTO.setTila(kayttoOikeusRyhmaTapahtumaHistoria.getTila());
         myonnettyKayttoOikeusDTO.setKasittelijaOid(kayttoOikeusRyhmaTapahtumaHistoria.getKasittelija().getOidHenkilo());
         myonnettyKayttoOikeusDTO.setKasittelijaNimi("N/A");

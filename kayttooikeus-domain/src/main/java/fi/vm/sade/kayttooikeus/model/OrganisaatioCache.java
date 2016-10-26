@@ -26,4 +26,12 @@ public class OrganisaatioCache implements Serializable {
 
     @Column(name = "organisaatio_oid_path")
     private String organisaatioOidPath;
+
+    public OrganisaatioCache() {
+    }
+
+    public OrganisaatioCache(String organisaatioOid, String organisaatioOidPath) {
+        this.organisaatioOid = organisaatioOid;
+        this.organisaatioOidPath = organisaatioOidPath;
+    }
 }

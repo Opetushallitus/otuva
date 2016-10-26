@@ -29,9 +29,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
     public List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid) {
         return jpa()
                 .from(myonnettyKayttoOikeusRyhmaTapahtuma)
-                .distinct()
-                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
-                .leftJoin(organisaatioHenkilo.henkilo)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo).fetchJoin()
+                .leftJoin(organisaatioHenkilo.henkilo).fetchJoin()
                 .where(
                         myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
                                 .and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.hidden.eq(false))
