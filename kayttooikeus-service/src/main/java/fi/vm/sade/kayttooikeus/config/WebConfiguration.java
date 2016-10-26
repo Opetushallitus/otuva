@@ -7,6 +7,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -14,7 +15,16 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
-public class WebConfiguration extends WebMvcConfigurerAdapter{
+public class WebConfiguration extends WebMvcConfigurerAdapter {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry
+                .addResourceHandler("/invite/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-invite/");
+
+        super.addResourceHandlers(registry);
+    }
 
     @Override
     public void configurePathMatch(PathMatchConfigurer matcher) {
@@ -40,5 +50,4 @@ public class WebConfiguration extends WebMvcConfigurerAdapter{
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(mappingJackson2HttpMessageConverter());
     }
-
 }

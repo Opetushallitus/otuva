@@ -17,11 +17,6 @@ import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.joining;
 
-/**
- * User: tommiratamaa
- * Date: 12/10/2016
- * Time: 15.05
- */
 public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final CachingRestClient restClient = new CachingRestClient()
             .setClientSubSystemCode("kayttooikeus.kayttooikeuspalvelu-service");
@@ -33,7 +28,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public OrganisaatioRDTO getOrganisaatioPerustiedot(String oid) {
-        String url = urlConfiguration.getProperty("organisaatio-service.organisaatio.perustiedot", oid);
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.perustiedot", oid);
         return retrying(io(() -> restClient.get(url,OrganisaatioRDTO.class)), 2)
                 .get().orFail(mapper(url));
     }
@@ -52,7 +47,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         if (organisaatioOids.isEmpty()) {
             return new ArrayList<>();
         }
-        String url = urlConfiguration.getProperty("organisaatio-service.organisaatio.hae");
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
         String params = "?oidRestrictionList="+organisaatioOids.stream().collect(joining("&oidRestrictionList=")) +
                 (limitToActive ? "&aktiiviset=true" : "");
         return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
