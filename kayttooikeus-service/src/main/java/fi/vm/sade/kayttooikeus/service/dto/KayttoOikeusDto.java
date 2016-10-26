@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.dto;
 
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import lombok.Getter;
 import lombok.Setter;

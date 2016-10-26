@@ -2,14 +2,11 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeus;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.QPalvelu;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
-import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
+import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.stereotype.Repository;

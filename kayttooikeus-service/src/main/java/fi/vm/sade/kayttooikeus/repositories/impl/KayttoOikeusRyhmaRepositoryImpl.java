@@ -1,19 +1,10 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import com.querydsl.core.types.Projections;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.model.Text;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Set;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
 

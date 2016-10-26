@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;

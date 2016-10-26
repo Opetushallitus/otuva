@@ -2,6 +2,10 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
+import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -26,8 +30,10 @@ public class KayttoOikeusRyhmaController {
     private static final Logger logger = LoggerFactory.getLogger(KayttoOikeusRyhmaController.class);
 
     @Autowired
-    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService) {
+    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService,
+                                       AccessRightAuditLogger accessRightAuditLogger) {
         this.kayttoOikeusService = kayttoOikeusService;
+        this.accessRightAuditLogger = accessRightAuditLogger;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -43,7 +49,7 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Listaa käyttöoikeusryhmät organisaation mukaan.",
             notes = "Listaa käyttöoikeusryhmät, jotka ovat mahdollisia pyynnössä annetulle organisaatiolle.")
     public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhmasByOrdOid(@PathVariable("organisaatioOid") String organisaatioOid) {
-        return kayttoOikeusRyhmaService.listPossibleRyhmasByOrganization(organisaatioOid);
+        return kayttoOikeusService.listPossibleRyhmasByOrganization(organisaatioOid);
     }
 
     @RequestMapping(value = "/{oid}/{organisaatioOid}", method = RequestMethod.GET)
@@ -58,7 +64,7 @@ public class KayttoOikeusRyhmaController {
     public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmasIncludingHenkilos(
             @PathVariable("oid") String oid, @PathVariable("organisaatioOid") String organisaatioOid) {
         try {
-            return kayttoOikeusRyhmaService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(
+            return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(
                     oid, organisaatioOid, getCurrentUserOid());
         } catch (Exception e) {
             logger.error("Error getting access right groups", e);
@@ -77,7 +83,7 @@ public class KayttoOikeusRyhmaController {
     public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmaByHenkilo(
             @PathVariable("oid") String oid,
             @QueryParam("ooid") String organisaatioOid) {
-        return kayttoOikeusRyhmaService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(oid, organisaatioOid);
+        return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(oid, organisaatioOid);
     }
 
     @RequestMapping(value = "/henkilo/current", method = RequestMethod.GET)
@@ -90,7 +96,7 @@ public class KayttoOikeusRyhmaController {
                     + "sekä rajaa ne tiettyyn organisaatioon, jos kutsussa on "
                     + "annettu organisaatiorajoite.")
     public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmaForCurrentUser(@QueryParam("ooid") String organisaatioOid) {
-        return kayttoOikeusRyhmaService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(getCurrentUserOid(), organisaatioOid);
+        return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(getCurrentUserOid(), organisaatioOid);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -102,7 +108,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Hakee yhden käyttöoikeusryhmän kaikki tiedot "
                     + "annetun käyttöoikeusryhmän ID:n avulla.")
     public KayttoOikeusRyhmaDto getKayttoOikeusRyhma(@PathVariable("id") Long id) {
-        return kayttoOikeusRyhmaService.findKayttoOikeusRyhma(id);
+        return kayttoOikeusService.findKayttoOikeusRyhma(id);
     }
 
 
@@ -112,7 +118,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa kaikki käyttöoikeusryhmälle alistetut käyttöoikeusryhmät "
                     + "eli ne ryhmät jotka tämän ryhmän myöntäminen mahdollistaa.")
     public List<KayttoOikeusRyhmaDto> getSubRyhmasByKayttoOikeusRyhma(@PathVariable("id") Long id) {
-        return kayttoOikeusRyhmaService.findSubRyhmasByMasterRyhma(id);
+        return kayttoOikeusService.findSubRyhmasByMasterRyhma(id);
     }
 
     @RequestMapping(value = "/{id}/kayttooikeus", method = RequestMethod.GET)
@@ -124,7 +130,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa kaikki annettuun käyttöoikeusryhmään kuuluvat "
                     + "palvelut ja roolit yhdistelmäpareina DTO:n avulla.")
     public List<PalveluRoooliDto> getKayttoOikeusByKayttoOikeusRyhma(@PathVariable("id") Long id) {
-        return kayttoOikeusRyhmaService.findPalveluRoolisByKayttoOikeusRyhma(id);
+        return kayttoOikeusService.findPalveluRoolisByKayttoOikeusRyhma(id);
     }
 
 
@@ -135,7 +141,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
     public Response createKayttoOikeusRyhma(@RequestBody KayttoOikeusRyhmaModifyDto uusiRyhma) {
         try {
-            KayttoOikeusRyhmaDto created = kayttoOikeusRyhmaService.createKayttoOikeusRyhma(uusiRyhma);
+            KayttoOikeusRyhmaDto created = kayttoOikeusService.createKayttoOikeusRyhma(uusiRyhma);
             accessRightAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), "NEW", true);
             return Response.ok(created.getId()).build();
         } catch (IllegalArgumentException iae) {
@@ -153,7 +159,7 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Luo uuden käyttöoikeuden.",
             notes = "Luo uuden käyttöoikeuden annetun käyttöoikeus modelin pohjalta.")
     public KayttoOikeusDto createNewKayttoOikeus(@RequestBody KayttoOikeusDto kayttoOikeus) {
-        return kayttoOikeusRyhmaService.createKayttoOikeus(kayttoOikeus);
+        return kayttoOikeusService.createKayttoOikeus(kayttoOikeus);
     }
 
 
@@ -164,7 +170,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Päivittää käyttöoikeusryhmän tiedot annetun DTO:n avulla.")
     public Response updateKayttoOikeusRyhma(@PathVariable("id") Long id, @RequestBody KayttoOikeusRyhmaModifyDto ryhmaData) {
         try {
-            KayttoOikeusRyhmaDto koryhma = kayttoOikeusRyhmaService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
+            KayttoOikeusRyhmaDto koryhma = kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
             accessRightAuditLogger.auditModifyAccessRightGroupData(getCurrentUserOid(), Long.toString(id), false);
             return Response.ok(koryhma).build();
         } catch (IllegalArgumentException e) {

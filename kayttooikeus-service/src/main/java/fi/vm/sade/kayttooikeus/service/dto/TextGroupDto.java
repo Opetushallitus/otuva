@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.dto;
 
+import fi.vm.sade.kayttooikeus.dto.TextDto;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaDto;
 
 import java.util.List;
 

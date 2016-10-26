@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.dto;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.DateTime;

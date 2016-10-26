@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
+import fi.vm.sade.kayttooikeus.model.TextGroup;
 import fi.vm.sade.kayttooikeus.repositories.TextGroupRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.TextGroupTextDto;
 import org.springframework.stereotype.Repository;

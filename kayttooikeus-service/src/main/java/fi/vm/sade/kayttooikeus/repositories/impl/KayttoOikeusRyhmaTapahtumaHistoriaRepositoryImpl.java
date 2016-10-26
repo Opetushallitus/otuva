@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaRepository;
 import org.apache.commons.lang.StringUtils;

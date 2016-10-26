@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.PalveluDto;
+import fi.vm.sade.kayttooikeus.model.Palvelu;
 
 import java.util.List;
 
