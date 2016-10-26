@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
+//TODO move to kayttooikeusservice
 @Service
 public class KayttoOikeusRyhmaServiceImpl extends AbstractService implements KayttoOikeusRyhmaService {
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;

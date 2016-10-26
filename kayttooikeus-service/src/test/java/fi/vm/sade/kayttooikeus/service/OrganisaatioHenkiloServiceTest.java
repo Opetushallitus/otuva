@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.config.ApplicationTest;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -23,9 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringRunner.class)
-@ApplicationTest
 public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
-
     @MockBean
     private OrganisaatioClient organisaatioClient;
 

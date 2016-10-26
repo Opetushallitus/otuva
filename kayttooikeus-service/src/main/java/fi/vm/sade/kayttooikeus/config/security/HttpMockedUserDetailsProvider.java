@@ -14,11 +14,6 @@ import java.net.URL;
 
 import static java.util.Optional.ofNullable;
 
-/**
- * User: tommiratamaa
- * Date: 10/10/2016
- * Time: 11.06
- */
 public class HttpMockedUserDetailsProvider implements UserDetailsService {
     private final String url;
     private final ObjectMapper objectMapper;

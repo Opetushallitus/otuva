@@ -1,10 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.exception;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 17.52
- */
 public class NotFoundException extends RuntimeException {
     public NotFoundException(String message) {
         super(message);

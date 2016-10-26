@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.model.Palvelu;
+import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +24,9 @@ public class PalveluRepositoryTest extends AbstractRepositoryTest {
         populate(palvelu("PALVELU1"));
         populate(palvelu("PALVELU2"));
         
-        List<Palvelu> palvelus = palveluRepository.findAll();
+        List<PalveluDto> palvelus = palveluRepository.findAll();
         assertEquals(2, palvelus.size());
         assertEquals(new HashSet<>(asList("PALVELU1", "PALVELU2")),
-                palvelus.stream().map(Palvelu::getName).collect(toSet()));
+                palvelus.stream().map(PalveluDto::getName).collect(toSet()));
     }
 }

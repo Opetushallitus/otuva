@@ -1,0 +1,19 @@
+[
+  {
+    "aikaleima": 1420063200000,
+    "kasittelija": "kasittelija",
+    "kayttoOikeusId": 1,
+    "kuvaus": [
+      {
+        "lang": "FI",
+        "text": "nimi"
+      }
+    ],
+    "organisaatioOid": "orgOid",
+    "tehtavanimike": "nimike",
+    "tila": "HYLATTY",
+    "tyyppi": "KOOSTEROOLI",
+    "voimassaAlkuPvm": "2015-01-01",
+    "voimassaLoppuPvm": "2015-12-31"
+  }
+]

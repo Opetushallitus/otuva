@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
@@ -36,7 +37,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
     @Type(type = "dateTime")
-    private DateTime aikaleima;
+    private DateTime aikaleima = new DateTime();
 
     @Temporal(TemporalType.DATE)
     @Column(name = "voimassaalkupvm", nullable = false)

@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
@@ -7,11 +8,6 @@ import org.joda.time.DateTime;
 
 import javax.persistence.*;
 
-/**
- * 
- * @author kkammone
- * 
- */
 @Entity
 @Getter @Setter
 @Table(name = "haettu_kayttooikeusryhma")

@@ -1,7 +1,11 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.model.TextGroup;
+
+import fi.vm.sade.kayttooikeus.repositories.dto.TextGroupTextDto;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface TextGroupRepository {
-    TextGroup insert(TextGroup textGroup);
+    List<TextGroupTextDto> findTexts(Collection<Long> textGroupIds);
 }

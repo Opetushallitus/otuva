@@ -1,34 +1,37 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import fi.vm.sade.kayttooikeus.repositories.PalveluRepository;
+import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PalveluService;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class PalveluServiceImpl implements PalveluService {
     private PalveluRepository palveluRepository;
-    private OrikaBeanMapper mapper;
+    private LocalizationService localizationService;
 
     @Autowired
-    public PalveluServiceImpl(PalveluRepository palveluRepository, OrikaBeanMapper mapper) {
+    public PalveluServiceImpl(PalveluRepository palveluRepository, LocalizationService localizationService) {
         this.palveluRepository = palveluRepository;
-        this.mapper = mapper;
+        this.localizationService = localizationService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PalveluDto> listPalvelus() {
-        return palveluRepository
-                .findAll()
-                .stream()
-                .map(palvelu -> mapper.map(palvelu, PalveluDto.class))
-                .collect(Collectors.toList());
+        List<PalveluDto> palvelus = localizationService.localize(palveluRepository.findAll());
+        Map<Long,PalveluDto> palvelusById = palvelus.stream().collect(toMap(PalveluDto::getId, dto -> dto));
+        palvelus.stream().filter(dto -> dto.getKokoelma() != null)
+                .forEach(dto -> dto.setKokoelma(palvelusById.get(dto.getKokoelma().getId())));
+        return palvelus;
     }
 }

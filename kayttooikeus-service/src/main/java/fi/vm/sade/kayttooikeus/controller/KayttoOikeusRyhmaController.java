@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusRyhmaService;
-import fi.vm.sade.kayttooikeus.service.dto.*;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -19,18 +19,15 @@ import java.util.List;
 @RequestMapping("/kayttooikeusryhma")
 @Api(value = "/kayttooikeusryhma", description = "Käyttöoikeusryhmien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusRyhmaController {
-
-    private KayttoOikeusRyhmaService kayttoOikeusRyhmaService;
+    private KayttoOikeusService kayttoOikeusService;
 
     private AccessRightAuditLogger accessRightAuditLogger;
 
     private static final Logger logger = LoggerFactory.getLogger(KayttoOikeusRyhmaController.class);
 
     @Autowired
-    public KayttoOikeusRyhmaController(KayttoOikeusRyhmaService kayttoOikeusRyhmaService,
-                                       AccessRightAuditLogger accessRightAuditLogger) {
-        this.kayttoOikeusRyhmaService = kayttoOikeusRyhmaService;
-        this.accessRightAuditLogger = accessRightAuditLogger;
+    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService) {
+        this.kayttoOikeusService = kayttoOikeusService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -38,7 +35,7 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Listaa kaikki käyttöoikeusryhmät.",
             notes = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan.")
     public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma() {
-        return kayttoOikeusRyhmaService.listAllKayttoOikeusRyhmas();
+        return kayttoOikeusService.listAllKayttoOikeusRyhmas();
     }
 
     @RequestMapping(value = "/organisaatio/{organisaatioOid}", method = RequestMethod.GET)

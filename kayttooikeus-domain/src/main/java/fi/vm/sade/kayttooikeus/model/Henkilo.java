@@ -5,11 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-/**
- * User: tommiratamaa
- * Date: 2.9.2016
- * Time: 13.10
- */
 @Entity
 @Getter @Setter
 @Table(name = "henkilo", schema = "public")

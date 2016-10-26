@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-public class OrganisaatioClientImplTest extends AbstractClientTest {
+public class OrganisaatioClientTest extends AbstractClientTest {
     @Autowired
     private OrganisaatioClient client;
     
