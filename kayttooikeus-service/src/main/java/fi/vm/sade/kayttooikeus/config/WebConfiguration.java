@@ -1,7 +1,11 @@
 package fi.vm.sade.kayttooikeus.config;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
+import org.joda.time.LocalDate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
@@ -11,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -33,10 +38,16 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 
     private ObjectMapper objectMapper() {
         Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
-        bean.setSimpleDateFormat("yyyy-dd-MM'T'HH:mm:ss");
         bean.afterPropertiesSet();
         ObjectMapper objectMapper = bean.getObject();
-        objectMapper.registerModule(new JodaModule());
+        JodaModule jodaModule = new JodaModule();
+        jodaModule.addSerializer(LocalDate.class, new LocalDateSerializer() {
+            @Override
+            public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+                gen.writeString(_format.createFormatter(provider).print(value));
+            }
+        });
+        objectMapper.registerModule(jodaModule);
         return objectMapper;
     }
 
