@@ -19,7 +19,7 @@ public class JsonUtil {
     }
 
     public static ObjectMapper getObjectMapper() {
-        return RestAssured.config().getObjectMapperConfig().jackson2ObjectMapperFactory().create(Object.class, "UTF-8");
+        return new ObjectMapper();
     }
 
     /**

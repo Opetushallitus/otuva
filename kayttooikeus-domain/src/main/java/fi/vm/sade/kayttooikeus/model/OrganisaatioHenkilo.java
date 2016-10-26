@@ -51,4 +51,7 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "voimassa_loppu_pvm")
     @Type(type = "localDate")
     private LocalDate voimassaLoppuPvm;
+
+    @Column(name = "tehtavanimike")
+    private String tehtavanimike;
 }

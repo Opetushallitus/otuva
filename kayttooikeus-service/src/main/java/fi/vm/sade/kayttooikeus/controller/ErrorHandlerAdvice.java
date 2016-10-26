@@ -4,6 +4,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import fi.vm.sade.generic.common.ValidationException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -66,7 +67,14 @@ public class ErrorHandlerAdvice {
         return handleException(req, exception, "error_NotAuthorizedException",
                 messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
     }
-    
+
+    @ResponseStatus(value = HttpStatus.GATEWAY_TIMEOUT) // 504: Gateway Timeout
+    @ExceptionHandler(ExternalServiceException.class) @ResponseBody
+    public Map<String,Object> errorCallingExternalService(HttpServletRequest req, ExternalServiceException exception) {
+        return handleException(req, exception, "error_calling_external_service",
+                messageSource.getMessage("error_calling_external_service", new Object[]{exception.getResource()}, getLocale(req)));
+    }
+
     private Locale getLocale(HttpServletRequest req) {
         Locale locale;
         if (req.getParameter("lang") != null) {

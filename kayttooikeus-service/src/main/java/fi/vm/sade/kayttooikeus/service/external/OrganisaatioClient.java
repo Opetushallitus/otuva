@@ -8,6 +8,4 @@ import java.util.List;
 
 public interface OrganisaatioClient {
     List<OrganisaatioPerustieto> listOganisaatioPerustiedot(Collection<String> organisaatioOids);
-
-    OrganisaatioRDTO getOrganisaatioPerustiedot(String oid);
 }

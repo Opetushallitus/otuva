@@ -9,9 +9,6 @@ import java.util.Set;
 
 /**
  * Käyttöoikeusryhmä koostuu käyttöoikeuksista
- * 
- * @author Eetu Blomqvist
- * 
  */
 @Entity
 @Getter @Setter

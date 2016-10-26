@@ -5,9 +5,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Created by autio on 29.9.2016.
- */
 @Getter
 @Setter
 @Configuration

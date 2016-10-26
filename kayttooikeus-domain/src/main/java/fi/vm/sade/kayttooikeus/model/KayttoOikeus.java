@@ -9,9 +9,6 @@ import java.util.Set;
 
 /**
  * Käyttöoikeus liittää tietyn roolin tiettyyn palveluun
- * 
- * @author Eetu Blomqvist
- * 
  */
 @Entity
 @Getter @Setter
@@ -31,4 +28,5 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "palvelu_id", nullable = false)
     private Palvelu palvelu;
+
 }

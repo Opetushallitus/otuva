@@ -50,3 +50,13 @@ cas:
 
 host:
   host-virkailija: {{host_virkailija}}
+  host-cas: {{host_cas}}
+
+service-users:
+	viestinta:
+		username: {{authentication_app_username_to_viestinta}}
+		password: {{authentication_app_password_to_viestinta}}
+
+tasks:
+  email-invitation:
+    sender-email: noreply@oph.fi

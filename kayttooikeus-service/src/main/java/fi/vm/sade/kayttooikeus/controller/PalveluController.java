@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.service.PalveluService;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -10,11 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 
-/**
- * User: tommiha
- * Date: 6/10/13
- * Time: 2:53 PM
- */
 @Entity
 @Builder
 @Getter @Setter
