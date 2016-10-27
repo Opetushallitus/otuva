@@ -180,7 +180,12 @@ function addMiddleware(devServer) {
     } else if (typeof proxy === 'object') {
       for (var key in proxy) {
         if (proxy.hasOwnProperty(key)) {
-          devServer.use(key, httpProxyMiddleware(proxy[key]));
+          devServer.use(key, httpProxyMiddleware(
+            Object.assign(proxy[key], {
+              logLevel: 'silent', 
+              onError: onProxyError(key) 
+            })
+          ));
         }
       }
     }
