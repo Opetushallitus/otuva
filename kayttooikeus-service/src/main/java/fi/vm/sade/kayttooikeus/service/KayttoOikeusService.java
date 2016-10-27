@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -24,9 +24,9 @@ public interface KayttoOikeusService {
 
     List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid);
 
-    List<MyonnettyKayttoOikeusDTO> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String oid, String organisaatioOid, String currentUserOid);
+    List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String oid, String organisaatioOid, String currentUserOid);
 
-    List<MyonnettyKayttoOikeusDTO> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String oid, String organisaatioOid);
+    List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String oid, String organisaatioOid);
 
     KayttoOikeusRyhmaDto findKayttoOikeusRyhma(Long id);
 

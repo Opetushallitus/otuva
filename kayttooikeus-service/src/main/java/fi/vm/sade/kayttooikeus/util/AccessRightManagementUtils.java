@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.util;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.dto.LocaleTextDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -134,46 +133,8 @@ public class AccessRightManagementUtils{
     }
 
     public List<Long> getGrantableKayttooikeusRyhmas(String myontajaOid) {
-        List<MyonnettyKayttoOikeusRyhmaTapahtuma> kasittelijaMKORTs = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidByHenkiloOid(myontajaOid);
-        List<Long> masterIds = new ArrayList<>();
-
-        for (MyonnettyKayttoOikeusRyhmaTapahtuma mkort : kasittelijaMKORTs) {
-            masterIds.add(mkort.getKayttoOikeusRyhma().getId());
-        }
-
+        List<Long> masterIds = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo(myontajaOid);
         return kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIds);
-    }
-
-    public List<MyonnettyKayttoOikeusDTO> createMyonnettyKayttoOikeusDTO(List<KayttoOikeusRyhma> allRyhmas,
-                                                                         List<MyonnettyKayttoOikeusRyhmaTapahtuma> henkilosKORs) {
-            List<MyonnettyKayttoOikeusDTO> results = new ArrayList<MyonnettyKayttoOikeusDTO>();
-
-            for (KayttoOikeusRyhma ko : allRyhmas) {
-                MyonnettyKayttoOikeusDTO mkDTO = new MyonnettyKayttoOikeusDTO();
-                mkDTO.setRyhmaId(ko.getId());
-                if (ko.getDescription() != null) {
-                    copyTexts(mkDTO, ko);
-                }
-                mkDTO.setSelected(false);
-                // Henkilo's all granted access rights must be checked to see
-                // if they contain same IDs as these need to be shown in the UI
-                for (MyonnettyKayttoOikeusRyhmaTapahtuma mkort : henkilosKORs) {
-                    if (mkort.getKayttoOikeusRyhma().getId().equals(ko.getId())) {
-                        mkDTO.setMyonnettyTapahtumaId(mkort.getId());
-                        mkDTO.setAlkuPvm(mkort.getVoimassaAlkuPvm());
-                        mkDTO.setVoimassaPvm(mkort.getVoimassaLoppuPvm());
-                        mkDTO.setSelected(true);
-                        break;
-                    }
-                }
-                results.add(mkDTO);
-            }
-
-            return results;
-    }
-
-    private void copyTexts(MyonnettyKayttoOikeusDTO mkDTO, KayttoOikeusRyhma kor) {
-        kor.getDescription().getTexts().forEach(text -> mkDTO.getRyhmaNames().add(new LocaleTextDto(text.getText(), text.getLang())));
     }
 
     public List<PalveluRoooliDto> createPalveluRooliDTO(List<Palvelu> palvelus) {

@@ -1,11 +1,11 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 
 import java.util.List;
 
 public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
-    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findValidByHenkiloOid(String henkiloOid);
+    List<Long> findMasterIdsByHenkilo(String henkiloOid);
 
-    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid);
+    List<MyonnettyKayttoOikeusDto> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid);
 }

@@ -12,7 +12,7 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,7 +108,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyonnettyKayttoOikeusDTO> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String henkiloOid, String organisaatioOid, String myontajaOid) {
+    public List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String henkiloOid, String organisaatioOid, String myontajaOid) {
         List<KayttoOikeusRyhma> allRyhmas;
         /* The list of groups that can be granted must be checked
          * from the granting person's limitation list, if the granting
@@ -131,8 +130,18 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         accessRightManagementUtils.parseRyhmaLimitationsBasedOnOrgOid(organisaatioOid, allRyhmas);
 
         if (!allRyhmas.isEmpty()) {
-            List<MyonnettyKayttoOikeusRyhmaTapahtuma> henkilosKORs = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
-            return accessRightManagementUtils.createMyonnettyKayttoOikeusDTO(allRyhmas, henkilosKORs);
+            List<MyonnettyKayttoOikeusDto> henkilosKORs = localizationService.localize(myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid));
+            List<MyonnettyKayttoOikeusDto> results = new ArrayList<>();
+            allRyhmas.forEach(kayttoOikeusRyhma -> {
+                for (MyonnettyKayttoOikeusDto henkilosKOR : henkilosKORs) {
+                    if (henkilosKOR.getRyhmaId().equals(kayttoOikeusRyhma.getId())) {
+                        henkilosKOR.setSelected(true);
+                        results.add(henkilosKOR);
+                        break;
+                    }
+                }
+            });
+            return results;
         }
 
         return null;
@@ -140,25 +149,22 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyonnettyKayttoOikeusDTO> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String henkiloOid, String organisaatioOid) {
+    public List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String henkiloOid, String organisaatioOid) {
 
-        List<MyonnettyKayttoOikeusRyhmaTapahtuma> ryhmaTapahtumas = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
-        List<MyonnettyKayttoOikeusDTO> all = mapper.mapAsList(ryhmaTapahtumas, MyonnettyKayttoOikeusDTO.class);
-
+        List<MyonnettyKayttoOikeusDto> all = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         /* History data must be fetched also since it's additional information for admin users
          * if they need to solve possible conflicts with users' access rights
          */
-        List<KayttoOikeusRyhmaTapahtumaHistoria> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
-        List<MyonnettyKayttoOikeusDTO> histories = mapper.mapAsList(ryhmaTapahtumaHistorias, MyonnettyKayttoOikeusDTO.class);
-        all.addAll(histories);
+        List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
+        all.addAll(ryhmaTapahtumaHistorias);
 
-        List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDTO::getKasittelijaOid).distinct().collect(Collectors.toList());
+        List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDto::getKasittelijaOid).distinct().collect(Collectors.toList());
         Map<String, String> kasittelijaNimet = oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids)
                 .stream()
                 .collect(Collectors.toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
         all.forEach(myonnettyKayttoOikeusDTO -> myonnettyKayttoOikeusDTO.setKasittelijaNimi(kasittelijaNimet.get(myonnettyKayttoOikeusDTO.getKasittelijaOid())));
 
-        return all;
+        return localizationService.localize(all);
     }
 
     @Override
@@ -310,7 +316,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                     koRyhma.addOrganisaatioViite(ov);
                 });
 
-        Set<KayttoOikeus> givenKOs = new HashSet<KayttoOikeus>();
+        Set<KayttoOikeus> givenKOs = new HashSet<>();
         for (PalveluRoooliDto prDto : ryhmaData.getPalvelutRoolit()) {
             List<Palvelu> palvelus = palveluRepository.findByName(prDto.getPalveluName());
             if (palvelus.isEmpty()) {

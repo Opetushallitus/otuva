@@ -1,9 +1,11 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaRepository;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +16,7 @@ import java.util.List;
 public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRepository implements KayttoOikeusRyhmaTapahtumaHistoriaRepository {
 
     @Override
-    public List<KayttoOikeusRyhmaTapahtumaHistoria> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid) {
+    public List<MyonnettyKayttoOikeusDto> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid) {
         QKayttoOikeusRyhmaTapahtumaHistoria korth = QKayttoOikeusRyhmaTapahtumaHistoria.kayttoOikeusRyhmaTapahtumaHistoria;
         QOrganisaatioHenkilo oh = QOrganisaatioHenkilo.organisaatioHenkilo;
         QKayttoOikeusRyhma kor = new QKayttoOikeusRyhma("k1");
@@ -33,13 +35,22 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
         }
 
         return jpa().from(korth).distinct()
-                .innerJoin(korth.kayttoOikeusRyhma, kor).fetchJoin()
+                .innerJoin(korth.kayttoOikeusRyhma, kor)
                 .innerJoin(korth.organisaatioHenkilo, oh)
                 .innerJoin(oh.henkilo)
-                .leftJoin(kor.kayttoOikeus, ko).fetchJoin()
-                .leftJoin(ko.palvelu, palvelu).fetchJoin()
-                .where(history, restriction, hidden)
-                .select(korth).fetch();
+                .leftJoin(kor.kayttoOikeus, ko)
+                .leftJoin(ko.palvelu, palvelu)
+                .select(Projections.bean(MyonnettyKayttoOikeusDto.class,
+                        korth.kayttoOikeusRyhma.id.as("ryhmaId"),
+                        korth.id.as("myonnettyTapahtumaId"),
+                        korth.organisaatioHenkilo.tehtavanimike.as("tehtavanimike"),
+                        korth.organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
+                        korth.tila.as("tila"),
+                        korth.kasittelija.oidHenkilo.as("kasittelijaOid"),
+                        korth.kayttoOikeusRyhma.description.id.as("ryhmaNamesId"),
+                        korth.aikaleima.as("kasitelty"),
+                        korth.syy.as("muutosSyy")
 
+                )).where(history, restriction, hidden).fetch();
     }
 }

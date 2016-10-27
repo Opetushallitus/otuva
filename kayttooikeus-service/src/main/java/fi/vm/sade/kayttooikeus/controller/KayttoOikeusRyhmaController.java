@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
+import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,7 +61,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa kaikki annetun henkilön ja tämän annettuun organisaatioon "
                     + "liittyvät voimassaolevat sekä mahdollisesti myönnettävissä olevat "
                     + "käyttöoikeusryhmät DTO:n avulla.")
-    public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmasIncludingHenkilos(
+    public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmasIncludingHenkilos(
             @PathVariable("oid") String oid, @PathVariable("organisaatioOid") String organisaatioOid) {
         try {
             return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(
@@ -80,7 +80,7 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Hakee henkilön käyttöoikeusryhmät.",
             notes = "Listaa henkilön kaikki käyttöoikeusryhmät sekä rajaa ne "
                     + "tiettyyn organisaatioon, jos kutsussa on annettu organisaatiorajoite.")
-    public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmaByHenkilo(
+    public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmaByHenkilo(
             @PathVariable("oid") String oid,
             @QueryParam("ooid") String organisaatioOid) {
         return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(oid, organisaatioOid);
@@ -95,7 +95,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa nykyisen kirjautuneen henkilön kaikki käyttöoikeusryhmät "
                     + "sekä rajaa ne tiettyyn organisaatioon, jos kutsussa on "
                     + "annettu organisaatiorajoite.")
-    public List<MyonnettyKayttoOikeusDTO> listKayttoOikeusRyhmaForCurrentUser(@QueryParam("ooid") String organisaatioOid) {
+    public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmaForCurrentUser(@QueryParam("ooid") String organisaatioOid) {
         return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(getCurrentUserOid(), organisaatioOid);
     }
 
