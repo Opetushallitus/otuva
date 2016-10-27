@@ -1,0 +1,49 @@
+{
+  "kayttoOikeusRyhmas": [
+    {
+      "description": {
+        "id": 10,
+        "texts": [
+          {
+            "lang": "FI",
+            "text": "kuvaus"
+          }
+        ]
+      },
+      "id": 110,
+      "name": "ryhmä",
+      "organisaatioViite": [
+        {
+          "id": 20,
+          "organisaatioTyyppi": "org tyyppi"
+        }
+      ],
+      "rooliRajoite": "roolirajoite"
+    }
+  ],
+  "palvelu": {
+    "description": {
+      "id": 3,
+      "texts": [
+        {
+          "lang": "FI",
+          "text": "palvelun kuvaus"
+        }
+      ]
+    },
+    "id": 20,
+    "kokoelma": {},
+    "name": "palvelun nimi",
+    "palveluTyyppi": "KOKOELMA"
+  },
+  "rooli": "joku rooli",
+  "textGroup": {
+    "id": 22,
+    "texts": [
+      {
+        "lang": "FI",
+        "text": "kuvaus"
+      }
+    ]
+  }
+}

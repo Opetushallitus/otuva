@@ -1,0 +1,40 @@
+{
+  "rooli": "joku rooli",
+  "textGroup": [
+    {
+      "text": "kuvaus",
+      "lang": "FI"
+    }
+  ],
+  "kayttoOikeusRyhmas": [
+    {
+      "id": 234234,
+      "name": "ryhmän nimi",
+      "rooliRajoite": "roolirajoite",
+      "organisaatioViite": [
+        {
+          "id": 2343,
+          "organisaatioTyyppi": "organisaatiotyyppi"
+        }
+      ],
+      "description": [
+        {
+          "text": "ryhmän kuvaus",
+          "lang": "FI"
+        }
+      ]
+    }
+  ],
+  "palvelu": {
+    "id": 34354,
+    "name": "Palvelu",
+    "palveluTyyppi": "KOKOELMA",
+    "description": [
+      {
+        "text": "palvelun kuvaus",
+        "lang": "FI"
+      }
+    ],
+    "kokoelma": null
+  }
+}

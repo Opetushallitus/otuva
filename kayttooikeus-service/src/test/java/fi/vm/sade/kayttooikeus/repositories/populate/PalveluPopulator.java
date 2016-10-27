@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import fi.vm.sade.kayttooikeus.dto.PalveluTyyppi;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 
@@ -11,6 +12,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 public class PalveluPopulator implements Populator<Palvelu> {
     private final String name;
     private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
+    private Populator<KayttoOikeus> kayttoOikeus = Populator.constant(new KayttoOikeus());
 
     public PalveluPopulator(String name) {
         this.name = name;
@@ -22,6 +24,11 @@ public class PalveluPopulator implements Populator<Palvelu> {
     
     public PalveluPopulator kuvaus(Populator<TextGroup> kuvaus) {
         this.kuvaus = kuvaus;
+        return this;
+    }
+
+    public PalveluPopulator kayttoOikeus(KayttoOikeusPopulator kayttoOikeus){
+        this.kayttoOikeus = kayttoOikeus;
         return this;
     }
 

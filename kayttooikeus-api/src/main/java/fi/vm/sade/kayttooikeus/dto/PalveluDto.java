@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +12,8 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class PalveluDto implements Serializable, LocalizableDto {
     private Long id;
     private String name;

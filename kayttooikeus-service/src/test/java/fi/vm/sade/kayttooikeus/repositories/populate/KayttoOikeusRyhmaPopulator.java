@@ -11,12 +11,14 @@ import java.util.List;
 
 public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> {
     private final String name;
+    private boolean hidden;
     private final List<Populator<OrganisaatioViite>> viitteet = new ArrayList<>();
     private final List<Populator<KayttoOikeus>> oikeus = new ArrayList<>();
     private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
 
     public KayttoOikeusRyhmaPopulator(String name) {
         this.name = name;
+        this.hidden = false;
     }
     
     public static KayttoOikeusRyhmaPopulator kayttoOikeusRyhma(String name) {
@@ -35,6 +37,11 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
     
     public KayttoOikeusRyhmaPopulator withViite(Populator<OrganisaatioViite> viite) {
         this.viitteet.add(viite);
+        return this;
+    }
+
+    public KayttoOikeusRyhmaPopulator asHidden(){
+        this.hidden = true;
         return this;
     }
     
@@ -57,6 +64,7 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
             r.setDescription(kuvaus.apply(entityManager));
             r.setHidden(false);
             r.setName(name);
+            r.setHidden(hidden);
             entityManager.persist(r);
             return r;
         });

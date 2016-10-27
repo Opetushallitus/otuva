@@ -1,0 +1,19 @@
+[
+  {
+    "id": 14,
+    "name": "Nimi",
+    "rooliRajoite": "roolirajoite",
+    "organisaatioViite": [
+      {
+        "id": 44,
+        "organisaatioTyyppi": "organisaatiotyyppi"
+      }
+    ],
+    "description": [
+      {
+        "text": "Test",
+        "lang": "FI"
+      }
+    ]
+  }
+]

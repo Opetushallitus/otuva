@@ -1,0 +1,27 @@
+{
+  "organisaatioTyypit": [
+    "ORGANISAATIOTYYPPI"
+  ],
+  "palvelutRoolit": [
+    {
+      "palveluName": "Palvelun nimi",
+      "palveluTexts": [
+        {
+          "lang": "nimi fi",
+          "text": "FI"
+        }
+      ],
+      "rooli": "Rooli",
+      "rooliTexts": [
+        {
+          "lang": "FI",
+          "text": "Rooli fi"
+        }
+      ]
+    }
+  ],
+  "rooliRajoite": "roolirajoite",
+  "ryhmaNameEn": "nimi en",
+  "ryhmaNameFi": "nimi",
+  "ryhmaNameSv": "nimi sv"
+}
