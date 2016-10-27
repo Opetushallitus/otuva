@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.NoResultException;
 import java.util.*;
 
 
@@ -194,7 +193,7 @@ public class AccessRightManagementUtils{
         return prDTOt;
     }
 
-    public HashSet<KayttoOikeus> bindToNonTransientInstances(KayttoOikeusRyhma kayttoOikeusRyhma) {
+    public Set<KayttoOikeus> bindToNonTransientInstances(KayttoOikeusRyhma kayttoOikeusRyhma) {
         HashSet<KayttoOikeus> kayttoOikeusHashSet = new HashSet<KayttoOikeus>();
         for (KayttoOikeus kayttoOikeus : kayttoOikeusRyhma.getKayttoOikeus()) {
             if (kayttoOikeus.getRooli() == null) {

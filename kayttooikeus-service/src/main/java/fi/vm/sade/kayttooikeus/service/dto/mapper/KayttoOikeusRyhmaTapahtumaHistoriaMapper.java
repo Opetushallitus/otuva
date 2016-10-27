@@ -21,7 +21,6 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaMapper extends CustomMapper<Kaytt
         }
         myonnettyKayttoOikeusDTO.setTila(kayttoOikeusRyhmaTapahtumaHistoria.getTila());
         myonnettyKayttoOikeusDTO.setKasittelijaOid(kayttoOikeusRyhmaTapahtumaHistoria.getKasittelija().getOidHenkilo());
-        myonnettyKayttoOikeusDTO.setKasittelijaNimi("N/A");
         myonnettyKayttoOikeusDTO.setMuutosSyy(kayttoOikeusRyhmaTapahtumaHistoria.getSyy());
 
         myonnettyKayttoOikeusDTO.setTyyppi("KORyhma");

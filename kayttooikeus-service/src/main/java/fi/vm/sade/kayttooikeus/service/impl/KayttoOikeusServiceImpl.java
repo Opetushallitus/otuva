@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
@@ -15,7 +16,9 @@ import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDTO;
 import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.AccessRightManagementUtils;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOikeusService {
@@ -38,6 +43,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private PalveluRepository palveluRepository;
     private OrganisaatioViiteRepository organisaatioViiteRepository;
     private TextGroupRepository textGroupRepository;
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private LdapSynchronization ldapSynchronization;
 
     @Autowired
     public KayttoOikeusServiceImpl(KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository,
@@ -50,7 +57,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository,
                                    PalveluRepository palveluRepository,
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
-                                   TextGroupRepository textGroupRepository) {
+                                   TextGroupRepository textGroupRepository,
+                                   OppijanumerorekisteriClient oppijanumerorekisteriClient,
+                                   LdapSynchronization ldapSynchronization) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.localizationService = localizationService;
@@ -62,6 +71,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.palveluRepository = palveluRepository;
         this.organisaatioViiteRepository = organisaatioViiteRepository;
         this.textGroupRepository = textGroupRepository;
+        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
+        this.ldapSynchronization = ldapSynchronization;
     }
     
     @Override
@@ -139,8 +150,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
          */
         List<KayttoOikeusRyhmaTapahtumaHistoria> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         List<MyonnettyKayttoOikeusDTO> histories = mapper.mapAsList(ryhmaTapahtumaHistorias, MyonnettyKayttoOikeusDTO.class);
-
         all.addAll(histories);
+
+        List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDTO::getKasittelijaOid).distinct().collect(Collectors.toList());
+        Map<String, String> kasittelijaNimet = oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids)
+                .stream()
+                .collect(Collectors.toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
+        all.forEach(myonnettyKayttoOikeusDTO -> myonnettyKayttoOikeusDTO.setKasittelijaNimi(kasittelijaNimet.get(myonnettyKayttoOikeusDTO.getKasittelijaOid())));
+
         return all;
     }
 
@@ -188,15 +205,13 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
         uusiRyhma.getPalvelutRoolit().forEach(palveluRoooliDto -> kor.getKayttoOikeus().add(createKayttoOikeus(kor, palveluRoooliDto)));
 
-
-
-        final HashSet<KayttoOikeus> kayttoOikeusHashSet = accessRightManagementUtils.bindToNonTransientInstances(kor);
+        final Set<KayttoOikeus> kayttoOikeusHashSet = accessRightManagementUtils.bindToNonTransientInstances(kor);
         kor.getKayttoOikeus().clear();
         kor.getKayttoOikeus().addAll(kayttoOikeusHashSet);
 
         KayttoOikeusRyhma createdRyhma = kayttoOikeusRyhmaRepository.insert(kor);
 
-//        // Organization limitation must be set only if the Organizatio OIDs are defined
+        // Organization limitation must be set only if the Organizatio OIDs are defined
         if (!CollectionUtils.isEmpty(uusiRyhma.getOrganisaatioTyypit())) {
             for (String orgTyyppi : uusiRyhma.getOrganisaatioTyypit()) {
                 OrganisaatioViite ov = new OrganisaatioViite();
@@ -287,17 +302,15 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             koRyhma.removeAllOrganisaatioViites();
         }
 
-        if (!CollectionUtils.isEmpty(ryhmaData.getOrganisaatioTyypit())) {
-            for (String orgTyyppi : ryhmaData.getOrganisaatioTyypit()) {
-                OrganisaatioViite ov = new OrganisaatioViite();
-                ov.setOrganisaatioTyyppi(orgTyyppi);
-                koRyhma.addOrganisaatioViite(ov);
-            }
-        }
-
+        Optional.ofNullable(ryhmaData.getOrganisaatioTyypit())
+                .orElseGet(Collections::emptyList)
+                .forEach(orgTyyppi -> {
+                    OrganisaatioViite ov = new OrganisaatioViite();
+                    ov.setOrganisaatioTyyppi(orgTyyppi);
+                    koRyhma.addOrganisaatioViite(ov);
+                });
 
         Set<KayttoOikeus> givenKOs = new HashSet<KayttoOikeus>();
-        Set<KayttoOikeus> toBeRemovedKOs = new HashSet<KayttoOikeus>();
         for (PalveluRoooliDto prDto : ryhmaData.getPalvelutRoolit()) {
             List<Palvelu> palvelus = palveluRepository.findByName(prDto.getPalveluName());
             if (palvelus.isEmpty()) {
@@ -311,25 +324,15 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             tempKo = kayttoOikeusRepository.findByRooliAndPalvelu(tempKo);
             givenKOs.add(tempKo);
         }
-        // removed KayttoOikeus objects that haven't been passed in the request
-        for (KayttoOikeus ko : koRyhma.getKayttoOikeus()) {
-            if (!givenKOs.contains(ko)) {
-                toBeRemovedKOs.add(ko);
-            }
-        }
-        // this has to be done in two parts since get method returns unmodifiable set
-        for (KayttoOikeus removed : toBeRemovedKOs) {
-            koRyhma.getKayttoOikeus().remove(removed);
-        }
 
+        // removed KayttoOikeus objects that haven't been passed in the request
+        koRyhma.getKayttoOikeus().stream()
+                .filter(kayttoOikeus -> !givenKOs.contains(kayttoOikeus))
+                .collect(Collectors.toList())
+                .forEach(koRyhma.getKayttoOikeus()::remove);
         koRyhma.getKayttoOikeus().addAll(givenKOs);
 
-        //TODO
-        /* Also LDAP needs to be updated, all access right group's updates
-             * queued as BATCH update request, it will be unpacked later on
-             */
-//        ldapSynchronization.triggerUpdate(null, id, LdapSynchronization.BATCH_PRIORITY);
-
+        ldapSynchronization.updateAccessRightGroup(id);
         return mapper.map(koRyhma, KayttoOikeusRyhmaDto.class);
     }
 

@@ -16,7 +16,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaMapper extends CustomMapper<Myon
         myonnettyKayttoOikeusDTO.setMyonnettyTapahtumaId(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
         myonnettyKayttoOikeusDTO.setTila(myonnettyKayttoOikeusRyhmaTapahtuma.getTila());
         myonnettyKayttoOikeusDTO.setKasittelijaOid(myonnettyKayttoOikeusRyhmaTapahtuma.getKasittelija().getOidHenkilo());
-        myonnettyKayttoOikeusDTO.setKasittelijaNimi("N/A");
         myonnettyKayttoOikeusDTO.setMuutosSyy(myonnettyKayttoOikeusRyhmaTapahtuma.getSyy());
 
         if( myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo() != null ){
