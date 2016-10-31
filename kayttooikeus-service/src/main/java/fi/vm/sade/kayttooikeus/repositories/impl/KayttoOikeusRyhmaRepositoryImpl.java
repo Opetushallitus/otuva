@@ -13,16 +13,17 @@ public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implemen
 
     @Override
     public List<KayttoOikeusRyhma> listAll() {
-        return from(kayttoOikeusRyhma)
+        return jpa().from(kayttoOikeusRyhma)
+                .leftJoin(kayttoOikeusRyhma.description).fetchJoin()
                 .where(kayttoOikeusRyhma.hidden.eq(false))
                 .orderBy(kayttoOikeusRyhma.id.asc())
-                .distinct()
                 .select(kayttoOikeusRyhma).fetch();
     }
 
     @Override
     public List<KayttoOikeusRyhma> findByIdList(List<Long> idList) {
-        return from(kayttoOikeusRyhma)
+        return jpa().from(kayttoOikeusRyhma)
+                .leftJoin(kayttoOikeusRyhma.description).fetchJoin()
                 .where(kayttoOikeusRyhma.hidden.eq(false).and(
                         kayttoOikeusRyhma.id.in(idList)))
                 .distinct()

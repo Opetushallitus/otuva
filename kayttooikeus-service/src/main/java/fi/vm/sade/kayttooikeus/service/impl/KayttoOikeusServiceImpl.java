@@ -77,7 +77,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas() {
-        return mapper.mapAsList(kayttoOikeusRyhmaRepository.listAll(), KayttoOikeusRyhmaDto.class);
+        List<KayttoOikeusRyhmaDto> list = mapper.mapAsList(kayttoOikeusRyhmaRepository.listAll(), KayttoOikeusRyhmaDto.class);
+        return localizationService.localize(list);
     }
 
     @Override
@@ -170,7 +171,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public KayttoOikeusRyhmaDto findKayttoOikeusRyhma(Long id) {
-        return mapper.map(kayttoOikeusRyhmaRepository.findById(id), KayttoOikeusRyhmaDto.class);
+        KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhmaRepository.findById(id), KayttoOikeusRyhmaDto.class);
+        return localizationService.localize(ryhma);
     }
 
     @Override
@@ -178,7 +180,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     public List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(Long id) {
         List<Long> slaveIds = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(Collections.singletonList(id));
         if(slaveIds != null && !slaveIds.isEmpty()) {
-            return mapper.mapAsList(kayttoOikeusRyhmaRepository.findByIdList(slaveIds), KayttoOikeusRyhmaDto.class);
+            List<KayttoOikeusRyhmaDto> list = mapper.mapAsList(kayttoOikeusRyhmaRepository.findByIdList(slaveIds), KayttoOikeusRyhmaDto.class);
+            return localizationService.localize(list);
         }
         return new ArrayList<>();
     }
@@ -232,7 +235,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             checkAndInsertSlaveGroups(uusiRyhma, createdRyhma);
         }
 
-        return mapper.map(createdRyhma, KayttoOikeusRyhmaDto.class);
+        KayttoOikeusRyhmaDto newRyhma = mapper.map(createdRyhma, KayttoOikeusRyhmaDto.class);
+        return localizationService.localize(newRyhma);
     }
 
     private void checkAndInsertSlaveGroups(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma koRyhma) {

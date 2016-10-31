@@ -21,7 +21,7 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl extends AbstractReposito
                 .distinct().select(myontoViite).fetch();
 
         if (viites != null && !viites.isEmpty()) {
-            slaveIds = new ArrayList<Long>();
+            slaveIds = new ArrayList<>();
             for (KayttoOikeusRyhmaMyontoViite viite : viites) {
                 slaveIds.add(viite.getSlaveId());
             }
