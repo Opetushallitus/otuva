@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Bacon from 'baconjs'
+import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
 
 import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'

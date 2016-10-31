@@ -151,31 +151,45 @@ function addMiddleware(devServer) {
       ['text/html', '*/*']
   }));
   if (proxy) {
-    if (typeof proxy !== 'string') {
-      console.log(chalk.red('When specified, "proxy" in package.json must be a string.'));
+    if (typeof proxy !== 'string' && (typeof proxy !== 'object')) {
+      console.log(chalk.red('When specified, "proxy" in package.json must be a string or an object.'));
       console.log(chalk.red('Instead, the type of "proxy" was "' + typeof proxy + '".'));
-      console.log(chalk.red('Either remove "proxy" from package.json, or make it a string.'));
+      console.log(chalk.red('Either remove "proxy" from package.json, or make it a string or object.'));
       process.exit(1);
     }
 
-    // Otherwise, if proxy is specified, we will let it handle any request.
-    // There are a few exceptions which we won't send to the proxy:
-    // - /index.html (served as HTML5 history API fallback)
-    // - /*.hot-update.json (WebpackDevServer uses this too for hot reloading)
-    // - /sockjs-node/* (WebpackDevServer uses this for hot reloading)
-    // Tip: use https://jex.im/regulex/ to visualize the regex
-    var mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
-    devServer.use(mayProxy,
-      // Pass the scope regex both to Express and to the middleware for proxying
-      // of both HTTP and WebSockets to work without false positives.
-      httpProxyMiddleware(pathname => mayProxy.test(pathname), {
-        target: proxy,
-        logLevel: 'silent',
-        onError: onProxyError(proxy),
-        secure: false,
-        changeOrigin: true
-      })
-    );
+    if (typeof proxy === 'string') {
+      // Otherwise, if proxy is specified, we will let it handle any request.
+      // There are a few exceptions which we won't send to the proxy:
+      // - /index.html (served as HTML5 history API fallback)
+      // - /*.hot-update.json (WebpackDevServer uses this too for hot reloading)
+      // - /sockjs-node/* (WebpackDevServer uses this for hot reloading)
+      // Tip: use https://jex.im/regulex/ to visualize the regex
+      var mayProxy = /^(?!\/(index\.html$|.*\.hot-update\.json$|sockjs-node\/)).*$/;
+      devServer.use(mayProxy,
+        // Pass the scope regex both to Express and to the middleware for proxying
+        // of both HTTP and WebSockets to work without false positives.
+        httpProxyMiddleware(pathname => mayProxy.test(pathname), {
+          target: proxy,
+          logLevel: 'silent',
+          onError: onProxyError(proxy),
+          secure: false,
+          changeOrigin: true
+        })
+      );
+    } else if (typeof proxy === 'object') {
+      for (var key in proxy) {
+        if (proxy.hasOwnProperty(key)) {
+          devServer.use(key, httpProxyMiddleware(
+            Object.assign(proxy[key], {
+              logLevel: 'silent', 
+              onError: onProxyError(key) 
+            })
+          ));
+        }
+      }
+    }
+
   }
   // Finally, by now we have certainly resolved the URL.
   // It may be /index.html, so let the dev server try serving it again.
