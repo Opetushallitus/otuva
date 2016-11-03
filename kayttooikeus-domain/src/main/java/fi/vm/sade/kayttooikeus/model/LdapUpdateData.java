@@ -3,6 +3,8 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,8 +31,9 @@ public class LdapUpdateData extends IdentifiableAndVersionedEntity{
 
     @Column(name = "status", nullable = false)
     private int status;
-
+    
+    @Type(type = "dateTime")
     @Column(name = "modified", nullable = false)
-    private Date modified;
+    private DateTime modified;
 
 }
