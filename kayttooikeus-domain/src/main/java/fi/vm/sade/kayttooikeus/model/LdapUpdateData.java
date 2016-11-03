@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.joda.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -28,9 +28,4 @@ public class TextGroupRepositoryImpl extends AbstractRepository implements TextG
                 .fetch();
     }
 
-    @Override
-    public TextGroup insert(TextGroup textGroup) {
-        return persist(textGroup);
-    }
-
 }

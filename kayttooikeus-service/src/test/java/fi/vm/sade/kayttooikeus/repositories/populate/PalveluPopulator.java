@@ -27,7 +27,7 @@ public class PalveluPopulator implements Populator<Palvelu> {
         return this;
     }
 
-    public PalveluPopulator kayttoOikeus(KayttoOikeusPopulator kayttoOikeus){
+    public PalveluPopulator kayttoOikeus(Populator<KayttoOikeus> kayttoOikeus){
         this.kayttoOikeus = kayttoOikeus;
         return this;
     }

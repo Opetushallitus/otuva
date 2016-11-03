@@ -1,15 +1,16 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
-import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
+import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
 import java.util.List;
 
-public interface KayttoOikeusRepository {
+public interface KayttoOikeusRepository extends BaseRepository<KayttoOikeus> {
     boolean isHenkiloMyonnettyKayttoOikeusToPalveluInRole(String henkiloOid, String palvelu, String role);
 
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
@@ -18,11 +19,8 @@ public interface KayttoOikeusRepository {
 
     List<ExpiringKayttoOikeusDto> findSoonToBeExpiredTapahtumas(LocalDate now, Period...expireThresholds);
 
-    List<KayttoOikeus> findByKayttoOikeusRyhma(Long id);
+    List<PalveluRooliDto> findPalveluRoolitByKayttoOikeusRyhmaId(Long id);
 
-    List<Long> findByKayttoOikeusRyhmaIds(Long id);
+    KayttoOikeus findByRooliAndPalvelu(String rooli, String palvelu);
 
-    KayttoOikeus findByRooliAndPalvelu(KayttoOikeus kayttoOikeus);
-
-    KayttoOikeus insert(KayttoOikeus kayttoOikeus);
 }

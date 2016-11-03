@@ -1,19 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
 import java.util.List;
 
 public interface KayttoOikeusService {
+    KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId);
+
     List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas();
 
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
@@ -28,15 +24,15 @@ public interface KayttoOikeusService {
 
     List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String oid, String organisaatioOid);
 
-    KayttoOikeusRyhmaDto findKayttoOikeusRyhma(Long id);
+    KayttoOikeusRyhmaDto findKayttoOikeusRyhma(long id);
 
-    List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(Long id);
+    List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(long id);
 
-    List<PalveluRoooliDto> findPalveluRoolisByKayttoOikeusRyhma(Long id);
+    List<PalveluRooliDto> findPalveluRoolisByKayttoOikeusRyhma(long id);
 
-    KayttoOikeusRyhmaDto createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma);
+    long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma);
 
-    KayttoOikeusDto createKayttoOikeus(KayttoOikeusDto kayttoOikeus);
+    long createKayttoOikeus(KayttoOikeusCreateDto kayttoOikeus);
 
-    KayttoOikeusRyhmaDto updateKayttoOikeusForKayttoOikeusRyhma(Long id, KayttoOikeusRyhmaModifyDto ryhmaData);
+    void updateKayttoOikeusForKayttoOikeusRyhma(long id, KayttoOikeusRyhmaModifyDto ryhmaData);
 }

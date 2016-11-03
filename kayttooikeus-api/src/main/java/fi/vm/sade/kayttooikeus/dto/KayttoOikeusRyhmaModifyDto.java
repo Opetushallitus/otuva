@@ -1,10 +1,12 @@
-package fi.vm.sade.kayttooikeus.service.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
+import fi.vm.sade.kayttooikeus.dto.validate.ContainsLanguages;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter
@@ -12,12 +14,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class KayttoOikeusRyhmaModifyDto {
-    private String ryhmaNameFi;
-    private String ryhmaNameSv;
-    private String ryhmaNameEn;
-    private List<PalveluRoooliDto> palvelutRoolit;
+    @NotNull @ContainsLanguages
+    private TextGroupDto ryhmaName;
+    @NotNull
+    private List<PalveluRooliDto> palvelutRoolit;
     private List<String> organisaatioTyypit;
     private String rooliRajoite;
     private List<Long> slaveIds;
-
 }

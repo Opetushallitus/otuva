@@ -13,7 +13,7 @@ import java.util.Set;
 @Table(name = "palvelu", uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
 public class Palvelu extends IdentifiableAndVersionedEntity {
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
     
     @Enumerated(EnumType.STRING)

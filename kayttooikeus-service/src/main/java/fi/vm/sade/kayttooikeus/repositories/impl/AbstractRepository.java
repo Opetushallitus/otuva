@@ -33,13 +33,4 @@ public abstract class AbstractRepository {
         return q.limit(1).fetchCount() > 0;
     }
 
-    public<T> T persist(T entity){
-        em.persist(entity);
-        em.flush();
-        return entity;
-    }
-
-    public<T> void remove(T entity){
-        em.remove(entity);
-    }
 }

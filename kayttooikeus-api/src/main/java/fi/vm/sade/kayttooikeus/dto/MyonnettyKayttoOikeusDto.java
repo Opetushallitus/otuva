@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.service.dto;
+package fi.vm.sade.kayttooikeus.dto;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.Localizable;

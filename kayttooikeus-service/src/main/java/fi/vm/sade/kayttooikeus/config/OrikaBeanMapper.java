@@ -80,15 +80,6 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
         for (Converter converter : converters.values()) {
             addConverter(converter);
         }
-
-        // use localizationService to find locales for group
-        factory.classMap( KayttoOikeusRyhma.class, KayttoOikeusRyhmaDto.class )
-                .exclude("description")
-                .field("id", "id")
-                .field("name", "name")
-                .field("organisaatioViite", "organisaatioViite")
-                .field("description.id", "descriptionId")
-                .register();
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

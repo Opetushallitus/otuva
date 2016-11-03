@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.stereotype.Repository;
@@ -17,12 +18,13 @@ import java.util.stream.Stream;
 import static com.querydsl.core.types.dsl.Expressions.FALSE;
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
 @Repository
-public class KayttoOikeusRepositoryImpl extends AbstractRepository implements KayttoOikeusRepository {
+public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus> implements KayttoOikeusRepository {
     public static BooleanExpression voimassa(QMyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma, LocalDate at) {
         return tapahtuma.voimassaAlkuPvm.loe(at).and(tapahtuma.voimassaLoppuPvm.isNull().or(tapahtuma.voimassaLoppuPvm.goe(at)));
     }
@@ -104,41 +106,26 @@ public class KayttoOikeusRepositoryImpl extends AbstractRepository implements Ka
     }
 
     @Override
-    public List<KayttoOikeus> findByKayttoOikeusRyhma(Long id) {
-        QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        QKayttoOikeus qKayttoOikeus = kayttoOikeus;
-
-        return jpa().from(qKayttoOikeus)
-                .innerJoin(qKayttoOikeus.kayttooikeusRyhmas, qKayttoOikeusRyhma)
-                .where(qKayttoOikeusRyhma.id.eq(id))
-                .select(qKayttoOikeus)
-                .fetch();
-    }
-
-    @Override
-    public List<Long> findByKayttoOikeusRyhmaIds(Long id) {
-        QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        QKayttoOikeus qKayttoOikeus = kayttoOikeus;
-
-        return jpa().from(qKayttoOikeus)
-                .innerJoin(qKayttoOikeus.kayttooikeusRyhmas, qKayttoOikeusRyhma)
-                .where(qKayttoOikeusRyhma.id.eq(id))
-                .select(qKayttoOikeus.id)
-                .distinct()
-                .fetch();
-    }
-
-    @Override
-    public KayttoOikeus findByRooliAndPalvelu(KayttoOikeus ko) {
+    public List<PalveluRooliDto> findPalveluRoolitByKayttoOikeusRyhmaId(Long ryhmaId) {
         return jpa().from(kayttoOikeus)
-                .where(kayttoOikeus.palvelu.name.eq(ko.getPalvelu().getName()),
-                        kayttoOikeus.rooli.eq(ko.getRooli()))
-                .select(kayttoOikeus).fetchFirst();
+                .innerJoin(kayttoOikeus.kayttooikeusRyhmas, kayttoOikeusRyhma)
+                .innerJoin(kayttoOikeus.palvelu, palvelu)
+                .where(kayttoOikeusRyhma.id.eq(ryhmaId))
+                .select(Projections.bean(PalveluRooliDto.class,
+                            palvelu.name.as("palveluName"),
+                            palvelu.description.id.as("palveluTextsId"),
+                            kayttoOikeus.rooli.as("rooli"),
+                            kayttoOikeus.textGroup.id.as("rooliTextsId")
+                        ))
+                .fetch();
     }
 
     @Override
-    public KayttoOikeus insert(KayttoOikeus kayttoOikeus) {
-        return persist(kayttoOikeus);
+    public KayttoOikeus findByRooliAndPalvelu(String rooli, String palvelu) {
+        return jpa().from(kayttoOikeus)
+                .where(kayttoOikeus.palvelu.name.eq(palvelu),
+                        kayttoOikeus.rooli.eq(rooli))
+                .select(kayttoOikeus).fetchFirst();
     }
 
 }

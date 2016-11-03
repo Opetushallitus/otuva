@@ -5,13 +5,8 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.dto.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.util.AccessRightManagementUtils;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
-import org.hamcrest.Matchers;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
@@ -43,7 +36,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.matches;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
@@ -142,21 +134,26 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.listActiveOganisaatioPerustiedot(anyListOf(String.class)))
                 .willReturn(singletonList(organisaatioPerustieto));
 
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaId(any()))
-                .willReturn(singletonList(OrganisaatioViite.builder()
-                        .organisaatioTyyppi("123.123.123")
-                        .build()));
+        Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
+                .put("EN", "User management"))
+                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                .withOikeus(oikeus("KOODISTO", "READ"))
+                .withViite(viite(kayttoOikeusRyhma("test"), "organisaatio tyyppi")))
+                .getId();
 
-        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "kuvaus"))
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                        .withOikeus(oikeus("KOODISTO", "READ"))
-        ).voimassaPaattyen(now().plusMonths(1)));
+        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
+                .willReturn(singletonList(OrganisaatioViiteDto.builder()
+                        .organisaatioTyyppi("123.123.123")
+                        .id(1L)
+                        .kayttoOikeusRyhmaId(ryhmaId)
+                        .build()));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listPossibleRyhmasByOrganization("123.123.123");
         assertEquals(1, ryhmas.size());
         assertEquals("RYHMA", ryhmas.get(0).getName());
+        assertEquals(1, ryhmas.get(0).getOrganisaatioViite().size());
+        assertEquals("123.123.123", ryhmas.get(0).getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
+        assertEquals("Käyttäjähallinta", ryhmas.get(0).getDescription().get("FI"));
     }
 
     @Test
@@ -196,7 +193,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("KOODISTO", "CRUD"))).getId();
 
-        List<PalveluRoooliDto> roolis = kayttoOikeusService.findPalveluRoolisByKayttoOikeusRyhma(id);
+        List<PalveluRooliDto> roolis = kayttoOikeusService.findPalveluRoolisByKayttoOikeusRyhma(id);
         assertEquals(1L, roolis.size());
         assertEquals("KOODISTO", roolis.get(0).getPalveluName());
         assertEquals("CRUD", roolis.get(0).getRooli());
@@ -228,28 +225,30 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         palvelu.getKayttoOikeus().add(oikeus);
 
         KayttoOikeusRyhmaModifyDto ryhma = KayttoOikeusRyhmaModifyDto.builder()
-                .ryhmaNameFi("ryhmäname")
-                .ryhmaNameSv("ryhmäname sv")
-                .ryhmaNameEn("ryhmäname en")
+                .ryhmaName(new TextGroupDto()
+                        .put("FI", "ryhmäname")
+                        .put("SV", "ryhmäname sv")
+                        .put("EN", "ryhmäname en"))
                 .rooliRajoite("roolirajoite")
-                .palvelutRoolit(singletonList(PalveluRoooliDto.builder()
+                .palvelutRoolit(singletonList(PalveluRooliDto.builder()
                         .rooli("CRUD")
                         .palveluName("HENKILOHALLINTA")
-                        .palveluTexts(singletonLocaleText("palvelun kuvaus"))
-                        .rooliTexts(singletonLocaleText("roolin kuvaus"))
+                        .palveluTexts(new TextGroupListDto().put("FI", "palvelun kuvaus"))
+                        .rooliTexts(new TextGroupListDto().put("FI", "roolin kuvaus"))
                         .build()))
                 .organisaatioTyypit(singletonList("org tyyppi"))
                 .build();
 
-        Long createdRyhmaId = kayttoOikeusService.createKayttoOikeusRyhma(ryhma).getId();
-        assertTrue(createdRyhmaId != null);
+        long createdRyhmaId = kayttoOikeusService.createKayttoOikeusRyhma(ryhma);
         KayttoOikeusRyhmaDto createdRyhma = kayttoOikeusService.findKayttoOikeusRyhma(createdRyhmaId);
 
+        assertNotNull(createdRyhma);
         assertTrue(createdRyhma.getName().startsWith("ryhmäname_"));
+        assertTrue(createdRyhma.getDescription().get("FI").contentEquals("ryhmäname"));
         assertEquals(1, createdRyhma.getOrganisaatioViite().size());
         assertEquals("org tyyppi", createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
 
-        ryhma.setRyhmaNameFi("uusi nimi");
+        ryhma.setRyhmaName(new TextGroupDto().put("FI", "uusi nimi"));
         ryhma.setRooliRajoite("uusi rajoite");
         ryhma.setOrganisaatioTyypit(singletonList("uusi org tyyppi"));
         kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(createdRyhmaId, ryhma);
@@ -267,35 +266,16 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .put("EN", "Person service").put("SV", "palvelu sv")));
         palvelu.getKayttoOikeus().add(oikeus);
 
-        KayttoOikeusDto ko = KayttoOikeusDto.builder()
+        KayttoOikeusCreateDto ko = KayttoOikeusCreateDto.builder()
                 .rooli("rooli")
-                .palvelu(PalveluDto.builder()
-                        .palveluTyyppi(PalveluTyyppi.KOKOELMA)
-                        .name("HENKILOHALLINTA")
-                        .description(new TextGroupListDto().put("FI", "palvelun kuvaus"))
-                        .build())
-                .textGroup(new TextGroupDto().put("FI", "kuvaus").put("SV", "kuvaus sv").put("EN", "kuvaus en"))
-                .kayttoOikeusRyhmas(singleton(KayttoOikeusRyhmaDto.builder()
-                        .name("ryhmän nimi")
-                        .rooliRajoite("roolirajoite")
-                        .description(new TextGroupListDto().put("FI", "ryhmän kuvaus"))
-                        .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
-                                .organisaatioTyyppi("organisaatiotyyppi")
-                                .build()))
-                        .build()))
+                .palveluName("HENKILOHALLINTA")
+                .textGroup(new TextGroupDto().put("FI", "kuvaus"))
                 .build();
-
-        KayttoOikeusDto dto = kayttoOikeusService.createKayttoOikeus(ko);
+        long id = kayttoOikeusService.createKayttoOikeus(ko);
+        KayttoOikeusDto dto = kayttoOikeusService.findKayttoOikeusById(id);
         assertEquals("rooli", dto.getRooli());
         assertEquals("HENKILOHALLINTA", dto.getPalvelu().getName());
         assertEquals("kuvaus", dto.getTextGroup().get("FI"));
-    }
-
-    private List<LocaleTextDto> singletonLocaleText(String text){
-        return singletonList(LocaleTextDto.builder()
-                .text(text)
-                .lang("FI")
-                .build());
     }
 
 }
