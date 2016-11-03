@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.Palvelu;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
@@ -25,14 +27,10 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloK
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
-import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.joda.time.LocalDate.now;
 import static org.joda.time.Period.months;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;

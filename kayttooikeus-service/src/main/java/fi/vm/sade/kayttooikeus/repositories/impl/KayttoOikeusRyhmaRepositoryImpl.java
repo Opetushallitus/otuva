@@ -1,17 +1,15 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.QBean;
 import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import org.joda.time.LocalDate;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.QBean;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 

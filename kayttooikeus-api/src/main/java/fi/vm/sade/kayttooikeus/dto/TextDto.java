@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class TextDto implements Serializable {
-//    @JsonIgnore
+    @JsonIgnore
     private Long id;
     private String text;
     private String lang;
