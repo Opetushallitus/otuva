@@ -9,13 +9,20 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 
 public class HenkiloPopulator implements Populator<Henkilo> {
     private final String oid;
+    private boolean passivoitu;
 
     public HenkiloPopulator(String oid) {
+        this.passivoitu = false;
         this.oid = oid;
     }
-    
+
     public static HenkiloPopulator henkilo(String oid) {
         return new HenkiloPopulator(oid);
+    }
+
+    public HenkiloPopulator withPassivoitu(boolean passivoitu) {
+        this.passivoitu = passivoitu;
+        return this;
     }
 
     @Override
@@ -27,6 +34,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         }
         Henkilo henkilo = new Henkilo();
         henkilo.setOidHenkilo(oid);
+        henkilo.setPassivoitu(passivoitu);
         henkilo.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
         entityManager.persist(henkilo);
         return entityManager.find(Henkilo.class, henkilo.getId());

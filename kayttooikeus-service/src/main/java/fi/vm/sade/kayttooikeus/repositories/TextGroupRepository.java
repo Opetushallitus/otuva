@@ -9,6 +9,4 @@ import java.util.List;
 
 public interface TextGroupRepository {
     List<TextGroupTextDto> findTexts(Collection<Long> textGroupIds);
-
-    TextGroup insert(TextGroup textGroup);
 }

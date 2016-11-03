@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.Set;
  */
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 @Table(name = "kayttooikeus", uniqueConstraints=@UniqueConstraint(columnNames={"palvelu_id", "textgroup_id"}))
 public class KayttoOikeus extends IdentifiableAndVersionedEntity {
 
@@ -29,4 +31,8 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
     @JoinColumn(name = "palvelu_id", nullable = false)
     private Palvelu palvelu;
 
+    public KayttoOikeus(String rooli, Palvelu palvelu) {
+        this.rooli = rooli;
+        this.palvelu = palvelu;
+    }
 }

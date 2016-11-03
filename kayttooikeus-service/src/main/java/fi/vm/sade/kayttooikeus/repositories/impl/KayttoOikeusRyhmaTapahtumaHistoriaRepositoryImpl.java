@@ -1,16 +1,21 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaRepository;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.HYLATTY;
+import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.PERUUTETTU;
+import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 
 @Repository
 public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRepository implements KayttoOikeusRyhmaTapahtumaHistoriaRepository {
@@ -23,15 +28,13 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
         QKayttoOikeus ko = new QKayttoOikeus("ko1");
         QPalvelu palvelu = new QPalvelu("p1");
 
-        List<KayttoOikeudenTila> tilat = new ArrayList<KayttoOikeudenTila>();
-        tilat.add(KayttoOikeudenTila.HYLATTY);
-        tilat.add(KayttoOikeudenTila.PERUUTETTU);
-        tilat.add(KayttoOikeudenTila.SULJETTU);
-        BooleanExpression history = korth.tila.in(tilat);
-        BooleanExpression restriction = oh.henkilo.oidHenkilo.eq(henkiloOid);
-        BooleanExpression hidden = kor.hidden.eq(false);
+        BooleanBuilder booleanBuilder = new BooleanBuilder()
+                .and(korth.tila.in(Arrays.asList(HYLATTY, PERUUTETTU, SULJETTU)))
+                .and(kor.hidden.eq(false))
+                .and(oh.henkilo.oidHenkilo.eq(henkiloOid));
+
         if (StringUtils.isNotBlank(organisaatioOid)) {
-            restriction = oh.henkilo.oidHenkilo.eq(henkiloOid).and(oh.organisaatioOid.eq(organisaatioOid));
+            booleanBuilder.and(oh.organisaatioOid.eq(organisaatioOid));
         }
 
         return jpa().from(korth).distinct()
@@ -50,7 +53,6 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
                         korth.kayttoOikeusRyhma.description.id.as("ryhmaNamesId"),
                         korth.aikaleima.as("kasitelty"),
                         korth.syy.as("muutosSyy")
-
-                )).where(history, restriction, hidden).fetch();
+                )).where(booleanBuilder).fetch();
     }
 }

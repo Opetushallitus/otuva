@@ -4,11 +4,10 @@ import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface PalveluRepository {
+public interface PalveluRepository extends BaseRepository<Palvelu> {
     List<PalveluDto> findAll();
 
-    List<Palvelu> findByKayttoOikeusIds(List<Long> koIds);
-
-    List<Palvelu> findByName(String name);
+    Optional<Palvelu> findByName(String name);
 }

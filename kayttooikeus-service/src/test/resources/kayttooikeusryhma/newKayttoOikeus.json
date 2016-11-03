@@ -1,40 +1,87 @@
 {
   "rooli": "joku rooli",
-  "textGroup": [
-    {
-      "text": "kuvaus",
-      "lang": "FI"
-    }
-  ],
+  "textGroup": {
+    "id": 2,
+    "texts": [
+      {
+        "text": "kuvaus",
+        "lang": "FI"
+      },
+      {
+        "text": "ryhmän kuvaus en",
+        "lang": "EN"
+      },
+      {
+        "text": "kuvaus sv",
+        "lang": "SV"
+      }
+    ]
+  },
   "kayttoOikeusRyhmas": [
     {
-      "id": 234234,
-      "name": "ryhmän nimi",
+      "id": 22,
+      "name": "kayttooikeusryhmä",
       "rooliRajoite": "roolirajoite",
       "organisaatioViite": [
         {
-          "id": 2343,
-          "organisaatioTyyppi": "organisaatiotyyppi"
+          "id": 44,
+          "organisaatioTyyppi": "viitteen tyyppi"
         }
       ],
-      "description": [
-        {
-          "text": "ryhmän kuvaus",
-          "lang": "FI"
-        }
-      ]
+      "description": {
+        "id": 3,
+        "texts": [
+          {
+            "text": "ryhmän kuvaus",
+            "lang": "FI"
+          },
+          {
+            "text": "ryhmän kuvaus sv",
+            "lang": "SV"
+          },
+          {
+            "text": "ryhmän kuvaus en",
+            "lang": "EN"
+          }
+        ]
+      }
     }
   ],
   "palvelu": {
-    "id": 34354,
-    "name": "Palvelu",
+    "id": 7,
+    "name": "palvelun nimi",
     "palveluTyyppi": "KOKOELMA",
-    "description": [
-      {
-        "text": "palvelun kuvaus",
-        "lang": "FI"
-      }
-    ],
-    "kokoelma": null
+    "description": {
+      "id": 4,
+      "texts": [
+        {
+          "text": "palvelun kuvaus",
+          "lang": "FI"
+        },
+        {
+          "text": "palvelun kuvaus en",
+          "lang": "EN"
+        },
+        {
+          "text": "palvelun kuvaus sv",
+          "lang": "SV"
+        }
+      ]
+    },
+    "kokoelma": {
+      "id": 8,
+      "name": "kuvaus",
+      "palveluTyyppi": "YKSITTAINEN",
+      "description": {
+        "id": 4,
+        "texts": [
+          {
+            "text": "kokoelman kuvaus",
+            "lang": "FI"
+          }
+        ]
+      },
+      "kokoelma": null
+    }
   }
 }

@@ -1,47 +1,54 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.dto.PalveluRoooliDto;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.util.AccessRightManagementUtils;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.*;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOikeusService {
+    public static final String FI = "FI";
+    public static final String SV = "SV";
+    public static final String EN = "EN";
+    private static final Function<OrganisaatioPerustieto, String> laitosTyyppi = child -> child.getOppilaitostyyppi().substring(17, 19);
+    private static final String OPH_ORGANIZATION_OID = "1.2.246.562.10.00000000001";
+    private static final String GROUP_ORGANIZATION_ID = "1.2.246.562.28";
+
+    private OrganisaatioClient organisaatioClient;
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
     private KayttoOikeusRepository kayttoOikeusRepository;
     private LocalizationService localizationService;
     private OrikaBeanMapper mapper;
-    private AccessRightManagementUtils accessRightManagementUtils;
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
     private PalveluRepository palveluRepository;
     private OrganisaatioViiteRepository organisaatioViiteRepository;
-    private TextGroupRepository textGroupRepository;
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private LdapSynchronization ldapSynchronization;
 
@@ -50,35 +57,38 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    KayttoOikeusRepository kayttoOikeusRepository,
                                    LocalizationService localizationService,
                                    OrikaBeanMapper mapper,
-                                   AccessRightManagementUtils accessRightManagementUtils,
                                    KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
                                    MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                                    KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository,
                                    PalveluRepository palveluRepository,
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
-                                   TextGroupRepository textGroupRepository,
                                    OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                                   LdapSynchronization ldapSynchronization) {
+                                   LdapSynchronization ldapSynchronization,
+                                   OrganisaatioClient organisaatioClient) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.localizationService = localizationService;
         this.mapper = mapper;
-        this.accessRightManagementUtils = accessRightManagementUtils;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaTapahtumaHistoriaRepository = kayttoOikeusRyhmaTapahtumaHistoriaRepository;
         this.palveluRepository = palveluRepository;
         this.organisaatioViiteRepository = organisaatioViiteRepository;
-        this.textGroupRepository = textGroupRepository;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.ldapSynchronization = ldapSynchronization;
+        this.organisaatioClient = organisaatioClient;
     }
-    
+
+    @Override
+    public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
+        return mapper.map(kayttoOikeusRepository.findById(kayttoOikeusId).orElseThrow(()
+                -> new NotFoundException("kayttöoikeus not found")), KayttoOikeusDto.class);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas() {
-        List<KayttoOikeusRyhmaDto> list = mapper.mapAsList(kayttoOikeusRyhmaRepository.listAll(), KayttoOikeusRyhmaDto.class);
-        return localizationService.localize(list);
+        return localizationService.localize(findAllKayttoOikeusRyhmasAsDtos());
     }
 
     @Override
@@ -101,51 +111,57 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
+    public Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid)  {
+        List<Tuple> results = this.kayttoOikeusRyhmaRepository.findOrganisaatioOidAndRyhmaIdByHenkiloOid(henkiloOid);
+
+        HashMap<String, List<Integer>> kayttooikeusRyhmasByOrganisation = new HashMap<>();
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        for(Tuple result : results) {
+            String organisaatioOid = result.get(organisaatioHenkilo.organisaatioOid);
+            Integer ryhmaId = Optional.ofNullable(result.get(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id))
+                    .orElseThrow(() -> new NullPointerException("null_ryhma_id")).intValue();
+
+            List<Integer> ryhmasInOrganisaatio = kayttooikeusRyhmasByOrganisation.get(organisaatioOid);
+            if(ryhmasInOrganisaatio == null) {
+                ryhmasInOrganisaatio = new ArrayList<>();
+                kayttooikeusRyhmasByOrganisation.put(organisaatioOid, ryhmasInOrganisaatio);
+            }
+            ryhmasInOrganisaatio.add(ryhmaId);
+        }
+        return kayttooikeusRyhmasByOrganisation;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid) {
-        List<KayttoOikeusRyhma> allRyhmas = kayttoOikeusRyhmaRepository.listAll();
-        accessRightManagementUtils.parseRyhmaLimitationsBasedOnOrgOid(organisaatioOid, allRyhmas);
-        return mapper.mapAsList(allRyhmas, KayttoOikeusRyhmaDto.class);
+        return localizationService.localize(getRyhmasWithoutOrganizationLimitations(
+                organisaatioOid, findAllKayttoOikeusRyhmasAsDtos()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String henkiloOid, String organisaatioOid, String myontajaOid) {
-        List<KayttoOikeusRyhma> allRyhmas;
-        /* The list of groups that can be granted must be checked
-         * from the granting person's limitation list, if the granting
-         * person has any limitations, if not then all groups are listed
-         */
 
-        List<Long> slaveIds = accessRightManagementUtils.getGrantableKayttooikeusRyhmas(myontajaOid);
-
-        if (!CollectionUtils.isEmpty(slaveIds)) {
-            allRyhmas = kayttoOikeusRyhmaRepository.findByIdList(slaveIds);
-        } else {
-            allRyhmas = kayttoOikeusRyhmaRepository.listAll();
+        List<KayttoOikeusRyhmaDto> allRyhmas = getGrantableRyhmasWithoutOrgLimitations(organisaatioOid, myontajaOid);
+        if (allRyhmas.isEmpty()){
+            return Collections.emptyList();
         }
 
-        /* If groups have limitations based on organization restrictions, those
-         * groups must be removed from the list since it confuses the user as UI
-         * can't know these limitations and the error message doesn't really help
-         */
-        accessRightManagementUtils.parseRyhmaLimitationsBasedOnOrgOid(organisaatioOid, allRyhmas);
+        List<MyonnettyKayttoOikeusDto> henkilosKORs = localizationService.localize(
+                myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid));
 
-        if (!allRyhmas.isEmpty()) {
-            List<MyonnettyKayttoOikeusDto> henkilosKORs = localizationService.localize(myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid));
-            List<MyonnettyKayttoOikeusDto> results = new ArrayList<>();
-            allRyhmas.forEach(kayttoOikeusRyhma -> {
-                for (MyonnettyKayttoOikeusDto henkilosKOR : henkilosKORs) {
-                    if (henkilosKOR.getRyhmaId().equals(kayttoOikeusRyhma.getId())) {
-                        henkilosKOR.setSelected(true);
-                        results.add(henkilosKOR);
-                        break;
-                    }
-                }
-            });
-            return results;
-        }
+        List<MyonnettyKayttoOikeusDto> all = new ArrayList<>();
+        allRyhmas.forEach(kayttoOikeusRyhma ->
+                all.addAll(henkilosKORs.stream().filter(myonnettyKayttoOikeusDto ->
+                        myonnettyKayttoOikeusDto.getRyhmaId().equals(kayttoOikeusRyhma.getId()))
+                        .map(myonnettyKayttoOikeusDto -> {
+                            myonnettyKayttoOikeusDto.setSelected(true);
+                            return myonnettyKayttoOikeusDto;
+                        }).collect(toList())));
 
-        return null;
+        return all;
     }
 
     @Override
@@ -156,13 +172,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         /* History data must be fetched also since it's additional information for admin users
          * if they need to solve possible conflicts with users' access rights
          */
-        List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
+        List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository
+                .findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         all.addAll(ryhmaTapahtumaHistorias);
 
-        List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDto::getKasittelijaOid).distinct().collect(Collectors.toList());
+        List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDto::getKasittelijaOid).distinct().collect(toList());
         Map<String, String> kasittelijaNimet = oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids)
                 .stream()
-                .collect(Collectors.toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
+                .collect(toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
         all.forEach(myonnettyKayttoOikeusDTO -> myonnettyKayttoOikeusDTO.setKasittelijaNimi(kasittelijaNimet.get(myonnettyKayttoOikeusDTO.getKasittelijaOid())));
 
         return localizationService.localize(all);
@@ -170,80 +187,174 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
-    public KayttoOikeusRyhmaDto findKayttoOikeusRyhma(Long id) {
-        KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhmaRepository.findById(id), KayttoOikeusRyhmaDto.class);
+    public KayttoOikeusRyhmaDto findKayttoOikeusRyhma(long id) {
+        KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhmaRepository.findByRyhmaId(id).orElseThrow(()
+                -> new NotFoundException("kayttooikeusryhma not found")), KayttoOikeusRyhmaDto.class);
         return localizationService.localize(ryhma);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(Long id) {
+    public List<KayttoOikeusRyhmaDto> findSubRyhmasByMasterRyhma(long id) {
         List<Long> slaveIds = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(Collections.singletonList(id));
-        if(slaveIds != null && !slaveIds.isEmpty()) {
-            List<KayttoOikeusRyhmaDto> list = mapper.mapAsList(kayttoOikeusRyhmaRepository.findByIdList(slaveIds), KayttoOikeusRyhmaDto.class);
-            return localizationService.localize(list);
-        }
-        return new ArrayList<>();
+        return localizationService.localize(kayttoOikeusRyhmaRepository.findByIdList(slaveIds));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PalveluRoooliDto> findPalveluRoolisByKayttoOikeusRyhma(Long id) {
-        List<Long> kosIds = kayttoOikeusRepository.findByKayttoOikeusRyhmaIds(id);
-        List<Palvelu> palvelus = palveluRepository.findByKayttoOikeusIds(kosIds);
-        return accessRightManagementUtils.createPalveluRooliDTO(palvelus);
+    public List<PalveluRooliDto> findPalveluRoolisByKayttoOikeusRyhma(long ryhmaId) {
+        return localizationService.localize(kayttoOikeusRepository.findPalveluRoolitByKayttoOikeusRyhmaId(ryhmaId));
     }
 
     @Override
     @Transactional
-    public KayttoOikeusRyhmaDto createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        TextGroup tg = createRyhmaDescription(uusiRyhma);
-
-        // Checks if the Finnish name for access right group has been used
-        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getRyhmaNameFi())) {
+    public long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma) {
+        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getRyhmaName().get(FI))) {
             throw new IllegalArgumentException("Group name already in use");
         }
 
-        KayttoOikeusRyhma kor = new KayttoOikeusRyhma();
-        kor.setName(uusiRyhma.getRyhmaNameFi() + "_" + System.currentTimeMillis());
-        kor.setDescription(tg);
+        KayttoOikeusRyhma kayttoOikeusRyhma = new KayttoOikeusRyhma();
+        kayttoOikeusRyhma.setName(uusiRyhma.getRyhmaName().get(FI) + "_" + System.currentTimeMillis());
+        TextGroup tg = createRyhmaDescription(uusiRyhma.getRyhmaName());
+        kayttoOikeusRyhma.setDescription(tg);
+        kayttoOikeusRyhma.setRooliRajoite(uusiRyhma.getRooliRajoite());
 
-        if (uusiRyhma.getRooliRajoite() != null) {
-            kor.setRooliRajoite(uusiRyhma.getRooliRajoite());
-        }
+        kayttoOikeusRyhma.getKayttoOikeus().addAll(uusiRyhma.getPalvelutRoolit().stream()
+                .map(palveluRoooliDto ->
+                        ofNullable(kayttoOikeusRepository.findByRooliAndPalvelu(palveluRoooliDto.getRooli(),
+                                palveluRoooliDto.getPalveluName()))
+                    .orElseGet(() -> kayttoOikeusRepository.persist(new KayttoOikeus(palveluRoooliDto.getRooli(),
+                            palveluRepository.findByName(palveluRoooliDto.getPalveluName())
+                                    .orElseThrow(() -> new NotFoundException("palvelu not found"))
+                    )))).collect(toList()));
 
-        uusiRyhma.getPalvelutRoolit().forEach(palveluRoooliDto -> kor.getKayttoOikeus().add(createKayttoOikeus(kor, palveluRoooliDto)));
-
-        final Set<KayttoOikeus> kayttoOikeusHashSet = accessRightManagementUtils.bindToNonTransientInstances(kor);
-        kor.getKayttoOikeus().clear();
-        kor.getKayttoOikeus().addAll(kayttoOikeusHashSet);
-
-        KayttoOikeusRyhma createdRyhma = kayttoOikeusRyhmaRepository.insert(kor);
+        kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.persist(kayttoOikeusRyhma);
 
         // Organization limitation must be set only if the Organizatio OIDs are defined
-        if (!CollectionUtils.isEmpty(uusiRyhma.getOrganisaatioTyypit())) {
+        if (!isEmpty(uusiRyhma.getOrganisaatioTyypit())) {
             for (String orgTyyppi : uusiRyhma.getOrganisaatioTyypit()) {
                 OrganisaatioViite ov = new OrganisaatioViite();
                 ov.setOrganisaatioTyyppi(orgTyyppi);
-                kor.addOrganisaatioViite(ov);
-                organisaatioViiteRepository.insert(ov);
+                kayttoOikeusRyhma.addOrganisaatioViite(ov);
+                organisaatioViiteRepository.persist(ov);
             }
         }
 
         // Group limitations must be set only if slave IDs have been defined
-        if (uusiRyhma.getSlaveIds() != null && !uusiRyhma.getSlaveIds().isEmpty()) {
-            checkAndInsertSlaveGroups(uusiRyhma, createdRyhma);
+        if (!isEmpty(uusiRyhma.getSlaveIds())) {
+            checkAndInsertSlaveGroups(uusiRyhma, kayttoOikeusRyhma);
         }
 
-        KayttoOikeusRyhmaDto newRyhma = mapper.map(createdRyhma, KayttoOikeusRyhmaDto.class);
-        return localizationService.localize(newRyhma);
+        return kayttoOikeusRyhma.getId();
+    }
+
+    @Override
+    @Transactional
+    public long createKayttoOikeus(KayttoOikeusCreateDto kayttoOikeus) {
+        KayttoOikeus ko = mapper.map(kayttoOikeus, KayttoOikeus.class);
+        ko.setPalvelu(palveluRepository.findByName(kayttoOikeus.getPalveluName()).orElseThrow(()
+                -> new NotFoundException("palvelu not found")));
+        return kayttoOikeusRepository.persist(ko).getId();
+    }
+
+    @Override
+    @Transactional
+    public void updateKayttoOikeusForKayttoOikeusRyhma(long id, KayttoOikeusRyhmaModifyDto ryhmaData) {
+        KayttoOikeusRyhma kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.findById(id).orElseThrow(()
+                -> new NotFoundException("kayttooikeusryhma not found"));
+
+        // UI must always send the list of group names even if they don't change!!
+        setRyhmaDescription(ryhmaData, kayttoOikeusRyhma);
+
+        for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(kayttoOikeusRyhma.getId())) {
+            kayttoOikeusRyhmaMyontoViiteRepository.persist(viite);
+        }
+
+        if (!isEmpty(ryhmaData.getSlaveIds())) {
+            checkAndInsertSlaveGroups(ryhmaData, kayttoOikeusRyhma);
+        }
+
+        kayttoOikeusRyhma.setRooliRajoite(ryhmaData.getRooliRajoite());
+        // UI must always send the list of organization restrictions even if they don't change!!
+        setRyhmaOrganisaatioViites(ryhmaData, kayttoOikeusRyhma);
+
+        setKayttoOikeusRyhmas(ryhmaData, kayttoOikeusRyhma);
+
+        ldapSynchronization.updateAccessRightGroup(id);
+    }
+
+    private void setKayttoOikeusRyhmas(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
+        Set<KayttoOikeus> givenKOs = new HashSet<>();
+        for (PalveluRooliDto prDto : ryhmaData.getPalvelutRoolit()) {
+            Palvelu palvelu = palveluRepository.findByName(prDto.getPalveluName()).orElseThrow(()
+                    -> new NotFoundException("palvelu not found"));
+            KayttoOikeus tempKo = kayttoOikeusRepository.findByRooliAndPalvelu(prDto.getRooli(), palvelu.getName());
+            givenKOs.add(tempKo);
+        }
+
+        // removed KayttoOikeus objects that haven't been passed in the request
+        kayttoOikeusRyhma.getKayttoOikeus().stream()
+                .filter(kayttoOikeus -> !givenKOs.contains(kayttoOikeus))
+                .collect(toList())
+                .forEach(kayttoOikeusRyhma.getKayttoOikeus()::remove);
+        kayttoOikeusRyhma.getKayttoOikeus().addAll(givenKOs);
+    }
+
+    private void setRyhmaOrganisaatioViites(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
+        if (!isEmpty(kayttoOikeusRyhma.getOrganisaatioViite())) {
+            for (OrganisaatioViite orgV : kayttoOikeusRyhma.getOrganisaatioViite()) {
+                organisaatioViiteRepository.remove(orgV);
+            }
+            kayttoOikeusRyhma.removeAllOrganisaatioViites();
+        }
+
+        ofNullable(ryhmaData.getOrganisaatioTyypit())
+                .orElseGet(Collections::emptyList)
+                .forEach(orgTyyppi -> {
+                    OrganisaatioViite ov = new OrganisaatioViite();
+                    ov.setOrganisaatioTyyppi(orgTyyppi);
+                    kayttoOikeusRyhma.addOrganisaatioViite(ov);
+                });
+    }
+
+    private void setRyhmaDescription(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
+        if (kayttoOikeusRyhma.getDescription() == null) {
+            kayttoOikeusRyhma.setDescription(createRyhmaDescription(ryhmaData.getRyhmaName()));
+        } else {
+            TextGroup description = kayttoOikeusRyhma.getDescription();
+            Set<Text> ryhmaNames = description.getTexts();
+
+            updateOrAddTextForLang(ryhmaNames, FI, ryhmaData.getRyhmaName().get(FI));
+            updateOrAddTextForLang(ryhmaNames, SV, ryhmaData.getRyhmaName().get(SV));
+            updateOrAddTextForLang(ryhmaNames, EN, ryhmaData.getRyhmaName().get(EN));
+        }
+    }
+
+    private ArrayList<KayttoOikeusRyhmaDto> findAllKayttoOikeusRyhmasAsDtos() {
+        Map<Long, KayttoOikeusRyhmaDto> byIds = kayttoOikeusRyhmaRepository.listAll().stream()
+                .collect(Collectors.toMap(KayttoOikeusRyhmaDto::getId, Function.identity()));
+
+        organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(byIds.keySet())
+                .forEach(fetched -> byIds.get(fetched.getKayttoOikeusRyhmaId())
+                        .getOrganisaatioViite().add(fetched));
+
+        return new ArrayList<>(byIds.values());
+    }
+
+    private List<KayttoOikeusRyhmaDto> getGrantableRyhmasWithoutOrgLimitations(String organisaatioOid, String myontajaOid) {
+        List<Long> slaveIds =  kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
+                myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo(myontajaOid));
+
+        List<KayttoOikeusRyhmaDto> allRyhmas = isEmpty(slaveIds) ?
+                kayttoOikeusRyhmaRepository.listAll() : kayttoOikeusRyhmaRepository.findByIdList(slaveIds);
+        return getRyhmasWithoutOrganizationLimitations(organisaatioOid, localizationService.localize(allRyhmas));
     }
 
     private void checkAndInsertSlaveGroups(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma koRyhma) {
-        // If the given group has another master group ID in its slave IDs list
-        // that MUST be prevented since it would create cyclic relationship!!
-
-        if (kayttoOikeusRyhmaMyontoViiteRepository.checkCyclicMyontoViite(koRyhma.getId(), ryhmaData.getSlaveIds())) {
+        if (isEmpty(ryhmaData.getSlaveIds())) {
+            return;
+        }
+        if (kayttoOikeusRyhmaMyontoViiteRepository.isCyclicMyontoViite(koRyhma.getId(), ryhmaData.getSlaveIds())) {
             throw new InvalidKayttoOikeusException("Cyclic master-slave dependency");
         }
 
@@ -251,133 +362,60 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             KayttoOikeusRyhmaMyontoViite myontoViite = new KayttoOikeusRyhmaMyontoViite();
             myontoViite.setMasterId(koRyhma.getId());
             myontoViite.setSlaveId(slaveId);
-
-            kayttoOikeusRyhmaMyontoViiteRepository.insert(myontoViite);
+            kayttoOikeusRyhmaMyontoViiteRepository.persist(myontoViite);
         }
-    }
-
-    @Override
-    @Transactional
-    public KayttoOikeusDto createKayttoOikeus(KayttoOikeusDto kayttoOikeus) {
-        if (kayttoOikeus.getRooli() == null) {
-            throw new InvalidKayttoOikeusException("Rooli may not be null");
-        }
-        KayttoOikeus ko = mapper.map(kayttoOikeus, KayttoOikeus.class);
-        TextGroup txtGroup = textGroupRepository.insert(ko.getTextGroup());
-        ko.setTextGroup(txtGroup);
-
-        ko = accessRightManagementUtils.createKayttoOikeus(ko);
-        return mapper.map(ko, KayttoOikeusDto.class);
-    }
-
-    @Override
-    @Transactional
-    public KayttoOikeusRyhmaDto updateKayttoOikeusForKayttoOikeusRyhma(Long id, KayttoOikeusRyhmaModifyDto ryhmaData) {
-        KayttoOikeusRyhma koRyhma = kayttoOikeusRyhmaRepository.findById(id);
-        if (koRyhma == null) {
-            throw new IllegalArgumentException("Could not find group with id: " + id);
-        }
-
-        if (hasMissingGroupNames(ryhmaData)) {
-            throw new IllegalArgumentException("Missing group names");
-        }
-
-        // UI must always send the list of group names even if they don't change!!
-        if (koRyhma.getDescription() == null) {
-            koRyhma.setDescription(createRyhmaDescription(ryhmaData));
-        } else {
-            TextGroup description = koRyhma.getDescription();
-            Set<Text> ryhmaNames = description.getTexts();
-
-            updateOrAddTextForLang(ryhmaNames, "FI", ryhmaData.getRyhmaNameFi());
-            updateOrAddTextForLang(ryhmaNames, "SV", ryhmaData.getRyhmaNameSv());
-            updateOrAddTextForLang(ryhmaNames, "EN", ryhmaData.getRyhmaNameEn());
-        }
-
-        for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(koRyhma.getId())) {
-            kayttoOikeusRyhmaMyontoViiteRepository.delete(viite);
-        }
-
-        if (ryhmaData.getSlaveIds() != null && !ryhmaData.getSlaveIds().isEmpty()) {
-            checkAndInsertSlaveGroups(ryhmaData, koRyhma);
-        }
-
-
-        koRyhma.setRooliRajoite(ryhmaData.getRooliRajoite());
-        // UI must always send the list of organization restrictions even if they don't change!!
-        if (koRyhma.getOrganisaatioViite() != null && !koRyhma.getOrganisaatioViite().isEmpty()) {
-            for (OrganisaatioViite orgV : koRyhma.getOrganisaatioViite()) {
-                organisaatioViiteRepository.delete(orgV);
-            }
-            koRyhma.removeAllOrganisaatioViites();
-        }
-
-        Optional.ofNullable(ryhmaData.getOrganisaatioTyypit())
-                .orElseGet(Collections::emptyList)
-                .forEach(orgTyyppi -> {
-                    OrganisaatioViite ov = new OrganisaatioViite();
-                    ov.setOrganisaatioTyyppi(orgTyyppi);
-                    koRyhma.addOrganisaatioViite(ov);
-                });
-
-        Set<KayttoOikeus> givenKOs = new HashSet<>();
-        for (PalveluRoooliDto prDto : ryhmaData.getPalvelutRoolit()) {
-            List<Palvelu> palvelus = palveluRepository.findByName(prDto.getPalveluName());
-            if (palvelus.isEmpty()) {
-                throw new NotFoundException("palvelu not found by name : " + prDto.getPalveluName());
-            }
-            Palvelu palvelu = palvelus.get(0);
-
-            KayttoOikeus tempKo = new KayttoOikeus();
-            tempKo.setPalvelu(palvelu);
-            tempKo.setRooli(prDto.getRooli());
-            tempKo = kayttoOikeusRepository.findByRooliAndPalvelu(tempKo);
-            givenKOs.add(tempKo);
-        }
-
-        // removed KayttoOikeus objects that haven't been passed in the request
-        koRyhma.getKayttoOikeus().stream()
-                .filter(kayttoOikeus -> !givenKOs.contains(kayttoOikeus))
-                .collect(Collectors.toList())
-                .forEach(koRyhma.getKayttoOikeus()::remove);
-        koRyhma.getKayttoOikeus().addAll(givenKOs);
-
-        ldapSynchronization.updateAccessRightGroup(id);
-        return mapper.map(koRyhma, KayttoOikeusRyhmaDto.class);
     }
 
     private void updateOrAddTextForLang(Set<Text> ryhmaNames, String lang, String newText) {
         Optional<Text> name = ryhmaNames.stream().filter(text -> text.getLang().equals(lang)).findFirst();
         if (name.isPresent()) {
             name.get().setText(newText);
-        }else{
+        } else {
             ryhmaNames.add(new Text(null, "FI", newText));
         }
     }
 
-    private KayttoOikeus createKayttoOikeus(KayttoOikeusRyhma kor, PalveluRoooliDto palveluRoooliDto) {
-        Palvelu tempPalvelu = new Palvelu();
-        KayttoOikeus tempKO = new KayttoOikeus();
-        tempPalvelu.setName(palveluRoooliDto.getPalveluName());
-        tempKO.setRooli(palveluRoooliDto.getRooli());
-        tempKO.setPalvelu(tempPalvelu);
-        tempKO.getKayttooikeusRyhmas().add(kor);
-        return tempKO;
-    }
-
-    private boolean hasMissingGroupNames(KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        return uusiRyhma.getRyhmaNameFi() == null || uusiRyhma.getRyhmaNameEn() == null || uusiRyhma.getRyhmaNameSv() == null;
-    }
-
-    private TextGroup createRyhmaDescription(KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        if (hasMissingGroupNames(uusiRyhma)) {
-            throw new IllegalArgumentException("Missing group names");
-        }
-
+    private TextGroup createRyhmaDescription(TextGroupDto name) {
         TextGroup tg = new TextGroup();
-        tg.addText(new Text(tg, "FI", uusiRyhma.getRyhmaNameFi()));
-        tg.addText(new Text(tg, "SV", uusiRyhma.getRyhmaNameSv()));
-        tg.addText(new Text(tg, "EN", uusiRyhma.getRyhmaNameEn()));
+        tg.addText(new Text(tg, FI, name.get(FI)));
+        tg.addText(new Text(tg, SV, name.get(SV)));
+        tg.addText(new Text(tg, EN, name.get(EN)));
         return tg;
     }
+
+    private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
+        boolean isOphOrganisation = organisaatioOid.equals(OPH_ORGANIZATION_OID);
+        return allRyhmas.stream()
+                .filter(kayttoOikeusRyhma -> {
+                    boolean emptyAndNotOphOrg = isEmpty(kayttoOikeusRyhma.getOrganisaatioViite()) && !isOphOrganisation;
+                    boolean noOrgLimits = !isEmpty(kayttoOikeusRyhma.getOrganisaatioViite())
+                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, kayttoOikeusRyhma.getOrganisaatioViite());
+                    return !emptyAndNotOphOrg && !noOrgLimits;
+                }).collect(toList());
+    }
+
+    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioViiteDto> viites) {
+        Set<String> tyyppis = viites.stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
+
+        if (organisaatioOid.startsWith(GROUP_ORGANIZATION_ID)) {
+            return oidIsFoundInViites(GROUP_ORGANIZATION_ID, tyyppis);
+        }
+        if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
+            return true;
+        }
+        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedot(Collections.singletonList(organisaatioOid));
+        return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
+                .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
+    }
+
+    private boolean orgTypeMatchesOrOidIsFoundInViites(String organisaatioOid, Set<String> organisaatioTyyppis, OrganisaatioPerustieto opt) {
+        return oidIsFoundInViites(organisaatioOid, organisaatioTyyppis)
+                || opt.getChildren().stream().filter(child -> isNotBlank(child.getOppilaitostyyppi()))
+                .map(laitosTyyppi).anyMatch(organisaatioTyyppis::contains);
+    }
+
+    private boolean oidIsFoundInViites(String organisaatioOid, Set<String> organisaatioTyyppis) {
+        return organisaatioTyyppis.stream().anyMatch(tyyppi -> tyyppi.equals(organisaatioOid));
+    }
+
 }

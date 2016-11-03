@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.dto.*;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -201,17 +200,12 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void getKayttoOikeusByKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.findPalveluRoolisByKayttoOikeusRyhma(46L))
-                .willReturn(singletonList(PalveluRoooliDto.builder()
+                .willReturn(singletonList(PalveluRooliDto.builder()
                         .palveluName("palvelunimi")
-                        .palveluTexts(singletonList(LocaleTextDto.builder()
-                                .lang("FI")
-                                .text("palvelu kuvaus").build()))
+                        .palveluTexts(new TextGroupListDto().put("FI", "palvelu kuvaus"))
                         .rooli("joku rooli")
-                        .rooliTexts(singletonList(LocaleTextDto.builder()
-                                .lang("FI")
-                                .text("rooli kuvaus")
-                                .build()))
-                        .build()));
+                        .rooliTexts(new TextGroupListDto().put("FI", "rooli kuvaus"))
+                    .build()));
 
         this.mvc.perform(get("/kayttooikeusryhma/46/kayttooikeus").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
@@ -231,15 +225,12 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void createKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.createKayttoOikeusRyhma(Matchers.any(KayttoOikeusRyhmaModifyDto.class)))
-                .willReturn(KayttoOikeusRyhmaDto.builder()
-                        .id(234L)
-                        .build());
+                .willReturn(234L);
 
         this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeusRyhma.json"))
                 .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"statusType\":\"OK\",\"entity\":234,\"entityType\":\"java.lang.Long\",\"metadata\":{},\"status\":200}"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -254,26 +245,41 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void createNewKayttoOikeusTest() throws Exception {
-        given(this.kayttoOikeusService.createKayttoOikeus(Matchers.any(KayttoOikeusDto.class)))
+        given(this.kayttoOikeusService.createKayttoOikeus(Matchers.any(KayttoOikeusCreateDto.class)))
+                .willReturn(1L);
+
+        given(this.kayttoOikeusService.findKayttoOikeusById(1L))
                 .willReturn(KayttoOikeusDto.builder()
-                        .palvelu(PalveluDto.builder()
-                                .palveluTyyppi(PalveluTyyppi.KOKOELMA)
-                                .id(34354L)
-                                .name("Palvelu")
-                                .description(new TextGroupListDto(1L).put("FI", "palvelun kuvaus"))
-                                .build())
-                        .textGroup(new TextGroupListDto(12L).put("FI", "kuvaus"))
+                        .rooli("joku rooli")
+                        .textGroup(new TextGroupDto(2L).put("FI", "kuvaus")
+                                .put("EN", "ryhmän kuvaus en")
+                                .put("SV", "kuvaus sv"))
                         .kayttoOikeusRyhmas(singleton(KayttoOikeusRyhmaDto.builder()
-                                .id(234234L)
-                                .name("ryhmän nimi")
+                                .id(22L)
+                                .name("kayttooikeusryhmä")
                                 .rooliRajoite("roolirajoite")
-                                .description(new TextGroupListDto(11L).put("FI", "ryhmän kuvaus"))
+                                .description(new TextGroupDto(3L).put("FI", "ryhmän kuvaus")
+                                        .put("SV", "ryhmän kuvaus sv")
+                                        .put("EN", "ryhmän kuvaus en"))
                                 .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
-                                        .id(2343L)
-                                        .organisaatioTyyppi("organisaatiotyyppi")
+                                        .id(44L)
+                                        .organisaatioTyyppi("viitteen tyyppi")
                                         .build()))
                                 .build()))
-                        .rooli("joku rooli")
+                        .palvelu(PalveluDto.builder()
+                                .id(7L)
+                                .name("palvelun nimi")
+                                .description(new TextGroupDto(4L).put("FI", "palvelun kuvaus")
+                                        .put("EN", "palvelun kuvaus en")
+                                        .put("SV", "palvelun kuvaus sv"))
+                                .palveluTyyppi(PalveluTyyppi.KOKOELMA)
+                                .kokoelma(PalveluDto.builder()
+                                        .id(8L)
+                                        .palveluTyyppi(PalveluTyyppi.YKSITTAINEN)
+                                        .description(new TextGroupDto(4L).put("FI", "kokoelman kuvaus"))
+                                        .name("kuvaus")
+                                        .build())
+                                .build())
                         .build());
 
         this.mvc.perform(post("/kayttooikeusryhma/kayttooikeus").contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -295,8 +301,17 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void updateKayttoOikeusRyhmaTest() throws Exception {
-        given(this.kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(Matchers.eq(345L), Matchers.any(KayttoOikeusRyhmaModifyDto.class)))
-                .willReturn(buildKayttoOikeusRyhma());
+        given(kayttoOikeusService.findKayttoOikeusRyhma(Matchers.eq(345L)))
+                .willReturn(KayttoOikeusRyhmaDto.builder()
+                        .id(345L)
+                        .name("kayttooikeusryhmä")
+                        .rooliRajoite("roolirajoite")
+                        .description(new TextGroupDto(3L).put("FI", "ryhmän kuvaus"))
+                        .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
+                                .id(44L)
+                                .organisaatioTyyppi("viitteen tyyppi")
+                                .build()))
+                        .build());
 
         this.mvc.perform(put("/kayttooikeusryhma/345").contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonResource("classpath:kayttooikeusryhma/updateKayttoOikeusRyhma.json"))

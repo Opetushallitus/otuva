@@ -1,7 +1,13 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import com.querydsl.core.Tuple;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import org.joda.time.LocalDate;
 import fi.vm.sade.kayttooikeus.model.Text;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 import org.junit.Test;
@@ -9,12 +15,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.constraints.AssertFalse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
+import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static org.junit.Assert.assertEquals;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.viite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static org.junit.Assert.*;
@@ -28,13 +39,45 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void listAllTest() {
         populate(kayttoOikeusRyhma("RYHMÄ")
-                .withOikeus(oikeus("APP1", "READ")) // ensure unique ryhmä
+                .withKuvaus(text("FI", "ryhmän kuvaus"))
+                .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE")));
-        
-        List<KayttoOikeusRyhma> ryhmas = kayttoOikeusRyhmaRepository.listAll();
-        assertEquals(1, ryhmas.size());
+
+        populate(kayttoOikeusRyhma("Piilotettu ryhmä")
+                .asHidden()
+                .withOikeus(oikeus("APP1", "READ"))
+                .withOikeus(oikeus("APP2", "WRITE")));
+
+        populate(kayttoOikeusRyhma("RYHMÄ2")
+                .withKuvaus(text("FI", "ryhmän 2 kuvaus"))
+                .withOikeus(oikeus("APP1", "READ"))
+                .withOikeus(oikeus("APP2", "WRITE")));
+
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll();
+        assertEquals(2, ryhmas.size());
         assertEquals("RYHMÄ", ryhmas.get(0).getName());
     }
+
+    @Test
+    public void Test() {
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "1.0.0.102.0"),
+                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                        .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
+        ).voimassaAlkaen(new LocalDate().minusMonths(3))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        List<Tuple> list = this.kayttoOikeusRyhmaRepository.findOrganisaatioOidAndRyhmaIdByHenkiloOid(
+                tapahtuma.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo());
+        assertEquals(list.get(0).get(organisaatioHenkilo.organisaatioOid),
+                tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid());
+        assertEquals(list.get(0).get(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id),
+                tapahtuma.getKayttoOikeusRyhma().getId());
+    }
+
 
     @Test
     public void findByIdListTest(){
@@ -51,9 +94,15 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
-        List<KayttoOikeusRyhma> ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList(id2));
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList(id2));
         assertEquals(1, ryhmas.size());
         assertEquals("RYHMÄ2", ryhmas.get(0).getName());
+
+        ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList());
+        assertEquals(0, ryhmas.size());
+
+        ryhmas = kayttoOikeusRyhmaRepository.findByIdList(null);
+        assertEquals(0, ryhmas.size());
 
         ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList(id1, id2));
         assertEquals(2, ryhmas.size());
@@ -70,29 +119,34 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void findByIdTest(){
-        Long id1 =populate(kayttoOikeusRyhma("RYHMÄ")
+        Long id =populate(kayttoOikeusRyhma("RYHMÄ")
                 .withKuvaus(text("FI", "Kuvaus"))
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
-        Long id3 = populate(kayttoOikeusRyhma("RYHMÄ2")
+        Long hiddenRyhmaId = populate(kayttoOikeusRyhma("RYHMÄ2")
                 .asHidden()
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
-        KayttoOikeusRyhma ryhma = kayttoOikeusRyhmaRepository.findById(id1);
-        assertEquals("RYHMÄ", ryhma.getName());
-        assertEquals(1, ryhma.getOrganisaatioViite().size());
-        assertEquals("RYHMA1", ryhma.getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getName());
-        assertEquals("Kuvaus", ryhma.getDescription().getTexts().stream().filter(text -> text.getLang().equals("FI")).findFirst().get().getText());
-        assertEquals(2, ryhma.getKayttoOikeus().size());
+        Optional<KayttoOikeusRyhma> ryhma = kayttoOikeusRyhmaRepository.findByRyhmaId(id);
+        assertTrue(ryhma.isPresent());
+        KayttoOikeusRyhma koRyhma = ryhma.get();
+        assertEquals("RYHMÄ", koRyhma.getName());
+        assertEquals(1, koRyhma.getOrganisaatioViite().size());
+        assertEquals("RYHMA1", koRyhma.getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getName());
+        assertEquals("Kuvaus", koRyhma.getDescription().getTexts().stream().filter(text -> text.getLang().equals("FI")).findFirst().get().getText());
+        assertEquals(2, koRyhma.getKayttoOikeus().size());
 
-        ryhma = kayttoOikeusRyhmaRepository.findById(id3);
-        assertNull(ryhma);
+        Optional<KayttoOikeusRyhma> hiddenRyhma  = kayttoOikeusRyhmaRepository.findById(hiddenRyhmaId);
+        assertTrue(hiddenRyhma.isPresent());
 
-        ryhma = kayttoOikeusRyhmaRepository.findById(434323423L);
-        assertNull(ryhma);
+        hiddenRyhma = kayttoOikeusRyhmaRepository.findByRyhmaId(hiddenRyhmaId);
+        assertFalse(hiddenRyhma.isPresent());
+
+        Optional<KayttoOikeusRyhma> nonexistent = kayttoOikeusRyhmaRepository.findByRyhmaId(434323423L);
+        assertFalse(nonexistent.isPresent());
     }
 
 
@@ -118,7 +172,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     public void insertTest(){
 
         KayttoOikeus oikeus = populate(oikeus("APP1", "READ"));
-        List<KayttoOikeusRyhma> ryhmas = kayttoOikeusRyhmaRepository.listAll();
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll();
         assertEquals(0, ryhmas.size());
 
         KayttoOikeusRyhma kor = new KayttoOikeusRyhma();
@@ -129,12 +183,12 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         kor.setDescription(textGroup);
         kor.getKayttoOikeus().add(oikeus);
         kor.setRooliRajoite("roolirajoite");
-        kor = kayttoOikeusRyhmaRepository.insert(kor);
+        kor = kayttoOikeusRyhmaRepository.persist(kor);
 
         ryhmas = kayttoOikeusRyhmaRepository.listAll();
         assertEquals(1, ryhmas.size());
 
-        KayttoOikeusRyhma ryhma = kayttoOikeusRyhmaRepository.findById(kor.getId());
+        KayttoOikeusRyhma ryhma = kayttoOikeusRyhmaRepository.findByRyhmaId(kor.getId()).get();
         assertEquals("TEST", ryhma.getName());
         assertEquals("roolirajoite", ryhma.getRooliRajoite());
         assertEquals("kuvaus", ryhma.getDescription().getTexts().stream().findFirst().get().getText());

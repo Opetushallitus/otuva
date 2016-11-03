@@ -1,13 +1,11 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioViiteDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 
 import java.util.List;
+import java.util.Set;
 
-public interface OrganisaatioViiteRepository {
-    List<OrganisaatioViite> findByKayttoOikeusRyhmaId(Long id);
-
-    OrganisaatioViite insert(OrganisaatioViite organisaatioViite);
-
-    void delete(OrganisaatioViite viite);
+public interface OrganisaatioViiteRepository extends BaseRepository<OrganisaatioViite>{
+    List<OrganisaatioViiteDto> findByKayttoOikeusRyhmaIds(Set<Long> ids);
 }

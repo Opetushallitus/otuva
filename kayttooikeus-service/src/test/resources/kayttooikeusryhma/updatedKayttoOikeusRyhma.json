@@ -1,27 +1,20 @@
 {
-  "statusType": "OK",
-  "entity": {
-    "id": 44,
-    "name": "ryhmänimi",
-    "rooliRajoite": "roolirajoite",
-    "organisaatioViite": [
+  "id": 345,
+  "name": "kayttooikeusryhmä",
+  "rooliRajoite": "roolirajoite",
+  "organisaatioViite": [
+    {
+      "id": 44,
+      "organisaatioTyyppi": "viitteen tyyppi"
+    }
+  ],
+  "description": {
+    "id": 3,
+    "texts": [
       {
-        "id": 3423,
-        "organisaatioTyyppi": "organisaatiotyyppi"
-      }
-    ],
-    "description": [
-      {
-        "text": "kuvaus en",
-        "lang": "EN"
-      },
-      {
-        "text": "Kuvaus",
+        "text": "ryhmän kuvaus",
         "lang": "FI"
       }
     ]
-  },
-  "entityType": "fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto",
-  "metadata": {},
-  "status": 200
+  }
 }

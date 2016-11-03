@@ -1,17 +1,21 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface KayttoOikeusRyhmaRepository {
-    List<KayttoOikeusRyhma> listAll();
+public interface KayttoOikeusRyhmaRepository extends BaseRepository<KayttoOikeusRyhma> {
+    List<KayttoOikeusRyhmaDto> findByIdList(List<Long> idList);
 
-    List<KayttoOikeusRyhma> findByIdList(List<Long> idList);
-
-    KayttoOikeusRyhma findById(Long id);
+    Optional<KayttoOikeusRyhma> findByRyhmaId(Long id);
 
     Boolean ryhmaNameFiExists(String ryhmaNameFi);
 
-    KayttoOikeusRyhma insert(KayttoOikeusRyhma kor);
+    List<KayttoOikeusRyhmaDto> listAll();
+
+    List<Tuple> findOrganisaatioOidAndRyhmaIdByHenkiloOid(String oid);
+
 }

@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 
 import java.util.List;
 

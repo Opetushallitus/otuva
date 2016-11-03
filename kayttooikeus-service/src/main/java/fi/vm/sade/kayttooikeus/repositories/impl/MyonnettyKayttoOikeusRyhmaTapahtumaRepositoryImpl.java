@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.service.dto.MyonnettyKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 

@@ -16,7 +16,7 @@ import javax.persistence.*;
         @TypeDef(name = "dateTime", typeClass = org.jadira.usertype.dateandtime.joda.PersistentDateTime.class,
                 parameters = {@org.hibernate.annotations.Parameter(name = "databaseZone", value = "jvm")})
 })
-public class IdentifiableAndVersionedEntity {
+public class IdentifiableAndVersionedEntity implements Identifiable {
     @Id
     @Column(name = "id", unique = true, nullable = false)
     @GeneratedValue
