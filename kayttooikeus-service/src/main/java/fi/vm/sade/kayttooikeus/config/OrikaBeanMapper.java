@@ -1,10 +1,13 @@
 package fi.vm.sade.kayttooikeus.config;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.Type;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

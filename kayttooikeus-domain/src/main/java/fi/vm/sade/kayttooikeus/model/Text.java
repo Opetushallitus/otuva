@@ -17,7 +17,7 @@ public class Text extends IdentifiableAndVersionedEntity {
 
     public Text() {
     }
-    
+
     public Text(TextGroup textGroup, String lang, String text) {
         this.textGroup = textGroup;
         this.lang = lang;

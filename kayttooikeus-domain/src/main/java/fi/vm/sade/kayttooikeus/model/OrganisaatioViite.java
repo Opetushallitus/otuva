@@ -1,12 +1,14 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "organisaatioviite")
 public class OrganisaatioViite extends IdentifiableAndVersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)

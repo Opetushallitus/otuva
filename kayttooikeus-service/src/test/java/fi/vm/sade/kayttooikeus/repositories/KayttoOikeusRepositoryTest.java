@@ -3,6 +3,9 @@ package fi.vm.sade.kayttooikeus.repositories;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusTyyppi;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import org.joda.time.LocalDate;
@@ -12,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
@@ -20,6 +24,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -128,4 +133,52 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), historia.get(0).getKasittelija());
         assertEquals(tapahtuma2.getKayttoOikeusRyhma().getDescription().getId(), historia.get(0).getKuvaus().getId());
     }
+
+    @Test
+    public void findPalveluRoolitByKayttoOikeusRyhmaIdTest() throws Exception {
+        KayttoOikeusRyhma kayttoOikeusRyhma = populate(kayttoOikeusRyhma("RYHMA")
+                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD")
+                        .kuvaus(text("FI", "Kuvaus").put("SV", "på svenska").put("EN", "desc")))
+                .withOikeus(oikeus("KOODISTO", "READ")
+                        .kuvaus(text("FI", "Kuvaus henkilöhallinta").put("SV", "på svenska").put("EN", "desc"))));
+
+        List<PalveluRooliDto> palveluRoolis = kayttoOikeusRepository.findPalveluRoolitByKayttoOikeusRyhmaId(kayttoOikeusRyhma.getId());
+        assertEquals(2, palveluRoolis.size());
+
+        assertTrue(palveluRoolis.stream()
+                .map(PalveluRooliDto::getPalveluName)
+                .collect(toList())
+                .containsAll(Arrays.asList("HENKILOHALLINTA", "KOODISTO")));
+    }
+
+    @Test
+    public void findByRooliAndPalveluTest() throws Exception {
+        KayttoOikeus kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("rooli", "palvelu");
+        assertNull(kayttoOikeus);
+
+        populate(kayttoOikeusRyhma("RYHMA")
+                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
+                .withOikeus(oikeus("KOODISTO", "READ")));
+
+        kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("READ", "KOODISTO");
+        assertNotNull(kayttoOikeus);
+        assertEquals("READ", kayttoOikeus.getRooli());
+        assertEquals("KOODISTO", kayttoOikeus.getPalvelu().getName());
+
+        kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("READ", "HENKILOHALLINTA");
+        assertNotNull(kayttoOikeus);
+        assertEquals("READ", kayttoOikeus.getRooli());
+        assertEquals("HENKILOHALLINTA", kayttoOikeus.getPalvelu().getName());
+
+        kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("CRUD", "HENKILOHALLINTA");
+        assertNotNull(kayttoOikeus);
+        assertEquals("CRUD", kayttoOikeus.getRooli());
+        assertEquals("HENKILOHALLINTA", kayttoOikeus.getPalvelu().getName());
+
+        kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("CRUD", "KOODISTO");
+        assertNull(kayttoOikeus);
+
+    }
+
 }

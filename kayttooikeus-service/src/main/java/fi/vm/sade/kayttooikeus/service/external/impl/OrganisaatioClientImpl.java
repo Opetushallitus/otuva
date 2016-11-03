@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioHakutulos;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,13 +26,31 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
+    public OrganisaatioRDTO getOrganisaatioPerustiedot(String oid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.perustiedot", oid);
+        return retrying(io(() -> restClient.get(url,OrganisaatioRDTO.class)), 2)
+                .get().orFail(mapper(url));
+    }
+
+    @Override
     public List<OrganisaatioPerustieto> listOganisaatioPerustiedot(Collection<String> organisaatioOids) {
-        if (organisaatioOids == null || organisaatioOids.isEmpty()) {
+        return getOrganisaatioPerustietos(organisaatioOids, false);
+    }
+
+    @Override
+    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(Collection<String> organisaatioOids) {
+        return getOrganisaatioPerustietos(organisaatioOids, true);
+    }
+
+    private List<OrganisaatioPerustieto> getOrganisaatioPerustietos(Collection<String> organisaatioOids, boolean limitToActive) {
+        if (organisaatioOids.isEmpty()) {
             return new ArrayList<>();
         }
         String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
-        return retrying(io(() -> restClient.get(url+"?oidRestrictionList="+organisaatioOids.stream()
-                        .collect(joining("&oidRestrictionList=")),OrganisaatioHakutulos.class)), 2)
+        String params = "?oidRestrictionList="+organisaatioOids.stream().collect(joining("&oidRestrictionList=")) +
+                (limitToActive ? "&aktiiviset=true" : "");
+        return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
                 .get().orFail(mapper(url)).getOrganisaatiot();
     }
+
 }

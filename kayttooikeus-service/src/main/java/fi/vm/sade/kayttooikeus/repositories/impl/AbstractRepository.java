@@ -32,4 +32,5 @@ public abstract class AbstractRepository {
     protected boolean exists(JPASQLQuery<?> q) {
         return q.limit(1).fetchCount() > 0;
     }
+
 }

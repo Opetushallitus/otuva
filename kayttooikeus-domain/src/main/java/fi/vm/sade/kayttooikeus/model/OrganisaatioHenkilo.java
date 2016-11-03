@@ -32,7 +32,7 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @JoinColumn(name = "organisaatio_oid", insertable = false, updatable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private OrganisaatioCache organisaatioCache;
-
+    
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
     private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmas = new HashSet<MyonnettyKayttoOikeusRyhmaTapahtuma>();
 
