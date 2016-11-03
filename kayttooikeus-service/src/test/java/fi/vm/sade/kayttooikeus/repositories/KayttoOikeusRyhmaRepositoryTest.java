@@ -1,8 +1,13 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import org.joda.time.LocalDate;
 import fi.vm.sade.kayttooikeus.model.Text;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 import org.junit.Test;
@@ -16,6 +21,11 @@ import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
+import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static org.junit.Assert.assertEquals;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.viite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static org.junit.Assert.*;
@@ -47,6 +57,27 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         assertEquals(2, ryhmas.size());
         assertEquals("RYHMÄ", ryhmas.get(0).getName());
     }
+
+    @Test
+    public void Test() {
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "1.0.0.102.0"),
+                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                        .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
+        ).voimassaAlkaen(new LocalDate().minusMonths(3))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        List<Tuple> list = this.kayttoOikeusRyhmaRepository.findOrganisaatioOidAndRyhmaIdByHenkiloOid(
+                tapahtuma.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo());
+        assertEquals(list.get(0).get(organisaatioHenkilo.organisaatioOid),
+                tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid());
+        assertEquals(list.get(0).get(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id),
+                tapahtuma.getKayttoOikeusRyhma().getId());
+    }
+
 
     @Test
     public void findByIdListTest(){

@@ -1,9 +1,17 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
@@ -20,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -106,6 +115,30 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Transactional(readOnly = true)
     public List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods) {
         return localizationService.localize(kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(at, expirationPeriods));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid)  {
+        List<Tuple> results = this.kayttoOikeusRyhmaRepository.findOrganisaatioOidAndRyhmaIdByHenkiloOid(henkiloOid);
+
+        HashMap<String, List<Integer>> kayttooikeusRyhmasByOrganisation = new HashMap<>();
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        for(Tuple result : results) {
+            String organisaatioOid = result.get(organisaatioHenkilo.organisaatioOid);
+            Integer ryhmaId = Optional.ofNullable(result.get(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id))
+                    .orElseThrow(() -> new NullPointerException("null_ryhma_id")).intValue();
+
+            List<Integer> ryhmasInOrganisaatio = kayttooikeusRyhmasByOrganisation.get(organisaatioOid);
+            if(ryhmasInOrganisaatio == null) {
+                ryhmasInOrganisaatio = new ArrayList<>();
+                kayttooikeusRyhmasByOrganisation.put(organisaatioOid, ryhmasInOrganisaatio);
+            }
+            ryhmasInOrganisaatio.add(ryhmaId);
+        }
+        return kayttooikeusRyhmasByOrganisation;
     }
 
     @Override

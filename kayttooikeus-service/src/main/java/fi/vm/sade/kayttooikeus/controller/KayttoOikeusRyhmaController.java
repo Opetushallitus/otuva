@@ -11,9 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.ws.rs.QueryParam;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/kayttooikeusryhma")
@@ -38,6 +44,13 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan.")
     public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma() {
         return kayttoOikeusService.listAllKayttoOikeusRyhmas();
+    }
+
+    @ApiOperation(value = "Hakee henkilön käyttöoikeusryhmät organisaatioittain")
+    @PreAuthorize("hasRole('APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(value = "ryhmasByOrganisaatio/{oid}", method = RequestMethod.GET)
+    public Map<String, List<Integer>> ryhmasByOrganisation(@PathVariable("oid") String henkiloOid) {
+        return this.kayttoOikeusService.findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(henkiloOid);
     }
 
     @RequestMapping(value = "/organisaatio/{organisaatioOid}", method = RequestMethod.GET)

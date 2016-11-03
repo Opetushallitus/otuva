@@ -6,6 +6,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
 import java.util.List;
+import java.util.Map;
 
 public interface KayttoOikeusService {
     KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId);
@@ -17,6 +18,8 @@ public interface KayttoOikeusService {
     List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForCurrentUser();
 
     List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods);
+
+    public Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid);
 
     List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid);
 
