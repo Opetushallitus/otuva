@@ -19,8 +19,8 @@ const InvitationForm = React.createClass({
     const L = this.props.l10n[uiLang]
     const props = {...this.props, uiLang, l10n: L}
     const confirmationProps = {
-      ...props, 
-      modalCloseFn: this.closeConfirmationModal, 
+      ...props,
+      modalCloseFn: this.closeConfirmationModal,
       modalOpen: this.state.confirmationModalOpen
     }
 
@@ -61,7 +61,7 @@ const InvitationForm = React.createClass({
       confirmationModalOpen: false
     })
   },
-  
+
 })
 
 export default InvitationForm

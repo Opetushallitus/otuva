@@ -1,8 +1,8 @@
 import React from 'react'
-import R from 'ramda'
 import Modal from 'modal'
 
 import invite from '../external/invitation'
+import { toLocalizedText } from '../logic/localizabletext'
 
 const InvitationConfirmation = React.createClass({
 
@@ -16,7 +16,7 @@ const InvitationConfirmation = React.createClass({
     const L = this.props.l10n
 
     return (
-      <Modal show={this.props.modalOpen} 
+      <Modal show={this.props.modalOpen}
         onClose={this.props.modalCloseFn} closeOnOuterClick={true}>
 
         <div className="confirmation-modal">
@@ -38,28 +38,20 @@ const InvitationConfirmation = React.createClass({
   },
 
   renderAddedOrg: function(org) {
-    const allOrgs = this.props.orgs
-    const nameKey = `name-${this.props.uiLang}`
-    const orgName = R.find(R.propEq('id', org.id))(allOrgs)[nameKey]
+    const orgName = toLocalizedText(this.props.uiLang, org.organisation.nimi, org.organisation.oid)
 
     return (
-      <div key={org.id}>
+      <div key={org.organisation.oid}>
         <h3>{orgName}</h3>
         {org.permissions.map(this.renderAddedOrgPermission)}
       </div>
     )
   },
 
-  renderAddedOrgPermission: function(permissionId) {
-    const allPermissions = 
-      R.flatten(R.pluck('permissions')(this.props.orgs))
-    const nameKey = `name-${this.props.uiLang}`
-    const permissionName = 
-      R.find(R.propEq('id', permissionId))(allPermissions)[nameKey]
-
+  renderAddedOrgPermission: function(permission) {
     return (
-      <div key={permissionId}>
-        <h4>{permissionName}</h4>
+      <div key={permission.id}>
+        <h4>{toLocalizedText(this.props.uiLang, permission.description, permission.name)}</h4>
       </div>
     )
   },
@@ -68,11 +60,11 @@ const InvitationConfirmation = React.createClass({
     e.preventDefault()
 
     const payload = {
-      orgs: this.props.addedOrgs, 
+      orgs: this.props.addedOrgs,
       info: this.props.basicInfo
     }
     const { invitationResponseS } = invite(payload)
-    
+
     invitationResponseS.onValue(response => {
       console.log(response)
       this.setState({
@@ -80,7 +72,7 @@ const InvitationConfirmation = React.createClass({
       })
     })
   },
-  
+
 })
 
 export default InvitationConfirmation

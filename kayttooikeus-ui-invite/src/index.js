@@ -4,6 +4,7 @@ import Bacon from 'baconjs'
 import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
 
 import organisations from './logic/organisations'
+import permissions from './logic/permissions'
 import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
@@ -16,6 +17,7 @@ import './index.css'
 
 const appStateS = Bacon.combineTemplate({
   addedOrgs: organisations.toProperty(),
+  permissions: permissions.toProperty(),
   basicInfo: basicInfo.toProperty(),
   l10n: l10nResponseS.toProperty(),
   orgs: orgsResponseS.toProperty(),

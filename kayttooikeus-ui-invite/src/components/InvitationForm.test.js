@@ -9,7 +9,14 @@ const appState = {
   l10n: {
     'fi': { }
   },
-  orgs: [{ id: '', permissions: [] }],
+  orgs: {
+    numHits: 1,
+    organisaatiot: [
+      {oid: 1, organisaatiotyypit: []},
+    ]
+  },
+  permissions: [
+  ],
   languages: [{ code: ''}]
 }
 
