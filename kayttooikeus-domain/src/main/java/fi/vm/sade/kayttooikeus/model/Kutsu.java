@@ -23,6 +23,9 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Column(name = "kutsuja_oid", nullable = false)
     private String kutsuja;
     
+    @Column(name = "kieli_koodi", nullable = false)
+    private String kieliKoodi;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "tila", nullable = false)
     private KutsunTila tila = KutsunTila.AVOIN;
