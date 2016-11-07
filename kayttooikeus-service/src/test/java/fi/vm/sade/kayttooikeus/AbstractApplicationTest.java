@@ -35,7 +35,7 @@ public abstract class AbstractApplicationTest {
      */
     protected String resource(@Language("spring-resource-reference") String resource) {
         try {
-            return IOUtils.toString(applicationContext.getResource(resource).getInputStream());
+            return IOUtils.toString(applicationContext.getResource(resource).getInputStream(), "UTF-8");
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not load resource: " + resource + ", cause: " + e.getMessage(), e);
         }
