@@ -11,10 +11,12 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     public static final String FI = "FI";
     public static final String SV = "SV";
     public static final String EN = "EN";
-    private static final Function<OrganisaatioPerustieto, String> laitosTyyppi = child -> child.getOppilaitostyyppi().substring(17, 19);
     private static final String OPH_ORGANIZATION_OID = "1.2.246.562.10.00000000001";
     private static final String GROUP_ORGANIZATION_ID = "1.2.246.562.28";
 
@@ -177,10 +178,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         all.addAll(ryhmaTapahtumaHistorias);
 
         List<String> kasittelijaOids = all.stream().map(MyonnettyKayttoOikeusDto::getKasittelijaOid).distinct().collect(toList());
-        Map<String, String> kasittelijaNimet = oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids)
-                .stream()
-                .collect(toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
-        all.forEach(myonnettyKayttoOikeusDTO -> myonnettyKayttoOikeusDTO.setKasittelijaNimi(kasittelijaNimet.get(myonnettyKayttoOikeusDTO.getKasittelijaOid())));
+        try {
+            Map<String, String> kasittelijaNimet = oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids)
+                    .stream()
+                    .collect(toMap(HenkiloPerustietoDto::getOidhenkilo, t -> t.getSukunimi() + ", " + t.getKutsumanimi()));
+            all.forEach(myonnettyKayttoOikeusDTO -> myonnettyKayttoOikeusDTO.setKasittelijaNimi(kasittelijaNimet.get(myonnettyKayttoOikeusDTO.getKasittelijaOid())));
+        }catch (ExternalServiceException e){
+            logger.error("could not get user info from oppijanumerorekisteri: " + e.getMessage());
+        }
 
         return localizationService.localize(all);
     }
@@ -409,9 +414,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private boolean orgTypeMatchesOrOidIsFoundInViites(String organisaatioOid, Set<String> organisaatioTyyppis, OrganisaatioPerustieto opt) {
-        return oidIsFoundInViites(organisaatioOid, organisaatioTyyppis)
-                || opt.getChildren().stream().filter(child -> isNotBlank(child.getOppilaitostyyppi()))
-                .map(laitosTyyppi).anyMatch(organisaatioTyyppis::contains);
+        String laitosTyyppi = StringUtils.isNotBlank(opt.getOppilaitostyyppi()) ? opt.getOppilaitostyyppi().substring(17, 19) : null;
+        return organisaatioTyyppis.stream().anyMatch(s -> s.equals(laitosTyyppi) || s.equals(organisaatioOid));
     }
 
     private boolean oidIsFoundInViites(String organisaatioOid, Set<String> organisaatioTyyppis) {
