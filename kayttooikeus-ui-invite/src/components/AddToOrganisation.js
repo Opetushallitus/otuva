@@ -1,4 +1,5 @@
 import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import R from 'ramda'
 
 import organisations from '../logic/organisations'
@@ -6,6 +7,8 @@ import AddedOrganisations from './AddedOrganisations'
 import { toLocalizedText } from '../logic/localizabletext'
 
 const AddToOrganisation = React.createClass({
+
+  mixins: [PureRenderMixin],
 
   render: function() {
     const L = this.props.l10n
