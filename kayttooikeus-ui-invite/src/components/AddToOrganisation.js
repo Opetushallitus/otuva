@@ -1,106 +1,66 @@
 import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import R from 'ramda'
 
 import organisations from '../logic/organisations'
 import AddedOrganisations from './AddedOrganisations'
+import { toLocalizedText } from '../logic/localizabletext'
 
 const AddToOrganisation = React.createClass({
 
-  getInitialState: function() {
-    return {
-      selectedOrganisation: '',
-      selectedPermissions: [],
-    }
-  },
-
-  componentWillMount: function() {
-    this.setState({
-      selectedOrganisation: this.props.orgs[0].id
-    })
-  },
+  mixins: [PureRenderMixin],
 
   render: function() {
     const L = this.props.l10n
-    const orgs = this.props.orgs
-    const selectedOrganisation = this.state.selectedOrganisation
-
-    const activeOrg = 
-      R.find(R.propEq('id', selectedOrganisation))(orgs)
-    const permissions = activeOrg.permissions
+    const orgs = this.props.orgs.organisaatiot
 
     return (
       <fieldset className="add-to-organisation">
-      
+
         <h2>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h2>
+
+        <AddedOrganisations addedOrgs={this.props.addedOrgs} l10n={this.props.l10n} uiLang={this.props.uiLang} />
 
         <div>
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
           </label>
           <select id="org" onChange={this.selectOrganisation}>
+            <option value=""></option>
             {orgs.map(this.renderOrganisation)}
           </select>
         </div>
-
-        <div>
-          <label htmlFor="permissions">
-            {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']}
-          </label>
-          <select onChange={this.selectPermissions} multiple 
-            id="permissions">
-            {permissions.map(this.renderPermission)}
-          </select>
-        </div>
-
-        <a href="" onClick={this.addOrganisation}>
-          {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_LISAA']}
-        </a>
-
-        <AddedOrganisations addedOrgs={this.props.addedOrgs} />
 
       </fieldset>
     )
   },
 
-  addOrganisation: function(e) {
-    e.preventDefault()
-
-    if (this.state.selectedPermissions.length > 0) {
-      organisations.add({
-        id: this.state.selectedOrganisation,
-        permissions: this.state.selectedPermissions
+  selectOrganisation: function(e) {
+    const selectedOrganization = R.find(R.propEq('oid', e.target.value))(this.props.orgs.organisaatiot)
+    if (selectedOrganization) {
+      const oid = selectedOrganization.oid
+      // TODO: use kayttooikeus-service
+      fetch(`/authentication-service/resources/kayttooikeusryhma/organisaatio/${oid}`, {
+        credentials: 'same-origin'
+      }).then(response => {
+        return response.json()
+      }).then(permissions => {
+        organisations.add({
+          id: selectedOrganization.oid,
+          organisation: selectedOrganization,
+          selectablePermissions: permissions,
+          selectedPermissions: [],
+        })
       })
     }
   },
 
-  selectOrganisation: function(e) {
-    this.setState({
-      selectedOrganisation: e.target.value,
-      selectedPermissions: []
-    }) 
-  },
-
-  selectPermissions: function(e) {
-    this.setState({
-      selectedPermissions: Array.apply(null, e.target.options)
-        .filter(option => option.selected)
-        .map(option => option.value)
-    })
-  },
-
   renderOrganisation: function(org) {
+    const organisaatiotyypit = org.organisaatiotyypit.join(',')
     return (
-      <option key={org.id} value={org.id}>
-        {org['name-' + this.props.uiLang]}
-      </option>  
-    )
-  },
-
-  renderPermission: function(permission) {
-    return (
-      <option key={permission.id} value={permission.id}>
-        {permission['name-' + this.props.uiLang]}
-      </option>  
+      <option key={org.oid} value={org.oid}>
+        {toLocalizedText(this.props.uiLang, org.nimi, org.oid)} ({organisaatiotyypit})
+      </option>
     )
   },
 
