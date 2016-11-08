@@ -15,8 +15,6 @@ const appState = {
       {oid: 1, organisaatiotyypit: []},
     ]
   },
-  permissions: [
-  ],
   languages: [{ code: ''}]
 }
 
