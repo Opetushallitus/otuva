@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +33,7 @@ public class ServiceToServiceController {
                                              @RequestParam("useroid") String userOid,
                                              @RequestParam("allowedroles") List<String> allowedRoles,
                                              @RequestParam(value = "externalpermissionservice", required = false)
-                                                     PermissionCheckerService.ExternalPermissionService externalPermissionService,
+                                                     ExternalPermissionService externalPermissionService,
                                              @RequestParam("callinguserroles") Set<String> callingUserRoles) {
         return permissionCheckerService.isAllowedToAccessPerson(callingUserOid, userOid, allowedRoles,
                 externalPermissionService, callingUserRoles);

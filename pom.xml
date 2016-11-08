@@ -34,11 +34,14 @@
     </modules>
     
     <properties>
+        <!-- Do not deploy this module to artifactory -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.fileEncoding>UTF-8</project.build.fileEncoding>
         <java.version>1.8</java.version>
         <assertj.version>3.5.2</assertj.version> <!-- java8 assertions -->
-        
+
         <oppijanumerorekisteri.version>0.0.1-SNAPSHOT</oppijanumerorekisteri.version>
         <organisaatio.version>2015-09</organisaatio.version>
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
@@ -222,17 +225,6 @@
     </dependencyManagement>
     
     <repositories>
-        <repository>
-            <id>oph-sade-artifactory-snapshots</id>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oph-sade-artifactory-releases</id>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>
-        </repository>
         <repository>
             <id>repository.jboss.org</id>
             <name>JBoss Repository</name>

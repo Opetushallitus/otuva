@@ -12,6 +12,10 @@
     <artifactId>kayttooikeus-service</artifactId>
     <name>Käyttöoikeuspalvelu :: Service</name>
 
+    <properties>
+        <!-- Do not deploy this module to artifactory -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
     <dependencies>
         <dependency>

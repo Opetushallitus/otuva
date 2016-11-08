@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -29,7 +30,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.*;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
 public class PermissionCheckerTest {
 
     private PermissionCheckerService permissionChecker;
@@ -97,14 +98,14 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsDeniedWhenUserIsNotFound() {
         when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                PermissionCheckerService.ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
+                ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
     }
 
     @Test
     public void testThatSuperuserIsAllowedAccess() {
         this.myRoles = createMockedRoles(Sets.newHashSet("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"));
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                PermissionCheckerService.ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
+                ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
     }
 
     @Test
@@ -114,7 +115,7 @@ public class PermissionCheckerTest {
         }});
         when(henkiloRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                PermissionCheckerService.ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
+                ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
     }
 
     @Test
@@ -157,7 +158,7 @@ public class PermissionCheckerTest {
         this.fakeRestClient.setAllowAccess(false);
         when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                PermissionCheckerService.ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
+                ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
     }
 
     @Test
@@ -167,7 +168,7 @@ public class PermissionCheckerTest {
         when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         this.fakeRestClient.setAllowAccess(true);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                PermissionCheckerService.ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
+                ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
     }
 
     private static List<OrganisaatioPerustieto> getDummyOrganisaatioHakutulos() {
