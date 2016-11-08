@@ -1,0 +1,11 @@
+.topNavigation {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+}
+.topNavigation a.navigationItem {
+    padding: 10px;
+    border: 2px solid gray;
+    cursor: pointer;
+    margin-left: 15px;
+}

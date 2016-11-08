@@ -9,7 +9,9 @@ fetchMock.get(L10N_URL,
   new Promise(res => setTimeout(res, MOCK_DELAY)).then(() => ({
     "fi": {
         'HYVAKSYMATTOMAT_KAYTTOOIKEUSANOMUKSET_OTSIKKO': 'Hyväksymättömät käyttöoikeusanomukset',
-        'KUTSUTUT_VIRKAILIJAT_OTSIKKO': 'Kutsutut virkailijat'
+        'KUTSUTUT_VIRKAILIJAT_OTSIKKO': 'Kutsutut virkailijat',
+        'NAYTA_KUTSUTUT_LINKKI': 'Näytä kutsutut',
+        'TAKAISIN_LINKKI': 'Takaisin'
     }
   })
 ));

@@ -17,10 +17,10 @@ const MainContainer = React.createClass({
     },
     
     renderView: function(props, view) {
-        if (!view || view == 'AnomusList') {
+        if (!view || view === 'AnomusList') {
             return (<AnomusListView {...props}></AnomusListView>);
         }
-        if (view == 'KutsuList') {
+        if (view === 'KutsuList') {
             return (<KutsuListView {...props}></KutsuListView>);
         }
         return (<span>View {view} not found.</span>)

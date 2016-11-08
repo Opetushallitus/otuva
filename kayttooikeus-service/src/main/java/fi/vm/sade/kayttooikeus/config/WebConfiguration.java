@@ -27,6 +27,9 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
         registry
                 .addResourceHandler("/invite/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-invite/");
+        registry
+                .addResourceHandler("/list/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-list/");;
 
         super.addResourceHandlers(registry);
     }
