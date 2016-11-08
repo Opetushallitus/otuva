@@ -43,7 +43,7 @@ const InvitationConfirmation = React.createClass({
     return (
       <div key={org.organisation.oid}>
         <h3>{orgName}</h3>
-        {org.permissions.map(this.renderAddedOrgPermission)}
+        {org.selectedPermissions.map(this.renderAddedOrgPermission)}
       </div>
     )
   },

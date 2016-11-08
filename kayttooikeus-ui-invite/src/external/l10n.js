@@ -5,7 +5,7 @@ import fetchMock from 'fetch-mock'
 const L10N_URL = 'http://l10n'
 const MOCK_DELAY = 800
 
-fetchMock.get(L10N_URL, 
+fetchMock.get(L10N_URL,
   new Promise(res => setTimeout(res, MOCK_DELAY)).then(() => ({
     "fi": {
       'VIRKAILIJAN_LISAYS_OTSIKKO': 'Virkailijan lisäys',
@@ -15,7 +15,6 @@ fetchMock.get(L10N_URL,
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO': 'Virkalijan lisäys organisaatioon',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO': 'Organisaatio',
       'VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA': 'Myönnä käyttöoikeuksia',
-      'VIRKAILIJAN_LISAYS_ORGANISAATIOON_LISAA': 'Lisää organisaatio...',
       'VIRKAILIJAN_LISAYS_TALLENNA': 'Tallenna ja lähetä itserekisteröitymissähköposti',
       'VIRKAILIJAN_LISAYS_LAHETETTY': 'Lähetetty',
       'VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO': 'Kutsu Virkailijan Opintopolkuun',

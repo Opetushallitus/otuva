@@ -1,9 +1,6 @@
 import React from 'react'
 
-import organisations from '../logic/organisations'
-import { toLocalizedText } from '../logic/localizabletext'
-
-import './AddedOrganisations.css'
+import AddedOrganisation from './AddedOrganisation'
 
 const AddedOrganisations = React.createClass({
 
@@ -17,23 +14,11 @@ const AddedOrganisations = React.createClass({
 
   renderAddedOrganisation: function(addedOrg) {
     return (
-      <div className="added-org" key={addedOrg.organisation.oid}>
-        <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi, addedOrg.organisation.oid)}
-          <a href=""
-            onClick={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)}>X</a>
-        </h3>
-        <ul>
-          {addedOrg.permissions.map(permission => {
-            return <li key={permission.id}>{toLocalizedText(this.props.uiLang, permission.description, permission.name)}</li>
-          })}
-        </ul>
-      </div>
+      <AddedOrganisation key={addedOrg.id}
+                         addedOrg={addedOrg}
+                         l10n={this.props.l10n}
+                         uiLang={this.props.uiLang} />
     )
-  },
-
-  removeAddedOrg: function(id, e) {
-    e.preventDefault()
-    organisations.removeById(id)
   },
 
 })
