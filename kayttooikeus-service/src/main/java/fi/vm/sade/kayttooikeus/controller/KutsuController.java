@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,5 +38,13 @@ public class KutsuController {
             @ApiParam("Järjestysperuste") @RequestParam(required = false) KutsuOrganisaatioOrder sortBy,
             @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Order direction) {
         return kutsuService.listAvoinKutsus(orderer(sortBy, direction).byDefault(AIKALEIMA, DESC));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    public void delete(@PathVariable Long id) {
+        kutsuService.deleteKutsu(id);
     }
 }

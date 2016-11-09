@@ -51,4 +51,13 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
 
     @Column(name = "luotu_henkilo_oid", nullable = true)
     private String luotuHenkiloOid;
+    
+    public void poista(String poistaja) {
+        if (this.tila != KutsunTila.AVOIN) {
+            throw new IllegalStateException("Can not delete kutsu in state " + tila);
+        }
+        this.setPoistettu(now());
+        this.setPoistaja(poistaja);
+        this.setTila(KutsunTila.POISTETTU);
+    }
 }

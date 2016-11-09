@@ -7,7 +7,7 @@ import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import MainContainer from './components/MainContainer.js'
 import view from './logic/view.js'
 import { buildVersionResponsePendingP } from './external/buildversion'
-import { kutsuListP, kutsuListResponseS } from './external/kutsuList'
+import { kutsuListP, kutsuListResponseS } from './external/kutsu'
 
 import './reset.css'
 import './index.css'

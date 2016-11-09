@@ -5,11 +5,6 @@ import './AnomusListView.css'
 import TopNavigation from './TopNavigation'
 
 const AnomusListView = React.createClass({
-    getInitialState: function() {
-        return {
-        }
-    },
-
     render: function() {
         const L = this.props.l10n;
         return (

@@ -1,4 +1,4 @@
-# Käyttöoikeusanomuksien ja kutsujen -frontend
+# Käyttöoikeusanomuksien ja kutsujen virkailijan listaus -frontend
 
 ## Description
 

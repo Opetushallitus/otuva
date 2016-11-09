@@ -2,18 +2,25 @@ import React from 'react'
 import dateformat from 'dateformat'
 
 import './KutsuListView.css'
-import kutsuList from '../external/kutsuList'
+import kutsuList, {peruutaKutsu} from '../external/kutsu'
 import TopNavigation from './TopNavigation'
-import Button from './Button'
-import SortByHeader from './SortByHeader'
-
+import Button from 'button'
+import SortByHeader from 'sort-by-header'
 import BackLink from './BackLink'
+import Modal from 'modal'
 
 const KutsuListView = React.createClass({
+    getInitialState: function() {
+        return {
+            confirmDeleteFor: null
+        };
+    },
+    
     render: function() {
         const L = this.props.l10n;
         const kutsuResponse = this.props.kutsuList;
         const state = this.props.kutsuListState.params;
+        console.log('confirmDeleteFor', this.state.confirmDeleteFor);
         return (
             <div className="wrapper">
                 <TopNavigation {...this.props}/>
@@ -23,9 +30,9 @@ const KutsuListView = React.createClass({
                 </div>
                 {!kutsuResponse.loaded 
                     && <div className="loading">{L['LADATAAN']}</div>}
-                {kutsuResponse.loaded && !kutsuResponse.result.length 
+                {kutsuResponse.loaded && !kutsuResponse.result.length > 0
                     && <div className="noResults">{L['EI_KUTSUJA']}</div>}
-                {kutsuResponse.loaded && kutsuResponse.result.length 
+                {kutsuResponse.loaded && kutsuResponse.result.length > 0
                     && <div className="results">
                         <table>
                             <thead>
@@ -43,26 +50,58 @@ const KutsuListView = React.createClass({
                                 </tr>
                             </thead>
                             <tbody>
-                                {kutsuResponse.result.map(r => <tr key={r.id}>
+                                {kutsuResponse.result.map(kutsu => <tr key={kutsu.id}>
                                     <td>
-                                        {r.sahkoposti}
+                                        {kutsu.sahkoposti}
                                     </td>
                                     <td>
-                                        {r.organisaatiot.map(org => 
+                                        {kutsu.organisaatiot.map(org => 
                                             <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.uiLang]}</div>)}
                                     </td>
                                     <td>
-                                        {dateformat(new Date(r.aikaleima), L['PVM_FORMAATTI'])}
+                                        {dateformat(new Date(kutsu.aikaleima), L['PVM_FORMAATTI'])}
                                     </td>
                                     <th>
-                                        {r.tila === 'AVOIN' && <Button action={this.cancelInvitationAction(r)}>{L['PERUUTA_KUTSU']}</Button>}
+                                        {kutsu.tila === 'AVOIN' && <Button action={this.cancelInvitationAction(kutsu)}>{L['PERUUTA_KUTSU']}</Button>}
                                     </th>
                                 </tr>)}
                             </tbody>
                         </table>
                     </div>}
-            </div>
-        )
+                
+                {this.state.confirmDeleteFor != null && <Modal show={this.state.confirmDeleteFor != null} onClose={this.cancelInvitationCancellation}
+                            closeOnOuterClick={true}>
+                    <div className="confirmation-modal">
+                        <h3>{L['PERUUTA_KUTSU_VAHVISTUS']}</h3>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>{L['KUTSUT_SAHKOPOSTI_OTSIKKO']}</th>
+                                    <td>{this.state.confirmDeleteFor.sahkoposti}</td>
+                                </tr>
+                                <tr>
+                                    <th>{L['KUTSUTUT_ORGANISAATIO_OTSIKKO']}</th>
+                                    <td>{this.state.confirmDeleteFor.organisaatiot.map(org =>
+                                        <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.uiLang]}</div>)}</td>
+                                </tr>
+                                <tr>
+                                    <th>{L['KUTSUTUT_KUTSU_LAHETETTY_OTSIKKO']}</th>
+                                    <td>{dateformat(new Date(this.state.confirmDeleteFor.aikaleima), L['PVM_FORMAATTI'])}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div className="row">
+                            <Button className="left action" action={this.cancelInvitationConfirmed}>
+                                {L['PERUUTA_KUTSU']}
+                            </Button>
+                            <Button className="right cancel" action={this.cancelInvitationCancellation}>
+                                {L['PERUUTA_KUTSUN_PERUUTTAMINEN']}
+                            </Button>
+                        </div>
+                        <div className="clear"></div>
+                    </div>
+                </Modal>}
+            </div>);
     },
 
     changeOrder: function(sortBy, direction) {
@@ -70,12 +109,21 @@ const KutsuListView = React.createClass({
     },
     
     cancelInvitationAction: function(r) {
-        const L = this.props.l10n;
         return () => {
-            if (confirm(L['PERUUTA_KUTSU_VAHVISTUS'])) {
-                // TODO
-            }
+            console.info('setting state ', r);
+            this.setState({confirmDeleteFor: r});
         };
+    },
+    
+    cancelInvitationCancellation: function() {
+        this.setState({confirmDeleteFor: null});
+    },
+
+    cancelInvitationConfirmed: function() {
+        if (this.state.confirmDeleteFor) {
+            peruutaKutsu(this.state.confirmDeleteFor.id);
+            this.setState({confirmDeleteFor: null});
+        }
     },
 
     componentDidMount: function() {

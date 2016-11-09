@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface KutsuService {
     List<KutsuListDto> listAvoinKutsus(OrderBy<KutsuOrganisaatioOrder> orderBy);
+
+    void deleteKutsu(long id);
 }

@@ -8,7 +8,8 @@ const Button = React.createClass({
     },
     
     render: function() {
-        return (<span onClick={this.props.action} className="button">{this.props.children}</span>);
+        const className = "button " + (this.props.className ? " " + this.props.className : "");
+        return (<span className={className} onClick={this.props.action}>{this.props.children}</span>);
     }
 });
 export default Button;
