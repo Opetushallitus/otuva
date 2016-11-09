@@ -80,7 +80,7 @@ public class KayttoOikeusRyhmaController {
                     + "tiettyyn organisaatioon, jos kutsussa on annettu organisaatiorajoite.")
     public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmaByHenkilo(
             @PathVariable("oid") String oid,
-            @QueryParam("ooid") String organisaatioOid) {
+            @RequestParam(value = "ooid", required = false) String organisaatioOid) {
         return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(oid, organisaatioOid);
     }
 
@@ -93,7 +93,8 @@ public class KayttoOikeusRyhmaController {
             notes = "Listaa nykyisen kirjautuneen henkilön kaikki käyttöoikeusryhmät "
                     + "sekä rajaa ne tiettyyn organisaatioon, jos kutsussa on "
                     + "annettu organisaatiorajoite.")
-    public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmaForCurrentUser(@QueryParam("ooid") String organisaatioOid) {
+    public List<MyonnettyKayttoOikeusDto> listKayttoOikeusRyhmaForCurrentUser(
+            @RequestParam(value = "ooid", required = false) String organisaatioOid) {
         return kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(UserDetailsUtil.getCurrentUserOid(), organisaatioOid);
     }
 
@@ -138,10 +139,10 @@ public class KayttoOikeusRyhmaController {
     @ApiOperation(value = "Luo uuden käyttöoikeusryhmän.",
             notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
     @ResponseBody
-    public String createKayttoOikeusRyhma(@RequestBody @Validated KayttoOikeusRyhmaModifyDto uusiRyhma) {
+    public Long createKayttoOikeusRyhma(@RequestBody @Validated KayttoOikeusRyhmaModifyDto uusiRyhma) {
         long createdId = kayttoOikeusService.createKayttoOikeusRyhma(uusiRyhma);
         accessRightAuditLogger.auditModifyAccessRightGroupData(UserDetailsUtil.getCurrentUserOid(), "NEW", true);
-        return String.format("%d", createdId);
+        return createdId;
     }
 
 

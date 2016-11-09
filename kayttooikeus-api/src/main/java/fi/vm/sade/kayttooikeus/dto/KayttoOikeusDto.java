@@ -15,6 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class KayttoOikeusDto {
+    private Long id;
     private String rooli;
     private TextGroupDto textGroup;
     private Set<KayttoOikeusRyhmaDto> kayttoOikeusRyhmas = new HashSet<>();

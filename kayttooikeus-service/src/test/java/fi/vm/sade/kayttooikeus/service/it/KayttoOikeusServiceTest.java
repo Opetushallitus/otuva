@@ -80,29 +80,29 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listMyonnettyKayttoOikeusHistoriaForCurrentUser() {
-        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma1 = populate(myonnettyKayttoOikeus(
-                    organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                    kayttoOikeusRyhma("RYHMA")
-                            .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                            .withOikeus(oikeus("KOODISTO", "READ"))
-                )),
-            tapahtuma2 = populate(myonnettyKayttoOikeus(
-                    organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
-                    kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta"))
-                            .withOikeus(oikeus("KOODISTO", "CRUD"))
-            ));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ"))
+        ));
+        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
+                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta"))
+                        .withOikeus(oikeus("KOODISTO", "CRUD"))
+        ));
         
         List<KayttoOikeusHistoriaDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
         assertEquals(3, list.size());
-        assertEquals(tapahtuma2.getAikaleima(), list.get(0).getAikaleima());
-        assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), list.get(0).getKasittelija());
-        assertEquals(tapahtuma2.getOrganisaatioHenkilo().getOrganisaatioOid(), list.get(0).getOrganisaatioOid());
-        assertEquals(tapahtuma2.getOrganisaatioHenkilo().getTehtavanimike(), list.get(0).getTehtavanimike());
+        assertEquals(tapahtuma.getAikaleima(), list.get(0).getAikaleima());
+        assertEquals(tapahtuma.getKasittelija().getOidHenkilo(), list.get(0).getKasittelija());
+        assertEquals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), list.get(0).getOrganisaatioOid());
+        assertEquals(tapahtuma.getOrganisaatioHenkilo().getTehtavanimike(), list.get(0).getTehtavanimike());
         assertEquals(KayttoOikeudenTila.MYONNETTY, list.get(0).getTila());
         assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, list.get(0).getTyyppi());
-        assertEquals(tapahtuma2.getVoimassaAlkuPvm(), list.get(0).getVoimassaAlkuPvm());
-        assertEquals(tapahtuma2.getVoimassaLoppuPvm(), list.get(0).getVoimassaLoppuPvm());
-        assertEquals(tapahtuma2.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
+        assertEquals(tapahtuma.getVoimassaAlkuPvm(), list.get(0).getVoimassaAlkuPvm());
+        assertEquals(tapahtuma.getVoimassaLoppuPvm(), list.get(0).getVoimassaLoppuPvm());
+        assertEquals(tapahtuma.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
                 list.get(0).getKayttoOikeusId());
         assertEquals("Koodistonhallinta", list.get(0).getKuvaus().get("FI"));
     }
@@ -175,12 +175,11 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void findPalveluRoolisByKayttoOikeusRyhmaTest(){
-        KayttoOikeus oikeus = populate(oikeus("HENKILOHALLINTA", "CRUD"));
-
-        Palvelu palvelu1 = populate(palvelu("HENKILOPALVELU").kuvaus(text("FI", "Henkilöpalvelu")
-                .put("EN", "Person service"))),
-                palvelu2 = populate(palvelu("KOODISTO"));
-        palvelu2.getKayttoOikeus().add(oikeus);
+        populate(palvelu("HENKILOPALVELU").kuvaus(text("FI", "Henkilöpalvelu").put("EN", "Person service")));
+        Palvelu palvelu = populate(palvelu("KOODISTO").kuvaus(text("FI", "palvelun kuvaus")
+                        .put("EN", "kuv en")
+                        .put("SV", "kuvaus på sv")));
+        palvelu.getKayttoOikeus().add(populate(oikeus("HENKILOHALLINTA", "CRUD")));
 
         populate(kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
@@ -195,6 +194,10 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals(1L, roolis.size());
         assertEquals("KOODISTO", roolis.get(0).getPalveluName());
         assertEquals("CRUD", roolis.get(0).getRooli());
+        assertEquals(3, roolis.get(0).getPalveluTexts().getTexts().size());
+        assertEquals("palvelun kuvaus", roolis.get(0).getPalveluTexts().get("FI"));
+        assertEquals("kuv en", roolis.get(0).getPalveluTexts().get("EN"));
+        assertEquals("kuvaus på sv", roolis.get(0).getPalveluTexts().get("SV"));
     }
 
     @Test

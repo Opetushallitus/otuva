@@ -110,7 +110,10 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                         .asHidden())
                 .voimassaPaattyen(new LocalDate().plusMonths(3)));
 
-        list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio("1.2.3.4.5", "3.4.5.6.7");
+        list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio("1.2.3.4.5", null);
         assertEquals(3, list.size());
+
+        list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio("1.2.3.4.5", "3.4.5.6.7");
+        assertEquals(1, list.size());
     }
 }
