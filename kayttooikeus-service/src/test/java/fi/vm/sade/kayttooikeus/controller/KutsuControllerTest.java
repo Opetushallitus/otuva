@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,5 +42,12 @@ public class KutsuControllerTest extends AbstractControllerTest {
         this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kutsu/simpleKutsuListaus.json")));
+    }
+    
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    public void deleteTest() throws Exception {
+        this.mvc.perform(delete("/kutsu/1").accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk());
     }
 }

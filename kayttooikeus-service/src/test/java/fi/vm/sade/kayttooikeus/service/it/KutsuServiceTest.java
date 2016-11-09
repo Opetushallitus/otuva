@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.repositories.OrderBy;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import org.joda.time.DateTime;
@@ -25,6 +26,7 @@ import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringRunner.class)
@@ -74,5 +76,32 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("1.2.3.4.6", kutsus.get(0).getOrganisaatiot().get(0).getOid());
         assertEquals("Nimi1", kutsus.get(0).getOrganisaatiot().get(0).getNimi().get("FI"));
         assertEquals("Nimi2", kutsus.get(0).getOrganisaatiot().get(1).getNimi().get("FI"));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    public void deleteKutsuTest() {
+        Kutsu kutsu = populate(kutsu("b@eaxmple.com")
+                .kutsuja("1.2.4")
+                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                        .ryhma(kayttoOikeusRyhma("RYHMA2")))
+        );
+        kutsuService.deleteKutsu(kutsu.getId());
+        em.flush();
+        assertEquals(KutsunTila.POISTETTU, kutsu.getTila());
+        assertEquals("1.2.4", kutsu.getPoistaja());
+        assertNotNull(kutsu.getPoistettu());
+    }
+
+
+    @Test(expected = NotFoundException.class)
+    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    public void deleteKutsuOtherKutsujaFailsTest() {
+        Kutsu kutsu = populate(kutsu("b@eaxmple.com")
+                .kutsuja("1.2.5")
+                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                        .ryhma(kayttoOikeusRyhma("RYHMA2")))
+        );
+        kutsuService.deleteKutsu(kutsu.getId());
     }
 }
