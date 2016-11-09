@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.Order.DESC;
-import static fi.vm.sade.kayttooikeus.model.KutsunTila.AVOIN;
+import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
@@ -47,8 +47,9 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         List<KutsuOrganisaatioListDto> kutsuOrganisaatios = kutsuDao.listKutsuOrganisaatioListDtos(criteria, orderBy);
         Map<String,List<KutsuOrganisaatioListDto>> byOrganisaatioOids = kutsuOrganisaatios.stream()
                 .collect(groupingBy(KutsuOrganisaatioListDto::getOid));
-        organisaatioClient.listActiveOganisaatioPerustiedot(byOrganisaatioOids.keySet())
-                .stream().map(perustiedot -> new SimpleEntry<>(perustiedot.getOid(), new TextGroupMapDto(null, perustiedot.getNimi())))
+        byOrganisaatioOids.keySet().stream().map(organisaatioClient::getOrganisaatioPerustiedot)
+                .filter(perustiedot -> byOrganisaatioOids.containsKey(perustiedot.getOid()))
+                .map(perustiedot -> new SimpleEntry<>(perustiedot.getOid(), new TextGroupMapDto(null, perustiedot.getNimi())))
                 .forEach(e -> byOrganisaatioOids.get(e.getKey()).forEach(dto -> dto.setNimi(e.getValue())));
         Stream<KutsuOrganisaatioListDto> kutsuOrganisaaStream = kutsuOrganisaatios.stream();
         if (orderBy.getBy() == ORGANISAATIO) {

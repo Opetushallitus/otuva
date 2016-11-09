@@ -54,7 +54,8 @@
     "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "ramda": "^0.22.1",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react-dom": "^15.3.2",
+    "dateformat": "1.0.12"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -90,10 +91,12 @@
     "extends": "react-app"
   },
   "proxy": {
-    "/kayttooikeus-service": {
+    "/kayttooikeus-service/*": {
       "target": "http://localhost:8080",
       "secure": false,
-      "changeOrigin": true
+      "changeOrigin": false,
+      "xfwd": true,
+      "auth": "test:test"
     }
   }
 }

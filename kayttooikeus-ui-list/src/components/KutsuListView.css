@@ -1,0 +1,16 @@
+.results table {
+    width: 100%;
+    border: 1px solid gray;
+}
+.results td, .results th {
+    text-align: left;
+    width: 30%;
+    padding: 20px;
+    border-bottom: 1px solid gray;
+}
+.results tr:last-child td {
+    border-bottom: 0;
+}
+.kutsuOrganisaatio {
+    padding-bottom: 5px;
+}

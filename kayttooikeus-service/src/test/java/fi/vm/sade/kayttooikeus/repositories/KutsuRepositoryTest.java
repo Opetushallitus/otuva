@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories;
 import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.model.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -16,6 +16,7 @@ import java.util.List;
 import static com.querydsl.core.types.Order.ASC;
 import static com.querydsl.core.types.Order.DESC;
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
+import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.AIKALEIMA;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.SAHKOPOSTI;
@@ -45,6 +46,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
         KutsuListDto dto = results.get(0);
         assertEquals(new DateTime(2016,1,1,0,0,0), dto.getAikaleima());
         assertEquals("a@eaxmple.com", dto.getSahkoposti());
+        assertEquals(AVOIN, dto.getTila());
         assertEquals(kutsu.getId(), dto.getId());
 
         results = kutsuRepository.listKutsuListDtos(new KutsuCriteria().withKutsuja("1.2.3")

@@ -5,8 +5,8 @@ import dispatcher from './dispatcher'
 const d = dispatcher();
 
 const view = {
-  toProperty: (initialOrgs = []) => {
-    return Bacon.update(initialOrgs,
+  toProperty: () => {
+    return Bacon.update([],
         [d.stream('changeCurrentView')], (current, newView) => [...current, newView],
         [d.stream('back')], (current) => current.length > 2 ? [...current][0..current.length-2] : []
     )

@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class KutsuListDto implements Serializable {
     private Long id;
+    private KutsunTila tila;
     private String sahkoposti;
     private DateTime aikaleima;
     private List<KutsuOrganisaatioListDto> organisaatiot = new ArrayList<>();

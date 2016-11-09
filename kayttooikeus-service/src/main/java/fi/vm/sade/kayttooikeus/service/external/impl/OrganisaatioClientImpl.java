@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -20,16 +21,18 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final CachingRestClient restClient = new CachingRestClient()
             .setClientSubSystemCode("kayttooikeus.kayttooikeuspalvelu-service");
     private final UrlConfiguration urlConfiguration;
+    private final ObjectMapper objectMapper;
 
-    public OrganisaatioClientImpl(UrlConfiguration urlConfiguration) {
+    public OrganisaatioClientImpl(UrlConfiguration urlConfiguration, ObjectMapper objectMapper) {
         this.urlConfiguration = urlConfiguration;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public OrganisaatioRDTO getOrganisaatioPerustiedot(String oid) {
         String url = urlConfiguration.url("organisaatio-service.organisaatio.perustiedot", oid);
-        return retrying(io(() -> restClient.get(url,OrganisaatioRDTO.class)), 2)
-                .get().orFail(mapper(url));
+        return retrying(io(() -> (OrganisaatioRDTO) objectMapper.readerFor(OrganisaatioRDTO.class)
+                    .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url));
     }
 
     @Override

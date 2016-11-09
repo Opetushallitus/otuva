@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
-import fi.vm.sade.kayttooikeus.model.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.repositories.populate.Populator;
 import org.joda.time.DateTime;
 

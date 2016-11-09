@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import com.querydsl.core.BooleanBuilder;
-import fi.vm.sade.kayttooikeus.model.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.model.QKutsu;
 import lombok.Getter;
 import lombok.Setter;

@@ -3,9 +3,16 @@
     top: 30px;
     right: 40px;
 }
-.topNavigation a.navigationItem {
+.topNavigation .navigationItem {
     padding: 10px;
     border: 2px solid gray;
-    cursor: pointer;
     margin-left: 15px;
+}
+.topNavigation a.navigationItem {
+    cursor: pointer;
+}
+.topNavigation .navigationItem.currentView {
+    background-color: rgb(21, 158, 203);
+    border: 2px solid rgb(21, 158, 203);
+    color: white;
 }

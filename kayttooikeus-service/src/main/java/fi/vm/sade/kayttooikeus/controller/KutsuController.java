@@ -34,8 +34,8 @@ public class KutsuController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public List<KutsuListDto> listAvoinKutsus(
-            @ApiParam("Järjestysperuste") @RequestParam(required = false) KutsuOrganisaatioOrder orderBy,
+            @ApiParam("Järjestysperuste") @RequestParam(required = false) KutsuOrganisaatioOrder sortBy,
             @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Order direction) {
-        return kutsuService.listAvoinKutsus(orderer(orderBy, direction).byDefault(AIKALEIMA, DESC));
+        return kutsuService.listAvoinKutsus(orderer(sortBy, direction).byDefault(AIKALEIMA, DESC));
     }
 }

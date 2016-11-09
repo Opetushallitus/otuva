@@ -1,9 +1,6 @@
 import Bacon from 'baconjs'
-import fetchMock from 'fetch-mock'
 
 const BUILDVERSION_URL = '/kayttooikeus-service/buildversion.txt';
-
-fetchMock.spy(BUILDVERSION_URL);
 
 const fetchFromUrl = url => {
   return Bacon.fromPromise(

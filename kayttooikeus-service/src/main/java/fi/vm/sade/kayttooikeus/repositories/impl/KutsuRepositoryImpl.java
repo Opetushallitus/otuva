@@ -21,6 +21,7 @@ public class KutsuRepositoryImpl extends AbstractRepository implements KutsuRepo
         return jpa().from(kutsu).where(criteria.builder(kutsu). getValue())
                 .select(bean(KutsuListDto.class,
                     kutsu.id.as("id"),
+                    kutsu.tila.as("tila"),
                     kutsu.aikaleima.as("aikaleima"),
                     kutsu.sahkoposti.as("sahkoposti")
                 )).orderBy(kutsu.aikaleima.desc()).fetch();
