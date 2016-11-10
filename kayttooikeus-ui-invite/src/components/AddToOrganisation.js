@@ -11,7 +11,7 @@ const AddToOrganisation = React.createClass({
   mixins: [PureRenderMixin],
 
   organisaatioNimi: function(organisaatio) {
-    return toLocalizedText(this.props.uiLang, organisaatio.nimi, organisaatio.oid)
+    return toLocalizedText(this.props.uiLang, organisaatio.nimi)
   },
 
   render: function() {

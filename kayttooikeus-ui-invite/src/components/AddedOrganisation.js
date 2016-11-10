@@ -14,7 +14,7 @@ const AddedOrganisation = React.createClass({
     const L = this.props.l10n
     return (
       <div className="added-org" key={addedOrg.organisation.oid}>
-        <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi, addedOrg.organisation.oid)}
+        <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}
           <a href=""
             onClick={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)}>X</a>
         </h3>
