@@ -3,27 +3,19 @@ import ReactDOM from 'react-dom'
 import Bacon from 'baconjs'
 import 'oph-urls-js'  // functions (urls, url, etc.) attached to window
 
-import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
-import MainContainer from './components/MainContainer.js'
-import view from './logic/view.js'
-import { buildVersionResponsePendingP } from './external/buildversion'
-import { kutsuListP, kutsuListResponseS } from './external/kutsu'
+import { l10nP } from './external/l10n'
+import { contentP } from './logic/route'
+import { locationP } from './logic/location'
+import TopNavigation from './components/TopNavigation'
 
 import './reset.css'
 import './index.css'
 
-const appStateS = Bacon.combineTemplate({
-    l10n: l10nResponseS.toProperty(),
-    view: view.toProperty(),
-    kutsuListState: kutsuListP,
-    kutsuList: kutsuListResponseS.toProperty({loaded:false, result:[]})
-}).changes();
-
-appStateS
-  .skipWhile(l10nResponsePendingP
-        .or(buildVersionResponsePendingP))
-  .onValue(appState => {
-    ReactDOM.render(
-      <MainContainer {...appState} />, document.getElementById('root')
-    );
-  });
+const domP = Bacon.combineWith(locationP, l10nP, contentP, (location, l10n, content) => {
+    const props = {location, l10n};
+    return <div className="mainContainer">
+        <TopNavigation {...props}/>
+        {content}
+    </div>
+});
+domP.onValue(component => ReactDOM.render(component, document.getElementById('root')));

@@ -1,13 +1,17 @@
 import React from 'react'
+import Bacon from 'baconjs'
 import dateformat from 'dateformat'
 
 import './KutsuListView.css'
-import kutsuList, {peruutaKutsu} from '../external/kutsu'
-import TopNavigation from './TopNavigation'
+
+import Modal from 'modal'
 import Button from 'button'
 import SortByHeader from 'sort-by-header'
+
 import BackLink from './BackLink'
-import Modal from 'modal'
+
+import kutsuList, { kutsuListStateP, kutsuListP, peruutaKutsu } from '../external/kutsu'
+import { l10nP, localeP } from '../external/l10n'
 
 const KutsuListView = React.createClass({
     getInitialState: function() {
@@ -20,10 +24,8 @@ const KutsuListView = React.createClass({
         const L = this.props.l10n;
         const kutsuResponse = this.props.kutsuList;
         const state = this.props.kutsuListState.params;
-        console.log('confirmDeleteFor', this.state.confirmDeleteFor);
         return (
             <div className="wrapper">
-                <TopNavigation {...this.props}/>
                 <BackLink {...this.props}/>
                 <div className="header">
                     <h1>{L['KUTSUTUT_VIRKAILIJAT_OTSIKKO']}</h1>
@@ -56,7 +58,7 @@ const KutsuListView = React.createClass({
                                     </td>
                                     <td>
                                         {kutsu.organisaatiot.map(org => 
-                                            <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.uiLang]}</div>)}
+                                            <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.locale]}</div>)}
                                     </td>
                                     <td>
                                         {dateformat(new Date(kutsu.aikaleima), L['PVM_FORMAATTI'])}
@@ -82,7 +84,7 @@ const KutsuListView = React.createClass({
                                 <tr>
                                     <th>{L['KUTSUTUT_ORGANISAATIO_OTSIKKO']}</th>
                                     <td>{this.state.confirmDeleteFor.organisaatiot.map(org =>
-                                        <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.uiLang]}</div>)}</td>
+                                        <div className="kutsuOrganisaatio" key={org.oid}>{org.nimi[this.props.locale]}</div>)}</td>
                                 </tr>
                                 <tr>
                                     <th>{L['KUTSUTUT_KUTSU_LAHETETTY_OTSIKKO']}</th>
@@ -110,7 +112,6 @@ const KutsuListView = React.createClass({
     
     cancelInvitationAction: function(r) {
         return () => {
-            console.info('setting state ', r);
             this.setState({confirmDeleteFor: r});
         };
     },
@@ -127,8 +128,16 @@ const KutsuListView = React.createClass({
     },
 
     componentDidMount: function() {
-        kutsuList.activate();
+        kutsuList.update(); // initial fetch
     }
+});
+
+export const kutsuListViewContentP = Bacon.combineWith(l10nP, localeP, kutsuListStateP, kutsuListP,
+        (l10n, locale, kutsuListState, kutsuList) => {
+    const props = {l10n, locale, kutsuListState, kutsuList};
+    return {
+        content: <KutsuListView {...props}/>
+    };
 });
 
 export default KutsuListView

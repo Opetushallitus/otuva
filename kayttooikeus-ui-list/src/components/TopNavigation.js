@@ -1,27 +1,26 @@
 import React from 'react'
 
 import './TopNavigation.css'
-import view from '../logic/view'
+import {navigateTo} from '../logic/location'
 
 const TopNavigation = React.createClass({
     render: function() {
         return (<div className="topNavigation">
-            {this.item('KutsuList', 'NAYTA_KUTSUTUT_LINKKI')}
+            {this.item('/kutsu', 'NAYTA_KUTSUTUT_LINKKI')}
         </div>);
     },
     
-    item: function(viewId, key) {
+    item: function(path, key) {
         const L = this.props.l10n;
-        const currentView = this.props.view.length ? this.props.view[this.props.view.length-1] : '';
-        if (currentView === viewId) {
+        if (this.props.location.path === path) {
             return (<div className="navigationItem currentView">{L[key]}</div>);
         }
-        return (<a className="navigationItem" onClick={this.changeViewAction(viewId)}>{L[key]}</a>);
+        return (<a className="navigationItem" onClick={this.changeViewAction(path)}>{L[key]}</a>);
     },
     
     changeViewAction: function(to) {
         return () => {
-            view.change(to);
+            navigateTo(to);
         };
     }
 });

@@ -3,17 +3,15 @@ import dispatcher from '../logic/dispatcher'
 import {queryString} from '../logic/fetchUtils'
 
 const KUTSU_URL = '/kayttooikeus-service/kutsu';
-const kutsuListDispatcher = dispatcher('kutsuList');
+const kutsuListDispatcher = dispatcher();
 
 const kutsuList = {
     toProperty: (initialState = {
-        active: false,
         params: {
             sortBy: 'AIKALEIMA',
             direction: 'DESC'
         }
     }) => Bacon.update(initialState,
-        [kutsuListDispatcher.stream('activate')], (current) => ({...current, active: true}),
         [kutsuListDispatcher.stream('update')], (current) => ({...current}),
         [kutsuListDispatcher.stream('changeParams')], (current, params) => ({...current, params})
     ),
@@ -21,8 +19,7 @@ const kutsuList = {
         sortBy: by,
         direction: direction
     }),
-    update: () => kutsuListDispatcher.push('update'),
-    activate: () => kutsuListDispatcher.push('activate')
+    update: () => kutsuListDispatcher.push('update')
 };
 
 export const peruutaKutsu = (id) => {
@@ -34,11 +31,12 @@ export const peruutaKutsu = (id) => {
     }));
 };
 
-export const kutsuListP = kutsuList.toProperty();
-export const kutsuListRequestS = Bacon.combineTemplate({state: kutsuListP}).changes();
-export const kutsuListResponseS = kutsuListRequestS.skipWhile(stateHolder => !stateHolder.state.active)
-    .flatMap(stateHolder => Bacon.fromPromise(fetch(KUTSU_URL+queryString(stateHolder.state.params))
+export const kutsuListStateP = kutsuList.toProperty();
+export const kutsuListRequestS = Bacon.combineTemplate({state: kutsuListStateP}).changes();
+export const kutsuListResponseS = kutsuListRequestS.flatMap(stateHolder => 
+    Bacon.fromPromise(fetch(KUTSU_URL+queryString(stateHolder.state.params))
         .then(response => response.json().then(json => ({loaded: true, result: json}))
             .catch(no => ({loaded:false, result:null}))))
     );
+export const kutsuListP = kutsuListResponseS.toProperty({loaded:false, result:[]});
 export default kutsuList
