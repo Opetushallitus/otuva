@@ -24,14 +24,14 @@ public class HenkiloVitteRepositoryImpl extends AbstractRepository implements He
         String masterOid = this.jpa().select(qHenkiloViite.masterOid).from(qHenkiloViite)
                 .where(qHenkiloViite.masterOid.eq(oid)
                 .or(qHenkiloViite.slaveOid.eq(oid)))
-                .fetchOne();
+                .fetchFirst();
 
         if(masterOid == null) {
             return Sets.newHashSet(oid);
         }
         Set<String> personOidsForSamePerson = Sets.newHashSet(masterOid);
 
-        List<String> masterOidSlaves = this.jpa().select(qHenkiloViite.masterOid).from(qHenkiloViite)
+        List<String> masterOidSlaves = this.jpa().select(qHenkiloViite.slaveOid).from(qHenkiloViite)
                 .where(qHenkiloViite.masterOid.eq(masterOid))
                 .fetch();
 

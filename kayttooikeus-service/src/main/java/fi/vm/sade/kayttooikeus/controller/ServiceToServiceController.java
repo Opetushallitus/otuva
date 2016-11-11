@@ -29,4 +29,3 @@ public class ServiceToServiceController {
                 permissionCheckDto.getExternalPermissionService(), permissionCheckDto.getCallingUserRoles());
     }
 }
-

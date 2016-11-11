@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PermissionCheckerServiceImpl implements PermissionCheckerService {
-
-
     private static final Logger LOG = LoggerFactory.getLogger(PermissionCheckerService.class);
     private static CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode("henkilo.authentication-service");
     private static ObjectMapper objectMapper = new ObjectMapper();
