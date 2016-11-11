@@ -38,7 +38,7 @@ const InvitationConfirmation = React.createClass({
   },
 
   renderAddedOrg: function(org) {
-    const orgName = toLocalizedText(this.props.uiLang, org.organisation.nimi, org.organisation.oid)
+    const orgName = toLocalizedText(this.props.uiLang, org.organisation.nimi)
 
     return (
       <div key={org.organisation.oid}>

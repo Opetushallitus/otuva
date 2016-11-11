@@ -3,27 +3,44 @@ import R from 'ramda'
 const FORMATS = [
   {
     // used (at least) in henkilöpalvelu
-    isValid: (localizableText) => Array.isArray(localizableText.texts),
-    getValue: (localizableText, uiLang) => R.find(R.propEq('lang', uiLang.toUpperCase()))(localizableText.texts).text
+    isValid: (localizableText) => Array.isArray(localizableText.texts) && localizableText.texts.length > 0,
+    getValue: (localizableText, uiLang) => R.find(R.propEq('lang', uiLang.toUpperCase()))(localizableText.texts).text,
+    getFallbackValue: (localizableText) => localizableText[0]
   },
   {
     // used (at least) in organisaatiopalvelu
     isValid: (localizableText) => typeof localizableText === "object" && localizableText !== null,
-    getValue: (localizableText, uiLang) => localizableText[uiLang.toLowerCase()]
+    getValue: (localizableText, uiLang) => localizableText[uiLang.toLowerCase()],
+    getFallbackValue: (localizableText) => Object.keys(localizableText)[0]
   }
 ]
+
+const hasValue = (value) => {
+  return typeof value !== 'undefined'
+}
+
+const isValid = (format, localizableText) => {
+  return format.isValid(localizableText)
+}
+
+const getValue = (format, localizableText, uiLang, fallbackValue) => {
+  let value = format.getValue(localizableText, uiLang)
+  if (hasValue(value)) {
+    return value
+  }
+  if (hasValue(fallbackValue)) {
+    return fallbackValue
+  }
+  return format.getFallbackValue(localizableText)
+}
 
 export function toLocalizedText(uiLang, localizableText, fallbackValue) {
   if (typeof localizableText === 'undefined') {
     return fallbackValue
   }
-  let value = R.pipe(
-    R.filter((format) => format.isValid(localizableText)),
-    R.map((format) => format.getValue(localizableText, uiLang)),
-    R.find((value) => typeof value !== 'undefined')
+  return R.pipe(
+    R.filter((format) => isValid(format, localizableText)),
+    R.map((format) => getValue(format, localizableText, uiLang, fallbackValue)),
+    R.find(hasValue)
   )(FORMATS)
-  if (typeof value === 'undefined') {
-    return fallbackValue
-  }
-  return value
 }
