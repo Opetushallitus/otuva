@@ -1,12 +1,7 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import fi.vm.sade.kayttooikeus.dto.Localizable;
-import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
-import fi.vm.sade.kayttooikeus.dto.TextGroupListDto;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Getter
@@ -24,7 +19,7 @@ public class PalveluRooliDto implements LocalizableDto {
         this.palveluTexts = TextGroupListDto.localizeAsListLaterById(id);
     }
 
-    public void setRooliText(Long id) {
+    public void setRooliTextsId(Long id) {
         this.rooliTexts = TextGroupListDto.localizeAsListLaterById(id);
     }
     

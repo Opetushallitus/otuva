@@ -1,9 +1,5 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.dto.Localizable;
-import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
-import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import lombok.*;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;

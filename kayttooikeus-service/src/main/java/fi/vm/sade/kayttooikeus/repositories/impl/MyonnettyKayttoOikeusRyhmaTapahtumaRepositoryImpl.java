@@ -1,10 +1,12 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -29,6 +31,14 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
 
     @Override
     public List<MyonnettyKayttoOikeusDto> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid) {
+        BooleanBuilder booleanBuilder = new BooleanBuilder()
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid))
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.hidden.eq(false));
+
+        if (!StringUtils.isEmpty(organisaatioOid)) {
+            booleanBuilder.and(organisaatioHenkilo.organisaatioOid.eq(organisaatioOid));
+        }
+
         return jpa()
                 .from(myonnettyKayttoOikeusRyhmaTapahtuma)
                 .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
@@ -46,10 +56,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
                         myonnettyKayttoOikeusRyhmaTapahtuma.aikaleima.as("kasitelty"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.syy.as("muutosSyy")
                 ))
-                .where(
-                        myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
-                                .and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.hidden.eq(false))
-                ).orderBy(myonnettyKayttoOikeusRyhmaTapahtuma.id.asc()).fetch();
+                .where(booleanBuilder)
+                .orderBy(myonnettyKayttoOikeusRyhmaTapahtuma.id.asc()).fetch();
     }
 
 }

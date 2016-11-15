@@ -1,8 +1,6 @@
 import React from 'react'
 
-import organisations from '../logic/organisations'
-
-import './AddedOrganisations.css'
+import AddedOrganisation from './AddedOrganisation'
 
 const AddedOrganisations = React.createClass({
 
@@ -16,23 +14,11 @@ const AddedOrganisations = React.createClass({
 
   renderAddedOrganisation: function(addedOrg) {
     return (
-      <div className="added-org" key={addedOrg.id}>
-        <h3>{addedOrg.id} 
-          <a href="" 
-            onClick={this.removeAddedOrg.bind(null, addedOrg.id)}>X</a>
-        </h3>
-        <ul> 
-          {addedOrg.permissions.map(permission => {
-            return <li key={permission}>{permission}</li>
-          })}
-        </ul>
-      </div>
+      <AddedOrganisation key={addedOrg.id}
+                         addedOrg={addedOrg}
+                         l10n={this.props.l10n}
+                         uiLang={this.props.uiLang} />
     )
-  },
-
-  removeAddedOrg: function(id, e) {
-    e.preventDefault()
-    organisations.removeById(id)
   },
 
 })

@@ -17,10 +17,12 @@ const InvitationForm = React.createClass({
   render: function() {
     const uiLang = 'fi'
     const L = this.props.l10n[uiLang]
-    const props = {...this.props, uiLang, l10n: L}
     const confirmationProps = {
-      ...props, 
-      modalCloseFn: this.closeConfirmationModal, 
+      l10n: L,
+      uiLang: uiLang,
+      basicInfo: this.props.basicInfo,
+      addedOrgs: this.props.addedOrgs,
+      modalCloseFn: this.closeConfirmationModal,
       modalOpen: this.state.confirmationModalOpen
     }
 
@@ -31,8 +33,10 @@ const InvitationForm = React.createClass({
           <h1>{L['VIRKAILIJAN_LISAYS_OTSIKKO']}</h1>
         </div>
 
-        <BasicInfo {...props} />
-        <AddToOrganisation {...props} />
+        <BasicInfo l10n={L} uiLang={uiLang}
+                   languages={this.props.languages} />
+        <AddToOrganisation l10n={L} uiLang={uiLang}
+                           orgs={this.props.orgs} addedOrgs={this.props.addedOrgs} />
 
         <div className="footer">
           <button onClick={this.openConfirmationModal}>
@@ -61,7 +65,7 @@ const InvitationForm = React.createClass({
       confirmationModalOpen: false
     })
   },
-  
+
 })
 
 export default InvitationForm

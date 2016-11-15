@@ -230,6 +230,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeusRyhma.json"))
                 .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().string("234"))
                 .andExpect(status().isOk());
     }
 
@@ -250,6 +251,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
 
         given(this.kayttoOikeusService.findKayttoOikeusById(1L))
                 .willReturn(KayttoOikeusDto.builder()
+                        .id(3423L)
                         .rooli("joku rooli")
                         .textGroup(new TextGroupDto(2L).put("FI", "kuvaus")
                                 .put("EN", "ryhmän kuvaus en")
