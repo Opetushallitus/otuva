@@ -1,10 +1,8 @@
-import Bacon from 'baconjs'
-
-const BUILDVERSION_URL = '/kayttooikeus-service/buildversion.txt';
+import Bacon from "baconjs";
 
 const fetchFromUrl = url => Bacon.fromPromise(fetch(url).then(response => response));
 
-const buildVersionRequestS = Bacon.later(0, BUILDVERSION_URL);
+const buildVersionRequestS = Bacon.fromCallback(callback => setTimeout(() => callback(window.url('kayttooikeus-service.buildversion')),0));
 const buildVersionResponseS = buildVersionRequestS.flatMap(fetchFromUrl);
 
 export const buildVersionResponsePendingP = buildVersionRequestS.awaiting(buildVersionResponseS);

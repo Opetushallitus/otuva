@@ -167,7 +167,9 @@ module.exports = {
     new InterpolateHtmlPlugin({
       PUBLIC_URL: publicUrl,
       RAAMIT_URL: '',
-      JQUERY_URL: ''
+      JQUERY_URL: '',
+      CONFIG_URL: '/kayttooikeus-service/config/frontProperties.js',
+      CONFIG_URL_OVERRIDE: publicUrl + '/dev.properties.js'
     }),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({

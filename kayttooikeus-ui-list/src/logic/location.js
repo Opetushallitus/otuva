@@ -35,6 +35,5 @@ window.onpopstate = function() {
     locationBus.push(parseLocation(document.location));
 };
 
-
 export const locationP = locationBus.toProperty(parseLocation(document.location));
 export const showError = (error) => locationBus.error(error);

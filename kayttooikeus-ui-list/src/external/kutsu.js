@@ -2,7 +2,6 @@ import Bacon from 'baconjs'
 import dispatcher from '../logic/dispatcher'
 import {queryString} from '../logic/fetchUtils'
 
-const KUTSU_URL = '/kayttooikeus-service/kutsu';
 const kutsuListDispatcher = dispatcher();
 
 const kutsuList = {
@@ -23,7 +22,7 @@ const kutsuList = {
 };
 
 export const peruutaKutsu = (id) => {
-    return Bacon.fromPromise(fetch(KUTSU_URL+'/'+id, {
+    return Bacon.fromPromise(fetch(window.url('kayttooikeus-service.peruutaKutsu', id), {
         method: 'DELETE'
     }).then(response => {
         kutsuList.update();
@@ -34,7 +33,7 @@ export const peruutaKutsu = (id) => {
 export const kutsuListStateP = kutsuList.toProperty();
 export const kutsuListRequestS = Bacon.combineTemplate({state: kutsuListStateP}).changes();
 export const kutsuListResponseS = kutsuListRequestS.flatMap(stateHolder => 
-    Bacon.fromPromise(fetch(KUTSU_URL+queryString(stateHolder.state.params))
+    Bacon.fromPromise(fetch(window.url('kayttooikeus-service.kutsu')+queryString(stateHolder.state.params))
         .then(response => response.json().then(json => ({loaded: true, result: json}))
             .catch(no => ({loaded:false, result:null}))))
     );

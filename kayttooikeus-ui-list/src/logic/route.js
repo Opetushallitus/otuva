@@ -11,3 +11,4 @@ export const routeP = locationP.flatMapLatest(({path, queryString}) => {
 }).toProperty();
 
 export const contentP = routeP.map('.content');
+export const routeErrorP = contentP.map(content => content ? {} : { httpStatus: 404, comment: 'route not found' });

@@ -24,7 +24,6 @@ public class LocalizationController {
 
     @RequestMapping(method = GET)
     public Map<String,Map<String,String>> list() {
-        //TODO: call localization service and use these ase base values:
         return Stream.of(FI,SV,EN).collect(toMap(locale -> locale.getLanguage().toLowerCase(),
             locale -> messageSource.getMessages(locale).entrySet().stream()
                 .collect(toMap(e -> e.getKey().toString().toUpperCase(),
