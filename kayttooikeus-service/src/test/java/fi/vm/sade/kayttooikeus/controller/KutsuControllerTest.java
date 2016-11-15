@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.KutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
@@ -15,9 +16,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import org.mockito.invocation.InvocationOnMock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -43,7 +47,21 @@ public class KutsuControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kutsu/simpleKutsuListaus.json")));
     }
-    
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    public void createTest() throws Exception {
+        given(kutsuService.createKutsu(any())).willAnswer((InvocationOnMock invocation) -> {
+            KutsuDto dto = invocation.getArgumentAt(0, KutsuDto.class);
+            dto.setId(1L);
+            return dto;
+        });
+
+        mvc.perform(post("/kutsu").contentType(MediaType.APPLICATION_JSON).content(jsonResource("classpath:kutsu/simpleKutsuLuonti.json")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void deleteTest() throws Exception {

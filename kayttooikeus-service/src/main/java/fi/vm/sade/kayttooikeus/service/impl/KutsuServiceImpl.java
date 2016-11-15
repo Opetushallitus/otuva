@@ -23,20 +23,27 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.Order.DESC;
+import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.dto.KutsuDto;
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
+import org.joda.time.DateTime;
 
 @Service
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
+
     private final KutsuRepository kutsuRepository;
+    private final OrikaBeanMapper mapper;
     private final OrganisaatioClient organisaatioClient;
 
     @Autowired
-    public KutsuServiceImpl(KutsuRepository kutsuRepository, OrganisaatioClient organisaatioClient) {
+    public KutsuServiceImpl(KutsuRepository kutsuRepository,
+            OrikaBeanMapper mapper, OrganisaatioClient organisaatioClient) {
         this.kutsuRepository = kutsuRepository;
+        this.mapper = mapper;
         this.organisaatioClient = organisaatioClient;
     }
 
@@ -62,6 +69,29 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                 byIds.get(kutsuOrganisaatio.getKutsuId()).getOrganisaatiot().add(kutsuOrganisaatio));
         return kutsuOrganisaaStream.collect(groupingBy(KutsuOrganisaatioListDto::getKutsuId, LinkedHashTreeMap::new, toList()))
             .keySet().stream().map(byIds::get).collect(toList());
+    }
+
+    @Override
+    @Transactional
+    public KutsuDto createKutsu(KutsuDto dto) {
+        Kutsu entity = mapper.map(dto, Kutsu.class);
+
+        entity.setId(null);
+        entity.setAikaleima(DateTime.now());
+        entity.setKutsuja(getCurrentUserOid());
+        entity.setTila(AVOIN);
+
+        entity = kutsuRepository.persist(entity);
+
+        return mapper.map(entity, KutsuDto.class);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public KutsuDto getKutsu(Long id) {
+        Kutsu kutsu = kutsuRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        return mapper.map(kutsu, KutsuDto.class);
     }
 
     @Override

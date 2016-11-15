@@ -82,7 +82,6 @@ public class KutsuPopulator implements Populator<Kutsu> {
             
             organisaatiot.forEach(organisaatioPopulator -> {
                 KutsuOrganisaatio kutsuOrganisaatio = organisaatioPopulator.apply(entityManager);
-                kutsuOrganisaatio.setKutsu(kutsu);
                 kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
             });
             

@@ -23,8 +23,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
+import fi.vm.sade.kayttooikeus.dto.KutsuDto;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
+import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import java.util.AbstractMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
@@ -76,6 +84,36 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("1.2.3.4.6", kutsus.get(0).getOrganisaatiot().get(0).getOid());
         assertEquals("Nimi1", kutsus.get(0).getOrganisaatiot().get(0).getNimi().get("FI"));
         assertEquals("Nimi2", kutsus.get(0).getOrganisaatiot().get(1).getNimi().get("FI"));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    public void createKutsuTest() {
+        Long kayttoOikeusRyhmaId = populate(kayttoOikeusRyhma("kayttoOikeusRyhma")
+                .withKuvaus(text("fi", "Käyttöoikeusryhmä"))).getId();
+        KutsuDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuDto.KayttoOikeusRyhmaDto();
+        kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
+
+        KutsuDto kutsu = new KutsuDto();
+        kutsu.setSahkoposti("example@example.com");
+        kutsu.setAsiointikieli("fi");
+        kutsu.setOrganisaatiot(new LinkedHashSet<>());
+        KutsuDto.KutsuOrganisaatioDto kutsuOrganisaatio = new KutsuDto.KutsuOrganisaatioDto();
+        kutsuOrganisaatio.setOrganisaatioOid("organisaatio1");
+        kutsuOrganisaatio.setKayttoOikeusRyhmat(Stream.of(kutsuKayttoOikeusRyhma).collect(toSet()));
+        kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
+
+        kutsu = kutsuService.createKutsu(kutsu);
+
+        assertThat(kutsu.getId()).isNotNull();
+        assertThat(kutsu.getAsiointikieli()).isEqualTo("fi");
+        Set<KutsuDto.KutsuOrganisaatioDto> organisaatiot = kutsu.getOrganisaatiot();
+        assertThat(organisaatiot).hasSize(1);
+        kutsuOrganisaatio = organisaatiot.iterator().next();
+        Set<KutsuDto.KayttoOikeusRyhmaDto> kayttoOikeusRyhmat = kutsuOrganisaatio.getKayttoOikeusRyhmat();
+        assertThat(kayttoOikeusRyhmat).hasSize(1);
+        kutsuKayttoOikeusRyhma = kayttoOikeusRyhmat.iterator().next();
+        assertThat(kutsuKayttoOikeusRyhma.getNimi().getTexts()).containsExactly(new AbstractMap.SimpleEntry<>("fi", "Käyttöoikeusryhmä"));
     }
 
     @Test

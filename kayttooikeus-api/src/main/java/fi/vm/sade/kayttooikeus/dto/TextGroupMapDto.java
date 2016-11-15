@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
@@ -30,7 +31,7 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
     }
 
     @JsonCreator
-    public TextGroupMapDto(Long id, Map<String, String> values) {
+    public TextGroupMapDto(@JsonProperty("id") Long id, @JsonProperty("values") Map<String, String> values) {
         this.id = id;
         this.texts = values == null ? null : values.entrySet().stream()
                 .map(kv -> new SimpleEntry<>(kv.getKey().toLowerCase(), kv.getValue()))
