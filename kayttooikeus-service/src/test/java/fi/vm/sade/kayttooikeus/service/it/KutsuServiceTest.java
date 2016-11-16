@@ -24,8 +24,11 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
 import fi.vm.sade.kayttooikeus.dto.KutsuDto;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -89,8 +92,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void createKutsuTest() {
-        Long kayttoOikeusRyhmaId = populate(kayttoOikeusRyhma("kayttoOikeusRyhma")
-                .withKuvaus(text("fi", "Käyttöoikeusryhmä"))).getId();
+        MyonnettyKayttoOikeusRyhmaTapahtuma populate = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo("1.2.4", "1.2.246.562.10.00000000001"),
+                kayttoOikeusRyhma("kayttoOikeusRyhma").withKuvaus(text("fi", "Käyttöoikeusryhmä"))));
+        Long kayttoOikeusRyhmaId = populate.getKayttoOikeusRyhma().getId();
         KutsuDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuDto.KayttoOikeusRyhmaDto();
         kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
 
@@ -99,7 +104,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         kutsu.setAsiointikieli("fi");
         kutsu.setOrganisaatiot(new LinkedHashSet<>());
         KutsuDto.KutsuOrganisaatioDto kutsuOrganisaatio = new KutsuDto.KutsuOrganisaatioDto();
-        kutsuOrganisaatio.setOrganisaatioOid("organisaatio1");
+        kutsuOrganisaatio.setOrganisaatioOid("1.2.246.562.10.00000000001");
         kutsuOrganisaatio.setKayttoOikeusRyhmat(Stream.of(kutsuKayttoOikeusRyhma).collect(toSet()));
         kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
 

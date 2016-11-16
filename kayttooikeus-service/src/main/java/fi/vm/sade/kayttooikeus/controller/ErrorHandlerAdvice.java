@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import fi.vm.sade.generic.common.ValidationException;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
@@ -116,6 +117,12 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(IllegalArgumentException.class) @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, IllegalArgumentException exception) {
         return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
+    }
+
+    @ResponseStatus(value = HttpStatus.FORBIDDEN) // 403 Forbidden
+    @ExceptionHandler(ForbiddenException.class) @ResponseBody
+    public Map<String,Object> forbidden(HttpServletRequest req, ForbiddenException exception) {
+        return handleException(req, exception, "forbidden", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal

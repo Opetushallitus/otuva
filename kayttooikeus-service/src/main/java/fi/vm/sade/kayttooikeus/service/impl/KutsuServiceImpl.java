@@ -37,13 +37,16 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     private final KutsuRepository kutsuRepository;
     private final OrikaBeanMapper mapper;
+    private final KutsuValidator validator;
     private final OrganisaatioClient organisaatioClient;
 
     @Autowired
     public KutsuServiceImpl(KutsuRepository kutsuRepository,
-            OrikaBeanMapper mapper, OrganisaatioClient organisaatioClient) {
+            OrikaBeanMapper mapper, KutsuValidator validator,
+            OrganisaatioClient organisaatioClient) {
         this.kutsuRepository = kutsuRepository;
         this.mapper = mapper;
+        this.validator = validator;
         this.organisaatioClient = organisaatioClient;
     }
 
@@ -80,6 +83,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         entity.setAikaleima(DateTime.now());
         entity.setKutsuja(getCurrentUserOid());
         entity.setTila(AVOIN);
+
+        validator.validate(entity);
 
         entity = kutsuRepository.persist(entity);
 
