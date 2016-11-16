@@ -27,6 +27,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloK
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.joda.time.LocalDate.now;
 import static org.joda.time.Period.months;
@@ -59,7 +60,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listAllKayttoOikeusRyhmas();
         assertEquals(2, ryhmas.size());
-        
+
     }
 
     @Test
@@ -279,4 +280,68 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("kuvaus", dto.getTextGroup().get("FI"));
     }
 
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(){
+        MyonnettyKayttoOikeusRyhmaTapahtuma mko = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+                        .put("EN", "Code management"))
+                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                        .withOikeus(oikeus("KOODISTO", "CRUD"))
+        ));
+
+
+        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
+                .willReturn(asList(OrganisaatioViiteDto.builder()
+                                .organisaatioTyyppi("123.123.123")
+                                .id(1L)
+                                .kayttoOikeusRyhmaId(mko.getKayttoOikeusRyhma().getId())
+                                .build(),
+                        OrganisaatioViiteDto.builder()
+                                .organisaatioTyyppi("3.4.5.6.7")
+                                .id(2L)
+                                .kayttoOikeusRyhmaId(mko.getKayttoOikeusRyhma().getId())
+                                .build()));
+
+        List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
+        assertEquals(1, list.size());
+
+        list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.madeup", "1.2.3.4.5");
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilosWithMyontoViite(){
+        MyonnettyKayttoOikeusRyhmaTapahtuma mko = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+                        .put("EN", "Code management"))
+                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                        .withOikeus(oikeus("KOODISTO", "CRUD"))
+        ));
+
+        MyonnettyKayttoOikeusRyhmaTapahtuma mko2 = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA3").withKuvaus(text("FI", "Koodistonhallinta")
+                        .put("EN", "Code management"))
+                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                        .withOikeus(oikeus("KOODISTO", "CRUD"))
+        ));
+
+        populate(kayttoOikeusRyhmaMyontoViite(mko.getKayttoOikeusRyhma().getId(), mko2.getId()));
+        Long viiteKoId = mko.getKayttoOikeusRyhma().getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getId();
+
+        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
+                .willReturn(singletonList(OrganisaatioViiteDto.builder()
+                                .organisaatioTyyppi("3.4.5.6.7")
+                                .id(123123L)
+                                .kayttoOikeusRyhmaId(viiteKoId)
+                                .build()));
+
+
+        List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
+        assertEquals(1, list.size());
+    }
 }
