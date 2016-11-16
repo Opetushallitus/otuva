@@ -3,8 +3,11 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaMyontoViite;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite.*;
@@ -17,6 +20,10 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl
     @Override
     public List<Long> getSlaveIdsByMasterIds(List<Long> masterIds) {
         QKayttoOikeusRyhmaMyontoViite myontoViite = kayttoOikeusRyhmaMyontoViite;
+
+        if (CollectionUtils.isEmpty(masterIds)) {
+            return new ArrayList<>();
+        }
 
         return jpa().from(myontoViite)
                 .where(myontoViite.masterId.in(masterIds))

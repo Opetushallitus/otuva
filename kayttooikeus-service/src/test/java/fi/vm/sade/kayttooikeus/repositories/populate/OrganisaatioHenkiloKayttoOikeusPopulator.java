@@ -13,7 +13,7 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
     private final Populator<OrganisaatioHenkilo> henkilo;
     private final Populator<KayttoOikeusRyhma> kayttoOikeusRyhma;
     private LocalDate voimassaAlkaen = new LocalDate();
-    private LocalDate voimassaPaattyen;
+    private LocalDate voimassaPaattyen = new LocalDate();
 
     public OrganisaatioHenkiloKayttoOikeusPopulator(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         this.henkilo = henkilo;
