@@ -1,13 +1,15 @@
 package fi.vm.sade.kayttooikeus.config;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.Type;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -33,6 +35,27 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
     protected void configure(MapperFactory factory) {
         this.factory = factory;
         addAllSpringBeans(applicationContext);
+
+        factory.classMap(KutsuCreateDto.class, Kutsu.class)
+                .fieldAToB("asiointikieli", "kieliKoodi")
+                .byDefault()
+                .register();
+        factory.classMap(KutsuCreateDto.KutsuOrganisaatioDto.class, KutsuOrganisaatio.class)
+                .fieldAToB("kayttoOikeusRyhmat", "ryhmat")
+                .byDefault()
+                .register();
+        factory.classMap(Kutsu.class, KutsuReadDto.class)
+                .fieldAToB("kieliKoodi", "asiointikieli")
+                .byDefault()
+                .register();
+        factory.classMap(KutsuOrganisaatio.class, KutsuReadDto.KutsuOrganisaatioDto.class)
+                .fieldAToB("ryhmat", "kayttoOikeusRyhmat")
+                .byDefault()
+                .register();
+        factory.classMap(KayttoOikeusRyhma.class, KutsuReadDto.KayttoOikeusRyhmaDto.class)
+                .fieldAToB("description", "nimi")
+                .byDefault()
+                .register();
     }
 
     /**
