@@ -35,7 +35,7 @@ const InvitationForm = React.createClass({
 
         <BasicInfo l10n={L} uiLang={uiLang}
                    languages={this.props.languages} />
-        <AddToOrganisation l10n={L} uiLang={uiLang}
+        <AddToOrganisation l10n={L} uiLang={uiLang} omatTiedot={this.props.omatTiedot}
                            orgs={this.props.orgs} addedOrgs={this.props.addedOrgs} />
 
         <div className="footer">

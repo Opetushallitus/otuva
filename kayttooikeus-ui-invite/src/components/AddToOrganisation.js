@@ -42,9 +42,9 @@ const AddToOrganisation = React.createClass({
   selectOrganisation: function(e) {
     const selectedOrganization = R.find(R.propEq('oid', e.target.value))(this.props.orgs.organisaatiot)
     if (selectedOrganization) {
-      const oid = selectedOrganization.oid
-      // TODO: use kayttooikeus-service
-      fetch(`/authentication-service/resources/kayttooikeusryhma/organisaatio/${oid}`, {
+      const henkiloOid = this.props.omatTiedot.oidHenkilo
+      const organisaatioOid = selectedOrganization.oid
+      fetch(`/kayttooikeus-service/kayttooikeusryhma/${henkiloOid}/${organisaatioOid}`, {
         credentials: 'same-origin'
       }).then(response => {
         return response.json()

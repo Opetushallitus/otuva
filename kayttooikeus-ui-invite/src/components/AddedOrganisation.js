@@ -30,9 +30,9 @@ const AddedOrganisation = React.createClass({
         <ul>
           {addedOrg.selectedPermissions.map(permission => {
             return (
-              <li key={permission.id}>
-                {toLocalizedText(this.props.uiLang, permission.description, permission.name)}
-                <a href="" onClick={this.removeAddedPermission.bind(null, permission.id)}>X</a>
+              <li key={permission.ryhmaId}>
+                {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
+                <a href="" onClick={this.removeAddedPermission.bind(null, permission.ryhmaId)}>X</a>
               </li>
             )
           })}
@@ -43,8 +43,8 @@ const AddedOrganisation = React.createClass({
 
   renderPermission: function(permission) {
     return (
-      <option key={permission.id} value={permission.id}>
-        {toLocalizedText(this.props.uiLang, permission.description, permission.name)}
+      <option key={permission.ryhmaId} value={permission.ryhmaId}>
+        {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
       </option>
     )
   },
@@ -59,14 +59,14 @@ const AddedOrganisation = React.createClass({
       .filter(option => option.selected)
       .map(option => option.value)
       .map(value => parseInt(value, 10))
-    const selectedPermissions = R.filter((permission) => selectedIds.includes(permission.id), this.props.addedOrg.selectablePermissions)
+    const selectedPermissions = R.filter((permission) => selectedIds.includes(permission.ryhmaId), this.props.addedOrg.selectablePermissions)
     this.props.addedOrg.selectedPermissions = R.union(this.props.addedOrg.selectedPermissions, selectedPermissions)
     this.forceUpdate()
   },
 
   removeAddedPermission: function(id, e) {
     e.preventDefault()
-    this.props.addedOrg.selectedPermissions = R.reject(permission => permission.id === id, this.props.addedOrg.selectedPermissions)
+    this.props.addedOrg.selectedPermissions = R.reject(permission => permission.ryhmaId === id, this.props.addedOrg.selectedPermissions)
     this.forceUpdate()
   }
 

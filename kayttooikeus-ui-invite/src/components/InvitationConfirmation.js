@@ -50,8 +50,8 @@ const InvitationConfirmation = React.createClass({
 
   renderAddedOrgPermission: function(permission) {
     return (
-      <div key={permission.id}>
-        <h4>{toLocalizedText(this.props.uiLang, permission.description, permission.name)}</h4>
+      <div key={permission.ryhmaId}>
+        <h4>{toLocalizedText(this.props.uiLang, permission.ryhmaNames)}</h4>
       </div>
     )
   },
