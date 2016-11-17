@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 
 public interface OrganisaatioClient {
-    List<OrganisaatioPerustieto> listOganisaatioPerustiedot(Collection<String> organisaatioOids);
+    List<OrganisaatioPerustieto> listOganisaatioPerustiedotRecusive(Collection<String> organisaatioOids);
 
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(Collection<String> organisaatioOids);
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(Collection<String> organisaatioOids);
 
     OrganisaatioRDTO getOrganisaatioPerustiedot(String oid);
 }

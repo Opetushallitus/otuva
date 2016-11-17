@@ -1,10 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +39,54 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     
     @Autowired
     private OrganisaatioHenkiloService organisaatioHenkiloService;
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void listOrganisaatioHenkilosTest() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedot("1.2.3.4.1")).willAnswer(invocation -> {
+            OrganisaatioRDTO orgDto = new OrganisaatioRDTO();
+            orgDto.setOid("1.2.3.4.1");
+            orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
+            orgDto.setTyypit(asList("Tyyppi1", "Tyyppi2"));
+            return orgDto;
+        });
+        given(this.organisaatioClient.getOrganisaatioPerustiedot("1.2.3.4.2")).willAnswer(invocation -> {
+            OrganisaatioRDTO orgDto = new OrganisaatioRDTO();
+            orgDto.setOid("1.2.3.4.2");
+            orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());
+            orgDto.setTyypit(singletonList("Tyyppi1"));
+            return orgDto;
+        });
+        given(this.organisaatioHenkiloRepository.findOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
+                asList(OrganisaatioHenkiloListDto.builder().id(1L).passivoitu(false)
+                        .voimassaAlkuPvm(new LocalDate()).voimassaLoppuPvm(new LocalDate().plusYears(1))
+                        .tehtavanimike("Devaaja")
+                        .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.1").build()).build(),
+                    OrganisaatioHenkiloListDto.builder().id(2L).voimassaAlkuPvm(new LocalDate().minusYears(1))
+                        .passivoitu(true).tehtavanimike("Opettaja")
+                        .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build()
+                ));
+
+        List<OrganisaatioHenkiloListDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi");
+        assertEquals(2, result.size());
+        assertEquals("1.2.3.4.2", result.get(0).getOrganisaatio().getOid()); // O < S
+        assertEquals(2L, result.get(0).getId());
+        assertEquals("Only in English", result.get(0).getOrganisaatio().getNimi().getOrAny("fi").orElse(null));
+        assertEquals(true, result.get(0).isPassivoitu());
+        assertEquals("1.2.3.4.1", result.get(1).getOrganisaatio().getOid());
+        assertEquals("Suomeksi", result.get(1).getOrganisaatio().getNimi().get("fi"));
+        assertEquals(asList("Tyyppi1", "Tyyppi2"), result.get(1).getOrganisaatio().getTyypit());
+        assertEquals(new LocalDate(), result.get(1).getVoimassaAlkuPvm());
+        assertEquals(new LocalDate().plusYears(1), result.get(1).getVoimassaLoppuPvm());
+        assertEquals("Devaaja", result.get(1).getTehtavanimike());
+    }
     
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listOrganisaatioPerustiedotForCurrentUserTest() {
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
                 .willReturn(singletonList("2.3.4.5.6"));
-        given(this.organisaatioClient.listOganisaatioPerustiedot(singletonList("2.3.4.5.6")))
+        given(this.organisaatioClient.listOganisaatioPerustiedotRecusive(singletonList("2.3.4.5.6")))
                 .willReturn(singletonList(readJson(jsonResource("classpath:organisaatio/organisaatioPerustiedot.json"), OrganisaatioPerustieto.class)));
 
         List<OrganisaatioPerustieto> result = organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();

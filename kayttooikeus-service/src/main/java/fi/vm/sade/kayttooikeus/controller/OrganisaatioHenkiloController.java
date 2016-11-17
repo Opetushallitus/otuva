@@ -35,7 +35,7 @@ public class OrganisaatioHenkiloController {
     public List<OrganisaatioPerustieto> listOrganisaatiosByCurrentHenkilo() {
         return organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();
     }
-
+    
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"

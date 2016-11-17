@@ -81,6 +81,6 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
         if (result != 0) {
             return result;
         }
-        return 0;
+        return Localizable.comparePrimarlyByLang(this, o, "fi");
     }
 }

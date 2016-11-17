@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import org.joda.time.LocalDate;
 
 import javax.persistence.EntityManager;
@@ -15,7 +15,10 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
     private final Populator<Henkilo> henkilo;
     private final String organisaatioOid;
     private LocalDate voimassaAlku = new LocalDate();
+    private LocalDate voimassaAsti;
     private String tehtavanimike;
+    private OrganisaatioHenkiloTyyppi tyyppi = OrganisaatioHenkiloTyyppi.VIRKAILIJA;
+    private boolean passivoitu = false;
 
     public OrganisaatioHenkiloPopulator(String henkiloOid, String organisaatioOid) {
         this.henkilo = new HenkiloPopulator(henkiloOid);
@@ -39,9 +42,24 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         this.voimassaAlku = alkaen;
         return this;
     }
+
+    public OrganisaatioHenkiloPopulator voimassaAsti(LocalDate asti) {
+        this.voimassaAsti = asti;
+        return this;
+    }
     
     public OrganisaatioHenkiloPopulator tehtavanimike(String tehtavanimike) {
         this.tehtavanimike = tehtavanimike;
+        return this;
+    }
+    
+    public OrganisaatioHenkiloPopulator passivoitu() {
+        this.passivoitu = true;
+        return this;
+    }
+    
+    public OrganisaatioHenkiloPopulator tyyppi(OrganisaatioHenkiloTyyppi tyyppi) {
+        this.tyyppi = tyyppi;
         return this;
     }
     
@@ -64,9 +82,10 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
                 .build()));
         organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
         organisaatioHenkilo.setTehtavanimike(tehtavanimike);
-        organisaatioHenkilo.setPassivoitu(false);
+        organisaatioHenkilo.setPassivoitu(passivoitu);
         organisaatioHenkilo.setVoimassaAlkuPvm(voimassaAlku);
-        organisaatioHenkilo.setOrganisaatioHenkiloTyyppi(OrganisaatioHenkiloTyyppi.VIRKAILIJA);
+        organisaatioHenkilo.setVoimassaLoppuPvm(voimassaAsti);
+        organisaatioHenkilo.setOrganisaatioHenkiloTyyppi(tyyppi);
         entityManager.persist(organisaatioHenkilo);
         return organisaatioHenkilo;
     }

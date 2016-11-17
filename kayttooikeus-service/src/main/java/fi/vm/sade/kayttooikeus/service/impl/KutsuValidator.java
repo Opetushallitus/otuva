@@ -30,7 +30,7 @@ public class KutsuValidator {
         String organisaatioOid = kutsuOrganisaatio.getOrganisaatioOid();
         List<MyonnettyKayttoOikeusDto> kutsujaKayttoOikeudet = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(kutsujaOid, organisaatioOid, kutsujaOid);
 
-        kutsuttuKayttoOikeusRyhmat.forEach((kutsuttuKayttoOikeusRyhma) -> {
+        kutsuttuKayttoOikeusRyhmat.forEach(kutsuttuKayttoOikeusRyhma -> {
             Predicate<MyonnettyKayttoOikeusDto> predicate = (MyonnettyKayttoOikeusDto t)
                     -> Objects.equals(t.getRyhmaId(), kutsuttuKayttoOikeusRyhma.getId());
             if (!kutsujaKayttoOikeudet.stream().anyMatch(predicate)) {

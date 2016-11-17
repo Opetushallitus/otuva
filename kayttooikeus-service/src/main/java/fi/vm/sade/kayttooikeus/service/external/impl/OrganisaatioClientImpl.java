@@ -36,16 +36,16 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public List<OrganisaatioPerustieto> listOganisaatioPerustiedot(Collection<String> organisaatioOids) {
-        return getOrganisaatioPerustietos(organisaatioOids, false);
+    public List<OrganisaatioPerustieto> listOganisaatioPerustiedotRecusive(Collection<String> organisaatioOids) {
+        return getOrganisaatioPerustietosRecursive(organisaatioOids, false);
     }
 
     @Override
-    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(Collection<String> organisaatioOids) {
-        return getOrganisaatioPerustietos(organisaatioOids, true);
+    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(Collection<String> organisaatioOids) {
+        return getOrganisaatioPerustietosRecursive(organisaatioOids, true);
     }
 
-    private List<OrganisaatioPerustieto> getOrganisaatioPerustietos(Collection<String> organisaatioOids, boolean limitToActive) {
+    private List<OrganisaatioPerustieto> getOrganisaatioPerustietosRecursive(Collection<String> organisaatioOids, boolean limitToActive) {
         if (organisaatioOids.isEmpty()) {
             return new ArrayList<>();
         }
