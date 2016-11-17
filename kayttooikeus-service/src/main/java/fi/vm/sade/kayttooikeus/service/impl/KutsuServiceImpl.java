@@ -24,7 +24,8 @@ import java.util.stream.Stream;
 
 import static com.querydsl.core.types.Order.DESC;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.KutsuDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
 import static java.util.Comparator.comparing;
@@ -76,7 +77,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional
-    public KutsuDto createKutsu(KutsuDto dto) {
+    public long createKutsu(KutsuCreateDto dto) {
         Kutsu entity = mapper.map(dto, Kutsu.class);
 
         entity.setId(null);
@@ -88,15 +89,15 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
         entity = kutsuRepository.persist(entity);
 
-        return mapper.map(entity, KutsuDto.class);
+        return entity.getId();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public KutsuDto getKutsu(Long id) {
+    public KutsuReadDto getKutsu(Long id) {
         Kutsu kutsu = kutsuRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Kutsu not found"));
-        return mapper.map(kutsu, KutsuDto.class);
+        return mapper.map(kutsu, KutsuReadDto.class);
     }
 
     @Override
