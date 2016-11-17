@@ -10,6 +10,10 @@ const AddToOrganisation = React.createClass({
 
   mixins: [PureRenderMixin],
 
+  organisaatioNimi: function(organisaatio) {
+    return toLocalizedText(this.props.uiLang, organisaatio.nimi)
+  },
+
   render: function() {
     const L = this.props.l10n
     const orgs = this.props.orgs.organisaatiot
@@ -27,7 +31,7 @@ const AddToOrganisation = React.createClass({
           </label>
           <select id="org" onChange={this.selectOrganisation}>
             <option value=""></option>
-            {orgs.map(this.renderOrganisation)}
+            {R.sortBy(this.organisaatioNimi)(orgs).map(this.renderOrganisation)}
           </select>
         </div>
 
@@ -59,7 +63,7 @@ const AddToOrganisation = React.createClass({
     const organisaatiotyypit = org.organisaatiotyypit.join(',')
     return (
       <option key={org.oid} value={org.oid}>
-        {toLocalizedText(this.props.uiLang, org.nimi, org.oid)} ({organisaatiotyypit})
+        {this.organisaatioNimi(org)} ({organisaatiotyypit})
       </option>
     )
   },
