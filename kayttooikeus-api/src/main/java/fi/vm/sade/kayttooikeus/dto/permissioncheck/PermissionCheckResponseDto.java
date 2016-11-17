@@ -1,5 +1,10 @@
 package fi.vm.sade.kayttooikeus.dto.permissioncheck;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class PermissionCheckResponseDto {
 
     private boolean accessAllowed = false;
@@ -7,18 +12,6 @@ public class PermissionCheckResponseDto {
 
     public boolean isAccessAllowed() {
         return accessAllowed;
-    }
-
-    public void setAccessAllowed(boolean accessAllowed) {
-        this.accessAllowed = accessAllowed;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
 }
