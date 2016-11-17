@@ -13,7 +13,12 @@
     <packaging>jar</packaging>
 
     <name>Käyttöoikeuspalvelu :: Api</name>
-    
+
+    <properties>
+        <!-- Deploy this module to artifactory -->
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
