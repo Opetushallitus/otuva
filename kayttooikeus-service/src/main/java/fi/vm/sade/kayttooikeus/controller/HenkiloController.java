@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
@@ -28,17 +29,16 @@ public class HenkiloController {
         this.henkiloService = henkiloService;
     }
 
-    @PreAuthorize("hasRole('APP_HENKILONHALLINTA_OPHREKISTERI')")
-//    @PreAuthorize("@permissionChecker.isAllowedToAccessPerson(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön organisaatiot.",
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo", method = RequestMethod.GET)
-    public List<OrganisaatioHenkiloDto> listOrganisaatioHenkilos(@PathVariable("oid") String henkiloOid) {
+    public List<OrganisaatioHenkiloDto> listOrganisaatioHenkilos(@PathVariable("oid") String henkiloOid,
+                                                                 @RequestParam(value = "permissionService", required = false) ExternalPermissionService permissionService) {
         return organisaatioHenkiloService.findOrganisaatioByHenkilo(henkiloOid);
     }
 
-    @PreAuthorize("hasRole('APP_HENKILONHALLINTA_OPHREKISTERI')")
-    //    @PreAuthorize("@permissionChecker.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
     @ApiOperation(value = "Hakee henkilön yhden organisaation tiedot.",
             notes = "Hakee henkilön yhden organisaatiohenkilön tiedot.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo/{organisaatioOid}", method = RequestMethod.GET)
@@ -46,7 +46,6 @@ public class HenkiloController {
                                                         @PathVariable("organisaatioOid") String organisaatioOid) {
         return organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio(henkiloOid, organisaatioOid);
     }
-
 
     @ApiOperation(value = "Hakee henkilöitä organisaatioiden ja käyttöoikeuksien mukaan.",
             notes = "Tämä toteutus on tehty Osoitepalvelua varten, jonka pitää pystyä "

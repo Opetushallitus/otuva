@@ -11,8 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Transactional(propagation = Propagation.MANDATORY)
 @Repository
-public interface HenkiloRepository extends QueryDslPredicateExecutor, JpaRepository<Henkilo, Long> {
-    Optional<Henkilo> findByOidHenkilo(String oidHenkilo);
+public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
+    List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName);
 }

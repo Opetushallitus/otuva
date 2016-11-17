@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.BooleanBuilder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -17,7 +17,7 @@ import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Repository
-public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloRepository {
+public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
 
     @Override
     public List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName) {

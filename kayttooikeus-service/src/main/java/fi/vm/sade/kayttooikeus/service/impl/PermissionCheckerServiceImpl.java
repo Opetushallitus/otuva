@@ -1,40 +1,39 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
-import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.properties.OphProperties;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class PermissionCheckerServiceImpl implements PermissionCheckerService {
+public class PermissionCheckerServiceImpl extends AbstractService implements PermissionCheckerService {
     private static final Logger LOG = LoggerFactory.getLogger(PermissionCheckerService.class);
     private static CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode("henkilo.authentication-service");
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -60,6 +59,13 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         this.organisaatioClient = organisaatioClient;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
+        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, getCasRoles());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, List<String> allowedRoles,
                                            ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
@@ -121,7 +127,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
      * Checks if the logged in user has HENKILONHALLINTA roles that
      * grants access to the wanted person (personOid)
     */
-    private boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
         if (isSuperUser(callingUserRoles)) {
             return true;
         }
@@ -202,6 +210,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         }).toSet();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid) {
         List<OrganisaatioPerustieto> organisaatios = new ArrayList<>();

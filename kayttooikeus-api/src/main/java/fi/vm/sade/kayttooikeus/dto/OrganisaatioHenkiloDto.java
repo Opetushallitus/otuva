@@ -1,11 +1,13 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.joda.time.LocalDate;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganisaatioHenkiloDto {
     private Long id;
     private String organisaatioOid;
