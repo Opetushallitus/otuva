@@ -5,6 +5,10 @@ const INVITATION_URL = '/kayttooikeus-service/kutsu'
 const fetchFromUrl = ({url, payload}) => {
   return Bacon.fromPromise(
     fetch(url, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin',
       method: 'POST',
       body: JSON.stringify(payload)
     })
