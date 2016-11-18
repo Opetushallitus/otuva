@@ -1,4 +1,5 @@
 import React from 'react'
+import R from 'ramda'
 import Modal from 'modal'
 
 import invite from '../external/invitation'
@@ -60,8 +61,18 @@ const InvitationConfirmation = React.createClass({
     e.preventDefault()
 
     const payload = {
-      orgs: this.props.addedOrgs,
-      info: this.props.basicInfo
+      sahkoposti: this.props.basicInfo.email,
+      asiointikieli: this.props.basicInfo.languageCode,
+      organisaatiot: R.map(addedOrg => {
+        return {
+          organisaatioOid: addedOrg.id,
+          kayttoOikeusRyhmat: R.map(selectedPermission => {
+            return {
+              id: selectedPermission.ryhmaId
+            }
+          })(addedOrg.selectedPermissions)
+        }
+      })(this.props.addedOrgs)
     }
     const { invitationResponseS } = invite(payload)
 
