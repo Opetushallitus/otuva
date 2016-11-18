@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
@@ -8,8 +9,8 @@ import org.joda.time.LocalDate;
 
 import javax.persistence.EntityManager;
 
-import static java.util.Optional.ofNullable;
 import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
+import static java.util.Optional.ofNullable;
 
 public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenkilo> {
     private final Populator<Henkilo> henkilo;

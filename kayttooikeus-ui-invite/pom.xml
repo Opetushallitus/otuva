@@ -13,6 +13,11 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <!-- Do not deploy this module to artifactory -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <build>
         <plugins>
             <plugin>

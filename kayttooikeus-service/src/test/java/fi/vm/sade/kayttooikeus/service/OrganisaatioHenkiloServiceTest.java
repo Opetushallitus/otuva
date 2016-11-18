@@ -3,9 +3,11 @@ package fi.vm.sade.kayttooikeus.service;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
@@ -19,11 +21,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringRunner.class)
@@ -112,4 +116,27 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA)), new HashSet<>(list));
     }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void findOrganisaatioHenkiloByHenkiloAndOrganisaatioTest() {
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidAndOrganisaatioOid("1.2.3.4.5", "5.6.7.8.9"))
+                .willReturn(Optional.of(OrganisaatioHenkiloDto.builder()
+                        .id(33L)
+                        .organisaatioOid("5.6.7.8.9")
+                        .build()));
+
+        OrganisaatioHenkiloDto organisaatioHenkilo = organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio("1.2.3.4.5", "5.6.7.8.9");
+        assertNotNull(organisaatioHenkilo);
+        assertEquals(Long.valueOf(33), organisaatioHenkilo.getId());
+        assertEquals("5.6.7.8.9", organisaatioHenkilo.getOrganisaatioOid());
+    }
+
+    @Test(expected = NotFoundException.class)
+    @WithMockUser(username = "1.2.3.4.5")
+    public void findOrganisaatioHenkiloByHenkiloAndOrganisaatioErrorTest() {
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1")).willReturn(Optional.empty());
+        organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio("1.2.3.4.5", "1.1.1.1.1");
+    }
+
 }
