@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -34,30 +34,22 @@ public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implem
     }
 
     @Override
-    public List<OrganisaatioHenkiloListDto> findOrganisaatioHenkiloListDtos(String henkiloOoid) {
+    public List<OrganisaatioHenkiloWithOrganisaatioDto> findActiveOrganisaatioHenkiloListDtos(String henkiloOoid) {
         return jpa().from(organisaatioHenkilo)
                 .innerJoin(organisaatioHenkilo.henkilo, henkilo)
                 .where(voimassa(organisaatioHenkilo, new LocalDate())
                         .and(henkilo.oidHenkilo.eq(henkiloOoid)))
-                .select(Projections.bean(OrganisaatioHenkiloListDto.class,
-                        organisaatioHenkilo.id.as("id"),
-                        organisaatioHenkilo.organisaatioHenkiloTyyppi.as("tyyppi"),
-                        organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
-                        organisaatioHenkilo.passivoitu.as("passivoitu"),
-                        organisaatioHenkilo.voimassaAlkuPvm.as("voimassaAlkuPvm"),
-                        organisaatioHenkilo.voimassaLoppuPvm.as("voimassaLoppuPvm"),
-                        organisaatioHenkilo.tehtavanimike.as("tehtavanimike")
-                )).orderBy(organisaatioHenkilo.organisaatioOid.asc()).fetch();
+                .select(organisaatioHenkiloDtoProjection(OrganisaatioHenkiloWithOrganisaatioDto.class))
+                .orderBy(organisaatioHenkilo.organisaatioOid.asc()).fetch();
     }
 
     @Override
     public Optional<OrganisaatioHenkiloDto> findByHenkiloOidAndOrganisaatioOid(String henkiloOid, String organisaatioOid) {
         return Optional.ofNullable(jpa().from(organisaatioHenkilo)
                 .join(organisaatioHenkilo.henkilo)
-                .where(
-                        organisaatioHenkilo.organisaatioOid.eq(organisaatioOid),
+                .where(organisaatioHenkilo.organisaatioOid.eq(organisaatioOid),
                         organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
-                ).select(organisaatioHenkiloDtoProjection())
+                ).select(organisaatioHenkiloDtoProjection(OrganisaatioHenkiloDto.class))
                 .distinct().fetchOne());
     }
 
@@ -65,14 +57,13 @@ public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implem
     public List<OrganisaatioHenkiloDto> findOrganisaatioHenkilosForHenkilo(String henkiloOid) {
         return jpa().from(organisaatioHenkilo)
                 .join(organisaatioHenkilo.henkilo)
-                .where(
-                        organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
-                ).select(organisaatioHenkiloDtoProjection())
+                .where(organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid))
+                .select(organisaatioHenkiloDtoProjection(OrganisaatioHenkiloDto.class))
                 .fetch();
     }
 
-    private QBean<OrganisaatioHenkiloDto> organisaatioHenkiloDtoProjection() {
-        return Projections.bean(OrganisaatioHenkiloDto.class,
+    private<T extends OrganisaatioHenkiloDto> QBean<T> organisaatioHenkiloDtoProjection(Class<T> clz) {
+        return Projections.bean(clz,
                 organisaatioHenkilo.id.as("id"),
                 organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
                 organisaatioHenkilo.organisaatioHenkiloTyyppi.as("organisaatioHenkiloTyyppi"),

@@ -1,13 +1,12 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
-import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -31,16 +30,17 @@ public class HenkiloController {
         this.henkiloService = henkiloService;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
-            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
-            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
+    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot organisaatioiden tiedoilla.",
+            notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
-    public List<OrganisaatioHenkiloListDto> listOrganisatioHenkilos(
+    public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
             @PathVariable @ApiParam("Henkilö-OID") String oid,
-            @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)") String comparisonLangCode) {
+            @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)") String comparisonLangCode,
+            @RequestParam(value = "permissionService", required = false) ExternalPermissionService permissionService) {
         return organisaatioHenkiloService.listOrganisaatioHenkilos(oid, comparisonLangCode);
     }
-
+    
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön organisaatiot.",
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")

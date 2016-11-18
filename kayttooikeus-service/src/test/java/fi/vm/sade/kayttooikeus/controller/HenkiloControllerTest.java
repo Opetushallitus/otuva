@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import org.joda.time.LocalDate;
@@ -38,8 +38,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void listOrganisatioHenkilosTest() throws Exception {
         given(this.service.listOrganisaatioHenkilos("1.2.3.4.5", "fi")).willReturn(singletonList(
-                OrganisaatioHenkiloListDto.builder()
-                        .id(1L)
+                OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L)
                         .voimassaAlkuPvm(new LocalDate(2016,1,1))
                         .voimassaLoppuPvm(new LocalDate(2016,12,31))
                         .tyyppi(OrganisaatioHenkiloTyyppi.HAKIJA)

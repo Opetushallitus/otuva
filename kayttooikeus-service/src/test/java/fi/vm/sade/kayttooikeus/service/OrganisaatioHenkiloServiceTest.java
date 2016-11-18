@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
@@ -61,17 +61,17 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
             orgDto.setTyypit(singletonList("Tyyppi1"));
             return orgDto;
         });
-        given(this.organisaatioHenkiloRepository.findOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
-                asList(OrganisaatioHenkiloListDto.builder().id(1L).passivoitu(false)
+        given(this.organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
+                asList(OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L).passivoitu(false)
                         .voimassaAlkuPvm(new LocalDate()).voimassaLoppuPvm(new LocalDate().plusYears(1))
                         .tehtavanimike("Devaaja")
                         .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.1").build()).build(),
-                    OrganisaatioHenkiloListDto.builder().id(2L).voimassaAlkuPvm(new LocalDate().minusYears(1))
+                    OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(2L).voimassaAlkuPvm(new LocalDate().minusYears(1))
                         .passivoitu(true).tehtavanimike("Opettaja")
                         .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build()
                 ));
 
-        List<OrganisaatioHenkiloListDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi");
+        List<OrganisaatioHenkiloWithOrganisaatioDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi");
         assertEquals(2, result.size());
         assertEquals("1.2.3.4.2", result.get(0).getOrganisaatio().getOid()); // O < S
         assertEquals(2L, result.get(0).getId());
@@ -122,13 +122,11 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     public void findOrganisaatioHenkiloByHenkiloAndOrganisaatioTest() {
         given(this.organisaatioHenkiloRepository.findByHenkiloOidAndOrganisaatioOid("1.2.3.4.5", "5.6.7.8.9"))
                 .willReturn(Optional.of(OrganisaatioHenkiloDto.builder()
-                        .id(33L)
-                        .organisaatioOid("5.6.7.8.9")
-                        .build()));
+                        .id(33L).organisaatioOid("5.6.7.8.9").build()));
 
         OrganisaatioHenkiloDto organisaatioHenkilo = organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio("1.2.3.4.5", "5.6.7.8.9");
         assertNotNull(organisaatioHenkilo);
-        assertEquals(Long.valueOf(33), organisaatioHenkilo.getId());
+        assertEquals(33L, organisaatioHenkilo.getId());
         assertEquals("5.6.7.8.9", organisaatioHenkilo.getOrganisaatioOid());
     }
 

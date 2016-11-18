@@ -202,12 +202,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     private static Set<String> getPrefixedRoles(final String prefix, final List<String> rolesWithoutPrefix) {
-        return FluentIterable.from(rolesWithoutPrefix).transform(new Function<String, String>() {
-            @Override
-            public String apply(String role) {
-                return prefix.concat(role);
-            }
-        }).toSet();
+        return FluentIterable.from(rolesWithoutPrefix).transform(role -> prefix.concat(role)).toSet();
     }
 
     @Override
@@ -218,7 +213,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listOganisaatioPerustiedot(organisaatioOids);
+            organisaatios = organisaatioClient.listOganisaatioPerustiedotRecusive(organisaatioOids);
         }
         return organisaatios;
     }

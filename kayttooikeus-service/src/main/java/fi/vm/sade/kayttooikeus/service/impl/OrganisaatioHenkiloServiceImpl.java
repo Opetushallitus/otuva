@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +50,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrganisaatioHenkiloListDto> listOrganisaatioHenkilos(String henkiloOid, String compareByLang) {
-        return organisaatioHenkiloRepository.findOrganisaatioHenkiloListDtos(henkiloOid)
+    public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisaatioHenkilos(String henkiloOid, String compareByLang) {
+        return organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos(henkiloOid)
                 .stream().peek(organisaatioHenkilo -> {
                     OrganisaatioDto organisaatioDto = organisaatioHenkilo.getOrganisaatio();
                     OrganisaatioRDTO perustiedot = organisaatioClient.getOrganisaatioPerustiedot(organisaatioDto.getOid());

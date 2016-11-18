@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.kayttooikeus.model.HenkiloViite;
 import fi.vm.sade.kayttooikeus.model.QHenkiloViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
 import org.springframework.stereotype.Repository;
@@ -9,7 +8,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

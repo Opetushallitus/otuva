@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloListDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface OrganisaatioHenkiloRepository {
     List<String> findDistinctOrganisaatiosForHenkiloOid(String henkiloOid);
     
-    List<OrganisaatioHenkiloListDto> findOrganisaatioHenkiloListDtos(String henkiloOoid);
+    List<OrganisaatioHenkiloWithOrganisaatioDto> findActiveOrganisaatioHenkiloListDtos(String henkiloOoid);
 
     Optional<OrganisaatioHenkiloDto> findByHenkiloOidAndOrganisaatioOid(String henkiloOid, String organisaatioOid);
 
