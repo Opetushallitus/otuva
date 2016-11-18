@@ -14,6 +14,11 @@ See [package.json](./package.json).
 
 To enable calls to kayttooikeus backend, start it as well. See [README](../README.md). Proxy configuration will forward the API requests. 
 
+Alternatively without need to install node/npm locally, just run:
+mvn -Pdev-server install
+
+To change logged in user authenticated with basic authentication, change "proxy"."/kayttooikeus-service/*"."auth" property to user:password in package.json
+
 ## Tests
 
 `npm run test` (starts watcher)
