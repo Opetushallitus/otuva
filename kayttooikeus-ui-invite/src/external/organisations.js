@@ -1,18 +1,11 @@
 import Bacon from 'baconjs'
 
-const ORGS_URL = '/organisaatio-service/rest/organisaatio/v2/hae/tyyppi?aktiiviset=true&suunnitellut=false&lakkautetut=false'
+import omatTiedotResponseS from './omattiedot'
 
-const fetchFromUrl = url => {
-  return Bacon.fromPromise(
-    fetch(url)
-      .then(response => {
-        return response.json()
-      })
-  )
-}
+const orgsResponseS = Bacon.fromPromise(omatTiedotResponseS.toPromise().then(omatTiedot => {
+  const henkiloOid = omatTiedot.oidHenkilo
+  const ORGS_URL = `/kayttooikeus-service/henkilo/${henkiloOid}/organisaatio`
+  return fetch(ORGS_URL, { credentials: 'same-origin' }).then(response => response.json())
+}))
 
-const orgsRequestS = Bacon.later(0, ORGS_URL)
-const orgsResponseS = orgsRequestS.flatMap(fetchFromUrl)
-
-export const orgsResponsePendingP = orgsRequestS.awaiting(orgsResponseS)
 export default orgsResponseS

@@ -16,7 +16,7 @@ const AddToOrganisation = React.createClass({
 
   render: function() {
     const L = this.props.l10n
-    const orgs = this.props.orgs.organisaatiot
+    const orgs = this.props.orgs
 
     return (
       <fieldset className="add-to-organisation">
@@ -40,18 +40,18 @@ const AddToOrganisation = React.createClass({
   },
 
   selectOrganisation: function(e) {
-    const selectedOrganization = R.find(R.propEq('oid', e.target.value))(this.props.orgs.organisaatiot)
+    const selectedOrganization = R.find(R.pathEq(['organisaatio', 'oid'], e.target.value))(this.props.orgs)
     if (selectedOrganization) {
       const henkiloOid = this.props.omatTiedot.oidHenkilo
-      const organisaatioOid = selectedOrganization.oid
+      const organisaatioOid = selectedOrganization.organisaatio.oid
       fetch(`/kayttooikeus-service/kayttooikeusryhma/${henkiloOid}/${organisaatioOid}`, {
         credentials: 'same-origin'
       }).then(response => {
         return response.json()
       }).then(permissions => {
         organisations.add({
-          id: selectedOrganization.oid,
-          organisation: selectedOrganization,
+          id: selectedOrganization.organisaatio.oid,
+          organisation: selectedOrganization.organisaatio,
           selectablePermissions: permissions,
           selectedPermissions: [],
         })
@@ -60,10 +60,10 @@ const AddToOrganisation = React.createClass({
   },
 
   renderOrganisation: function(org) {
-    const organisaatiotyypit = org.organisaatiotyypit.join(',')
+    const organisaatiotyypit = org.organisaatio.tyypit.join(',')
     return (
-      <option key={org.oid} value={org.oid}>
-        {this.organisaatioNimi(org)} ({organisaatiotyypit})
+      <option key={org.organisaatio.oid} value={org.organisaatio.oid}>
+        {this.organisaatioNimi(org.organisaatio)} ({organisaatiotyypit})
       </option>
     )
   },

@@ -7,7 +7,7 @@ import organisations from './logic/organisations'
 import basicInfo from './logic/basicInfo'
 import l10nResponseS, { l10nResponsePendingP } from './external/l10n'
 import omatTiedotResponseS, { omatTiedotResponsePendingP } from './external/omattiedot'
-import orgsResponseS, { orgsResponsePendingP } from './external/organisations'
+import orgsResponseS from './external/organisations'
 import langResponseS, { langResponsePendingP } from './external/languages'
 import buildVersionResponseS from './external/buildversion'
 import InvitationForm from './components/InvitationForm'
@@ -25,8 +25,7 @@ const appStateS = Bacon.combineTemplate({
 }).changes()
 
 appStateS
-  .skipWhile(orgsResponsePendingP
-    .or(omatTiedotResponsePendingP)
+  .skipWhile(omatTiedotResponsePendingP
     .or(l10nResponsePendingP)
     .or(langResponsePendingP))
   .onValue(appState => {
