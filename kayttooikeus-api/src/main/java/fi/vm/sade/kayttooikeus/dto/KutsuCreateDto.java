@@ -5,15 +5,17 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Email;
 
 @Getter
 @Setter
 public class KutsuCreateDto {
 
     @NotNull
+    @Email
     private String sahkoposti;
     @NotNull
-    private String asiointikieli;
+    private Asiointikieli asiointikieli;
     @Valid
     @NotNull
     private Set<KutsuOrganisaatioDto> organisaatiot;

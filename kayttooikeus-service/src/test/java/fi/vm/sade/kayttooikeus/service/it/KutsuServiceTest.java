@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
+import fi.vm.sade.kayttooikeus.dto.Asiointikieli;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -102,7 +103,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         KutsuCreateDto kutsu = new KutsuCreateDto();
         kutsu.setSahkoposti("example@example.com");
-        kutsu.setAsiointikieli("fi");
+        kutsu.setAsiointikieli(Asiointikieli.fi);
         kutsu.setOrganisaatiot(new LinkedHashSet<>());
         KutsuCreateDto.KutsuOrganisaatioDto kutsuOrganisaatio = new KutsuCreateDto.KutsuOrganisaatioDto();
         kutsuOrganisaatio.setOrganisaatioOid("1.2.246.562.10.00000000001");
@@ -112,7 +113,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         long id = kutsuService.createKutsu(kutsu);
         KutsuReadDto tallennettu = kutsuService.getKutsu(id);
 
-        assertThat(tallennettu.getAsiointikieli()).isEqualTo("fi");
+        assertThat(tallennettu.getAsiointikieli()).isEqualByComparingTo(Asiointikieli.fi);
         Set<KutsuReadDto.KutsuOrganisaatioDto> organisaatiot = tallennettu.getOrganisaatiot();
         assertThat(organisaatiot).hasSize(1);
         KutsuReadDto.KutsuOrganisaatioDto tallennettuKutsuOrganisaatio = organisaatiot.iterator().next();

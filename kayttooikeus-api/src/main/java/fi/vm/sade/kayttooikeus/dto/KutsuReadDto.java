@@ -10,7 +10,7 @@ public class KutsuReadDto {
 
     private Long id;
     private String sahkoposti;
-    private String asiointikieli;
+    private Asiointikieli asiointikieli;
     private Set<KutsuOrganisaatioDto> organisaatiot;
 
     @Getter
