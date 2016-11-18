@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.config.properties;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.properties.OphProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -16,18 +14,15 @@ import java.util.regex.Pattern;
 
 @Configuration
 public class UrlConfiguration extends OphProperties {
-    private final ObjectMapper objectMapper;
 
     @Autowired
-    public UrlConfiguration(Environment environment, ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public UrlConfiguration(Environment environment) {
         addFiles("/kayttooikeus-service-oph.properties");
         addOptionalFiles(environment.getProperty("spring.config.location"));
     }
 
-    @Override
     // The default implementation wont resolve variables, e.g. ${url-virkailija}
-    public String frontPropertiesToJson() {
+    public Map<String,String> frontPropertiesAsMap() {
         Map<String,String> results = new HashMap<>();
         Pattern var = Pattern.compile(".*(\\$\\{(.*?)\\}).*");
         for (Entry<Object,Object> kv : frontProperties.entrySet()) {
@@ -39,10 +34,6 @@ public class UrlConfiguration extends OphProperties {
             }
             results.put(kv.getKey().toString(), val);
         }
-        try {
-            return objectMapper.writeValueAsString(results);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
+        return results;
     }
 }

@@ -168,8 +168,8 @@ module.exports = {
       PUBLIC_URL: publicUrl,
       RAAMIT_URL: '',
       JQUERY_URL: '',
-      CONFIG_URL: '/kayttooikeus-service/config/frontProperties.js',
-      CONFIG_URL_OVERRIDE: publicUrl + '/dev.properties.js'
+      CONFIG_URL: '/kayttooikeus-service/config/frontProperties.json',
+      CONFIG_URL_OVERRIDE: publicUrl + '/dev.properties.json'
     }),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({

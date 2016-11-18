@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -16,24 +16,22 @@
     <script src="%JQUERY_URL%"></script>
     <script src="%RAAMIT_URL%"></script>
     <title>List</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <script>
+        var CONFIG_URL = '%CONFIG_URL%';
+        var CONFIG_URL_OVERRIDE = '%CONFIG_URL_OVERRIDE%';
+    </script>
+</head>
+<body>
+<div id="root"></div>
+<!--
+  This HTML file is a template.
+  If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  You can add webfonts, meta tags, or analytics to this file.
+  The build step will place the bundled scripts into the <body> tag.
 
-      To begin the development, run `npm start`.
-      To create a production bundle, use `npm run build`.
-    -->
-  </body>
-  <!-- No way to inject anything after the bundle.js which is inserted at the end of body with webpack.
-	   So with this dirty hack (works with at least Chrome, FF and Safari) the desired could be achieved. -->
-  <body>
-    <script src="%CONFIG_URL%"></script>
-    <script src="%CONFIG_URL_OVERRIDE%"></script>
-  </body>
+  To begin the development, run `npm start`.
+  To create a production bundle, use `npm run build`.
+-->
+</body>
 </html>
