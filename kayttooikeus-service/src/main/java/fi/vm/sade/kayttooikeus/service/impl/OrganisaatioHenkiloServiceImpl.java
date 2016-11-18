@@ -1,11 +1,14 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,5 +59,18 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
             return singletonList(VIRKAILIJA);
         }
         return emptyList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrganisaatioHenkiloDto findOrganisaatioHenkiloByHenkiloAndOrganisaatio(String henkiloOid, String organisaatioOid) {
+        return organisaatioHenkiloRepository.findByHenkiloOidAndOrganisaatioOid(henkiloOid, organisaatioOid)
+                .orElseThrow(() -> new NotFoundException("Could not find organisaatiohenkilo"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganisaatioHenkiloDto> findOrganisaatioByHenkilo(String henkiloOid) {
+        return organisaatioHenkiloRepository.findOrganisaatioHenkilosForHenkilo(henkiloOid);
     }
 }
