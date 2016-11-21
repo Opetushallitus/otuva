@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import org.joda.time.LocalDate;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void findHenkilosTest() throws Exception {
-        List<String> list = henkiloService.findHenkilos(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), null);
+        List<String> list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), null));
         assertEquals(0, list.size());
 
         populate(myonnettyKayttoOikeus(
@@ -62,18 +63,18 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("RYHMA2")
         ).voimassaAlkaen(new LocalDate().plusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(2)));
 
-        list = henkiloService.findHenkilos(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("1.1.1.1.1"), null);
+        list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("1.1.1.1.1"), null));
         assertEquals(0, list.size());
 
-        list = henkiloService.findHenkilos(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), null);
+        list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), null));
         assertEquals(3, list.size());
         assertTrue(list.containsAll(Arrays.asList("1.2.3.4.5", "1.2.3.4.6", "1.2.3.4.7")));
 
-        list = henkiloService.findHenkilos(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), "RYHMA2");
+        list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("3.4.5.6.7"), "RYHMA2"));
         assertEquals(2, list.size());
         assertTrue(list.containsAll(Arrays.asList("1.2.3.4.6", "1.2.3.4.7")));
 
-        list = henkiloService.findHenkilos(HenkiloTyyppi.PALVELU, Collections.singletonList("3.4.5.6.7"), null);
+        list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.PALVELU, Collections.singletonList("3.4.5.6.7"), null));
         assertEquals(0, list.size());
     }
 

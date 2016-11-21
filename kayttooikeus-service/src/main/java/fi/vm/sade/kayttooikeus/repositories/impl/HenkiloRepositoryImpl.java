@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;

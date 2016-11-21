@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.model;
+package fi.vm.sade.kayttooikeus.dto;
 
 /**
  * Vanhaa henkilön tietomallia, henkilön tyypitys tehdään jatkossa organisaatiohenkilölle

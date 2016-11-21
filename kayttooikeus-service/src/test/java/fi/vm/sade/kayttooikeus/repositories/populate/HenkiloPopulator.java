@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 
 import javax.persistence.EntityManager;
 

@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -30,11 +30,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> findHenkilos(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName) {
+    public List<String> findHenkilos(OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
         ArrayList<String> allowedRoles = Lists.newArrayList("READ", "READ_UPDATE", "CRUD");
         Set<String> roles = getCasRoles();
 
-        return henkiloHibernateRepository.findHenkiloOids(henkiloTyyppi, ooids, groupName)
+        return henkiloHibernateRepository.findHenkiloOids(organisaatioOidsSearchDto.getHenkiloTyyppi(),
+                organisaatioOidsSearchDto.getOrganisaatioOids(), organisaatioOidsSearchDto.getGroupName())
                 .stream()
                 .filter(henkiloOid -> permissionCheckerService.hasInternalAccess(henkiloOid, allowedRoles, roles))
                 .collect(Collectors.toList());
