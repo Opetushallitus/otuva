@@ -19,6 +19,8 @@ import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.AIKALEIMA;
 import static fi.vm.sade.kayttooikeus.repositories.OrderBy.orderer;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
+
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -49,15 +51,12 @@ public class KutsuController {
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    public ResponseEntity<Void> create(@Validated @RequestBody KutsuCreateDto kutsu) {
+    public ResponseEntity<Long> create(@Validated @RequestBody KutsuCreateDto kutsu) {
         long id = kutsuService.createKutsu(kutsu);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()
-                .pathSegment(String.valueOf(id))
-                .build().toUri();
-        return ResponseEntity.created(location).build();
+        URI location = fromCurrentRequestUri().pathSegment(String.valueOf(id)).build().toUri();
+        return ResponseEntity.created(location).body(id);
     }
-
+    
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")

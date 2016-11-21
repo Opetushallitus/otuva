@@ -1,0 +1,9 @@
+{
+ "kayttooikeus-service.l10n": "/kayttooikeus-service/l10n",
+ "kayttooikeus-service.kutsu": "/kayttooikeus-service/kutsu",
+ "kayttooikeus-service.peruutaKutsu": "/kayttooikeus-service/kutsu/$1",
+ "kayttooikeus-service.buildversion": "/kayttooikeus-service/buildversion.txt",
+ "kayttooikeus-service.l10n.languages": "/kayttooikeus-service/l10n/languages",
+ "kayttooikeus-service.henkilo.organisaatios": "/kayttooikeus-service/henkilo/$1/organisaatio",
+ "kayttooikeus-service.omattiedot.oid": "/kayttooikeus-service/omattiedot/oid"
+}
