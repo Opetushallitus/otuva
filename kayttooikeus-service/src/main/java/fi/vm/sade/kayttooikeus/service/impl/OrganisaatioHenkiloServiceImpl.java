@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
@@ -22,6 +23,8 @@ import java.util.List;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
 import static fi.vm.sade.kayttooikeus.model.HenkiloTyyppi.PALVELU;
 import static fi.vm.sade.kayttooikeus.model.HenkiloTyyppi.VIRKAILIJA;
+import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.PALVELU;
+import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.VIRKAILIJA;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import lombok.Getter;
 import lombok.Setter;
 

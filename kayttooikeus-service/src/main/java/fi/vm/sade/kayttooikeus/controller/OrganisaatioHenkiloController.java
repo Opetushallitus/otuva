@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import io.swagger.annotations.Api;

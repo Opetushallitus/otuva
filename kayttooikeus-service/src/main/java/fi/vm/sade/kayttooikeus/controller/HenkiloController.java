@@ -4,16 +4,16 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.kayttooikeus.model.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -67,11 +67,8 @@ public class HenkiloController {
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @RequestMapping(value = "/byOoids", method = RequestMethod.GET)
-    public List<String> findHenkilos(@ApiParam("Henkilötyypin määre") @RequestParam(value = "ht", required = false) HenkiloTyyppi henkiloTyyppi,
-                             @ApiParam("Organisaatiorajoitteet") @RequestParam(value = "ooids", required = false) List<String> ooids,
-                             @ApiParam("Käyttöoikeusryhmä") @RequestParam(value = "kor", required = false) String groupName) {
-        henkiloTyyppi = henkiloTyyppi == null ? HenkiloTyyppi.VIRKAILIJA : henkiloTyyppi;
-        return henkiloService.findHenkilos(henkiloTyyppi, ooids, groupName);
+    @RequestMapping(value = "/byOoids", method = RequestMethod.POST)
+    public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
+        return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
 }
