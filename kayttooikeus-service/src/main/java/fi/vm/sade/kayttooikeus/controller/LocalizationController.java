@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,7 @@ public class LocalizationController {
         this.koodistoClient = koodistoClient;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(method = GET)
     public Map<String,Map<String,String>> list() {
         return LOCALES.get().collect(toMap(locale -> locale.getLanguage().toLowerCase(),
@@ -46,6 +48,7 @@ public class LocalizationController {
                         e -> e.getValue().toString()))));
     }
     
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/languages")
     public List<LanguageCode> languages() {
         Map<String,KoodiArvoDto> koodistoKoodisByLocale = koodistoClient.listKoodisto("kieli").stream()
