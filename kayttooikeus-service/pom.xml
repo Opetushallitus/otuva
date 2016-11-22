@@ -31,7 +31,7 @@
 
         <dependency>
             <groupId>fi.vm.sade.kayttooikeus</groupId>
-            <artifactId>kayttooikeus-ui-invite</artifactId>
+            <artifactId>kayttooikeus-ui-virkailija</artifactId>
             <version>${project.version}</version>
         </dependency>
 
