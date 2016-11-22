@@ -1,9 +1,17 @@
-import { routeErrorP } from './route'
 import Bacon from 'baconjs'
 
+import { routeErrorP } from './route'
+import dispatcher from './dispatcher'
+
 const logError = (error) => {
-    console.log('ERROR', error)
+    console.log('ERROR', error);
 };
+
+const globalErrorDispatcher = dispatcher();
+const globalErrorP = Bacon.update({},
+    [globalErrorDispatcher.stream('set')], (current, newError) => ({...newError}),
+    [globalErrorDispatcher.stream('clear')], () => ({})
+);
 
 const errorText = (code, l10n) => l10n['ERROR_'+code] || {
     400: 'Järjestelmässä tapahtui odottamaton virhe. Yritä myöhemmin uudelleen.',
@@ -21,19 +29,30 @@ export const errorPF = (stateP, l10nP) => {
             ? Bacon.fromEvent(document.body, 'click').map({}) // Retryable errors can be dismissed
             : Bacon.never()
         )).toProperty({});
-    return Bacon.combineWith(stateErrorP, routeErrorP, (error, routeError) =>
-        error.httpStatus ? error : routeError
-    );
+    return Bacon.combineWith(stateErrorP, routeErrorP, globalErrorP, l10nP, (error, routeError, globalError, l10n) => {
+        return error.httpStatus ? error : ( globalError.message ? {
+            type: globalError.type || 'error',
+            comment: l10n[globalError.message.toUpperCase()] || (l10n[globalError.messageKey.toUpperCase()] || globalError.message)
+        } : routeError);
+    });
 };
 
-export const handleError = (error) => {
+export const commonHandleError = (error) => {
     if (requiresLogin(error)) {
         document.location = window.url('cas.login');
     } else {
-        logError(error)
+        logError(error);
+        error.json().then(json => globalErrorDispatcher.push('set',json));
     }
 };
 
+export function clearGlobalErrors() {
+    globalErrorDispatcher.push('clear');
+}
+export function setSuccess(msg) {
+    globalErrorDispatcher.push('set', {type: 'success', message:msg});
+}
+
 export function requiresLogin(e) {
-    return e.httpStatus === 401 || e.httpStatus === 403;
+    return e.status === 401 || e.status === 403;
 }

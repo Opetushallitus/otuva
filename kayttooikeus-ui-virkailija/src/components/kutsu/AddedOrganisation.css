@@ -1,5 +1,6 @@
 .added-org {
   margin: .5em;
-  padding: .5em;
-  border: 1px solid black;
+  padding: 1em;
+  color: white;
+  background: #00526C;
 }

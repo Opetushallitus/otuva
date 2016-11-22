@@ -16,14 +16,15 @@ var Button = _react2.default.createClass({
     displayName: 'Button',
 
     propTypes: {
-        action: _react2.default.PropTypes.func.isRequired
+        action: _react2.default.PropTypes.func.isRequired,
+        disabled: _react2.default.PropTypes.bool
     },
 
     render: function render() {
-        var className = "button " + (this.props.className ? " " + this.props.className : "");
+        var className = "button " + (this.props.className ? " " + this.props.className : "") + (this.props.disabled ? " disabled" : "");
         return _react2.default.createElement(
             'span',
-            { className: className, onClick: this.props.action },
+            { className: className, onClick: !this.props.disabled ? this.props.action : function () {} },
             this.props.children
         );
     }

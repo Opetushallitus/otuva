@@ -1,4 +1,7 @@
+import Bacon from 'baconjs'
+
 import { locationP } from './location'
+import { l10nP } from '../external/l10n'
 import { kutsuListViewContentP } from '../components/kutsu/KutsuListView'
 import { anomusListViewContentP } from '../components/anomus/AnomusListView'
 import { kutsuFormContentP } from '../components/kutsu/KutsuForm'
@@ -15,4 +18,5 @@ export const routeP = locationP.flatMapLatest(({path, queryString}) => {
 }).toProperty();
 
 export const contentP = routeP.map('.content');
-export const routeErrorP = contentP.map(content => content ? {} : { httpStatus: 404, comment: 'route not found' });
+export const routeErrorP =  Bacon.combineWith(l10nP, contentP, locationP, (l10n, content, location) => 
+    content ? {} : { httpStatus: 404, comment: l10n.msg('ROUTE_NOT_FOUND', location.path)});

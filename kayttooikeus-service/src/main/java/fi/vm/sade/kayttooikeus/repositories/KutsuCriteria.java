@@ -12,7 +12,8 @@ import java.util.List;
 public class KutsuCriteria extends BaseCriteria {
     private List<KutsunTila> tilas;
     private String kutsujaOid;
-    
+    private String sahkoposti;
+
     public BooleanBuilder builder(QKutsu kutsu) {
         BooleanBuilder builder = new BooleanBuilder();
         if (used(tilas)) {
@@ -20,6 +21,9 @@ public class KutsuCriteria extends BaseCriteria {
         }
         if (used(kutsujaOid)) {
             builder.and(kutsu.kutsuja.eq(kutsujaOid));
+        }
+        if (used(sahkoposti)) {
+            builder.and(kutsu.sahkoposti.eq(sahkoposti));
         }
         return builder;
     }
@@ -31,6 +35,11 @@ public class KutsuCriteria extends BaseCriteria {
     
     public KutsuCriteria withKutsuja(String kutsujaOid) {
         this.kutsujaOid = kutsujaOid;
+        return this;
+    }
+    
+    public KutsuCriteria withSahkoposti(String sahkoposti) {
+        this.sahkoposti = sahkoposti;
         return this;
     }
 }

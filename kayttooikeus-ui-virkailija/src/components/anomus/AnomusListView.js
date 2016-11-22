@@ -11,7 +11,7 @@ const AnomusListView = React.createClass({
         return (
             <div className="wrapper">
                 <div className="header">
-                    <h1>{L['HYVAKSYMATTOMAT_KAYTTOOIKEUSANOMUKSET_OTSIKKO']}</h1>
+                    <h2>{L['HYVAKSYMATTOMAT_KAYTTOOIKEUSANOMUKSET_OTSIKKO']}</h2>
                 </div>
                 <p>
                     TODO: taulukko tähän (oma tikettinsä)

@@ -20,7 +20,7 @@ const AddToOrganisation = React.createClass({
     return (
       <fieldset className="add-to-organisation">
 
-        <h2>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h2>
+        <h3>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h3>
 
         <AddedOrganisations addedOrgs={this.props.addedOrgs} l10n={this.props.l10n} uiLang={this.props.uiLang} />
 

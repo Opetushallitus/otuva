@@ -1,17 +1,27 @@
-* {
-  font-size: 16px;
+body {
+  color: #2B2B2B;
+  font-family: OpenSans;
+  font-size: 15px;
+  letter-spacing: 0;
+  line-height: 19px;
 }
 
 h1 {
-  font-size: 2em;
+  font-family: OpenSans-Semibold;
+  font-size: 32px;
+  letter-spacing: 0;
 }
 
 h2 {
-  font-size: 1.75em;
+  font-family: OpenSans-Semibold;
+  font-size: 24px;
+  letter-spacing: 0;
 }
 
 h3 {
-  font-size: 1.5em;
+  font-family: OpenSans-Semibold;
+  font-size: 16px;
+  letter-spacing: 0;
 }
 
 h4 {
@@ -27,11 +37,13 @@ form {
 }
 
 fieldset {
-  background-color: #cecece;
+  background-color: #F6F4F0;
 }
 
 p {
   text-align: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .mainContainer {
@@ -46,4 +58,63 @@ p {
   font-size: 0.6em;
   font-weight: bold;
   margin-bottom: 20px;
+}
+
+.clear {
+  clear: both;
+}
+.appFooter {
+  clear: both;
+  margin-top: 40px;
+  border-top: 1px solid #AEAEAE;
+  padding: 20px;
+}
+.appFooter .build {
+  float:right;
+  font-size: 0.65em;
+  color: #AEAEAE;
+}
+
+.is-error {
+  font-size: 15px;
+  color: #E44E4E;
+  letter-spacing: 0;
+  line-height: 16px;
+}
+.error {
+  padding: 10px;
+  border: 2px solid #E44E4E;
+  border-radius: 2px;
+  clear:both;
+  margin: 10px;
+}
+.success.topError {
+  clear: both;
+  position: relative;
+  top: 80px;
+  padding: 10px;
+  background: #E6FFC1;
+  border: 1px solid #99D740;
+  border-radius: 2px;
+  margin: 10px;
+  margin-bottom: 50px;
+  color: #2B2B2B;
+}
+.error.topError {
+  clear: both;
+  position: relative;
+  top: 80px;
+  background: #FFE9E9;
+  border: 1px solid #E09191;
+  border-radius: 2px;
+  color: #2B2B2B;
+  margin: 10px;
+  margin-bottom: 50px;
+}
+.mainContent {
+  margin-bottom: 50px;
+}
+.clear {
+  clear:both;
+  margin-bottom:10px;
 }

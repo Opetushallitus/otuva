@@ -10,6 +10,7 @@ import BackLink from '../BackLink'
 
 import kutsuList, { kutsuListStateP, kutsuListP, peruutaKutsu } from '../../external/kutsu'
 import { l10nP, localeP } from '../../external/l10n'
+import { setSuccess } from '../../logic/error'
 
 import './KutsuListView.css'
 
@@ -28,7 +29,7 @@ const KutsuListView = React.createClass({
             <div className="wrapper">
                 <BackLink {...this.props}/>
                 <div className="header">
-                    <h1>{L['KUTSUTUT_VIRKAILIJAT_OTSIKKO']}</h1>
+                    <h2>{L['KUTSUTUT_VIRKAILIJAT_OTSIKKO']}</h2>
                 </div>
                 {!kutsuResponse.loaded 
                     && <div className="loading">{L['LADATAAN']}
@@ -65,7 +66,7 @@ const KutsuListView = React.createClass({
                                         {dateformat(new Date(kutsu.aikaleima), L['PVM_FORMAATTI'])}
                                     </td>
                                     <th>
-                                        {kutsu.tila === 'AVOIN' && <Button action={this.cancelInvitationAction(kutsu)}>{L['PERUUTA_KUTSU']}</Button>}
+                                        {kutsu.tila === 'AVOIN' && <Button className="cancel" action={this.cancelInvitationAction(kutsu)}>{L['PERUUTA_KUTSU']}</Button>}
                                     </th>
                                 </tr>)}
                             </tbody>
@@ -123,8 +124,10 @@ const KutsuListView = React.createClass({
 
     cancelInvitationConfirmed: function() {
         if (this.state.confirmDeleteFor) {
-            peruutaKutsu(this.state.confirmDeleteFor.id);
-            this.setState({confirmDeleteFor: null});
+            peruutaKutsu(this.state.confirmDeleteFor.id).onValue(() => {
+                setSuccess('KUTSU_PERUUTETTU');
+                this.setState({confirmDeleteFor: null});
+            });
         }
     },
 

@@ -1,7 +1,7 @@
 #/bin/bash
 
 pwd=`pwd`
-NODE_UI_PROJECT="../../kayttooikeus-ui-list"
+NODE_UI_PROJECT="../../kayttooikeus-ui-virkailija"
 NODE="$NODE_UI_PROJECT/node/node"
 NPM="$NODE_UI_PROJECT/node/node_modules/npm/bin/npm-cli.js"
 NODE_MODULES="$NODE_UI_PROJECT/node_modules"

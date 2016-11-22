@@ -1,10 +1,12 @@
 import React from 'react'
 import R from 'ramda'
+import Button from 'button'
 
 import organisations from '../../logic/organisations'
 import { toLocalizedText } from '../../logic/localizabletext'
 
 import './AddedOrganisation.css'
+
 
 const AddedOrganisation = React.createClass({
   render: function() {
@@ -14,10 +16,9 @@ const AddedOrganisation = React.createClass({
     return (
       <div className="added-org" key={addedOrg.organisation.oid}>
         <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}
-          <a href=""
-            onClick={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)}>X</a>
+          <Button className="cancel right" action={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)}>X</Button>
         </h3>
-        <div>
+        <div className="row">
           <label htmlFor="permissions">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']}
           </label>
@@ -31,7 +32,7 @@ const AddedOrganisation = React.createClass({
             return (
               <li key={permission.ryhmaId}>
                 {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
-                <a href="" onClick={this.removeAddedPermission.bind(null, permission.ryhmaId)}>X</a>
+                <Button className="cancel right" action={this.removeAddedPermission.bind(null, permission.ryhmaId)}>X</Button>
               </li>
             )
           })}

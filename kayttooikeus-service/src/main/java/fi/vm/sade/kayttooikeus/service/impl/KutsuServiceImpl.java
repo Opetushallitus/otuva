@@ -78,6 +78,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public long createKutsu(KutsuCreateDto dto) {
+         if (!kutsuRepository.listKutsuListDtos(new KutsuCriteria().withTila(AVOIN).withSahkoposti(dto.getSahkoposti())).isEmpty()) {
+             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
+         }
+        
         Kutsu entity = mapper.map(dto, Kutsu.class);
 
         entity.setId(null);

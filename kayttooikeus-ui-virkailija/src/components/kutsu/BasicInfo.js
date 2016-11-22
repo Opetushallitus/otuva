@@ -12,12 +12,12 @@ const BasicInfo = React.createClass({
     const langs = this.props.languages;
     return (
       <fieldset className="basic-info">
-        <h2>{L['VIRKAILIJAN_TIEDOT_OTSIKKO']}</h2>
-        <div>
+        <h3>{L['VIRKAILIJAN_TIEDOT_OTSIKKO']}</h3>
+        <div className="row">
           <label htmlFor="email">{L['VIRKAILIJAN_TIEDOT_SPOSTI']}</label>
           <input type="text" id="email" onChange={this.handleEmail}/>
         </div>
-        <div>
+        <div className="row">
           <label htmlFor="lang">{L['VIRKAILIJAN_TIEDOT_KIELI']}</label>
           <select id="lang" onChange={this.selectLanguage}>
             {langs.map(this.renderLang)}
@@ -42,7 +42,6 @@ const BasicInfo = React.createClass({
   selectLanguage: function(e) {
     basicInfo.setLanguage(e.target.value)
   }
-
 });
 
 export default BasicInfo

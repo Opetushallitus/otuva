@@ -1,5 +1,7 @@
 import Bacon from 'baconjs'
 
+import {clearGlobalErrors, setSuccess} from './error'
+
 const locationBus = new Bacon.Bus();
 
 function parseQuery(qstr) {
@@ -26,7 +28,12 @@ const parsePath = (path) => {
     return parseLocation(a);
 };
 
-export const navigateTo = function (path) {
+export const navigateTo = function (path, successMsg=null) {
+    if (successMsg) {
+        setSuccess(successMsg);
+    } else {
+        clearGlobalErrors();
+    }
     history.pushState(null, null, path);
     locationBus.push(parsePath(path));
 };

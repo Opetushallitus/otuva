@@ -6,24 +6,33 @@ import Bacon from 'baconjs'
 
 import { l10nP } from './external/l10n'
 import { urlsP } from './external/urls'
+import { buildVersionP } from './external/buildversion'
 import { contentP } from './logic/route'
 import { locationP } from './logic/location'
-import { errorPF, handleError } from './logic/error'
+import { errorPF, commonHandleError } from './logic/error'
 import TopNavigation from './components/TopNavigation'
 
 import './reset.css'
 import './index.css'
 
 const errorP = errorPF(contentP, l10nP);
-const domP = Bacon.combineWith(urlsP, locationP, l10nP, errorP, contentP, (urls, location, l10n, error, content) => {
+const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, contentP, (buildVersion, urls, location, l10n, error, content) => {
     const props = {location, l10n};
     return <div className="mainContainer">
-        {error && error.httpStatus && <div className="error is-error">
+        <TopNavigation {...props}/>
+        {error && (error.httpStatus || error.comment) && <div className={(error.type || 'error is-error ')+' topError'}>
             {error.comment}
         </div>}
-        <TopNavigation {...props}/>
-        {content}
+        <div className="mainContent">
+            {content}
+        </div>
+        <div className="appFooter">
+            <div className="build">
+                Build {buildVersion.branchName} #<span title={buildVersion.buildTtime}>{buildVersion.buildNumber}</span>
+            </div>
+        </div>
     </div>
 });
 domP.onValue(component => ReactDOM.render(component, document.getElementById('root')));
-domP.onError(handleError);
+domP.onError(commonHandleError);
+buildVersionP.onValue(buildVersion => console.info('Backend version: ', buildVersion));

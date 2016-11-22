@@ -1,3 +1,4 @@
+
 const queryParams = (map) => {
     const params = new URLSearchParams();
     for (var k in map) {
@@ -19,9 +20,9 @@ export const postFormBoby = (map) => {
     return queryParams(map);
 };
 
-export const handleError = (response) => {
+export const handleFetchError = (response) => {
     if (!response.ok) {
-        throw Error(response.statusText);
+        throw response;
     }
     return response;
 };

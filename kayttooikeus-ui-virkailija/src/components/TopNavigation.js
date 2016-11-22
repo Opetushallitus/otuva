@@ -5,11 +5,11 @@ import {navigateTo} from '../logic/location'
 
 const TopNavigation = React.createClass({
     render: function() {
-        return (<div className="topNavigation">
+        return (<div className="topNavigationContainer"><div className="topNavigation">
             {this.item('/', 'NAYTA_ANOMUKSET_LINKKI')},
             {this.item('/kutsu/list', 'NAYTA_KUTSUTUT_LINKKI')},
             {this.item('/kutsu', 'VIRKAILIJAN_KUTSU_LINKKI')}
-        </div>);
+        </div></div>);
     },
     
     item: function(path, key) {

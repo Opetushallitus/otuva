@@ -1,9 +1,9 @@
-import React from 'react'
-import R from 'ramda'
-import Modal from 'modal'
-
-import {kutsu} from '../../external/kutsu'
-import {toLocalizedText} from '../../logic/localizabletext'
+import React from "react";
+import R from "ramda";
+import Modal from "modal";
+import Button from "button";
+import {kutsu} from "../../external/kutsu";
+import {toLocalizedText} from "../../logic/localizabletext";
 
 const KutsuConfirmation = React.createClass({
 
@@ -19,16 +19,19 @@ const KutsuConfirmation = React.createClass({
     return (
       <Modal show={this.props.modalOpen} onClose={this.props.modalCloseFn} closeOnOuterClick={true}>
         <div className="confirmation-modal">
-          <h1>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO']}</h1>
+          <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO']}</h2>
           <p>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_TEKSTI']} {this.props.basicInfo.email}</p>
-          <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h2>
+          <h3>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h3>
           {this.props.addedOrgs.map(this.renderAddedOrg)}
-          <button onClick={this.sendInvitation}>
-            {L['VIRKAILIJAN_LISAYS_TALLENNA']}
-          </button>
-          <button onClick={this.props.modalCloseFn}>
-            {L['VIRKAILIJAN_LISAYS_ESIKATSELU_SULJE']}
-          </button>
+          <div className="row">
+            <Button className="left action" action={this.sendInvitation}>
+              {L['VIRKAILIJAN_LISAYS_TALLENNA']}
+            </Button>
+            <Button className="right cancel" action={this.props.modalCloseFn}>
+              {L['VIRKAILIJAN_LISAYS_ESIKATSELU_SULJE']}
+            </Button>
+          </div>
+          <div className="clear"></div>
           <p>{this.state.sent ? L['VIRKAILIJAN_LISAYS_LAHETETTY'] : ''}</p>
         </div>
       </Modal>
@@ -69,11 +72,17 @@ const KutsuConfirmation = React.createClass({
     const {invitationResponseS} = kutsu(payload);
 
     invitationResponseS.onValue(response => {
-      console.info('inviation sent', response);
-      this.setState({sent: true});
+      console.info('invitation sent', response);
+      if (this.props.ready) {
+        this.props.ready(true);
+      } else {
+        this.setState({sent: true});
+      }
     });
-    invitationResponseS.onError(error => {
-      console.error('invitation send error: ', error);
+    invitationResponseS.onError(() => {
+      if (this.props.ready) {
+        this.props.ready(false);
+      }
     });
   }
 });
