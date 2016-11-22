@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
@@ -28,6 +29,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.joda.time.LocalDate.now;
 import static org.joda.time.Period.months;
@@ -343,5 +345,37 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
         List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
         assertEquals(1, list.size());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void findKayttoOikeusRyhmasByKayttoOikeusIdsTest() {
+        KayttoOikeusRyhma ryhma = populate(kayttoOikeusRyhma("RYHMA")
+                .withKuvaus(text("FI", "Käyttäjähallinta")
+                        .put("EN", "User management")
+                        .put("SV", "på svenska"))
+                .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                .withOikeus(oikeus("KOODISTO", "READ")));
+        Long oikeusId = ryhma.getKayttoOikeus().iterator().next().getId();
+
+        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
+                .willReturn(singletonList(OrganisaatioViiteDto.builder()
+                        .organisaatioTyyppi("123.123.123")
+                        .id(1L)
+                        .kayttoOikeusRyhmaId(ryhma.getId())
+                        .build()));
+
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(singletonList(oikeusId));
+        assertEquals(1, ryhmas.size());
+        assertEquals("RYHMA", ryhmas.get(0).getName());
+        assertEquals("Käyttäjähallinta", ryhmas.get(0).getDescription().get("FI"));
+        assertEquals("User management", ryhmas.get(0).getDescription().get("EN"));
+        assertEquals("på svenska", ryhmas.get(0).getDescription().get("SV"));
+        assertEquals("123.123.123", ryhmas.get(0).getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
+
+        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any())).willReturn(emptyList());
+        ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(emptyList());
+        assertEquals(0, ryhmas.size());
     }
 }

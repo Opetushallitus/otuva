@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.QueryParam;
 import java.util.List;
 import java.util.Map;
 
@@ -166,6 +165,16 @@ public class KayttoOikeusRyhmaController {
         kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
         accessRightAuditLogger.auditModifyAccessRightGroupData(UserDetailsUtil.getCurrentUserOid(), Long.toString(id), false);
         return kayttoOikeusService.findKayttoOikeusRyhma(id);
+    }
+
+    @RequestMapping(value = "/ryhmasByKayttooikeus", method = RequestMethod.POST)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
+            + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee käyttöoikeusryhmät joissa jokin annetuista käyttöoikeuksista esiintyy.")
+    public List<KayttoOikeusRyhmaDto> getKayttoOikeusRyhmasByKayttoOikeus(@RequestBody List<Long> kayttoOikeusIds) {
+        return kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(kayttoOikeusIds);
     }
 
 }

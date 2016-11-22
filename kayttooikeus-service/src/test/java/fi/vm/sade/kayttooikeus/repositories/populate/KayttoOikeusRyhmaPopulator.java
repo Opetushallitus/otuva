@@ -62,7 +62,6 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
                     "where kor.name = :name").setParameter("name", name)).orElseGet(() -> {
             KayttoOikeusRyhma r = new KayttoOikeusRyhma();
             r.setDescription(kuvaus.apply(entityManager));
-            r.setHidden(false);
             r.setName(name);
             r.setHidden(hidden);
             entityManager.persist(r);

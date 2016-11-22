@@ -38,4 +38,6 @@ public interface KayttoOikeusService {
     long createKayttoOikeus(KayttoOikeusCreateDto kayttoOikeus);
 
     void updateKayttoOikeusForKayttoOikeusRyhma(long id, KayttoOikeusRyhmaModifyDto ryhmaData);
+
+    List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds);
 }
