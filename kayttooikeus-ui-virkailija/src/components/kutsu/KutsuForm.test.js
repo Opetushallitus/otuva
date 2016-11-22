@@ -1,3 +1,6 @@
+import 'oph-urls-js';
+import '../../test.properties.js'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 

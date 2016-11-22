@@ -1,5 +1,6 @@
 import Bacon from 'baconjs'
 
+import {urlsP} from '../external/urls'
 import {clearGlobalErrors, setSuccess} from './error'
 
 const locationBus = new Bacon.Bus();
@@ -15,8 +16,9 @@ function parseQuery(qstr) {
 }
 
 function parseLocation(location) {
+    const path = location.pathname.replace(window.url('kayttooikeus-service.virkialija-ui.baseUrl'), '');
     return {
-        path: location.pathname,
+        path: path,
         params: parseQuery(location.search),
         queryString: location.search || ''
     }
@@ -34,13 +36,16 @@ export const navigateTo = function (path, successMsg=null) {
     } else {
         clearGlobalErrors();
     }
-    history.pushState(null, null, path);
-    locationBus.push(parsePath(path));
+    const pathToUse = window.url('kayttooikeus-service.virkialija-ui.baseUrl')+path;
+    history.pushState(null, null, pathToUse);
+    locationBus.push(parsePath(pathToUse));
 };
 
 window.onpopstate = function() {
     locationBus.push(parseLocation(document.location));
 };
 
-export const locationP = locationBus.toProperty(parseLocation(document.location));
+urlsP.changes().onValue(urls => locationBus.push(parseLocation(document.location)));
+
+export const locationP = locationBus.toProperty();
 export const showError = (error) => locationBus.error(error);

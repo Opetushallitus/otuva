@@ -67,6 +67,16 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
 
     @Override
     @Transactional(readOnly = true)
+    public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
+        String currentUserOid = getCurrentUserOid();
+        if (personOid.equals(currentUserOid)) {
+            return true;
+        }
+        return isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, List<String> allowedRoles,
                                            ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
 

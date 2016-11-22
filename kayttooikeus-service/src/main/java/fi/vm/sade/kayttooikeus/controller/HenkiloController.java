@@ -31,7 +31,7 @@ public class HenkiloController {
         this.henkiloService = henkiloService;
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot organisaatioiden tiedoilla.",
             notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
