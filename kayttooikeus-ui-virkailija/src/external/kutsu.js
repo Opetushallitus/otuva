@@ -27,7 +27,7 @@ const kutsuList = {
 
 export const peruutaKutsu = (id) => {
     const response = Bacon.fromPromise(fetch(window.url('kayttooikeus-service.peruutaKutsu', id),
-        {method: 'DELETE'})
+        {method: 'DELETE', credentials: 'same-origin'})
         .then(handleFetchError).then(response => {
             kutsuList.update();
             return response;
@@ -40,7 +40,7 @@ export const kutsuListStateP = kutsuList.toProperty();
 export const kutsuListStateS = Bacon.combineWith(kutsuListStateP, urlsP, (state, urls) => ({state, urls})).changes()
     .skipWhile(({state}) => !state.active);
 export const kutsuListResponseS = kutsuListStateS.flatMap(({state}) => 
-    Bacon.fromPromise(fetch(window.url('kayttooikeus-service.kutsu')+queryString(state.params))
+    Bacon.fromPromise(fetch(window.url('kayttooikeus-service.kutsu')+queryString(state.params),{credentials: 'same-origin'})
         .then(handleFetchError).then(response => response.json().then(json => ({loaded: true, result: json}))
             .catch(() => ({loaded:false, result:[]}))))).toEventStream();
 export const kutsuListP = kutsuListResponseS.toProperty({loaded:false, result:[]});

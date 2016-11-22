@@ -43,7 +43,7 @@ const AddToOrganisation = React.createClass({
     if (selectedOrganization) {
       const henkiloOid = this.props.omaOid;
       const organisaatioOid = selectedOrganization.organisaatio.oid;
-      fetch(`/kayttooikeus-service/kayttooikeusryhma/${henkiloOid}/${organisaatioOid}`, {
+      fetch(window.url('kayttooikeus-service.kayttooikeusryhma.forHenkilo.inOrganisaatio', henkiloOid, organisaatioOid), {
         credentials: 'same-origin'
       }).then(response => {
         return response.json()
