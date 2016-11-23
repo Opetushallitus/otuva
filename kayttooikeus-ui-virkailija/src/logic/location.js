@@ -1,7 +1,6 @@
-import Bacon from 'baconjs'
-
-import {urlsP} from '../external/urls'
-import {clearGlobalErrors, setSuccess} from './error'
+import Bacon from "baconjs";
+import {urlsP} from "../external/urls";
+import {clearGlobalErrors, setSuccess} from "./error";
 
 const locationBus = new Bacon.Bus();
 
@@ -16,7 +15,9 @@ function parseQuery(qstr) {
 }
 
 function parseLocation(location) {
-    const path = location.pathname.replace(window.url('kayttooikeus-service.virkialija-ui.baseUrl'), '');
+    const basePath = window.url('kayttooikeus-service.virkialija-ui.basePath');
+    const originalPathName = location.pathname;
+    const path = originalPathName.startsWith(basePath) ? originalPathName.substring(basePath.length) : originalPathName;
     return {
         path: path,
         params: parseQuery(location.search),
@@ -36,7 +37,7 @@ export const navigateTo = function (path, successMsg=null) {
     } else {
         clearGlobalErrors();
     }
-    const pathToUse = window.url('kayttooikeus-service.virkialija-ui.baseUrl')+path;
+    const pathToUse = window.url('kayttooikeus-service.virkialija-ui.basePath')+path;
     history.pushState(null, null, pathToUse);
     locationBus.push(parsePath(pathToUse));
 };

@@ -7,5 +7,5 @@
  "kayttooikeus-service.henkilo.organisaatios": "/kayttooikeus-service/henkilo/$1/organisaatio",
  "kayttooikeus-service.omattiedot.oid": "/kayttooikeus-service/omattiedot/oid",
  "kayttooikeus-service.kayttooikeusryhma.forHenkilo.inOrganisaatio": "/kayttooikeus-service/kayttooikeusryhma/$1/$2",
- "kayttooikeus-service.virkialija-ui.baseUrl": ""
+ "kayttooikeus-service.virkialija-ui.basePath": ""
 }

@@ -3,5 +3,5 @@ window.urls.override = {
     "kayttooikeus-service.kutsu": "/kayttooikeus-service/kutsu",
     "kayttooikeus-service.peruutaKutsu": "/kayttooikeus-service/kutsu/$1",
     "kayttooikeus-service.buildversion": "/kayttooikeus-service/buildversion.txt",
-    "kayttooikeus-service.virkialija-ui.baseUrl": ""
+    "kayttooikeus-service.virkialija-ui.basePath": ""
 };
