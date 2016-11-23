@@ -16,13 +16,36 @@ public class StaticController {
         return "redirect:/swagger-ui.html";
     }
 
+    @Controller
     @RequestMapping("/virkailija")
-    public String virkailijaIndex() {
-        return "/virkailija/index.html";
+    public static class VirkailijaPaths extends RedirectPathsController {
+        @Override
+        protected String getTargetFile() {
+            return "/virkailija/index.html";
+        }
     }
+    
+    public abstract static class RedirectPathsController {
+        protected abstract String getTargetFile();
 
-    @RequestMapping(value = "/virkailija/{[path:[^\\.]*}")
-    public String redirect() {
-        return "forward:/virkailija/index.html";
+        @RequestMapping
+        public String virkailijaIndex() {
+            return getTargetFile();
+        }
+
+        @RequestMapping("{:[^\\.]*}")
+        public String virkailijaRedirect() {
+            return "forward:" + getTargetFile();
+        }
+
+        @RequestMapping("/{:.*?}/{:[^\\.]*}")
+        public String virkailijaRedirect2Part() {
+            return "forward:" + getTargetFile();
+        }
+
+        @RequestMapping("/{:.*?}/{:.*?}/{:[^\\.]*}")
+        public String virkailijaRedirect3Part() {
+            return "forward:" + getTargetFile();
+        }
     }
 }
