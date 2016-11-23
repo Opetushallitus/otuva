@@ -18,33 +18,37 @@ public class StaticController {
 
     @Controller
     @RequestMapping("/virkailija")
-    public static class VirkailijaPaths extends RedirectPathsController {
+    public static class VirkailijaPaths extends Html5RedirectPathsController {
         @Override
         protected String getTargetFile() {
             return "/virkailija/index.html";
         }
     }
-    
-    public abstract static class RedirectPathsController {
+
+    /**
+     * Redirects paths to given file returned by {@link #getTargetFile()},
+     * for a html page to support HTML5 style navigation.    
+     */
+    public abstract static class Html5RedirectPathsController {
         protected abstract String getTargetFile();
 
         @RequestMapping
-        public String virkailijaIndex() {
+        public String index() {
             return getTargetFile();
         }
 
         @RequestMapping("{:[^\\.]*}")
-        public String virkailijaRedirect() {
+        public String redirectPath() {
             return "forward:" + getTargetFile();
         }
 
         @RequestMapping("/{:.*?}/{:[^\\.]*}")
-        public String virkailijaRedirect2Part() {
+        public String redirectPath2Parts() {
             return "forward:" + getTargetFile();
         }
 
         @RequestMapping("/{:.*?}/{:.*?}/{:[^\\.]*}")
-        public String virkailijaRedirect3Part() {
+        public String redirectPath3Parts() {
             return "forward:" + getTargetFile();
         }
     }
