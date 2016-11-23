@@ -27,7 +27,8 @@ public class StaticController {
 
     /**
      * Redirects paths to given file returned by {@link #getTargetFile()},
-     * for a html page to support HTML5 style navigation.    
+     * for a html page to support HTML5 style navigation. However, does not
+     * forward paths ending to part containing dot. E.g. resource.js or style.css etc.
      */
     public abstract static class Html5RedirectPathsController {
         protected abstract String getTargetFile();
@@ -42,13 +43,8 @@ public class StaticController {
             return "forward:" + getTargetFile();
         }
 
-        @RequestMapping("/{:.*?}/{:[^\\.]*}")
-        public String redirectPath2Parts() {
-            return "forward:" + getTargetFile();
-        }
-
-        @RequestMapping("/{:.*?}/{:.*?}/{:[^\\.]*}")
-        public String redirectPath3Parts() {
+        @RequestMapping("/**/{:[^\\.]*}")
+        public String redirectPathMultiParts() {
             return "forward:" + getTargetFile();
         }
     }
