@@ -357,6 +357,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ")));
+        ryhma.setRooliRajoite("roolirajoite");
         Long oikeusId = ryhma.getKayttoOikeus().iterator().next().getId();
 
         given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
@@ -369,6 +370,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(singletonList(oikeusId));
         assertEquals(1, ryhmas.size());
         assertEquals("RYHMA", ryhmas.get(0).getName());
+        assertEquals("roolirajoite", ryhmas.get(0).getRooliRajoite());
         assertEquals("Käyttäjähallinta", ryhmas.get(0).getDescription().get("FI"));
         assertEquals("User management", ryhmas.get(0).getDescription().get("EN"));
         assertEquals("på svenska", ryhmas.get(0).getDescription().get("SV"));
