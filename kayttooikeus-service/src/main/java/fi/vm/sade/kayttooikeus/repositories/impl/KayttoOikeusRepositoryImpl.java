@@ -62,20 +62,22 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
         QOrganisaatioHenkilo oh = QOrganisaatioHenkilo.organisaatioHenkilo;
         QKayttoOikeusRyhma kor = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         QKayttoOikeus ko = QKayttoOikeus.kayttoOikeus;
-        QTextGroup description = QTextGroup.textGroup;
         QHenkilo h = QHenkilo.henkilo;
         return jpa().from(mkort)
                     .leftJoin(mkort.kasittelija, h)
                     .leftJoin(mkort.organisaatioHenkilo, oh)
                     .leftJoin(mkort.kayttoOikeusRyhma, kor)
-                    .leftJoin(kor.description, description)
                     .leftJoin(kor.kayttoOikeus, ko)
-                    .leftJoin(description.texts)
                 .select(Projections.bean(KayttoOikeusHistoriaDto.class,
                         oh.organisaatioOid.as("organisaatioOid"),
                         ko.id.as("kayttoOikeusId"),
                         oh.tehtavanimike.as("tehtavanimike"),
-                        description.id.as("kuvausId"),
+                        kor.id.as("kayttoOikeusRyhmaId"),
+                        kor.description.id.as("kuvausId"),
+                        ko.rooli.as("rooli"),
+                        ko.textGroup.id.as("kayttoOikeusKuvausId"),
+                        ko.palvelu.name.as("palvelu"),
+                        ko.palvelu.description.id.as("palveluKuvausId"),
                         mkort.tila.as("tila"),
                         mkort.voimassaAlkuPvm.as("voimassaAlkuPvm"),
                         mkort.voimassaLoppuPvm.as("voimassaLoppuPvm"),
