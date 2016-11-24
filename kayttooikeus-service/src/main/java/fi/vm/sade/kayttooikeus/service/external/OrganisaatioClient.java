@@ -1,17 +1,37 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import lombok.Getter;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface OrganisaatioClient {
-    List<OrganisaatioPerustieto> listOganisaatioPerustiedotRecusive(Collection<String> organisaatioOids);
+    @Getter
+    class Mode {
+        private final boolean expectMultiple;
+        private boolean changeChecked;
 
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(Collection<String> organisaatioOids);
+        Mode(boolean expectMultiple) {
+            this.expectMultiple = expectMultiple;
+        }
+
+        public static Mode single() {
+            return new Mode(false);
+        }
+        
+        public static Mode multiple() {
+            return new Mode(true);
+        }
+
+        public Mode checked() {
+            this.changeChecked = true;
+            return this;
+        }
+    }
     
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(String organisaatioOid);
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(String organisaatioOid, Mode mode);
 
-    OrganisaatioRDTO getOrganisaatioPerustiedot(String oid);
+    OrganisaatioPerustieto getOrganisaatioPerustiedot(String oid, Mode mode);
+
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 }

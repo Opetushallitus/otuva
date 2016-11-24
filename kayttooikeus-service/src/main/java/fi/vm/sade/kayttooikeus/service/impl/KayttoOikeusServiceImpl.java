@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
@@ -12,7 +13,8 @@ import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -34,9 +36,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     public static final String FI = "FI";
     public static final String SV = "SV";
     public static final String EN = "EN";
-    private static final String OPH_ORGANIZATION_OID = "1.2.246.562.10.00000000001";
-    private static final String GROUP_ORGANIZATION_ID = "1.2.246.562.28";
 
+    private final String rootOrganizationOid;
+    private final String groupOrganizationId;
     private OrganisaatioClient organisaatioClient;
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
     private KayttoOikeusRepository kayttoOikeusRepository;
@@ -60,7 +62,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    PalveluRepository palveluRepository,
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
                                    LdapSynchronization ldapSynchronization,
-                                   OrganisaatioClient organisaatioClient) {
+                                   OrganisaatioClient organisaatioClient,
+                                   CommonProperties commonProperties) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.localizationService = localizationService;
@@ -72,6 +75,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.organisaatioViiteRepository = organisaatioViiteRepository;
         this.ldapSynchronization = ldapSynchronization;
         this.organisaatioClient = organisaatioClient;
+        this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
+        this.groupOrganizationId = commonProperties.getGroupOrganizationId();
     }
 
     @Override
@@ -132,21 +137,18 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid) {
         return localizationService.localize(getRyhmasWithoutOrganizationLimitations(
-                organisaatioOid, findAllKayttoOikeusRyhmasAsDtos()));
+                organisaatioOid, findAllKayttoOikeusRyhmasAsDtos(), Mode.multiple()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(String henkiloOid, String organisaatioOid, String myontajaOid) {
-
-        List<KayttoOikeusRyhmaDto> allRyhmas = getGrantableRyhmasWithoutOrgLimitations(organisaatioOid, myontajaOid);
+        List<KayttoOikeusRyhmaDto> allRyhmas = getGrantableRyhmasWithoutOrgLimitations(organisaatioOid, myontajaOid, Mode.multiple());
         if (allRyhmas.isEmpty()){
             return Collections.emptyList();
         }
 
-        List<MyonnettyKayttoOikeusDto> kayttoOikeusForHenkilo = localizationService.localize(
-                myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid));
-
+        List<MyonnettyKayttoOikeusDto> kayttoOikeusForHenkilo = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         List<MyonnettyKayttoOikeusDto> all = allRyhmas.stream()
                 .map(kayttoOikeusRyhmaDto -> {
             MyonnettyKayttoOikeusDto dto = new MyonnettyKayttoOikeusDto();
@@ -343,14 +345,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         return addOrganisaatioViitteesToRyhmas(kayttoOikeusRyhmaRepository.listAll());
     }
 
-    private List<KayttoOikeusRyhmaDto> getGrantableRyhmasWithoutOrgLimitations(String organisaatioOid, String myontajaOid) {
+    private List<KayttoOikeusRyhmaDto> getGrantableRyhmasWithoutOrgLimitations(String organisaatioOid, String myontajaOid, Mode organisaatioClientState) {
         List<Long> slaveIds =  kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
                 myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo(myontajaOid));
 
         List<KayttoOikeusRyhmaDto> allRyhmas = isEmpty(slaveIds) ?
                 kayttoOikeusRyhmaRepository.listAll() : kayttoOikeusRyhmaRepository.findByIdList(slaveIds);
-        return getRyhmasWithoutOrganizationLimitations(organisaatioOid, localizationService.localize(
-                addOrganisaatioViitteesToRyhmas(allRyhmas)));
+        return getRyhmasWithoutOrganizationLimitations(organisaatioOid,
+                addOrganisaatioViitteesToRyhmas(allRyhmas), organisaatioClientState);
     }
 
     private void checkAndInsertSlaveGroups(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma koRyhma) {
@@ -386,29 +388,29 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         return tg;
     }
 
-    private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
-        boolean isOphOrganisation = organisaatioOid.equals(OPH_ORGANIZATION_OID);
+    private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas, Mode organisaatioClientState) {
+        boolean isOphOrganisation = organisaatioOid.equals(rootOrganizationOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {
                     if (isEmpty(kayttoOikeusRyhma.getOrganisaatioViite()) && !isOphOrganisation) {
                         return false;
                     }
                     boolean noOrgLimits = !isEmpty(kayttoOikeusRyhma.getOrganisaatioViite())
-                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, kayttoOikeusRyhma.getOrganisaatioViite());
+                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, kayttoOikeusRyhma.getOrganisaatioViite(), organisaatioClientState);
                     return !noOrgLimits;
                 }).collect(toList());
     }
 
-    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioViiteDto> viites) {
+    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioViiteDto> viites, Mode organisaatioClientState) {
         Set<String> tyyppis = viites.stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
 
-        if (organisaatioOid.startsWith(GROUP_ORGANIZATION_ID)) {
-            return oidIsFoundInViites(GROUP_ORGANIZATION_ID, tyyppis);
+        if (organisaatioOid.startsWith(groupOrganizationId)) {
+            return oidIsFoundInViites(groupOrganizationId, tyyppis);
         }
         if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
             return true;
         }
-        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedot(organisaatioOid);
+        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursive(organisaatioOid, organisaatioClientState);
         return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
     }

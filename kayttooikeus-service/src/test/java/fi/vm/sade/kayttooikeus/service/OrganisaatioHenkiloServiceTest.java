@@ -1,16 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +28,8 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
 public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
@@ -47,15 +48,15 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listOrganisaatioHenkilosTest() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedot("1.2.3.4.1")).willAnswer(invocation -> {
-            OrganisaatioRDTO orgDto = new OrganisaatioRDTO();
+        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.1"), any())).willAnswer(invocation -> {
+            OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.1");
             orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
             orgDto.setTyypit(asList("Tyyppi1", "Tyyppi2"));
             return orgDto;
         });
-        given(this.organisaatioClient.getOrganisaatioPerustiedot("1.2.3.4.2")).willAnswer(invocation -> {
-            OrganisaatioRDTO orgDto = new OrganisaatioRDTO();
+        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.2"), any())).willAnswer(invocation -> {
+            OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.2");
             orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());
             orgDto.setTyypit(singletonList("Tyyppi1"));
@@ -90,7 +91,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     public void listOrganisaatioPerustiedotForCurrentUserTest() {
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
                 .willReturn(singletonList("2.3.4.5.6"));
-        given(this.organisaatioClient.listOganisaatioPerustiedotRecusive(singletonList("2.3.4.5.6")))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(singletonList("2.3.4.5.6")))
                 .willReturn(singletonList(readJson(jsonResource("classpath:organisaatio/organisaatioPerustiedot.json"), OrganisaatioPerustieto.class)));
 
         List<OrganisaatioPerustieto> result = organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();

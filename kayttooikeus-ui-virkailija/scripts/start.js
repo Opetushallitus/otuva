@@ -180,6 +180,9 @@ function addMiddleware(devServer) {
     } else if (typeof proxy === 'object') {
       for (var key in proxy) {
         if (proxy.hasOwnProperty(key)) {
+          if (proxy[key]['auth'] && process.env.PROXY_AUTH) {
+            proxy[key]['auth'] = process.env.PROXY_AUTH;
+          }
           devServer.use(key, httpProxyMiddleware(
             Object.assign(proxy[key], {
               logLevel: 'silent', 

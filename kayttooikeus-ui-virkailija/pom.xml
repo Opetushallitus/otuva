@@ -74,6 +74,9 @@
     <profiles>
         <profile>
             <id>dev-server</id>
+            <properties>
+                <PROXY_AUTH></PROXY_AUTH>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -88,6 +91,9 @@
                                 </goals>
                                 <configuration>
                                     <arguments>start</arguments>
+                                    <environmentVariables>
+                                        <PROXY_AUTH>${PROXY_AUTH}</PROXY_AUTH>
+                                    </environmentVariables>
                                 </configuration>
                             </execution>
                         </executions>

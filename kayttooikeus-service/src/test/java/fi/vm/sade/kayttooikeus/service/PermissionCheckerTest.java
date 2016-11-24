@@ -14,8 +14,8 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -37,9 +37,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(SpringRunner.class)

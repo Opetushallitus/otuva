@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -18,7 +17,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -223,7 +222,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listOganisaatioPerustiedotRecusive(organisaatioOids);
+            organisaatios = organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
         }
         return organisaatios;
     }

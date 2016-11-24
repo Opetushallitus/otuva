@@ -18,6 +18,7 @@ Alternatively without need to install node/npm locally, just run:
 mvn -Pdev-server install
 
 To change logged in user authenticated with basic authentication, change "proxy"."/kayttooikeus-service/*"."auth" property to user:password in package.json
+You can overwrite this by using PROXY_AUTH environment variable, e.g. with mvn: mvn -Pdev-server install -DPROXY_AUTH="your.oid:security.properties.configured.password"
 
 ## Tests
 

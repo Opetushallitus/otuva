@@ -8,7 +8,7 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,8 +133,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3.4.6")
     public void listPossibleRyhmasByOrganizationTest(){
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
-        organisaatioPerustieto.setAliOrganisaatioMaara(3);
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedot(any()))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursive(any(), any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
         Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
@@ -147,9 +146,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
                 .willReturn(singletonList(OrganisaatioViiteDto.builder()
                         .organisaatioTyyppi("123.123.123")
-                        .id(1L)
-                        .kayttoOikeusRyhmaId(ryhmaId)
-                        .build()));
+                        .id(1L).kayttoOikeusRyhmaId(ryhmaId).build()));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listPossibleRyhmasByOrganization("123.123.123");
         assertEquals(1, ryhmas.size());

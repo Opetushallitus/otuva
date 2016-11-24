@@ -2,8 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
-import org.springframework.transaction.annotation.Transactional;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.List;
 import java.util.Set;
