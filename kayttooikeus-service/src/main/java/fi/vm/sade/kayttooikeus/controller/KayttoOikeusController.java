@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-
 @RestController
 @RequestMapping("/kayttooikeus")
 @Api(value = "/kayttooikeus", description = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
@@ -61,8 +59,8 @@ public class KayttoOikeusController {
     @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
             authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
-            produces = TEXT_PLAIN, response = Integer.class)
-    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST, produces = TEXT_PLAIN)
+            produces = "text/plain", response = Integer.class)
+    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST, produces = "text/plain")
     public String sendExpirationReminders(@ApiParam("Vuosi") @RequestParam("year") int year,
                                        @ApiParam("Kuukausi") @RequestParam("month") int month,
                                        @ApiParam("Päivä") @RequestParam("day") int day) {

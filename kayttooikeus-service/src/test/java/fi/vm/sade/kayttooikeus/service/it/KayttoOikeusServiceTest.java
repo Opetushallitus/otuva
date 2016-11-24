@@ -34,7 +34,6 @@ import static org.joda.time.Period.months;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
@@ -135,7 +134,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     public void listPossibleRyhmasByOrganizationTest(){
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setAliOrganisaatioMaara(3);
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursive(anyListOf(String.class)))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedot(any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
         Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")

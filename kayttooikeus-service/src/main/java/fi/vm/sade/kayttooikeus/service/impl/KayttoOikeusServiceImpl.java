@@ -13,7 +13,7 @@ import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -408,7 +408,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
             return true;
         }
-        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursive(Collections.singletonList(organisaatioOid));
+        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedot(organisaatioOid);
         return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
     }

@@ -10,6 +10,8 @@ public interface OrganisaatioClient {
     List<OrganisaatioPerustieto> listOganisaatioPerustiedotRecusive(Collection<String> organisaatioOids);
 
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(Collection<String> organisaatioOids);
+    
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(String organisaatioOid);
 
     OrganisaatioRDTO getOrganisaatioPerustiedot(String oid);
 }
