@@ -38,8 +38,11 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(Collection<String> organisaatioOids) {
-        return getOrganisaatioPerustietos(organisaatioOids, true);
+    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(String organisaatioOid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
+        String params = "?oid="+organisaatioOid + "&aktiiviset=true";
+        return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
+                .get().orFail(mapper(url)).getOrganisaatiot();
     }
 
     private List<OrganisaatioPerustieto> getOrganisaatioPerustietos(Collection<String> organisaatioOids, boolean limitToActive) {

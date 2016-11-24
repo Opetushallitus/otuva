@@ -130,7 +130,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     public void listPossibleRyhmasByOrganizationTest(){
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setAliOrganisaatioMaara(3);
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedot(anyListOf(String.class)))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedot(any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
         Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")

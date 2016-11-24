@@ -11,7 +11,6 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import org.apache.commons.lang.StringUtils;
@@ -48,7 +47,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
     private PalveluRepository palveluRepository;
     private OrganisaatioViiteRepository organisaatioViiteRepository;
-    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private LdapSynchronization ldapSynchronization;
 
     @Autowired
@@ -61,7 +59,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository,
                                    PalveluRepository palveluRepository,
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
-                                   OppijanumerorekisteriClient oppijanumerorekisteriClient,
                                    LdapSynchronization ldapSynchronization,
                                    OrganisaatioClient organisaatioClient) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
@@ -73,7 +70,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.kayttoOikeusRyhmaTapahtumaHistoriaRepository = kayttoOikeusRyhmaTapahtumaHistoriaRepository;
         this.palveluRepository = palveluRepository;
         this.organisaatioViiteRepository = organisaatioViiteRepository;
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.ldapSynchronization = ldapSynchronization;
         this.organisaatioClient = organisaatioClient;
     }
@@ -412,7 +408,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
             return true;
         }
-        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedot(Collections.singletonList(organisaatioOid));
+        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedot(organisaatioOid);
         return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
     }
