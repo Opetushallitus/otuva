@@ -45,6 +45,14 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return getOrganisaatioPerustietosRecursive(organisaatioOids, true);
     }
 
+    @Override
+    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedot(String organisaatioOid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
+        String params = "?oid="+organisaatioOid + "&aktiiviset=true";
+        return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
+                .get().orFail(mapper(url)).getOrganisaatiot();
+    }
+
     private List<OrganisaatioPerustieto> getOrganisaatioPerustietosRecursive(Collection<String> organisaatioOids, boolean limitToActive) {
         if (organisaatioOids.isEmpty()) {
             return new ArrayList<>();

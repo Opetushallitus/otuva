@@ -2,11 +2,26 @@
   {
     "aikaleima": 1420063200000,
     "kasittelija": "kasittelija",
-    "kayttoOikeusId": 1,
+    "kayttoOikeusRyhmaId": 5,
     "kuvaus": [
       {
         "lang": "FI",
         "text": "nimi"
+      }
+    ],
+    "kayttoOikeusId": 1,
+    "kayttoOikeusKuvaus": [
+      {
+        "lang": "FI",
+        "text": "Oikeus"
+      }
+    ],
+    "rooli": "ROOLI",
+    "palvelu": "PALVELU",
+    "palveluKuvaus": [
+      {
+        "lang": "FI",
+        "text": "Palvelu"
       }
     ],
     "organisaatioOid": "orgOid",

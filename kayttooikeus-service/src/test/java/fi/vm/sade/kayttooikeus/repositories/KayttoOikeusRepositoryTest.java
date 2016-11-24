@@ -23,6 +23,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
@@ -110,15 +111,15 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma1 = populate(myonnettyKayttoOikeus(
                     organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                     kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
-                            .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                            .withOikeus(oikeus("KOODISTO", "READ")))
+                            .withOikeus(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Luku-muokkaus")))
+                            .withOikeus(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Palvelukuvaus")), "READ")))
                         .voimassaPaattyen(new LocalDate())),
             tapahtuma2 = populate(myonnettyKayttoOikeus(
                     organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8").tehtavanimike("testaaja"),
-                    kayttoOikeusRyhma("RYHMA2")
-                            .withOikeus(oikeus("KOODISTO", "WRITE")))
+                    kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Ryhmäkuvaus"))
+                            .withOikeus(oikeus("KOODISTO", "WRITE").kuvaus(text("FI", "Kirjoitusoikeus"))))
                     .voimassaPaattyen(new LocalDate().plusMonths(3)));
-
+        
         List<KayttoOikeusHistoriaDto> historia = kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo("1.2.3.4.5");
         assertEquals(3, historia.size());
         assertEquals(tapahtuma2.getAikaleima(), historia.get(0).getAikaleima());
@@ -132,6 +133,14 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals(new LocalDate(), historia.get(0).getVoimassaAlkuPvm());
         assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), historia.get(0).getKasittelija());
         assertEquals(tapahtuma2.getKayttoOikeusRyhma().getDescription().getId(), historia.get(0).getKuvaus().getId());
+        assertEquals("KOODISTO", historia.get(0).getPalvelu());
+        assertEquals("WRITE", historia.get(0).getRooli());
+        assertNotNull(historia.get(0).getKuvaus());
+        assertNotNull(historia.get(0).getKuvaus().getId());
+        assertNotNull(historia.get(0).getPalveluKuvaus());
+        assertNotNull(historia.get(0).getPalveluKuvaus().getId());
+        assertNotNull(historia.get(0).getKayttoOikeusKuvaus());
+        assertNotNull(historia.get(0).getKayttoOikeusKuvaus().getId());
     }
 
     @Test
