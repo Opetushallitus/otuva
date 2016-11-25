@@ -12,4 +12,12 @@ import org.springframework.context.annotation.Configuration;
 public class CommonProperties {
     private String rootOrganizationOid;
     private String groupOrganizationId;
+    private InvitationEmail invitationEmail;
+    
+    @Getter @Setter
+    public static class InvitationEmail {
+        private String template;
+        private String from;
+        private String sender;
+    }
 }

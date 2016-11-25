@@ -1,9 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.gson.internal.LinkedHashTreeMap;
-import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
-import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
+import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties.InvitationEmail;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
@@ -13,43 +14,56 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
+import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
+import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
+import fi.vm.sade.ryhmasahkoposti.api.dto.EmailRecipient;
+import fi.vm.sade.ryhmasahkoposti.api.dto.ReportedRecipientReplacementDTO;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.Order.DESC;
-import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
-import org.joda.time.DateTime;
 
 @Service
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
-
     private final KutsuRepository kutsuRepository;
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
     private final OrganisaatioClient organisaatioClient;
+    private final RyhmasahkopostiClient ryhmasahkopostiClient;
+    private final OphProperties urlProperties;
+    private final InvitationEmail invitationEmail;
 
     @Autowired
     public KutsuServiceImpl(KutsuRepository kutsuRepository,
-            OrikaBeanMapper mapper, KutsuValidator validator,
-            OrganisaatioClient organisaatioClient) {
+                            OrikaBeanMapper mapper, KutsuValidator validator,
+                            OrganisaatioClient organisaatioClient,
+                            RyhmasahkopostiClient ryhmasahkopostiClient,
+                            OphProperties urlProperties,
+                            CommonProperties commonProperties) {
         this.kutsuRepository = kutsuRepository;
         this.mapper = mapper;
         this.validator = validator;
         this.organisaatioClient = organisaatioClient;
+        this.ryhmasahkopostiClient = ryhmasahkopostiClient;
+        this.urlProperties = urlProperties;
+        this.invitationEmail = commonProperties.getInvitationEmail();
     }
 
     @Override
@@ -89,13 +103,52 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         entity.setId(null);
         entity.setAikaleima(DateTime.now());
         entity.setKutsuja(getCurrentUserOid());
+        entity.setSalsisuus(UUID.randomUUID().toString());
         entity.setTila(AVOIN);
 
         validator.validate(entity);
 
         entity = kutsuRepository.persist(entity);
+        
+        sendInvitationEmail(entity);
 
         return entity.getId();
+    }
+
+    private void sendInvitationEmail(Kutsu kutsu) {
+        EmailData emailData = new EmailData();
+        
+        EmailMessage email = new EmailMessage();
+        email.setTemplateName(invitationEmail.getTemplate());
+        email.setLanguageCode(kutsu.getKieliKoodi());
+        email.setCallingProcess("kayttooikeus.kayttooikeuspalvelu-service");
+        email.setFrom(invitationEmail.getFrom());
+        email.setCharset("UTF-8");
+        email.setHtml(true);
+        email.setSender(invitationEmail.getSender());
+        emailData.setEmail(email);
+        
+        EmailRecipient recipient = new EmailRecipient();
+        recipient.setEmail(kutsu.getSahkoposti());
+        recipient.setLanguageCode(kutsu.getKieliKoodi());
+        
+        List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
+        ReportedRecipientReplacementDTO urlReplacement = new ReportedRecipientReplacementDTO();
+        urlReplacement.setName("url");
+        urlReplacement.setValue(urlProperties.url("kayttooikeus-service.invitation.url", kutsu.getSalsisuus()));
+        replacements.add(urlReplacement);
+        recipient.setRecipientReplacements(replacements);
+        
+        emailData.setRecipient(singletonList(recipient));
+        
+        logger.info("Sending invitation email to {}", kutsu.getSahkoposti());
+        HttpResponse response = ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
+        try {
+            logger.info("Sent invitation email to {}, ryhmasahkoposti-result: {}", kutsu.getSahkoposti(),
+                    IOUtils.toString(response.getEntity().getContent()));
+        } catch (IOException e) {
+            logger.error("Could not read ryhmasahkoposti-result: " + e.getMessage(), e);
+        }
     }
 
     @Override
