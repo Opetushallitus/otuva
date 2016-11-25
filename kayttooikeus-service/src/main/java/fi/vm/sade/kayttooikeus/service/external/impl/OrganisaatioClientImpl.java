@@ -16,7 +16,6 @@ import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -25,6 +24,7 @@ import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final CachingRestClient restClient = new CachingRestClient()
@@ -77,6 +77,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     retrying(io(() -> restClient.get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
                         .get().orFail(mapper(haeHierarchyUrl)).getOrganisaatiot()
             );
+            cacheUpdatedAt = DateTime.now();
         }
     }
     
@@ -87,12 +88,17 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     private boolean changesSince(LocalDate date) {
         String url = urlConfiguration.url("organisaatio-service.organisaatio.muutetut.oid", date.toString());
-        boolean result = !retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
-                .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids().isEmpty();
-        if (result && latestChanges.isBefore(date.plusDays(1))) {
+        boolean result = !isReallyEmpty(retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
+                .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids());
+        if (result && (latestChanges == null || latestChanges.isBefore(date.plusDays(1)))) {
             latestChanges = date.plusDays(1);
         }
         return result;
+    }
+    
+    private boolean isReallyEmpty(List<String> oids) {
+        // "conveniently" muutetut/oid returns {"oids":[""]} for empty result
+        return oids.isEmpty() || oids.get(0).isEmpty();
     }
 
     @Override
@@ -123,17 +129,15 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         perustieto.setChildren(new ArrayList<>());
         return perustieto;
     }
-
-    private LocalDate date(Date pvm) {
-        return pvm != null ? new LocalDate(pvm) : null;
-    }
     
     @Override
     public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(String organisaatioOid, Mode mode) {
-        String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
-        String params = "?oid="+organisaatioOid + "&aktiiviset=true";
-        return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
-                .get().orFail(mapper(url)).getOrganisaatiot();
+        return cached(c -> c.flatHierarchyByOid(organisaatioOid).collect(toList()), () -> {
+            String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
+            String params = "?oid="+organisaatioOid + "&aktiiviset=true";
+            return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
+                    .get().orFail(mapper(url)).getOrganisaatiot();
+        }, mode);
     }
 
     @Override

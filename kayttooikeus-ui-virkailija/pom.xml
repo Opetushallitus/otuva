@@ -75,7 +75,7 @@
         <profile>
             <id>dev-server</id>
             <properties>
-                <PROXY_AUTH></PROXY_AUTH>
+                <PROXY_AUTH>test:test</PROXY_AUTH>
             </properties>
             <build>
                 <plugins>
