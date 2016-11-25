@@ -52,14 +52,14 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
             OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.1");
             orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
-            orgDto.setTyypit(asList("Tyyppi1", "Tyyppi2"));
+            orgDto.setOrganisaatiotyypit(asList("Tyyppi1", "Tyyppi2"));
             return orgDto;
         });
         given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.2"), any())).willAnswer(invocation -> {
             OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.2");
             orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());
-            orgDto.setTyypit(singletonList("Tyyppi1"));
+            orgDto.setOrganisaatiotyypit(singletonList("Tyyppi1"));
             return orgDto;
         });
         given(this.organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(

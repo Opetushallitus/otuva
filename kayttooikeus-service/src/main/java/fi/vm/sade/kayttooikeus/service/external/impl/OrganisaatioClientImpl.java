@@ -119,13 +119,15 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         perustieto.setParentOid(organisaatioRDTO.getParentOid());
         perustieto.setParentOidPath(organisaatioRDTO.getParentOidPath());
         perustieto.setNimi(organisaatioRDTO.getNimi());
-        perustieto.setTyypit(organisaatioRDTO.getTyypit());
+        perustieto.setOrganisaatiotyypit(organisaatioRDTO.getTyypit());
         perustieto.setOppilaitosKoodi(organisaatioRDTO.getOppilaitosKoodi());
         perustieto.setOppilaitostyyppi(organisaatioRDTO.getOppilaitosTyyppiUri());
         perustieto.setKieletUris(organisaatioRDTO.getKieletUris());
         perustieto.setVirastotunnus(organisaatioRDTO.getVirastoTunnus());
         perustieto.setYtunnus(organisaatioRDTO.getYTunnus());
         perustieto.setKotipaikkaUri(organisaatioRDTO.getKotipaikkaUri());
+        perustieto.setAlkuPvm(organisaatioRDTO.getAlkuPvm());
+        perustieto.setLakkautusPvm(organisaatioRDTO.getLakkautusPvm());
         perustieto.setChildren(new ArrayList<>());
         return perustieto;
     }
