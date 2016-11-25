@@ -132,7 +132,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     
     @Override
     public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(String organisaatioOid, Mode mode) {
-        return cached(c -> c.flatHierarchyByOid(organisaatioOid).collect(toList()), () -> {
+        return cached(c -> c.flatWithParentsAndChildren(organisaatioOid)
+                .filter(org -> !rootOrganizationOid.equals(org.getOid())) // the resource never returns the root
+                .collect(toList()), () -> {
             String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
             String params = "?oid="+organisaatioOid + "&aktiiviset=true";
             return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)

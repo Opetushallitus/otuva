@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,9 +25,19 @@ public class OrganisaatioPerustieto {
     private List<String> kieletUris = new ArrayList<String>();
     private String kotipaikkaUri;
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
+    @JsonIgnore // avoid recursion if this is returned in JSON
+    private OrganisaatioPerustieto parent;
 
     public Stream<OrganisaatioPerustieto> andChildren() {
         return Stream.concat(Stream.of(this),
                 children.stream().flatMap(OrganisaatioPerustieto::andChildren));
+    }
+
+    public Stream<OrganisaatioPerustieto> andParents() {
+        return Stream.concat(Stream.of(this), parents());
+    }
+
+    public Stream<OrganisaatioPerustieto> parents() {
+        return parent == null ? Stream.empty() : parent.andParents();
     }
 }

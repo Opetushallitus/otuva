@@ -2,10 +2,7 @@ package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -20,9 +17,17 @@ public class OrganisaatioCache {
         this.root = root;
         this.byOid = new HashMap<>();
         root.setChildren(children);
+        setParents(root, children);
         this.byOid.put(root.getOid(), root);
         this.byOid.putAll(children.stream().flatMap(OrganisaatioPerustieto::andChildren)
             .collect(toMap(OrganisaatioPerustieto::getOid, identity())));
+    }
+    
+    private void setParents(OrganisaatioPerustieto root, Collection<OrganisaatioPerustieto> children) {
+        children.forEach(c -> {
+            c.setParent(root);
+            setParents(c, c.getChildren());
+        });
     }
     
     public OrganisaatioPerustieto getRoot() {
@@ -33,7 +38,15 @@ public class OrganisaatioCache {
         return ofNullable(byOid.get(oid));
     }
     
-    public Stream<OrganisaatioPerustieto> flatHierarchyByOid(String oid) {
+    public Stream<OrganisaatioPerustieto> flatWithChildrenByOid(String oid) {
         return getByOid(oid).map(OrganisaatioPerustieto::andChildren).orElse(Stream.empty());
+    }
+
+    public Stream<OrganisaatioPerustieto> flatWithParentsByOid(String oid) {
+        return getByOid(oid).map(OrganisaatioPerustieto::andParents).orElse(Stream.empty());
+    }
+
+    public Stream<OrganisaatioPerustieto> flatWithParentsAndChildren(String oid) {
+        return getByOid(oid).map(org -> Stream.concat(org.parents(), org.andChildren())).orElse(Stream.empty());
     }
 }
