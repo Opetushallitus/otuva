@@ -30,9 +30,11 @@ export const errorPF = (stateP, l10nP) => {
             : Bacon.never()
         )).toProperty({});
     return Bacon.combineWith(stateErrorP, routeErrorP, globalErrorP, l10nP, (error, routeError, globalError, l10n) => {
-        return error.httpStatus ? error : ( globalError.message ? {
+        return error.httpStatus ? error : ((globalError.message || globalError.messageKey) ? {
             type: globalError.type || 'error',
-            comment: l10n[globalError.message.toUpperCase()] || (l10n[globalError.messageKey.toUpperCase()] || globalError.message)
+            comment: (globalError.message && l10n[globalError.message.toUpperCase()]) || globalError.message
+                    || (globalError.messageKey && l10n[globalError.messageKey.toUpperCase()])
+                    || (globalError.status && errorText(globalError.status, l10n))
         } : routeError);
     });
 };

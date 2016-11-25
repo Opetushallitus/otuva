@@ -19,7 +19,7 @@ const l10nByLocaleP = Bacon.combineWith(l10nResponseS.toProperty(), lokalisointi
         return byLocale;
     });
 export const l10nP = Bacon.combineWith(l10nByLocaleP, localeP, (l10n, locale) => ({...l10n[locale], msg:function(key, ...params) {
-    var msg = l10n[locale][key], i = 1;
+    var msg = l10n[locale][key], i = 0;
     R.forEach((param) => msg = !msg ? null : (""+msg).replace(new RegExp('\\{'+(i++)+'\\}', 'g'), param), params);
     return msg;
 }}));
