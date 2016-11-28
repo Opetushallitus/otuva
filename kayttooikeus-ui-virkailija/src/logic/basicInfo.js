@@ -5,7 +5,7 @@ import dispatcher from './dispatcher'
 const d = dispatcher();
 
 const basicInfo = {
-  toProperty: (initialBasicInfo={}) => {
+  toProperty: (initialBasicInfo={email: null, language: null}) => {
     const assignLanguage = (basicInfo, languageCode) => {
       return {...basicInfo, languageCode}
     };

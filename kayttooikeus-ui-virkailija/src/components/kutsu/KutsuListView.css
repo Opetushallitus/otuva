@@ -28,6 +28,7 @@
 }
 .row {
     margin:10px;
+    clear: both;
 }
 .left {
     float: left;

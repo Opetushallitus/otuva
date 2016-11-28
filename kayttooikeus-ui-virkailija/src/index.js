@@ -12,6 +12,7 @@ import { locationP } from './logic/location'
 import { errorPF, commonHandleError } from './logic/error'
 import TopNavigation from './components/TopNavigation'
 
+import 'select2/dist/css/select2.min.css'
 import './reset.css'
 import './index.css'
 

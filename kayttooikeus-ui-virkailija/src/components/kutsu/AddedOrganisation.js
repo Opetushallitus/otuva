@@ -4,15 +4,17 @@ import Button from 'button'
 
 import organisations from '../../logic/organisations'
 import { toLocalizedText } from '../../logic/localizabletext'
+import Select2 from 'react-select2-wrapper';
 
 import './AddedOrganisation.css'
 
 
 const AddedOrganisation = React.createClass({
   render: function() {
-    const addedOrg = this.props.addedOrg
-    const selectablePermissions = R.difference(addedOrg.selectablePermissions, addedOrg.selectedPermissions)
-    const L = this.props.l10n
+    const addedOrg = this.props.addedOrg;
+    const selectablePermissions = R.difference(addedOrg.selectablePermissions, addedOrg.selectedPermissions);
+    const L = this.props.l10n;
+    const uiLang = this.props.uiLang;
     return (
       <div className="added-org" key={addedOrg.organisation.oid}>
         <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}
@@ -22,10 +24,9 @@ const AddedOrganisation = React.createClass({
           <label htmlFor="permissions">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']}
           </label>
-          <select onChange={this.selectPermissions} multiple
-            id="permissions">
-            {selectablePermissions.map(this.renderPermission)}
-          </select>
+          <Select2 onSelect={this.selectPermissions} multiple id="permissions"
+                 data={selectablePermissions.map(permission => ({id: permission.ryhmaId, text: toLocalizedText(uiLang, permission.ryhmaNames)}))}>
+          </Select2>
         </div>
         <ul>
           {addedOrg.selectedPermissions.map(permission => {
@@ -38,14 +39,6 @@ const AddedOrganisation = React.createClass({
           })}
         </ul>
       </div>
-    )
-  },
-
-  renderPermission: function(permission) {
-    return (
-      <option key={permission.ryhmaId} value={permission.ryhmaId}>
-        {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
-      </option>
     )
   },
 

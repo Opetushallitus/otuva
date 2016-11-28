@@ -1,15 +1,9 @@
 .kutsuFormWrapper {
   padding-top: 40px;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-around;
 }
 .kutsuFormHeader, .kutsuFormFooter {
-  flex: 100%;
 }
-.basic-info, 
-.add-to-organisation {
-  flex: 0px;
+.basic-info, .add-to-organisation {
 }
 
 .confirmation-modal {

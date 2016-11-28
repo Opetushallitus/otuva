@@ -1,6 +1,7 @@
 import React from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import R from 'ramda'
+import Select2 from 'react-select2-wrapper';
 
 import organisations from '../../logic/organisations'
 import AddedOrganisations from './AddedOrganisations'
@@ -8,32 +9,25 @@ import { toLocalizedText } from '../../logic/localizabletext'
 
 const AddToOrganisation = React.createClass({
   mixins: [PureRenderMixin],
-
-  organisaatioNimi: function(organisaatio) {
-    return toLocalizedText(this.props.uiLang, organisaatio.nimi)
-  },
-
+  
   render: function() {
     const L = this.props.l10n;
     const orgs = this.props.orgs;
+    const uiLang = this.props.uiLang;
+    const organisaatioNimi = org => toLocalizedText(uiLang, org.organisaatio.nimi);
 
     return (
       <fieldset className="add-to-organisation">
-
-        <h3>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h3>
+        <h2>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h2>
 
         <AddedOrganisations addedOrgs={this.props.addedOrgs} l10n={this.props.l10n} uiLang={this.props.uiLang} />
 
-        <div>
+        <div className="row">
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
           </label>
-          <select id="org" onChange={this.selectOrganisation}>
-            <option value=""></option>
-            {R.sortBy(this.organisaatioNimi)(orgs).map(this.renderOrganisation)}
-          </select>
+          <Select2 id="org" onSelect={this.selectOrganisation} data={R.sortBy(organisaatioNimi)(orgs).map(org => ({id: org.organisaatio.oid, text: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`}))}/>
         </div>
-
       </fieldset>
     )
   },
@@ -56,15 +50,6 @@ const AddToOrganisation = React.createClass({
         })
       })
     }
-  },
-
-  renderOrganisation: function(org) {
-    const organisaatiotyypit = org.organisaatio.tyypit.join(',');
-    return (
-      <option key={org.organisaatio.oid} value={org.organisaatio.oid}>
-        {this.organisaatioNimi(org.organisaatio)} ({organisaatiotyypit})
-      </option>
-    )
   }
 
 });
