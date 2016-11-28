@@ -42,6 +42,7 @@ import static java.util.stream.Collectors.*;
 
 @Service
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
+    public static final String CALLING_PROCESS = "kayttooikeus.kayttooikeuspalvelu-service";
     private final KutsuRepository kutsuRepository;
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
@@ -121,7 +122,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         EmailMessage email = new EmailMessage();
         email.setTemplateName(invitationEmail.getTemplate());
         email.setLanguageCode(kutsu.getKieliKoodi());
-        email.setCallingProcess("kayttooikeus.kayttooikeuspalvelu-service");
+        email.setCallingProcess(CALLING_PROCESS);
         email.setFrom(invitationEmail.getFrom());
         email.setCharset("UTF-8");
         email.setHtml(true);

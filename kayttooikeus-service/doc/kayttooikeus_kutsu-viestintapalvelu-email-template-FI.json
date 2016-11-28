@@ -18,7 +18,7 @@
             "role": "header",
             "name": "email_subject",
             "contentType": "plain",
-            "content": "Kutsu Virkailijan opintopolkuun"
+            "content": "$subject"
           },
           {
             "role": "body",
@@ -43,6 +43,11 @@
     {
       "name": "url",
       "mandatory": true
+    },
+    {
+      "name": "subject",
+      "defaultValue": "Kutsu Virkailijan Opintopolkuun",
+      "mandatory": false
     }
   ]
 }
