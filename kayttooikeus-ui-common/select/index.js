@@ -26,6 +26,8 @@ var _jquery2 = _interopRequireDefault(_jquery);
 
 require('select2');
 
+require('select2/dist/css/select2.min.css');
+
 require('./oph-select2-style.css');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

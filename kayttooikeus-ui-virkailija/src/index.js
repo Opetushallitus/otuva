@@ -12,9 +12,9 @@ import { locationP } from './logic/location'
 import { errorPF, commonHandleError } from './logic/error'
 import TopNavigation from './components/TopNavigation'
 
-import 'select2/dist/css/select2.min.css'
 import './reset.css'
 import './index.css'
+import 'font-awesome-webpack'
 
 const errorP = errorPF(contentP, l10nP);
 const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, contentP, (buildVersion, urls, location, l10n, error, content) => {

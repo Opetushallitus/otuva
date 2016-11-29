@@ -1,5 +1,6 @@
 import React from "react";
 import Bacon from "baconjs";
+import R from 'ramda'
 import Button from 'button'
 import BasicInfo from "./BasicInfo";
 import AddToOrganisation from "./AddToOrganisation";
@@ -51,15 +52,15 @@ const KutsuForm = React.createClass({
                         {L['VIRKAILIJAN_LISAYS_TALLENNA']}
                     </Button>
                 </div>
-
                 <KutsuConfirmation {...confirmationProps} />
             </form>
         )
     },
-    
+
     isValid: function() {
         return this.isValidEmail(this.props.basicInfo.email)
-            && this.props.addedOrgs.length > 0;
+            && this.props.addedOrgs.length > 0
+            && R.all(org => org.id && org.selectedPermissions.length > 0)(this.props.addedOrgs);
     },
     
     isValidEmail: function(email) {

@@ -1,8 +1,7 @@
-import Bacon from 'baconjs'
-import R from 'ramda'
-import {fetchOrganizationPermissionsPromise} from '../external/organisations'
-
-import dispatcher from './dispatcher'
+import Bacon from "baconjs";
+import R from "ramda";
+import {fetchOrganizationPermissionsPromise} from "../external/organisations";
+import dispatcher from "./dispatcher";
 
 const d = dispatcher()
 
@@ -14,26 +13,43 @@ const organisations = {
     const removeOrg = (orgs, orgIdToRemove) => {
       return R.reject(org => org.id === orgIdToRemove, orgs)
     };
-    const replaceById = (orgs, orgId, org) => {
-      const index = R.findIndex(R.propEq('id', orgId))(orgs);
+    const replaceByOid = (orgs, {oldOid, org}) => {
+      const newAddedIndex = R.findIndex(R.pathEq(['id'], org.id))(orgs),
+          newAddedAlready = newAddedIndex >= 0;
+      const index = R.findIndex(R.pathEq(['id'], oldOid))(orgs);
       if (index >= 0) {
-        return [...orgs[0..index], org, ...orgs[index+1..orgs.length]];
+        const orgsCopy = [...orgs];
+        if (newAddedAlready) {
+          orgsCopy.splice(index,1);
+        } else {
+          orgsCopy.splice(index,1,org);
+        }
+        return orgsCopy;
       }
-      return [...orgs, org];
+      return newAddedAlready ? orgs : [...orgs, org];
     };
     return Bacon.update(initialOrgs,
       [d.stream('add')], addOrgIfUnique,
       [d.stream('remove')], removeOrg,
-      [d.stream('replace')], replaceById
+      [d.stream('replace')], replaceByOid,
+      [d.stream('updated')], orgs => ([...orgs])
     )
   },
   add: org => d.push('add', org),
   removeById: orgId => d.push('remove', orgId),
-  replaceById: (orgId, org) => d.push('replace', orgId, org)
+  replaceByOid: (oldOid, org) => d.push('replace', {oldOid, org}),
+  updated: () => d.push('updated', {})
 };
 
 export default organisations
-export const addedOrganizationsP = organisations.toProperty();
+const emptyOrganization = () => ({
+  id: '',
+  organisation: {oid:''},
+  selectablePermissions: [],
+  selectedPermissions: []
+});
+export const addedOrganizationsP = organisations.toProperty([emptyOrganization()]);
+export const addEmptyOrganization = () => organisations.add(emptyOrganization());
 export const addSelectedOrganization = (organization, henkiloOid) =>
     fetchOrganizationPermissionsPromise(henkiloOid, organization.oid).then(permissions => {
       organisations.add({
@@ -43,9 +59,9 @@ export const addSelectedOrganization = (organization, henkiloOid) =>
         selectedPermissions: []
       })
     });
-export const changeOrganization = (id, organization, henkiloOid) =>
+export const changeOrganization = (oldOid, organization, henkiloOid) =>
     fetchOrganizationPermissionsPromise(henkiloOid, organization.oid).then(permissions => {
-      organisations.replaceById(id, {
+      organisations.replaceByOid(oldOid, {
         id: organization.oid,
         organisation: organization,
         selectablePermissions: permissions,

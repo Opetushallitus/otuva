@@ -5,6 +5,8 @@ import Button from "button";
 import {kutsu} from "../../external/kutsu";
 import {toLocalizedText} from "../../logic/localizabletext";
 
+import './KutsuConfirmation.css'
+
 const KutsuConfirmation = React.createClass({
 
   getInitialState: function() {
@@ -19,16 +21,14 @@ const KutsuConfirmation = React.createClass({
     return (
       <Modal show={this.props.modalOpen} onClose={this.props.modalCloseFn} closeOnOuterClick={true}>
         <div className="confirmation-modal">
-          <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO']}</h2>
+          <i className="fa fa-times-circle fa-2 clickable right" onClick={this.props.modalCloseFn} aria-hidden="true"></i>
+          <h1>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO']}</h1>
           <p>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_TEKSTI']} {this.props.basicInfo.email}</p>
-          <h3>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h3>
+          <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h2>
           {this.props.addedOrgs.map(this.renderAddedOrg)}
           <div className="row">
             <Button className="left action" action={this.sendInvitation}>
               {L['VIRKAILIJAN_LISAYS_TALLENNA']}
-            </Button>
-            <Button className="right cancel" action={this.props.modalCloseFn}>
-              {L['VIRKAILIJAN_LISAYS_ESIKATSELU_SULJE']}
             </Button>
           </div>
           <div className="clear"></div>

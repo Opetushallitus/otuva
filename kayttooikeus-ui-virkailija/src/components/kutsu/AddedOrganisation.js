@@ -1,6 +1,5 @@
 import React from 'react'
 import R from 'ramda'
-import Button from 'button'
 
 import organisations from '../../logic/organisations'
 import { toLocalizedText } from '../../logic/localizabletext'
@@ -25,36 +24,37 @@ const AddedOrganisation = React.createClass({
     });
     return (
       <div className="added-org" key={addedOrg.organisation.oid}>
-        <h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}
-          <Button className="cancel right" action={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)}>X</Button>
-        </h3>
+        {/*<h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}</h3>*/}
 
         <div className="row">
           <label htmlFor="org">
-            {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
+            {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']} *
           </label>
-          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.organisation.id)} data={orgs.map(mapOrgOption)}
-              value={addedOrg.organisation.oid}/>
+          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.organisation.oid)} data={orgs.map(mapOrgOption)}
+              value={addedOrg.organisation.oid} options={{placeholder:L['VIRKAILIJAN_LISAYS_VALITSE_ORGANISAATIO']}}/>
+          <i className="fa fa-times-circle remove-icon after" onClick={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)} aria-hidden="true"></i>
         </div>
         
-        <div className="row">
+        <div className="row permissions-row">
           <label htmlFor="permissions">
-            {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']}
+            {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']} *
           </label>
           <Select2 onSelect={this.selectPermissions} multiple id="permissions"
-                 data={selectablePermissions.map(permission => ({id: permission.ryhmaId, text: toLocalizedText(uiLang, permission.ryhmaNames)}))}>
+                    data={selectablePermissions.map(permission => ({id: permission.ryhmaId, text: toLocalizedText(uiLang, permission.ryhmaNames)}))}
+                    options={{disabled:!addedOrg.organisation.oid, placeholder:L['VIRKAILIJAN_LISAYS_SUODATA_KAYTTOOIKEUKSIA']}}>
           </Select2>
+          <ul className="selected-permissions">
+            {addedOrg.selectedPermissions.map(permission => {
+              return (
+                  <li key={permission.ryhmaId}>
+                    {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
+                    <i className="fa fa-times-circle right remove-icon" onClick={this.removeAddedPermission.bind(null, permission.ryhmaId)} aria-hidden="true"></i>
+                  </li>
+              )
+            })}
+          </ul>
         </div>
-        <ul>
-          {addedOrg.selectedPermissions.map(permission => {
-            return (
-              <li key={permission.ryhmaId}>
-                {toLocalizedText(this.props.uiLang, permission.ryhmaNames)}
-                <Button className="cancel right" action={this.removeAddedPermission.bind(null, permission.ryhmaId)}>X</Button>
-              </li>
-            )
-          })}
-        </ul>
+        <div className="clear"></div>
       </div>
     )
   },
@@ -71,13 +71,13 @@ const AddedOrganisation = React.createClass({
       .map(value => parseInt(value, 10));
     const selectedPermissions = R.filter((permission) => selectedIds.includes(permission.ryhmaId), this.props.addedOrg.selectablePermissions);
     this.props.addedOrg.selectedPermissions = R.union(this.props.addedOrg.selectedPermissions, selectedPermissions);
-    this.forceUpdate()
+    organisations.updated();
   },
 
   removeAddedPermission: function(id, e) {
     e.preventDefault();
     this.props.addedOrg.selectedPermissions = R.reject(permission => permission.ryhmaId === id, this.props.addedOrg.selectedPermissions);
-    this.forceUpdate()
+    organisations.updated();
   }
 
 });

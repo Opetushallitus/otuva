@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import shallowEqualFuzzy from 'shallow-equal-fuzzy';
 import $ from 'jquery';
 import 'select2';
+import 'select2/dist/css/select2.min.css'
 import './oph-select2-style.css'
 
 const namespace = 'react-select2-wrapper';

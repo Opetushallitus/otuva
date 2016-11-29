@@ -46,7 +46,8 @@
     "url-loader": "0.5.7",
     "webpack": "1.13.2",
     "webpack-dev-server": "1.16.1",
-    "whatwg-fetch": "1.0.0"
+    "whatwg-fetch": "1.0.0",
+    "less": "2.7.1"
   },
   "dependencies": {
     "baconjs": "^0.7.88",
@@ -62,7 +63,9 @@
     "react-addons-pure-render-mixin": "^15.3.2",
     "dateformat": "1.0.12",
     "react-select2-wrapper": "1.0.4-beta1",
-    "jquery": "2.1.4"
+    "jquery": "2.1.4",
+    "font-awesome": "4.3.0",
+    "font-awesome-webpack": "0.0.4"
   },
   "scripts": {
     "start": "node scripts/start.js",

@@ -76,7 +76,7 @@ const KutsuListView = React.createClass({
                 {this.state.confirmDeleteFor != null && <Modal show={this.state.confirmDeleteFor != null} onClose={this.cancelInvitationCancellation}
                             closeOnOuterClick={true}>
                     <div className="confirmation-modal">
-                        <h3>{L['PERUUTA_KUTSU_VAHVISTUS']}</h3>
+                        <h2>{L['PERUUTA_KUTSU_VAHVISTUS']}</h2>
                         <table>
                             <tbody>
                                 <tr>
