@@ -33,7 +33,8 @@ const AddedOrganisation = React.createClass({
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
           </label>
-          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.organisation.id)} data={orgs.map(mapOrgOption)}/>
+          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.organisation.id)} data={orgs.map(mapOrgOption)}
+              value={addedOrg.organisation.oid}/>
         </div>
         
         <div className="row">

@@ -29,6 +29,7 @@ export const organizationHierarchyRootsP = Bacon.combineWith(orgsP, localeP, (or
         if (lowestLevel === null || lowestLevel > org.organisaatio.level) {
             lowestLevel = org.organisaatio.level;
         }
+        org.organisaatio.children = [];
     }, orgs);
     // Map children by direct parent:
     const roots = [];
@@ -36,7 +37,7 @@ export const organizationHierarchyRootsP = Bacon.combineWith(orgsP, localeP, (or
         if (org.organisaatio.parentOid) {
             const parent = byOid[org.organisaatio.parentOid];
             if (parent) {
-                (parent.organisaatio.children || (parent.organisaatio.children = [])).push(org);
+                parent.organisaatio.children.push(org);
             } else {
                 // not the root org but root can not be found (=> makes this lowest accessable)
                 roots.push(org);
