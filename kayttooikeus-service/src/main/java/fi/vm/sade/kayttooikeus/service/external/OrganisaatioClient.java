@@ -23,6 +23,10 @@ public interface OrganisaatioClient {
             return new Mode(true);
         }
 
+        public static Mode requireCache() {
+            return new Mode(true);
+        }
+
         public Mode checked() {
             this.changeChecked = true;
             return this;

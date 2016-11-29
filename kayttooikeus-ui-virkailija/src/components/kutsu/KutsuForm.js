@@ -4,7 +4,7 @@ import Button from 'button'
 import BasicInfo from "./BasicInfo";
 import AddToOrganisation from "./AddToOrganisation";
 import KutsuConfirmation from "./KutsuConfirmation";
-import {orgsP} from "../../external/organisations";
+import {organizationsFlatInHierarchyOrderP} from "../../external/organisations";
 import {languagesP} from "../../external/languages";
 import {omaOidP} from "../../external/omattiedot";
 import {addedOrganizationsP} from "../../logic/organisations";
@@ -44,7 +44,7 @@ const KutsuForm = React.createClass({
                 <BasicInfo l10n={L} locale={uiLang} basicInfo={this.props.basicInfo}
                            languages={this.props.languages}/>
                 <AddToOrganisation l10n={L} uiLang={uiLang} omaOid={this.props.omaOid}
-                                   orgs={this.props.orgs} addedOrgs={this.props.addedOrgs}/>
+                                   orgs={this.props.organizationsFlatInHierarchyOrder} addedOrgs={this.props.addedOrgs}/>
 
                 <div className="kutsuFormFooter row">
                     <Button className="action" action={this.openConfirmationModal} disabled={!this.isValid()}>
@@ -81,9 +81,9 @@ const KutsuForm = React.createClass({
     }
 });
 
-export const kutsuFormContentP = Bacon.combineWith(l10nP, localeP, orgsP, addedOrganizationsP, basicInfoP, languagesP, omaOidP,
-    (l10n, locale, orgs, addedOrgs, basicInfo, languages, omaOid) => {
-        const props = {l10n, locale, orgs, addedOrgs, basicInfo, languages, omaOid};
+export const kutsuFormContentP = Bacon.combineWith(l10nP, localeP, organizationsFlatInHierarchyOrderP, addedOrganizationsP, basicInfoP, languagesP, omaOidP,
+    (l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid) => {
+        const props = {l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid};
         return {
             content: <KutsuForm {...props}/>
         };

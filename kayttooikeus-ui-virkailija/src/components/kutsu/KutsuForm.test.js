@@ -11,13 +11,11 @@ const appState = {
   basicInfo: {},
   l10n: {},
   locale: 'fi',
-  orgs: {
-    numHits: 1,
-    organisaatiot: [
-      {oid: 1, organisaatiotyypit: []},
-    ]
-  },
-  languages: [{ code: '', name: {}}]
+  organizationsFlatInHierarchyOrder: [
+    {organisaatio: {oid: 1, tyypit: []}}
+  ],
+  languages: [{ code: '', name: {}}],
+  omaOid: '1.2.3'
 };
 
 it('renders without crashing', () => {

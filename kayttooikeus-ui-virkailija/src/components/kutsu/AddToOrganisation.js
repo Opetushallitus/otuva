@@ -1,11 +1,12 @@
 import React from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import R from 'ramda'
-import Select2 from 'react-select2-wrapper';
 
-import organisations from '../../logic/organisations'
+import organisations, {addSelectedOrganization, changeOrganization} from '../../logic/organisations'
 import AddedOrganisations from './AddedOrganisations'
+import OrgSelect2 from './OrgSelect2'
 import { toLocalizedText } from '../../logic/localizabletext'
+
 
 const AddToOrganisation = React.createClass({
   mixins: [PureRenderMixin],
@@ -15,43 +16,41 @@ const AddToOrganisation = React.createClass({
     const orgs = this.props.orgs;
     const uiLang = this.props.uiLang;
     const organisaatioNimi = org => toLocalizedText(uiLang, org.organisaatio.nimi);
-
+    const mapOrgOption = org => ({
+      id: org.organisaatio.oid,
+      text: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`,
+      visibleText: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`,
+      level: org.organisaatio.level
+    });
     return (
       <fieldset className="add-to-organisation">
         <h2>{L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_OTSIKKO']}</h2>
 
-        <AddedOrganisations addedOrgs={this.props.addedOrgs} l10n={this.props.l10n} uiLang={this.props.uiLang} />
-
+        <AddedOrganisations changeOrganization={e => oldId => this.changeOrganization(oldId, e)} orgs={this.props.orgs}
+            addedOrgs={this.props.addedOrgs} l10n={this.props.l10n} uiLang={this.props.uiLang} />
         <div className="row">
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']}
           </label>
-          <Select2 id="org" onSelect={this.selectOrganisation} data={R.sortBy(organisaatioNimi)(orgs).map(org => ({id: org.organisaatio.oid, text: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`}))}/>
+          <OrgSelect2 id="org" onSelect={this.selectOrganisation} data={orgs.map(mapOrgOption)}/>
         </div>
       </fieldset>
     )
   },
+  
+  changeOrganization: function(oldId, e) {
+    const selectedOrganization = R.find(R.pathEq(['organisaatio', 'oid'], e.target.value))(this.props.orgs);
+    if (selectedOrganization) {
+      changeOrganization(oldId, selectedOrganization.organisaatio, this.props.omaOid);
+    }
+  },
 
   selectOrganisation: function(e) {
-    const selectedOrganization = R.find(R.pathEq(['organisaatio', 'oid'], e.target.value))(this.props.orgs)
+    const selectedOrganization = R.find(R.pathEq(['organisaatio', 'oid'], e.target.value))(this.props.orgs);
     if (selectedOrganization) {
-      const henkiloOid = this.props.omaOid;
-      const organisaatioOid = selectedOrganization.organisaatio.oid;
-      fetch(window.url('kayttooikeus-service.kayttooikeusryhma.forHenkilo.inOrganisaatio', henkiloOid, organisaatioOid), {
-        credentials: 'same-origin'
-      }).then(response => {
-        return response.json()
-      }).then(permissions => {
-        organisations.add({
-          id: selectedOrganization.organisaatio.oid,
-          organisation: selectedOrganization.organisaatio,
-          selectablePermissions: permissions,
-          selectedPermissions: []
-        })
-      })
+      addSelectedOrganization(selectedOrganization.organisaatio, this.props.omaOid);
     }
   }
-
 });
 
 export default AddToOrganisation

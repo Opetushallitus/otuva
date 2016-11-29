@@ -53,6 +53,7 @@ public class OrganisaatioHenkiloWithOrganisaatioDto extends OrganisaatioHenkiloD
     @AllArgsConstructor
     public static class OrganisaatioDto {
         private String oid;
+        private String parentOidPath;
         private TextGroupMapDto nimi;
         private List<String> tyypit;
     }

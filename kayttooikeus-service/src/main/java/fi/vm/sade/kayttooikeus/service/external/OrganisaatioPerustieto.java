@@ -43,4 +43,14 @@ public class OrganisaatioPerustieto {
     public Stream<OrganisaatioPerustieto> parents() {
         return parent == null ? Stream.empty() : parent.andParents();
     }
+    
+    public int getHierarchyLevel() {
+        int level = 1;
+        OrganisaatioPerustieto node = this;
+        while (node.parent != null) {
+            ++level;
+            node = node.parent;
+        }
+        return level;
+    }
 }

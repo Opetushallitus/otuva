@@ -53,6 +53,7 @@
     "fetch-mock": "^5.5.0",
     "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "modal": "file:../kayttooikeus-ui-common/modal",
+    "select": "file:../kayttooikeus-ui-common/select",
     "button": "file:../kayttooikeus-ui-common/button",
     "sort-by-header": "file:../kayttooikeus-ui-common/sort-by-header",
     "ramda": "^0.22.1",

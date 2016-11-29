@@ -38,8 +38,8 @@ const Modal = React.createClass({
     if (e.target.dataset.modal && this.props.closeOnOuterClick) {
       this.props.onClose(e)
     }
-  },
+  }
 
-})
+});
 
 export default Modal

@@ -57,6 +57,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                     OrganisaatioDto organisaatioDto = organisaatioHenkilo.getOrganisaatio();
                     OrganisaatioPerustieto perustiedot = organisaatioClient.getOrganisaatioPerustiedot(organisaatioDto.getOid(), organisaatioClientMode);
                     organisaatioDto.setNimi(new TextGroupMapDto(null, perustiedot.getNimi()));
+                    organisaatioDto.setParentOidPath(perustiedot.getParentOidPath());
                     organisaatioDto.setTyypit(perustiedot.getTyypit());
                 }).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());

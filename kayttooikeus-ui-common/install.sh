@@ -10,6 +10,7 @@ function install {
 	echo "Installing $1..."
 	cd $1 && $NODE $NPM install \
 		&& $NODE $NPM run build \
+		&& rm -rf "$NODE_MODULES/$1" \
 		&& git add index.js \
 		&& echo "Installed $1"
 	cd $pwd
@@ -17,4 +18,5 @@ function install {
 
 install "modal" \
 	&& install "button" \
-	&& install "sort-by-header"
+	&& install "sort-by-header" \
+	&& install "select"
