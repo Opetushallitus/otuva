@@ -19,11 +19,14 @@ body  .select2-container--default .select2-results__option--highlighted[aria-sel
     background-color: #159ECB;
 }
 body .select2-selection__arrow {
-    margin-right: -10px;
+    margin-right: -25px;
 }
 body .select2-container--classic .select2-selection--multiple:focus {
     border: 1px solid #159ECB;
 }
 body .select2-container--classic.select2-container--open .select2-selection--multiple {
     border: 1px solid #159ECB;
+}
+body .select2-container--default .select2-selection--single .select2-selection__arrow {
+    right: 15px;
 }

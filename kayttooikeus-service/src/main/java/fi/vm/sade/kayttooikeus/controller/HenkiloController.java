@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/henkilo")
-@Api(value = "/organisaatiohenkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
+@Api(value = "/henkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
 public class HenkiloController {
     private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final HenkiloService henkiloService;
@@ -32,8 +33,8 @@ public class HenkiloController {
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
-    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot organisaatioiden tiedoilla.",
-            notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla.")
+    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tiedoilla rekursiiisesti.",
+            notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla siten, että roganisaatio sisältää myös lapsiroganisaationsa rekursiivisesti.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
             @PathVariable @ApiParam("Henkilö-OID") String oid,

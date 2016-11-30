@@ -51,16 +51,27 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Override
     @Transactional(readOnly = true)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisaatioHenkilos(String henkiloOid, String compareByLang) {
-        Mode organisaatioClientMode = Mode.multiple();
+        Mode organisaatioClientMode = Mode.requireCache();
         return organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos(henkiloOid)
-                .stream().peek(organisaatioHenkilo -> {
-                    OrganisaatioDto organisaatioDto = organisaatioHenkilo.getOrganisaatio();
-                    OrganisaatioPerustieto perustiedot = organisaatioClient.getOrganisaatioPerustiedot(organisaatioDto.getOid(), organisaatioClientMode);
-                    organisaatioDto.setNimi(new TextGroupMapDto(null, perustiedot.getNimi()));
-                    organisaatioDto.setParentOidPath(perustiedot.getParentOidPath());
-                    organisaatioDto.setTyypit(perustiedot.getTyypit());
-                }).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
+                .stream().peek(organisaatioHenkilo ->
+                    organisaatioHenkilo.setOrganisaatio(
+                        mapOrganisaatioDtoRecursive(
+                            organisaatioClient.getOrganisaatioPerustiedot(organisaatioHenkilo.getOrganisaatio().getOid(), organisaatioClientMode),
+                            compareByLang))
+                ).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());
+    }
+
+    protected OrganisaatioDto mapOrganisaatioDtoRecursive(OrganisaatioPerustieto perustiedot, String compareByLang) {
+        OrganisaatioDto dto = new OrganisaatioDto();
+        dto.setOid(perustiedot.getOid());
+        dto.setNimi(new TextGroupMapDto(null, perustiedot.getNimi()));
+        dto.setParentOidPath(perustiedot.getParentOidPath());
+        dto.setTyypit(perustiedot.getTyypit());
+        dto.setChildren(perustiedot.getChildren().stream().map(child -> mapOrganisaatioDtoRecursive(child, compareByLang))
+            .sorted(Comparator.comparing(OrganisaatioDto::getNimi, comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE))))
+            .collect(toList()));
+        return dto;
     }
     
     @Override

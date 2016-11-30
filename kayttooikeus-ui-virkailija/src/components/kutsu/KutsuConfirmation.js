@@ -63,14 +63,14 @@ const KutsuConfirmation = React.createClass({
       sahkoposti: this.props.basicInfo.email,
       asiointikieli: this.props.basicInfo.languageCode,
       organisaatiot: R.map(addedOrg => ({
-          organisaatioOid: addedOrg.id,
+          organisaatioOid: addedOrg.oid,
           kayttoOikeusRyhmat: R.map(selectedPermission => ({
               id: selectedPermission.ryhmaId
             }))(addedOrg.selectedPermissions)
         }))(this.props.addedOrgs)
     };
     const {invitationResponseS} = kutsu(payload);
-
+    
     invitationResponseS.onValue(response => {
       console.info('invitation sent', response);
       if (this.props.ready) {

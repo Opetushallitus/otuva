@@ -56,5 +56,6 @@ public class OrganisaatioHenkiloWithOrganisaatioDto extends OrganisaatioHenkiloD
         private String parentOidPath;
         private TextGroupMapDto nimi;
         private List<String> tyypit;
+        private List<OrganisaatioDto> children;
     }
 }

@@ -13,7 +13,7 @@ const AddedOrganisations = React.createClass({
 
   renderAddedOrganisation: function(addedOrg) {
     return (
-      <AddedOrganisation key={addedOrg.id} orgs={this.props.orgs}
+      <AddedOrganisation key={addedOrg.oid} orgs={this.props.orgs}
                          addedOrg={addedOrg}
                          changeOrganization={this.props.changeOrganization}
                          l10n={this.props.l10n}

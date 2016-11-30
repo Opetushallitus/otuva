@@ -8,15 +8,15 @@ const d = dispatcher()
 const organisations = {
   toProperty: (initialOrgs=[]) => {
     const addOrgIfUnique = (orgs, newOrg) => {
-      return R.find(R.propEq('id', newOrg.id))(orgs) ? orgs : [...orgs, newOrg]
+      return R.find(R.propEq('oid', newOrg.oid))(orgs) ? orgs : [...orgs, newOrg]
     };
-    const removeOrg = (orgs, orgIdToRemove) => {
-      return R.reject(org => org.id === orgIdToRemove, orgs)
+    const removeOrg = (orgs, orgOidToRemove) => {
+      return R.reject(org => org.oid === orgOidToRemove, orgs)
     };
     const replaceByOid = (orgs, {oldOid, org}) => {
-      const newAddedIndex = R.findIndex(R.pathEq(['id'], org.id))(orgs),
+      const newAddedIndex = R.findIndex(R.pathEq(['oid'], org.oid))(orgs),
           newAddedAlready = newAddedIndex >= 0;
-      const index = R.findIndex(R.pathEq(['id'], oldOid))(orgs);
+      const index = R.findIndex(R.pathEq(['oid'], oldOid))(orgs);
       if (index >= 0) {
         const orgsCopy = [...orgs];
         if (newAddedAlready) {
@@ -36,14 +36,14 @@ const organisations = {
     )
   },
   add: org => d.push('add', org),
-  removeById: orgId => d.push('remove', orgId),
+  removeByOid: orgId => d.push('remove', orgId),
   replaceByOid: (oldOid, org) => d.push('replace', {oldOid, org}),
   updated: () => d.push('updated', {})
 };
 
 export default organisations
 const emptyOrganization = () => ({
-  id: '',
+  oid: '',
   organisation: {oid:''},
   selectablePermissions: [],
   selectedPermissions: []
@@ -53,7 +53,7 @@ export const addEmptyOrganization = () => organisations.add(emptyOrganization())
 export const addSelectedOrganization = (organization, henkiloOid) =>
     fetchOrganizationPermissionsPromise(henkiloOid, organization.oid).then(permissions => {
       organisations.add({
-        id: organization.oid,
+        oid: organization.oid,
         organisation: organization,
         selectablePermissions: permissions,
         selectedPermissions: []
@@ -61,8 +61,9 @@ export const addSelectedOrganization = (organization, henkiloOid) =>
     });
 export const changeOrganization = (oldOid, organization, henkiloOid) =>
     fetchOrganizationPermissionsPromise(henkiloOid, organization.oid).then(permissions => {
+      //console.info('changeOrganization replaceByOid', oldOid, 'new', organization, 'permissions', permissions);
       organisations.replaceByOid(oldOid, {
-        id: organization.oid,
+        oid: organization.oid,
         organisation: organization,
         selectablePermissions: permissions,
         selectedPermissions: []

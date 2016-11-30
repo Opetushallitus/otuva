@@ -10,7 +10,6 @@ import org.hibernate.validator.constraints.Email;
 @Getter
 @Setter
 public class KutsuCreateDto {
-
     @NotNull
     @Email
     private String sahkoposti;
@@ -23,22 +22,17 @@ public class KutsuCreateDto {
     @Getter
     @Setter
     public static class KutsuOrganisaatioDto {
-
         @NotNull
         private String organisaatioOid;
         @Valid
         @NotNull
         private Set<KayttoOikeusRyhmaDto> kayttoOikeusRyhmat;
-
     }
 
     @Getter
     @Setter
     public static class KayttoOikeusRyhmaDto {
-
         @NotNull
         private Long id;
-
     }
-
 }

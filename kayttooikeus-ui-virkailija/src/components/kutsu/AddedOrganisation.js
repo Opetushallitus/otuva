@@ -15,24 +15,22 @@ const AddedOrganisation = React.createClass({
     const L = this.props.l10n;
     const uiLang = this.props.uiLang;
     const orgs = this.props.orgs;
-    const organisaatioNimi = org => toLocalizedText(uiLang, org.organisaatio.nimi);
+    const organisaatioNimi = org => toLocalizedText(uiLang, org.nimi);
     const mapOrgOption = org => ({
-      id: org.organisaatio.oid,
-      text: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`,
-      visibleText: `${organisaatioNimi(org)} (${org.organisaatio.tyypit.join(',')})`,
-      level: org.organisaatio.level
+      id: org.oid,
+      searchText: org.fullLocalizedName,
+      text: `${organisaatioNimi(org)} (${org.tyypit.join(',')})`,
+      level: org.level
     });
     return (
-      <div className="added-org" key={addedOrg.organisation.oid}>
-        {/*<h3>{toLocalizedText(this.props.uiLang, addedOrg.organisation.nimi)}</h3>*/}
-
+      <div className="added-org" key={addedOrg.oid}>
         <div className="row">
           <label htmlFor="org">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']} *
           </label>
-          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.organisation.oid)} data={orgs.map(mapOrgOption)}
-              value={addedOrg.organisation.oid} options={{placeholder:L['VIRKAILIJAN_LISAYS_VALITSE_ORGANISAATIO']}}/>
-          <i className="fa fa-times-circle remove-icon after" onClick={this.removeAddedOrg.bind(null, addedOrg.organisation.oid)} aria-hidden="true"></i>
+          <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.oid)} data={orgs.map(mapOrgOption)}
+              l10n={L} value={addedOrg.oid} options={{placeholder:L['VIRKAILIJAN_LISAYS_VALITSE_ORGANISAATIO']}}/>
+          <i className="fa fa-times-circle remove-icon after" onClick={this.removeAddedOrg.bind(null, addedOrg.oid)} aria-hidden="true"></i>
         </div>
         
         <div className="row permissions-row">
@@ -41,7 +39,7 @@ const AddedOrganisation = React.createClass({
           </label>
           <Select2 onSelect={this.selectPermissions} multiple id="permissions"
                     data={selectablePermissions.map(permission => ({id: permission.ryhmaId, text: toLocalizedText(uiLang, permission.ryhmaNames)}))}
-                    options={{disabled:!addedOrg.organisation.oid, placeholder:L['VIRKAILIJAN_LISAYS_SUODATA_KAYTTOOIKEUKSIA']}}>
+                    options={{disabled:!addedOrg.oid, placeholder:L['VIRKAILIJAN_LISAYS_SUODATA_KAYTTOOIKEUKSIA']}}>
           </Select2>
           <ul className="selected-permissions">
             {addedOrg.selectedPermissions.map(permission => {
@@ -59,9 +57,9 @@ const AddedOrganisation = React.createClass({
     )
   },
 
-  removeAddedOrg: function(id, e) {
+  removeAddedOrg: function(oid, e) {
     e.preventDefault();
-    organisations.removeById(id);
+    organisations.removeByOid(oid);
   },
 
   selectPermissions: function(e) {

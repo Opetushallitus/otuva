@@ -1,7 +1,7 @@
 import Bacon from 'baconjs'
 import R from 'ramda'
 import {urlsP} from './urls'
-import {handleFetchError} from "../logic/fetchUtils";
+import {handleFetchError} from '../logic/fetchUtils'
 
 const localeBus = new Bacon.Bus();
 export const localeP = localeBus.toProperty('fi');
@@ -23,4 +23,5 @@ export const l10nP = Bacon.combineWith(l10nByLocaleP, localeP, (l10n, locale) =>
     R.forEach((param) => msg = !msg ? null : (""+msg).replace(new RegExp('\\{'+(i++)+'\\}', 'g'), param), params);
     return msg;
 }}));
+
 export default l10nResponseS
