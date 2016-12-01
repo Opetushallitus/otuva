@@ -19,7 +19,7 @@ public interface KayttoOikeusService {
 
     List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods);
 
-    public Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid);
+    Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid);
 
     List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid);
 
@@ -38,4 +38,6 @@ public interface KayttoOikeusService {
     long createKayttoOikeus(KayttoOikeusCreateDto kayttoOikeus);
 
     void updateKayttoOikeusForKayttoOikeusRyhma(long id, KayttoOikeusRyhmaModifyDto ryhmaData);
+
+    List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds);
 }

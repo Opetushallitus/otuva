@@ -283,6 +283,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         ldapSynchronization.updateAccessRightGroup(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds) {
+        List<KayttoOikeusRyhmaDto> ryhmas = addOrganisaatioViitteesToRyhmas(kayttoOikeusRyhmaRepository
+                .findKayttoOikeusRyhmasByKayttoOikeusIds(kayttoOikeusIds));
+        return localizationService.localize(ryhmas);
+    }
+
     private void setKayttoOikeusRyhmas(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
         Set<KayttoOikeus> givenKOs = new HashSet<>();
         for (PalveluRooliDto prDto : ryhmaData.getPalvelutRoolit()) {

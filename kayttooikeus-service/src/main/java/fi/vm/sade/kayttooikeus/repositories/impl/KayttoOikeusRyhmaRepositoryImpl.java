@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
 
 @Repository
@@ -94,5 +95,19 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
                 .and(mkt.voimassaAlkuPvm.before(LocalDate.now()))
                 .and(mkt.voimassaLoppuPvm.after(LocalDate.now())));
         return query.fetch();
+    }
+
+    @Override
+    public List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds) {
+        BooleanBuilder booleanBuilder = new BooleanBuilder()
+                .and(kayttoOikeus.id.in(kayttoOikeusIds))
+                .and(kayttoOikeusRyhma.hidden.eq(false));
+
+        return jpa().from(kayttoOikeusRyhma)
+                .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .where(booleanBuilder)
+                .select(KayttoOikeusRyhmaDtoBean())
+                .distinct()
+                .fetch();
     }
 }

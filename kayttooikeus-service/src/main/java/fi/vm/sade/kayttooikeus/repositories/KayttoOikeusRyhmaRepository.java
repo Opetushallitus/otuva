@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import com.querydsl.core.Tuple;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 
 import java.util.List;
@@ -18,4 +18,5 @@ public interface KayttoOikeusRyhmaRepository extends BaseRepository<KayttoOikeus
 
     List<Tuple> findOrganisaatioOidAndRyhmaIdByHenkiloOid(String oid);
 
+    List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds);
 }
