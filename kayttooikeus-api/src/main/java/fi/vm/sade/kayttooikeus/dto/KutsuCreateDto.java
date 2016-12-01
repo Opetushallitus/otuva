@@ -6,10 +6,15 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Getter
 @Setter
 public class KutsuCreateDto {
+    @NotEmpty
+    private String etunimi;
+    @NotEmpty
+    private String sukunimi;
     @NotNull
     @Email
     private String sahkoposti;

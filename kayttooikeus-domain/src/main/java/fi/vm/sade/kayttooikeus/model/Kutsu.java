@@ -16,7 +16,7 @@ import static org.joda.time.DateTime.now;
 @Getter @Setter
 @Table(name = "kutsu", schema = "public")
 public class Kutsu extends IdentifiableAndVersionedEntity {
-
+    
     @Type(type = "dateTime")
     @Column(name = "aikaleima", nullable = false)
     private DateTime aikaleima = now();
@@ -30,6 +30,12 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "tila", nullable = false)
     private KutsunTila tila = KutsunTila.AVOIN;
+    
+    @Column(name = "etunimi", nullable = false)
+    private String etunimi;
+
+    @Column(name = "sukunimi", nullable = false)
+    private String sukunimi;
     
     @Column(name = "sahkoposti", nullable = false) 
     private String sahkoposti;
