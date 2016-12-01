@@ -11,10 +11,11 @@ import './AddedOrganisation.css'
 const AddedOrganisation = React.createClass({
   render: function() {
     const addedOrg = this.props.addedOrg;
+    const excludedOrgOids = R.map(R.prop('oid'), R.filter(org => addedOrg.oid !== org.oid)(this.props.addedOrgs));
     const selectablePermissions = R.difference(addedOrg.selectablePermissions, addedOrg.selectedPermissions);
     const L = this.props.l10n;
     const uiLang = this.props.uiLang;
-    const orgs = this.props.orgs;
+    const orgs = R.filter(org => excludedOrgOids.indexOf(org.oid) < 0, this.props.orgs);
     const organisaatioNimi = org => toLocalizedText(uiLang, org.nimi);
     const mapOrgOption = org => ({
       id: org.oid,
@@ -29,7 +30,7 @@ const AddedOrganisation = React.createClass({
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_ORGANISAATIO']} *
           </label>
           <OrgSelect2 id="org" onSelect={this.props.changeOrganization(addedOrg.oid)} data={orgs.map(mapOrgOption)}
-              l10n={L} value={addedOrg.oid} options={{placeholder:L['VIRKAILIJAN_LISAYS_VALITSE_ORGANISAATIO']}}/>
+                      l10n={L} value={addedOrg.oid} options={{placeholder:L['VIRKAILIJAN_LISAYS_VALITSE_ORGANISAATIO']}}/>
           <i className="fa fa-times-circle remove-icon after" onClick={this.removeAddedOrg.bind(null, addedOrg.oid)} aria-hidden="true"></i>
         </div>
         
@@ -37,7 +38,7 @@ const AddedOrganisation = React.createClass({
           <label htmlFor="permissions">
             {L['VIRKAILIJAN_LISAYS_ORGANISAATIOON_MYONNA_KAYTTOOIKEUKSIA']} *
           </label>
-          <Select2 onSelect={this.selectPermissions} multiple id="permissions"
+          <Select2 onSelect={this.selectPermissions} multiple id="permissions" l10n={L}
                     data={selectablePermissions.map(permission => ({id: permission.ryhmaId, text: toLocalizedText(uiLang, permission.ryhmaNames)}))}
                     options={{disabled:!addedOrg.oid, placeholder:L['VIRKAILIJAN_LISAYS_SUODATA_KAYTTOOIKEUKSIA']}}>
           </Select2>

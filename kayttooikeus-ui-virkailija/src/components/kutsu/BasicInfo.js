@@ -1,5 +1,5 @@
 import React from 'react'
-import Select2 from 'react-select2-wrapper';
+import Select2 from 'select';
 
 import basicInfo from '../../logic/basicInfo'
 

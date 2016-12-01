@@ -8,6 +8,14 @@ import './oph-select2-style.css'
 
 const namespace = 'react-select2-wrapper';
 
+function swapNodesIfInGivenOrder(a, b) {
+  if (a.nextSibling === b) {
+    var aparent = a.parentNode;
+    b.parentNode.insertBefore(a, b);
+    aparent.insertBefore(b, a);
+  }
+}
+
 const Select2 = React.createClass({
   propTypes: {
     defaultValue: PropTypes.oneOfType([
@@ -29,7 +37,8 @@ const Select2 = React.createClass({
     onSelect: PropTypes.func,
     onChange: PropTypes.func,
     onUnselect: PropTypes.func,
-    passData: PropTypes.bool
+    passData: PropTypes.bool,
+    l10n: PropTypes.object
   },
 
   el: null,
@@ -111,6 +120,28 @@ const Select2 = React.createClass({
         this.el.on(event[0], props[event[1]]);
       }
     });
+    // Hacking select2 to seem like having no additional search field:
+    if (!props.multiple) {
+      // Multiple-selection does not add a separate search field but single selects do. However, these dropdown
+      // menus are identical in terms of css classes so we need to apply a more specific class through an event:
+      this.el.on(`select2:open.${namespace}`, function() {
+        const $above = $(".select2-dropdown.select2-dropdown--above");
+        if ($above.length) {
+          // If the single select dropdown is above, we first need to switch the order of elements
+          // within the dropdown to get the search field over the selection placeholder (but only do it once per dropdown)
+          const $search = $above.find('.select2-search--dropdown'),
+              $results = $above.find('.select2-results');
+          // remove+append will not work (causes bound events to fail) so we need to switch them in place:
+          swapNodesIfInGivenOrder($search[0], $results[0]); // does not do this if already swapped (select2 reuses the same dropdown)
+          // Add the position fixing css class after the switch (so that mouse key release won't happen over
+          // an option (which would cause the dropdown to close instantly):
+          $(".select2-container--open").addClass('single-selector');
+        } else {
+          // Just do the position fix for below dropdown for single selection:
+          $(".select2-container--open").addClass('single-selector');
+        }
+      });
+    }
   },
 
   detachEventHandlers: function(props) {
@@ -138,6 +169,34 @@ const Select2 = React.createClass({
     }
     if (this.props.passData) {
       opt.data = this.props.data;
+    }
+    
+    if (this.props.l10n) {
+      const l10n = this.props.l10n;
+      opt.language = {
+        errorLoading: function () {
+          return l10n['VIRHE_LADATTAESSA_VASTAUKSIA'];
+        },
+        inputTooLong: function (args) {
+          const overChars = args.input.length - args.maximum;
+          return l10n.msg('POISTA_MERKKIA', overChars);
+        },
+        inputTooShort: function (args) {
+          return l10n.msg('SYOTA_VAHINTAAN_MERKKIA', args.minimum);
+        },
+        loadingMore: function () {
+          return l10n['LADATAAN'];
+        },
+        noResults: function () {
+          return l10n['EI_TULOKSIA'];
+        },
+        maximumSelected: function (args) {
+          return l10n.msg('VOIT_VALITA_VAIN', args.maximum);
+        },
+        searching: function () {
+          return l10n['ETSITAAN'];
+        }
+      };
     }
     return opt;
   },
@@ -174,6 +233,7 @@ const Select2 = React.createClass({
     delete props.onSelect;
     delete props.onChange;
     delete props.onUnselect;
+    delete props.l10n;
 
     return (
       <select {...props}>
@@ -199,12 +259,12 @@ const Select2 = React.createClass({
 
 Select2.defaultProps= {
   data: [],
-      events: [
+  events: [
     [`change.${namespace}`, 'onChange'],
     [`select2:open.${namespace}`, 'onOpen'],
     [`select2:close.${namespace}`, 'onClose'],
     [`select2:select.${namespace}`, 'onSelect'],
-    [`select2:unselect.${namespace}`, 'onUnselect'],
+    [`select2:unselect.${namespace}`, 'onUnselect']
   ],
   options: {},
   multiple: false

@@ -30,7 +30,7 @@ const AddToOrganisation = React.createClass({
 
   changeOrganization: function(oldOid, e) {
     const selectedOrganization = R.find(R.pathEq(['oid'], e.target.value))(this.props.orgs);
-    console.info('changeOrganization', e.target.value, selectedOrganization);
+    //console.info('changeOrganization', e.target.value, selectedOrganization);
     if (selectedOrganization) {
       changeOrganization(oldOid, selectedOrganization, this.props.omaOid);
     }

@@ -34,6 +34,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var namespace = 'react-select2-wrapper';
 
+function swapNodesIfInGivenOrder(a, b) {
+  if (a.nextSibling === b) {
+    var aparent = a.parentNode;
+    b.parentNode.insertBefore(a, b);
+    aparent.insertBefore(b, a);
+  }
+}
+
 var Select2 = _react2.default.createClass({
   displayName: 'Select2',
 
@@ -49,7 +57,8 @@ var Select2 = _react2.default.createClass({
     onSelect: _react.PropTypes.func,
     onChange: _react.PropTypes.func,
     onUnselect: _react.PropTypes.func,
-    passData: _react.PropTypes.bool
+    passData: _react.PropTypes.bool,
+    l10n: _react.PropTypes.object
   },
 
   el: null,
@@ -144,6 +153,28 @@ var Select2 = _react2.default.createClass({
         _this.el.on(event[0], props[event[1]]);
       }
     });
+    // Hacking select2 to seem like having no additional search field:
+    if (!props.multiple) {
+      // Multiple-selection does not add a separate search field but single selects do. However, these dropdown
+      // menus are identical in terms of css classes so we need to apply a more specific class through an event:
+      this.el.on('select2:open.' + namespace, function () {
+        var $above = (0, _jquery2.default)(".select2-dropdown.select2-dropdown--above");
+        if ($above.length) {
+          // If the single select dropdown is above, we first need to switch the order of elements
+          // within the dropdown to get the search field over the selection placeholder (but only do it once per dropdown)
+          var $search = $above.find('.select2-search--dropdown'),
+              $results = $above.find('.select2-results');
+          // remove+append will not work (causes bound events to fail) so we need to switch them in place:
+          swapNodesIfInGivenOrder($search[0], $results[0]); // does not do this if already swapped (select2 reuses the same dropdown)
+          // Add the position fixing css class after the switch (so that mouse key release won't happen over
+          // an option (which would cause the dropdown to close instantly):
+          (0, _jquery2.default)(".select2-container--open").addClass('single-selector');
+        } else {
+          // Just do the position fix for below dropdown for single selection:
+          (0, _jquery2.default)(".select2-container--open").addClass('single-selector');
+        }
+      });
+    }
   },
 
   detachEventHandlers: function detachEventHandlers(props) {
@@ -167,12 +198,44 @@ var Select2 = _react2.default.createClass({
   },
 
   prepareOptions: function prepareOptions(options) {
+    var _this3 = this;
+
     var opt = options;
     if (typeof opt.dropdownParent === 'string') {
       opt.dropdownParent = (0, _jquery2.default)(opt.dropdownParent);
     }
     if (this.props.passData) {
       opt.data = this.props.data;
+    }
+
+    if (this.props.l10n) {
+      (function () {
+        var l10n = _this3.props.l10n;
+        opt.language = {
+          errorLoading: function errorLoading() {
+            return l10n['VIRHE_LADATTAESSA_VASTAUKSIA'];
+          },
+          inputTooLong: function inputTooLong(args) {
+            var overChars = args.input.length - args.maximum;
+            return l10n.msg('POISTA_MERKKIA', overChars);
+          },
+          inputTooShort: function inputTooShort(args) {
+            return l10n.msg('SYOTA_VAHINTAAN_MERKKIA', args.minimum);
+          },
+          loadingMore: function loadingMore() {
+            return l10n['LADATAAN'];
+          },
+          noResults: function noResults() {
+            return l10n['EI_TULOKSIA'];
+          },
+          maximumSelected: function maximumSelected(args) {
+            return l10n.msg('VOIT_VALITA_VAIN', args.maximum);
+          },
+          searching: function searching() {
+            return l10n['ETSITAAN'];
+          }
+        };
+      })();
     }
     return opt;
   },
@@ -203,7 +266,7 @@ var Select2 = _react2.default.createClass({
   },
 
   render: function render() {
-    var _this3 = this;
+    var _this4 = this;
 
     var props = _jquery2.default.extend({}, this.props),
         data = this.props.data,
@@ -219,12 +282,13 @@ var Select2 = _react2.default.createClass({
     delete props.onSelect;
     delete props.onChange;
     delete props.onUnselect;
+    delete props.l10n;
 
     return _react2.default.createElement(
       'select',
       props,
       !passData && data.map(function (item, k) {
-        if (_this3.isObject(item) && _this3.isObject(item.children)) {
+        if (_this4.isObject(item) && _this4.isObject(item.children)) {
           var itemParams = _jquery2.default.extend({}, item),
               children = item.children,
               text = item.text;
@@ -234,11 +298,11 @@ var Select2 = _react2.default.createClass({
             'optgroup',
             _extends({ key: 'optgroup-' + k, label: text }, itemParams),
             children.map(function (child) {
-              return _this3.makeOption(child);
+              return _this4.makeOption(child);
             })
           );
         }
-        return _this3.makeOption(item);
+        return _this4.makeOption(item);
       })
     );
   }
