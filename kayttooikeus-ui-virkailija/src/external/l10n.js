@@ -9,7 +9,7 @@ export const localeP = localeBus.toProperty('fi');
 const l10nRequestS = Bacon.combineWith(urlsP, urls => urls.url('kayttooikeus-service.l10n')).toEventStream();
 const l10nResponseS = l10nRequestS.flatMap(url => Bacon.fromPromise(fetch(url, {credentials: 'same-origin'})
     .then(handleFetchError).then(response =>  response.json())));
-const lokalisointiRequestS = Bacon.combineWith(urlsP, urls => urls.url('lokalisointi.localisation')).toEventStream();
+const lokalisointiRequestS = Bacon.combineWith(urlsP, urls => urls.url('lokalisointi.localisation', {category: "kayttooikeus"})).toEventStream();
 const lokalisointiResponseS = lokalisointiRequestS.flatMap(url => Bacon.fromPromise(fetch(url, {credentials: 'same-origin'})
     .then(handleFetchError).then(response =>  response.json())));
 const l10nByLocaleP = Bacon.combineWith(l10nResponseS.toProperty(), lokalisointiResponseS.toProperty(),

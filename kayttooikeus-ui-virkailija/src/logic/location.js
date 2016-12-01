@@ -15,7 +15,7 @@ function parseQuery(qstr) {
 }
 
 function parseLocation(location) {
-    const basePath = window.url('kayttooikeus-service.virkialija-ui.basePath');
+    const basePath = window.url('kayttooikeus-service.virkailija-ui.basePath');
     const originalPathName = location.pathname;
     const path = originalPathName.startsWith(basePath) ? originalPathName.substring(basePath.length) : originalPathName;
     return {
@@ -37,7 +37,7 @@ export const navigateTo = function (path, successMsg=null) {
     } else {
         clearGlobalErrors();
     }
-    const pathToUse = window.url('kayttooikeus-service.virkialija-ui.basePath')+path;
+    const pathToUse = window.url('kayttooikeus-service.virkailija-ui.basePath')+path;
     history.pushState(null, null, pathToUse);
     locationBus.push(parsePath(pathToUse));
 };
