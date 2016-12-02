@@ -61,19 +61,19 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsus() {
-        Kutsu kutsu1 = populate(kutsu("a@eaxmple.com")
+        Kutsu kutsu1 = populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(new DateTime(2016,1,1,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1"))
                 )),
-            kutsu2 = populate(kutsu("b@eaxmple.com")
+            kutsu2 = populate(kutsu("Matti", "Meikäläinen", "b@eaxmple.com")
                 .kutsuja("1.2.4").aikaleima(new DateTime(2016,2,1,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.6")
                         .ryhma(kayttoOikeusRyhma("RYHMA3")))
             ),
-            kutsu3 = populate(kutsu("a@eaxmple.com")
+            kutsu3 = populate(kutsu("Eero", "Esimerkki", "c@eaxmple.com")
                 .tila(KutsunTila.POISTETTU)
                 .kutsuja("1.2.4").aikaleima(new DateTime(2016,1,1,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5").ryhma(kayttoOikeusRyhma("RYHMA1"))
@@ -116,6 +116,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
 
         KutsuCreateDto kutsu = new KutsuCreateDto();
+        kutsu.setEtunimi("Etu");
+        kutsu.setSukunimi("Suku");
         kutsu.setSahkoposti("example@example.com");
         kutsu.setAsiointikieli(Asiointikieli.fi);
         kutsu.setOrganisaatiot(new LinkedHashSet<>());
@@ -143,7 +145,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void deleteKutsuTest() {
-        Kutsu kutsu = populate(kutsu("b@eaxmple.com")
+        Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
                 .kutsuja("1.2.4")
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
@@ -158,7 +160,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test(expected = NotFoundException.class)
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void deleteKutsuOtherKutsujaFailsTest() {
-        Kutsu kutsu = populate(kutsu("b@eaxmple.com")
+        Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
                 .kutsuja("1.2.5")
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
