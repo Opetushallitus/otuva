@@ -23,11 +23,31 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 
 ### kayttooikeus-service
 
-dev-profiilia varten kopioi security-context-backend-local-testing.properties.template oph-configuraation hakemistoon ja nimeä tiedosto security-context.properties
+Devausta varten kopioi oph-configuraation-hakemistoon
+* security-context-backend-local-testing.properties.template ja nimeä tiedosto security-context.properties
+* kayttooikeus.yml.template, nimeä tiedosto kayttooikeus.yml ja aseta placeholdereiden tilalle kehitysympäristön tiedot
+
+Lisää kayttoikeus.yml:ään host-osioon
+
+    front.lokalisointi.localisation: https://<virkailija>/lokalisointi/cxf/rest/v1/localisation
 
 Backend-palvelun käynnistäminen dev-profiililla:
 
     java -jar -Dspring.profiles.active=dev -Dspring.config.location=/<path>/<to>/oph-configuration/kayttooikeus.yml kayttooikeus-service/target/kayttooikeus-service-1.0.0-SNAPSHOT.jar
+
+## Webpack-dev-server
+
+Service käynnistää käyttöliittymän oletuksena /kayttooikeus-service/virkailija-polkuun.
+
+Jos haluat käyttää palvelua suoraan käyttöliittymän kanssa, lisää palvelimen käynnistykseen
+
+    -Dfront.kayttooikeus-service.baseUrl=""
+
+tai jos tämä on yleisempi vaihtoehto, niin vaihtoehtoisesti kayttooikeus.yml-tiedostoon host-osioon:
+
+    front.kayttooikeus-service.baseUrl:
+
+ja ylikirjoita tämä tarvittaessa.
 
 ## Kääntäminen
 Jotta kaikki riippuvuudet voidaan latada, täytyy omaan .m2/settings.xml tiedostoon laittaa artifaktoryn snapshot ja release osoitteet. Kysy tarkemmin joltain kehittäjältä tai etsi wikistä.

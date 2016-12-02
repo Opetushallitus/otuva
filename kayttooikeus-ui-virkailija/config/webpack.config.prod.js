@@ -183,7 +183,7 @@ module.exports = {
       PUBLIC_URL: publicUrl,
       RAAMIT_URL: '/virkailija-raamit/apply-raamit.js',
       JQUERY_URL: publicUrl + '/jquery-3.1.1.min.js',
-      CONFIG_URL: '/kayttooikeus-service/config/frontProperties.json'
+      CONFIG_URL: '/kayttooikeus-service/config/frontProperties'
     }),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({

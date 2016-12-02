@@ -1,7 +1,7 @@
 import Bacon from "baconjs";
 import {urlsP} from "./urls";
 import dispatcher from "../logic/dispatcher";
-import {queryString, handleFetchError} from "../logic/fetchUtils";
+import {handleFetchError} from "../logic/fetchUtils";
 import {commonHandleError} from "../logic/error";
 
 const kutsuListDispatcher = dispatcher();
@@ -40,7 +40,7 @@ export const kutsuListStateP = kutsuList.toProperty();
 export const kutsuListStateS = Bacon.combineWith(kutsuListStateP, urlsP, (state, urls) => ({state, urls})).changes()
     .skipWhile(({state}) => !state.active);
 export const kutsuListResponseS = kutsuListStateS.flatMap(({state}) => 
-    Bacon.fromPromise(fetch(window.url('kayttooikeus-service.kutsu')+queryString(state.params),{credentials: 'same-origin'})
+    Bacon.fromPromise(fetch(window.url('kayttooikeus-service.kutsu', state.params),{credentials: 'same-origin'})
         .then(handleFetchError).then(response => response.json().then(json => ({loaded: true, result: json}))
             .catch(() => ({loaded:false, result:[]}))))).toEventStream();
 export const kutsuListP = kutsuListResponseS.toProperty({loaded:false, result:[]});

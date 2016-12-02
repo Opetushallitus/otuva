@@ -8,14 +8,6 @@ const queryParams = (map) => {
     }
     return params.toString();
 };
-
-export const queryString = (map) => {
-    const params = queryParams(map);
-    if (params) {
-        return '?'+params;
-    }
-    return '';
-};
 export const postFormBoby = (map) => {
     return queryParams(map);
 };

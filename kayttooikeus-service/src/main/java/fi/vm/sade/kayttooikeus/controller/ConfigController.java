@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
-
 @Controller
 @RequestMapping(value = "/config")
 public class ConfigController {
@@ -22,8 +20,8 @@ public class ConfigController {
     
     @ResponseBody
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/frontProperties.json", method = RequestMethod.GET)
-    public Map<String,String> frontPropertiesJson() {
-        return urlProperties.frontPropertiesAsMap();
+    @RequestMapping(value = "/frontProperties", method = RequestMethod.GET, produces = "text/plain")
+    public String frontPropertiesJson() {
+        return urlProperties.frontPropertiesToJson();
     }
 }
