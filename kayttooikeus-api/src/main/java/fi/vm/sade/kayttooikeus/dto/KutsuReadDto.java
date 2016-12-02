@@ -7,8 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class KutsuReadDto {
-
     private Long id;
+    private String etunimi;
+    private String sukunimi;
     private String sahkoposti;
     private Asiointikieli asiointikieli;
     private Set<KutsuOrganisaatioDto> organisaatiot;

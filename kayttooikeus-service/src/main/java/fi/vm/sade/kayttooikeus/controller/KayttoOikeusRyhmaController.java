@@ -167,4 +167,15 @@ public class KayttoOikeusRyhmaController {
         return kayttoOikeusService.findKayttoOikeusRyhma(id);
     }
 
+    @RequestMapping(value = "/ryhmasByKayttooikeus", method = RequestMethod.POST)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
+            + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Listaa käyttöoikeusryhmät käyttooikeuksien mukaan.",
+            notes = "Hakee käyttöoikeusryhmät joissa esiintyy jokin annetuista käyttöoikeuksista.")
+    public List<KayttoOikeusRyhmaDto> getKayttoOikeusRyhmasByKayttoOikeus(@RequestBody List<Long> kayttoOikeusIds) {
+        return kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(kayttoOikeusIds);
+    }
+
 }

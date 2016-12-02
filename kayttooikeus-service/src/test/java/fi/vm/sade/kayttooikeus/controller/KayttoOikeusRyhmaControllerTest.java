@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyList;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -342,4 +343,34 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .build();
     }
 
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_READ")
+    public void getKayttoOikeusRyhmasByKayttoOikeusTest() throws Exception {
+        given(kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(anyList()))
+                .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()
+                        .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
+                                .organisaatioTyyppi("organisaatiotyyppi")
+                                .id(44L).build()))
+                        .rooliRajoite("roolirajoite")
+                        .id(14L)
+                        .name("Nimi")
+                        .description(new TextGroupListDto(1L).put("FI", "Test"))
+                        .build()));
+
+        this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content("[345]")
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
+    }
+
+    @Test
+    public void getKayttoOikeusRyhmasByKayttoOikeusTestDenied() throws Exception {
+        this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content("[345]")
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is3xxRedirection());
+    }
 }

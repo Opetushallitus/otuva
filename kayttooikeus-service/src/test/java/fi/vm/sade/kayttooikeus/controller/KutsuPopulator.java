@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class KutsuPopulator implements Populator<Kutsu> {
-    private final String sahkoposti;
     private final List<Populator<KutsuOrganisaatio>> organisaatiot = new ArrayList<>();
+    private final String etunimi;
+    private final String sukunimi;
+    private final String sahkoposti;
     private String salaisuus = UUID.randomUUID().toString();
     private KutsunTila tila = KutsunTila.AVOIN;
     private String kieliKoodi = "FI";
@@ -22,12 +24,14 @@ public class KutsuPopulator implements Populator<Kutsu> {
     private String luotuHenkiloOid;
     private DateTime aikaleima = DateTime.now();
 
-    public KutsuPopulator(String sahkoposti) {
+    public KutsuPopulator(String etunimi, String sukunimi, String sahkoposti) {
+        this.etunimi = etunimi;
+        this.sukunimi = sukunimi;
         this.sahkoposti = sahkoposti;
     }
     
-    public static KutsuPopulator kutsu(String sahkoposti) {
-        return new KutsuPopulator(sahkoposti);
+    public static KutsuPopulator kutsu(String etunimi, String sukunimi, String sahkoposti) {
+        return new KutsuPopulator(etunimi, sukunimi, sahkoposti);
     }
     
     public KutsuPopulator kutsuja(String kutsuja) {
@@ -71,6 +75,8 @@ public class KutsuPopulator implements Populator<Kutsu> {
                     "from Kutsu k where k.sahkoposti = :sahkoposti")
                 .setParameter("sahkoposti", sahkoposti)).orElseGet(() -> {
             Kutsu kutsu = new Kutsu();
+            kutsu.setEtunimi(etunimi);
+            kutsu.setSukunimi(sukunimi);
             kutsu.setAikaleima(aikaleima);
             kutsu.setTila(tila);
             kutsu.setSahkoposti(sahkoposti);
