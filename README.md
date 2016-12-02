@@ -29,7 +29,7 @@ Devausta varten kopioi oph-configuraation-hakemistoon
 
 Lisää kayttoikeus.yml:ään host-osioon
 
-    front.lokalisointi.localisation: https://<virkailija>/lokalisointi/cxf/rest/v1/localisation
+    front.lokalisointi.baseUrl: https://<virkailija>
 
 Backend-palvelun käynnistäminen dev-profiililla:
 
@@ -41,11 +41,11 @@ Service käynnistää käyttöliittymän oletuksena /kayttooikeus-service/virkai
 
 Jos haluat käyttää palvelua suoraan käyttöliittymän kanssa, lisää palvelimen käynnistykseen
 
-    -Dfront.kayttooikeus-service.baseUrl=""
+    -Dfront.kayttooikeus-service.virkailija-ui.basePath=""
 
 tai jos tämä on yleisempi vaihtoehto, niin vaihtoehtoisesti kayttooikeus.yml-tiedostoon host-osioon:
 
-    front.kayttooikeus-service.baseUrl:
+    front.kayttooikeus-service.virkailija-ui.basePath:
 
 ja ylikirjoita tämä tarvittaessa.
 
