@@ -38,10 +38,6 @@ const KutsuForm = React.createClass({
         return (
             <form className="kutsuFormWrapper">
 
-                <div className="kutsuFormHeader">
-                    <h1>{L['VIRKAILIJAN_LISAYS_OTSIKKO']}</h1>
-                </div>
-
                 <BasicInfo l10n={L} locale={uiLang} basicInfo={this.props.basicInfo}
                            languages={this.props.languages}/>
                 <AddToOrganisation l10n={L} uiLang={uiLang} omaOid={this.props.omaOid}
