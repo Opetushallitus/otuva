@@ -32,7 +32,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void listKutsuListDtosTest() {
-        Kutsu kutsu = populate(kutsu("a@eaxmple.com")
+        Kutsu kutsu = populate(kutsu("Aapo", "Esimerkki", "a@eaxmple.com")
             .kutsuja("1.2.3").aikaleima(new DateTime(2016,1,1,0,0,0))
             .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                 .ryhma(kayttoOikeusRyhma("RYHMA")
@@ -59,13 +59,13 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void listKutsuOrganisaatioListDtosTest() {
-        Kutsu kutsu1 = populate(kutsu("a@eaxmple.com")
+        Kutsu kutsu1 = populate(kutsu("Aapo", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(new DateTime(2016,1,1,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                     .ryhma(kayttoOikeusRyhma("RYHMA1")
                         .withKuvaus(text("FI", "B")))
                 )),
-            kutsu2 = populate(kutsu("b@eaxmple.com")
+            kutsu2 = populate(kutsu("Essi", "Esimerkki", "b@eaxmple.com")
                 .tila(KutsunTila.KAYTETTY)
                 .kutsuja("1.2.4").aikaleima(new DateTime(2016,2,1,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")

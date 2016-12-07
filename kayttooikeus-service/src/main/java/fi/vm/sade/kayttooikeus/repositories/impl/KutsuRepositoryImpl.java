@@ -24,7 +24,9 @@ public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements Ku
                     kutsu.id.as("id"),
                     kutsu.tila.as("tila"),
                     kutsu.aikaleima.as("aikaleima"),
-                    kutsu.sahkoposti.as("sahkoposti")
+                    kutsu.sahkoposti.as("sahkoposti"),
+                    kutsu.etunimi.as("etunimi"),
+                    kutsu.sukunimi.as("sukunimi")
                 )).orderBy(kutsu.aikaleima.desc()).fetch();
     }
     
@@ -38,6 +40,7 @@ public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements Ku
                     kutsuOrganisaatio.id.as("id"),
                     kutsuOrganisaatio.organisaatioOid.as("oid")
                 )).orderBy(orderBy.order(SAHKOPOSTI, kutsu.sahkoposti)
+                        .order(NIMI, kutsu.sukunimi.concat(" ").concat(kutsu.etunimi))
                         .order(ORGANISAATIO, kutsuOrganisaatio.organisaatioOid)
                         .order(AIKALEIMA, kutsu.aikaleima)
                         .order(kutsuOrganisaatio.organisaatioOid).get()).fetch();

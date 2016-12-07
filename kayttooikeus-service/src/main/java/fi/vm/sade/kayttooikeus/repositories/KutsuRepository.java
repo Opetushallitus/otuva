@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface KutsuRepository extends BaseRepository<Kutsu> {
     enum KutsuOrganisaatioOrder {
+        NIMI,
         SAHKOPOSTI,
         ORGANISAATIO,
         AIKALEIMA

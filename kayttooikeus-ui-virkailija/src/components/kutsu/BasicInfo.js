@@ -16,6 +16,14 @@ const BasicInfo = React.createClass({
       <fieldset className="basic-info">
         <h2>{L['VIRKAILIJAN_TIEDOT_OTSIKKO']}</h2>
         <div className="row">
+          <label htmlFor="etunimi">{L['VIRKAILIJAN_TIEDOT_ETUNIMI']}</label>
+          <input type="text" id="etunimi" value={basicInfo.etunimi || ''} onChange={this.handleEtunimi}/>
+        </div>
+        <div className="row">
+          <label htmlFor="etunimi">{L['VIRKAILIJAN_TIEDOT_SUKUNIMI']}</label>
+          <input type="text" id="etunimi" value={basicInfo.sukunimi || ''} onChange={this.handleSukunimi}/>
+        </div>
+        <div className="row">
           <label htmlFor="email">{L['VIRKAILIJAN_TIEDOT_SPOSTI']}</label>
           <input type="text" id="email" value={basicInfo.email || ''} onChange={this.handleEmail}/>
         </div>
@@ -40,6 +48,14 @@ const BasicInfo = React.createClass({
 
   handleEmail: function(e) {
     basicInfo.setEmail(e.target.value)
+  },
+  
+  handleEtunimi: function(e) {
+    basicInfo.setEtunimi(e.target.value)
+  },
+
+  handleSukunimi: function(e) {
+    basicInfo.setSukunimi(e.target.value)
   },
 
   selectLanguage: function(e) {

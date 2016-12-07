@@ -88,3 +88,6 @@ endpoints:
     enabled: false
   shutdown:
     enabled: false
+
+kayttooikeus:
+  uses-ssl-proxy: true

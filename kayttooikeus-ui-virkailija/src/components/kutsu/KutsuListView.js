@@ -41,6 +41,9 @@ const KutsuListView = React.createClass({
                         <table>
                             <thead>
                                 <tr>
+                                    <SortByHeader by="NIMI" state={state} onChange={this.changeOrder}>
+                                        {L['KUTSUT_NIMI_OTSIKKO']}
+                                    </SortByHeader>
                                     <SortByHeader by="SAHKOPOSTI" state={state} onChange={this.changeOrder}>
                                         {L['KUTSUT_SAHKOPOSTI_OTSIKKO']}
                                     </SortByHeader>
@@ -55,6 +58,9 @@ const KutsuListView = React.createClass({
                             </thead>
                             <tbody>
                                 {kutsuResponse.result.map(kutsu => <tr key={kutsu.id}>
+                                    <td>
+                                        {kutsu.etunimi} {kutsu.sukunimi}
+                                    </td>
                                     <td>
                                         {kutsu.sahkoposti}
                                     </td>
@@ -79,6 +85,10 @@ const KutsuListView = React.createClass({
                         <h2>{L['PERUUTA_KUTSU_VAHVISTUS']}</h2>
                         <table>
                             <tbody>
+                                <tr>
+                                    <th>{L['KUTSUT_NIMI_OTSIKKO']}</th>
+                                    <td>{this.state.confirmDeleteFor.etunimi} {this.state.confirmDeleteFor.sukunimi}</td>
+                                </tr>
                                 <tr>
                                     <th>{L['KUTSUT_SAHKOPOSTI_OTSIKKO']}</th>
                                     <td>{this.state.confirmDeleteFor.sahkoposti}</td>

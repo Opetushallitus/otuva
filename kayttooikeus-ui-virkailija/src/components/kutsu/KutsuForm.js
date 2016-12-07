@@ -55,6 +55,7 @@ const KutsuForm = React.createClass({
 
     isValid: function() {
         return this.isValidEmail(this.props.basicInfo.email)
+            && this.props.basicInfo.etunimi && this.props.basicInfo.sukunimi
             && this.props.addedOrgs.length > 0
             && R.all(org => org.oid && org.selectedPermissions.length > 0)(this.props.addedOrgs);
     },

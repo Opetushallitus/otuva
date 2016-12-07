@@ -7,9 +7,7 @@ import ReactDOM from 'react-dom'
 import KutsuListView from './KutsuListView'
 
 const state = {
-    l10n: {
-        'fi': { }
-    },
+    l10n: {msg: () => ""},
     kutsuListState: {
         params: {sortBy: 'AIKALEIMA', direction: 'DESC'}
     },
