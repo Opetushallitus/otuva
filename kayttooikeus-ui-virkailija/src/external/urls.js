@@ -5,6 +5,6 @@ window.urls.addProperties(frontUrls)
 
 export const urlsP = Bacon.fromCallback(callback =>
   window.CONFIG_URL ?
-    window.urls.loadFromUrls("/kayttooikeus-service/config/frontProperties").success(() => callback(window)) :
+    window.urls.load({overrides: "/kayttooikeus-service/config/frontProperties"}).then(() => callback(window)) :
     callback(window)
 ).toProperty();
