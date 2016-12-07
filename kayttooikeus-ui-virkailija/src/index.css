@@ -15,6 +15,7 @@ fieldset label {
   /*width: 20%;*/
   min-width: 150px;
 }
+
 fieldset input, fieldset select {
   float: left;
   min-width: 250px;
@@ -31,12 +32,11 @@ input {
 }
 fieldset .row {
     vertical-align: middle;
-  /*clear: both;*/
-  /*padding-top: 16px;*/
 }
 
 .row label{
     font-weight: bold;
+    padding-top: 20px;
 }
 .mainContainer {
   margin-top: 10px;

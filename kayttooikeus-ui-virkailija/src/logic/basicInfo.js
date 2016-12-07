@@ -16,7 +16,7 @@ const basicInfo = {
       [d.stream('language')], assignLanguage,
       [d.stream('email')], assignEmail,
       [d.stream('etunimi')], (info, etunimi) => ({...info, etunimi}),
-      [d.stream('sukuinimi')], (info, sukunimi) => ({...info, sukunimi})
+      [d.stream('sukunimi')], (info, sukunimi) => ({...info, sukunimi})
     )
   },
   setLanguage: code => d.push('language', code),

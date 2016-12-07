@@ -20,8 +20,8 @@ const BasicInfo = React.createClass({
           <input type="text" id="etunimi" value={basicInfo.etunimi || ''} onChange={this.handleEtunimi}/>
         </div>
         <div className="row">
-          <label htmlFor="etunimi">{L['VIRKAILIJAN_TIEDOT_SUKUNIMI']}</label>
-          <input type="text" id="etunimi" value={basicInfo.sukunimi || ''} onChange={this.handleSukunimi}/>
+          <label htmlFor="sukunimi">{L['VIRKAILIJAN_TIEDOT_SUKUNIMI']}</label>
+          <input type="text" id="sukunimi" value={basicInfo.sukunimi || ''} onChange={this.handleSukunimi}/>
         </div>
         <div className="row">
           <label htmlFor="email">{L['VIRKAILIJAN_TIEDOT_SPOSTI']}</label>
