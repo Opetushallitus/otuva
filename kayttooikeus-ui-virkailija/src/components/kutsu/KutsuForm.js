@@ -82,6 +82,7 @@ const KutsuForm = React.createClass({
 export const kutsuFormContentP = Bacon.combineWith(l10nP, localeP, organizationsFlatInHierarchyOrderP, addedOrganizationsP, basicInfoP, languagesP, omaOidP,
     (l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid) => {
         const props = {l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid};
+        props.languages = R.reject((lang) => lang.code === 'en', props.languages);
         return {
             content: <KutsuForm {...props}/>
         };

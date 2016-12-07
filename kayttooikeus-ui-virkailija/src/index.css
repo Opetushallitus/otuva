@@ -32,6 +32,10 @@ input {
     padding-top: 20px;
 }
 
+label.required::after{
+  content: '*';
+}
+
 .select-row{
   padding-top: 10px;
 }
