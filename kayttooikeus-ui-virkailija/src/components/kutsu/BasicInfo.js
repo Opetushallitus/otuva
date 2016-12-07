@@ -27,7 +27,7 @@ const BasicInfo = React.createClass({
           <label htmlFor="email">{L['VIRKAILIJAN_TIEDOT_SPOSTI']}</label>
           <input type="text" id="email" value={basicInfo.email || ''} onChange={this.handleEmail}/>
         </div>
-        <div className="row">
+        <div className="row select-row">
           <label htmlFor="lang">{L['VIRKAILIJAN_TIEDOT_KIELI']}</label>
           <Select2 id="lang" data={langs.map(lang => ({id: lang.code, text:lang.name[this.props.locale]}))}
                    onSelect={this.selectLanguage} value={basicInfo.languageCode}>

@@ -60,6 +60,8 @@ const KutsuConfirmation = React.createClass({
     e.preventDefault();
 
     const payload = {
+      etunimi: this.props.basicInfo.etunimi,
+      sukunimi: this.props.basicInfo.sukunimi,
       sahkoposti: this.props.basicInfo.email,
       asiointikieli: this.props.basicInfo.languageCode,
       organisaatiot: R.map(addedOrg => ({
