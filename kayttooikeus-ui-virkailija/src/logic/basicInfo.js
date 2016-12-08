@@ -6,23 +6,15 @@ const d = dispatcher();
 
 const basicInfo = {
   toProperty: (initialBasicInfo={email: null, language: null, etunimi: null, sukunimi: null}) => {
-    const assignLanguage = (basicInfo, languageCode) => {
-      return {...basicInfo, languageCode}
-    };
-    const assignEmail = (basicInfo, email) => {
-      return {...basicInfo, email}
-    };
     return Bacon.update(initialBasicInfo,
-      [d.stream('language')], assignLanguage,
-      [d.stream('email')], assignEmail,
-      [d.stream('etunimi')], (info, etunimi) => ({...info, etunimi}),
-      [d.stream('sukunimi')], (info, sukunimi) => ({...info, sukunimi})
+      [d.stream('overwrite')], (info, over) => ({...info, ...over})
     )
   },
-  setLanguage: code => d.push('language', code),
-  setEmail: address => d.push('email', address),
-  setEtunimi: etunimi => d.push('etunimi', etunimi),
-  setSukunimi: sukuinimi => d.push('sukunimi', sukuinimi)
+  setLanguage: code => d.push('overwrite', {languageCode: code}),
+  setEmail: address => d.push('overwrite', {email: address}),
+  setEtunimi: etunimi => d.push('overwrite', {etunimi: etunimi}),
+  setSukunimi: sukuinimi => d.push('overwrite', {sukunimi: sukuinimi}),
+  clear: () => d.push('overwrite', {email: null, etunimi: null, sukunimi: null})
 };
 
 export default basicInfo

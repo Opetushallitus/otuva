@@ -4,6 +4,7 @@ import Modal from "modal";
 import Button from "button";
 import {kutsu} from "../../external/kutsu";
 import {toLocalizedText} from "../../logic/localizabletext";
+import basicInfo from '../../logic/basicInfo'
 
 import './KutsuConfirmation.css'
 
@@ -75,6 +76,7 @@ const KutsuConfirmation = React.createClass({
     
     invitationResponseS.onValue(response => {
       console.info('invitation sent', response);
+      basicInfo.clear();
       if (this.props.ready) {
         this.props.ready(true);
       } else {

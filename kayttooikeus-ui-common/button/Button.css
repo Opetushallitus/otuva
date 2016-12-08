@@ -9,7 +9,7 @@
     border: 1px solid rgb(21, 158, 203);
     color: #F5F5F5;
 }
-.cancel {
+.button.cancel {
     background: #E44E4E;
     border-radius: 2px;
     border: 1px #E44E4E;
