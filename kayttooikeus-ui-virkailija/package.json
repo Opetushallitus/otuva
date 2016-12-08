@@ -52,7 +52,7 @@
   "dependencies": {
     "baconjs": "^0.7.88",
     "fetch-mock": "^5.5.0",
-    "oph-urls-js": "Opetushallitus/oph-urls-js#dfa4dcfac8602926196724f840dfc4a70690d96d",
+    "oph-urls-js": "Opetushallitus/oph-urls-js#master",
     "virkailija-styles": "Opetushallitus/virkailija-styles",
     "modal": "file:../kayttooikeus-ui-common/modal",
     "select": "file:../kayttooikeus-ui-common/select",
@@ -108,21 +108,6 @@
       "changeOrigin": true,
       "xfwd": true,
       "auth": "test:test"
-    },
-    "/cas": {
-      "target": "http://localhost:8081",
-      "secure": false,
-      "changeOrigin": true
-    },
-    "/authentication-service": {
-      "target": "http://localhost:8082",
-      "secure": false,
-      "changeOrigin": true
-    },
-    "/organisaatio-service": {
-      "target": "http://localhost:8083",
-      "secure": false,
-      "changeOrigin": true
     }
   }
 }
