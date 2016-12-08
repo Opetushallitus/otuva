@@ -24,7 +24,7 @@
             "role": "body",
             "name": "email_body",
             "contentType": "html",
-            "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n        \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n    <meta http-equiv=\"Content-Style-Type\" content=\"text/css\"/>\n</head>\n<body>\n<div>\n    <div class=\"sisalto\">\n        <p>Hei,</p>\n        <p>sinut on lisätty virkailijaksi virkailija.opintopolku.fi-palveluun. Palvelun<br/>\n            käyttöönotto tapahtuu alla olevasta linkistä ja vaatii vahvan tunnistautumisen<br/>\n            pankkikortin tai mobiilivarmenteen avulla.\n        </p>\n        <p>\n            <a href=\"${url}\">${url}</a>\n        </p>\n        <p>\n            Terveisin,<br/>\n            Opetushallitus\n        </p>\n    </div>\n</div>\n</body>"
+            "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n        \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n    <meta http-equiv=\"Content-Style-Type\" content=\"text/css\"/>\n</head>\n<body>\n<div>\n    <div class=\"sisalto\">\n        <p>Hei $etunimi,</p>\n        <p>sinut on lisätty virkailijaksi virkailija.opintopolku.fi-palveluun. Palvelun<br/>\n            käyttöönotto tapahtuu alla olevasta linkistä ja vaatii vahvan tunnistautumisen<br/>\n            pankkikortin tai mobiilivarmenteen avulla.\n        </p>\n        <p>\n            <a href=\"${url}\">${url}</a>\n        </p>\n        <p>\n            Terveisin,<br/>\n            Opetushallitus\n        </p>\n    </div>\n</div>\n</body>"
           }
         ]
       }
@@ -47,6 +47,16 @@
     {
       "name": "subject",
       "defaultValue": "Kutsu Virkailijan Opintopolkuun",
+      "mandatory": false
+    },
+    {
+      "name": "etunimi",
+      "defaultValue": "",
+      "mandatory": false
+    },
+    {
+      "name": "sukunimi",
+      "defaultValue": "",
       "mandatory": false
     }
   ]

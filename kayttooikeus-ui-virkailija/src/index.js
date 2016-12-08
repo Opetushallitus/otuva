@@ -15,6 +15,7 @@ import TopNavigation from './components/TopNavigation'
 import './reset.css'
 import './index.css'
 import 'font-awesome-webpack'
+import 'virkailija-styles/styles/styles.css';
 
 const errorP = errorPF(contentP, l10nP);
 const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, contentP, (buildVersion, urls, location, l10n, error, content) => {

@@ -138,8 +138,15 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         urlReplacement.setName("url");
         urlReplacement.setValue(urlProperties.url("kayttooikeus-service.invitation.url", kutsu.getSalsisuus()));
         replacements.add(urlReplacement);
+        ReportedRecipientReplacementDTO etunimiReplacement = new ReportedRecipientReplacementDTO();
+        etunimiReplacement.setName("etunimi");
+        etunimiReplacement.setValue(kutsu.getEtunimi());
+        replacements.add(etunimiReplacement);
+        ReportedRecipientReplacementDTO sukunimiReplacement = new ReportedRecipientReplacementDTO();
+        sukunimiReplacement.setName("sukunimi");
+        sukunimiReplacement.setValue(kutsu.getSukunimi());
+        replacements.add(sukunimiReplacement);
         recipient.setRecipientReplacements(replacements);
-        
         emailData.setRecipient(singletonList(recipient));
         
         logger.info("Sending invitation email to {}", kutsu.getSahkoposti());

@@ -38,10 +38,6 @@ const KutsuForm = React.createClass({
         return (
             <form className="kutsuFormWrapper">
 
-                <div className="kutsuFormHeader">
-                    <h1>{L['VIRKAILIJAN_LISAYS_OTSIKKO']}</h1>
-                </div>
-
                 <BasicInfo l10n={L} locale={uiLang} basicInfo={this.props.basicInfo}
                            languages={this.props.languages}/>
                 <AddToOrganisation l10n={L} uiLang={uiLang} omaOid={this.props.omaOid}
@@ -59,6 +55,7 @@ const KutsuForm = React.createClass({
 
     isValid: function() {
         return this.isValidEmail(this.props.basicInfo.email)
+            && this.props.basicInfo.etunimi && this.props.basicInfo.sukunimi
             && this.props.addedOrgs.length > 0
             && R.all(org => org.oid && org.selectedPermissions.length > 0)(this.props.addedOrgs);
     },
@@ -85,6 +82,7 @@ const KutsuForm = React.createClass({
 export const kutsuFormContentP = Bacon.combineWith(l10nP, localeP, organizationsFlatInHierarchyOrderP, addedOrganizationsP, basicInfoP, languagesP, omaOidP,
     (l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid) => {
         const props = {l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid};
+        props.languages = R.reject((lang) => lang.code === 'en', props.languages);
         return {
             content: <KutsuForm {...props}/>
         };

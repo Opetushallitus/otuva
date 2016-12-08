@@ -23,7 +23,7 @@ const KutsuConfirmation = React.createClass({
         <div className="confirmation-modal">
           <i className="fa fa-times-circle fa-2 clickable right" onClick={this.props.modalCloseFn} aria-hidden="true"></i>
           <h1>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_OTSIKKO']}</h1>
-          <p>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_TEKSTI']} {this.props.basicInfo.email}</p>
+          <p>{L.msg('VIRKAILIJAN_LISAYS_ESIKATSELU_TEKSTI', this.props.basicInfo.email, this.props.basicInfo.etunimi, this.props.basicInfo.sukunimi)}</p>
           <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h2>
           {this.props.addedOrgs.map(this.renderAddedOrg)}
           <div className="row">
@@ -60,6 +60,8 @@ const KutsuConfirmation = React.createClass({
     e.preventDefault();
 
     const payload = {
+      etunimi: this.props.basicInfo.etunimi,
+      sukunimi: this.props.basicInfo.sukunimi,
       sahkoposti: this.props.basicInfo.email,
       asiointikieli: this.props.basicInfo.languageCode,
       organisaatiot: R.map(addedOrg => ({

@@ -1,41 +1,3 @@
-body {
-  color: #2B2B2B;
-  font-family: OpenSans;
-  font-size: 15px;
-  letter-spacing: 0;
-  line-height: 19px;
-  color: #2B2B2B;
-}
-
-h1 {
-  font-family: OpenSans-Semibold;
-  font-size: 32px;
-  letter-spacing: 0;
-  border-bottom: 1px solid #AEAEAE;
-  padding-bottom: 17px;
-  margin-bottom: 16px;
-  color: #2A2A2A;
-}
-
-h2 {
-  font-family: OpenSans-Semibold;
-  font-size: 24px;
-  letter-spacing: 0;
-  color: #2A2A2A;
-}
-
-h3 {
-  font-family: OpenSans-Semibold;
-  font-size: 16px;
-  letter-spacing: 0;
-  color: #2A2A2A;
-}
-
-h4 {
-  font-size: 14px;
-  color: #2A2A2A;
-}
-
 fieldset {
   margin: .5em;
   padding: .5em;
@@ -50,15 +12,12 @@ fieldset {
 
 fieldset label {
   float: left;
-  width: 20%;
   min-width: 150px;
 }
+
 fieldset input, fieldset select {
   float: left;
   min-width: 250px;
-  padding: 9px;
-  padding-top: 6px;
-  padding-bottom: 6px;
   border: 1px #AEAEAE solid;
   box-shadow:inset 0 0 3px #AEAEAE;
   -moz-box-shadow:inset 0 0 3px #AEAEAE;
@@ -67,22 +26,27 @@ fieldset input, fieldset select {
 input {
   font-size: 14px;
 }
-fieldset .row {
-  clear: both;
-  padding-top: 16px;
-}
-a, a:visited, a:active, a:hover {
-  text-decoration: none;
-  color: #159ECB;
+
+.row label{
+    font-weight: bold;
+    padding-top: 20px;
 }
 
-p {
-  text-align: left;
-  margin-top: 10px;
-  margin-bottom: 10px;
+label.required::after{
+  content: '*';
+}
+
+.select-row{
+  padding-top: 10px;
+}
+
+.select-row label{
+  font-weight: bold;
+  padding-top: 10px;
 }
 
 .mainContainer {
+  margin-top: 10px;
   position: relative;
   text-align: left;
   font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;

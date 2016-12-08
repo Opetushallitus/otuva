@@ -8,7 +8,7 @@ import KutsuForm from './KutsuForm'
 const appState = {
   addedOrgs: [],
   basicInfo: {},
-  l10n: {},
+  l10n: {msg: () => ""},
   locale: 'fi',
   organizationsFlatInHierarchyOrder: [
     {organisaatio: {oid: 1, tyypit: []}}
