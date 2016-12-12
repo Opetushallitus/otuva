@@ -1,9 +1,11 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
+import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,12 +23,15 @@ public class HenkiloController {
 
     private OrganisaatioHenkiloService organisaatioHenkiloService;
     private HenkiloService henkiloService;
+    private KayttajatiedotService kayttajatiedotService;
 
     @Autowired
     public HenkiloController(OrganisaatioHenkiloService organisaatioHenkiloService,
-                             HenkiloService henkiloService) {
+                             HenkiloService henkiloService,
+                             KayttajatiedotService kayttajatiedotService) {
         this.organisaatioHenkiloService = organisaatioHenkiloService;
         this.henkiloService = henkiloService;
+        this.kayttajatiedotService = kayttajatiedotService;
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
@@ -45,6 +50,14 @@ public class HenkiloController {
     public OrganisaatioHenkiloDto findByOrganisaatioOid(@PathVariable("oid") String henkiloOid,
                                                         @PathVariable("organisaatioOid") String organisaatioOid) {
         return organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio(henkiloOid, organisaatioOid);
+    }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
+    @ApiOperation(value = "Hakee henkilön käyttäjätiedot.",
+            notes = "Hakee henkilön käyttäjätiedot.")
+    @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.GET)
+    public KayttajatiedotReadDto getKayttajatiedot(@PathVariable("oid") String henkiloOid) {
+        return kayttajatiedotService.getKayttajatiedotByOid(henkiloOid);
     }
 
     @ApiOperation(value = "Hakee henkilöitä organisaatioiden ja käyttöoikeuksien mukaan.",
