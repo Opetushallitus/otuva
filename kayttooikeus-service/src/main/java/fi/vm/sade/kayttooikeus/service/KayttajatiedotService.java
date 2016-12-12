@@ -4,6 +4,6 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 
 public interface KayttajatiedotService {
 
-    KayttajatiedotReadDto getKayttajatiedotByOid(String henkiloOid);
+    KayttajatiedotReadDto getByHenkiloOid(String henkiloOid);
 
 }

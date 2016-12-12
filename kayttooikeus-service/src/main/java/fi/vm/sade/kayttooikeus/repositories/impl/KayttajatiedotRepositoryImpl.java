@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepositoryCustom;
 import java.util.Optional;
@@ -20,11 +21,12 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
 
     @Override
     public Optional<KayttajatiedotReadDto> findByHenkiloOid(String henkiloOid) {
-        JPAQuery<KayttajatiedotReadDto> query = new JPAQuery<>(em);
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
-        KayttajatiedotReadDto dto = query
-                .from(qKayttajatiedot)
-                .where(qKayttajatiedot.henkilo.oidHenkilo.eq(henkiloOid))
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+
+        KayttajatiedotReadDto dto = new JPAQuery<>(em)
+                .from(qKayttajatiedot).join(qKayttajatiedot.henkilo, qHenkilo)
+                .where(qHenkilo.oidHenkilo.eq(henkiloOid))
                 .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.id, qKayttajatiedot.username))
                 .fetchOne();
         return Optional.ofNullable(dto);

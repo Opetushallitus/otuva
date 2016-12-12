@@ -16,7 +16,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     @Override
-    public KayttajatiedotReadDto getKayttajatiedotByOid(String henkiloOid) {
+    public KayttajatiedotReadDto getByHenkiloOid(String henkiloOid) {
         return kayttajatiedotRepository.findByHenkiloOid(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Käyttäjätietoja ei löytynyt OID:lla " + henkiloOid));
     }

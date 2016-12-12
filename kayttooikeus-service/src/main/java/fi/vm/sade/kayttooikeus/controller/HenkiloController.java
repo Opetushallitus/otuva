@@ -57,7 +57,7 @@ public class HenkiloController {
             notes = "Hakee henkilön käyttäjätiedot.")
     @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.GET)
     public KayttajatiedotReadDto getKayttajatiedot(@PathVariable("oid") String henkiloOid) {
-        return kayttajatiedotService.getKayttajatiedotByOid(henkiloOid);
+        return kayttajatiedotService.getByHenkiloOid(henkiloOid);
     }
 
     @ApiOperation(value = "Hakee henkilöitä organisaatioiden ja käyttöoikeuksien mukaan.",
