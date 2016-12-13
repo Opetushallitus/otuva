@@ -46,7 +46,10 @@ const KutsuForm = React.createClass({
                 <div className="kutsuFormFooter row">
                     <Button className="action" action={this.openConfirmationModal} disabled={!this.isValid()}>
                         {L['VIRKAILIJAN_LISAYS_TALLENNA']}
-                    </Button>
+                    </Button> {this.isAddToOrganizationsNotificationShown() &&
+                    <span className="missingInfo">
+                        {L['VIRKAILIJAN_LISAYS_VALITSE_VAH_ORGANISAATIO_JA_YKSI_OIKEUS']}
+                    </span>}
                 </div>
                 <KutsuConfirmation {...confirmationProps} />
             </form>
@@ -56,12 +59,20 @@ const KutsuForm = React.createClass({
     isValid: function() {
         return this.isValidEmail(this.props.basicInfo.email)
             && this.props.basicInfo.etunimi && this.props.basicInfo.sukunimi
-            && this.props.addedOrgs.length > 0
-            && R.all(org => org.oid && org.selectedPermissions.length > 0)(this.props.addedOrgs);
+            && this.isOrganizationsValid();
+    },
+    
+    isOrganizationsValid: function() {
+        return this.props.addedOrgs.length > 0
+            && R.all(org => org.oid && org.selectedPermissions.length > 0)(this.props.addedOrgs)
     },
     
     isValidEmail: function(email) {
         return email != null && email.indexOf('@') > 2 && email.indexOf('@') < email.length-3
+    },
+    
+    isAddToOrganizationsNotificationShown: function() {
+        return !this.isOrganizationsValid();
     },
 
     openConfirmationModal: function (e) {

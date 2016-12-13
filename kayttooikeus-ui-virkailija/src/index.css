@@ -14,7 +14,10 @@ fieldset label {
   float: left;
   min-width: 150px;
 }
-
+fieldset input {
+  margin: 0px;
+  margin-top: 10px;
+}
 fieldset input, fieldset select {
   float: left;
   min-width: 250px;
@@ -22,6 +25,13 @@ fieldset input, fieldset select {
   box-shadow:inset 0 0 3px #AEAEAE;
   -moz-box-shadow:inset 0 0 3px #AEAEAE;
   -webkit-box-shadow:inset 0 0 3px #AEAEAE;
+}
+fieldset .fieldContainer {
+  float: left;
+  min-width: 250px;
+}
+.descriptionBelow {
+  padding-top: 5px;
 }
 input {
   font-size: 14px;
@@ -120,4 +130,7 @@ label.required::after{
 .clear {
   clear:both;
   margin-bottom:10px;
+}
+body h2 {
+  padding-bottom: 5px
 }

@@ -6,8 +6,6 @@ import Modal from 'modal'
 import Button from 'button'
 import SortByHeader from 'sort-by-header'
 
-import BackLink from '../BackLink'
-
 import kutsuList, { kutsuListStateP, kutsuListP, peruutaKutsu } from '../../external/kutsu'
 import { l10nP, localeP } from '../../external/l10n'
 import { setSuccess } from '../../logic/error'
@@ -27,7 +25,6 @@ const KutsuListView = React.createClass({
         const state = this.props.kutsuListState.params;
         return (
             <div className="wrapper">
-                <BackLink {...this.props}/>
                 <div className="header">
                     <h2>{L['KUTSUTUT_VIRKAILIJAT_OTSIKKO']}</h2>
                 </div>
