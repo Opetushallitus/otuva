@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.TYOOSOITE;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.apache.http.HttpVersion.HTTP_1_1;

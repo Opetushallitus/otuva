@@ -53,3 +53,7 @@ ja ylikirjoita tämä tarvittaessa.
 Jotta kaikki riippuvuudet voidaan latada, täytyy omaan .m2/settings.xml tiedostoon laittaa artifaktoryn snapshot ja release osoitteet. Kysy tarkemmin joltain kehittäjältä tai etsi wikistä.
 
     mvn clean install
+
+## API-dokumentaatio
+
+Rest API on dokumentoitu swaggerin avulla ja löytyy osoitteesta https://virkailija.opintopolku.fi/kayttooikeus-service/swagger-ui.html

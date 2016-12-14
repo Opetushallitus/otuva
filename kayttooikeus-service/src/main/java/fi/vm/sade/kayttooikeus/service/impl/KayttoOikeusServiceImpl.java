@@ -160,7 +160,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             kayttoOikeusForHenkilo.stream()
                     .filter(myonnettyKayttoOikeusDto -> myonnettyKayttoOikeusDto.getRyhmaId().equals(dto.getRyhmaId()))
                     .findFirst().ifPresent(myonnettyKayttoOikeusDto -> {
-                        dto.setMyonnettyTapahtumaId(myonnettyKayttoOikeusDto.getRyhmaId());
+                        dto.setMyonnettyTapahtumaId(myonnettyKayttoOikeusDto.getMyonnettyTapahtumaId());
                         dto.setAlkuPvm(myonnettyKayttoOikeusDto.getAlkuPvm());
                         dto.setVoimassaPvm(myonnettyKayttoOikeusDto.getVoimassaPvm());
                         dto.setSelected(true);

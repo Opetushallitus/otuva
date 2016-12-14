@@ -3,6 +3,8 @@ package fi.vm.sade.kayttooikeus.service.external;
 
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 import java.util.Optional;
 
-import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.*;
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.KOTIOSOITE;
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.PRIORITY_ORDER;
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.TYOOSOITE;
 import static java.util.Collections.singletonList;
 import static net.jadler.Jadler.onRequest;
 import static org.hamcrest.Matchers.is;
