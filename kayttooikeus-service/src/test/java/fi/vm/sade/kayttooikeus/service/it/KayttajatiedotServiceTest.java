@@ -19,7 +19,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     private KayttajatiedotService kayttajatiedotService;
 
     @Test
-    public void createShouldReturnWithId() {
+    public void createShouldReturn() {
         String oid = "1.2.3.4.5";
         populate(henkilo(oid));
         KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto();
@@ -27,7 +27,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
         KayttajatiedotReadDto readDto = kayttajatiedotService.create(oid, createDto);
 
-        assertThat(readDto.getId()).isNotNull();
+        assertThat(readDto).isNotNull();
     }
 
     @Test

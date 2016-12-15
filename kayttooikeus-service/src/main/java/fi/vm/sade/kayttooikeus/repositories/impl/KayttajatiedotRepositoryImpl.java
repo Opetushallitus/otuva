@@ -27,7 +27,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         KayttajatiedotReadDto dto = new JPAQuery<>(em)
                 .from(qKayttajatiedot).join(qKayttajatiedot.henkilo, qHenkilo)
                 .where(qHenkilo.oidHenkilo.eq(henkiloOid))
-                .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.id, qKayttajatiedot.username))
+                .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.username))
                 .fetchOne();
         return Optional.ofNullable(dto);
     }

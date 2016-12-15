@@ -7,11 +7,9 @@ import lombok.Setter;
 @Setter
 public class KayttajatiedotReadDto {
 
-    private final Long id;
     private final String username;
 
-    public KayttajatiedotReadDto(Long id, String username) {
-        this.id = id;
+    public KayttajatiedotReadDto(String username) {
         this.username = username;
     }
 
