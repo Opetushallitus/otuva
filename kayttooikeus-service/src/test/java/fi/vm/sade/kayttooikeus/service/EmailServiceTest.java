@@ -44,8 +44,8 @@ public class EmailServiceTest extends AbstractServiceTest {
     public void sendExpirationReminderTest() {
         HenkiloPerustietoDto perustiedot = new HenkiloPerustietoDto();
         KielisyysDto kielisyys = new KielisyysDto();
-        kielisyys.setKielikoodi("FI");
-        perustiedot.setAsiointikieli(kielisyys);
+        kielisyys.setKieliKoodi("FI");
+        perustiedot.setAsiointiKieli(kielisyys);
         given(oppijanumerorekisteriClient.getHenkilonPerustiedot("1.2.3.4.5")).willReturn(of(perustiedot));
         given(oppijanumerorekisteriClient.getHenkilonYhteystiedot("1.2.3.4.5")).willReturn(new HenkilonYhteystiedotViewDto()
             .put(TYOOSOITE, YhteystiedotDto.builder().sahkoposti("testi@example.com").build()));
