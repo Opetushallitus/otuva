@@ -2,18 +2,22 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +47,16 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .content("{\"username\": \"user.1\"}").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().string(containsString("Pattern")));
         verifyZeroInteractions(kayttajatiedotService);
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void getHenkiloKayttajatiedotShouldReturnNotFoundError() throws Exception {
+        when(kayttajatiedotService.getByHenkiloOid(any()))
+                .thenThrow(NotFoundException.class);
+        mvc.perform(get("/henkilo/{henkiloOid}/kayttajatiedot", "1.2.3.4.5"))
+                .andExpect(status().isNotFound());
+        verify(kayttajatiedotService).getByHenkiloOid(eq("1.2.3.4.5"));
     }
 
 }
