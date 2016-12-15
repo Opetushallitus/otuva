@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.AuthorizationDataDto;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -69,4 +71,15 @@ public class KayttoOikeusController {
         Period expireThreshold = new Period(LocalDate.now(), new LocalDate(year, month, day));
         return String.format("%d", taskExecutorService.sendExpirationReminders(expireThreshold));
     }
+
+    @ApiOperation("Palauttaa henkilön käyttöoikeudet ja käyttöoikeusryhmät")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
+            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(method = RequestMethod.POST, value = "/authorizationData/{oid}")
+    public AuthorizationDataDto authorizationDataByOid(@PathVariable("oid") String oid) {
+        return kayttoOikeusService.findAuthorizationDataByOid(oid);
+    }
+
 }

@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import org.joda.time.LocalDate;
@@ -12,6 +13,9 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
+import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
 @Repository
 public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractRepository implements MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
@@ -58,6 +62,28 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
                 ))
                 .where(booleanBuilder)
                 .orderBy(myonnettyKayttoOikeusRyhmaTapahtuma.id.asc()).fetch();
+    }
+
+    @Override
+    public List<AccessRightTypeDto> findValidAccessRightsByOid(String oid) {
+        BooleanBuilder booleanBuilder = new BooleanBuilder()
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(oid))
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.hidden.eq(false));
+
+        return jpa()
+                .from(myonnettyKayttoOikeusRyhmaTapahtuma)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
+                .leftJoin(organisaatioHenkilo.henkilo)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
+                .leftJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .leftJoin(kayttoOikeus)
+                .leftJoin(kayttoOikeus.palvelu, palvelu)
+                .select(Projections.bean(AccessRightTypeDto.class,
+                        myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
+                        kayttoOikeus.palvelu.name.as("palvelu"),
+                        kayttoOikeus.rooli.as("rooli")))
+                .where(booleanBuilder)
+                .fetch();
     }
 
 }

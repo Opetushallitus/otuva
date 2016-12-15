@@ -289,6 +289,17 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         return localizationService.localize(ryhmas);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public AuthorizationDataDto findAuthorizationDataByOid(String oid) {
+        AuthorizationDataDto dto = new AuthorizationDataDto();
+        List<AccessRightTypeDto> accessRights = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid(oid);
+        AccessRightListTypeDto acc = new AccessRightListTypeDto();
+        acc.setAccessRight(accessRights);
+        dto.setAccessrights(acc);
+        return dto;
+    }
+
     private void setKayttoOikeusRyhmas(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
         Set<KayttoOikeus> givenKOs = new HashSet<>();
         for (PalveluRooliDto prDto : ryhmaData.getPalvelutRoolit()) {
