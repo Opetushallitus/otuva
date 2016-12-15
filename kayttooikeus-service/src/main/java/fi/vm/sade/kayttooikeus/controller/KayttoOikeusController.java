@@ -1,15 +1,14 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.AuthorizationDataDto;
-import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class KayttoOikeusController {
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @RequestMapping(method = RequestMethod.POST, value = "/authorizationData/{oid}")
+    @RequestMapping(value = "/authorizationData/{oid}", method = RequestMethod.GET)
     public AuthorizationDataDto authorizationDataByOid(@PathVariable("oid") String oid) {
         return kayttoOikeusService.findAuthorizationDataByOid(oid);
     }
