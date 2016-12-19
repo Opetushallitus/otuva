@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import org.joda.time.LocalDate;
@@ -16,7 +17,7 @@ import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Repository
-public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implements OrganisaatioHenkiloRepository {
+public class OrganisaatioHenkiloRepositoryImpl extends BaseRepositoryImpl<OrganisaatioHenkilo> implements OrganisaatioHenkiloRepository {
     public static BooleanExpression voimassa(QOrganisaatioHenkilo oh, LocalDate at) {
         return oh.passivoitu.eq(false)
             .and(oh.voimassaAlkuPvm.isNull().or(oh.voimassaAlkuPvm.loe(at)))
