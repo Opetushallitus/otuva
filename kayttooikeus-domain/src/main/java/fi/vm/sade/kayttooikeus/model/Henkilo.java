@@ -30,4 +30,8 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
             CascadeType.REFRESH })
     private Set<OrganisaatioHenkilo> organisaatioHenkilos = new HashSet<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "henkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH })
+    private Set<Identification> identifications = new HashSet<>();
+
 }

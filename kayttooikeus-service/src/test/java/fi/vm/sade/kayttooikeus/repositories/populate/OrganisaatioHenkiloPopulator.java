@@ -16,6 +16,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
     private final String organisaatioOid;
     private LocalDate voimassaAlku = new LocalDate();
     private String tehtavanimike;
+    private Boolean passivoitu = false;
 
     public OrganisaatioHenkiloPopulator(String henkiloOid, String organisaatioOid) {
         this.henkilo = new HenkiloPopulator(henkiloOid);
@@ -39,7 +40,12 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         this.voimassaAlku = alkaen;
         return this;
     }
-    
+
+    public OrganisaatioHenkiloPopulator passivoitu(Boolean passivoitu) {
+        this.passivoitu = passivoitu;
+        return this;
+    }
+
     public OrganisaatioHenkiloPopulator tehtavanimike(String tehtavanimike) {
         this.tehtavanimike = tehtavanimike;
         return this;
@@ -64,7 +70,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
                 .build()));
         organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
         organisaatioHenkilo.setTehtavanimike(tehtavanimike);
-        organisaatioHenkilo.setPassivoitu(false);
+        organisaatioHenkilo.setPassivoitu(passivoitu);
         organisaatioHenkilo.setVoimassaAlkuPvm(voimassaAlku);
         organisaatioHenkilo.setOrganisaatioHenkiloTyyppi(OrganisaatioHenkiloTyyppi.VIRKAILIJA);
         entityManager.persist(organisaatioHenkilo);

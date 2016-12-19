@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+
 import javax.persistence.EntityManager;
 
 public class KayttajatiedotPopulator implements Populator<Kayttajatiedot> {
@@ -25,6 +26,7 @@ public class KayttajatiedotPopulator implements Populator<Kayttajatiedot> {
         kayttajatiedot.setHenkilo(henkilo);
         kayttajatiedot.setUsername(username);
         t.persist(kayttajatiedot);
+        henkilo.setKayttajatiedot(kayttajatiedot);
         return kayttajatiedot;
     }
 
