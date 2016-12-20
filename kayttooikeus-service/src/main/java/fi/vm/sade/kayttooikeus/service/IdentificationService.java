@@ -9,5 +9,5 @@ public interface IdentificationService {
 
     IdentifiedHenkiloTypeDto validateAuthToken(String authToken);
 
-    String generateTokenWithHetu(String hetu);
+    String generateTokenForHenkilo(String henkiloOid);
 }

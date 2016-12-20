@@ -11,15 +11,11 @@ import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidationException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -35,7 +31,6 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     private IdentificationRepository identificationRepository;
     private HenkiloRepository henkiloRepository;
     private KayttoOikeusService kayttoOikeusService;
-    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private AuthProperties authProperties;
     private OrikaBeanMapper mapper;
 
@@ -43,13 +38,11 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     public IdentificationServiceImpl(IdentificationRepository identificationRepository,
                                      HenkiloRepository henkiloRepository,
                                      KayttoOikeusService kayttoOikeusService,
-                                     OppijanumerorekisteriClient oppijanumerorekisteriClient,
                                      AuthProperties authProperties,
                                      OrikaBeanMapper mapper){
         this.identificationRepository = identificationRepository;
         this.henkiloRepository = henkiloRepository;
         this.kayttoOikeusService = kayttoOikeusService;
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.authProperties = authProperties;
         this.mapper = mapper;
     }
@@ -68,7 +61,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
                         idpIdentifier.equals(henkiloIdentification.getIdentifier()) && idpKey.equals(henkiloIdentification.getIdpEntityId()))
                 .findFirst();
 
-        String token = generateSalt();
+        String token = generateToken();
         if (identification.isPresent()) {
             updateTokenIfNotExpired(identification.get(), token);
         } else {
@@ -103,15 +96,10 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public String generateTokenWithHetu(String hetu) {
-        if (StringUtils.isEmpty(hetu)) {
-            throw new ValidationException("query.hetu.invalid");
-        }
-        HenkiloPerustietoDto perustietos = oppijanumerorekisteriClient.findByHetu(hetu);
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(perustietos.getOidHenkilo()).orElseThrow(()
+    public String generateTokenForHenkilo(String oid) {
+        Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("henkilo not found"));
-
-        String token = generateSalt();
+        String token = generateToken();
         Optional<Identification> henkiloIdentification = henkilo.getIdentifications().stream()
                 .filter(identification -> STRONG_AUTHENTICATION_IDP.equals(identification.getIdpEntityId()))
                 .findFirst();
@@ -172,7 +160,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         return new DateTime().plusMonths(authProperties.getExpirationMonths()).toDate();
     }
 
-    private String generateSalt() {
+    private String generateToken() {
         SecureRandom random = new SecureRandom();
         return new BigInteger(128, random).toString(32);
     }

@@ -11,8 +11,6 @@ import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Rule;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.ValidationException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +48,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private AuthProperties authProperties;
-
-    @MockBean
-    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -178,32 +172,18 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    public void generateTokenWithHetuEmptyTest() throws Exception {
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage("query.hetu.invalid");
-        identificationService.generateTokenWithHetu("");
-    }
-
-    @Test
-    public void generateTokenWithHetuHenkiloNotFoundTest() throws Exception {
-        given(oppijanumerorekisteriClient.findByHetu("220294-7132"))
-                .willReturn(HenkiloPerustietoDto.builder()
-                        .oidHenkilo("1.2.3.4.5").build());
-
+    public void generateTokenHenkiloNotFoundTest() throws Exception {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("henkilo not found");
-        identificationService.generateTokenWithHetu("220294-7132");
+        identificationService.generateTokenForHenkilo("1.2.3");
     }
 
     @Test
     public void generateTokenWithHetuTest() throws Exception {
         populate(kayttajatiedot(henkilo("1.2.3.4.5"), "user1"));
-        given(oppijanumerorekisteriClient.findByHetu("220294-7132"))
-                .willReturn(HenkiloPerustietoDto.builder()
-                        .oidHenkilo("1.2.3.4.5").build());
 
         //create new
-        String token = identificationService.generateTokenWithHetu("220294-7132");
+        String token = identificationService.generateTokenForHenkilo("1.2.3.4.5");
         assertTrue(token.length() > 20);
         Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());
@@ -212,7 +192,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         Long id = identification.get().getId();
 
         //update old
-        token = identificationService.generateTokenWithHetu("220294-7132");
+        token = identificationService.generateTokenForHenkilo("1.2.3.4.5");
         assertTrue(token.length() > 20);
         identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());

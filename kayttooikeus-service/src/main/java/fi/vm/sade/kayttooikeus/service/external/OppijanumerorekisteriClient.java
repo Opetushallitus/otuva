@@ -13,8 +13,6 @@ public interface OppijanumerorekisteriClient {
 
     List<HenkiloPerustietoDto> getHenkilonPerustiedot(Collection<String> henkiloOid);
 
-    HenkiloPerustietoDto findByHetu(String hetu);
-
     default Optional<HenkiloPerustietoDto> getHenkilonPerustiedot(String henkiloOid) {
         if (henkiloOid == null) {
             return Optional.empty();

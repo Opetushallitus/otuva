@@ -50,15 +50,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
-    public HenkiloPerustietoDto findByHetu(String hetu) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHetu", hetu);
-        return retrying(FunctionalUtils.<HenkiloPerustietoDto>io(
-                () -> objectMapper.readerFor(HenkiloPerustietoDto.class)
-                        .readValue(restClient.getAsString(url))), 2).get()
-                .orFail(mapper(url));
-    }
-
-    @Override
     public HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid) {
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot", henkiloOid);
         return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(

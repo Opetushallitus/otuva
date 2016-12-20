@@ -55,10 +55,9 @@ public class CasController {
     }
 
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
-            notes = "Hakee henkilön identieettitiedot annetun henkilötunnuksen avulla "
-                    + "ja generoi tälle kertakäyttöisen auth tokenin.")
-    @RequestMapping(value = "/hetu/{hetu}", method = RequestMethod.GET)
-    public String getIdentityByHetu(@PathVariable("hetu") String hetu) throws IOException {
-        return identificationService.generateTokenWithHetu(hetu);
+            notes = "Hakee henkilön identieettitiedot annetun oidin avulla ja generoi tälle kertakäyttöisen auth tokenin.")
+    @RequestMapping(value = "/henkilo/{oid}", method = RequestMethod.GET)
+    public String getIdentityByOid(@PathVariable("oid") String oid) throws IOException {
+        return identificationService.generateTokenForHenkilo(oid);
     }
 }
