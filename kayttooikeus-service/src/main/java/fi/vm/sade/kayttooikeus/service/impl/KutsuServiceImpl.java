@@ -43,6 +43,7 @@ import static com.querydsl.core.types.Order.DESC;
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder.ORGANISAATIO;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
@@ -155,6 +156,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                         )
                     ).sorted(comparing(OranizationReplacement::getName)).collect(toList()))
         ));
+        emailData.setRecipient(singletonList(recipient));
         
         logger.info("Sending invitation email to {}", kutsu.getSahkoposti());
         HttpResponse response = ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
