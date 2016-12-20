@@ -42,7 +42,7 @@
         <java.version>1.8</java.version>
         <assertj.version>3.5.2</assertj.version> <!-- java8 assertions -->
 
-        <oppijanumerorekisteri.version>0.0.1-SNAPSHOT</oppijanumerorekisteri.version>
+        <oppijanumerorekisteri.version>0.1.0-SNAPSHOT</oppijanumerorekisteri.version>
         <organisaatio.version>2015-09</organisaatio.version>
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
 
@@ -159,11 +159,6 @@
                 <groupId>net.sf.ehcache</groupId>
                 <artifactId>ehcache-core</artifactId>
                 <version>${ehcache.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.ehcache</groupId>
-                <artifactId>ehcache-jgroupsreplication</artifactId>
-                <version>1.5</version>
             </dependency>
 
             <dependency>

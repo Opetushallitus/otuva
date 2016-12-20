@@ -88,6 +88,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         organisaatioHenkilo.setVoimassaLoppuPvm(voimassaAsti);
         organisaatioHenkilo.setOrganisaatioHenkiloTyyppi(tyyppi);
         entityManager.persist(organisaatioHenkilo);
+        henkilo.getOrganisaatioHenkilos().add(organisaatioHenkilo);
         return organisaatioHenkilo;
     }
 }

@@ -18,7 +18,7 @@ public interface OppijanumerorekisteriClient {
             return Optional.empty();
         }
         return getHenkilonPerustiedot(singletonList(henkiloOid)).stream()
-                .filter(h -> henkiloOid.equals(h.getOidhenkilo())).findFirst();
+                .filter(h -> henkiloOid.equals(h.getOidHenkilo())).findFirst();
     }
     
     HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid);

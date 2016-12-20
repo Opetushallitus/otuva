@@ -97,7 +97,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String getLanguageCode(HenkiloPerustietoDto henkilo) {
-        return ofNullable(henkilo.getAsiointikieli()).flatMap(k -> ofNullable(k.getKielikoodi()))
+        return ofNullable(henkilo.getAsiointiKieli()).flatMap(k -> ofNullable(k.getKieliKoodi()))
                 .orElse(DEFAULT_LANGUAGE_CODE);
     }
     

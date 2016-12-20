@@ -1,15 +1,16 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.Palvelu;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator;
+import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
@@ -36,6 +41,7 @@ import static org.joda.time.Period.months;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
@@ -380,5 +386,66 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any())).willReturn(emptyList());
         ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(emptyList());
         assertEquals(0, ryhmas.size());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void findAuthorizationDataByOidTest() throws Exception {
+        OrganisaatioHenkiloPopulator orgHenkilo = organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7");
+        populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA2")
+                .withOikeus(oikeus("KOODISTO", "READ"))
+                .withOikeus(oikeus("KOODISTO", "CRUD"))));
+
+        OrganisaatioHenkilo organisaatioHenkilo = populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA3")
+                .withOikeus(oikeus("KOODISTO", "CRUD"))
+                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD")))).getOrganisaatioHenkilo();
+
+        populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA4")
+                .withOikeus(oikeus("HENKILOHALLINTA", "READ2")))
+                .voimassaAlkaen(new LocalDate().plusDays(1))
+                .voimassaPaattyen(new LocalDate().plusDays(2)));
+
+        populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA4")
+                .withOikeus(oikeus("HENKILOHALLINTA", "READ3")))
+                .voimassaAlkaen(new LocalDate().minusDays(2))
+                .voimassaPaattyen(new LocalDate().minusDays(1)));
+
+        AuthorizationDataDto authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
+        List<AccessRightTypeDto> accessRights = authData.getAccessrights().getAccessRight();
+        assertEquals(3, accessRights.size());
+        List<AccessRightTypeDto> koodistoList = accessRights.stream()
+                .filter(dto -> dto.getPalvelu().equals("KOODISTO"))
+                .collect(Collectors.toList());
+        assertEquals(2, koodistoList.size());
+        assertTrue(koodistoList.stream().allMatch(dto -> Arrays.asList("CRUD", "READ").contains(dto.getRooli())));
+
+        List<AccessRightTypeDto> henkilohallinta = accessRights.stream()
+                .filter(dto -> dto.getPalvelu().equals("HENKILOHALLINTA"))
+                .collect(Collectors.toList());
+        assertEquals(1, henkilohallinta.size());
+        assertEquals("CRUD", henkilohallinta.get(0).getRooli());
+
+        List<GroupTypeDto> group = authData.getGroups().getGroup();
+        assertEquals(2, group.size());
+        assertTrue(group.stream().allMatch(dto -> Arrays.asList("RYHMA2", "RYHMA3").contains(dto.getNimi())));
+
+        organisaatioHenkilo.setPassivoitu(true);
+        authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
+        assertEquals(0, authData.getAccessrights().getAccessRight().size());
+        assertEquals(0, authData.getGroups().getGroup().size());
+
+        organisaatioHenkilo.setPassivoitu(false);
+        authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
+        assertEquals(3, authData.getAccessrights().getAccessRight().size());
+        assertEquals(2, authData.getGroups().getGroup().size());
+
+        organisaatioHenkilo.getHenkilo().setPassivoitu(true);
+        authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
+        assertEquals(0, authData.getAccessrights().getAccessRight().size());
+        assertEquals(0, authData.getGroups().getGroup().size());
+
+        authData = kayttoOikeusService.findAuthorizationDataByOid("1.1.1.madeup.1");
+        assertEquals(0, authData.getAccessrights().getAccessRight().size());
+        assertEquals(0, authData.getGroups().getGroup().size());
     }
 }

@@ -37,12 +37,12 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
                 .withBody(jsonResource("classpath:henkilo/henkilonPerustiedot.json"));
         List<HenkiloPerustietoDto> results = this.client.getHenkilonPerustiedot(singletonList("1.2.3.4.5"));
         assertEquals(1, results.size());
-        assertEquals("1.2.3.4.5", results.get(0).getOidhenkilo());
-        assertEquals("EN", results.get(0).getAsiointikieli().getKielikoodi());
+        assertEquals("1.2.3.4.5", results.get(0).getOidHenkilo());
+        assertEquals("EN", results.get(0).getAsiointiKieli().getKieliKoodi());
 
         Optional<HenkiloPerustietoDto> result = this.client.getHenkilonPerustiedot("1.2.3.4.5");
         assertTrue(result.isPresent());
-        assertEquals("1.2.3.4.5", result.get().getOidhenkilo());
+        assertEquals("1.2.3.4.5", result.get().getOidHenkilo());
     }
 
     @Test
