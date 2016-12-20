@@ -22,12 +22,17 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
     private final Map<String, String> texts;
 
     public TextGroupMapDto() {
-        this(null);
+        this((Long)null);
     }
 
     public TextGroupMapDto(Long id) {
         this.id = id;
         this.texts = new HashMap<>();
+    }
+
+    public TextGroupMapDto(Map<String, String> values) {
+        this.id = null;
+        this.texts = values;
     }
 
     @JsonCreator
