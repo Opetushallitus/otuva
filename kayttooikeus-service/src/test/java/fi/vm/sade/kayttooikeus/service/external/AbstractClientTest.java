@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.config.security.MockedUserDetails;
 import fi.vm.sade.kayttooikeus.service.AbstractServiceTest;
 import net.jadler.junit.rule.JadlerRule;
 import net.jadler.stubbing.server.jdk.JdkStubHttpServer;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.jasig.cas.client.validation.AssertionImpl;
 import org.junit.Rule;

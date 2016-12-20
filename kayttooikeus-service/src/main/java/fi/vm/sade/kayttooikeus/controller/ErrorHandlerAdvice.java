@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import fi.vm.sade.generic.common.ValidationException;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
@@ -12,9 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.ldap.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,6 +30,8 @@ import javax.validation.ConstraintViolationException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.toList;
 
 @ControllerAdvice(basePackageClasses = ErrorHandlerAdvice.class)
 public class ErrorHandlerAdvice {
@@ -89,8 +95,14 @@ public class ErrorHandlerAdvice {
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
     @ExceptionHandler(org.hibernate.exception.ConstraintViolationException.class) @ResponseBody
-    public Map<String,Object> badConstraintViolatingRequest(HttpServletRequest req, ConstraintViolationException exception) {
+    public Map<String,Object> constraintViolatingRequest(HttpServletRequest req, ConstraintViolationException exception) {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
+    @ExceptionHandler(MethodArgumentNotValidException.class) @ResponseBody
+    public Map<String,Object> methodArgumentNotValidException(HttpServletRequest req, MethodArgumentNotValidException exception) {
+        return handleConstraintViolations(req, exception, exception.getBindingResult());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
@@ -118,6 +130,12 @@ public class ErrorHandlerAdvice {
         return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
     }
 
+    @ResponseStatus(value = HttpStatus.FORBIDDEN) // 403 Forbidden
+    @ExceptionHandler(ForbiddenException.class) @ResponseBody
+    public Map<String,Object> forbidden(HttpServletRequest req, ForbiddenException exception) {
+        return handleException(req, exception, "forbidden", exception.getMessage());
+    }
+
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal
     @ExceptionHandler(Exception.class) @ResponseBody // any other type
     public Map<String,Object> internalError(HttpServletRequest req, Exception exception) {
@@ -128,6 +146,20 @@ public class ErrorHandlerAdvice {
                                                           Set<? extends ConstraintViolation<?>> exViolations) {
         Collection<ViolationDto> violations = Collections2.transform(exViolations, VIOLATIONS_TRANSFORMER::apply);
         Collection<String> violationsMsgs = Collections2.transform(exViolations, MESSAGES_TRANSFORMER::apply);
+        Map<String,Object> result = handleException(req, exception, "bad_request_error",
+                StringHelper.join(", ", violationsMsgs.iterator()));
+        result.put("errors", violationsMsgs);
+        result.put("violations", violations);
+        return result;
+    }
+
+    private Map<String,Object> handleConstraintViolations(HttpServletRequest req, Exception exception,
+                                                          BindingResult exViolations) {
+        Collection<ViolationDto> violations = exViolations.getFieldErrors().stream()
+                .map(ex -> new ViolationDto(ex.getField(), ex.getField(), ex.getDefaultMessage(), ex.getRejectedValue()))
+                .collect(toList());
+        Collection<String> violationsMsgs = exViolations.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(toList());
         Map<String,Object> result = handleException(req, exception, "bad_request_error",
                 StringHelper.join(", ", violationsMsgs.iterator()));
         result.put("errors", violationsMsgs);

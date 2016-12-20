@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class OrganisaatioHenkiloController {
     public List<OrganisaatioPerustieto> listOrganisaatiosByCurrentHenkilo() {
         return organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();
     }
-
+    
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"

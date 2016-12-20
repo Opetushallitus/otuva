@@ -20,9 +20,7 @@ import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus.TYOOSO
 import static java.util.Collections.singletonList;
 import static net.jadler.Jadler.onRequest;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 public class OppijanumerorekisteriClientTest extends AbstractClientTest {

@@ -3,14 +3,13 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaMyontoViite;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import org.apache.commons.lang.ArrayUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite.*;
+import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite.kayttoOikeusRyhmaMyontoViite;
 
 @Repository
 public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl

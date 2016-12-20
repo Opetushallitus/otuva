@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -18,7 +17,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +62,16 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, getCasRoles());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
+        String currentUserOid = getCurrentUserOid();
+        if (personOid.equals(currentUserOid)) {
+            return true;
+        }
+        return isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
     }
 
     @Override
@@ -202,12 +211,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     private static Set<String> getPrefixedRoles(final String prefix, final List<String> rolesWithoutPrefix) {
-        return FluentIterable.from(rolesWithoutPrefix).transform(new Function<String, String>() {
-            @Override
-            public String apply(String role) {
-                return prefix.concat(role);
-            }
-        }).toSet();
+        return FluentIterable.from(rolesWithoutPrefix).transform(role -> prefix.concat(role)).toSet();
     }
 
     @Override
@@ -218,7 +222,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listOganisaatioPerustiedot(organisaatioOids);
+            organisaatios = organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
         }
         return organisaatios;
     }

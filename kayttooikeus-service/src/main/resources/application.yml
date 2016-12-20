@@ -11,4 +11,3 @@ server:
   session:
     tracking-modes: cookie
     timeout: 30
-

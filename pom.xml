@@ -30,7 +30,7 @@
         <module>kayttooikeus-api</module>
         <module>kayttooikeus-domain</module>
         <module>kayttooikeus-service</module>
-        <module>kayttooikeus-ui-invite</module>
+        <module>kayttooikeus-ui-virkailija</module>
     </modules>
     
     <properties>
@@ -178,7 +178,6 @@
                 <version>${orika.version}</version>
             </dependency>
 
-
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
@@ -236,7 +235,6 @@
     </dependencies>
     
     <build>
-
         <pluginManagement>
             <plugins>
                 <plugin>

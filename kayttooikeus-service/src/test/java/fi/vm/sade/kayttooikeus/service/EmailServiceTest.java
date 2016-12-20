@@ -4,10 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
@@ -48,7 +45,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         perustiedot.setAsiointiKieli(kielisyys);
         given(oppijanumerorekisteriClient.getHenkilonPerustiedot("1.2.3.4.5")).willReturn(of(perustiedot));
         given(oppijanumerorekisteriClient.getHenkilonYhteystiedot("1.2.3.4.5")).willReturn(new HenkilonYhteystiedotViewDto()
-            .put(TYOOSOITE, YhteystiedotDto.builder().sahkoposti("testi@example.com").build()));
+            .put(YhteystietoRyhmaKuvaus.TYOOSOITE, YhteystiedotDto.builder().sahkoposti("testi@example.com").build()));
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any(EmailData.class)))
                 .willReturn(new BasicHttpResponse(new BasicStatusLine(HTTP_1_1, 200, "")));
         emailService.sendExpirationReminder("1.2.3.4.5", asList(
