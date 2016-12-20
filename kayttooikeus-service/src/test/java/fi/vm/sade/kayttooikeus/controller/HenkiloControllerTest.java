@@ -68,7 +68,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     public void postHenkiloKayttajatiedotShouldReturnValidationError() throws Exception {
         mvc.perform(post("/henkilo/{henkiloOid}/kayttajatiedot", "1.2.3.4.5")
                 .content("{\"username\": \"user.1\"}").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(containsString("Pattern")));
+                .andExpect(content().string(containsString("must match")));
         verifyZeroInteractions(kayttajatiedotService);
     }
 
