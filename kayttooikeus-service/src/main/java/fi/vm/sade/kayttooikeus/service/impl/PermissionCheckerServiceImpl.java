@@ -14,8 +14,8 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
@@ -40,7 +40,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
     private HenkiloRepository henkiloRepository;
-    private HenkiloViiteRepository henkiloViiteRepository;
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private OrganisaatioClient organisaatioClient;
 
@@ -48,14 +48,14 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
 
     @Autowired
     public PermissionCheckerServiceImpl(OphProperties ophProperties,
-                                        HenkiloViiteRepository henkiloViiteRepository,
                                         HenkiloRepository henkiloRepository,
-                                        OrganisaatioClient organisaatioClient) {
+                                        OrganisaatioClient organisaatioClient,
+                                        OppijanumerorekisteriClient oppijanumerorekisteriClient) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
-        this.henkiloViiteRepository = henkiloViiteRepository;
         this.henkiloRepository = henkiloRepository;
         this.organisaatioClient = organisaatioClient;
+        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
             return false;
         }
 
-        Set<String> personOidsForSamePerson = henkiloViiteRepository.getAllOidsForSamePerson(personOidToAccess);
+        Set<String> personOidsForSamePerson = oppijanumerorekisteriClient.getAllOidsForSamePerson(personOidToAccess);
 
         PermissionCheckResponseDto response = checkPermissionFromExternalService(serviceUri, personOidsForSamePerson, flattedOrgs, callingUserRoles);
 

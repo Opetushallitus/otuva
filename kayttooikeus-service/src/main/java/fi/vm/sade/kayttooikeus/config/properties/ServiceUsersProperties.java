@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "service-users", ignoreUnknownFields = false)
 public class ServiceUsersProperties {
     private ServiceUserAccount viestinta;
+    private ServiceUserAccount oppijanumerorekisteri;
     
     @Getter
     @Setter
