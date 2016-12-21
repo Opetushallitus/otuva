@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "datasource", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "datasource")
 public class DatasourceProperties {
     private String url;
     private String testUrl;

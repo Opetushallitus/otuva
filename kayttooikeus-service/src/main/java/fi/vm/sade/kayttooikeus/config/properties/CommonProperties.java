@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "common", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "common")
 public class CommonProperties {
     private String rootOrganizationOid;
     private String groupOrganizationId;
