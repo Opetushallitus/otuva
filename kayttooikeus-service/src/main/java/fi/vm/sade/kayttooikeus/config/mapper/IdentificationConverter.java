@@ -19,7 +19,7 @@ public class IdentificationConverter extends CustomConverter<Identification, Ide
                 .identifier(identification.getIdentifier())
                 .idpEntityId(identification.getIdpEntityId())
                 .oidHenkilo(henkilo.getOidHenkilo())
-                .version(henkilo.getVersion())
+                .version(identification.getVersion())
                 .id(henkilo.getId())
                 .passivoitu(henkilo.isPassivoitu())
                 .kayttajatiedot(henkilo.getKayttajatiedot() != null ? new KayttajatiedotReadDto(henkilo.getKayttajatiedot().getUsername()) : null)

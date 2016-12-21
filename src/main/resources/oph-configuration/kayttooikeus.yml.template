@@ -85,4 +85,4 @@ kayttooikeus:
   uses-ssl-proxy: true
 
 auth:
-  expiration-months: 24
+  expiration-months: P2Y

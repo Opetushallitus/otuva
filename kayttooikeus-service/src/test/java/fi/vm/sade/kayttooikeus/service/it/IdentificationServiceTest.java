@@ -13,6 +13,7 @@ import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -63,7 +64,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     public void generateAuthTokenForHenkiloTest() {
         populate(henkilo("1.2.3.4.5"));
         populate(henkilo("1.2.3.4.6"));
-        given(authProperties.getExpirationMonths()).willReturn(24);
+        given(authProperties.getExpirationMonths()).willReturn(Period.months(24));
 
         String token = identificationService.generateAuthTokenForHenkilo("1.2.3.4.5",
                 "key", "identifier");
@@ -128,7 +129,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2").withOikeus(oikeus("KOODISTO", "CRUD"))));
 
-        IdentifiedHenkiloTypeDto dto = identificationService.validateAuthToken("12345");
+        IdentifiedHenkiloTypeDto dto = identificationService.findByTokenAndInvalidateToken("12345");
         assertEquals("1.2.3.4.5", dto.getOidHenkilo());
         assertEquals(HenkiloTyyppi.VIRKAILIJA, dto.getHenkiloTyyppi());
         assertEquals("haka", dto.getIdpEntityId());
@@ -161,21 +162,21 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @Test(expected = NotFoundException.class)
     public void validateAuthTokenNotFoundTest() {
-        identificationService.validateAuthToken("12345");
+        identificationService.findByTokenAndInvalidateToken("12345");
     }
 
     @Test(expected = NotFoundException.class)
     public void validateAuthTokenUsedTest() {
         populate(identification("haka", "identifier", henkilo("1.2.3.4.5")).withAuthToken("12345"));
-        identificationService.validateAuthToken("12345");
-        identificationService.validateAuthToken("12345");
+        identificationService.findByTokenAndInvalidateToken("12345");
+        identificationService.findByTokenAndInvalidateToken("12345");
     }
 
     @Test
     public void generateTokenHenkiloNotFoundTest() throws Exception {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("henkilo not found");
-        identificationService.generateTokenForHenkilo("1.2.3");
+        identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3");
     }
 
     @Test
@@ -183,7 +184,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         populate(kayttajatiedot(henkilo("1.2.3.4.5"), "user1"));
 
         //create new
-        String token = identificationService.generateTokenForHenkilo("1.2.3.4.5");
+        String token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3.4.5");
         assertTrue(token.length() > 20);
         Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());
@@ -192,7 +193,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         Long id = identification.get().getId();
 
         //update old
-        token = identificationService.generateTokenForHenkilo("1.2.3.4.5");
+        token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3.4.5");
         assertTrue(token.length() > 20);
         identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());

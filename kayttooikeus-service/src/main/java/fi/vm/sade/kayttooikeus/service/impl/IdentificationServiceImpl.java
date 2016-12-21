@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
@@ -27,6 +26,7 @@ import java.util.Optional;
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
 
     private static final String STRONG_AUTHENTICATION_IDP = "vetuma";
+    private static final String HAKA_AUTHENTICATION_IDP = "haka";
 
     private IdentificationRepository identificationRepository;
     private HenkiloRepository henkiloRepository;
@@ -54,9 +54,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("no henkilo found with oid:[" + oid + "]"));
 
-        Optional<Identification> identification = Optional.ofNullable(henkilo.getIdentifications())
-                .orElseGet(Collections::emptySet)
-                .stream()
+        Optional<Identification> identification = henkilo.getIdentifications().stream()
                 .filter(henkiloIdentification ->
                         idpIdentifier.equals(henkiloIdentification.getIdentifier()) && idpKey.equals(henkiloIdentification.getIdpEntityId()))
                 .findFirst();
@@ -83,7 +81,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public IdentifiedHenkiloTypeDto validateAuthToken(String token) {
+    public IdentifiedHenkiloTypeDto findByTokenAndInvalidateToken(String token) {
         logger.info("validateAuthToken:[{}]", token);
         Identification identification = identificationRepository.findByAuthtoken(token)
                 .orElseThrow(() -> new NotFoundException("identification not found"));
@@ -96,7 +94,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public String generateTokenForHenkilo(String oid) {
+    public String updateIdentificationAndGenerateTokenForHenkilo(String oid) {
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("henkilo not found"));
         String token = generateToken();
@@ -134,7 +132,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         identification.setIdentifier(identifier);
         identification.setIdpEntityId(idpKey);
         identification.setAuthtoken(token);
-        if ("haka".equals(idpKey)) {
+        if (HAKA_AUTHENTICATION_IDP.equals(idpKey)) {
             identification.setExpirationDate(getExpirationDateFromNow());
         }
     }
@@ -148,7 +146,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
             identification.setAuthtoken(token);
             logger.info("old identification found, setting new token:[{}]", token);
 
-            if ("haka".equals(identification.getIdpEntityId())) {
+            if (HAKA_AUTHENTICATION_IDP.equals(identification.getIdpEntityId())) {
                 identification.setExpirationDate(getExpirationDateFromNow());
                 logger.debug("New expiration date for haka user {}: {}", identification.getIdentifier(),
                         identification.getExpirationDate());
@@ -157,7 +155,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     }
 
     private Date getExpirationDateFromNow() {
-        return new DateTime().plusMonths(authProperties.getExpirationMonths()).toDate();
+        return new DateTime().withPeriodAdded(authProperties.getExpirationMonths(), 1).toDate();
     }
 
     private String generateToken() {

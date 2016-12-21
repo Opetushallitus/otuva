@@ -7,7 +7,7 @@ public interface IdentificationService {
 
     String getHenkiloOidByIdpAndIdentifier(String idpKey, String idpIdentifier);
 
-    IdentifiedHenkiloTypeDto validateAuthToken(String authToken);
+    IdentifiedHenkiloTypeDto findByTokenAndInvalidateToken(String authToken);
 
-    String generateTokenForHenkilo(String henkiloOid);
+    String updateIdentificationAndGenerateTokenForHenkilo(String henkiloOid);
 }

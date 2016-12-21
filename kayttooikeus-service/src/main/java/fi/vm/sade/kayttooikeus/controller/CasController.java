@@ -48,16 +48,16 @@ public class CasController {
     }
 
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
-            notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla.")
+            notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/{token}", method = RequestMethod.GET)
     public IdentifiedHenkiloTypeDto getIdentityByAuthToken(@PathVariable("token") String authToken) throws IOException {
-        return identificationService.validateAuthToken(authToken);
+        return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
-    @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
-            notes = "Hakee henkilön identieettitiedot annetun oidin avulla ja generoi tälle kertakäyttöisen auth tokenin.")
+    @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen auth tokenin.",
+            notes = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen auth tokenin.")
     @RequestMapping(value = "/henkilo/{oid}", method = RequestMethod.GET)
     public String getIdentityByOid(@PathVariable("oid") String oid) throws IOException {
-        return identificationService.generateTokenForHenkilo(oid);
+        return identificationService.updateIdentificationAndGenerateTokenForHenkilo(oid);
     }
 }
