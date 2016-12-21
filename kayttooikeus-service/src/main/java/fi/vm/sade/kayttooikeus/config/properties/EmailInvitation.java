@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "tasks.emailInvitation", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "tasks.emailInvitation")
 public class EmailInvitation {
     private String senderEmail;
 }

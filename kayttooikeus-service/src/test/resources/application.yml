@@ -32,6 +32,17 @@ service-users:
   viestinta:
     username: test
     password: test
+  oppijanumerorekisteri:
+    username: test
+    password: test
+
+common:
+  root-organization-oid: 1.2.246.562.10.00000000001
+  group-organization-id: 1.2.246.562.28
+  invitation-email:
+    template: kayttooikeus_kutsu
+    sender: Opetushallitus
+    from: noreply@oph.fi
 
 tasks:
   email-invitation:

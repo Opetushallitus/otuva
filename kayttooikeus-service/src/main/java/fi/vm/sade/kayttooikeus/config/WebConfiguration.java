@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import org.joda.time.LocalDate;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
@@ -25,9 +26,8 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/invite/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-invite/");
-
+                .addResourceHandler("/virkailija/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-virkailija/");
         super.addResourceHandlers(registry);
     }
 
@@ -63,5 +63,12 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(mappingJackson2HttpMessageConverter());
+    }
+    
+    @Bean
+    public ExposedResourceMessageBundleSource messageSource() {
+        ExposedResourceMessageBundleSource source = new ExposedResourceMessageBundleSource();
+        source.addBasenames("classpath:Messages");
+        return source;
     }
 }

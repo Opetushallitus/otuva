@@ -4,11 +4,10 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,9 +17,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
@@ -40,7 +37,6 @@ import static org.joda.time.Period.months;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
@@ -140,8 +136,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3.4.6")
     public void listPossibleRyhmasByOrganizationTest(){
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
-        organisaatioPerustieto.setAliOrganisaatioMaara(3);
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedot(any()))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursive(any(), any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
         Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
@@ -154,9 +149,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
                 .willReturn(singletonList(OrganisaatioViiteDto.builder()
                         .organisaatioTyyppi("123.123.123")
-                        .id(1L)
-                        .kayttoOikeusRyhmaId(ryhmaId)
-                        .build()));
+                        .id(1L).kayttoOikeusRyhmaId(ryhmaId).build()));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listPossibleRyhmasByOrganization("123.123.123");
         assertEquals(1, ryhmas.size());

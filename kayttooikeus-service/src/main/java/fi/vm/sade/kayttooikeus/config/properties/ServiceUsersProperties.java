@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "service-users", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "service-users")
 public class ServiceUsersProperties {
     private ServiceUserAccount viestinta;
+    private ServiceUserAccount oppijanumerorekisteri;
     
     @Getter
     @Setter

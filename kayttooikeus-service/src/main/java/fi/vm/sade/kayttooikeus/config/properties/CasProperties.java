@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "cas", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "cas")
 public class CasProperties {
     @Getter
     @Setter

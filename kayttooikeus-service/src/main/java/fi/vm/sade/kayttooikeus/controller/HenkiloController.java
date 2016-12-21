@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
@@ -10,22 +11,23 @@ import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/henkilo")
-@Api(value = "/henkilo", description = "Henkilön käsittelyyn liittyvät operaatiot.")
+@Api(value = "/henkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
 public class HenkiloController {
-
-    private OrganisaatioHenkiloService organisaatioHenkiloService;
-    private HenkiloService henkiloService;
-    private KayttajatiedotService kayttajatiedotService;
+    private final OrganisaatioHenkiloService organisaatioHenkiloService;
+    private final HenkiloService henkiloService;
+    private final KayttajatiedotService kayttajatiedotService;
 
     @Autowired
     public HenkiloController(OrganisaatioHenkiloService organisaatioHenkiloService,
@@ -36,6 +38,17 @@ public class HenkiloController {
         this.kayttajatiedotService = kayttajatiedotService;
     }
 
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
+    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tiedoilla rekursiiisesti.",
+            notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla siten, että roganisaatio sisältää myös lapsiroganisaationsa rekursiivisesti.")
+    @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
+    public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
+            @PathVariable @ApiParam("Henkilö-OID") String oid,
+            @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)") String comparisonLangCode,
+            @RequestParam(value = "permissionService", required = false) ExternalPermissionService permissionService) {
+        return organisaatioHenkiloService.listOrganisaatioHenkilos(oid, comparisonLangCode);
+    }
+    
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön organisaatiot.",
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")
@@ -83,5 +96,4 @@ public class HenkiloController {
     public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
         return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
-
 }

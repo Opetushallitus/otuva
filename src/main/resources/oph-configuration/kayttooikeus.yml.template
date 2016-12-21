@@ -56,6 +56,17 @@ service-users:
   viestinta:
     username: {{authentication_app_username_to_viestinta}}
     password: {{authentication_app_password_to_viestinta}}
+  oppijanumerorekisteri:
+    username: {{authentication_app_username_to_oppijanumerorekisteri}}
+    password: {{authentication_app_password_to_oppijanumerorekisteri}}
+
+common:
+  root-organization-oid: 1.2.246.562.10.00000000001
+  group-organization-id: 1.2.246.562.28
+  invitation-email:
+    template: kayttooikeus_kutsu
+    sender: opintopolku@oph.fi
+    from: opintopolku@oph.fi
 
 tasks:
   email-invitation:

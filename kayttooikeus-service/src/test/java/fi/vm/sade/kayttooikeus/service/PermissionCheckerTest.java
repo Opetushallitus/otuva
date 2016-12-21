@@ -12,10 +12,10 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloViiteRepository;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
-import fi.vm.sade.organisaatio.api.search.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -37,9 +37,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(SpringRunner.class)
@@ -55,6 +53,9 @@ public class PermissionCheckerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private FakeRestClient fakeRestClient = new FakeRestClient();
+    
+    @Mock
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private Set<String> myRoles;
 
@@ -66,15 +67,14 @@ public class PermissionCheckerTest {
         this.myRoles = createMockedRoles(new HashSet<>());
 
         this.henkiloRepositoryMock = Mockito.mock(HenkiloRepository.class);
-        HenkiloViiteRepository henkiloViiteRepositoryMock = Mockito.mock(HenkiloViiteRepository.class);
         OrganisaatioClient organisaatioClient = Mockito.mock(OrganisaatioClient.class);
         OphProperties ophPropertiesMock = Mockito.mock(OphProperties.class);
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
-        this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock, henkiloViiteRepositoryMock,
-                this.henkiloRepositoryMock, organisaatioClient));
+        this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
+                this.henkiloRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient));
         Whitebox.setInternalState(permissionChecker, "restClient", this.fakeRestClient);
-        when(henkiloViiteRepositoryMock.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
+        when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")
         );
     }
