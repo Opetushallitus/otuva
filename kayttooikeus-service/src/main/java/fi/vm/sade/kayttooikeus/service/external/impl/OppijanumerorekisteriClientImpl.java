@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.core.MediaType;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -57,7 +58,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHenkiloOidList");
         return retrying(FunctionalUtils.<List<HenkiloPerustietoDto>>io(
             () -> objectMapper.readerFor(new TypeReference<List<HenkiloPerustietoDto>>() {})
-                    .readValue(IOUtils.toString(restClient.post(url, APPLICATION_JSON_UTF8.getType(),
+                    .readValue(IOUtils.toString(restClient.post(url, MediaType.APPLICATION_JSON,
                             objectMapper.writer().writeValueAsString(henkiloOid)).getEntity().getContent()))), 2).get()
                 .orFail(mapper(url));
     }
@@ -79,7 +80,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         return Stream.concat(Stream.of(personOid),
             retrying(FunctionalUtils.<List<HenkiloViiteDto>>io(
                 () ->  objectMapper.readerFor(new TypeReference<List<HenkiloViiteDto>>() {})
-                    .readValue(IOUtils.toString(this.serviceAccountClient.post(url, APPLICATION_JSON_UTF8.getType(),
+                    .readValue(IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
                         objectMapper.writeValueAsString(criteria)).getEntity().getContent()))), 2).get()
             .orFail(mapper(url)).stream().flatMap(viite -> Stream.of(viite.getHenkiloOid(), viite.getMasterOid()))
         ).collect(toSet());
