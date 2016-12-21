@@ -136,7 +136,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
 
         //should not find these
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(true),
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(),
                 kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(new LocalDate().plusMonths(3)));
         populate(myonnettyKayttoOikeus(
@@ -184,7 +184,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
 
         //should not find these
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(true),
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(),
                 kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(new LocalDate().plusMonths(3)));
         populate(myonnettyKayttoOikeus(
