@@ -107,6 +107,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         response.setEntity(emailResponseEntity);
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn(response);
         
+        OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
+        org1.setOid("1.2.246.562.10.00000000001");
+        org1.setNimi(new TextGroupMapDto().put("FI", "Opetushallitus").asMap());
+        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.246.562.10.00000000001"), Matchers.any())).willReturn(org1);
+        
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo("1.2.4", "1.2.246.562.10.00000000001"),
                 kayttoOikeusRyhma("kayttoOikeusRyhma").withKuvaus(text("fi", "Käyttöoikeusryhmä"))));
@@ -114,7 +119,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Long kayttoOikeusRyhmaId = tapahtuma.getKayttoOikeusRyhma().getId();
         KutsuCreateDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KayttoOikeusRyhmaDto();
         kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
-
+        
         KutsuCreateDto kutsu = new KutsuCreateDto();
         kutsu.setEtunimi("Etu");
         kutsu.setSukunimi("Suku");

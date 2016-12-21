@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -27,5 +28,14 @@ public class TextGroup extends IdentifiableAndVersionedEntity {
 
     public void clearTexts() {
         texts.clear();
+    }
+    
+    public Optional<String> getOrAny(String lang) {
+        Optional<String> opt = texts.stream().filter(t -> lang.equalsIgnoreCase(t.getLang()))
+                .map(Text::getText).findFirst();
+        if (opt.isPresent()) {
+            return opt;
+        }
+        return texts.stream().map(Text::getText).filter(t -> t != null).findFirst();
     }
 }
