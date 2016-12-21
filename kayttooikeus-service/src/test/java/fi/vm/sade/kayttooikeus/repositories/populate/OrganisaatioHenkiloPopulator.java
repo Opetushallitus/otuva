@@ -48,7 +48,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         this.voimassaAsti = asti;
         return this;
     }
-    
+
     public OrganisaatioHenkiloPopulator tehtavanimike(String tehtavanimike) {
         this.tehtavanimike = tehtavanimike;
         return this;
@@ -58,12 +58,12 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         this.passivoitu = true;
         return this;
     }
-    
+
     public OrganisaatioHenkiloPopulator tyyppi(OrganisaatioHenkiloTyyppi tyyppi) {
         this.tyyppi = tyyppi;
         return this;
     }
-    
+
     @Override
     public OrganisaatioHenkilo apply(EntityManager entityManager) {
         Henkilo henkilo = this.henkilo.apply(entityManager);

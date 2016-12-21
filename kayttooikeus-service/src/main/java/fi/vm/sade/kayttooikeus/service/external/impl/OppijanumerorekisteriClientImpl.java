@@ -62,7 +62,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                             objectMapper.writer().writeValueAsString(henkiloOid)).getEntity().getContent()))), 2).get()
                 .orFail(mapper(url));
     }
-    
+
     @Override
     public HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid) {
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot", henkiloOid);

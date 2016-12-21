@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
+import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import org.joda.time.LocalDate;
@@ -115,5 +117,94 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
 
         list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio("1.2.3.4.5", "3.4.5.6.7");
         assertEquals(1, list.size());
+    }
+
+    @Test
+    public void findValidAccessRightsByOidTest() throws Exception {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ")))
+                .voimassaPaattyen(new LocalDate().plusMonths(2)));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
+                kayttoOikeusRyhma("RYHMA2")
+                        .withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        //should not find these
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(),
+                kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.11"),
+                kayttoOikeusRyhma("EIVOIMASSA").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().minusDays(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.12"),
+                kayttoOikeusRyhma("EIVOIMASSA2").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaAlkaen(new LocalDate().plusDays(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.6").withPassivoitu(true), "4.5.6.7.9"),
+                kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        assertEquals(0, myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.3.4.6").size());
+        assertEquals(0, myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.madeup.4").size());
+        List<AccessRightTypeDto> list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.3.4.5");
+        assertEquals(3, list.size());
+        assertEquals("HENKILOHALLINTA", list.get(0).getPalvelu());
+        assertEquals("CRUD", list.get(0).getRooli());
+        assertEquals("3.4.5.6.7", list.get(0).getOrganisaatioOid());
+        assertEquals("KOODISTO", list.get(1).getPalvelu());
+        assertEquals("READ", list.get(1).getRooli());
+        assertEquals("3.4.5.6.7", list.get(1).getOrganisaatioOid());
+        assertEquals("KOODISTO", list.get(2).getPalvelu());
+        assertEquals("WRITE", list.get(2).getRooli());
+        assertEquals("4.5.6.7.8", list.get(2).getOrganisaatioOid());
+    }
+
+    @Test
+    public void findValidGroupsByHenkiloTest() throws Exception {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ")))
+                .voimassaPaattyen(new LocalDate().plusMonths(2)));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
+                kayttoOikeusRyhma("RYHMA2")
+                        .withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        //should not find these
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.10").passivoitu(),
+                kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.11"),
+                kayttoOikeusRyhma("EIVOIMASSA").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().minusDays(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.12"),
+                kayttoOikeusRyhma("EIVOIMASSA2").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaAlkaen(new LocalDate().plusDays(3)));
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.6").withPassivoitu(true), "4.5.6.7.9"),
+                kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
+                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+
+        List<GroupTypeDto> list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidGroupsByHenkilo("1.2.3.4.5");
+        assertEquals(2, list.size());
+        assertEquals("RYHMA", list.get(0).getNimi());
+        assertEquals("3.4.5.6.7", list.get(0).getOrganisaatioOid());
+        assertEquals("RYHMA2", list.get(1).getNimi());
+        assertEquals("4.5.6.7.8", list.get(1).getOrganisaatioOid());
     }
 }
