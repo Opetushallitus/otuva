@@ -11,13 +11,8 @@ public class StaticController {
         return "redirect:/virkailija";
     }
 
-    @RequestMapping("/swagger")
+    @RequestMapping({"/swagger", "/swagger/**"})
     public String swagger() {
-        return "redirect:/swagger-ui.html";
-    }
-
-    @RequestMapping("/swagger/**")
-    public String swaggerThereafter() {
         return "redirect:/swagger-ui.html";
     }
 
@@ -43,13 +38,8 @@ public class StaticController {
             return getTargetFile();
         }
 
-        @RequestMapping("{:[^\\.]*}")
+        @RequestMapping({"{:[^\\.]*}", "/**/{:[^\\.]*}"})
         public String redirectPath() {
-            return "forward:" + getTargetFile();
-        }
-
-        @RequestMapping("/**/{:[^\\.]*}")
-        public String redirectPathMultiParts() {
             return "forward:" + getTargetFile();
         }
     }
