@@ -16,6 +16,11 @@ public class StaticController {
         return "redirect:/swagger-ui.html";
     }
 
+    @RequestMapping("/swagger/**")
+    public String swaggerThereafter() {
+        return "redirect:/swagger-ui.html";
+    }
+
     @Controller
     @RequestMapping("/virkailija")
     public static class VirkailijaPaths extends Html5RedirectPathsController {
