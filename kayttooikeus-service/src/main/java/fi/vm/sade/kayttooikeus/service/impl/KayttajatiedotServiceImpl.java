@@ -10,6 +10,7 @@ import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class KayttajatiedotServiceImpl implements KayttajatiedotService {
@@ -27,6 +28,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     @Override
+    @Transactional
     public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto dto) {
         Kayttajatiedot entity = mapper.map(dto, Kayttajatiedot.class);
 
@@ -47,6 +49,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public KayttajatiedotReadDto getByHenkiloOid(String henkiloOid) {
         return kayttajatiedotRepository.findByHenkiloOid(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Käyttäjätietoja ei löytynyt OID:lla " + henkiloOid));
