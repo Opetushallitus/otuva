@@ -91,7 +91,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
         OpintopolkuCasAuthenticationFilter casAuthenticationFilter = new OpintopolkuCasAuthenticationFilter(serviceProperties());
         casAuthenticationFilter.setAuthenticationManager(authenticationManager());
-        casAuthenticationFilter.setFilterProcessesUrl("/j_spring_cas_security_proxyreceptor");
+        casAuthenticationFilter.setProxyReceptorUrl("/j_spring_cas_security_proxyreceptor");
         return casAuthenticationFilter;
     }
 
