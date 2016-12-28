@@ -28,4 +28,6 @@ public class Identification extends IdentifiableAndVersionedEntity{
     @Column(name = "expiration_date")
     private Date expirationDate;
 
+    @Column(name = "email")
+    private String email;
 }

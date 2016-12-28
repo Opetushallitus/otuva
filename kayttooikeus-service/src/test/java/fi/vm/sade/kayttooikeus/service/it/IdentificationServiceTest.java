@@ -11,6 +11,11 @@ import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -49,6 +54,9 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private AuthProperties authProperties;
+
+    @MockBean
+    OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -129,6 +137,21 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2").withOikeus(oikeus("KOODISTO", "CRUD"))));
 
+        given(oppijanumerorekisteriClient.getPerustietoByOid("1.2.3.4.5"))
+                .willReturn(HenkiloPerustietoDto.builder()
+                        .etunimet("Teemu")
+                        .kutsumanimi("Teemu")
+                        .sukunimi("Testi")
+                        .hetu("11111-1111")
+                        .sukupuoli("1")
+                        .build());
+
+        HenkilonYhteystiedotViewDto tiedot = new HenkilonYhteystiedotViewDto();
+        YhteystiedotDto yhteystiedotDto = new YhteystiedotDto();
+        yhteystiedotDto.setSahkoposti("test@test.com");
+        tiedot.put(YhteystietoRyhmaKuvaus.TYOOSOITE, yhteystiedotDto);
+        given(oppijanumerorekisteriClient.getYhteystiedotByOid("1.2.3.4.5")).willReturn(tiedot);
+
         IdentifiedHenkiloTypeDto dto = identificationService.findByTokenAndInvalidateToken("12345");
         assertEquals("1.2.3.4.5", dto.getOidHenkilo());
         assertEquals(HenkiloTyyppi.VIRKAILIJA, dto.getHenkiloTyyppi());
@@ -136,6 +159,12 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("identifier", dto.getIdentifier());
         assertEquals("hakakäyttäjä", dto.getKayttajatiedot().getUsername());
         assertFalse(dto.isPassivoitu());
+        assertEquals("Teemu", dto.getKutsumanimi());
+        assertEquals("Teemu", dto.getEtunimet());
+        assertEquals("Testi", dto.getSukunimi());
+        assertEquals("11111-1111", dto.getHetu());
+        assertEquals("MIES", dto.getSukupuoli());
+        assertEquals("test@test.com", dto.getEmail());
 
         List<AccessRightTypeDto> accessRights = dto.getAuthorizationData().getAccessrights().getAccessRight();
         assertEquals(3, accessRights.size());
@@ -167,6 +196,21 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @Test(expected = NotFoundException.class)
     public void validateAuthTokenUsedTest() {
+        given(oppijanumerorekisteriClient.getPerustietoByOid("1.2.3.4.5"))
+                .willReturn(HenkiloPerustietoDto.builder()
+                        .etunimet("Teemu")
+                        .kutsumanimi("Teemu")
+                        .sukunimi("Testi")
+                        .hetu("11111-1111")
+                        .sukupuoli("1")
+                        .build());
+
+        HenkilonYhteystiedotViewDto tiedot = new HenkilonYhteystiedotViewDto();
+        YhteystiedotDto yhteystiedotDto = new YhteystiedotDto();
+        yhteystiedotDto.setSahkoposti("test@test.com");
+        tiedot.put(YhteystietoRyhmaKuvaus.TYOOSOITE, yhteystiedotDto);
+        given(oppijanumerorekisteriClient.getYhteystiedotByOid("1.2.3.4.5")).willReturn(tiedot);
+
         populate(identification("haka", "identifier", henkilo("1.2.3.4.5")).withAuthToken("12345"));
         identificationService.findByTokenAndInvalidateToken("12345");
         identificationService.findByTokenAndInvalidateToken("12345");
@@ -183,8 +227,9 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     public void generateTokenWithHetuTest() throws Exception {
         populate(kayttajatiedot(henkilo("1.2.3.4.5"), "user1"));
 
+        given(oppijanumerorekisteriClient.getOidByHetu("090689-1393")).willReturn("1.2.3.4.5");
         //create new
-        String token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3.4.5");
+        String token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("090689-1393");
         assertTrue(token.length() > 20);
         Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());
@@ -193,7 +238,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         Long id = identification.get().getId();
 
         //update old
-        token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3.4.5");
+        token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("090689-1393");
         assertTrue(token.length() > 20);
         identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());

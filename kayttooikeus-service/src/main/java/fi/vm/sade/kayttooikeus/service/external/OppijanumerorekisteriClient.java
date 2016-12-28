@@ -25,4 +25,10 @@ public interface OppijanumerorekisteriClient {
     HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid);
 
     Set<String> getAllOidsForSamePerson(String personOid);
+
+    String getOidByHetu(String hetu);
+
+    HenkiloPerustietoDto getPerustietoByOid(String oidHenkilo);
+
+    HenkilonYhteystiedotViewDto getYhteystiedotByOid(String oidHenkilo);
 }

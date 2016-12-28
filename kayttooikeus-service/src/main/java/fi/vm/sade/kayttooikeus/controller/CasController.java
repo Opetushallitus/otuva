@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import java.io.IOException;
 
 @RestController
@@ -49,15 +50,15 @@ public class CasController {
 
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
-    @RequestMapping(value = "/auth/{token}", method = RequestMethod.GET)
+    @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
     public IdentifiedHenkiloTypeDto getIdentityByAuthToken(@PathVariable("token") String authToken) throws IOException {
         return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
     @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen auth tokenin.",
-            notes = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen auth tokenin.")
-    @RequestMapping(value = "/henkilo/{oid}", method = RequestMethod.GET)
-    public String getIdentityByOid(@PathVariable("oid") String oid) throws IOException {
-        return identificationService.updateIdentificationAndGenerateTokenForHenkilo(oid);
+            notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen auth tokenin.")
+    @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
+    public String getIdentityByHetu(@PathVariable("hetu") String hetu) throws IOException {
+        return identificationService.updateIdentificationAndGenerateTokenForHenkilo(hetu);
     }
 }

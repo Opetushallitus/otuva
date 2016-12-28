@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.ServiceUsersProperties;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
@@ -23,7 +25,6 @@ import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 @Component
 public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriClient {
@@ -85,7 +86,44 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
             .orFail(mapper(url)).stream().flatMap(viite -> Stream.of(viite.getHenkiloOid(), viite.getMasterOid()))
         ).collect(toSet());
     }
-    
+
+    @Override
+    public String getOidByHetu(String hetu) {
+        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.oidByHetu", hetu);
+        return retrying(FunctionalUtils.io(
+                () -> IOUtils.toString(serviceAccountClient.get(url))), 2).get()
+                .orFail((RuntimeException e) -> {
+                    if (e.getCause() instanceof CachingRestClient.HttpException) {
+                        if (((CachingRestClient.HttpException) e.getCause()).getStatusCode() == 404) {
+                            throw new NotFoundException("could not find oid with hetu: " + hetu);
+                        }
+                    }
+                    return new ExternalServiceException(url, e.getMessage(), e);
+                });
+    }
+
+    @Override
+    public HenkiloPerustietoDto getPerustietoByOid(String oid) {
+        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.henkiloPerustieto");
+        Map<String,Object> data = new HashMap<>();
+        data.put("oidHenkilo", oid);
+
+        return retrying(FunctionalUtils.<HenkiloPerustietoDto>io(
+                () -> objectMapper.readerFor(HenkiloPerustietoDto.class)
+                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                                objectMapper.writeValueAsString(data)).getEntity().getContent())), 2).get()
+                .orFail(mapper(url));
+    }
+
+    @Override
+    public HenkilonYhteystiedotViewDto getYhteystiedotByOid(String oid) {
+        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.yhteystiedotByOid", oid);
+        return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(
+                () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
+                        .readValue(serviceAccountClient.getAsString(url))), 2).get()
+                .orFail(mapper(url));
+    }
+
     @Getter @Setter
     public static class HenkiloViiteDto {
         private String henkiloOid;
