@@ -47,7 +47,7 @@
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
 
         <!-- Sade utils -->
-        <generic.version>9.4-SNAPSHOT</generic.version>
+        <generic.version>9.6-SNAPSHOT</generic.version>
         <java.utils.version>0.1.0-SNAPSHOT</java.utils.version>
         <auditlog.api.version>5.0.0-SNAPSHOT</auditlog.api.version>
 
