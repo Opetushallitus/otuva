@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.security.PermitAll;
 import java.io.IOException;
 
 @RestController
@@ -55,8 +54,8 @@ public class CasController {
         return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
-    @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen auth tokenin.",
-            notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen auth tokenin.")
+    @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen autentikointitokenin.",
+            notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen autentikointitokenin.")
     @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
     public String getIdentityByHetu(@PathVariable("hetu") String hetu) throws IOException {
         return identificationService.updateIdentificationAndGenerateTokenForHenkilo(hetu);

@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,8 +175,9 @@ public class KayttoOikeusRyhmaController {
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Listaa käyttöoikeusryhmät käyttooikeuksien mukaan.",
             notes = "Hakee käyttöoikeusryhmät joissa esiintyy jokin annetuista käyttöoikeuksista.")
-    public List<KayttoOikeusRyhmaDto> getKayttoOikeusRyhmasByKayttoOikeus(@RequestBody List<Long> kayttoOikeusIds) {
-        return kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(kayttoOikeusIds);
+    public List<KayttoOikeusRyhmaDto> getKayttoOikeusRyhmasByKayttoOikeus(
+            @ApiParam("Format: {\"PALVELU\": \"ROOLI\", ...}") @RequestBody Map<String, String> kayttoOikeusList) {
+        return kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(kayttoOikeusList);
     }
 
 }

@@ -285,7 +285,11 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
-    public List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds) {
+    public List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusList(Map<String, String> kayttoOikeusList) {
+        List<Long> kayttoOikeusIds = kayttoOikeusList.keySet().stream()
+                .map(key -> kayttoOikeusRepository.findByRooliAndPalvelu(kayttoOikeusList.get(key), key))
+                .filter(Objects::nonNull).map(IdentifiableAndVersionedEntity::getId).collect(Collectors.toList());
+
         List<KayttoOikeusRyhmaDto> ryhmas = addOrganisaatioViitteesToRyhmas(kayttoOikeusRyhmaRepository
                 .findKayttoOikeusRyhmasByKayttoOikeusIds(kayttoOikeusIds));
         return localizationService.localize(ryhmas);
