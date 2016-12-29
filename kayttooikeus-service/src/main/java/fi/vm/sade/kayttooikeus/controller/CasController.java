@@ -57,7 +57,7 @@ public class CasController {
     @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen autentikointitokenin.",
             notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen autentikointitokenin.")
     @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
-    public String getIdentityByHetu(@PathVariable("hetu") String hetu) throws IOException {
-        return identificationService.updateIdentificationAndGenerateTokenForHenkilo(hetu);
+    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(@PathVariable("hetu") String hetu) throws IOException {
+        return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
     }
 }

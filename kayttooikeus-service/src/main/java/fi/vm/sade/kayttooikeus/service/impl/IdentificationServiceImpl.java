@@ -124,7 +124,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public String updateIdentificationAndGenerateTokenForHenkilo(String hetu) {
+    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
         String oid = oppijanumerorekisteriClient.getOidByHetu(hetu);
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("henkilo not found"));

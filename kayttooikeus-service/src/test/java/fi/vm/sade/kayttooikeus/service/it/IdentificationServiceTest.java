@@ -217,19 +217,19 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    public void generateTokenHenkiloNotFoundTest() throws Exception {
+    public void updateIdentificationAndGenerateTokenForHenkiloByHetuNotFoundTest() throws Exception {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("henkilo not found");
-        identificationService.updateIdentificationAndGenerateTokenForHenkilo("1.2.3");
+        identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("1.2.3");
     }
 
     @Test
-    public void generateTokenWithHetuTest() throws Exception {
+    public void updateIdentificationAndGenerateTokenForHenkiloByHetuTest() throws Exception {
         populate(kayttajatiedot(henkilo("1.2.3.4.5"), "user1"));
 
         given(oppijanumerorekisteriClient.getOidByHetu("090689-1393")).willReturn("1.2.3.4.5");
         //create new
-        String token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("090689-1393");
+        String token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
         assertTrue(token.length() > 20);
         Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());
@@ -238,7 +238,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         Long id = identification.get().getId();
 
         //update old
-        token = identificationService.updateIdentificationAndGenerateTokenForHenkilo("090689-1393");
+        token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
         assertTrue(token.length() > 20);
         identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());

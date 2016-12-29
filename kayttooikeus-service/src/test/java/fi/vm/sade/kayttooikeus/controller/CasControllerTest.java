@@ -94,13 +94,13 @@ public class CasControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    public void getIdentityByHetuTest() throws Exception {
-        given(identificationService.updateIdentificationAndGenerateTokenForHenkilo("11111-madeup"))
+    public void updateIdentificationAndGenerateTokenForHenkiloByHetuTest() throws Exception {
+        given(identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("11111-madeup"))
                 .willThrow(new NotFoundException("henkilo not found"));
         this.mvc.perform(get("/cas/henkilo/11111-madeup"))
                 .andExpect(status().is4xxClientError());
 
-        given(identificationService.updateIdentificationAndGenerateTokenForHenkilo("11111-1111"))
+        given(identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("11111-1111"))
                 .willReturn("sometoken");
         this.mvc.perform(get("/cas/henkilo/11111-1111"))
                 .andExpect(status().isOk())
