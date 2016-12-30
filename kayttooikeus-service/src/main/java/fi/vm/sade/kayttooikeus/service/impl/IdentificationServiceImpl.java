@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.authentication.business.exception.IdentificationExpiredException;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
+import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
@@ -11,6 +12,11 @@ import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,18 +39,21 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     private KayttoOikeusService kayttoOikeusService;
     private AuthProperties authProperties;
     private OrikaBeanMapper mapper;
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Autowired
     public IdentificationServiceImpl(IdentificationRepository identificationRepository,
                                      HenkiloRepository henkiloRepository,
                                      KayttoOikeusService kayttoOikeusService,
                                      AuthProperties authProperties,
-                                     OrikaBeanMapper mapper){
+                                     OrikaBeanMapper mapper,
+                                     OppijanumerorekisteriClient oppijanumerorekisteriClient){
         this.identificationRepository = identificationRepository;
         this.henkiloRepository = henkiloRepository;
         this.kayttoOikeusService = kayttoOikeusService;
         this.authProperties = authProperties;
         this.mapper = mapper;
+        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
     }
 
     @Override
@@ -87,14 +96,36 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
                 .orElseThrow(() -> new NotFoundException("identification not found"));
         identification.setAuthtoken(null);
 
+        HenkiloPerustietoDto perustiedot = oppijanumerorekisteriClient.getPerustietoByOid(identification.getHenkilo().getOidHenkilo());
+        HenkilonYhteystiedotViewDto yhteystiedotDto = oppijanumerorekisteriClient.getYhteystiedotByOid(identification.getHenkilo().getOidHenkilo());
         IdentifiedHenkiloTypeDto dto = mapper.map(identification, IdentifiedHenkiloTypeDto.class);
         dto.setAuthorizationData(kayttoOikeusService.findAuthorizationDataByOid(dto.getOidHenkilo()));
+
+        dto.setEtunimet(perustiedot.getEtunimet());
+        dto.setKutsumanimi(perustiedot.getKutsumanimi());
+        dto.setSukunimi(perustiedot.getSukunimi());
+        dto.setHetu(perustiedot.getHetu());
+        if (!StringUtils.isEmpty(perustiedot.getSukupuoli())) {
+            dto.setSukupuoli(perustiedot.getSukupuoli().equals("1") ? "MIES" : "NAINEN");
+        }
+        if (perustiedot.getAsiointiKieli() != null) {
+            dto.setAsiointiKieli(new AsiointikieliDto(perustiedot.getAsiointiKieli().getKieliKoodi(), perustiedot.getAsiointiKieli().getKieliTyyppi()));
+        }
+
+        if (yhteystiedotDto != null) {
+            String email = yhteystiedotDto.get(YhteystietoRyhmaKuvaus.PRIORITY_ORDER).getSahkoposti();
+            if (!StringUtils.isEmpty(email)) {
+                dto.setEmail(email);
+                identification.setEmail(email);
+            }
+        }
         return dto;
     }
 
     @Override
     @Transactional
-    public String updateIdentificationAndGenerateTokenForHenkilo(String oid) {
+    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
+        String oid = oppijanumerorekisteriClient.getOidByHetu(hetu);
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("henkilo not found"));
         String token = generateToken();

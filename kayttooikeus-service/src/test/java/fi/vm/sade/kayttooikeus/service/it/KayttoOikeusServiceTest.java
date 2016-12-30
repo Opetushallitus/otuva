@@ -30,8 +30,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static org.joda.time.LocalDate.now;
 import static org.joda.time.Period.months;
 import static org.junit.Assert.*;
@@ -369,7 +368,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .kayttoOikeusRyhmaId(ryhma.getId())
                         .build()));
 
-        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(singletonList(oikeusId));
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(singletonMap("HENKILOHALLINTA", "CRUD"));
         assertEquals(1, ryhmas.size());
         assertEquals("RYHMA", ryhmas.get(0).getName());
         assertEquals("roolirajoite", ryhmas.get(0).getRooliRajoite());
@@ -379,7 +378,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("123.123.123", ryhmas.get(0).getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
 
         given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any())).willReturn(emptyList());
-        ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(emptyList());
+        ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(emptyMap());
         assertEquals(0, ryhmas.size());
     }
 

@@ -16,6 +16,13 @@ public class IdentifiedHenkiloTypeDto {
     private boolean passivoitu;
     private String idpEntityId;
     private String identifier;
+    private String kutsumanimi;
+    private String etunimet;
+    private String sukunimi;
+    private String hetu;
+    private String sukupuoli;
+    private String email;
     private KayttajatiedotReadDto kayttajatiedot;
     private AuthorizationDataDto authorizationData;
+    private AsiointikieliDto asiointiKieli;
 }

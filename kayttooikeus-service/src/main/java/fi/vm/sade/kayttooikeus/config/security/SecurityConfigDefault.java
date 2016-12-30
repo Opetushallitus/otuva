@@ -109,6 +109,8 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/buildversion.txt").permitAll()
+                .antMatchers("/cas/auth/token/*").permitAll()
+                .antMatchers("/cas/henkilo/*").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()

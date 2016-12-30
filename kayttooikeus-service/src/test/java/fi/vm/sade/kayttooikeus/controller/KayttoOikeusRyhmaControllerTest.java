@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyMap;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -346,7 +346,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_READ")
     public void getKayttoOikeusRyhmasByKayttoOikeusTest() throws Exception {
-        given(kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusIds(anyList()))
+        given(kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(anyMap()))
                 .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()
                         .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
                                 .organisaatioTyyppi("organisaatiotyyppi")
@@ -359,7 +359,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
 
         this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content("[345]")
+                .content("{\"KOODISTO\": \"CRUD\"}")
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
