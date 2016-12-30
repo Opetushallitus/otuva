@@ -14,10 +14,12 @@ import fi.vm.sade.properties.OphProperties;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -108,8 +110,8 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         Map<String,Object> data = new HashMap<>();
         data.put("oidHenkilo", oid);
 
-        return retrying(FunctionalUtils.<HenkiloPerustietoDto>io(
-                () -> objectMapper.readerFor(HenkiloPerustietoDto.class)
+        return retrying(FunctionalUtils.<HenkiloPerustiedotDto>io(
+                () -> objectMapper.readerFor(HenkiloPerustiedotDto.class)
                         .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
                                 objectMapper.writeValueAsString(data)).getEntity().getContent())), 2).get()
                 .orFail(mapper(url));
@@ -122,6 +124,15 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
                         .readValue(serviceAccountClient.getAsString(url))), 2).get()
                 .orFail(mapper(url));
+    }
+
+    //ONR uses java.time.LocalDate
+    public static class HenkiloPerustiedotDto extends HenkiloPerustietoDto {
+        public void setSyntymaaika(String localDate) {
+            if (!StringUtils.isEmpty(localDate)) {
+                this.setSyntymaaika(LocalDate.parse(localDate));
+            }
+        }
     }
 
     @Getter @Setter
