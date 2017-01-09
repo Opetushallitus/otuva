@@ -57,6 +57,8 @@ public class PermissionCheckerTest {
     @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
+    private OrganisaatioClient organisaatioClient;
+
     private Set<String> myRoles;
 
     private static final String ORG1 = "org1";
@@ -67,7 +69,7 @@ public class PermissionCheckerTest {
         this.myRoles = createMockedRoles(new HashSet<>());
 
         this.henkiloRepositoryMock = Mockito.mock(HenkiloRepository.class);
-        OrganisaatioClient organisaatioClient = Mockito.mock(OrganisaatioClient.class);
+        this.organisaatioClient = Mockito.mock(OrganisaatioClient.class);
         OphProperties ophPropertiesMock = Mockito.mock(OphProperties.class);
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
@@ -167,8 +169,25 @@ public class PermissionCheckerTest {
         this.fakeRestClient.setAllowAccess(false);
         when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         this.fakeRestClient.setAllowAccess(true);
-        assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
-                ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
+        assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson",
+                Lists.newArrayList("CRUD"), ExternalPermissionService.HAKU_APP, this.myRoles))
+                .isTrue();
+    }
+
+    @Test
+    public void testThatHasRoleForOrganizationReturnsFalseWhenUserNotAssociatedWithOrg() {
+        Mockito.when(organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
+                .thenReturn(new ArrayList<>());
+        assertThat(permissionChecker.hasRoleForOrganization("orgThatLoggedInUserIsNotAssociatedWith",
+                Lists.newArrayList("CRUD", "READ"), this.myRoles))
+                .isFalse();
+    }
+
+    @Test
+    public void testThatHasRoleForOrganizationReturnsTrueWhenUserIsAssociatedWithOrg() {
+        Mockito.when(organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
+                .thenReturn(getDummyOrganisaatioHakutulos());
+        assertThat(permissionChecker.hasRoleForOrganization("org1", Lists.newArrayList("CRUD", "READ"), this.myRoles)).isTrue();
     }
 
     private static List<OrganisaatioPerustieto> getDummyOrganisaatioHakutulos() {

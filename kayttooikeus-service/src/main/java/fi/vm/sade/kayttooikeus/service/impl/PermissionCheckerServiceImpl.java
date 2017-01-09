@@ -1,8 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
@@ -225,5 +227,41 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
             organisaatios = organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
         }
         return organisaatios;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasRoleForOrganization(String orgOid, final List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
+        if (isSuperUser(callingUserRoles)) {
+            return true;
+        }
+
+        final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
+
+        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
+                .stream().findFirst();
+        if (!oh.isPresent()) {
+            LOG.warn("Organization " + orgOid + " not found!");
+            return false;
+        }
+        final OrganisaatioPerustieto org = oh.get();
+        Set<String> orgAndParentOids = Sets.newHashSet(org.getParentOidPath().split("/"));
+        orgAndParentOids.add(org.getOid());
+
+        Set<Set<String>> candidateRolesByOrg = Sets.newHashSet(Iterables.transform(orgAndParentOids, new Function<String, Set<String>>() {
+            @Override
+            public Set<String> apply(final String orgOid) {
+                return Sets.newHashSet(Iterables.transform(allowedRoles, new Function<String, String>() {
+                    @Override
+                    public String apply(final String role) {
+                        return role.concat("_" + orgOid);
+                    }
+                }));
+            }
+        }));
+
+        Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
+
+        return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, callingUserRoles);
     }
 }
