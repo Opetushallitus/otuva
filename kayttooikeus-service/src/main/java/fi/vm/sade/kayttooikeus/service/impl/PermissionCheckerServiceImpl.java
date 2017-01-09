@@ -248,17 +248,9 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         Set<String> orgAndParentOids = Sets.newHashSet(org.getParentOidPath().split("/"));
         orgAndParentOids.add(org.getOid());
 
-        Set<Set<String>> candidateRolesByOrg = Sets.newHashSet(Iterables.transform(orgAndParentOids, new Function<String, Set<String>>() {
-            @Override
-            public Set<String> apply(final String orgOid) {
-                return Sets.newHashSet(Iterables.transform(allowedRoles, new Function<String, String>() {
-                    @Override
-                    public String apply(final String role) {
-                        return role.concat("_" + orgOid);
-                    }
-                }));
-            }
-        }));
+        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream().map(orgOid1 ->
+                allowedRoles.stream().map(role -> role.concat("_" + orgOid1)).collect(Collectors.toCollection(HashSet::new)))
+                .collect(Collectors.toCollection(HashSet::new));
 
         Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
 
