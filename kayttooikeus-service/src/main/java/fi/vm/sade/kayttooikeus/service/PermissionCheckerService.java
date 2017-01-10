@@ -1,9 +1,9 @@
 package fi.vm.sade.kayttooikeus.service;
 
 
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -19,6 +19,8 @@ public interface PermissionCheckerService {
     List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid);
 
     boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
+
+    boolean hasRoleForOrganizations(List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
 
     boolean hasRoleForOrganization(String orgOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
 }

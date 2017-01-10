@@ -1,15 +1,15 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -45,5 +45,12 @@ public class OrganisaatioHenkiloController {
             notes = "Listaa ne organisaatiohenkilötyypit joita kirjautunt käyttäjä saa luoda henkilöhallintaan.")
     public List<HenkiloTyyppi> listPossibleHenkiloTypesByCurrentHenkilo() {
         return organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
+    }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganizations(#organisaatioHenkiloList, {'CRUD'})")
+    @RequestMapping(value = "/{oid}/findOrCreate", method = RequestMethod.POST)
+    public List<OrganisaatioHenkiloDto> updateOrganisaatioHenkilos(@PathVariable(value = "oid") String oidHenkilo,
+                                                                   @RequestBody List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloList) {
+        return this.organisaatioHenkiloService.addOrganisaatioHenkilot(oidHenkilo, organisaatioHenkiloList);
     }
 }

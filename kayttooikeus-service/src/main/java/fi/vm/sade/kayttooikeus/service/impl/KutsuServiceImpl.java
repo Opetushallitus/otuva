@@ -85,7 +85,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         List<KutsuOrganisaatioListDto> kutsuOrganisaatios = kutsuRepository.listKutsuOrganisaatioListDtos(criteria, orderBy);
         Map<String,List<KutsuOrganisaatioListDto>> byOrganisaatioOids = kutsuOrganisaatios.stream()
                 .collect(groupingBy(KutsuOrganisaatioListDto::getOid));
-        byOrganisaatioOids.keySet().stream().map(oid -> organisaatioClient.getOrganisaatioPerustiedot(oid, organizationClientState))
+        byOrganisaatioOids.keySet().stream().map(oid -> organisaatioClient.getOrganisaatioPerustiedotCached(oid, organizationClientState))
                 .filter(perustiedot -> byOrganisaatioOids.containsKey(perustiedot.getOid()))
                 .map(perustiedot -> new SimpleEntry<>(perustiedot.getOid(), new TextGroupMapDto(perustiedot.getNimi())))
                 .forEach(e -> byOrganisaatioOids.get(e.getKey()).forEach(dto -> dto.setNimi(e.getValue())));
@@ -148,7 +148,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                 replacement("sukunimi", kutsu.getSukunimi()),
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
                     .map(org -> new OranizationReplacement(new TextGroupMapDto(
-                            organisaatioClient.getOrganisaatioPerustiedot(org.getOrganisaatioOid(),
+                            organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid(),
                                     organizationClientState).getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
                             org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)
                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))

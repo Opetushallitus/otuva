@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
@@ -45,18 +46,21 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final HenkiloRepository henkiloRepository;
     private final OrikaBeanMapper mapper;
     private final OrganisaatioClient organisaatioClient;
+    private final PermissionCheckerService permissionCheckerService;
 
     @Autowired
     public OrganisaatioHenkiloServiceImpl(OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
                                           KayttoOikeusRepository kayttoOikeusRepository,
                                           HenkiloRepository henkiloRepository,
                                           OrikaBeanMapper mapper,
-                                          OrganisaatioClient organisaatioClient) {
+                                          OrganisaatioClient organisaatioClient,
+                                          PermissionCheckerService permissionCheckerService) {
         this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.henkiloRepository = henkiloRepository;
         this.mapper = mapper;
         this.organisaatioClient = organisaatioClient;
+        this.permissionCheckerService = permissionCheckerService;
     }
 
     @Override
@@ -67,7 +71,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                 .stream().peek(organisaatioHenkilo ->
                     organisaatioHenkilo.setOrganisaatio(
                         mapOrganisaatioDtoRecursive(
-                            organisaatioClient.getOrganisaatioPerustiedot(organisaatioHenkilo.getOrganisaatio().getOid(), organisaatioClientMode),
+                            organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioHenkilo.getOrganisaatio().getOid(), organisaatioClientMode),
                             compareByLang))
                 ).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());
@@ -124,13 +128,15 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     public List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) {
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
+        final Mode clientMode = Mode.requireCache();
 
         organisaatioHenkilot.stream()
-                .filter((OrganisaatioHenkiloCreateDto t) -> {
-                    return henkilo.getOrganisaatioHenkilos().stream()
-                            .noneMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(t.getOrganisaatioOid()));
-                })
+                .filter((OrganisaatioHenkiloCreateDto t) ->
+                    henkilo.getOrganisaatioHenkilos().stream()
+                            .noneMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(t.getOrganisaatioOid()))
+                )
                 .forEach((OrganisaatioHenkiloCreateDto t) -> {
+                    this.organisaatioClient.getOrganisaatioPerustiedotCached(t.getOrganisaatioOid(), clientMode);
                     OrganisaatioHenkilo organisaatioHenkilo = mapper.map(t, OrganisaatioHenkilo.class);
                     organisaatioHenkilo.setHenkilo(henkilo);
                     henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.persist(organisaatioHenkilo));
@@ -138,4 +144,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
         return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
     }
+
+//    @Override
+//    @Transactional
+//    public List<OrganisaatioHenkiloDto> updateOrganisaatio
 }

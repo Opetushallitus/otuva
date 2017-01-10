@@ -33,9 +33,9 @@ public interface OrganisaatioClient {
         }
     }
     
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(String organisaatioOid, Mode mode);
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode);
 
-    OrganisaatioPerustieto getOrganisaatioPerustiedot(String oid, Mode mode);
+    OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode);
 
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 }

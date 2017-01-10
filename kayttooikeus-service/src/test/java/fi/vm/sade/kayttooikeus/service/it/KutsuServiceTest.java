@@ -85,8 +85,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
         org2.setOid("1.2.3.4.6");
         org2.setNimi(new TextGroupMapDto().put("FI", "Nimi1").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.5"), Matchers.any())).willReturn(org1);
-        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.6"), Matchers.any())).willReturn(org2);
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), Matchers.any())).willReturn(org1);
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any())).willReturn(org2);
         
         List<KutsuListDto> kutsus = kutsuService.listAvoinKutsus(new OrderBy<>(KutsuOrganisaatioOrder.ORGANISAATIO, Order.ASC));
         assertEquals(1, kutsus.size());
@@ -110,7 +110,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
         org1.setOid("1.2.246.562.10.00000000001");
         org1.setNimi(new TextGroupMapDto().put("FI", "Opetushallitus").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.246.562.10.00000000001"), Matchers.any())).willReturn(org1);
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.00000000001"), Matchers.any())).willReturn(org1);
         
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo("1.2.4", "1.2.246.562.10.00000000001"),

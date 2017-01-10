@@ -48,14 +48,14 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listOrganisaatioHenkilosTest() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.1"), any())).willAnswer(invocation -> {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.1"), any())).willAnswer(invocation -> {
             OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.1");
             orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
             orgDto.setOrganisaatiotyypit(asList("Tyyppi1", "Tyyppi2"));
             return orgDto;
         });
-        given(this.organisaatioClient.getOrganisaatioPerustiedot(eq("1.2.3.4.2"), any())).willAnswer(invocation -> {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.2"), any())).willAnswer(invocation -> {
             OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.2");
             orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());

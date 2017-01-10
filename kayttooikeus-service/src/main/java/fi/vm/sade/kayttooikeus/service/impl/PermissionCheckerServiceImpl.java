@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
@@ -9,6 +8,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -175,6 +177,19 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         return CollectionUtils.containsAny(callingUserRoles, candidateRoles);
     }
 
+    @Override
+    public boolean hasRoleForOrganizations(@NotNull List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloDtoList,
+                                           List<String> allowedRolesWithoutPrefix) {
+        List<String> orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloCreateDto::getOrganisaatioOid)
+                .collect(Collectors.toList());
+        for(String oid : orgOidList) {
+            if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static boolean isSuperUser(Set<String> roles) {
         return roles.contains(ROLE_HENKILONHALLINTA_PREFIX + "OPHREKISTERI");
     }
@@ -248,8 +263,8 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         Set<String> orgAndParentOids = Sets.newHashSet(org.getParentOidPath().split("/"));
         orgAndParentOids.add(org.getOid());
 
-        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream().map(orgOid1 ->
-                allowedRoles.stream().map(role -> role.concat("_" + orgOid1)).collect(Collectors.toCollection(HashSet::new)))
+        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream().map(orgOrParentOid ->
+                allowedRoles.stream().map(role -> role.concat("_" + orgOrParentOid)).collect(Collectors.toCollection(HashSet::new)))
                 .collect(Collectors.toCollection(HashSet::new));
 
         Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
