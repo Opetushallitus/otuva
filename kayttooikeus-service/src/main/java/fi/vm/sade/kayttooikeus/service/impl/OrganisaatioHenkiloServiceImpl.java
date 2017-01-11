@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import ma.glasnost.orika.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,7 +92,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Override
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatioPerustiedotForCurrentUser() {
-        return organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(
+        return organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(
                 organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(getCurrentUserOid()));
     }
 

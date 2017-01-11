@@ -24,7 +24,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
                 .havingPath(is("/organisaatio-service/rest/organisaatio/hae"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
-        List<OrganisaatioPerustieto> results = this.client.listActiveOganisaatioPerustiedotByOidRestrictionList(singletonList("1.2.246.562.10.14175756379"));
+        List<OrganisaatioPerustieto> results = this.client.listActiveOrganisaatioPerustiedotByOidRestrictionList(singletonList("1.2.246.562.10.14175756379"));
         assertEquals(1, results.size());
         assertEquals("1.2.246.562.10.14175756379", results.get(0).getOid());
     }

@@ -29,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
@@ -92,7 +91,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceTest {
     public void listOrganisaatioPerustiedotForCurrentUserTest() {
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
                 .willReturn(singletonList("2.3.4.5.6"));
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(singletonList("2.3.4.5.6")))
+        given(this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(singletonList("2.3.4.5.6")))
                 .willReturn(singletonList(readJson(jsonResource("classpath:organisaatio/organisaatioPerustiedot.json"), OrganisaatioPerustieto.class)));
 
         List<OrganisaatioPerustieto> result = organisaatioHenkiloService.listOrganisaatioPerustiedotForCurrentUser();

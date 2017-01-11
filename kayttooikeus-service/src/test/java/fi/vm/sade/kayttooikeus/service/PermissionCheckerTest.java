@@ -176,7 +176,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void testThatHasRoleForOrganizationReturnsFalseWhenUserNotAssociatedWithOrg() {
-        Mockito.when(organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
+        Mockito.when(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
                 .thenReturn(new ArrayList<>());
         assertThat(permissionChecker.hasRoleForOrganization("orgThatLoggedInUserIsNotAssociatedWith",
                 Lists.newArrayList("CRUD", "READ"), this.myRoles))
@@ -185,7 +185,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void testThatHasRoleForOrganizationReturnsTrueWhenUserIsAssociatedWithOrg() {
-        Mockito.when(organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
+        Mockito.when(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
                 .thenReturn(getDummyOrganisaatioHakutulos());
         assertThat(permissionChecker.hasRoleForOrganization("org1", Lists.newArrayList("CRUD", "READ"), this.myRoles)).isTrue();
     }

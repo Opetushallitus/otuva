@@ -26,7 +26,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -258,7 +257,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
+            organisaatios = organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
         }
         return organisaatios;
     }
@@ -272,7 +271,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
 
         final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
 
-        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
+        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
                 .stream().findFirst();
         if (!oh.isPresent()) {
             LOG.warn("Organization " + orgOid + " not found!");
