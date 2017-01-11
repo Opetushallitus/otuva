@@ -59,7 +59,7 @@
         <commons.io.version>1.3.2</commons.io.version>
         <javax.validation.api.version>1.0.0.GA</javax.validation.api.version>
 
-        <springfox.version>2.5.0</springfox.version>
+        <springfox.version>2.6.1</springfox.version>
 
 
         <!-- buildversion.txt generation plugin -->
