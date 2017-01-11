@@ -7,6 +7,7 @@ import net.jadler.stubbing.server.jdk.JdkStubHttpServer;
 import org.apache.http.HttpStatus;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.jasig.cas.client.validation.AssertionImpl;
+import org.junit.After;
 import org.junit.Rule;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +23,17 @@ import static org.hamcrest.Matchers.startsWith;
 
 public abstract class AbstractClientTest extends AbstractServiceTest {
     protected static final int OK = HttpStatus.SC_OK;
-    protected static final int MOCK_SERVER_PORT = portNumberBySystemPropertyOrFree("test.port");
+    protected static int MOCK_SERVER_PORT = portNumberBySystemPropertyOrFree("test.port");
+    protected final JdkStubHttpServer stubHttpServer = new JdkStubHttpServer(MOCK_SERVER_PORT);
     @Rule
-    public final JadlerRule jalder = new JadlerRule(new JdkStubHttpServer(MOCK_SERVER_PORT));
-    
+    public final JadlerRule jadler = new JadlerRule(stubHttpServer);
+
+    @After
+    public void tearDown() throws Exception {
+        stubHttpServer.stop();
+        Thread.sleep(20L);
+    }
+
     protected void casAuthenticated(String henkiloOid) {
         SecurityContextHolder.getContext().setAuthentication(new CasAuthenticationToken("KEY", henkiloOid, "CRED",
                 Collections.emptyList(), new MockedUserDetails(), new AssertionImpl(new AttributePrincipal() {

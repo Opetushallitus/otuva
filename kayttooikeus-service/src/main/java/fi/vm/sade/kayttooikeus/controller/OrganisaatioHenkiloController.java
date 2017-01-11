@@ -59,7 +59,7 @@ public class OrganisaatioHenkiloController {
     @RequestMapping(value = "/{oid}/createOrUpdate", method = RequestMethod.PUT)
     public List<OrganisaatioHenkiloDto> updateOrganisaatioHenkilos(@PathVariable(value = "oid") String oidHenkilo,
                                                                    @RequestBody List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloList) {
-        return this.organisaatioHenkiloService.CreateOrUpdateOrganisaatioHenkilos(oidHenkilo, organisaatioHenkiloList);
+        return this.organisaatioHenkiloService.createOrUpdateOrganisaatioHenkilos(oidHenkilo, organisaatioHenkiloList);
     }
 
 }

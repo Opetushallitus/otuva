@@ -27,6 +27,6 @@ public interface OrganisaatioHenkiloService {
      */
     List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot);
 
-    List<OrganisaatioHenkiloDto> CreateOrUpdateOrganisaatioHenkilos(String henkiloOid,
+    List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
                                                                     List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList);
 }

@@ -152,7 +152,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
     @Override
     @Transactional
-    public List<OrganisaatioHenkiloDto> CreateOrUpdateOrganisaatioHenkilos(String henkiloOid,
+    public List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
                                                                            List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList) {
         final Mode clientMode = Mode.requireCache();
         Henkilo henkilo = this.henkiloRepository.findByOidHenkilo(henkiloOid)
