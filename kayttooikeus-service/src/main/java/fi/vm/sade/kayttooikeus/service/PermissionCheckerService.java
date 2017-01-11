@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
@@ -20,7 +19,7 @@ public interface PermissionCheckerService {
 
     boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
 
-    boolean hasRoleForOrganizations(List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
+    boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
 
     boolean hasRoleForOrganization(String orgOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
 }

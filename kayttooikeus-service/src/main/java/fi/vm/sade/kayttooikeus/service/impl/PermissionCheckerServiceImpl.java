@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -23,8 +23,10 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,10 +180,27 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     @Override
-    public boolean hasRoleForOrganizations(@NotNull List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloDtoList,
+    public boolean hasRoleForOrganisations(@NotNull List<Object> organisaatioHenkiloDtoList,
                                            List<String> allowedRolesWithoutPrefix) {
-        List<String> orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloCreateDto::getOrganisaatioOid)
-                .collect(Collectors.toList());
+        List<String> orgOidList;
+        if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
+            throw new NullPointerException();
+        }
+        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream()
+                    .map(o -> ((OrganisaatioHenkiloCreateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+        }
+        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloUpdateDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream()
+                    .map(o -> ((OrganisaatioHenkiloUpdateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+        }
+        else {
+            throw new NotImplementedException("Unsupported input type.");
+        }
+        return checkRoleForOrganisation(allowedRolesWithoutPrefix, orgOidList);
+    }
+
+    private boolean checkRoleForOrganisation(List<String> allowedRolesWithoutPrefix, List<String> orgOidList) {
         for(String oid : orgOidList) {
             if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
                 return false;

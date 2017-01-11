@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.List;
@@ -29,4 +26,7 @@ public interface OrganisaatioHenkiloService {
      * @return kaikki henkilön organisaatiotiedot
      */
     List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot);
+
+    List<OrganisaatioHenkiloDto> CreateOrUpdateOrganisaatioHenkilos(String henkiloOid,
+                                                                    List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList);
 }

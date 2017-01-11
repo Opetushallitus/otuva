@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import io.swagger.annotations.Api;
@@ -47,10 +48,18 @@ public class OrganisaatioHenkiloController {
         return organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganizations(#organisaatioHenkiloList, {'CRUD'})")
+    @PreAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(#organisaatioHenkiloList, {'CRUD'})")
     @RequestMapping(value = "/{oid}/findOrCreate", method = RequestMethod.POST)
-    public List<OrganisaatioHenkiloDto> updateOrganisaatioHenkilos(@PathVariable(value = "oid") String oidHenkilo,
-                                                                   @RequestBody List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloList) {
+    public List<OrganisaatioHenkiloDto> findOrCreateOrganisaatioHenkilos(@PathVariable(value = "oid") String oidHenkilo,
+                                                                         @RequestBody List<OrganisaatioHenkiloCreateDto> organisaatioHenkiloList) {
         return this.organisaatioHenkiloService.addOrganisaatioHenkilot(oidHenkilo, organisaatioHenkiloList);
     }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(#organisaatioHenkiloList, {'CRUD'})")
+    @RequestMapping(value = "/{oid}/createOrUpdate", method = RequestMethod.PUT)
+    public List<OrganisaatioHenkiloDto> updateOrganisaatioHenkilos(@PathVariable(value = "oid") String oidHenkilo,
+                                                                   @RequestBody List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloList) {
+        return this.organisaatioHenkiloService.CreateOrUpdateOrganisaatioHenkilos(oidHenkilo, organisaatioHenkiloList);
+    }
+
 }
