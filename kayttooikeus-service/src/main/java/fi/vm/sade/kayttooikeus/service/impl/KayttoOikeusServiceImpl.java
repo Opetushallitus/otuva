@@ -432,7 +432,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
             return true;
         }
-        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursive(organisaatioOid, organisaatioClientState);
+        List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid, organisaatioClientState);
         return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
     }

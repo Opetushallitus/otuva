@@ -3,10 +3,13 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -20,6 +23,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
@@ -28,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -173,6 +178,36 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         return CollectionUtils.containsAny(callingUserRoles, candidateRoles);
     }
 
+    @Override
+    public boolean hasRoleForOrganisations(@NotNull List<Object> organisaatioHenkiloDtoList,
+                                           List<String> allowedRolesWithoutPrefix) {
+        List<String> orgOidList;
+        if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
+            throw new NullPointerException();
+        }
+        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream()
+                    .map(o -> ((OrganisaatioHenkiloCreateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+        }
+        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloUpdateDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream()
+                    .map(o -> ((OrganisaatioHenkiloUpdateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+        }
+        else {
+            throw new NotImplementedException("Unsupported input type.");
+        }
+        return checkRoleForOrganisation(allowedRolesWithoutPrefix, orgOidList);
+    }
+
+    private boolean checkRoleForOrganisation(List<String> allowedRolesWithoutPrefix, List<String> orgOidList) {
+        for(String oid : orgOidList) {
+            if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static boolean isSuperUser(Set<String> roles) {
         return roles.contains(ROLE_HENKILONHALLINTA_PREFIX + "OPHREKISTERI");
     }
@@ -222,8 +257,36 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listActiveOganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
+            organisaatios = organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
         }
         return organisaatios;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasRoleForOrganization(String orgOid, final List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
+        if (isSuperUser(callingUserRoles)) {
+            return true;
+        }
+
+        final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
+
+        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
+                .stream().findFirst();
+        if (!oh.isPresent()) {
+            LOG.warn("Organization " + orgOid + " not found!");
+            return false;
+        }
+        final OrganisaatioPerustieto org = oh.get();
+        Set<String> orgAndParentOids = Sets.newHashSet(org.getParentOidPath().split("/"));
+        orgAndParentOids.add(org.getOid());
+
+        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream().map(orgOrParentOid ->
+                allowedRoles.stream().map(role -> role.concat("_" + orgOrParentOid)).collect(Collectors.toCollection(HashSet::new)))
+                .collect(Collectors.toCollection(HashSet::new));
+
+        Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
+
+        return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, callingUserRoles);
     }
 }

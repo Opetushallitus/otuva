@@ -102,7 +102,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public OrganisaatioPerustieto getOrganisaatioPerustiedot(String oid, Mode mode) {
+    public OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode) {
         return cached(c -> c.getByOid(oid).<NotFoundException>orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
                 () -> fetchPerustiedot(oid), mode);
     }
@@ -133,7 +133,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
     
     @Override
-    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursive(String organisaatioOid, Mode mode) {
+    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode) {
         return cached(c -> c.flatWithParentsAndChildren(organisaatioOid)
                 .filter(org -> !rootOrganizationOid.equals(org.getOid())) // the resource never returns the root
                 .collect(toList()), () -> {
@@ -145,7 +145,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids) {
+    public List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids) {
         if (organisaatioOids.isEmpty()) {
             return new ArrayList<>();
         }
