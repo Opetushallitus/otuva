@@ -183,7 +183,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                            List<String> allowedRolesWithoutPrefix) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("Permissionchecker received empty input.");
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
             orgOidList = organisaatioHenkiloDtoList.stream()
