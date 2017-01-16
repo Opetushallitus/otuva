@@ -94,6 +94,3 @@ endpoints:
 
 kayttooikeus:
   uses-ssl-proxy: true
-
-auth:
-  expiration-months: P2Y

@@ -5,13 +5,11 @@ import fi.vm.sade.kayttooikeus.model.Identification;
 
 import javax.persistence.EntityManager;
 import java.util.Collections;
-import java.util.Date;
 
 public class IdentificationPopulator implements Populator<Identification> {
     private HenkiloPopulator henkilo;
     private String idpEntityId;
     private String identifier;
-    private Date expirationDate;
     private String authToken;
 
     public IdentificationPopulator(String idpEntityId, String identifier, HenkiloPopulator henkilo) {
@@ -22,11 +20,6 @@ public class IdentificationPopulator implements Populator<Identification> {
 
     public static IdentificationPopulator identification(String idpEntityId, String identifier, HenkiloPopulator henkilo) {
         return new IdentificationPopulator(idpEntityId, identifier, henkilo);
-    }
-
-    public IdentificationPopulator withExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-        return this;
     }
 
     public IdentificationPopulator withAuthToken(String token) {
@@ -40,7 +33,6 @@ public class IdentificationPopulator implements Populator<Identification> {
         Identification identification = new Identification();
         identification.setIdentifier(identifier);
         identification.setIdpEntityId(idpEntityId);
-        identification.setExpirationDate(expirationDate);
         identification.setAuthtoken(authToken);
         identification.setHenkilo(henkiloo);
         entityManager.persist(identification);

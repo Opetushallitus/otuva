@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -24,9 +23,6 @@ public class Identification extends IdentifiableAndVersionedEntity{
 
     @Column(name = "authtoken")
     private String authtoken;
-
-    @Column(name = "expiration_date")
-    private Date expirationDate;
 
     @Column(name = "email")
     private String email;
