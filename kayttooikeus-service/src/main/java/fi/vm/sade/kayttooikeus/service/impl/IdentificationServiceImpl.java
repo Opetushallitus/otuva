@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.authentication.business.exception.IdentificationExpiredException;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -17,14 +15,12 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -32,12 +28,10 @@ import java.util.Optional;
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
 
     private static final String STRONG_AUTHENTICATION_IDP = "vetuma";
-    private static final String HAKA_AUTHENTICATION_IDP = "haka";
 
     private IdentificationRepository identificationRepository;
     private HenkiloRepository henkiloRepository;
     private KayttoOikeusService kayttoOikeusService;
-    private AuthProperties authProperties;
     private OrikaBeanMapper mapper;
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -45,13 +39,11 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     public IdentificationServiceImpl(IdentificationRepository identificationRepository,
                                      HenkiloRepository henkiloRepository,
                                      KayttoOikeusService kayttoOikeusService,
-                                     AuthProperties authProperties,
                                      OrikaBeanMapper mapper,
                                      OppijanumerorekisteriClient oppijanumerorekisteriClient){
         this.identificationRepository = identificationRepository;
         this.henkiloRepository = henkiloRepository;
         this.kayttoOikeusService = kayttoOikeusService;
-        this.authProperties = authProperties;
         this.mapper = mapper;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
     }
@@ -70,7 +62,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
         String token = generateToken();
         if (identification.isPresent()) {
-            updateTokenIfNotExpired(identification.get(), token);
+            updateToken(identification.get(), token);
         } else {
             createIdentification(henkilo, token, idpIdentifier, idpKey);
         }
@@ -163,30 +155,11 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         identification.setIdentifier(identifier);
         identification.setIdpEntityId(idpKey);
         identification.setAuthtoken(token);
-        if (HAKA_AUTHENTICATION_IDP.equals(idpKey)) {
-            identification.setExpirationDate(getExpirationDateFromNow());
-        }
     }
 
-    private void updateTokenIfNotExpired(Identification identification, String token) {
-        if (identification.getExpirationDate() != null && new Date().after(identification.getExpirationDate())) {
-            logger.info("Login denied. Haka identification expired for user {} on expiration date {}",
-                    identification.getIdentifier(), identification.getExpirationDate());
-            throw new IdentificationExpiredException("Haka identification expired");
-        } else {
-            identification.setAuthtoken(token);
-            logger.info("old identification found, setting new token:[{}]", token);
-
-            if (HAKA_AUTHENTICATION_IDP.equals(identification.getIdpEntityId())) {
-                identification.setExpirationDate(getExpirationDateFromNow());
-                logger.debug("New expiration date for haka user {}: {}", identification.getIdentifier(),
-                        identification.getExpirationDate());
-            }
-        }
-    }
-
-    private Date getExpirationDateFromNow() {
-        return new DateTime().withPeriodAdded(authProperties.getExpirationMonths(), 1).toDate();
+    private void updateToken(Identification identification, String token) {
+        identification.setAuthtoken(token);
+        logger.info("old identification found, setting new token:[{}]", token);
     }
 
     private String generateToken() {

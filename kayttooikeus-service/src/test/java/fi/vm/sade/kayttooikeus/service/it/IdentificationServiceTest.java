@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
-import fi.vm.sade.authentication.business.exception.IdentificationExpiredException;
-import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
@@ -16,9 +14,6 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoRyhmaKuvaus;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -53,9 +48,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     private IdentificationRepository identificationRepository;
 
     @MockBean
-    private AuthProperties authProperties;
-
-    @MockBean
     OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Rule
@@ -72,7 +64,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     public void generateAuthTokenForHenkiloTest() {
         populate(henkilo("1.2.3.4.5"));
         populate(henkilo("1.2.3.4.6"));
-        given(authProperties.getExpirationMonths()).willReturn(Period.months(24));
 
         String token = identificationService.generateAuthTokenForHenkilo("1.2.3.4.5",
                 "key", "identifier");
@@ -88,21 +79,9 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertTrue(token.length() > 20);
         identification = identificationRepository.findByAuthtoken(token);
         assertTrue(identification.isPresent());
-        assertTrue(identification.get().getExpirationDate().after(new DateTime().plusMonths(23).toDate()));
-        assertTrue(identification.get().getExpirationDate().before(new DateTime().plusMonths(25).toDate()));
         assertEquals("hakaidentifier", identification.get().getIdentifier());
         assertEquals("haka", identification.get().getIdpEntityId());
         assertEquals("1.2.3.4.6", identification.get().getHenkilo().getOidHenkilo());
-    }
-
-    @Test
-    public void generateAuthTokenExpiredTest() throws Exception {
-        populate(identification("haka", "identifier", henkilo("1.2.3.4.6"))
-                .withExpirationDate(new LocalDate().minusMonths(1).toDate()));
-
-        thrown.expect(IdentificationExpiredException.class);
-        thrown.expectMessage("Haka identification expired");
-        identificationService.generateAuthTokenForHenkilo("1.2.3.4.6", "haka", "identifier");
     }
 
     @Test(expected = NotFoundException.class)
