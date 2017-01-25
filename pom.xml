@@ -199,6 +199,12 @@
         <repository>
             <id>oph-sade-artifactory-releases</id>
             <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>repository.jboss.org</id>
