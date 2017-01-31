@@ -20,6 +20,9 @@ mvn -Pdev-server install
 To change logged in user authenticated with basic authentication, change "proxy"."/kayttooikeus-service/*"."auth" property to user:password in package.json
 You can overwrite this by using PROXY_AUTH environment variable, e.g. with mvn: mvn -Pdev-server install -DPROXY_AUTH="your.oid:security.properties.configured.password"
 
+### Safe write
+If WebpackDevServer does not update automatically check https://webpack.github.io/docs/webpack-dev-server.html#working-with-editors-ides-supporting-safe-write
+
 ## Tests
 
 `npm run test` (starts watcher)
