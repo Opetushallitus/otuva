@@ -44,8 +44,10 @@ public class HenkiloController {
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
             @PathVariable @ApiParam("Henkilö-OID") String oid,
-            @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)") String comparisonLangCode,
-            @RequestParam(value = "permissionService", required = false) ExternalPermissionService permissionService) {
+            @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)")
+                    String comparisonLangCode,
+            @RequestHeader(value = "External-Permission-Service", required = false)
+                    ExternalPermissionService permissionService) {
         return organisaatioHenkiloService.listOrganisaatioHenkilos(oid, comparisonLangCode);
     }
     
@@ -54,7 +56,8 @@ public class HenkiloController {
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloDto> listOrganisaatioHenkilos(@PathVariable("oid") String henkiloOid,
-                                                                 @RequestParam(value = "permissionService", required = false) ExternalPermissionService permissionService) {
+                                                                 @RequestHeader(value = "External-Permission-Service", required = false)
+                                                                         ExternalPermissionService permissionService) {
         return organisaatioHenkiloService.findOrganisaatioByHenkilo(henkiloOid);
     }
 
