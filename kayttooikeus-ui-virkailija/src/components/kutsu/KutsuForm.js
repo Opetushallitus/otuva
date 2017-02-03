@@ -13,6 +13,7 @@ import {l10nP, localeP} from "../../external/l10n";
 import {basicInfoP} from "../../logic/basicInfo";
 import {navigateTo} from "../../logic/location";
 import "./KutsuForm.css";
+import {defaultNavi} from "../../external/navilists";
 
 const KutsuForm = React.createClass({
     getInitialState: function () {
@@ -95,7 +96,8 @@ export const kutsuFormContentP = Bacon.combineWith(l10nP, localeP, organizations
         const props = {l10n, locale, organizationsFlatInHierarchyOrder, addedOrgs, basicInfo, languages, omaOid};
         props.languages = R.reject((lang) => lang.code === 'en', props.languages);
         return {
-            content: <KutsuForm {...props}/>
+            content: <KutsuForm {...props}/>,
+            navi: defaultNavi
         };
     });
 

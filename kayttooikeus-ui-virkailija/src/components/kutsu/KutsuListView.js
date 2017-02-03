@@ -11,6 +11,7 @@ import { l10nP, localeP } from '../../external/l10n'
 import { setSuccess } from '../../logic/error'
 
 import './KutsuListView.css'
+import {defaultNavi} from "../../external/navilists";
 
 const KutsuListView = React.createClass({
     getInitialState: function() {
@@ -147,7 +148,8 @@ export const kutsuListViewContentP = Bacon.combineWith(l10nP, localeP, kutsuList
         (l10n, locale, kutsuListState, kutsuList) => {
     const props = {l10n, locale, kutsuListState, kutsuList};
     return {
-        content: <KutsuListView {...props}/>
+        content: <KutsuListView {...props}/>,
+        navi: defaultNavi
     };
 });
 
