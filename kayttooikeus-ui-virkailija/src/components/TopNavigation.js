@@ -17,7 +17,7 @@ const TopNavigation = React.createClass({
             path += '?oid=' + array.oid;
         }
         const L = this.props.l10n;
-        if (this.props.location.path === path || (!this.props.location.path && path === '/')) {
+        if (this.props.location.path === value.path || (!this.props.location.path && value.path === '/')) {
             return (<li key={idx} className="active">{L[key]}</li>);
         }
         return (<li key={idx} onClick={this.changeViewAction(path)}>{L[key]}</li>);
