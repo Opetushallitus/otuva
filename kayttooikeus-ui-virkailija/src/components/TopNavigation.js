@@ -2,7 +2,7 @@ import React from 'react'
 
 import './TopNavigation.css'
 import {navigateTo} from '../logic/location'
-import Button from "button";
+import Button from 'button';
 
 const TopNavigation = React.createClass({
     render: function() {

@@ -13,7 +13,7 @@ require('./Button.css');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Button = _react2.default.createClass({
-    displayName: 'Button',
+    displayName: 'Field',
 
     propTypes: {
         action: _react2.default.PropTypes.func.isRequired,

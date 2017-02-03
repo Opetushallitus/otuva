@@ -1,23 +1,24 @@
+import './HenkiloView.css'
 import React from 'react'
 import Bacon from 'baconjs'
-
-import './HenkiloView.css'
+import HenkiloViewUserContent from './HenkiloViewUserContent'
 
 import {l10nP} from '../../external/l10n'
 import {henkiloNavi} from "../../external/navilists";
 import {locationP} from "../../logic/location";
 
 const HenkiloView = React.createClass({
+    getInitialState: function() {
+        return {
+            readOnly: true
+        }
+    },
     render: function() {
-        const L = this.props.l10n;
         return (
             <div className="wrapper">
-                <div className="header">
-                    <h2>{L['HENKILO_PERUSTIEDOT_OTSIKKO']}</h2>
-                </div>
-                <p>
-                    TODO: henkilön tietoja
-                </p>
+                <form>
+                    <HenkiloViewUserContent {...this.props} />
+                </form>
             </div>
         )
     }
