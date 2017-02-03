@@ -26,6 +26,7 @@ const HenkiloView = React.createClass({
 export const henkiloViewContentP = Bacon.combineWith(l10nP, locationP, (l10n, location) => {
     const props = {l10n};
     henkiloNavi.oid = location.params['oid'];
+    henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloView {...props}/>,
         navi: henkiloNavi

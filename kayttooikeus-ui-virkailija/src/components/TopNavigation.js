@@ -2,12 +2,20 @@ import React from 'react'
 
 import './TopNavigation.css'
 import {navigateTo} from '../logic/location'
+import Button from "button";
 
 const TopNavigation = React.createClass({
     render: function() {
-        return (<ul className="tabs">
-            { this.props.items.map(this.item)}
-        </ul>);
+        const L = this.props.l10n;
+        const s = this.props.items.backLocation
+            ? <Button action={this.changeViewAction(this.props.items.backLocation)}>&#8701; {L['TAKAISIN_LINKKI']}</Button>
+            : null;
+        return (
+            <div>
+                {s}
+                <ul className="tabs">{ this.props.items.map(this.item)}</ul>
+            </div>
+        )
     },
     
     item: function(value, idx, array) {
