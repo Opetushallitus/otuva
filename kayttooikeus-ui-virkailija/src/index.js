@@ -7,7 +7,7 @@ import Bacon from 'baconjs'
 import { l10nP } from './external/l10n'
 import { urlsP } from './external/urls'
 import { buildVersionP } from './external/buildversion'
-import { contentP, naviContentP, backgroundColorP} from './logic/route'
+import { routeP } from './logic/route'
 import { locationP } from './logic/location'
 import { errorPF, commonHandleError } from './logic/error'
 import TopNavigation from './components/TopNavigation'
@@ -18,19 +18,19 @@ import 'font-awesome-webpack'
 import './fa-styles.css';
 import './general-styles.css';
 
-const errorP = errorPF(contentP, l10nP);
-const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, contentP, naviContentP, backgroundColorP,
-    (buildVersion, urls, location, l10n, error, content, naviContent, backgroundColor) => {
+const errorP = errorPF(routeP.map('.content'), l10nP);
+const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, routeP,
+    (buildVersion, urls, location, l10n, error, route) => {
     const props = {location, l10n};
-        document.body.style.backgroundColor = backgroundColor ? backgroundColor : "white";
+        document.body.style.backgroundColor = route.backgroundColor ? route.backgroundColor : "white";
 
     return <div className="mainContainer">
-        <TopNavigation {...props} items={naviContent}/>
+        <TopNavigation {...props} items={route.navi}/>
         {error && (error.httpStatus || error.comment) && <div className={(error.type || 'error is-error ')+' topError'}>
             {error.comment}
         </div>}
         <div className="mainContent">
-            {content}
+            {route.content}
         </div>
         <div className="appFooter">
             <div className="build">
