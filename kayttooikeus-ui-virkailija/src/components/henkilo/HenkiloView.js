@@ -12,13 +12,6 @@ const HenkiloView = React.createClass({
         return {
         }
     },
-    componentWillMount: function () {
-        this.originalBackgroundColor = document.body.style.backgroundColor;
-        document.body.style.backgroundColor = "#f6f4f0";
-    },
-    componentWillUnmount: function () {
-        document.body.style.backgroundColor = this.originalBackgroundColor;
-    },
     render: function() {
         return (
         <div>
@@ -37,7 +30,8 @@ export const henkiloViewContentP = Bacon.combineWith(l10nP, locationP, (l10n, lo
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloView {...props}/>,
-        navi: henkiloNavi
+        navi: henkiloNavi,
+        backgroundColor: "#f6f4f0"
     };
 });
 

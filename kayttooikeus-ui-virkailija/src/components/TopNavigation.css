@@ -2,11 +2,13 @@
     position: relative;
     clear: both;
 }
+
 .topNavigation {
     position: absolute;
     top: 30px;
     right: 40px;
 }
+
 .topNavigation .navigationItem {
     padding: 10px;
     color: rgb(21, 158, 203);
@@ -14,9 +16,11 @@
     margin-left: 15px;
     border-radius: 2px;
 }
+
 .topNavigation a.navigationItem {
     cursor: pointer;
 }
+
 .topNavigation .navigationItem.currentView {
     background-color: rgb(21, 158, 203);
     border: 2px solid rgb(21, 158, 203);
@@ -45,7 +49,9 @@
     border-right: 1px solid #d5d5d5;
     border-top: 2px solid #159ECB;
     border-bottom: none;
-    padding-bottom: 9px;
+    padding-bottom: 10px;
+    background-color: white;
+    /*padding-bottom: 10px !important;*/
 }
 
 .tabs::after {

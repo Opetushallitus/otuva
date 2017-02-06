@@ -28,5 +28,6 @@ export const routeP = locationP.flatMapLatest(({path, queryString, params}) => {
 
 export const contentP = routeP.map('.content');
 export const naviContentP = routeP.map('.navi');
+export const backgroundColorP = routeP.map('.backgroundColor');
 export const routeErrorP =  Bacon.combineWith(l10nP, contentP, locationP, (l10n, content, location) => 
     content ? {} : { httpStatus: 404, comment: l10n.msg('ROUTE_NOT_FOUND', location.path)});

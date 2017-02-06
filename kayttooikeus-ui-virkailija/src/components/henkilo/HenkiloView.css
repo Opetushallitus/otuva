@@ -1,13 +1,6 @@
 .wrapper {
-    background-color: white;
-    border: #d5d5d5 solid 1px;
-    border-radius: 2px;
-
-    margin-bottom: 40px;
 }
 
 .tabs li.active {
-    background-color: white;
-    padding-bottom: 10px !important;
 }
 

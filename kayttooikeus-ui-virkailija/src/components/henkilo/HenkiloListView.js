@@ -1,10 +1,12 @@
 import React from 'react'
 import Bacon from 'baconjs'
+import Button from "button";
 
 import './HenkiloListView.css'
 
 import {l10nP} from '../../external/l10n'
 import {defaultNavi} from "../../external/navilists";
+import {navigateTo} from "../../logic/location";
 
 const HenkiloListView = React.createClass({
     render: function() {
@@ -16,6 +18,7 @@ const HenkiloListView = React.createClass({
                 </div>
                 <p>
                     TODO: taulukko tähän (oma tikettinsä)
+                    <Button action={() => navigateTo('/henkilo?oid=1.234.567.8910111213')}>Testihenkilöön</Button>
                 </p>
             </div>
         )

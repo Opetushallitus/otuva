@@ -29,7 +29,8 @@ export const henkiloDuplicatesViewContentP = Bacon.combineWith(l10nP, locationP,
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloDuplicatesView {...props}/>,
-        navi: henkiloNavi
+        navi: henkiloNavi,
+        backgroundColor: "#f6f4f0"
     };
 });
 
