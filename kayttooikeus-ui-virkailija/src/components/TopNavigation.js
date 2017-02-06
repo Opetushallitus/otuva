@@ -5,12 +5,16 @@ import {navigateTo} from '../logic/location'
 import Button from 'button';
 
 const TopNavigation = React.createClass({
+    propTypes: {
+        items: React.PropTypes.arrayOf(React.PropTypes.object),
+        oid: React.PropTypes.string
+    },
     render: function() {
         const L = this.props.l10n;
         return (
-            <div>
+            <div id="topNavigation">
                 {this.props.items && this.props.items.backLocation
-                    ? <Button action={this.changeViewAction(this.props.items.backLocation)}>&#8701; {L['TAKAISIN_LINKKI']}</Button>
+                    ? <Button href="#" action={this.changeViewAction(this.props.items.backLocation)}>&#8701; {L['TAKAISIN_LINKKI']}</Button>
                     : null}
                 <ul className="tabs">{ this.props.items.map(this.item)}</ul>
             </div>
@@ -36,9 +40,5 @@ const TopNavigation = React.createClass({
         };
     }
 });
-
-TopNavigation.propTypes = {
-    items: React.PropTypes.arrayOf(React.PropTypes.object)
-};
 
 export default TopNavigation;

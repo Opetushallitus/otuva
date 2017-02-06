@@ -90,6 +90,11 @@ label.required::after{
     clear: both;
 }
 
+#topNavigation a {
+    display: inline-block;
+    padding: 10px;
+}
+
 .appFooter {
     clear: both;
     margin-top: 40px;

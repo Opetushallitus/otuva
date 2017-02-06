@@ -260,6 +260,7 @@ input:disabled {
 
 .button, .large-button {
     padding: 10px 15px;
+    margin-right: 10px;
     background: #159ECB;
     border-radius: 2px;
     font-size: 15px;

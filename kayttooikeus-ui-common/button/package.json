@@ -9,6 +9,7 @@
   },
   "author": "",
   "dependencies": {
+    "classnames": "^2.2.5",
     "react": "^15.3.2"
   },
   "devDependencies": {
