@@ -15,12 +15,14 @@ import TopNavigation from './components/TopNavigation'
 import './reset.css'
 import './index.css'
 import 'font-awesome-webpack'
-import 'virkailija-styles/styles/styles.css';
+import './fa-styles.css';
+import './general-styles.css';
 
 const errorP = errorPF(contentP, l10nP);
 const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, contentP, naviContentP,
     (buildVersion, urls, location, l10n, error, content, naviContent) => {
     const props = {location, l10n};
+
     return <div className="mainContainer">
         <TopNavigation {...props} items={naviContent}/>
         {error && (error.httpStatus || error.comment) && <div className={(error.type || 'error is-error ')+' topError'}>

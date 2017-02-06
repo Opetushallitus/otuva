@@ -1,4 +1,4 @@
-import './HenkiloView.css'
+import './HenkiloViewUserContent.css'
 import React from 'react'
 import Columns from 'react-columns'
 import Field from 'field';
@@ -13,7 +13,7 @@ const HenkiloViewUserContent = React.createClass({
     render: function() {
         const L = this.props.l10n;
         return (
-            <div>
+            <div className="henkiloViewUserContentWrapper">
                 <Columns columns={3}>
                     <div>
                         <div className="header">
@@ -36,7 +36,17 @@ const HenkiloViewUserContent = React.createClass({
                         <div className="henkiloViewContent"></div>
                     </div>
                 </Columns>
-                <Button action={() => this.setState({readOnly: false})}>{L['MUOKKAA_LINKKI']}</Button>
+                {this.state.readOnly
+                    ? <div className="henkiloViewButtons">
+                        <Button action={() => this.setState({readOnly: false})}>{L['MUOKKAA_LINKKI']}</Button>
+                        <Button action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
+                        <Button action={() => {}}>{L['PASSIVOI_LINKKI']}</Button>
+                        <Button action={() => {}}>{L['LISAA_HAKA_LINKKI']}</Button>
+                    </div>
+                    : <div className="henkiloViewEditButtons">
+                        <Button action={() => {}}>{L['TALLENNA_LINKKI']}</Button>
+                        <Button action={() => {}}>{L['PERUUTA_LINKKI']}</Button>
+                    </div> }
             </div>
         )
     }

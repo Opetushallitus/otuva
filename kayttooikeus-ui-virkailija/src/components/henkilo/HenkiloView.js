@@ -10,16 +10,23 @@ import {locationP} from "../../logic/location";
 const HenkiloView = React.createClass({
     getInitialState: function() {
         return {
-            readOnly: true
         }
+    },
+    componentWillMount: function () {
+        this.originalBackgroundColor = document.body.style.backgroundColor;
+        document.body.style.backgroundColor = "#f6f4f0";
+    },
+    componentWillUnmount: function () {
+        document.body.style.backgroundColor = this.originalBackgroundColor;
     },
     render: function() {
         return (
+        <div>
             <div className="wrapper">
-                <form>
-                    <HenkiloViewUserContent {...this.props} />
-                </form>
+                <HenkiloViewUserContent {...this.props} readOnly={true} />
             </div>
+            <div className="wrapper">Another</div>
+        </div>
         )
     }
 });
