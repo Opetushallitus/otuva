@@ -20,8 +20,8 @@ const TopNavigation = React.createClass({
     item: function(value, idx, array) {
         let path = value.path;
         let key =  value.value;
-        if(array.oid) {
-            path += '?oid=' + array.oid;
+        if(this.props.oid) {
+            path += '?oid=' + this.props.oid;
         }
         const L = this.props.l10n;
         if (this.props.location.path === value.path || (!this.props.location.path && value.path === '/')) {

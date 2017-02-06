@@ -25,7 +25,6 @@ const HenkiloDuplicatesView = React.createClass({
 
 export const henkiloDuplicatesViewContentP = Bacon.combineWith(l10nP, locationP, (l10n, location) => {
     const props = {l10n};
-    henkiloNavi.oid = location.params['oid'];
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloDuplicatesView {...props}/>,

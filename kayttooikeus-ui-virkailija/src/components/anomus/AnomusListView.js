@@ -27,7 +27,6 @@ export const anomusListViewContentP = Bacon.combineWith(l10nP, (l10n) => {
     return {
         content: <AnomusListView {...props}/>,
         navi: defaultNavi,
-        backgroundColor: null
     };
 });
 
