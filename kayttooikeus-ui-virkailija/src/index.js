@@ -17,6 +17,7 @@ import './index.css'
 import 'font-awesome-webpack'
 import './fa-styles.css';
 import './general-styles.css';
+// import 'virkailija-style-guide/oph-styles.css'
 
 const errorP = errorPF(routeP.map('.content'), l10nP);
 const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, routeP,
