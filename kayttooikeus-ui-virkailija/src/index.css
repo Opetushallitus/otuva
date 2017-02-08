@@ -65,7 +65,7 @@ label.required::after{
     margin-right: 1%;
     position: relative;
     text-align: left;
-    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    /*font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;*/
 }
 
 .wrapper {

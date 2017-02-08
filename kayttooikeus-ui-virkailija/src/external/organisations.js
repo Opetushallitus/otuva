@@ -14,7 +14,7 @@ export const organizationHierarchyRootsP = Bacon.combineWith(orgsP, localeP, (or
     // First sort by name:
     orgs = R.sortBy(org => toLocalizedText(locale, org.organisaatio.nimi), orgs);
     const byOid = {};
-    var lowestLevel = null;
+    let lowestLevel = null;
     // Determine organization levels, lowest level, direct parent oid and map by oid:
     const mapOrg = org => {
         byOid[org.oid] = org;

@@ -1,24 +1,7 @@
-.button {
-    padding: 10px;
-    cursor: pointer;
-    border: 1px solid rgb(21, 158, 203);
-    white-space: nowrap;
-}
 .action {
     background-color: rgb(21, 158, 203);
     border: 1px solid rgb(21, 158, 203);
     color: #F5F5F5;
 }
-.button.cancel {
-    background: #E44E4E;
-    border-radius: 2px;
-    border: 1px #E44E4E;
-    color: #F5F5F5;
-}
-.button.disabled {
-    cursor: not-allowed;
-    border: 1px solid #CCCCCC;
-    background: #CCCCCC;
-    border-radius: 2px;
-    color: #F5F5F5;
-}
+
+/* Relies virkailija-styles on app for button styles */
