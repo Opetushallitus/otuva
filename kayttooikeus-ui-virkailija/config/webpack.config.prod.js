@@ -6,7 +6,8 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 var url = require('url');
 var paths = require('./paths');
-var copyWebpackPlugin = require('copy-webpack-plugin');
+var WebpackCopyPlugin = require('webpack-copy-plugin');
+var WatchIgnorePlugin = webpack.WatchIgnorePlugin;
 var getClientEnvironment = require('./env');
 
 function ensureSlash(path, needsSlash) {
@@ -176,6 +177,15 @@ module.exports = {
     ];
   },
   plugins: [
+    new WebpackCopyPlugin({
+        dirs: [
+            { from: 'node_modules/font-awesome/fonts', to: 'node_modules/fonts' },
+        ],
+        options: {},
+    }),
+    new WatchIgnorePlugin([
+        'node_modules/fonts'
+    ]),
     // Makes the public URL available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In production, it will be an empty string unless you specify "homepage"
@@ -227,11 +237,7 @@ module.exports = {
       }
     }),
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-    new ExtractTextPlugin('static/css/[name].[contenthash:8].css'),
-    // Because virkailija-styles-guide can't provide these
-    new copyWebpackPlugin([
-        {from: './node_modules/virkailija-style-guide/node_modules/font-awesome/fonts', to: './node_modules/fonts'}
-    ]),
+    new ExtractTextPlugin('static/css/[name].[contenthash:8].css')
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
