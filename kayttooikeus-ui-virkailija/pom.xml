@@ -74,6 +74,9 @@
                             <includes>
                                 <include>**/**</include>
                             </includes>
+                            <excludes>
+                                <exclude>fonts</exclude>
+                            </excludes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                     </filesets>
