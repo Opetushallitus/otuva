@@ -28,7 +28,7 @@ const KutsuConfirmation = React.createClass({
           <h2>{L['VIRKAILIJAN_LISAYS_ESIKATSELU_ALAOTSIKKO']}</h2>
           {this.props.addedOrgs.map(this.renderAddedOrg)}
           <div className="row">
-            <Button className="left action" action={this.sendInvitation}>
+            <Button confirm className="left" action={this.sendInvitation}>
               {L['VIRKAILIJAN_LISAYS_TALLENNA']}
             </Button>
           </div>

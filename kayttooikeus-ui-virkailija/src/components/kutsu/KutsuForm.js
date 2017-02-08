@@ -45,7 +45,7 @@ const KutsuForm = React.createClass({
                                    orgs={this.props.organizationsFlatInHierarchyOrder} addedOrgs={this.props.addedOrgs}/>
 
                 <div className="kutsuFormFooter row">
-                    <Button className="action" action={this.openConfirmationModal} disabled={!this.isValid()}>
+                    <Button confirm action={this.openConfirmationModal} disabled={!this.isValid()}>
                         {L['VIRKAILIJAN_LISAYS_TALLENNA']}
                     </Button> {this.isAddToOrganizationsNotificationShown() &&
                     <span className="missingInfo">
