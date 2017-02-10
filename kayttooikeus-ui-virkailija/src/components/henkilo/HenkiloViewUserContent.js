@@ -7,7 +7,8 @@ import Button from "button";
 const HenkiloViewUserContent = React.createClass({
     getInitialState: function() {
         return {
-            readOnly: this.props.readOnly
+            readOnly: this.props.readOnly,
+            showPassive: false
         }
     },
     render: function() {
@@ -28,6 +29,9 @@ const HenkiloViewUserContent = React.createClass({
                 ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo})
             )
         ).reduce((a,b) => a.concat(b));
+        const organisationInfo = this.props.organisations.map(organisation =>
+            ({name: organisation.organisaatio.nimi.fi, typesFlat: organisation.organisaatio.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
+            role: organisation.tehtavanimike, passive: organisation.passivoitu}));
         return (
             <div className="henkiloViewUserContentWrapper">
                 <Columns columns={3}>
@@ -61,7 +65,19 @@ const HenkiloViewUserContent = React.createClass({
                         <div className="header">
                             <h2>{L['HENKILO_ORGANISAATIOT_OTSIKKO']}</h2>
                         </div>
-                        <div className="henkiloViewContent">työtehtäviä</div>
+                        <input type="checkbox" onChange={() => this.setState({showPassive: !this.state.showPassive})} />
+                        <span> {L['HENKILO_NAYTA_PASSIIVISET_TEKSTI']}</span>
+                        <div className="henkiloViewContent">
+                            {organisationInfo.map((values, idx) =>
+                                !values.passive || this.state.showPassive
+                                    ? <div key={idx}>
+                                        <div><span>{values.name} ({values.typesFlat})</span></div>
+                                        <div><span>{L['HENKILO_TEHTAVANIMIKE']}: {values.role}</span></div>
+                                        <div><Button action={() => {}}>{L['HENKILO_PASSIVOI']}</Button></div>
+                                    </div>
+                                    : null
+                            )}
+                        </div>
                     </div>
                 </Columns>
                 {this.state.readOnly
