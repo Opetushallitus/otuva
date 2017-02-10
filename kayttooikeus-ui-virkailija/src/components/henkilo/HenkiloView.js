@@ -5,30 +5,30 @@ import HenkiloViewUserContent from './HenkiloViewUserContent'
 
 import {l10nP} from '../../external/l10n'
 import {henkiloNavi} from "../../external/navilists";
-import {locationP} from "../../logic/location";
+import {henkiloP} from "../../external/henkiloClient";
 
 const HenkiloView = React.createClass({
-    getInitialState: function() {
-        return {
-        }
-    },
     render: function() {
+        const henkiloResponse = this.props.henkilo;
+        const L = this.props.l10n;
         return (
-        <div>
-            <div className="wrapper">
-                <HenkiloViewUserContent {...this.props} readOnly={true} />
+            <div>
+                <div className="wrapper">
+                    {henkiloResponse.loaded
+                        ? <HenkiloViewUserContent {...this.props} {...henkiloResponse.result} readOnly={true} />
+                        : L['LADATAAN']}
+                </div>
+                <div className="wrapper">Another</div>
             </div>
-            <div className="wrapper">Another</div>
-        </div>
         )
-    }
+    },
 });
 
-export const henkiloViewContentP = Bacon.combineWith(l10nP, locationP, (l10n, location) => {
-    const props = {l10n};
+export const henkiloViewContentP = Bacon.combineWith(l10nP, henkiloP, (l10n, henkilo) => {
+    const props = {l10n, henkilo};
     henkiloNavi.backLocation = '/henkilo';
     return {
-        content: <HenkiloView {...props}/>,
+        content: <HenkiloView {...props} />,
         navi: henkiloNavi,
         backgroundColor: "#f6f4f0"
     };

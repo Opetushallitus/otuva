@@ -1,17 +1,17 @@
 import Bacon from "baconjs";
-import {urlsP} from "../external/urls";
-import dispatcher from "../logic/dispatcher";
 import {handleFetchError} from "../logic/fetchUtils";
-import {commonHandleError} from "../logic/error";
-
-const henkiloDispatcher = dispatcher();
+import {locationP} from "../logic/location";
 
 
+export const henkiloP = Bacon.combineWith(locationP, (location) => {
+    const oid = location.params['oid'];
+    return Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
+        .then(handleFetchError)
+        .then(response => response.json().then(json => ({loaded: true, result: json})))
+        .catch(e => console.error(e)));
+}).flatMap(result => result).toEventStream().toProperty({loaded: false, result: {}});
 
-export const fetchHenkiloByOid = oid =>
-    Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
-        .then(response => response.text())).then(handleFetchError).then(response => {
-        kutsuList.update();
-        return response;
-    });
+
+
+
 
