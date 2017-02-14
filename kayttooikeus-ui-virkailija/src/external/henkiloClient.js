@@ -1,6 +1,38 @@
 import Bacon from "baconjs";
 import {handleFetchError} from "../logic/fetchUtils";
 import {locationP} from "../logic/location";
+import {commonHandleError} from "../logic/error";
+import dispatcher from "../logic/dispatcher";
+
+const henkiloDispatcher = dispatcher();
+
+const henkilo = {
+    toProperty: (initialState = {
+        params: {
+        }
+    }) => Bacon.update(initialState,
+        [henkiloDispatcher.stream('update')], (current) => ({...current}),
+    ),
+    update: () => henkiloDispatcher.push('update'),
+};
+
+
+export const updateHenkilo = (basicInfo, contactInfo) => {
+    const payload = Object.assign(basicInfo, contactInfo);
+    const response = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo'),
+        {
+            method: 'PUT',
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+            headers: {'Content-Type': 'application/json'},
+        })
+        .then(handleFetchError).then(response => {
+            henkilo.update();
+            return response;
+        }));
+    response.onError(commonHandleError);
+    return response;
+};
 
 
 export const henkiloP = Bacon.combineWith(locationP, (location) => {
@@ -18,3 +50,4 @@ export const henkiloOrganisationsP = Bacon.combineWith(locationP, (location) => 
         .then(response => response.json().then(json => ({loaded: true, result: json})))
         .catch(e => console.error(e)));
 }).flatMap(result => result).toEventStream().toProperty({loaded: false, result: {}});
+

@@ -16,7 +16,7 @@ const HenkiloView = React.createClass({
             <div>
                 <div className="wrapper">
                     {henkiloResponse.loaded && henkiloOrgsResponse.loaded
-                        ? <HenkiloViewUserContent {...this.props} {...henkiloResponse.result}
+                        ? <HenkiloViewUserContent l10n={this.props.l10n} henkilo={henkiloResponse.result}
                                                   organisations={henkiloOrgsResponse.result} readOnly={true} />
                         : L['LADATAAN']}
                 </div>

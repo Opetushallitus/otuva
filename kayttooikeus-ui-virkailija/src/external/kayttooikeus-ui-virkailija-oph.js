@@ -11,5 +11,6 @@ export default {
     "kayttooikeus-service.kayttooikeusryhma.forHenkilo.inOrganisaatio": "/kayttooikeus-service/kayttooikeusryhma/$1/$2",
     "kayttooikeus-service.virkailija-ui.basePath": "/kayttooikeus-service/virkailija",
 
-    "oppijanumerorekisteri-service.henkilo.oid": "/oppijanumerorekisteri-service/henkilo/$1"
+    "oppijanumerorekisteri-service.henkilo.oid": "/oppijanumerorekisteri-service/henkilo/$1",
+    "oppijanumerorekisteri-service.henkilo": "/oppijanumerorekisteri-service/henkilo"
 }

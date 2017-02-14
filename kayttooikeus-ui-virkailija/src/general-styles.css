@@ -257,3 +257,7 @@ input:disabled {
     font-size: 14px;
     color: #00526C;
 }
+
+.strong {
+    font-weight: bold;
+}

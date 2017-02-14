@@ -9,18 +9,25 @@ const HenkiloViewUserContent = React.createClass({
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
+            henkiloUpdate: this.props.henkilo,
             basicInfo: [
-                {translation: 'HENKILO_ETUNIMET', value: this.props.etunimet},
-                {translation: 'HENKILO_SUKUNIMI', value:  this.props.sukunimi},
-                {translation: 'HENKILO_SYNTYMAAIKA', value:  this.props.syntymaaika},
-                this.props.kansalaisuus && this.props.kansalaisuus.length
-                    ? this.props.kansalaisuus.map(values => ({translation: 'HENKILO_KANSALAISUUS', value: values.kansalaisuusKoodi}))
-                    : {translation: 'HENKILO_KANSALAISUUS', value: null},
-                {translation: 'HENKILO_AIDINKIELI', value:  this.props.aidinkieli && this.props.aidinkieli.kieliTyyppi},
-                {translation: 'HENKILO_KAYTTAJANIMI', value:  this.props.kayttajanimi},
-                {translation: 'HENKILO_ASIOINTIKIELI', value:  this.props.asiointiKieli && this.props.asiointiKieli.kieliTyyppi},
+                {translation: 'HENKILO_ETUNIMET', value: this.props.henkilo.etunimet, inputValue: 'etunimet'},
+                {translation: 'HENKILO_SUKUNIMI', value: this.props.henkilo.sukunimi, inputValue: 'sukunimi'},
+                {translation: 'HENKILO_SYNTYMAAIKA', value: this.props.henkilo.syntymaaika, inputValue: 'syntymaaika'},
+                this.props.henkilo.kansalaisuus && this.props.henkilo.kansalaisuus.length
+                    ? this.props.henkilo.kansalaisuus.map(values => ({translation: 'HENKILO_KANSALAISUUS',
+                        value: values.kansalaisuusKoodi, inputValue: 'kansalaisuus.kansalaisuuskoodi'}))
+                    : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.kansalaisuuskoodi'},
+                {translation: 'HENKILO_AIDINKIELI', value: this.props.henkilo.aidinkieli && this.props.henkilo.aidinkieli.kieliTyyppi,
+                    inputValue: 'aidinkieli.kieliTyyppi'},
+                {translation: 'HENKILO_HETU', value: this.props.henkilo.hetu, showOnlyOnWrite: true, inputValue: 'hetu'},
+                {translation: 'HENKILO_KAYTTAJANIMI', value: this.props.henkilo.kayttajanimi, inputValue: 'kayttajanimi'},
+                {translation: 'HENKILO_ASIOINTIKIELI', value: this.props.henkilo.asiointiKieli && this.props.henkilo.asiointiKieli.kieliTyyppi,
+                    inputValue: 'asiointiKieli.kieliTyyppi'},
+                {translation: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: true},
+                {translation: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
             ],
-            contactInfo: this.props.yhteystiedotRyhma.map(yhteystiedotRyhma =>
+            contactInfo: this.props.henkilo.yhteystiedotRyhma.map(yhteystiedotRyhma =>
                 yhteystiedotRyhma.yhteystieto.map(yhteystieto =>
                     ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo})
                 )
@@ -46,10 +53,14 @@ const HenkiloViewUserContent = React.createClass({
                         </div>
                         <div className="henkiloViewContent">
                             {this.state.basicInfo.map((values, idx) =>
-                            <Columns columns={2}  key={idx}>
-                                <span>{L[values.translation]} </span>
-                                <Field readOnly={this.state.readOnly}>{values.value}</Field>
-                            </Columns>
+                            !values.showOnlyOnWrite || !this.state.readOnly
+                                ? <div key={idx} id={values.translation}>
+                                    <Columns columns={2}>
+                                        <span className="strong">{L[values.translation]} </span>
+                                        <Field inputValue={values.inputValue} changeAction={this._updateModelField} readOnly={this.state.readOnly}>{values.value}</Field>
+                                    </Columns>
+                                </div>
+                                : null
                             )}
                         </div>
                     </div>
@@ -59,10 +70,12 @@ const HenkiloViewUserContent = React.createClass({
                         </div>
                         <div className="henkiloViewContent">
                             {this.state.contactInfo.map((values, idx) =>
-                                <Columns columns={2} key={idx}>
-                                    <span>{L[values.translation]} </span>
-                                    <Field readOnly={this.state.readOnly}>{values.value}</Field>
-                                </Columns>
+                                <div key={idx} id={values.translation}>
+                                    <Columns columns={2}>
+                                        <span className="strong">{L[values.translation]} </span>
+                                        <Field readOnly={this.state.readOnly}>{values.value}</Field>
+                                    </Columns>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -76,8 +89,12 @@ const HenkiloViewUserContent = React.createClass({
                             {this.state.organisationInfo.map((values, idx) =>
                                 !values.passive || this.state.showPassive
                                     ? <div key={idx}>
-                                        <div><span>{values.name} ({values.typesFlat})</span></div>
-                                        <div><span>{L['HENKILO_TEHTAVANIMIKE']}: {values.role}</span></div>
+                                        <div><span className="strong">{values.name} ({values.typesFlat})</span></div>
+                                        <div>
+                                            <span className="strong">{L['HENKILO_TEHTAVANIMIKE']}:</span>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <span>{values.role}</span>
+                                        </div>
                                         {!this.state.readOnly
                                             ? <div><Button action={() => {}}>{L['HENKILO_PASSIVOI']}</Button></div>
                                             : null}
@@ -89,14 +106,14 @@ const HenkiloViewUserContent = React.createClass({
                 </Columns>
                 {this.state.readOnly
                     ? <div className="henkiloViewButtons">
-                        <Button action={this._edit}>{L['MUOKKAA_LINKKI']}</Button>
-                        <Button action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
-                        <Button action={() => {}}>{L['PASSIVOI_LINKKI']}</Button>
-                        <Button action={() => {}}>{L['LISAA_HAKA_LINKKI']}</Button>
+                        <Button big action={this._edit}>{L['MUOKKAA_LINKKI']}</Button>
+                        <Button big action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
+                        <Button big action={() => {}}>{L['PASSIVOI_LINKKI']}</Button>
+                        <Button big action={() => {}}>{L['LISAA_HAKA_LINKKI']}</Button>
                     </div>
-                    : <div className="henkiloViewEditButtons right">
-                        <Button action={() => {}}>{L['TALLENNA_LINKKI']}</Button>
-                        <Button action={this._discard}>{L['PERUUTA_LINKKI']}</Button>
+                    : <div className="henkiloViewEditButtons">
+                        <Button big action={this._discard}>{L['PERUUTA_LINKKI']}</Button>
+                        <Button confirm big action={this._update}>{L['TALLENNA_LINKKI']}</Button>
                     </div>
                 }
             </div>
@@ -117,6 +134,32 @@ const HenkiloViewUserContent = React.createClass({
             contactInfo: this._preEditData.contactInfo,
             organisationInfo: this._preEditData.organisationInfo,
         });
+    },
+    _update: function () {
+
+    },
+    _updateModelField: function (event) {
+        const value = event.target.value;
+        const fieldpath = event.target.name;
+        const newUpdatehenkilo = Object.assign({}, this.state.henkiloUpdate);
+        this._updateFieldByDotAnnotation(newUpdatehenkilo, fieldpath, value);
+        this.setState({
+            henkiloUpdate: newUpdatehenkilo,
+        })
+    },
+    _updateFieldByDotAnnotation: function(obj, path, value) {
+        let schema = obj;  // a moving reference to internal objects within obj
+        const pList = path.split('.');
+        const len = pList.length;
+        for(let i = 0; i < len-1; i++) {
+            let elem = pList[i];
+            if( !schema[elem] ) {
+                schema[elem] = {};
+            }
+            schema = schema[elem];
+        }
+
+        schema[pList[len-1]] = value;
     }
 });
 

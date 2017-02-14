@@ -5,7 +5,9 @@ import classNames from 'classnames/bind';
 
 const Field = React.createClass({
     propTypes: {
-        readOnly: React.PropTypes.bool
+        readOnly: React.PropTypes.bool,
+        changeAction: React.PropTypes.func,
+        inputValue: React.PropTypes.string
     },
     getInitialState: function () {
         return {
@@ -19,7 +21,8 @@ const Field = React.createClass({
         return (
             this.props.readOnly
                 ? <span className={className}>{this.props.children}</span>
-                : <input className={className} defaultValue={this.props.children} />
+                : <input className={className} name={this.props.inputValue} onChange={this.props.changeAction}
+                         defaultValue={this.props.children} />
         )
     }
 });

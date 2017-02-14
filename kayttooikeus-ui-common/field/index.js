@@ -20,7 +20,9 @@ var Field = _react2.default.createClass({
     displayName: 'Field',
 
     propTypes: {
-        readOnly: _react2.default.PropTypes.bool
+        readOnly: _react2.default.PropTypes.bool,
+        changeAction: _react2.default.PropTypes.func,
+        inputValue: _react2.default.PropTypes.string
     },
     getInitialState: function getInitialState() {
         return {
@@ -35,7 +37,8 @@ var Field = _react2.default.createClass({
             'span',
             { className: className },
             this.props.children
-        ) : _react2.default.createElement('input', { className: className, defaultValue: this.props.children });
+        ) : _react2.default.createElement('input', { className: className, name: this.props.inputValue, onChange: this.props.changeAction,
+            defaultValue: this.props.children });
     }
 });
 exports.default = Field;
