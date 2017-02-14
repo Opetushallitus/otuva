@@ -5,6 +5,14 @@ import Field from 'field';
 import Button from "button";
 
 const HenkiloViewUserContent = React.createClass({
+    propTypes: function () {
+        return {
+            l10n: React.PropTypes.object.isRequired,
+            henkilo: React.PropTypes.object.isRequired,
+            readOnly: React.PropTypes.bool.isRequired,
+            showPassive: React.PropTypes.bool
+        }
+    },
     getInitialState: function() {
         this.henkiloUpdate = this.props.henkilo;
         return {
@@ -20,26 +28,22 @@ const HenkiloViewUserContent = React.createClass({
                     : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.0.kansalaisuusKoodi'},
                 {translation: 'HENKILO_AIDINKIELI', value: this.props.henkilo.aidinkieli && this.props.henkilo.aidinkieli.kieliTyyppi,
                     inputValue: 'aidinkieli.kieliTyyppi'},
-                {translation: 'HENKILO_HETU', value: this.props.henkilo.hetu, showOnlyOnWrite: true, inputValue: 'hetu'},
+                {translation: 'HENKILO_HETU', value: this.props.henkilo.hetu, inputValue: 'hetu'},
                 {translation: 'HENKILO_KAYTTAJANIMI', value: this.props.henkilo.kayttajanimi, inputValue: 'kayttajanimi'},
                 {translation: 'HENKILO_ASIOINTIKIELI', value: this.props.henkilo.asiointiKieli && this.props.henkilo.asiointiKieli.kieliTyyppi,
                     inputValue: 'asiointiKieli.kieliTyyppi'},
                 {translation: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: true},
                 {translation: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
             ],
-            contactInfo: this.props.henkilo.yhteystiedotRyhma.map(yhteystiedotRyhma =>
-                yhteystiedotRyhma.yhteystieto.map(yhteystieto =>
-                    ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo})
+            contactInfo: this.props.henkilo.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) =>
+                yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
+                    ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
+                        inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'})
                 )
             ).reduce((a,b) => a.concat(b)),
             organisationInfo: this.props.organisations.map(organisation =>
                 ({name: organisation.organisaatio.nimi.fi, typesFlat: organisation.organisaatio.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
                     role: organisation.tehtavanimike, passive: organisation.passivoitu}))
-        }
-    },
-    propTypes: function () {
-        return {
-            l10n: React.PropTypes.object.isRequired
         }
     },
     render: function() {
@@ -57,7 +61,8 @@ const HenkiloViewUserContent = React.createClass({
                                 ? <div key={idx} id={values.translation}>
                                     <Columns columns={2}>
                                         <span className="strong">{L[values.translation]} </span>
-                                        <Field inputValue={values.inputValue} changeAction={this._updateModelField} readOnly={this.state.readOnly}>{values.value}</Field>
+                                        <Field inputValue={values.inputValue} changeAction={this._updateModelField}
+                                               readOnly={this.state.readOnly}>{values.value}</Field>
                                     </Columns>
                                 </div>
                                 : null
@@ -73,7 +78,8 @@ const HenkiloViewUserContent = React.createClass({
                                 <div key={idx} id={values.translation}>
                                     <Columns columns={2}>
                                         <span className="strong">{L[values.translation]} </span>
-                                        <Field readOnly={this.state.readOnly}>{values.value}</Field>
+                                        <Field inputValue={values.inputValue} changeAction={this._updateModelField}
+                                               readOnly={this.state.readOnly}>{values.value}</Field>
                                     </Columns>
                                 </div>
                             )}
