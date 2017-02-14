@@ -16,9 +16,7 @@ const henkilo = {
     update: () => henkiloDispatcher.push('update'),
 };
 
-
-export const updateHenkilo = (basicInfo, contactInfo) => {
-    const payload = Object.assign(basicInfo, contactInfo);
+export const updateHenkilo = payload => {
     const response = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo'),
         {
             method: 'PUT',
@@ -34,7 +32,6 @@ export const updateHenkilo = (basicInfo, contactInfo) => {
     return response;
 };
 
-
 export const henkiloP = Bacon.combineWith(locationP, (location) => {
     const oid = location.params['oid'];
     return Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
@@ -45,7 +42,7 @@ export const henkiloP = Bacon.combineWith(locationP, (location) => {
 
 export const henkiloOrganisationsP = Bacon.combineWith(locationP, (location) => {
     const oid = location.params['oid'];
-    return Bacon.fromPromise(fetch(window.url('kayttooikeus-service.henkilo.organisaatios', oid), {credentials: 'same-origin'})
+    return Bacon.fromPromise(fetch(window.url('kayttooikeus-service.henkilo.organisaatiohenkilos', oid), {credentials: 'same-origin'})
         .then(handleFetchError)
         .then(response => response.json().then(json => ({loaded: true, result: json})))
         .catch(e => console.error(e)));

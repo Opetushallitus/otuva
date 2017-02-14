@@ -3,6 +3,7 @@ import React from 'react'
 import Columns from 'react-columns'
 import Field from 'field';
 import Button from "button";
+import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewUserContent = React.createClass({
     propTypes: function () {
@@ -42,7 +43,7 @@ const HenkiloViewUserContent = React.createClass({
                 )
             ).reduce((a,b) => a.concat(b)),
             organisationInfo: this.props.organisations.map(organisation =>
-                ({name: organisation.organisaatio.nimi.fi, typesFlat: organisation.organisaatio.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
+                ({name: organisation.organisaatioOid, typesFlat: organisation.organisaatioHenkiloTyyppi && organisation.organisaatioHenkiloTyyppi.reduce((type1, type2) => type1.concat(', ', type2)),
                     role: organisation.tehtavanimike, passive: organisation.passivoitu}))
         }
     },
@@ -142,7 +143,7 @@ const HenkiloViewUserContent = React.createClass({
         });
     },
     _update: function () {
-
+        updateHenkilo(this.henkiloUpdate);
     },
     _updateModelField: function (event) {
         const value = event.target.value;
