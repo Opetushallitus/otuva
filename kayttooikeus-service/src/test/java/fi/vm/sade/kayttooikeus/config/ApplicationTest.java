@@ -16,7 +16,6 @@ import static fi.vm.sade.kayttooikeus.util.FreePortUtil.portNumberBySystemProper
 @Inherited
 @SpringBootTest(classes = Application.class,
     properties = {"mock.ldap=true",
-        "spring.config.location=classpath:/application.yml" // <- won't start whithout this, should?
     })
 @TestExecutionListeners(mergeMode = MergeMode.MERGE_WITH_DEFAULTS,
         listeners = {ApplicationTest.SetEnvTestExecutionListener.class})

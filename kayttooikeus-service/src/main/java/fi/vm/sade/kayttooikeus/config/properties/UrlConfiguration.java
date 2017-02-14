@@ -11,6 +11,7 @@ public class UrlConfiguration extends OphProperties {
     @Autowired
     public UrlConfiguration(Environment environment) {
         addFiles("/kayttooikeus-service-oph.properties");
-        addOptionalFiles(environment.getProperty("spring.config.location"));
+        addOverride("host-cas", environment.getRequiredProperty("host.host-cas"));
+        addOverride("host-virkailija", environment.getRequiredProperty("host.host-virkailija"));
     }
 }

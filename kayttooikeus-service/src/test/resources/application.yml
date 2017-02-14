@@ -28,6 +28,10 @@ cas:
   send-renew: false
   key: kayttooikeus-service
 
+host:
+  host-virkailija: localhost
+  host-cas: localhost
+
 service-users:
   viestinta:
     username: test
