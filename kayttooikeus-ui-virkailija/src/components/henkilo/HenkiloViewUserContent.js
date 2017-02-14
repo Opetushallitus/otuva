@@ -15,9 +15,9 @@ const HenkiloViewUserContent = React.createClass({
                 {translation: 'HENKILO_SUKUNIMI', value: this.props.henkilo.sukunimi, inputValue: 'sukunimi'},
                 {translation: 'HENKILO_SYNTYMAAIKA', value: this.props.henkilo.syntymaaika, inputValue: 'syntymaaika'},
                 this.props.henkilo.kansalaisuus && this.props.henkilo.kansalaisuus.length
-                    ? this.props.henkilo.kansalaisuus.map(values => ({translation: 'HENKILO_KANSALAISUUS',
-                        value: values.kansalaisuusKoodi, inputValue: 'kansalaisuus.kansalaisuuskoodi'}))
-                    : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.kansalaisuuskoodi'},
+                    ? this.props.henkilo.kansalaisuus.map((values, idx) => ({translation: 'HENKILO_KANSALAISUUS',
+                        value: values.kansalaisuusKoodi, inputValue: 'kansalaisuus.' + idx + '.kansalaisuusKoodi'}))
+                    : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.0.kansalaisuusKoodi'},
                 {translation: 'HENKILO_AIDINKIELI', value: this.props.henkilo.aidinkieli && this.props.henkilo.aidinkieli.kieliTyyppi,
                     inputValue: 'aidinkieli.kieliTyyppi'},
                 {translation: 'HENKILO_HETU', value: this.props.henkilo.hetu, showOnlyOnWrite: true, inputValue: 'hetu'},
