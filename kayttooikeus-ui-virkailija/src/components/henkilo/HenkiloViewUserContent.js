@@ -6,10 +6,10 @@ import Button from "button";
 
 const HenkiloViewUserContent = React.createClass({
     getInitialState: function() {
+        this.henkiloUpdate = this.props.henkilo;
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
-            henkiloUpdate: this.props.henkilo,
             basicInfo: [
                 {translation: 'HENKILO_ETUNIMET', value: this.props.henkilo.etunimet, inputValue: 'etunimet'},
                 {translation: 'HENKILO_SUKUNIMI', value: this.props.henkilo.sukunimi, inputValue: 'sukunimi'},
@@ -141,11 +141,7 @@ const HenkiloViewUserContent = React.createClass({
     _updateModelField: function (event) {
         const value = event.target.value;
         const fieldpath = event.target.name;
-        const newUpdatehenkilo = Object.assign({}, this.state.henkiloUpdate);
-        this._updateFieldByDotAnnotation(newUpdatehenkilo, fieldpath, value);
-        this.setState({
-            henkiloUpdate: newUpdatehenkilo,
-        })
+        this._updateFieldByDotAnnotation(this.henkiloUpdate, fieldpath, value);
     },
     _updateFieldByDotAnnotation: function(obj, path, value) {
         let schema = obj;  // a moving reference to internal objects within obj
