@@ -6,6 +6,8 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 var url = require('url');
 var paths = require('./paths');
+var WebpackCopyPlugin = require('webpack-copy-plugin');
+var WatchIgnorePlugin = webpack.WatchIgnorePlugin;
 var getClientEnvironment = require('./env');
 
 function ensureSlash(path, needsSlash) {
@@ -175,6 +177,14 @@ module.exports = {
     ];
   },
   plugins: [
+    // Because virkailija-styles-guide can't provide the fa fonts
+    new WebpackCopyPlugin({
+        dirs: [
+            { from: 'node_modules/font-awesome/fonts', to: 'node_modules/fonts' },
+        ],
+        options: {},
+    }),
+    new WatchIgnorePlugin([/(node_modules.fonts)/]),
     // Makes the public URL available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In production, it will be an empty string unless you specify "homepage"

@@ -7,6 +7,8 @@ var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 var InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 var getClientEnvironment = require('./env');
+var WebpackCopyPlugin = require('webpack-copy-plugin');
+var WatchIgnorePlugin = webpack.WatchIgnorePlugin;
 var paths = require('./paths');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -27,7 +29,7 @@ module.exports = {
   // We don't use source maps here because they can be confusing:
   // https://github.com/facebookincubator/create-react-app/issues/343#issuecomment-237241875
   // You may want 'cheap-module-source-map' instead if you prefer source maps.
-  devtool: 'eval',
+  devtool: 'cheap-module-source-map',
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
   // The first two entry points enable "hot" CSS and auto-refreshes for JS.
@@ -161,6 +163,14 @@ module.exports = {
     ];
   },
   plugins: [
+    // Because virkailija-styles-guide can't provide the fa fonts
+    new WebpackCopyPlugin({
+        dirs: [
+            { from: 'node_modules/font-awesome/fonts', to: 'node_modules/fonts' },
+        ],
+        options: {},
+    }),
+    new WatchIgnorePlugin([/(node_modules.fonts)/]),
     // Makes the public URL available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.
