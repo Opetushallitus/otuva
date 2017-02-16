@@ -13,5 +13,6 @@ public class UrlConfiguration extends OphProperties {
         addFiles("/kayttooikeus-service-oph.properties");
         addOverride("host-cas", environment.getRequiredProperty("host.host-cas"));
         addOverride("host-virkailija", environment.getRequiredProperty("host.host-virkailija"));
+        frontProperties.put("lokalisointi.baseUrl", environment.getRequiredProperty("front.lokalisointi.baseUrl"));
     }
 }
