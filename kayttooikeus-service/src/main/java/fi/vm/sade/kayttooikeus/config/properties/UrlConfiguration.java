@@ -4,6 +4,7 @@ import fi.vm.sade.properties.OphProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 @Configuration
 public class UrlConfiguration extends OphProperties {
@@ -13,6 +14,8 @@ public class UrlConfiguration extends OphProperties {
         addFiles("/kayttooikeus-service-oph.properties");
         addOverride("host-cas", environment.getRequiredProperty("host.host-cas"));
         addOverride("host-virkailija", environment.getRequiredProperty("host.host-virkailija"));
-        frontProperties.put("lokalisointi.baseUrl", environment.getRequiredProperty("front.lokalisointi.baseUrl"));
+        if(!StringUtils.isEmpty(environment.getProperty("front.lokalisointi.baseUrl"))) {
+            frontProperties.put("lokalisointi.baseUrl", environment.getProperty("front.lokalisointi.baseUrl"));
+        }
     }
 }
