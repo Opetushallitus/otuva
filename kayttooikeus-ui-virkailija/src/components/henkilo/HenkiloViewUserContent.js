@@ -15,36 +15,38 @@ const HenkiloViewUserContent = React.createClass({
         }
     },
     getInitialState: function() {
-        this.henkiloUpdate = this.props.henkilo;
+        const organisations = this.props.organisations.map(organisation => organisation.result);
+        const kayttajatieto = this.props.kayttajatieto.result;
+        this.henkiloUpdate = this.props.henkilo.result;
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
             basicInfo: [
-                {translation: 'HENKILO_ETUNIMET', value: this.props.henkilo.etunimet, inputValue: 'etunimet'},
-                {translation: 'HENKILO_SUKUNIMI', value: this.props.henkilo.sukunimi, inputValue: 'sukunimi'},
-                {translation: 'HENKILO_SYNTYMAAIKA', value: this.props.henkilo.syntymaaika, inputValue: 'syntymaaika'},
-                this.props.henkilo.kansalaisuus && this.props.henkilo.kansalaisuus.length
-                    ? this.props.henkilo.kansalaisuus.map((values, idx) => ({translation: 'HENKILO_KANSALAISUUS',
+                {translation: 'HENKILO_ETUNIMET', value: this.henkiloUpdate.etunimet, inputValue: 'etunimet'},
+                {translation: 'HENKILO_SUKUNIMI', value: this.henkiloUpdate.sukunimi, inputValue: 'sukunimi'},
+                {translation: 'HENKILO_SYNTYMAAIKA', value: this.henkiloUpdate.syntymaaika, inputValue: 'syntymaaika'},
+                this.henkiloUpdate.kansalaisuus && this.henkiloUpdate.kansalaisuus.length
+                    ? this.henkiloUpdate.kansalaisuus.map((values, idx) => ({translation: 'HENKILO_KANSALAISUUS',
                         value: values.kansalaisuusKoodi, inputValue: 'kansalaisuus.' + idx + '.kansalaisuusKoodi'}))
                     : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.0.kansalaisuusKoodi'},
-                {translation: 'HENKILO_AIDINKIELI', value: this.props.henkilo.aidinkieli && this.props.henkilo.aidinkieli.kieliTyyppi,
+                {translation: 'HENKILO_AIDINKIELI', value: this.henkiloUpdate.aidinkieli && this.henkiloUpdate.aidinkieli.kieliTyyppi,
                     inputValue: 'aidinkieli.kieliTyyppi'},
-                {translation: 'HENKILO_HETU', value: this.props.henkilo.hetu, inputValue: 'hetu'},
-                {translation: 'HENKILO_KAYTTAJANIMI', value: this.props.henkilo.kayttajanimi, inputValue: 'kayttajanimi'},
-                {translation: 'HENKILO_ASIOINTIKIELI', value: this.props.henkilo.asiointiKieli && this.props.henkilo.asiointiKieli.kieliTyyppi,
+                {translation: 'HENKILO_HETU', value: this.henkiloUpdate.hetu, inputValue: 'hetu'},
+                {translation: 'HENKILO_KAYTTAJANIMI', value: kayttajatieto.username, inputValue: 'kayttajanimi'},
+                {translation: 'HENKILO_ASIOINTIKIELI', value: this.henkiloUpdate.asiointiKieli && this.henkiloUpdate.asiointiKieli.kieliTyyppi,
                     inputValue: 'asiointiKieli.kieliTyyppi'},
                 {translation: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: true},
                 {translation: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
             ],
-            contactInfo: this.props.henkilo.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) =>
+            contactInfo: this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) =>
                 yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
                     ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
                         inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'})
                 )
             ).reduce((a,b) => a.concat(b)),
-            organisationInfo: this.props.organisations.map(organisation =>
-                ({name: organisation.organisaatioOid, typesFlat: organisation.organisaatioHenkiloTyyppi && organisation.organisaatioHenkiloTyyppi.reduce((type1, type2) => type1.concat(', ', type2)),
-                    role: organisation.tehtavanimike, passive: organisation.passivoitu}))
+            organisationInfo: organisations.map(organisation =>
+                ({name: organisation.nimi.fi, typesFlat: organisation.tyypit && organisation.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
+                    role: organisation.orgHenkilo.tehtavanimike, passive: organisation.orgHenkilo.passivoitu}))
         }
     },
     render: function() {
