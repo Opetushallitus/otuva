@@ -3,7 +3,7 @@ import React from 'react'
 import Bacon from 'baconjs'
 import HenkiloViewUserContent from './HenkiloViewUserContent'
 
-import {l10nP} from '../../external/l10n'
+import {l10nP, localeP} from '../../external/l10n'
 import {henkiloNavi} from "../../external/navilists";
 import {henkiloP, henkiloOrganisationsP, kayttajatietoP} from "../../external/henkiloClient";
 import {koodistoKieliP} from "../../external/koodistoClient";
@@ -23,7 +23,7 @@ const HenkiloView = React.createClass({
                         && koodistoKieliResponse.loaded
                             ? <HenkiloViewUserContent l10n={L} henkilo={henkiloResponse} kayttajatieto={kayttajatietoResponse}
                                                       organisations={henkiloOrgsResponse} readOnly={true}
-                                                      koodistoKieli={koodistoKieliResponse} />
+                                                      koodistoKieli={koodistoKieliResponse} locale={this.props.locale} />
                             : L['LADATAAN']
                     }
                 </div>
@@ -34,8 +34,9 @@ const HenkiloView = React.createClass({
 });
 
 export const henkiloViewContentP = Bacon.combineWith(l10nP, henkiloP, henkiloOrganisationsP, kayttajatietoP, koodistoKieliP,
-    (l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli) => {
-    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli};
+    localeP,
+    (l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale) => {
+    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale};
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloView {...props} />,

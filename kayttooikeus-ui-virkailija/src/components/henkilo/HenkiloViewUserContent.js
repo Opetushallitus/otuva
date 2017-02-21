@@ -11,7 +11,8 @@ const HenkiloViewUserContent = React.createClass({
             l10n: React.PropTypes.object.isRequired,
             henkilo: React.PropTypes.object.isRequired,
             readOnly: React.PropTypes.bool.isRequired,
-            showPassive: React.PropTypes.bool
+            showPassive: React.PropTypes.bool,
+            locale: React.PropTypes.string.isRequired
         }
     },
     getInitialState: function() {
@@ -43,9 +44,9 @@ const HenkiloViewUserContent = React.createClass({
                     inputValue: 'aidinkieli.kieliTyyppi'},
                 {translation: 'HENKILO_HETU', value: this.henkiloUpdate.hetu, inputValue: 'hetu'},
                 {translation: 'HENKILO_KAYTTAJANIMI', value: kayttajatieto.username, inputValue: 'kayttajanimi'},
-                {translation: 'HENKILO_ASIOINTIKIELI', data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi['fi']})),
+                {translation: 'HENKILO_ASIOINTIKIELI', data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'asiointiKieli.kieliKoodi', value: this.henkiloUpdate.asiointiKieli && this.henkiloUpdate.asiointiKieli.kieliTyyppi,
-                    selectValue: this.henkiloUpdate.asiointiKieli && this.henkiloUpdate.asiointiKieli.kieliTyyppi},
+                    selectValue: this.henkiloUpdate.asiointiKieli && this.henkiloUpdate.asiointiKieli.kieliKoodi},
                 {translation: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: true},
                 {translation: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
             ],
@@ -56,7 +57,7 @@ const HenkiloViewUserContent = React.createClass({
                 )
             ).reduce((a,b) => a.concat(b)),
             organisationInfo: organisations.map(organisation =>
-                ({name: organisation.nimi.fi, typesFlat: organisation.tyypit && organisation.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
+                ({name: organisation.nimi[this.props.locale], typesFlat: organisation.tyypit && organisation.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
                     role: organisation.orgHenkilo.tehtavanimike, passive: organisation.orgHenkilo.passivoitu})),
         }
     },
@@ -76,7 +77,8 @@ const HenkiloViewUserContent = React.createClass({
                                     <Columns columns={2}>
                                         <span className="strong">{L[values.translation]}</span>
                                         <Field inputValue={values.inputValue} changeAction={this._updateModelField}
-                                               readOnly={this.state.readOnly} data={values.data} selectValue={values.selectValue}>
+                                               readOnly={this.state.readOnly} data={values.data}
+                                               selectValue={values.selectValue}>
                                             {values.value}
                                         </Field>
                                     </Columns>
