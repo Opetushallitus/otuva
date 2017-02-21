@@ -6,6 +6,7 @@ import HenkiloViewUserContent from './HenkiloViewUserContent'
 import {l10nP} from '../../external/l10n'
 import {henkiloNavi} from "../../external/navilists";
 import {henkiloP, henkiloOrganisationsP, kayttajatietoP} from "../../external/henkiloClient";
+import {koodistoKieliP} from "../../external/koodistoClient";
 
 const HenkiloView = React.createClass({
     render: function() {
@@ -13,13 +14,18 @@ const HenkiloView = React.createClass({
         const henkiloOrgsResponse = this.props.henkiloOrgs;
         const L = this.props.l10n;
         const kayttajatietoResponse = this.props.kayttajatieto;
+        const koodistoKieliResponse = this.props.koodistoKieli;
         return (
             <div>
                 <div className="wrapper">
-                    {henkiloResponse.loaded && henkiloOrgsResponse.map(r => r.loaded) && kayttajatietoResponse.loaded
-                        ? <HenkiloViewUserContent l10n={L} henkilo={henkiloResponse} kayttajatieto={kayttajatietoResponse}
-                                                  organisations={henkiloOrgsResponse} readOnly={true} />
-                        : L['LADATAAN']}
+                    {
+                        henkiloResponse.loaded && henkiloOrgsResponse.map(r => r.loaded) && kayttajatietoResponse.loaded
+                        && koodistoKieliResponse.loaded
+                            ? <HenkiloViewUserContent l10n={L} henkilo={henkiloResponse} kayttajatieto={kayttajatietoResponse}
+                                                      organisations={henkiloOrgsResponse} readOnly={true}
+                                                      koodistoKieli={koodistoKieliResponse} />
+                            : L['LADATAAN']
+                    }
                 </div>
                 <div className="wrapper">Another</div>
             </div>
@@ -27,9 +33,9 @@ const HenkiloView = React.createClass({
     },
 });
 
-export const henkiloViewContentP = Bacon.combineWith(l10nP, henkiloP, henkiloOrganisationsP, kayttajatietoP,
-    (l10n, henkilo, henkiloOrgs, kayttajatieto) => {
-    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto};
+export const henkiloViewContentP = Bacon.combineWith(l10nP, henkiloP, henkiloOrganisationsP, kayttajatietoP, koodistoKieliP,
+    (l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli) => {
+    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli};
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloView {...props} />,

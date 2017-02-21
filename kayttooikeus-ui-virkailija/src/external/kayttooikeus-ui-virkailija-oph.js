@@ -19,4 +19,6 @@ export default {
     "oppijanumerorekisteri-service.henkilo": "/oppijanumerorekisteri-service/henkilo",
 
     "organisaatio-service.organisaatio.ByOid": "/organisaatio-service/rest/organisaatio/$1",
+
+    "koodisto-service.koodisto.kieli": "/koodisto-service/rest/json/kieli/koodi"
 }

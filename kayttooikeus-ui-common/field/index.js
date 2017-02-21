@@ -8,6 +8,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _select = require('select');
+
+var _select2 = _interopRequireDefault(_select);
+
 require('./Field.css');
 
 var _bind = require('classnames/bind');
@@ -22,7 +26,8 @@ var Field = _react2.default.createClass({
     propTypes: {
         readOnly: _react2.default.PropTypes.bool,
         changeAction: _react2.default.PropTypes.func,
-        inputValue: _react2.default.PropTypes.string
+        inputValue: _react2.default.PropTypes.string,
+        selectValue: _react2.default.PropTypes.string
     },
     getInitialState: function getInitialState() {
         return {
@@ -37,7 +42,8 @@ var Field = _react2.default.createClass({
             'span',
             { className: className },
             this.props.children
-        ) : _react2.default.createElement('input', { className: className, name: this.props.inputValue, onChange: this.props.changeAction,
+        ) : this.props.selectValue ? _react2.default.createElement(_select2.default, { data: this.props.data, name: this.props.inputValue, onSelect: this.props.changeAction,
+            value: this.props.selectValue }) : _react2.default.createElement('input', { className: className, name: this.props.inputValue, onChange: this.props.changeAction,
             defaultValue: this.props.children });
     }
 });

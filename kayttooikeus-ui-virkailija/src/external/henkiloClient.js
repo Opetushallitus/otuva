@@ -3,7 +3,7 @@ import {handleFetchError} from "../logic/fetchUtils";
 import {locationP} from "../logic/location";
 import {commonHandleError} from "../logic/error";
 import dispatcher from "../logic/dispatcher";
-import {organisationByOid} from "./organisaationClient";
+import {organisationByOid} from "./organisaatioClient";
 
 const henkiloDispatcher = dispatcher();
 
