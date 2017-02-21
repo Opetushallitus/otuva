@@ -12,7 +12,7 @@ const HenkiloViewUserContent = React.createClass({
             henkilo: React.PropTypes.object.isRequired,
             readOnly: React.PropTypes.bool.isRequired,
             showPassive: React.PropTypes.bool,
-            locale: React.PropTypes.string.isRequired
+            locale: React.PropTypes.string.isRequired,
         }
     },
     getInitialState: function() {
@@ -28,6 +28,15 @@ const HenkiloViewUserContent = React.createClass({
                 }, {})
             })
         );
+        this.kansalaisuusKoodis = this.props.koodistoKansalaisuus.result.map(koodi =>
+            ({value: koodi.koodiArvo.toLowerCase(),
+                ...koodi.metadata.map(kansalaisuusKoodi =>
+                    ({[kansalaisuusKoodi.kieli.toLowerCase()]: kansalaisuusKoodi.nimi})).reduce((a,b) => {
+                    a[Object.keys(b)[0]] = b[Object.keys(b)[0]];
+                    return a
+                }, {})
+            })
+        );
 
         return {
             readOnly: this.props.readOnly,
@@ -38,10 +47,15 @@ const HenkiloViewUserContent = React.createClass({
                 {translation: 'HENKILO_SYNTYMAAIKA', value: this.henkiloUpdate.syntymaaika, inputValue: 'syntymaaika'},
                 this.henkiloUpdate.kansalaisuus && this.henkiloUpdate.kansalaisuus.length
                     ? this.henkiloUpdate.kansalaisuus.map((values, idx) => ({translation: 'HENKILO_KANSALAISUUS',
-                        value: values.kansalaisuusKoodi, inputValue: 'kansalaisuus.' + idx + '.kansalaisuusKoodi'}))
-                    : {translation: 'HENKILO_KANSALAISUUS', value: null, inputValue: 'kansalaisuus.0.kansalaisuusKoodi'},
-                // {translation: 'HENKILO_AIDINKIELI', value: this.henkiloUpdate.aidinkieli && this.henkiloUpdate.aidinkieli.kieliTyyppi,
-                //     inputValue: 'aidinkieli.kieliTyyppi'},
+                        data: this.kansalaisuusKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
+                        value: this.kansalaisuusKoodis.filter(kansalaisuus => kansalaisuus.value === values.kansalaisuusKoodi)[0][this.props.locale], inputValue: 'kansalaisuus.' + idx + '.kansalaisuusKoodi',
+                        selectValue: values.kansalaisuusKoodi
+                    })).reduce((a,b) => a.concat(b))
+                    : {translation: 'HENKILO_KANSALAISUUS',
+                        data: this.kansalaisuusKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
+                        inputValue: 'kansalaisuus.0.kansalaisuusKoodi',
+                        value: null},
+
                 {translation: 'HENKILO_AIDINKIELI',
                     data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'aidinkieli.kieliKoodi',

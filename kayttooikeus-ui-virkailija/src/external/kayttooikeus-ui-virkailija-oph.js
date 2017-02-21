@@ -20,5 +20,6 @@ export default {
 
     "organisaatio-service.organisaatio.ByOid": "/organisaatio-service/rest/organisaatio/$1",
 
-    "koodisto-service.koodisto.kieli": "/koodisto-service/rest/json/kieli/koodi"
+    "koodisto-service.koodisto.kieli": "/koodisto-service/rest/json/kieli/koodi",
+    "koodisto-service.koodisto.kansalaisuus": "/koodisto-service/rest/json/maatjavaltiot2/koodi"
 }
