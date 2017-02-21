@@ -42,7 +42,7 @@ var Field = _react2.default.createClass({
             'span',
             { className: className },
             this.props.children
-        ) : this.props.selectValue ? _react2.default.createElement(_select2.default, { data: this.props.data, name: this.props.inputValue, onSelect: this.props.changeAction,
+        ) : this.props.data ? _react2.default.createElement(_select2.default, { data: this.props.data, name: this.props.inputValue, onSelect: this.props.changeAction,
             value: this.props.selectValue }) : _react2.default.createElement('input', { className: className, name: this.props.inputValue, onChange: this.props.changeAction,
             defaultValue: this.props.children });
     }

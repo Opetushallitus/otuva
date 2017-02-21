@@ -23,7 +23,7 @@ const Field = React.createClass({
         return (
             this.props.readOnly
                 ? <span className={className}>{this.props.children}</span>
-                : this.props.selectValue
+                : this.props.data
                     ? <Select2 data={this.props.data} name={this.props.inputValue} onSelect={this.props.changeAction}
                                value={this.props.selectValue} />
                     : <input className={className} name={this.props.inputValue} onChange={this.props.changeAction}
