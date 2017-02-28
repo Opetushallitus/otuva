@@ -82,6 +82,7 @@ const HenkiloViewUserContent = React.createClass({
                     value: this.henkiloUpdate.sukupuoli && this.sukupuoliKoodis.filter(sukupuoli =>
                     sukupuoli.value === this.henkiloUpdate.sukupuoli)[0][this.props.locale],
                     selectValue: this.henkiloUpdate.sukupuoli},
+                {translation: 'HENKILO_OPPIJANUMERO', value: this.henkiloUpdate.oidHenkilo, inputValue: 'oidHenkilo'},
                 {translation: 'HENKILO_ASIOINTIKIELI',
                     data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'asiointiKieli.kieliKoodi',
