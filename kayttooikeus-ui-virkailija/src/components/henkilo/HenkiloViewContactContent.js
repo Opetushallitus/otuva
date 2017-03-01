@@ -22,6 +22,16 @@ const HenkiloViewContactContent = React.createClass({
             {label: 'YHTEYSTIETO_POSTINUMERO', value: null, inputValue: null},
             {label: 'YHTEYSTIETO_KUNTA', value: null, inputValue: null},
         ];
+        this.yhteystietotyypitKoodis = this.props.koodistoYhteystietotyypit.result.map(koodi =>
+            ({value: koodi.koodiArvo.toLowerCase(),
+                ...koodi.metadata.map(kieliKoodi =>
+                    ({[kieliKoodi.kieli.toLowerCase()]: kieliKoodi.nimi})).reduce((a,b) => {
+                    a[Object.keys(b)[0]] = b[Object.keys(b)[0]];
+                    return a
+                }, {})
+            })
+        );
+
 
         return {
             readOnly: this.props.readOnly,
@@ -33,12 +43,8 @@ const HenkiloViewContactContent = React.createClass({
                             && yhteystiedotRyhma.yhteystieto.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0].yhteystietoArvo,
                             inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
                         ))),
-                    // value: yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
-                    //     ({label: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
-                    //             inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
-                    //     )
-                    // ),
-                    name: yhteystiedotRyhma.ryhmaKuvaus
+                    name: yhteystiedotRyhma.ryhmaKuvaus && this.yhteystietotyypitKoodis.filter(kieli =>
+                    kieli.value === yhteystiedotRyhma.ryhmaKuvaus)[0][this.props.locale]
                 }
             )
             ),

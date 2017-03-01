@@ -35,3 +35,14 @@ export const koodistoSukupuoliP = Bacon.combineWith(l10nP, l10n => {
     koodistoSukupuoliS.onError(commonHandleError);
     return koodistoSukupuoliS;
 }).flatMap(r => r);
+
+// l10nP just to wait until frontProperties have been loaded
+export const koodistoYhteystietotyypitP = Bacon.combineWith(l10nP, l10n => {
+    const koodistoYhteystietotyypitS = Bacon.fromPromise(fetch(window.url('koodisto-service.koodisto.yhteystietotyypit'),
+        {credentials: 'same-origin'})
+        .then(handleFetchError)
+        .then(response => response.json().then(json => ({loaded: true, result: json}))
+            .catch(e => console.error(e))));
+    koodistoYhteystietotyypitS.onError(commonHandleError);
+    return koodistoYhteystietotyypitS;
+}).flatMap(r => r);

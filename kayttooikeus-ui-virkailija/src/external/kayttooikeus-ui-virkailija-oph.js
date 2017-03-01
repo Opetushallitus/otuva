@@ -22,5 +22,6 @@ export default {
 
     "koodisto-service.koodisto.kieli": "/koodisto-service/rest/json/kieli/koodi",
     "koodisto-service.koodisto.kansalaisuus": "/koodisto-service/rest/json/maatjavaltiot2/koodi",
-    "koodisto-service.koodisto.sukupuoli": "/koodisto-service/rest/json/sukupuoli/koodi"
+    "koodisto-service.koodisto.sukupuoli": "/koodisto-service/rest/json/sukupuoli/koodi",
+    "koodisto-service.koodisto.yhteystietotyypit": "/koodisto-service/rest/json/yhteystietotyypit/koodi"
 }

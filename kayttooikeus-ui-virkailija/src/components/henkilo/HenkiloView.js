@@ -8,7 +8,7 @@ import HenkiloViewOrganisationContent from './HenkiloViewOrganisationContent'
 import {l10nP, localeP} from '../../external/l10n'
 import {henkiloNavi} from "../../external/navilists";
 import {henkiloP, henkiloOrganisationsP, kayttajatietoP} from "../../external/henkiloClient";
-import {koodistoKieliP, koodistoKansalaisuusP, koodistoSukupuoliP} from "../../external/koodistoClient";
+import {koodistoKieliP, koodistoKansalaisuusP, koodistoYhteystietotyypitP, koodistoSukupuoliP} from "../../external/koodistoClient";
 
 const HenkiloView = React.createClass({
     render: function() {
@@ -19,6 +19,7 @@ const HenkiloView = React.createClass({
         const koodistoKieliResponse = this.props.koodistoKieli;
         const koodistoKansalaisuusResponse = this.props.koodistoKansalaisuus;
         const koodistoSukupuoliResponse = this.props.koodistoSukupuoli;
+        const koodistoYhteystietotyypitResponse = this.props.koodistoYhteystietotyypit;
         return (
             <div>
                 <div className="wrapper">
@@ -35,11 +36,10 @@ const HenkiloView = React.createClass({
                 </div>
                 <div className="wrapper">
                     {
-                        henkiloResponse.loaded
-                            ? <HenkiloViewContactContent l10n={L} henkilo={henkiloResponse} kayttajatieto={kayttajatietoResponse}
-                                                      readOnly={true} koodistoKieli={koodistoKieliResponse}
-                                                      locale={this.props.locale}
-                                                      koodistoKansalaisuus={koodistoKansalaisuusResponse} />
+                        henkiloResponse.loaded && koodistoYhteystietotyypitResponse.loaded
+                            ? <HenkiloViewContactContent l10n={L} henkilo={henkiloResponse}
+                                                         readOnly={true} locale={this.props.locale}
+                                                         koodistoYhteystietotyypit={koodistoYhteystietotyypitResponse} />
                             : L['LADATAAN']
                     }
                 </div>
@@ -47,8 +47,8 @@ const HenkiloView = React.createClass({
                     {
                         henkiloResponse.loaded && henkiloOrgsResponse.map(r => r.loaded)
                             ? <HenkiloViewOrganisationContent l10n={L}
-                                                      organisations={henkiloOrgsResponse} readOnly={true}
-                                                      henkilo={henkiloResponse} locale={this.props.locale} />
+                                                              organisations={henkiloOrgsResponse} readOnly={true}
+                                                              henkilo={henkiloResponse} locale={this.props.locale} />
                             : L['LADATAAN']
                     }
                 </div>
@@ -58,9 +58,10 @@ const HenkiloView = React.createClass({
 });
 
 export const henkiloViewContentP = Bacon.combineWith(l10nP, henkiloP, henkiloOrganisationsP, kayttajatietoP, koodistoKieliP,
-    localeP, koodistoKansalaisuusP, koodistoSukupuoliP,
-    (l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale, koodistoKansalaisuus, koodistoSukupuoli) => {
-    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale, koodistoKansalaisuus, koodistoSukupuoli};
+    localeP, koodistoKansalaisuusP, koodistoSukupuoliP, koodistoYhteystietotyypitP,
+    (l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale, koodistoKansalaisuus, koodistoSukupuoli, koodistoYhteystietotyypit) => {
+    const props = {l10n, henkilo, henkiloOrgs, kayttajatieto, koodistoKieli, locale, koodistoKansalaisuus, koodistoSukupuoli,
+        koodistoYhteystietotyypit};
     henkiloNavi.backLocation = '/henkilo';
     return {
         content: <HenkiloView {...props} />,
