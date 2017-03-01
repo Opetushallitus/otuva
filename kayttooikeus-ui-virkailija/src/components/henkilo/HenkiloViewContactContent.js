@@ -14,16 +14,34 @@ const HenkiloViewContactContent = React.createClass({
     },
     getInitialState: function() {
         this.henkiloUpdate = this.props.henkilo.result;
+        this.contactInfoTemplate = [
+            {label: 'YHTEYSTIETO_SAHKOPOSTI', value: null, inputValue: null},
+            {label: 'YHTEYSTIETO_PUHELINNUMERO', value: null, inputValue: null},
+            {label: 'YHTEYSTIETO_MATKAPUHELINNUMERO', value: null, inputValue: null},
+            {label: 'YHTEYSTIETO_KATUOSOITE', value: null, inputValue: null},
+            {label: 'YHTEYSTIETO_POSTINUMERO', value: null, inputValue: null},
+            {label: 'YHTEYSTIETO_KUNTA', value: null, inputValue: null},
+        ];
 
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
-            contactInfo: this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) =>
-                yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
-                    ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
+            contactInfo: this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) => (
+                {
+                    value: this.contactInfoTemplate.map(((template, idx2) => (
+                            {label: template.label, value: yhteystiedotRyhma.yhteystieto.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0]
+                            && yhteystiedotRyhma.yhteystieto.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0].yhteystietoArvo,
                             inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
-                    )
-            )),
+                        ))),
+                    // value: yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
+                    //     ({label: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
+                    //             inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
+                    //     )
+                    // ),
+                    name: yhteystiedotRyhma.ryhmaKuvaus
+                }
+            )
+            ),
         }
     },
     render: function() {
@@ -39,12 +57,12 @@ const HenkiloViewContactContent = React.createClass({
                             {this.state.contactInfo.map((yhteystiedotRyhma, idx) =>
                             <div key={idx}>
                                 <Columns columns={this.state.contactInfo.length}>
-                                    <h3>ryhmanimi</h3>
-                                    { yhteystiedotRyhma.map((yhteystieto, idx2) =>
-                                        <div key={idx2} id={yhteystieto.translation}>
+                                    <h3>{yhteystiedotRyhma.name}</h3>
+                                    { yhteystiedotRyhma.value.map((yhteystieto, idx2) =>
+                                        <div key={idx2} id={yhteystieto.label}>
                                             { !this.state.readOnly || yhteystieto.value
                                                 ? <Columns columns={2}>
-                                                    <span className="strong">{L[yhteystieto.translation]}</span>
+                                                    <span className="strong">{L[yhteystieto.label]}</span>
                                                     <Field inputValue={yhteystieto.inputValue} changeAction={this._updateModelField}
                                                            readOnly={this.state.readOnly}>{yhteystieto.value}</Field>
                                                 </Columns>
@@ -73,17 +91,15 @@ const HenkiloViewContactContent = React.createClass({
     _edit: function () {
         this.setState({readOnly: false});
         this._preEditData = {
-            basicInfo: this.state.basicInfo,
             contactInfo: this.state.contactInfo,
-            organisationInfo: this.state.organisationInfo,
+            henkiloUpdate: JSON.parse(JSON.stringify(this.henkiloUpdate)), // deep copy
         }
     },
     _discard: function () {
+        this.henkiloUpdate = this._preEditData.henkiloUpdate;
         this.setState({
             readOnly: true,
-            basicInfo: this._preEditData.basicInfo,
             contactInfo: this._preEditData.contactInfo,
-            organisationInfo: this._preEditData.organisationInfo,
         });
     },
     _update: function () {

@@ -48,40 +48,40 @@ const HenkiloViewUserContent = React.createClass({
             readOnly: this.props.readOnly,
             showPassive: false,
             basicInfo: [
-                {translation: 'HENKILO_ETUNIMET', value: this.henkiloUpdate.etunimet, inputValue: 'etunimet'},
-                {translation: 'HENKILO_SUKUNIMI', value: this.henkiloUpdate.sukunimi, inputValue: 'sukunimi'},
-                {translation: 'HENKILO_SYNTYMAAIKA', value: this.henkiloUpdate.syntymaaika, inputValue: 'syntymaaika'},
-                {translation: 'HENKILO_HETU', value: this.henkiloUpdate.hetu, inputValue: 'hetu'},
-                {translation: 'HENKILO_KUTSUMANIMI', value: this.henkiloUpdate.kutsumanimi, inputValue: 'kutsumanimi'},
+                {label: 'HENKILO_ETUNIMET', value: this.henkiloUpdate.etunimet, inputValue: 'etunimet'},
+                {label: 'HENKILO_SUKUNIMI', value: this.henkiloUpdate.sukunimi, inputValue: 'sukunimi'},
+                {label: 'HENKILO_SYNTYMAAIKA', value: this.henkiloUpdate.syntymaaika, inputValue: 'syntymaaika'},
+                {label: 'HENKILO_HETU', value: this.henkiloUpdate.hetu, inputValue: 'hetu'},
+                {label: 'HENKILO_KUTSUMANIMI', value: this.henkiloUpdate.kutsumanimi, inputValue: 'kutsumanimi'},
             ],
             basicInfo2: [
                 this.henkiloUpdate.kansalaisuus && this.henkiloUpdate.kansalaisuus.length
-                    ? this.henkiloUpdate.kansalaisuus.map((values, idx) => ({translation: 'HENKILO_KANSALAISUUS',
+                    ? this.henkiloUpdate.kansalaisuus.map((values, idx) => ({label: 'HENKILO_KANSALAISUUS',
                         data: this.kansalaisuusKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                         value: this.kansalaisuusKoodis.filter(kansalaisuus =>
                         kansalaisuus.value === values.kansalaisuusKoodi)[0][this.props.locale],
                         inputValue: 'kansalaisuus.' + idx + '.kansalaisuusKoodi',
                         selectValue: values.kansalaisuusKoodi
                     })).reduce((a,b) => a.concat(b))
-                    : {translation: 'HENKILO_KANSALAISUUS',
+                    : {label: 'HENKILO_KANSALAISUUS',
                         data: this.kansalaisuusKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                         inputValue: 'kansalaisuus.0.kansalaisuusKoodi',
                         value: null},
 
-                {translation: 'HENKILO_AIDINKIELI',
+                {label: 'HENKILO_AIDINKIELI',
                     data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'aidinkieli.kieliKoodi',
                     value: this.henkiloUpdate.aidinkieli && this.kieliKoodis.filter(kieli =>
                     kieli.value === this.henkiloUpdate.aidinkieli.kieliKoodi)[0][this.props.locale],
                     selectValue: this.henkiloUpdate.aidinkieli && this.henkiloUpdate.aidinkieli.kieliKoodi},
-                {translation: 'HENKILO_SUKUPUOLI',
+                {label: 'HENKILO_SUKUPUOLI',
                     data: this.sukupuoliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'sukupuoli',
                     value: this.henkiloUpdate.sukupuoli && this.sukupuoliKoodis.filter(sukupuoli =>
                     sukupuoli.value === this.henkiloUpdate.sukupuoli)[0][this.props.locale],
                     selectValue: this.henkiloUpdate.sukupuoli},
-                {translation: 'HENKILO_OPPIJANUMERO', value: this.henkiloUpdate.oidHenkilo, inputValue: 'oidHenkilo'},
-                {translation: 'HENKILO_ASIOINTIKIELI',
+                {label: 'HENKILO_OPPIJANUMERO', value: this.henkiloUpdate.oidHenkilo, inputValue: 'oidHenkilo'},
+                {label: 'HENKILO_ASIOINTIKIELI',
                     data: this.kieliKoodis.map(koodi => ({id: koodi.value, text: koodi[this.props.locale]})),
                     inputValue: 'asiointiKieli.kieliKoodi',
                     value: this.henkiloUpdate.asiointiKieli && this.kieliKoodis.filter(kieli =>
@@ -89,9 +89,9 @@ const HenkiloViewUserContent = React.createClass({
                     selectValue: this.henkiloUpdate.asiointiKieli && this.henkiloUpdate.asiointiKieli.kieliKoodi},
             ],
             loginInfo: [
-                {translation: 'HENKILO_KAYTTAJANIMI', value: kayttajatieto.username, inputValue: 'kayttajanimi'},
-                {translation: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: false},
-                {translation: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
+                {label: 'HENKILO_KAYTTAJANIMI', value: kayttajatieto.username, inputValue: 'kayttajanimi'},
+                {label: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: false},
+                {label: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
             ]
         }
     },
@@ -107,9 +107,9 @@ const HenkiloViewUserContent = React.createClass({
                             <div className="henkiloViewContent">
                                 {this.state.basicInfo.map((values, idx) =>
                                 !values.showOnlyOnWrite || !this.state.readOnly
-                                    ? <div key={idx} id={values.translation}>
+                                    ? <div key={idx} id={values.label}>
                                         <Columns columns={2}>
-                                            <span className="strong">{L[values.translation]}</span>
+                                            <span className="strong">{L[values.label]}</span>
                                             <Field inputValue={values.inputValue} changeAction={this._updateModelField}
                                                    readOnly={this.state.readOnly} data={values.data}
                                                    selectValue={values.selectValue}>
@@ -123,9 +123,9 @@ const HenkiloViewUserContent = React.createClass({
                             <div className="henkiloViewContent">
                                 {this.state.basicInfo2.map((values, idx) =>
                                 !values.showOnlyOnWrite || !this.state.readOnly
-                                    ? <div key={idx} id={values.translation}>
+                                    ? <div key={idx} id={values.label}>
                                         <Columns columns={2}>
-                                            <span className="strong">{L[values.translation]}</span>
+                                            <span className="strong">{L[values.label]}</span>
                                             <Field inputValue={values.inputValue} changeAction={this._updateModelField}
                                                    readOnly={this.state.readOnly} data={values.data}
                                                    selectValue={values.selectValue}>
@@ -139,9 +139,9 @@ const HenkiloViewUserContent = React.createClass({
                             <div className="henkiloViewContent">
                                 {this.state.loginInfo.map((values, idx) =>
                                 !values.showOnlyOnWrite || !this.state.readOnly
-                                    ? <div key={idx} id={values.translation}>
+                                    ? <div key={idx} id={values.label}>
                                         <Columns columns={2}>
-                                            <span className="strong">{L[values.translation]}</span>
+                                            <span className="strong">{L[values.label]}</span>
                                             <Field inputValue={values.inputValue} changeAction={this._updateModelField}
                                                    readOnly={this.state.readOnly} data={values.data}
                                                    selectValue={values.selectValue}>
@@ -173,16 +173,14 @@ const HenkiloViewUserContent = React.createClass({
         this.setState({readOnly: false});
         this._preEditData = {
             basicInfo: this.state.basicInfo,
-            contactInfo: this.state.contactInfo,
-            organisationInfo: this.state.organisationInfo,
+            henkiloUpdate: JSON.parse(JSON.stringify(this.henkiloUpdate)), // deep copy
         }
     },
     _discard: function () {
+        this.henkiloUpdate = this._preEditData.henkiloUpdate;
         this.setState({
             readOnly: true,
             basicInfo: this._preEditData.basicInfo,
-            contactInfo: this._preEditData.contactInfo,
-            organisationInfo: this._preEditData.organisationInfo,
         });
     },
     _update: function () {

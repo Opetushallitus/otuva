@@ -2,7 +2,6 @@ import './HenkiloViewOrganisationContent.css'
 import React from 'react'
 import Columns from 'react-columns'
 import Button from "button";
-import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewOrganisationContent = React.createClass({
     propTypes: {
