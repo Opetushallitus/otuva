@@ -6,14 +6,11 @@ import Button from "button";
 import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewContactContent = React.createClass({
-    propTypes: function () {
-        return {
-            l10n: React.PropTypes.object.isRequired,
-            henkilo: React.PropTypes.object.isRequired,
-            readOnly: React.PropTypes.bool.isRequired,
-            showPassive: React.PropTypes.bool,
-            locale: React.PropTypes.string.isRequired,
-        }
+    propTypes: {
+        l10n: React.PropTypes.object.isRequired,
+        henkilo: React.PropTypes.object.isRequired,
+        readOnly: React.PropTypes.bool.isRequired,
+        locale: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
         this.henkiloUpdate = this.props.henkilo.result;
@@ -23,14 +20,10 @@ const HenkiloViewContactContent = React.createClass({
             showPassive: false,
             contactInfo: this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) =>
                 yhteystiedotRyhma.yhteystieto.map((yhteystieto, idx2) =>
-                    (['YHTEYSTIETO_KATUOSOITE', 'YHTEYSTIETO_POSTINUMERO', 'YHTEYSTIETO_KUNTA', 'YHTEYSTIETO_KAUPUNKI']
-                        .indexOf(yhteystieto.yhteystietoTyyppi) === -1
-                        ? {translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo, group: idx+1,
+                    ({translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo,
                             inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
-                        : {['osoite' + idx]: {translation: yhteystieto.yhteystietoTyyppi, value: yhteystieto.yhteystietoArvo, group: idx,
-                            inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}})
-                )
-            ).reduce((a,b) => a.concat(b)),
+                    )
+            )),
         }
     },
     render: function() {
@@ -43,17 +36,24 @@ const HenkiloViewContactContent = React.createClass({
                             <h2>{L['HENKILO_YHTEYSTIEDOT_OTSIKKO']}</h2>
                         </div>
                         <div className="henkiloViewContent">
-                            {this.state.contactInfo.map((values, idx) =>
-                                <div key={idx} id={values.translation}>
-                                    { values.group >= 0
-                                        ? <Columns columns={2}>
-                                            <span className="strong">{L[values.translation] + ' ' + values.group}</span>
-                                            <Field inputValue={values.inputValue} changeAction={this._updateModelField}
-                                                   readOnly={this.state.readOnly}>{values.value}</Field>
-                                        </Columns>
-                                        : <span key={idx} className="strong">{'osoite ' + values.osoite0}</span>
-                                    }
-                                </div>
+                            {this.state.contactInfo.map((yhteystiedotRyhma, idx) =>
+                            <div key={idx}>
+                                <Columns columns={this.state.contactInfo.length}>
+                                    <h3>ryhmanimi</h3>
+                                    { yhteystiedotRyhma.map((yhteystieto, idx2) =>
+                                        <div key={idx2} id={yhteystieto.translation}>
+                                            { !this.state.readOnly || yhteystieto.value
+                                                ? <Columns columns={2}>
+                                                    <span className="strong">{L[yhteystieto.translation]}</span>
+                                                    <Field inputValue={yhteystieto.inputValue} changeAction={this._updateModelField}
+                                                           readOnly={this.state.readOnly}>{yhteystieto.value}</Field>
+                                                </Columns>
+                                                : null}
+
+                                        </div>
+                                    ) }
+                                </Columns>
+                            </div>
                             )}
                         </div>
                     </div>

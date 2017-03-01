@@ -1,19 +1,16 @@
 import './HenkiloViewOrganisationContent.css'
 import React from 'react'
 import Columns from 'react-columns'
-import Field from 'field';
 import Button from "button";
 import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewOrganisationContent = React.createClass({
-    propTypes: function () {
-        return {
-            l10n: React.PropTypes.object.isRequired,
-            henkilo: React.PropTypes.object.isRequired,
-            readOnly: React.PropTypes.bool.isRequired,
-            showPassive: React.PropTypes.bool,
-            locale: React.PropTypes.string.isRequired,
-        }
+    propTypes: {
+        l10n: React.PropTypes.object.isRequired,
+        henkilo: React.PropTypes.object.isRequired,
+        readOnly: React.PropTypes.bool.isRequired,
+        showPassive: React.PropTypes.bool,
+        locale: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
         const organisations = this.props.organisations.map(organisation => organisation.result);
@@ -60,44 +57,6 @@ const HenkiloViewOrganisationContent = React.createClass({
             </div>
         )
     },
-    _edit: function () {
-        this.setState({readOnly: false});
-        this._preEditData = {
-            basicInfo: this.state.basicInfo,
-            contactInfo: this.state.contactInfo,
-            organisationInfo: this.state.organisationInfo,
-        }
-    },
-    _discard: function () {
-        this.setState({
-            readOnly: true,
-            basicInfo: this._preEditData.basicInfo,
-            contactInfo: this._preEditData.contactInfo,
-            organisationInfo: this._preEditData.organisationInfo,
-        });
-    },
-    _update: function () {
-        updateHenkilo(this.henkiloUpdate);
-    },
-    _updateModelField: function (event) {
-        const value = event.target.value;
-        const fieldpath = event.target.name;
-        this._updateFieldByDotAnnotation(this.henkiloUpdate, fieldpath, value);
-    },
-    _updateFieldByDotAnnotation: function(obj, path, value) {
-        let schema = obj;  // a moving reference to internal objects within obj
-        const pList = path.split('.');
-        const len = pList.length;
-        for(let i = 0; i < len-1; i++) {
-            let elem = pList[i];
-            if( !schema[elem] ) {
-                schema[elem] = {};
-            }
-            schema = schema[elem];
-        }
-
-        schema[pList[len-1]] = value;
-    }
 });
 
 export default HenkiloViewOrganisationContent

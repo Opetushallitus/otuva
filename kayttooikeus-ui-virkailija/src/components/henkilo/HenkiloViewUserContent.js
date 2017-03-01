@@ -6,14 +6,12 @@ import Button from "button";
 import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewUserContent = React.createClass({
-    propTypes: function () {
-        return {
-            l10n: React.PropTypes.object.isRequired,
-            henkilo: React.PropTypes.object.isRequired,
-            readOnly: React.PropTypes.bool.isRequired,
-            showPassive: React.PropTypes.bool,
-            locale: React.PropTypes.string.isRequired,
-        }
+    propTypes: {
+        l10n: React.PropTypes.object.isRequired,
+        henkilo: React.PropTypes.object.isRequired,
+        readOnly: React.PropTypes.bool.isRequired,
+        showPassive: React.PropTypes.bool,
+        locale: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
         const kayttajatieto = this.props.kayttajatieto.result;
