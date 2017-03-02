@@ -3,6 +3,7 @@ import React from 'react'
 import Columns from 'react-columns'
 import Field from 'field';
 import Button from "button";
+import Select2 from 'select';
 import {updateHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewContactContent = React.createClass({
@@ -36,18 +37,7 @@ const HenkiloViewContactContent = React.createClass({
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
-            contactInfo: this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) => (
-                {
-                    value: this.contactInfoTemplate.map(((template, idx2) => (
-                            {label: template.label, value: yhteystiedotRyhma.yhteystieto.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0]
-                            && yhteystiedotRyhma.yhteystieto.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0].yhteystietoArvo,
-                            inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
-                        ))),
-                    name: yhteystiedotRyhma.ryhmaKuvaus && this.yhteystietotyypitKoodis.filter(kieli =>
-                    kieli.value === yhteystiedotRyhma.ryhmaKuvaus)[0][this.props.locale]
-                }
-            )
-            ),
+            contactInfo: this._updateYhteystiedot(this),
         }
     },
     render: function() {
@@ -58,6 +48,15 @@ const HenkiloViewContactContent = React.createClass({
                     <div>
                         <div className="header">
                             <h2>{L['HENKILO_YHTEYSTIEDOT_OTSIKKO']}</h2>
+                            { !this.state.readOnly
+                                ? <div>
+                                    <Select2 data={this.yhteystietotyypitKoodis.map((yhteystietotyyppi, idx) =>
+                                        ({id: yhteystietotyyppi.value, text:yhteystietotyyppi[this.props.locale]}))}
+                                             onSelect={this._createYhteystiedotRyhma}
+                                             options={{placeholder:L['HENKILO_LUOYHTEYSTIETO']}} />
+                                </div>
+                                : null
+                            }
                         </div>
                         <div className="henkiloViewContent">
                             {this.state.contactInfo.map((yhteystiedotRyhma, idx) =>
@@ -129,7 +128,40 @@ const HenkiloViewContactContent = React.createClass({
         }
 
         schema[pList[len-1]] = value;
-    }
+    },
+    _createYhteystiedotRyhma: function (event) {
+        this.henkiloUpdate.yhteystiedotRyhma.push({
+            readOnly: false,
+            ryhmaAlkuperaTieto: "alkupera2", // Virkailija
+            ryhmaKuvaus: event.target.value,
+            yhteystieto: []
+        });
+        const contactInfo = this._updateYhteystiedot(this);
+        this.setState({
+            contactInfo: contactInfo
+        });
+    },
+
+    _updateYhteystiedot: _this =>
+        _this.henkiloUpdate.yhteystiedotRyhma.map((yhteystiedotRyhma, idx) => {
+            const yhteystietoList = yhteystiedotRyhma.yhteystieto;
+            const YhteystietoFlatList = {
+                value: _this.contactInfoTemplate.map(((template, idx2) => (
+                    {label: template.label, value: yhteystietoList.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0]
+                    && yhteystietoList.filter(yhteystieto => yhteystieto.yhteystietoTyyppi === template.label)[0].yhteystietoArvo,
+                        inputValue: 'yhteystiedotRyhma.' + idx + '.yhteystieto.' + idx2 + '.yhteystietoArvo'}
+                ))),
+                name: yhteystiedotRyhma.ryhmaKuvaus && _this.yhteystietotyypitKoodis.filter(kieli =>
+                kieli.value === yhteystiedotRyhma.ryhmaKuvaus)[0][_this.props.locale]
+            };
+            yhteystiedotRyhma.yhteystieto = YhteystietoFlatList.value.map(yhteystietoFlat => (
+                {
+                    yhteystietoTyyppi: yhteystietoFlat.label,
+                    yhteystietoArvo: yhteystietoFlat.value,
+                }
+            ));
+            return YhteystietoFlatList;
+        }),
 });
 
 export default HenkiloViewContactContent
