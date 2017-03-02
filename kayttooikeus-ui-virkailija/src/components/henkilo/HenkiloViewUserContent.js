@@ -1,6 +1,7 @@
 import './HenkiloViewUserContent.css'
 import React from 'react'
 import Columns from 'react-columns'
+import dateformat from 'dateformat'
 import Field from 'field';
 import Button from "button";
 import {updateHenkilo} from "../../external/henkiloClient";
@@ -50,7 +51,8 @@ const HenkiloViewUserContent = React.createClass({
             basicInfo: [
                 {label: 'HENKILO_ETUNIMET', value: this.henkiloUpdate.etunimet, inputValue: 'etunimet'},
                 {label: 'HENKILO_SUKUNIMI', value: this.henkiloUpdate.sukunimi, inputValue: 'sukunimi'},
-                {label: 'HENKILO_SYNTYMAAIKA', value: this.henkiloUpdate.syntymaaika, inputValue: 'syntymaaika'},
+                {label: 'HENKILO_SYNTYMAAIKA', inputValue: 'syntymaaika', date: true,
+                    value: dateformat(new Date(this.henkiloUpdate.syntymaaika), this.props.l10n['PVM_FORMAATTI']), },
                 {label: 'HENKILO_HETU', value: this.henkiloUpdate.hetu, inputValue: 'hetu'},
                 {label: 'HENKILO_KUTSUMANIMI', value: this.henkiloUpdate.kutsumanimi, inputValue: 'kutsumanimi'},
             ],
@@ -110,7 +112,7 @@ const HenkiloViewUserContent = React.createClass({
                                     ? <div key={idx} id={values.label}>
                                         <Columns columns={2}>
                                             <span className="strong">{L[values.label]}</span>
-                                            <Field inputValue={values.inputValue} changeAction={this._updateModelField}
+                                            <Field inputValue={values.inputValue} changeAction={!values.date ? this._updateModelField : this._updateDateField}
                                                    readOnly={this.state.readOnly} data={values.data}
                                                    selectValue={values.selectValue}>
                                                 {values.value}
@@ -190,6 +192,12 @@ const HenkiloViewUserContent = React.createClass({
         const value = event.target.value;
         const fieldpath = event.target.name;
         this._updateFieldByDotAnnotation(this.henkiloUpdate, fieldpath, value);
+    },
+    _updateDateField: function(event) {
+        const value = event.target.value;
+        const fieldpath = event.target.name;
+        this._updateFieldByDotAnnotation(this.henkiloUpdate, fieldpath,
+            dateformat(new Date(value), this.props.l10n['PVM_DBFORMAATTI']));
     },
     _updateFieldByDotAnnotation: function(obj, path, value) {
         let schema = obj;  // a moving reference to internal objects within obj

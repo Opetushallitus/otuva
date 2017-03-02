@@ -20,7 +20,9 @@ const HenkiloViewOrganisationContent = React.createClass({
             showPassive: false,
             organisationInfo: organisations.map(organisation =>
                 ({name: organisation.nimi[this.props.locale], typesFlat: organisation.tyypit && organisation.tyypit.reduce((type1, type2) => type1.concat(', ', type2)),
-                    role: organisation.orgHenkilo.tehtavanimike, passive: organisation.orgHenkilo.passivoitu})),
+                    role: organisation.orgHenkilo.tehtavanimike, passive: organisation.orgHenkilo.passivoitu,
+                    id: organisation.oid
+                })),
         }
     },
     render: function() {
@@ -40,13 +42,20 @@ const HenkiloViewOrganisationContent = React.createClass({
                                     ? <div key={idx}>
                                         <div><span className="strong">{values.name} ({values.typesFlat})</span></div>
                                         <div>
+                                            <span className="strong">{L['HENKILO_ORGTUNNISTE']}:</span>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <span>{values.id}</span>
+                                        </div>
+                                        <div>
                                             <span className="strong">{L['HENKILO_TEHTAVANIMIKE']}:</span>
                                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <span>{values.role}</span>
                                         </div>
-                                        {!values.passive
-                                            ? <div><Button action={() => {}}>{L['HENKILO_PASSIVOI']}</Button></div>
-                                            : null}
+                                        <div>
+                                            {!values.passive
+                                                ? <Button action={() => {}}>{L['HENKILO_PASSIVOI']}</Button>
+                                                : <Button action={() => {}} disabled={true}>{L['HENKILO_PASSIVOITU']}</Button>}
+                                        </div>
                                     </div>
                                     : null
                             )}
