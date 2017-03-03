@@ -12,13 +12,14 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Locale;
+
 import org.springframework.validation.annotation.Validated;
 
 @RestController
@@ -99,4 +100,18 @@ public class HenkiloController {
     public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
         return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'CRUD'}, null)")
+    @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST)
+    @ApiOperation(value = "Asettaa henkilön salasanan. DEPRECATE.",
+            notes = "Asettaa henkilölle uuden salasanan virkailijan "
+                    + "toimesta, ei tee tarkistusta vanhalle salasanalle "
+                    + "vaan yliajaa suoraan uudella.",
+            authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_CRUD"),
+                    @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
+    public void setPassword( @ApiParam("Henkilön OID") @PathVariable("henkiloOid") String henkiloOid,
+                                 @RequestBody String password) {
+            this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
+    }
+
 }

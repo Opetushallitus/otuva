@@ -5,17 +5,32 @@ import {commonHandleError} from "../logic/error";
 import dispatcher from "../logic/dispatcher";
 import {organisationByOid} from "./organisaatioClient";
 
-const henkiloDispatcher = dispatcher();
+export const henkiloBus = new Bacon.Bus();
 
-const henkilo = {
-    toProperty: (initialState = {
-        params: {
-        }
-    }) => Bacon.update(initialState,
-        [henkiloDispatcher.stream('update')], (current) => ({...current}),
-    ),
-    update: () => henkiloDispatcher.push('update'),
-};
+henkiloBus.log('test');
+
+const henkiloBusS = henkiloBus.toEventStream().log('tst');
+
+export const henkiloP = Bacon.update({},
+    [henkiloBusS], (prev, oid) => {
+        console.log('update');
+        return oid;
+        // return findByOid(oid);
+    }
+);
+const x = henkiloP.onValue();
+
+locationP.flatMap(location => {
+    console.log('lok2');
+    const oid = location.params['oid'];
+    findByOid(oid).onValue(value => {
+        console.log(value);
+        return henkiloBus.push(value);
+    });
+    // henkiloBus.push(oid);
+}).onValue();
+
+locationP.log('lok');
 
 export const updateHenkilo = payload => {
     const response = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo'),
@@ -26,20 +41,39 @@ export const updateHenkilo = payload => {
             headers: {'Content-Type': 'application/json'},
         })
         .then(handleFetchError).then(response => {
-            henkilo.update();
+            henkiloBus.push(payload.oid);
             return response;
         }));
     response.onError(commonHandleError);
     return response;
 };
 
-export const henkiloP = Bacon.combineWith(locationP, (location) => {
-    const oid = location.params['oid'];
-    return Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
+const findByOid = (oid) => {
+    const response = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
         .then(handleFetchError)
-        .then(response => response.json().then(json => ({loaded: true, result: json})))
+        .then(response => {
+            console.log(response);
+            return response.json().then(json => ({loaded: true, result: json}))
+        })
         .catch(e => console.error(e)));
-}).flatMap(r => r);
+    response.onError(commonHandleError);
+    return response;
+};
+
+
+
+
+// export const henkiloP = Bacon.combineWith(locationP, (location) => {
+//     const oid = location.params['oid'];
+//     const henkiloS = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
+//         .then(handleFetchError)
+//         .then(response => {
+//             console.log(response);
+//             return response.json().then(json => ({loaded: true, result: json}))
+//         })
+//         .catch(e => console.error(e)));
+//     return henkiloS;
+// }).flatMap(r => r);
 
 export const henkiloOrganisationsS = Bacon.combineWith(locationP, (location) => {
     const oid = location.params['oid'];
