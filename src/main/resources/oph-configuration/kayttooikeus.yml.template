@@ -93,3 +93,7 @@ endpoints:
 
 kayttooikeus:
   uses-ssl-proxy: true
+
+auth:
+  crypto-service:
+    static-salt: {{auth_cryptoservice_static_salt}}
