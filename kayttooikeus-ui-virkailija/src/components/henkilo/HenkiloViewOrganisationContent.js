@@ -12,7 +12,7 @@ const HenkiloViewOrganisationContent = React.createClass({
         locale: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
-        const organisations = this.props.organisations.map(organisation => organisation.result);
+        const organisations = this.props.organisations;
         this.henkiloUpdate = this.props.henkilo;
 
         return {
