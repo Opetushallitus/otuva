@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
+import fi.vm.sade.kayttooikeus.dto.HenkiloHakaDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -18,10 +19,13 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -140,6 +144,25 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         }
 
         return token;
+    }
+
+    @Transactional(readOnly = true)
+    public List<HenkiloHakaDto> getHenkiloHakaDTOsByHenkiloAndIdp(String oid, String ipdKey) {
+        List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, "haka");
+        List<HenkiloHakaDto> results = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(identifications)) {
+            for (Identification id : identifications) {
+                HenkiloHakaDto result = new HenkiloHakaDto();
+                result.setId(id.getId());
+                result.setEPPN(id.getIdentifier());
+                results.add(result);
+            }
+        }
+        return results;
+    }
+
+    private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
+        return identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, idp);
     }
 
     private void createIdentification(Henkilo henkilo, String token, String identifier, String idpKey) {

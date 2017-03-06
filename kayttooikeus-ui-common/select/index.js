@@ -198,8 +198,6 @@ var Select2 = _react2.default.createClass({
   },
 
   prepareOptions: function prepareOptions(options) {
-    var _this3 = this;
-
     var opt = options;
     if (typeof opt.dropdownParent === 'string') {
       opt.dropdownParent = (0, _jquery2.default)(opt.dropdownParent);
@@ -209,33 +207,31 @@ var Select2 = _react2.default.createClass({
     }
 
     if (this.props.l10n) {
-      (function () {
-        var l10n = _this3.props.l10n;
-        opt.language = {
-          errorLoading: function errorLoading() {
-            return l10n['VIRHE_LADATTAESSA_VASTAUKSIA'];
-          },
-          inputTooLong: function inputTooLong(args) {
-            var overChars = args.input.length - args.maximum;
-            return l10n.msg('POISTA_MERKKIA', overChars);
-          },
-          inputTooShort: function inputTooShort(args) {
-            return l10n.msg('SYOTA_VAHINTAAN_MERKKIA', args.minimum);
-          },
-          loadingMore: function loadingMore() {
-            return l10n['LADATAAN'];
-          },
-          noResults: function noResults() {
-            return l10n['EI_TULOKSIA'];
-          },
-          maximumSelected: function maximumSelected(args) {
-            return l10n.msg('VOIT_VALITA_VAIN', args.maximum);
-          },
-          searching: function searching() {
-            return l10n['ETSITAAN'];
-          }
-        };
-      })();
+      var l10n = this.props.l10n;
+      opt.language = {
+        errorLoading: function errorLoading() {
+          return l10n['VIRHE_LADATTAESSA_VASTAUKSIA'];
+        },
+        inputTooLong: function inputTooLong(args) {
+          var overChars = args.input.length - args.maximum;
+          return l10n.msg('POISTA_MERKKIA', overChars);
+        },
+        inputTooShort: function inputTooShort(args) {
+          return l10n.msg('SYOTA_VAHINTAAN_MERKKIA', args.minimum);
+        },
+        loadingMore: function loadingMore() {
+          return l10n['LADATAAN'];
+        },
+        noResults: function noResults() {
+          return l10n['EI_TULOKSIA'];
+        },
+        maximumSelected: function maximumSelected(args) {
+          return l10n.msg('VOIT_VALITA_VAIN', args.maximum);
+        },
+        searching: function searching() {
+          return l10n['ETSITAAN'];
+        }
+      };
     }
     return opt;
   },
@@ -266,7 +262,7 @@ var Select2 = _react2.default.createClass({
   },
 
   render: function render() {
-    var _this4 = this;
+    var _this3 = this;
 
     var props = _jquery2.default.extend({}, this.props),
         data = this.props.data,
@@ -288,7 +284,7 @@ var Select2 = _react2.default.createClass({
       'select',
       props,
       !passData && data.map(function (item, k) {
-        if (_this4.isObject(item) && _this4.isObject(item.children)) {
+        if (_this3.isObject(item) && _this3.isObject(item.children)) {
           var itemParams = _jquery2.default.extend({}, item),
               children = item.children,
               text = item.text;
@@ -298,11 +294,11 @@ var Select2 = _react2.default.createClass({
             'optgroup',
             _extends({ key: 'optgroup-' + k, label: text }, itemParams),
             children.map(function (child) {
-              return _this4.makeOption(child);
+              return _this3.makeOption(child);
             })
           );
         }
-        return _this4.makeOption(item);
+        return _this3.makeOption(item);
       })
     );
   }

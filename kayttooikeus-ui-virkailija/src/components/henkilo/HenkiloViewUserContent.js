@@ -4,6 +4,10 @@ import Columns from 'react-columns'
 import Field from 'field';
 import Button from "button";
 import {updateHenkilo} from "../../external/henkiloClient";
+import {HenkiloAddHakatunnus} from './HenkiloAddHakatunnus';
+import ReactDOM from 'react-dom';
+import Modal from './Modal';
+
 
 const HenkiloViewUserContent = React.createClass({
     propTypes: function () {
@@ -19,6 +23,7 @@ const HenkiloViewUserContent = React.createClass({
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
+            showHakatunnusPopup: false,
             basicInfo: [
                 {translation: 'HENKILO_ETUNIMET', value: this.props.henkilo.etunimet, inputValue: 'etunimet'},
                 {translation: 'HENKILO_SUKUNIMI', value: this.props.henkilo.sukunimi, inputValue: 'sukunimi'},
@@ -46,6 +51,11 @@ const HenkiloViewUserContent = React.createClass({
                 ({name: organisation.organisaatioOid, typesFlat: organisation.organisaatioHenkiloTyyppi && organisation.organisaatioHenkiloTyyppi.reduce((type1, type2) => type1.concat(', ', type2)),
                     role: organisation.tehtavanimike, passive: organisation.passivoitu}))
         }
+    },
+    componentDidMount: function() {
+        this.setState({
+            targetElement: ReactDOM.findDOMNode(this.refs.hakabutton)
+        });
     },
     render: function() {
         const L = this.props.l10n;
@@ -116,7 +126,11 @@ const HenkiloViewUserContent = React.createClass({
                         <Button big action={this._edit}>{L['MUOKKAA_LINKKI']}</Button>
                         <Button big action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
                         <Button big action={() => {}}>{L['PASSIVOI_LINKKI']}</Button>
-                        <Button big action={() => {}}>{L['LISAA_HAKA_LINKKI']}</Button>
+                        <Button ref={ component => this.addHakatunnus = console.log(component) } big action={() => { this.setState({showHakatunnusPopup: true})} }>Lisää HAKA-tunnus</Button>
+                        <span id="test">asdfasdf</span>
+                        <Modal show={this.state.showHakatunnusPopup} onClose={() => this.setState({showHakatunnusPopup: false})} closeOnOuterClick={true} >
+                            <HenkiloAddHakatunnus targetElement={document.getElementById('test')}></HenkiloAddHakatunnus>
+                        </Modal>
                     </div>
                     : <div className="henkiloViewEditButtons">
                         <Button big action={this._discard}>{L['PERUUTA_LINKKI']}</Button>

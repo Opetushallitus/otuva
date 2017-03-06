@@ -1,22 +1,25 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
+import com.fasterxml.jackson.annotation.JsonView;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.kayttooikeus.service.HenkiloService;
-import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
-import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.model.Identification;
+import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.validation.annotation.Validated;
@@ -28,14 +31,17 @@ public class HenkiloController {
     private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final HenkiloService henkiloService;
     private final KayttajatiedotService kayttajatiedotService;
+    private final IdentificationService identificationService;
 
     @Autowired
     public HenkiloController(OrganisaatioHenkiloService organisaatioHenkiloService,
                              HenkiloService henkiloService,
-                             KayttajatiedotService kayttajatiedotService) {
+                             KayttajatiedotService kayttajatiedotService,
+                             IdentificationService identificationService) {
         this.organisaatioHenkiloService = organisaatioHenkiloService;
         this.henkiloService = henkiloService;
         this.kayttajatiedotService = kayttajatiedotService;
+        this.identificationService = identificationService;
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
@@ -99,4 +105,21 @@ public class HenkiloController {
     public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
         return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
+
+    @Produces(MediaType.APPLICATION_JSON)
+    @PreAuthorize("@permissionChecker.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
+    @Path("/{oid}/hakatunnus")
+    @GET
+    @ApiOperation(value = "Hakee henkilön Haka-tunnisteet. DEPRECATE.",
+            notes = "Hakee annetun henkilön Haka-tunnisteet.",
+            authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_CRUD, " +
+                    "ROLE_APP_HENKILONHALLINTA_KKVASTUU, " +
+                    "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
+            response = List.class)
+    public List<HenkiloHakaDto> getHenkilosHakaTunnisteet(@P("oid") @ApiParam("Henkilön OID") @PathParam("oid") String oid,
+                                                          @P("permissionService") @HeaderParam("External-Permission-Service")
+                                                                  ExternalPermissionService permissionService) {
+       return identificationService.getHenkiloHakaDTOsByHenkiloAndIdp(oid, "haka");
+    }
+
 }
