@@ -103,7 +103,7 @@ public class HenkiloController {
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'CRUD'}, null)")
     @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST)
-    @ApiOperation(value = "Asettaa henkilön salasanan. DEPRECATE.",
+    @ApiOperation(value = "Asettaa henkilön salasanan.",
             notes = "Asettaa henkilölle uuden salasanan virkailijan "
                     + "toimesta, ei tee tarkistusta vanhalle salasanalle "
                     + "vaan yliajaa suoraan uudella.",
