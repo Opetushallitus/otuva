@@ -24,7 +24,7 @@ const HenkiloView = React.createClass({
             <div>
                 <div className="wrapper">
                     {
-                        henkiloResponse.loaded && kayttajatietoResponse.loaded && koodistoSukupuoliResponse.loaded
+                        henkiloResponse && kayttajatietoResponse.loaded && koodistoSukupuoliResponse.loaded
                         && koodistoKieliResponse.loaded && koodistoKansalaisuusResponse.loaded
                             ? <HenkiloViewUserContent l10n={L} henkilo={henkiloResponse} kayttajatieto={kayttajatietoResponse}
                                                       readOnly={true}
@@ -36,7 +36,7 @@ const HenkiloView = React.createClass({
                 </div>
                 <div className="wrapper">
                     {
-                        henkiloResponse.loaded && koodistoYhteystietotyypitResponse.loaded
+                        henkiloResponse && koodistoYhteystietotyypitResponse.loaded
                             ? <HenkiloViewContactContent l10n={L} henkilo={henkiloResponse}
                                                          readOnly={true} locale={this.props.locale}
                                                          koodistoYhteystietotyypit={koodistoYhteystietotyypitResponse} />
@@ -45,7 +45,7 @@ const HenkiloView = React.createClass({
                 </div>
                 <div className="wrapper">
                     {
-                        henkiloResponse.loaded && henkiloOrgsResponse.map(r => r.loaded)
+                        henkiloResponse && henkiloOrgsResponse.map(r => r.loaded)
                             ? <HenkiloViewOrganisationContent l10n={L}
                                                               organisations={henkiloOrgsResponse} readOnly={true}
                                                               henkilo={henkiloResponse} locale={this.props.locale} />

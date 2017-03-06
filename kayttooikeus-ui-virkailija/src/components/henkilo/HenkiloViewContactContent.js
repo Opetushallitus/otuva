@@ -14,7 +14,7 @@ const HenkiloViewContactContent = React.createClass({
         locale: React.PropTypes.string.isRequired,
     },
     getInitialState: function() {
-        this.henkiloUpdate = this.props.henkilo.result;
+        this.henkiloUpdate = this.props.henkilo;
         this.contactInfoTemplate = [
             {label: 'YHTEYSTIETO_SAHKOPOSTI', value: null, inputValue: null},
             {label: 'YHTEYSTIETO_PUHELINNUMERO', value: null, inputValue: null},

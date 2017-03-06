@@ -1,6 +1,6 @@
 import Bacon from 'baconjs'
 
-var reqCount = 0;
+let reqCount = 0;
 const modifyReqCount = delta => {
     reqCount += delta;
     document.body.className = (reqCount > 0) ? 'loading' : ''
@@ -35,11 +35,11 @@ const http = (url, options) => {
     return Bacon.fromPromise(promise).mapError({status: 503}).flatMap(parseResponse).toProperty()
 };
 
-http.get = (url) => http(url, { credentials: 'include' })
-http.post = (url, entity) => http(url, { credentials: 'include', method: 'post', body: JSON.stringify(entity), headers: { 'Content-Type': 'application/json'} })
-http.put = (url, entity) => http(url, { credentials: 'include', method: 'put', body: JSON.stringify(entity), headers: { 'Content-Type': 'application/json'} })
-http.mock = (url, result) => mocks[url] = result
+http.get = (url) => http(url, { credentials: 'include' });
+http.post = (url, entity) => http(url, { credentials: 'include', method: 'post', body: JSON.stringify(entity), headers: { 'Content-Type': 'application/json'} });
+http.put = (url, entity) => http(url, { credentials: 'same-origin', method: 'put', body: JSON.stringify(entity), headers: { 'Content-Type': 'application/json'} });
+http.mock = (url, result) => mocks[url] = result;
 let cache = {};
-http.cachedGet = (url, params = {}) => (cache[url] && !params.force) ? Bacon.constant(cache[url]) : http.get(url).doAction((value) => cache[url] = value)
+http.cachedGet = (url, params = {}) => (cache[url] && !params.force) ? Bacon.constant(cache[url]) : http.get(url).doAction((value) => cache[url] = value);
 window.http = http;
 export default http

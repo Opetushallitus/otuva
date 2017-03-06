@@ -13,7 +13,7 @@ const HenkiloViewOrganisationContent = React.createClass({
     },
     getInitialState: function() {
         const organisations = this.props.organisations.map(organisation => organisation.result);
-        this.henkiloUpdate = this.props.henkilo.result;
+        this.henkiloUpdate = this.props.henkilo;
 
         return {
             readOnly: this.props.readOnly,

@@ -16,7 +16,7 @@ const HenkiloViewUserContent = React.createClass({
     },
     getInitialState: function() {
         const kayttajatieto = this.props.kayttajatieto.result;
-        this.henkiloUpdate = this.props.henkilo.result;
+        this.henkiloUpdate = this.props.henkilo;
         this.kieliKoodis = this.props.koodistoKieli.result.map(koodi =>
             ({value: koodi.koodiArvo.toLowerCase(),
                 ...koodi.metadata.map(kieliKoodi =>
