@@ -9,7 +9,8 @@ const Field = React.createClass({
         readOnly: React.PropTypes.bool,
         changeAction: React.PropTypes.func,
         inputValue: React.PropTypes.string,
-        selectValue: React.PropTypes.string
+        selectValue: React.PropTypes.string,
+        password: React.PropTypes.bool
     },
     getInitialState: function () {
         return {
@@ -20,6 +21,7 @@ const Field = React.createClass({
         const className = classNames({'field': true,
             '${this.props.className}': this.props.className,
             'readonly': this.props.readOnly});
+        const type = {type: this.props.password ? 'password' : false};
         return (
             this.props.readOnly
                 ? <span className={className}>{this.props.children}</span>
@@ -27,7 +29,7 @@ const Field = React.createClass({
                     ? <Select2 data={this.props.data} name={this.props.inputValue} onSelect={this.props.changeAction}
                                value={this.props.selectValue} />
                     : <input className={className} name={this.props.inputValue} onChange={this.props.changeAction}
-                         defaultValue={this.props.children} />
+                         defaultValue={this.props.children} {...type} />
         )
     }
 });

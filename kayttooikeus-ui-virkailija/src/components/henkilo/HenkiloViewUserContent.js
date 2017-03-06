@@ -4,7 +4,7 @@ import Columns from 'react-columns'
 import dateformat from 'dateformat'
 import Field from 'field';
 import Button from "button";
-import {updateHenkilo} from "../../external/henkiloClient";
+import {updateHenkilo, updatePassword} from "../../external/henkiloClient";
 
 const HenkiloViewUserContent = React.createClass({
     propTypes: {
@@ -92,8 +92,8 @@ const HenkiloViewUserContent = React.createClass({
             ],
             loginInfo: [
                 {label: 'HENKILO_KAYTTAJANIMI', value: kayttajatieto.username, inputValue: 'kayttajanimi'},
-                {label: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: false},
-                {label: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true},
+                {label: 'HENKILO_PASSWORD', value: null, showOnlyOnWrite: false, inputValue: 'password', password: true},
+                {label: 'HENKILO_PASSWORDAGAIN', value: null, showOnlyOnWrite: true, inputValue: 'passwordAgain', password: true},
             ]
         }
     },
@@ -146,7 +146,7 @@ const HenkiloViewUserContent = React.createClass({
                                             <span className="strong">{L[values.label]}</span>
                                             <Field inputValue={values.inputValue} changeAction={this._updateModelField}
                                                    readOnly={this.state.readOnly} data={values.data}
-                                                   selectValue={values.selectValue}>
+                                                   selectValue={values.selectValue} password={values.password}>
                                                 {values.value}
                                             </Field>
                                         </Columns>
@@ -187,6 +187,11 @@ const HenkiloViewUserContent = React.createClass({
     },
     _update: function () {
         updateHenkilo(this.henkiloUpdate);
+        if(this.henkiloUpdate.password && this.henkiloUpdate.password === this.henkiloUpdate.passwordAgain) {
+            updatePassword(this.henkiloUpdate.oidHenkilo, this.henkiloUpdate.password);
+            this.henkiloUpdate.password = this.henkiloUpdate.passwordAgain = null;
+        }
+        this.setState({readOnly: true});
     },
     _updateModelField: function (event) {
         const value = event.target.value;

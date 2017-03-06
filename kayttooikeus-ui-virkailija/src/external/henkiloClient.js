@@ -48,3 +48,5 @@ export const kayttajatietoP = locationP.flatMap(location => {
     return http.get(window.url('kayttooikeus-service.henkilo.kayttajatieto', oid));
 }).toProperty();
 
+export const updatePassword = (oid, password) =>
+    http.post(window.url('kayttooikeus-service.henkilo.password', oid), password);

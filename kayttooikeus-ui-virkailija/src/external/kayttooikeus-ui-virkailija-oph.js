@@ -11,9 +11,11 @@ export default {
     "kayttooikeus-service.henkilo.organisaatios": "/kayttooikeus-service/henkilo/$1/organisaatio",
     "kayttooikeus-service.henkilo.organisaatiohenkilos": "/kayttooikeus-service/henkilo/$1/organisaatiohenkilo",
     "kayttooikeus-service.henkilo.kayttajatieto": "/kayttooikeus-service/henkilo/$1/kayttajatiedot",
+    "kayttooikeus-service.henkilo.password": "/kayttooikeus-service/henkilo/$1/password",
     "kayttooikeus-service.omattiedot.oid": "/kayttooikeus-service/omattiedot/oid",
     "kayttooikeus-service.kayttooikeusryhma.forHenkilo.inOrganisaatio": "/kayttooikeus-service/kayttooikeusryhma/$1/$2",
     "kayttooikeus-service.virkailija-ui.basePath": "/kayttooikeus-service/virkailija",
+
 
     "oppijanumerorekisteri-service.henkilo.oid": "/oppijanumerorekisteri-service/henkilo/$1",
     "oppijanumerorekisteri-service.henkilo": "/oppijanumerorekisteri-service/henkilo",
