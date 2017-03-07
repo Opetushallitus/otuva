@@ -50,3 +50,8 @@ export const kayttajatietoP = locationP.flatMap(location => {
 
 export const updatePassword = (oid, password) =>
     http.post(window.url('kayttooikeus-service.henkilo.password', oid), password);
+
+export const passivoiHenkilo = oid => {
+    http.delete(window.url('oppijanumerorekisteri-service.henkilo.delete', oid));
+    // TODO: push to henkiloBus
+};

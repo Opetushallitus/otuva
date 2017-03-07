@@ -4,7 +4,7 @@ import Columns from 'react-columns'
 import dateformat from 'dateformat'
 import Field from 'field';
 import Button from "button";
-import {updateHenkilo, updatePassword} from "../../external/henkiloClient";
+import {updateHenkilo, updatePassword, passivoiHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewUserContent = React.createClass({
     propTypes: {
@@ -160,7 +160,12 @@ const HenkiloViewUserContent = React.createClass({
                     ? <div className="henkiloViewButtons">
                         <Button big action={this._edit}>{L['MUOKKAA_LINKKI']}</Button>
                         <Button big action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
-                        <Button big action={() => {}}>{L['PASSIVOI_LINKKI']}</Button>
+                        { this.henkiloUpdate.passivoitu
+                            ? <Button big disabled action={() => {}}>{L['PASSIVOI_PASSIVOITU']}</Button>
+                            : !this.state.confirmPassivointi
+                                ? <Button big action={() => {this.setState({confirmPassivointi: true})}}>{L['PASSIVOI_LINKKI']}</Button>
+                                : <Button big confirm action={this._passivoi}>{L['PASSIVOI_CONFIRM']}</Button>
+                        }
                         <Button big action={() => {}}>{L['LISAA_HAKA_LINKKI']}</Button>
                     </div>
                     : <div className="henkiloViewEditButtons">
@@ -192,6 +197,9 @@ const HenkiloViewUserContent = React.createClass({
             this.henkiloUpdate.password = this.henkiloUpdate.passwordAgain = null;
         }
         this.setState({readOnly: true});
+    },
+    _passivoi: function () {
+        passivoiHenkilo(this.henkiloUpdate.oidHenkilo);
     },
     _updateModelField: function (event) {
         const value = event.target.value;

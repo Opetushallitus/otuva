@@ -114,4 +114,16 @@ public class HenkiloController {
             this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
     }
 
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(value = "/{henkiloOid}/passivoi/{kasittelijaOid}", method = RequestMethod.DELETE)
+    @ApiOperation(value = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet.",
+            notes = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet. Kutsutaan oppijanumerorekisterin henkilön" +
+                    "passivoinnin yhteydessä automaattisesti.",
+            authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
+    public void passivoi( @ApiParam("Henkilön OID") @PathVariable("henkiloOid") String henkiloOid,
+                                 @PathVariable("kasittelijaOid") String kasittelijaOid) {
+            this.henkiloService.passivoiHenkiloOrganisationsAndKayttooikeus(henkiloOid, kasittelijaOid);
+    }
+
+
 }
