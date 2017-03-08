@@ -44,7 +44,7 @@ public class HenkiloController {
             notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla siten, että roganisaatio sisältää myös lapsiroganisaationsa rekursiivisesti.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
-            @PathVariable @ApiParam("Henkilö-OID") String oid,
+            @PathVariable @ApiParam(value = "Henkilö-OID", required = true) String oid,
             @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)")
                     String comparisonLangCode,
             @RequestHeader(value = "External-Permission-Service", required = false)
@@ -109,21 +109,21 @@ public class HenkiloController {
                     + "vaan yliajaa suoraan uudella.",
             authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_CRUD"),
                     @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
-    public void setPassword( @ApiParam("Henkilön OID") @PathVariable("henkiloOid") String henkiloOid,
+    public void setPassword( @ApiParam(value = "Henkilön OID", required = true) @PathVariable("henkiloOid") String henkiloOid,
                                  @RequestBody String password) {
             this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
     }
 
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @RequestMapping(value = "/{henkiloOid}/passivoi/{kasittelijaOid}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{henkiloOid}/passivoi", method = RequestMethod.DELETE)
     @ApiOperation(value = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet.",
             notes = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet. Kutsutaan oppijanumerorekisterin henkilön" +
                     "passivoinnin yhteydessä automaattisesti.",
             authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
-    public void passivoi( @ApiParam("Henkilön OID") @PathVariable("henkiloOid") String henkiloOid,
-                                 @PathVariable("kasittelijaOid") String kasittelijaOid) {
+    public void passivoi( @ApiParam(value = "Henkilön OID", required = true) @PathVariable(value = "henkiloOid") String henkiloOid,
+                          @ApiParam(value = "Jos ei annettu käytetään kirjautunutta")
+                          @RequestParam(value = "kasittelijaOid", required = false) String kasittelijaOid) {
             this.henkiloService.passivoiHenkiloOrganisationsAndKayttooikeus(henkiloOid, kasittelijaOid);
     }
-
 
 }

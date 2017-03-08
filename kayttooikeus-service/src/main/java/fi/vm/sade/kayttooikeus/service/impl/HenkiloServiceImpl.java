@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,9 +28,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     private PermissionCheckerService permissionCheckerService;
 
-    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final HenkiloRepository henkiloRepository;
@@ -37,16 +36,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Autowired
     HenkiloServiceImpl(HenkiloHibernateRepository henkiloHibernateRepository,
                        PermissionCheckerService permissionCheckerService,
-                       OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
-                       MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                        KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
                        OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
                        HenkiloRepository henkiloRepository) {
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.permissionCheckerService = permissionCheckerService;
-        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -69,6 +64,10 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Override
     @Transactional
     public void passivoiHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid) {
+        if(StringUtils.isEmpty(kasittelijaOid)) {
+            kasittelijaOid = getCurrentUserOid();
+        }
+        final String kasittelijaOidFinal = kasittelijaOid;
         List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(henkiloOid);
         for (OrganisaatioHenkilo oh : orgHenkilos) {
             oh.setPassivoitu(true);
@@ -81,7 +80,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                             mkort.getKayttoOikeusRyhma(),
                             mkort.getOrganisaatioHenkilo(),
                             this.henkiloRepository.findByOidHenkilo(kasittelijaOid)
-                                    .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOid)),
+                                    .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal)),
                             KayttoOikeudenTila.SULJETTU,
                             "Oikeuksien poisto, koko henkilön passivointi");
                     this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
