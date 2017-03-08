@@ -63,7 +63,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional
-    public void passivoiHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid) {
+    public void disableHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid) {
         if(StringUtils.isEmpty(kasittelijaOid)) {
             kasittelijaOid = getCurrentUserOid();
         }

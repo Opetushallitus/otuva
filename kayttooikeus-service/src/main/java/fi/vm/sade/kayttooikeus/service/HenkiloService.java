@@ -7,5 +7,5 @@ import java.util.List;
 public interface HenkiloService {
     List<String> findHenkilos(OrganisaatioOidsSearchDto organisaatioOidsSearchDto);
 
-    void passivoiHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid);
+    void disableHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid);
 }

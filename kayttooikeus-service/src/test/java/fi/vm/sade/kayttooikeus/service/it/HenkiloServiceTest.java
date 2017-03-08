@@ -109,7 +109,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 .voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
         myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet(myonnettyKayttoOikeusRyhmaTapahtuma));
         this.em.persist(myonnettyKayttoOikeusRyhmaTapahtuma);
-        this.henkiloService.passivoiHenkiloOrganisationsAndKayttooikeus("1.2.3.4.5", "1.2.3.4.1");
+        this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus("1.2.3.4.5", "1.2.3.4.1");
 
         List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(oidHenkilo);
         assertThat(henkilo.size()).isEqualTo(1);
