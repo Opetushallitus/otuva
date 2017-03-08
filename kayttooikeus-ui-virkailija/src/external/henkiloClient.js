@@ -2,6 +2,7 @@ import Bacon from "baconjs";
 import {locationP} from "../logic/location";
 import {organisationByOid} from "./organisaatioClient";
 import http from "../external/http"
+import R from "ramda";
 
 export const henkiloBus = new Bacon.Bus();
 
@@ -28,16 +29,15 @@ export const henkiloOrganisationsS = locationP.flatMap(location => {
     return http.get(window.url('kayttooikeus-service.henkilo.organisaatiohenkilos', oid));
 }).toProperty();
 
-export const henkiloOrganisationsP = henkiloOrganisationsS.flatMap(value => {
-    const organisationInfoList = value.map(organisaatioHenkilo => {
+export const henkiloOrganisationsP = henkiloOrganisationsS.flatMap(organisaatioHenkilos => {
+    const organizationOidsP = organisaatioHenkilos.map(organisaatioHenkilo => {
         return organisationByOid(organisaatioHenkilo.organisaatioOid);
     });
-    return Bacon.zipWith(organisationInfoList, function(...results) {
+
+    return Bacon.zipWith(organizationOidsP, function(...results) {
         // include organisation henkilo to the result
         return results.map(organisation => {
-            organisation.orgHenkilo = value.filter(orgHenkilo => {
-                return orgHenkilo.organisaatioOid === organisation.oid;
-            })[0];
+            organisation.orgHenkilo = R.find(R.propEq('organisaatioOid', organisation.oid))(organisaatioHenkilos);
             return organisation;
         });
     });
