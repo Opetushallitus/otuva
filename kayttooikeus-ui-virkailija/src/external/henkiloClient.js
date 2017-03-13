@@ -55,3 +55,8 @@ export const passivoiHenkilo = oid => {
     http.delete(window.url('oppijanumerorekisteri-service.henkilo.delete', oid));
     // TODO: push to henkiloBus
 };
+
+export const yksiloiHenkilo = oid => {
+    http.post(window.url('oppijanumerorekisteri-service.henkilo.yksiloi', oid));
+    // TODO: push to henkiloBus
+};

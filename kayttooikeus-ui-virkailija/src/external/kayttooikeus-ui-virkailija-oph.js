@@ -1,7 +1,7 @@
 export default {
     "cas.login": "/cas/login",
 
-    "lokalisointi.localisation": "/lokalisointi/cxf/rest/v1/localisation",
+    "lokalisointi.localisation": "lokalisointi/cxf/rest/v1/localisation",
 
     "kayttooikeus-service.l10n": "/kayttooikeus-service/l10n",
     "kayttooikeus-service.l10n.languages": "/kayttooikeus-service/l10n/languages",
@@ -20,7 +20,7 @@ export default {
     "oppijanumerorekisteri-service.henkilo.oid": "/oppijanumerorekisteri-service/henkilo/$1",
     "oppijanumerorekisteri-service.henkilo": "/oppijanumerorekisteri-service/henkilo",
     "oppijanumerorekisteri-service.henkilo.delete": "/oppijanumerorekisteri-service/henkilo/$1",
-
+    "oppijanumerorekisteri-service.henkilo.yksiloi": "/oppijanumerorekisteri-service/henkilo/$1/yksiloi",
     "organisaatio-service.organisaatio.ByOid": "/organisaatio-service/rest/organisaatio/$1",
 
     "koodisto-service.koodisto.kieli": "/koodisto-service/rest/json/kieli/koodi",

@@ -4,7 +4,7 @@ import Columns from 'react-columns'
 import dateformat from 'dateformat'
 import Field from 'field';
 import Button from "button";
-import {updateHenkilo, updatePassword, passivoiHenkilo} from "../../external/henkiloClient";
+import {updateHenkilo, updatePassword, passivoiHenkilo, yksiloiHenkilo} from "../../external/henkiloClient";
 
 const HenkiloViewUserContent = React.createClass({
     propTypes: {
@@ -48,6 +48,8 @@ const HenkiloViewUserContent = React.createClass({
         return {
             readOnly: this.props.readOnly,
             showPassive: false,
+            confirmPassivointi: false,
+            confirmYksilointi: false,
             basicInfo: [
                 {label: 'HENKILO_ETUNIMET', value: this.henkiloUpdate.etunimet, inputValue: 'etunimet'},
                 {label: 'HENKILO_SUKUNIMI', value: this.henkiloUpdate.sukunimi, inputValue: 'sukunimi'},
@@ -159,7 +161,10 @@ const HenkiloViewUserContent = React.createClass({
                 {this.state.readOnly
                     ? <div className="henkiloViewButtons">
                         <Button big action={this._edit}>{L['MUOKKAA_LINKKI']}</Button>
-                        <Button big action={() => {}}>{L['YKSILOI_LINKKI']}</Button>
+                        { !this.state.confirmYksilointi
+                            ? <Button big action={() => {this.setState({confirmYksilointi: true})}}>{L['YKSILOI_LINKKI']}</Button>
+                            : <Button big confirm action={this._yksiloi}>{L['YKSILOI_CONFIRM']}</Button>
+                        }
                         { this.henkiloUpdate.passivoitu
                             ? <Button big disabled action={() => {}}>{L['PASSIVOI_PASSIVOITU']}</Button>
                             : !this.state.confirmPassivointi
@@ -200,6 +205,9 @@ const HenkiloViewUserContent = React.createClass({
     },
     _passivoi: function () {
         passivoiHenkilo(this.henkiloUpdate.oidHenkilo);
+    },
+    _yksiloi: function () {
+        yksiloiHenkilo(this.henkiloUpdate.oidHenkilo);
     },
     _updateModelField: function (event) {
         const value = event.target.value;
