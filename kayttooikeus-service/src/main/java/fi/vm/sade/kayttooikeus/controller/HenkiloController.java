@@ -12,13 +12,14 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Locale;
+
 import org.springframework.validation.annotation.Validated;
 
 @RestController
@@ -43,7 +44,7 @@ public class HenkiloController {
             notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tiedoilla siten, että roganisaatio sisältää myös lapsiroganisaationsa rekursiivisesti.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
-            @PathVariable @ApiParam("Henkilö-OID") String oid,
+            @PathVariable @ApiParam(value = "Henkilö-OID", required = true) String oid,
             @RequestParam(required = false, defaultValue = "fi") @ApiParam("Organisaatioiden järjestyksen kielikoodi (oletus fi)")
                     String comparisonLangCode,
             @RequestHeader(value = "External-Permission-Service", required = false)
@@ -99,4 +100,30 @@ public class HenkiloController {
     public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
         return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'CRUD'}, null)")
+    @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST)
+    @ApiOperation(value = "Asettaa henkilön salasanan.",
+            notes = "Asettaa henkilölle uuden salasanan virkailijan "
+                    + "toimesta, ei tee tarkistusta vanhalle salasanalle "
+                    + "vaan yliajaa suoraan uudella.",
+            authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_CRUD"),
+                    @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
+    public void setPassword( @ApiParam(value = "Henkilön OID", required = true) @PathVariable("henkiloOid") String henkiloOid,
+                                 @RequestBody String password) {
+            this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
+    }
+
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(value = "/{henkiloOid}/passivoi", method = RequestMethod.DELETE)
+    @ApiOperation(value = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet.",
+            notes = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet. Kutsutaan oppijanumerorekisterin henkilön" +
+                    "passivoinnin yhteydessä automaattisesti.",
+            authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
+    public void passivoi( @ApiParam(value = "Henkilön OID", required = true) @PathVariable(value = "henkiloOid") String henkiloOid,
+                          @ApiParam(value = "Jos ei annettu käytetään kirjautunutta")
+                          @RequestParam(value = "kasittelijaOid", required = false) String kasittelijaOid) {
+            this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus(henkiloOid, kasittelijaOid);
+    }
+
 }

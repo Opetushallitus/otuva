@@ -1,50 +1,62 @@
 import Bacon from "baconjs";
-import {handleFetchError} from "../logic/fetchUtils";
 import {locationP} from "../logic/location";
-import {commonHandleError} from "../logic/error";
-import dispatcher from "../logic/dispatcher";
+import {organisationByOid} from "./organisaatioClient";
+import http from "../external/http"
+import R from "ramda";
 
-const henkiloDispatcher = dispatcher();
+export const henkiloBus = new Bacon.Bus();
 
-const henkilo = {
-    toProperty: (initialState = {
-        params: {
-        }
-    }) => Bacon.update(initialState,
-        [henkiloDispatcher.stream('update')], (current) => ({...current}),
-    ),
-    update: () => henkiloDispatcher.push('update'),
+// Property containing henkilo info. Returns new event if henkilo info changes.
+export const henkiloP = Bacon.update({},
+    [henkiloBus], (prev, oid) => {
+        return oid;
+    }
+);
+// onValue() so stream stays alive.
+henkiloP.onValue();
+
+locationP.flatMap(location => {
+    const oid = location.params['oid'];
+    http.get(window.url('oppijanumerorekisteri-service.henkilo.oid', oid)).onValue(value => henkiloBus.push(value));
+}).onValue();
+
+export const updateHenkilo = henkilo => {
+    return http.put(window.url('oppijanumerorekisteri-service.henkilo'), henkilo);
 };
 
-export const updateHenkilo = payload => {
-    const response = Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo'),
-        {
-            method: 'PUT',
-            credentials: 'same-origin',
-            body: JSON.stringify(payload),
-            headers: {'Content-Type': 'application/json'},
-        })
-        .then(handleFetchError).then(response => {
-            henkilo.update();
-            return response;
-        }));
-    response.onError(commonHandleError);
-    return response;
+export const henkiloOrganisationsS = locationP.flatMap(location => {
+    const oid = location.params['oid'];
+    return http.get(window.url('kayttooikeus-service.henkilo.organisaatiohenkilos', oid));
+}).toProperty();
+
+export const henkiloOrganisationsP = henkiloOrganisationsS.flatMap(organisaatioHenkilos => {
+    const organizationOidsP = organisaatioHenkilos.map(organisaatioHenkilo => {
+        return organisationByOid(organisaatioHenkilo.organisaatioOid);
+    });
+
+    return Bacon.zipWith(organizationOidsP, function(...results) {
+        // include organisation henkilo to the result
+        return results.map(organisation => {
+            organisation.orgHenkilo = R.find(R.propEq('organisaatioOid', organisation.oid))(organisaatioHenkilos);
+            return organisation;
+        });
+    });
+}).toProperty();
+
+export const kayttajatietoP = locationP.flatMap(location => {
+    const oid = location.params['oid'];
+    return http.get(window.url('kayttooikeus-service.henkilo.kayttajatieto', oid));
+}).toProperty();
+
+export const updatePassword = (oid, password) =>
+    http.post(window.url('kayttooikeus-service.henkilo.password', oid), password);
+
+export const passivoiHenkilo = oid => {
+    http.delete(window.url('oppijanumerorekisteri-service.henkilo.delete', oid));
+    // TODO: push to henkiloBus
 };
 
-export const henkiloP = Bacon.combineWith(locationP, (location) => {
-    const oid = location.params['oid'];
-    return Bacon.fromPromise(fetch(window.url('oppijanumerorekisteri-service.henkilo.oid', oid), {credentials: 'same-origin'})
-        .then(handleFetchError)
-        .then(response => response.json().then(json => ({loaded: true, result: json})))
-        .catch(e => console.error(e)));
-}).flatMap(result => result).toEventStream().toProperty({loaded: false, result: {}});
-
-export const henkiloOrganisationsP = Bacon.combineWith(locationP, (location) => {
-    const oid = location.params['oid'];
-    return Bacon.fromPromise(fetch(window.url('kayttooikeus-service.henkilo.organisaatiohenkilos', oid), {credentials: 'same-origin'})
-        .then(handleFetchError)
-        .then(response => response.json().then(json => ({loaded: true, result: json})))
-        .catch(e => console.error(e)));
-}).flatMap(result => result).toEventStream().toProperty({loaded: false, result: {}});
-
+export const yksiloiHenkilo = oid => {
+    http.post(window.url('oppijanumerorekisteri-service.henkilo.yksiloi', oid));
+    // TODO: push to henkiloBus
+};

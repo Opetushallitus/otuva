@@ -19,7 +19,8 @@ import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHen
 import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
 @Repository
-public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractRepository implements MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
+public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractRepository
+        implements MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
 
     private BooleanBuilder getValidKayttoOikeusRyhmaCriteria(String oid) {
         LocalDate now = new LocalDate();

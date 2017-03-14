@@ -9,4 +9,5 @@ public interface KayttajatiedotService {
 
     KayttajatiedotReadDto getByHenkiloOid(String henkiloOid);
 
+    void changePasswordAsAdmin(String oid, String newPassword);
 }

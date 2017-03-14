@@ -23,7 +23,7 @@ const domP = Bacon.combineWith(buildVersionP, urlsP, locationP, l10nP, errorP, r
     (buildVersion, urls, location, l10n, error, route) => {
     const props = {location, l10n};
     document.body.style.backgroundColor = route.backgroundColor ? route.backgroundColor : "white";
-    return <div className="mainContainer oph-base">
+    return <div className="mainContainer oph-typography">
         <TopNavigation {...props} items={route.navi} oid={location.params['oid']} />
         {error && (error.httpStatus || error.comment) && <div className={(error.type || 'error is-error ')+' topError'}>
             {error.comment}

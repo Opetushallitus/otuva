@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -104,4 +105,14 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk()).andExpect(content()
                 .json(jsonResource("classpath:henkilo/henkiloOrganisaatios.json")));
     }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void changePassword() throws Exception {
+        mvc.perform(post("/henkilo/{henkiloOid}/password", "1.2.3.4.5")
+                .content("\"1.2.3.4.5\"").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(kayttajatiedotService).changePasswordAsAdmin(eq("1.2.3.4.5"), eq("1.2.3.4.5"));
+    }
+
 }

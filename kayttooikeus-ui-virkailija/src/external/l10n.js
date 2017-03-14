@@ -10,11 +10,15 @@ const l10nRequestS = Bacon.combineWith(urlsP, urls => urls.url('kayttooikeus-ser
 const l10nResponseS = l10nRequestS.flatMap(url => Bacon.fromPromise(fetch(url, {credentials: 'same-origin'})
     .then(handleFetchError).then(response =>  response.json())));
 const lokalisointiRequestS = Bacon.combineWith(urlsP, urls => urls.url('lokalisointi.localisation', {category: "kayttooikeus"})).toEventStream();
-const lokalisointiResponseS = lokalisointiRequestS.flatMap(url => Bacon.fromPromise(fetch(url, {credentials: 'same-origin'})
-    .then(handleFetchError).then(response =>  response.json())));
+const lokalisointiResponseS = lokalisointiRequestS.flatMap(url => {
+    // TODO: No need to fix properly if this will be replaced by redux.
+    Bacon.fromPromise(fetch(url.replace('//lok', '/lok'), {credentials: 'Access-Control-Allow-Origin'})
+        .then(handleFetchError).then(response =>  response.json()))
+});
 const l10nByLocaleP = Bacon.combineWith(l10nResponseS.toProperty(), lokalisointiResponseS.toProperty(),
     (defaultsJson, json) => {
         const byLocale = {...defaultsJson};
+        json = json || {};
         R.forEach(row => (byLocale[row.locale] || (byLocale[row.locale] = {}))[row.key.toUpperCase()] = row.value, json);
         return byLocale;
     });
