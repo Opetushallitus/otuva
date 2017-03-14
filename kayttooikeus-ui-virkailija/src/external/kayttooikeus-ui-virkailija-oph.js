@@ -1,7 +1,7 @@
 export default {
     "cas.login": "/cas/login",
 
-    "lokalisointi.localisation": "lokalisointi/cxf/rest/v1/localisation",
+    "lokalisointi.localisation": "/lokalisointi/cxf/rest/v1/localisation",
 
     "kayttooikeus-service.l10n": "/kayttooikeus-service/l10n",
     "kayttooikeus-service.l10n.languages": "/kayttooikeus-service/l10n/languages",
