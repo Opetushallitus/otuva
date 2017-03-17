@@ -267,7 +267,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         setRyhmaDescription(ryhmaData, kayttoOikeusRyhma);
 
         for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(kayttoOikeusRyhma.getId())) {
-            kayttoOikeusRyhmaMyontoViiteRepository.persist(viite);
+            kayttoOikeusRyhmaMyontoViiteRepository.remove(viite);
         }
 
         if (!isEmpty(ryhmaData.getSlaveIds())) {
