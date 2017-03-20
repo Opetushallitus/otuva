@@ -106,17 +106,15 @@ public class HenkiloController {
         return henkiloService.findHenkilos(organisaatioOidsSearchDto);
     }
 
-    @Produces(MediaType.APPLICATION_JSON)
     @PreAuthorize("@permissionChecker.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
-    @Path("/{oid}/hakatunnus")
-    @GET
+    @RequestMapping(value = "/{oid}/hakatunnus", method = RequestMethod.GET)
     @ApiOperation(value = "Hakee henkilön Haka-tunnisteet. DEPRECATE.",
             notes = "Hakee annetun henkilön Haka-tunnisteet.",
             authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_CRUD, " +
                     "ROLE_APP_HENKILONHALLINTA_KKVASTUU, " +
                     "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
             response = List.class)
-    public List<HenkiloHakaDto> getHenkilosHakaTunnisteet(@P("oid") @ApiParam("Henkilön OID") @PathParam("oid") String oid,
+    public List<HenkiloHakaDto> getHenkilosHakaTunnisteet(@P("oid") @ApiParam("Henkilön OID") String oid,
                                                           @P("permissionService") @HeaderParam("External-Permission-Service")
                                                                   ExternalPermissionService permissionService) {
        return identificationService.getHenkiloHakaDTOsByHenkiloAndIdp(oid, "haka");
