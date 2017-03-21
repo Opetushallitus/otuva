@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloHakaDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
-import fi.vm.sade.kayttooikeus.model.Identification;
 
 import java.util.List;
 
@@ -15,5 +13,5 @@ public interface IdentificationService {
 
     String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu);
 
-    List<HenkiloHakaDto> getHenkiloHakaDTOsByHenkiloAndIdp(String oid, String idpKey);
+    List<String> getHakatunnuksetByHenkiloAndIdp(String oid, String idpKey);
 }

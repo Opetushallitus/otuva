@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
-import fi.vm.sade.kayttooikeus.dto.HenkiloHakaDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
@@ -147,18 +147,9 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     }
 
     @Transactional(readOnly = true)
-    public List<HenkiloHakaDto> getHenkiloHakaDTOsByHenkiloAndIdp(String oid, String ipdKey) {
+    public List<String> getHakatunnuksetByHenkiloAndIdp(String oid, String ipdKey) {
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, "haka");
-        List<HenkiloHakaDto> results = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(identifications)) {
-            for (Identification id : identifications) {
-                HenkiloHakaDto result = new HenkiloHakaDto();
-                result.setId(id.getId());
-                result.setEPPN(id.getIdentifier());
-                results.add(result);
-            }
-        }
-        return results;
+        return identifications.stream().map(Identification::getIdentifier).collect(Collectors.toList());
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {

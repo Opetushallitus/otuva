@@ -4,7 +4,6 @@ import Columns from 'react-columns'
 import dateformat from 'dateformat'
 import Field from 'field';
 import Button from "button";
-import {updateHenkilo} from "../../external/henkiloClient";
 import {HenkiloAddHakatunnus} from './HenkiloAddHakatunnus';
 import ReactDOM from 'react-dom';
 import Modal from './Modal';

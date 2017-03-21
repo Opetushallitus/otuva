@@ -1,25 +1,17 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.service.*;
-import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.validation.annotation.Validated;
@@ -121,6 +113,8 @@ public class HenkiloController {
         this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
     }
 
+
+
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/{henkiloOid}/passivoi", method = RequestMethod.DELETE)
     @ApiOperation(value = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet.",
@@ -133,18 +127,18 @@ public class HenkiloController {
         this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus(henkiloOid, kasittelijaOid);
     }
 
-    @PreAuthorize("@permissionChecker.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
     @RequestMapping(value = "/{oid}/hakatunnus", method = RequestMethod.GET)
-    @ApiOperation(value = "Hakee henkilön Haka-tunnisteet. DEPRECATE.",
+    @ApiOperation(value = "Hakee henkilön Haka-tunnisteet.",
             notes = "Hakee annetun henkilön Haka-tunnisteet.",
             authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_CRUD, " +
                     "ROLE_APP_HENKILONHALLINTA_KKVASTUU, " +
                     "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
             response = List.class)
-    public List<HenkiloHakaDto> getHenkilosHakaTunnisteet(@P("oid") @ApiParam("Henkilön OID") String oid,
-                                                          @P("permissionService") @HeaderParam("External-Permission-Service")
+    public List<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
+                                                          @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.getHenkiloHakaDTOsByHenkiloAndIdp(oid, "haka");
+        return identificationService.getHakatunnuksetByHenkiloAndIdp(oid, "haka");
     }
 
 }
