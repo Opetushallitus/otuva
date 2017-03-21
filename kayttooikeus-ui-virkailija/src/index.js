@@ -15,7 +15,7 @@ import TopNavigation from './components/TopNavigation'
 import './reset.css'
 import 'font-awesome-webpack'
 import './general-styles.css';
-import 'virkailija-style-guide/oph-styles.css'
+import 'oph-virkailija-style-guide/oph-styles.css'
 import './index.css'
 
 const errorP = errorPF(routeP.map('.content'), l10nP);

@@ -8,4 +8,6 @@ public interface KayttajatiedotRepository extends CrudRepository<Kayttajatiedot,
 
     Optional<Kayttajatiedot> findByUsername(String username);
 
+    Optional<Kayttajatiedot> findByHenkiloOidHenkilo(String oidHenkilo);
+
 }

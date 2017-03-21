@@ -12,11 +12,6 @@
     <artifactId>kayttooikeus-service</artifactId>
     <name>Käyttöoikeuspalvelu :: Service</name>
 
-    <properties>
-        <!-- Do not deploy this module to artifactory -->
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>fi.vm.sade.kayttooikeus</groupId>
@@ -81,6 +76,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -193,7 +189,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

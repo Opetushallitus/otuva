@@ -17,5 +17,11 @@ public class UrlConfiguration extends OphProperties {
         if(!StringUtils.isEmpty(environment.getProperty("front.lokalisointi.baseUrl"))) {
             frontProperties.put("lokalisointi.baseUrl", environment.getProperty("front.lokalisointi.baseUrl"));
         }
+        if(!StringUtils.isEmpty(environment.getProperty("front.organisaatio.baseUrl"))) {
+            frontProperties.put("organisaatio-service.baseUrl", environment.getProperty("front.organisaatio.baseUrl"));
+        }
+        if(!StringUtils.isEmpty(environment.getProperty("front.koodisto.baseUrl"))) {
+            frontProperties.put("koodisto-service.baseUrl", environment.getProperty("front.koodisto.baseUrl"));
+        }
     }
 }

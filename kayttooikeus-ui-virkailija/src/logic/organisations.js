@@ -3,7 +3,7 @@ import R from "ramda";
 import {fetchOrganizationPermissionsPromise} from "../external/organisations";
 import dispatcher from "./dispatcher";
 
-const d = dispatcher()
+const d = dispatcher();
 
 const organisations = {
   toProperty: (initialOrgs=[]) => {
