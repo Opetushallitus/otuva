@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -134,11 +135,29 @@ public class HenkiloController {
             authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_CRUD, " +
                     "ROLE_APP_HENKILONHALLINTA_KKVASTUU, " +
                     "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
-            response = List.class)
-    public List<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
-                                                          @RequestHeader(value = "External-Permission-Service", required = false)
+            response = Set.class)
+    public Set<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
+                                                 @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
         return identificationService.getHakatunnuksetByHenkiloAndIdp(oid, "haka");
     }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
+    @RequestMapping(value = "/{oid}/hakatunnus", method = RequestMethod.PUT)
+    @ApiOperation(value = "Päivittää henkilön Haka-tunnisteet. ",
+            notes = "Päivittää annetun henkilön Haka-tunnisteet.",
+            authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_CRUD, "
+                    + "ROLE_APP_HENKILONHALLINTA_KKVASTUU, "
+                    + "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
+            response = Set.class)
+    public Set<String> updateHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
+                                                 @RequestBody Set<String> hakatunnisteet,
+                                                 @RequestHeader(value = "External-Permission-Service", required = false)
+                                                                  ExternalPermissionService permissionService) {
+        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, "haka", hakatunnisteet);
+
+    }
+
+
 
 }

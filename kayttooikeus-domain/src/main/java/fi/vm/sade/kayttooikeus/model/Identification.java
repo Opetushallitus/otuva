@@ -12,6 +12,15 @@ import javax.persistence.*;
 @Table(name = "identification")
 public class Identification extends IdentifiableAndVersionedEntity{
 
+
+    public Identification() {}
+
+    public Identification(Henkilo henkilo, String idpEntityId, String identifier) {
+        this.henkilo = henkilo;
+        this.idpEntityId = idpEntityId;
+        this.identifier = identifier;
+    }
+
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn(name = "henkilo_id", nullable = false)
     private Henkilo henkilo;
