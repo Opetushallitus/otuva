@@ -6,20 +6,30 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class WebConfiguration extends WebMvcConfigurerAdapter {
+    private final Environment environment;
+
+    @Autowired
+    public WebConfiguration(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -27,6 +37,14 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
                 .addResourceHandler("/virkailija/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-virkailija/");
         super.addResourceHandlers(registry);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        if(Arrays.stream(this.environment.getActiveProfiles()).anyMatch(s -> s.equals("dev") || s.equals("luokka"))) {
+            registry.addMapping("/**")
+                    .allowedOrigins("http://localhost:3000", "http://localhost:8280");
+        }
     }
 
     @Override
