@@ -24,12 +24,6 @@ import java.util.List;
 
 @Configuration
 public class WebConfiguration extends WebMvcConfigurerAdapter {
-    private final Environment environment;
-
-    @Autowired
-    public WebConfiguration(Environment environment) {
-        this.environment = environment;
-    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -37,14 +31,6 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
                 .addResourceHandler("/virkailija/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-virkailija/");
         super.addResourceHandlers(registry);
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        if(Arrays.stream(this.environment.getActiveProfiles()).anyMatch(s -> s.equals("dev") || s.equals("luokka"))) {
-            registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:3000", "http://localhost:8280");
-        }
     }
 
     @Override
