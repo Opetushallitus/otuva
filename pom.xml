@@ -30,7 +30,6 @@
         <module>kayttooikeus-api</module>
         <module>kayttooikeus-domain</module>
         <module>kayttooikeus-service</module>
-        <module>kayttooikeus-ui-virkailija</module>
     </modules>
     
     <properties>
