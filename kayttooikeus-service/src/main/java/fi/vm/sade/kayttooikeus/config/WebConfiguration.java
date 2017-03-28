@@ -6,32 +6,19 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import org.joda.time.LocalDate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class WebConfiguration extends WebMvcConfigurerAdapter {
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry
-                .addResourceHandler("/virkailija/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/kayttooikeus-ui-virkailija/");
-        super.addResourceHandlers(registry);
-    }
 
     @Override
     public void configurePathMatch(PathMatchConfigurer matcher) {
@@ -67,10 +54,4 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
         converters.add(mappingJackson2HttpMessageConverter());
     }
     
-    @Bean
-    public ExposedResourceMessageBundleSource messageSource() {
-        ExposedResourceMessageBundleSource source = new ExposedResourceMessageBundleSource();
-        source.addBasenames("classpath:Messages");
-        return source;
-    }
 }
