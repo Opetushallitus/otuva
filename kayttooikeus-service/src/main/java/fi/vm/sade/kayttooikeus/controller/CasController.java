@@ -64,7 +64,7 @@ public class CasController {
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
     }
 
-    @ApiOperation(value = "Auttaa CAS session avaamisessa oppijanumerorekisteriin.",
+    @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
             notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +
                     "täytyy tätä kutsua ensin.",
             authorizations = @Authorization("login"),
@@ -75,7 +75,7 @@ public class CasController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Auttaa CAS session avaamisessa oppijanumerorekisteriin.",
+    @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
             notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +
                     "täytyy tätä kutsua ensin.",
             authorizations = @Authorization("login"),
