@@ -1,6 +1,12 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.*;
 import io.swagger.annotations.Api;
@@ -158,6 +164,11 @@ public class HenkiloController {
 
     }
 
-
+    @GetMapping("/{oid}/kayttooikeudet")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
+    public KayttooikeudetDto getKayttooikeudet(@PathVariable String oid, OrganisaatioHenkiloCriteria criteria) {
+        return henkiloService.getKayttooikeudet(oid, criteria);
+    }
 
 }
