@@ -2,6 +2,8 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
@@ -124,6 +126,13 @@ public class HenkiloController {
                           @ApiParam(value = "Jos ei annettu käytetään kirjautunutta")
                           @RequestParam(value = "kasittelijaOid", required = false) String kasittelijaOid) {
             this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus(henkiloOid, kasittelijaOid);
+    }
+
+    @GetMapping("/{oid}/kayttooikeudet")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
+    public KayttooikeudetDto getKayttooikeudet(@PathVariable String oid, OrganisaatioHenkiloCriteria criteria) {
+        return henkiloService.getKayttooikeudet(oid, criteria);
     }
 
 }
