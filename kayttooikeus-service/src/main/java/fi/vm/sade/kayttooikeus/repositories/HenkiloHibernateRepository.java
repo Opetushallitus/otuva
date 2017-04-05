@@ -5,20 +5,18 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
 
     /**
-     * Palauttaa organisaatioon kuuluvien henkilöiden oid:t.
+     * Palauttaa hakukriteerien mukaiset henkilöiden oid:t.
      *
-     * @param organisaatioOid organisaatio oid
-     * @param passivoitu onko henkilö-organisaatio -liitos voimassa
+     * @param criteria hakukriteerit
      * @return henkilö oid:t
      */
-    Set<String> findOidsByOrganisaatio(String organisaatioOid, Optional<Boolean> passivoitu);
+    Set<String> findOidsBy(OrganisaatioHenkiloCriteria criteria);
 
     /**
      * Palauttaa henkilöiden oid:t joilla on sama organisaatio kuin annetulla

@@ -21,7 +21,6 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,10 +63,13 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
         String rootOrganizationOid = commonProperties.getRootOrganizationOid();
         if (organisaatioHenkiloRepository.isHenkiloInOrganisaatio(henkiloOid, rootOrganizationOid, false)) {
-            return Optional.ofNullable(criteria.getOrganisaatioOid())
-                    .map(organisaatioOid -> KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsByOrganisaatio(organisaatioOid, Optional.ofNullable(criteria.getPassivoitu()))))
-                    // henkilöllä on oikeutus kaikkiin henkilötietoihin
-                    .orElseGet(() -> KayttooikeudetDto.admin(null));
+            if (criteria.getOrganisaatioOid() != null) {
+                // haetaan organisaatioon kuuluvat henkilöt
+                return KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsBy(criteria));
+            } else {
+                // henkilöllä on oikeutus kaikkiin henkilötietoihin
+                return KayttooikeudetDto.admin(null);
+            }
         }
 
         // perustapauksena henkilöllä on oikeus omien organisaatioiden henkilötietoihin

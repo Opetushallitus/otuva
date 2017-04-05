@@ -28,17 +28,19 @@ import java.util.Set;
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
 
     @Override
-    public Set<String> findOidsByOrganisaatio(String organisaatioOid, Optional<Boolean> passivoitu) {
+    public Set<String> findOidsBy(OrganisaatioHenkiloCriteria criteria) {
         QOrganisaatioHenkilo qOrganisaatio = QOrganisaatioHenkilo.organisaatioHenkilo;
         QHenkilo qHenkilo = QHenkilo.henkilo;
 
         JPAQuery<String> query = jpa()
                 .select(qHenkilo.oidHenkilo).distinct()
                 .from(qOrganisaatio)
-                .join(qOrganisaatio.henkilo, qHenkilo)
-                .where(qOrganisaatio.organisaatioOid.eq(organisaatioOid));
+                .join(qOrganisaatio.henkilo, qHenkilo);
 
-        passivoitu.ifPresent(t -> query.where(qOrganisaatio.passivoitu.eq(t)));
+        Optional.ofNullable(criteria.getPassivoitu()).ifPresent(passivoitu
+                -> query.where(qOrganisaatio.passivoitu.eq(passivoitu)));
+        Optional.ofNullable(criteria.getOrganisaatioOid()).ifPresent(organisaatioOid
+                -> query.where(qOrganisaatio.organisaatioOid.eq(organisaatioOid)));
 
         return new LinkedHashSet<>(query.fetch());
     }
