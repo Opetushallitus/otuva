@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -42,6 +43,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final String FALLBACK_LANGUAGE = "fi";
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloRepository henkiloRepository;
     private final OrikaBeanMapper mapper;
@@ -50,12 +52,14 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
     @Autowired
     public OrganisaatioHenkiloServiceImpl(OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
+                                          OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                                           KayttoOikeusRepository kayttoOikeusRepository,
                                           HenkiloRepository henkiloRepository,
                                           OrikaBeanMapper mapper,
                                           OrganisaatioClient organisaatioClient,
                                           PermissionCheckerService permissionCheckerService) {
         this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
+        this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.henkiloRepository = henkiloRepository;
         this.mapper = mapper;
@@ -180,6 +184,15 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                     this.mapper.map(organisaatioHenkiloUpdateDto, savedOrgHenkilo);
                 });
         return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
+    }
+
+    @Transactional
+    @Override
+    public void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid) {
+        OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloDataRepository
+                .findByHenkiloOidHenkiloAndOrganisaatioOid(oidHenkilo, henkiloOrganisationOid)
+                .orElseThrow(() -> new NotFoundException("Unknown organisation" + henkiloOrganisationOid + "for henkilo" + oidHenkilo));
+        organisaatioHenkilo.setPassivoitu(true);
     }
 
     private OrganisaatioHenkilo findFirstMatching(OrganisaatioHenkiloUpdateDto organisaatioHenkilo,

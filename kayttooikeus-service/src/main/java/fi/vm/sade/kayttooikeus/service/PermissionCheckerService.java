@@ -15,6 +15,8 @@ public interface PermissionCheckerService {
     boolean isAllowedToAccessPerson(String callingUserOid, String personOid, List<String> allowedRoles,
                                     ExternalPermissionService permissionCheckService, Set<String> callingUserRoles);
 
+    boolean checkRoleForOrganisation(List<String> orgOidList, List<String> allowedRolesWithoutPrefix);
+
     List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid);
 
     boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);

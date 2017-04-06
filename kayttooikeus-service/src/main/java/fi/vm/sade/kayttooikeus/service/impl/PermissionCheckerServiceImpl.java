@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -73,10 +72,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
-        if (personOid.equals(currentUserOid)) {
-            return true;
-        }
-        return isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
+        return personOid.equals(currentUserOid) || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
     }
 
     @Override
@@ -196,10 +192,11 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         else {
             throw new NotImplementedException("Unsupported input type.");
         }
-        return checkRoleForOrganisation(allowedRolesWithoutPrefix, orgOidList);
+        return checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix);
     }
 
-    private boolean checkRoleForOrganisation(List<String> allowedRolesWithoutPrefix, List<String> orgOidList) {
+    @Override
+    public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
             if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
                 return false;
@@ -246,7 +243,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     private static Set<String> getPrefixedRoles(final String prefix, final List<String> rolesWithoutPrefix) {
-        return FluentIterable.from(rolesWithoutPrefix).transform(role -> prefix.concat(role)).toSet();
+        return rolesWithoutPrefix.stream().map(prefix::concat).collect(Collectors.toSet());
     }
 
     @Override
