@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
