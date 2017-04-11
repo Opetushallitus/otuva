@@ -39,8 +39,8 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
 
         Optional.ofNullable(criteria.getPassivoitu()).ifPresent(passivoitu
                 -> query.where(qOrganisaatio.passivoitu.eq(passivoitu)));
-        Optional.ofNullable(criteria.getOrganisaatioOid()).ifPresent(organisaatioOid
-                -> query.where(qOrganisaatio.organisaatioOid.eq(organisaatioOid)));
+        Optional.ofNullable(criteria.getOrganisaatioOids()).ifPresent(organisaatioOid
+                -> query.where(qOrganisaatio.organisaatioOid.in(organisaatioOid)));
 
         return new LinkedHashSet<>(query.fetch());
     }
@@ -64,8 +64,8 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             query.where(qOrganisaatio.passivoitu.eq(passivoitu));
             query.where(qOrganisaatioTarget.passivoitu.eq(passivoitu));
         });
-        Optional.ofNullable(criteria.getOrganisaatioOid()).ifPresent(organisaatioOid
-                -> query.where(qOrganisaatio.organisaatioOid.eq(organisaatioOid)));
+        Optional.ofNullable(criteria.getOrganisaatioOids()).ifPresent(organisaatioOid
+                -> query.where(qOrganisaatio.organisaatioOid.in(organisaatioOid)));
 
         return new LinkedHashSet<>(query.fetch());
     }

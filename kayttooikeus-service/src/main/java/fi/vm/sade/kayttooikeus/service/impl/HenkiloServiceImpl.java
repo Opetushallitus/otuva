@@ -63,7 +63,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
         String rootOrganizationOid = commonProperties.getRootOrganizationOid();
         if (organisaatioHenkiloRepository.isHenkiloInOrganisaatio(henkiloOid, rootOrganizationOid, false)) {
-            if (criteria.getOrganisaatioOid() != null) {
+            if (criteria.getOrganisaatioOids() != null) {
                 // haetaan organisaatioon kuuluvat henkilöt
                 return KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsBy(criteria));
             } else {
