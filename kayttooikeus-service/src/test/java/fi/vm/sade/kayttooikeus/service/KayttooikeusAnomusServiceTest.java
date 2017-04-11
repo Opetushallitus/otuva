@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
 import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.Anomus;
@@ -25,10 +26,10 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -40,11 +41,16 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
 
+    @MockBean
+    private LocalizationService localizationService;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
     public void setup() {
-        this.kayttooikeusAnomusService = new KayttooikeusAnomusServiceImpl(haettuKayttooikeusRyhmaDataRepository, orikaBeanMapper);
+        doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
+        this.kayttooikeusAnomusService = new KayttooikeusAnomusServiceImpl(this.haettuKayttooikeusRyhmaDataRepository,
+                orikaBeanMapper, this.localizationService);
     }
 
 
@@ -63,6 +69,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
         verify(this.haettuKayttooikeusRyhmaDataRepository, never()).findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(any(), any());
+        verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
     @Test
@@ -81,6 +88,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
         verify(this.haettuKayttooikeusRyhmaDataRepository, never()).findByAnomusHenkiloOidHenkilo(any());
+        verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
     private static HaettuKayttoOikeusRyhma createHaettuKayttooikeusryhma(String email, String korName, String organisaatioOid) {
