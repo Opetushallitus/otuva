@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NotFound;
@@ -67,10 +68,10 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private String hylkaamisperuste;
 
     @OneToMany(mappedBy = "anomus", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = new HashSet<HaettuKayttoOikeusRyhma>();
+    private Set<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "anomus_myonnettykayttooikeusryhmas", joinColumns = @JoinColumn(name = "anomus_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "myonnettykayttooikeusryhma_id", referencedColumnName = "id"))
-    private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<MyonnettyKayttoOikeusRyhmaTapahtuma>();
+    private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<>();
 }

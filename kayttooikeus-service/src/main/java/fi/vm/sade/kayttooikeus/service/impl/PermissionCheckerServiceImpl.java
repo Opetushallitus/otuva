@@ -6,9 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -179,15 +177,20 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                            List<String> allowedRolesWithoutPrefix) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
-            throw new IllegalArgumentException("Permissionchecker received empty input.");
+            logger.warn(this.getCurrentUserOid() + " called permission checker with empty input");
+            return true;
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream()
-                    .map(o -> ((OrganisaatioHenkiloCreateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloCreateDto.class::cast)
+                    .map(OrganisaatioHenkiloCreateDto::getOrganisaatioOid).collect(Collectors.toList());
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloUpdateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream()
-                    .map(o -> ((OrganisaatioHenkiloUpdateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloUpdateDto.class::cast)
+                    .map(OrganisaatioHenkiloUpdateDto::getOrganisaatioOid).collect(Collectors.toList());
+        }
+        else if(organisaatioHenkiloDtoList.get(0) instanceof HaettuKayttooikeusryhmaDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream().map(HaettuKayttooikeusryhmaDto.class::cast)
+                    .map(HaettuKayttooikeusryhmaDto::getAnomus).map(AnomusDto::getOrganisaatioOid).collect(Collectors.toList());
         }
         else {
             throw new NotImplementedException("Unsupported input type.");
@@ -196,6 +199,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
             if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
