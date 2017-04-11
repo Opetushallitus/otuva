@@ -109,9 +109,9 @@ public class HenkiloController {
                     + "vaan yliajaa suoraan uudella.",
             authorizations = {@Authorization("ROLE_APP_HENKILONHALLINTA_CRUD"),
                     @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")})
-    public void setPassword(@ApiParam(value = "Henkilön OID", required = true) @PathVariable("henkiloOid") String henkiloOid,
-                            @RequestBody String password) {
-        this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
+    public void setPassword( @ApiParam(value = "Henkilön OID", required = true) @PathVariable("henkiloOid") String henkiloOid,
+                                 @ApiParam(value = "Format: \"password\"", required = true) @RequestBody String password) {
+            this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
     }
 
 
