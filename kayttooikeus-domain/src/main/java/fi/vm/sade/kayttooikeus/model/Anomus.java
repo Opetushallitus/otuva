@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NotFound;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter
+@Builder
 @Table(name = "anomus", schema = "public")
 public class Anomus extends IdentifiableAndVersionedEntity {
 

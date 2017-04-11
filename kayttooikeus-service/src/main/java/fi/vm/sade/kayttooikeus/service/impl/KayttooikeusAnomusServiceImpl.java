@@ -18,7 +18,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
     private final OrikaBeanMapper mapper;
 
     @Autowired
-    KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
+    public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
                                   OrikaBeanMapper orikaBeanMapper) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
         this.mapper = orikaBeanMapper;
