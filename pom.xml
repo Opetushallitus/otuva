@@ -277,7 +277,7 @@ buildTtime=${maven.build.timestamp}
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.1.0,3.4.0)</version>
+                                    <version>[3.1.0,3.6.0)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>[1.8,1.9)</version>
