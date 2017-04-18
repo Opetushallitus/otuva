@@ -1,8 +1,10 @@
 package fi.vm.sade.kayttooikeus.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.joda.time.LocalDate;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -15,15 +17,19 @@ public class UpdateHaettuKayttooikeusryhmaDto {
 
     private Long id;
 
-//    @Pattern(regexp = "^(HYVAKSYTTY|HYLATTY)$", message = "invalid.kayttooikeudentila")
-    private KayttoOikeudenTila kayttoOikeudenTila;
+    @Pattern(regexp = "^(MYONNETTY|HYLATTY)$", message = "invalid.kayttooikeudentila")
+    private String kayttoOikeudenTila;
 
-    // TODO ennen loppupvm
     @NotNull
     private LocalDate alkupvm;
 
     @NotNull
-    // TODO alkupvm jälkeen ja enintään vuosi siitä (virkailijalle) tai 10v siitä (palvelulle)
     private LocalDate loppupvm;
+
+    @JsonIgnore
+    @AssertTrue(message = "invalid.date.alkupvm-after-loppupvm")
+    public boolean isAlkuPvmBeforeLoppuPvm() {
+        return this.alkupvm.isBefore(this.loppupvm);
+    }
 
 }

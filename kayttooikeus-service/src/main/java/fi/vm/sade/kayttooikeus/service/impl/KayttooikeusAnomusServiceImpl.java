@@ -104,7 +104,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         updateHaettuKayttooikeusryhmaAndAnomus(updateHaettuKayttooikeusryhmaDto, haettuKayttoOikeusRyhma);
 
         // Event is created only when kayttooikeus has been granted.
-        if(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila() == KayttoOikeudenTila.MYONNETTY) {
+        if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
             this.grantRequisition(updateHaettuKayttooikeusryhmaDto, kasittelija, anoja, haettuOrganisaatioHenkilo, myonnettavaKayttoOikeusRyhma);
         }
     }
@@ -118,7 +118,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     private void updateHaettuKayttooikeusryhmaAndAnomus(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {
-        haettuKayttoOikeusRyhma.setTyyppi(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila());
+        haettuKayttoOikeusRyhma.setTyyppi(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()));
         haettuKayttoOikeusRyhma.setKasittelyPvm(DateTime.now());
         if(haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().size() == 1) {
             // This is the last kayttooikeus on anomus so we mark anomus as KASITELTY or HYLATTY

@@ -40,7 +40,8 @@ public class AnomusController {
     @PreAuthorize("hasAnyRole('ROLE_APP_ANOMUSTENHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "", method = RequestMethod.PUT)
-    public void updateHaettuKayttooikeusryhma(@RequestBody @Validated UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
+    public void updateHaettuKayttooikeusryhma(@ApiParam("kayttoOikeudenTila MYONNETTY tai HYLATTY")
+                                                  @RequestBody @Validated UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
         this.kayttooikeusAnomusService.updateHaettuKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto);
     }
 
