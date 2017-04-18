@@ -92,28 +92,32 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         Henkilo anoja = this.henkiloRepository.findByOidHenkilo(haettuKayttoOikeusRyhma.getAnomus().getHenkilo().getOidHenkilo())
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid "
                         + haettuKayttoOikeusRyhma.getAnomus().getHenkilo().getOidHenkilo()));
-        OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = anoja.getOrganisaatioHenkilos().stream()
-                .filter(organisaatioHenkilo ->
-                        Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid()))
-                .findFirst().orElseGet(() ->
-                anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
-                        .organisaatioOid(haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid())
-                        .tehtavanimike(haettuKayttoOikeusRyhma.getAnomus().getTehtavanimike())
-                        .build()));
-        List<Long> slaves = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
-                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus(kasittelija.getOidHenkilo())
-                        .stream().map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                        .map(IdentifiableAndVersionedEntity::getId)
-                        .collect(Collectors.toList()));
-        /* If the granting person has group limitation, those limitations reduce the
-         * possible set of requested access rights and only those which IDs match
-         * are granted, but if the granting person doesn't have any limitations,
-         * then all requested access rights are handled
-         */
+        OrganisaatioHenkilo haettuOrganisaatioHenkilo = findOrCreateHaettuOrganisaatioHenkilo(haettuKayttoOikeusRyhma, anoja);
+        List<Long> slaves = getSlaveIdsByMasterIdsForKasittelija(kasittelija);
+        //  If the granting person has group limitation, those limitations reduce the possible set of requested access rights
+        //  and only those which IDs match are granted, but if the granting person doesn't have any limitations, then all
+        //  requested access rights are handled
         KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma = Optional.ofNullable(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma())
                 .filter(kayttoOikeusRyhma -> slaves.isEmpty() || slaves.contains(kayttoOikeusRyhma.getId()))
                 .orElseThrow(ForbiddenException::new);
 
+        updateHaettuKayttooikeusryhmaAndAnomus(updateHaettuKayttooikeusryhmaDto, haettuKayttoOikeusRyhma);
+
+        // Event is created only when kayttooikeus has been granted.
+        if(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila() == KayttoOikeudenTila.MYONNETTY) {
+            this.grantRequisition(updateHaettuKayttooikeusryhmaDto, kasittelija, anoja, haettuOrganisaatioHenkilo, myonnettavaKayttoOikeusRyhma);
+        }
+    }
+
+    private List<Long> getSlaveIdsByMasterIdsForKasittelija(Henkilo kasittelija) {
+        return this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus(kasittelija.getOidHenkilo())
+                        .stream().map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                        .map(IdentifiableAndVersionedEntity::getId)
+                        .collect(Collectors.toList()));
+    }
+
+    private void updateHaettuKayttooikeusryhmaAndAnomus(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {
         haettuKayttoOikeusRyhma.setTyyppi(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila());
         haettuKayttoOikeusRyhma.setKasittelyPvm(DateTime.now());
         if(haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().size() == 1) {
@@ -127,14 +131,17 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Remove the currently handled kayttooikeus from anomus
         haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().remove(haettuKayttoOikeusRyhma);
+    }
 
-
-        // Vanhassa toteutuksessa (ilmeisesti) myonnettydto korvaa vanhan anomuksen ryhmän (ei voi olla koska eri tyyppiä)
-        //
-        if(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila() == KayttoOikeudenTila.MYONNETTY) {
-            this.grantRequisition(updateHaettuKayttooikeusryhmaDto, kasittelija, anoja, myonnettavaOrganisaatioHenkilo, myonnettavaKayttoOikeusRyhma);
-        }
-
+    private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma, Henkilo anoja) {
+        return anoja.getOrganisaatioHenkilos().stream()
+                .filter(organisaatioHenkilo ->
+                        Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid()))
+                .findFirst().orElseGet(() ->
+                anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                        .organisaatioOid(haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid())
+                        .tehtavanimike(haettuKayttoOikeusRyhma.getAnomus().getTehtavanimike())
+                        .build()));
     }
 
     // Grant kayttooikeusryhma and create event
@@ -167,6 +174,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // TODO ldap sync for henkilo
     }
 
+    // New history event for change on kayttooikeusryhmatapahtuma.
     private void createHistoryEvent(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, String reason) {
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(new KayttoOikeusRyhmaTapahtumaHistoria(
                 myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma(),
