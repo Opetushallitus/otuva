@@ -34,4 +34,9 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
             CascadeType.REFRESH })
     private Set<Identification> identifications = new HashSet<>();
 
+    public OrganisaatioHenkilo addOrganisaatioHenkilo(OrganisaatioHenkilo organisaatioHenkilo) {
+        this.organisaatioHenkilos.add(organisaatioHenkilo);
+        return organisaatioHenkilo;
+    }
+
 }

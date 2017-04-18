@@ -15,6 +15,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaMyo
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractRepositoryTest {
@@ -47,6 +48,12 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractReposito
         ids = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(Collections.singletonList(2000L));
         assertEquals(1, ids.size());
         assertTrue(ids.containsAll(Collections.singletonList(id3)));
+    }
+
+    @Test
+    public void getSlaveIdsByMasterIdsEmpty() {
+        List<Long> ids = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(Collections.singletonList(1000L));
+        assertThat(ids).isNotNull().isEmpty();
     }
 
     @Test
@@ -96,4 +103,5 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractReposito
         viites = kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(1000L);
         assertEquals(2, viites.size());
     }
+
 }

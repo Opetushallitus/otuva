@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.service.impl;
+package fi.vm.sade.kayttooikeus.service.validators;
 
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
@@ -33,7 +33,7 @@ public class KutsuValidator {
         kutsuttuKayttoOikeusRyhmat.forEach(kutsuttuKayttoOikeusRyhma -> {
             Predicate<MyonnettyKayttoOikeusDto> predicate = (MyonnettyKayttoOikeusDto t)
                     -> Objects.equals(t.getRyhmaId(), kutsuttuKayttoOikeusRyhma.getId());
-            if (!kutsujaKayttoOikeudet.stream().anyMatch(predicate)) {
+            if (kutsujaKayttoOikeudet.stream().noneMatch(predicate)) {
                 throw new ForbiddenException("KayttoOikeusryhma with id " + kutsuttuKayttoOikeusRyhma.getId() + " not allowed for organisaatio " + organisaatioOid);
             }
         });

@@ -1,10 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
@@ -16,6 +13,9 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "organisaatiohenkilo", uniqueConstraints = @UniqueConstraint(name = "UK_organisaatiohenkilo_01",
         columnNames = { "organisaatio_oid", "henkilo_id" }))
 public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {

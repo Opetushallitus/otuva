@@ -24,4 +24,6 @@ public interface PermissionCheckerService {
     boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
 
     boolean hasRoleForOrganization(String orgOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
+
+    boolean notOwnData(String dataOwnderOid);
 }

@@ -10,6 +10,8 @@ import org.joda.time.DateTime;
 @NoArgsConstructor
 public class HaettuKayttooikeusryhmaDto {
 
+    private Long id;
+
     private AnomusDto anomus;
 
     private KayttoOikeusRyhmaDto kayttoOikeusRyhma;

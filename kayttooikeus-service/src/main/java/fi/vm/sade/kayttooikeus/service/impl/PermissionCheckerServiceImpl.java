@@ -26,6 +26,7 @@ import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -289,5 +290,11 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
 
         return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, callingUserRoles);
+    }
+
+    @Override
+    public boolean notOwnData(String dataOwnderOid) {
+        return !Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new NullPointerException("No user name available from SecurityContext!")).equals(dataOwnderOid);
     }
 }

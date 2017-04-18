@@ -11,8 +11,9 @@ import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.repositories.HaettuKayttooikeusRyhmaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
+import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,13 +45,35 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private LocalizationService localizationService;
 
+    @MockBean
+    private HenkiloRepository henkiloRepository;
+
+    @MockBean
+    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+
+    @MockBean
+    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+
+    @MockBean
+    private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
+
+    @MockBean
+    private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
     public void setup() {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
-        this.kayttooikeusAnomusService = new KayttooikeusAnomusServiceImpl(this.haettuKayttooikeusRyhmaDataRepository,
-                orikaBeanMapper, this.localizationService);
+        this.kayttooikeusAnomusService = new KayttooikeusAnomusServiceImpl(
+                this.haettuKayttooikeusRyhmaDataRepository,
+                this.henkiloRepository,
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                this.kayttoOikeusRyhmaMyontoViiteRepository,
+                this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
+                this.orikaBeanMapper,
+                this.localizationService,
+                this.haettuKayttooikeusryhmaValidator);
     }
 
 

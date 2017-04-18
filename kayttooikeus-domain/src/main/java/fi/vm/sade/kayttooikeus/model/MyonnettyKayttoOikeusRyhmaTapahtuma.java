@@ -1,8 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -13,6 +12,9 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "myonnetty_kayttooikeusryhma_tapahtuma")
 public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)

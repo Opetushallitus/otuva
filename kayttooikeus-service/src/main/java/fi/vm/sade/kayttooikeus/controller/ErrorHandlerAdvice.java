@@ -6,6 +6,7 @@ import fi.vm.sade.generic.common.ValidationException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
+import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ldap.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -141,6 +146,46 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(Exception.class) @ResponseBody // any other type
     public Map<String,Object> internalError(HttpServletRequest req, Exception exception) {
         return handleException(req, exception, "internal_server_error", exception.getMessage());
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<Map<String, Object>> unprocessableEntityException(UnprocessableEntityException exception, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        Map<String, Object> body = constructErrorBody(exception, status, request);
+        Errors errors = exception.getErrors();
+        body.put("globalErrors", errors.getGlobalErrors().stream()
+                .map(this::constructObjectError)
+                .collect(toList()));
+        body.put("fieldErrors", errors.getFieldErrors().stream()
+                .map(this::constructFieldError)
+                .collect(toList()));
+        return ResponseEntity.status(status).body(body);
+    }
+
+    private Map<String, Object> constructObjectError(ObjectError objectError) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", objectError.getCode());
+        body.put("arguments", objectError.getArguments());
+        body.put("message", objectError.getDefaultMessage());
+        return body;
+    }
+
+    private Map<String, Object> constructFieldError(FieldError fieldError) {
+        Map<String, Object> body = constructObjectError(fieldError);
+        body.put("field", fieldError.getField());
+        body.put("rejectedValue", fieldError.getRejectedValue());
+        return body;
+    }
+
+    private Map<String, Object> constructErrorBody(Exception exception, HttpStatus status, HttpServletRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("exception", exception.getClass().getCanonicalName());
+        body.put("message", exception.getMessage());
+        body.put("path", request.getRequestURI());
+        return body;
     }
 
     private Map<String,Object> handleConstraintViolations(HttpServletRequest req, Exception exception,
