@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
@@ -73,5 +74,15 @@ public class OrganisaatioHenkiloRepositoryImpl extends BaseRepositoryImpl<Organi
                 organisaatioHenkilo.voimassaAlkuPvm.as("voimassaAlkuPvm"),
                 organisaatioHenkilo.voimassaLoppuPvm.as("voimassaLoppuPvm")
         );
+    }
+
+    @Override
+    public boolean isHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid, boolean passivoitu) {
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        return jpa().from(qOrganisaatioHenkilo)
+                .where(qOrganisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid))
+                .where(qOrganisaatioHenkilo.organisaatioOid.eq(organisaatioOid))
+                .where(qOrganisaatioHenkilo.passivoitu.eq(passivoitu))
+                .select(Expressions.ONE).fetchFirst() != null;
     }
 }

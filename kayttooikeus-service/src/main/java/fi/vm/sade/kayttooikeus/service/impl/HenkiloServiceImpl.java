@@ -1,7 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
@@ -28,24 +31,49 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     private PermissionCheckerService permissionCheckerService;
 
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final HenkiloRepository henkiloRepository;
+    private final CommonProperties commonProperties;
 
     @Autowired
     HenkiloServiceImpl(HenkiloHibernateRepository henkiloHibernateRepository,
                        PermissionCheckerService permissionCheckerService,
                        KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
+                       OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
                        OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                       CommonProperties commonProperties,
                        HenkiloRepository henkiloRepository) {
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.permissionCheckerService = permissionCheckerService;
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
+        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+        this.commonProperties = commonProperties;
         this.henkiloRepository = henkiloRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public KayttooikeudetDto getKayttooikeudet(String henkiloOid, OrganisaatioHenkiloCriteria criteria) {
+        // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
+        String rootOrganizationOid = commonProperties.getRootOrganizationOid();
+        if (organisaatioHenkiloRepository.isHenkiloInOrganisaatio(henkiloOid, rootOrganizationOid, false)) {
+            if (criteria.getOrganisaatioOids() != null) {
+                // haetaan organisaatioon kuuluvat henkilöt
+                return KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsBy(criteria));
+            } else {
+                // henkilöllä on oikeutus kaikkiin henkilötietoihin
+                return KayttooikeudetDto.admin(null);
+            }
+        }
+
+        // perustapauksena henkilöllä on oikeus omien organisaatioiden henkilötietoihin
+        return KayttooikeudetDto.user(henkiloHibernateRepository.findOidsBySamaOrganisaatio(henkiloOid, criteria));
     }
 
     @Override
