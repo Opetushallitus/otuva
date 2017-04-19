@@ -12,5 +12,6 @@ public class OrganisaatioHenkiloCriteria {
 
     private Boolean passivoitu;
     private Set<String> organisaatioOids;
+    private Set<String> kayttoOikeusRyhmaNimet;
 
 }

@@ -17,6 +17,8 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QKayttajatiedot.kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
@@ -41,6 +43,14 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 -> query.where(qOrganisaatio.passivoitu.eq(passivoitu)));
         Optional.ofNullable(criteria.getOrganisaatioOids()).ifPresent(organisaatioOid
                 -> query.where(qOrganisaatio.organisaatioOid.in(organisaatioOid)));
+        Optional.ofNullable(criteria.getKayttoOikeusRyhmaNimet()).ifPresent(kayttoOikeusRyhmaNimet -> {
+            QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+            QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+
+            query.join(qOrganisaatio.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhma);
+            query.join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
+            query.where(qKayttoOikeusRyhma.name.in(kayttoOikeusRyhmaNimet));
+        });
 
         return new LinkedHashSet<>(query.fetch());
     }
@@ -66,6 +76,14 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         });
         Optional.ofNullable(criteria.getOrganisaatioOids()).ifPresent(organisaatioOid
                 -> query.where(qOrganisaatio.organisaatioOid.in(organisaatioOid)));
+        Optional.ofNullable(criteria.getKayttoOikeusRyhmaNimet()).ifPresent(kayttoOikeusRyhmaNimet -> {
+            QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+            QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+
+            query.join(qOrganisaatio.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhma);
+            query.join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
+            query.where(qKayttoOikeusRyhma.name.in(kayttoOikeusRyhmaNimet));
+        });
 
         return new LinkedHashSet<>(query.fetch());
     }
