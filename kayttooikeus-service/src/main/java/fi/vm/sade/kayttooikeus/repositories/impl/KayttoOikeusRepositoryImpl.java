@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -106,6 +107,20 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
                         .and(expireConditions))
                 .orderBy(henkilo.oidHenkilo.asc()).fetch();
     }
+
+    @Override
+    public List<String> findHenkilosByRyhma(long id) {
+        LocalDate now = new LocalDate();
+        return jpa().from(myonnettyKayttoOikeusRyhmaTapahtuma)
+                .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
+                .innerJoin(organisaatioHenkilo.henkilo, henkilo)
+                .select(henkilo.oidHenkilo)
+                .where(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(id)
+                        .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.goe(now))
+                        .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.lt(now))
+                ).fetch();
+    }
+
 
     @Override
     public List<PalveluRooliDto> findPalveluRoolitByKayttoOikeusRyhmaId(Long ryhmaId) {

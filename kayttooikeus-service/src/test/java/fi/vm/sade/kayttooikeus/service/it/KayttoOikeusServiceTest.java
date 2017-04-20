@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -202,6 +203,35 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("palvelun kuvaus", roolis.get(0).getPalveluTexts().get("FI"));
         assertEquals("kuv en", roolis.get(0).getPalveluTexts().get("EN"));
         assertEquals("kuvaus på sv", roolis.get(0).getPalveluTexts().get("SV"));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5")
+    public void findHenkilotByKayttoOikeusRyhma(){
+
+        KayttoOikeusRyhmaPopulator pop = kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Koodistonhallinta")
+                .put("EN", "Code management"))
+                .withOikeus(oikeus("KOODISTO", "CRUD"));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop).voimassaPaattyen(new LocalDate().plusMonths(3)).voimassaAlkaen(new LocalDate().minusMonths(1)));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("5.6.7.8.9"), "3.4.5.6.7"), pop).voimassaPaattyen(new LocalDate().plusMonths(2)).voimassaAlkaen(new LocalDate().minusMonths(1)));
+
+        KayttoOikeusRyhmaPopulator pop2 = kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "testiryhma")
+                .put("EN", "testgroup"))
+                .withOikeus(oikeus("HAKUAPP", "CRUD"));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop2).voimassaPaattyen(new LocalDate().minusMonths(1)).voimassaAlkaen(new LocalDate().minusMonths(2)));
+
+        RyhmanHenkilotDto henkilot = kayttoOikeusService.findHenkilotByKayttoOikeusRyhma(populate(pop).getId());
+        assertEquals(2, henkilot.getPersonOids().size());
+
+        RyhmanHenkilotDto henkilot2 = kayttoOikeusService.findHenkilotByKayttoOikeusRyhma(populate(pop2).getId());
+        assertEquals(0, henkilot2.getPersonOids().size());
+
     }
 
     @Test
