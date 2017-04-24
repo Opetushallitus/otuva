@@ -25,12 +25,6 @@
         </dependency>
 
         <dependency>
-            <groupId>fi.vm.sade.kayttooikeus</groupId>
-            <artifactId>kayttooikeus-ui-virkailija</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>fi.vm.sade.oppijanumerorekisteri</groupId>
             <artifactId>oppijanumerorekisteri-api</artifactId>
         </dependency>
