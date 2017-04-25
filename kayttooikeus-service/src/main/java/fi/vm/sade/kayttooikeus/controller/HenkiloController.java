@@ -171,4 +171,11 @@ public class HenkiloController {
         return henkiloService.getKayttooikeudet(oid, criteria);
     }
 
+    @PostMapping("/{oid}/kayttooikeudet")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
+    public KayttooikeudetDto postKayttooikeudet(@PathVariable String oid, @RequestBody OrganisaatioHenkiloCriteria criteria) {
+        return henkiloService.getKayttooikeudet(oid, criteria);
+    }
+
 }
