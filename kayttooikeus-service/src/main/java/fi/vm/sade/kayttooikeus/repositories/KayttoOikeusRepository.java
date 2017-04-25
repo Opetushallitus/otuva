@@ -23,4 +23,5 @@ public interface KayttoOikeusRepository extends BaseRepository<KayttoOikeus> {
 
     KayttoOikeus findByRooliAndPalvelu(String rooli, String palvelu);
 
+    List<String> findHenkilosByRyhma(long id);
 }

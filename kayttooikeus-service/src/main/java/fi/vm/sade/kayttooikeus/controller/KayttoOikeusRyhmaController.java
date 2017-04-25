@@ -133,6 +133,18 @@ public class KayttoOikeusRyhmaController {
     }
 
 
+    @RequestMapping(value = "/{id}/henkilot", method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
+            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee käyttöoikeusryhmään kuuluvat henkilot",
+            notes = "Listaa kaikki annettuun käyttöoikeusryhmään kuuluvat henkilöt joilla voimassaoleva lupa")
+    public RyhmanHenkilotDto getHenkilosByKayttoOikeusRyhma(@PathVariable("id") Long id) {
+        return kayttoOikeusService.findHenkilotByKayttoOikeusRyhma(id);
+    }
+
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")

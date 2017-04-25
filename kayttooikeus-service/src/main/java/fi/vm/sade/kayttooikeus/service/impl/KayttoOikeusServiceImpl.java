@@ -207,6 +207,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public RyhmanHenkilotDto findHenkilotByKayttoOikeusRyhma(long id) {
+        RyhmanHenkilotDto resp = new RyhmanHenkilotDto();
+        resp.setPersonOids(kayttoOikeusRepository.findHenkilosByRyhma(id));
+        return resp;
+    }
+
+    @Override
     @Transactional
     public long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma) {
         if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getRyhmaName().get(FI))) {

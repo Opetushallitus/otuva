@@ -33,6 +33,8 @@ public interface KayttoOikeusService {
 
     List<PalveluRooliDto> findPalveluRoolisByKayttoOikeusRyhma(long id);
 
+    RyhmanHenkilotDto findHenkilotByKayttoOikeusRyhma(long id);
+
     long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma);
 
     long createKayttoOikeus(KayttoOikeusCreateDto kayttoOikeus);
