@@ -37,7 +37,5 @@ public interface OrganisaatioClient {
 
     OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode);
 
-    OrganisaatioPerustieto getOrganisaatioAndRyhmaPerustiedotCached(String oid, Mode mode);
-
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 }
