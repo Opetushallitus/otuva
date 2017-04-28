@@ -6,6 +6,7 @@ import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -83,7 +84,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
             // Add ryhmas to cache
             organisaatios.addAll(Arrays.asList(retrying(io(() ->
                     restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
-                    .get().orFail(mapper(haeRyhmasUrl))));
+                    .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl))));
             cache = new OrganisaatioCache(fetchPerustiedot(rootOrganizationOid), organisaatios);
             cacheUpdatedAt = DateTime.now();
         }
