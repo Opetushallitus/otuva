@@ -17,9 +17,10 @@ public class OrganisaatioPerustieto {
     private String virastotunnus;
     private String oppilaitosKoodi;
     private String oppilaitostyyppi;
-    private Map<String, String> nimi = new HashMap<String, String>();
+    private Map<String, String> nimi = new HashMap<>();
     private List<String> organisaatiotyypit = new ArrayList<>();
-    private List<String> kieletUris = new ArrayList<String>();
+    private List<String> tyypit = new ArrayList<>();
+    private List<String> kieletUris = new ArrayList<>();
     private String kotipaikkaUri;
     private Date alkuPvm;
     private Date lakkautusPvm;
@@ -28,7 +29,10 @@ public class OrganisaatioPerustieto {
     private OrganisaatioPerustieto parent;
     
     public List<String> getTyypit() {
-        return organisaatiotyypit;
+        if(!this.organisaatiotyypit.isEmpty()) {
+            return this.organisaatiotyypit;
+        }
+        return this.tyypit;
     }
 
     public Stream<OrganisaatioPerustieto> andChildren() {

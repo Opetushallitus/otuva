@@ -75,7 +75,9 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                 .stream().peek(organisaatioHenkilo ->
                     organisaatioHenkilo.setOrganisaatio(
                         mapOrganisaatioDtoRecursive(
-                            organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioHenkilo.getOrganisaatio().getOid(), organisaatioClientMode),
+                            this.organisaatioClient.getOrganisaatioPerustiedotCached(
+                                    organisaatioHenkilo.getOrganisaatio().getOid(),
+                                    organisaatioClientMode),
                             compareByLang))
                 ).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());
