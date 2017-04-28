@@ -111,13 +111,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode) {
-        return cached(c -> c.getByOid(oid).orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
-                () -> fetchPerustiedot(oid), mode);
-    }
-
-    @Override
-    public OrganisaatioPerustieto getOrganisaatioAndRyhmaPerustiedotCached(String oid, Mode mode) {
-        return cached(c -> c.getByOid(oid).orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
+        return cached(c -> c.getByOid(oid).<NotFoundException>orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
                 () -> fetchPerustiedot(oid), mode);
     }
 
