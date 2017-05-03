@@ -24,20 +24,9 @@ public class HaettuKayttooikeusryhmaValidator implements Validator {
     }
 
     public void validate(Object object, Errors errors) {
-        HaettuKayttoOikeusRyhma haettuKayttooikeusryhmaDto = (HaettuKayttoOikeusRyhma) object;
+        HaettuKayttoOikeusRyhma haettuKayttooikeusryhma = (HaettuKayttoOikeusRyhma) object;
 
-        // Permission checks
-        if(!this.permissionCheckerService.notOwnData(haettuKayttooikeusryhmaDto.getAnomus().getHenkilo().getOidHenkilo())) {
-            throw new ForbiddenException("User can't edit his own data.");
-        }
-        if(!this.permissionCheckerService.checkRoleForOrganisation(Lists.newArrayList(haettuKayttooikeusryhmaDto.getAnomus().getOrganisaatioOid()),
-                Lists.newArrayList("READ_UPDATE", "CRUD"))) {
-            throw new ForbiddenException("No access through organisation hierarchy.");
-        }
-        // TODO organisaatioviite check
-        // TODO kayttooikeus myontoviite check
-
-        if(haettuKayttooikeusryhmaDto.getAnomus().getAnomuksenTila() != AnomuksenTila.ANOTTU) {
+        if(haettuKayttooikeusryhma.getAnomus().getAnomuksenTila() != AnomuksenTila.ANOTTU) {
             errors.reject("Anomus already handled");
         }
 

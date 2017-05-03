@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,4 +44,14 @@ public class AnomusController {
         this.kayttooikeusAnomusService.updateHaettuKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto);
     }
 
+    @ApiOperation("Myöntää halutut käyttöoikeusryhmät käyttäjälle haluttuun organisaatioon")
+    // Organisation access validated on server layer
+    @PreAuthorize("hasAnyRole('ROLE_APP_ANOMUSTENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(value = "/{oidHenkilo}/{organisaatioOid}", method = RequestMethod.PUT)
+    public void grantMyonnettyKayttooikeusryhmaForHenkilo(@PathVariable String oidHenkilo, @PathVariable String organisaatioOid,
+                                                          @RequestBody @Validated List<UpdateHaettuKayttooikeusryhmaDto>
+                                                                  updateHaettuKayttooikeusryhmaDtoList) {
+        this.kayttooikeusAnomusService.grantKayttooikeusryhma(oidHenkilo, organisaatioOid, updateHaettuKayttooikeusryhmaDtoList);
+    }
 }

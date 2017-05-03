@@ -11,4 +11,6 @@ public interface KayttooikeusAnomusService {
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);
 
     void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto);
+
+    void grantKayttooikeusryhma(String anojaOid, String organisaatioOid, List<UpdateHaettuKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList);
 }
