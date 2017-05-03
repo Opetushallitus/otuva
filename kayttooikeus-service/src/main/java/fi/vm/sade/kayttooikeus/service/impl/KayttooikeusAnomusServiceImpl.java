@@ -185,6 +185,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     @Override
+    @Transactional
     public void grantKayttooikeusryhma(String anojaOid,
                                        String organisaatioOid,
                                        List<UpdateHaettuKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList) {
