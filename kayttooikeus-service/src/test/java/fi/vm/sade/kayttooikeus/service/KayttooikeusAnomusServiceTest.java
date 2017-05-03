@@ -60,6 +60,12 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
 
+    @MockBean
+    private PermissionCheckerService permissionCheckerService;
+
+    @MockBean
+    private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
@@ -73,7 +79,9 @@ public class KayttooikeusAnomusServiceTest {
                 this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
-                this.haettuKayttooikeusryhmaValidator);
+                this.haettuKayttooikeusryhmaValidator,
+                this.permissionCheckerService,
+                this.kayttooikeusryhmaDataRepository);
     }
 
 
