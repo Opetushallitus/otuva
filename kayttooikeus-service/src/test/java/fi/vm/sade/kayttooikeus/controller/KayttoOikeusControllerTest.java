@@ -79,6 +79,8 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     public void sendExpirationRemindersTest() throws Exception {
         given(this.taskExecutorService.sendExpirationReminders(Matchers.any(Period.class))).willReturn(1);
         this.mvc.perform(post("/kayttooikeus/expirationReminders")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.TEXT_PLAIN)
                 .param("year", "2015").param("month", "1").param("day", "1"))
             .andExpect(status().isOk()).andExpect(content().string(is("1")));
     }

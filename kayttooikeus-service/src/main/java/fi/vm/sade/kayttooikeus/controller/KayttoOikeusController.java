@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @RestController
@@ -59,11 +60,12 @@ public class KayttoOikeusController {
     @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
             authorizations = @Authorization("ROLE_APP_HENKILONHALLINTA_OPHREKISTERI"),
-            produces = "text/plain", response = Integer.class)
-    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST, produces = "text/plain")
-    public String sendExpirationReminders(@ApiParam("Vuosi") @RequestParam("year") int year,
-                                       @ApiParam("Kuukausi") @RequestParam("month") int month,
-                                       @ApiParam("Päivä") @RequestParam("day") int day) {
+            response = Integer.class)
+    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON)
+    public String sendExpirationReminders(@ApiParam(value = "Vuosi", required = true) @RequestParam("year") int year,
+                                       @ApiParam(value = "Kuukausi", required = true) @RequestParam("month") int month,
+                                       @ApiParam(value = "Päivä", required = true) @RequestParam("day") int day) {
         Period expireThreshold = new Period(LocalDate.now(), new LocalDate(year, month, day));
         return String.format("%d", taskExecutorService.sendExpirationReminders(expireThreshold));
     }
