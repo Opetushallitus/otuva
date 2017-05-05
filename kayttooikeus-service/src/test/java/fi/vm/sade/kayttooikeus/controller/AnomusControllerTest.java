@@ -1,0 +1,101 @@
+package fi.vm.sade.kayttooikeus.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.ArrayList;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringRunner.class)
+public class AnomusControllerTest extends AbstractControllerTest {
+    @MockBean
+    private KayttooikeusAnomusService kayttooikeusAnomusService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void getActiveAnomuksetByHenkilo() throws Exception {
+        given(this.kayttooikeusAnomusService.getAllActiveAnomusByHenkiloOid(anyString(), anyBoolean()))
+                .willReturn(new ArrayList<>());
+        this.mvc.perform(get("/kayttooikeusanomus/1.2.3.4.5").param("activeOnly", "true"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void getActiveAnomuksetByHenkiloNotFound() throws Exception {
+        given(this.kayttooikeusAnomusService.getAllActiveAnomusByHenkiloOid(anyString(), anyBoolean()))
+                .willThrow(new NotFoundException("message"));
+        this.mvc.perform(get("/kayttooikeusanomus/1.2.3.4.5").param("activeOnly", "true"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void updateHaettuKayttooikeusryhma() throws Exception {
+        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
+                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        this.mvc.perform(put("/kayttooikeusanomus")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void updateHaettuKayttooikeusryhmaNotFound() throws Exception {
+        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
+                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        willThrow(new NotFoundException(""))
+                .given(this.kayttooikeusAnomusService)
+                .updateHaettuKayttooikeusryhma(any(UpdateHaettuKayttooikeusryhmaDto.class));
+        this.mvc.perform(put("/kayttooikeusanomus")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void grantMyonnettyKayttooikeusryhmaForHenkilo() throws Exception {
+        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
+                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(haettuKayttooikeusryhmaDto))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void grantMyonnettyKayttooikeusryhmaForHenkiloNotFound() throws Exception {
+        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
+                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        willThrow(new NotFoundException(""))
+                .given(this.kayttooikeusAnomusService).grantKayttooikeusryhma(anyString(), anyString(), any());
+        this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(haettuKayttooikeusryhmaDto))))
+                .andExpect(status().isNotFound());
+    }
+}
