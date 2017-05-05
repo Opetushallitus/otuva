@@ -103,8 +103,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             throw new UnprocessableEntityException(errors);
         }
 
-        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.getCurrentUserOid())
-                .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.getCurrentUserOid()));
+        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+                .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.permissionCheckerService.getCurrentUserOid()));
         haettuKayttoOikeusRyhma.getAnomus().setKasittelija(kasittelija);
 
         Henkilo anoja = this.henkiloRepository.findByOidHenkilo(haettuKayttoOikeusRyhma.getAnomus().getHenkilo().getOidHenkilo())
@@ -205,7 +205,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                         String tehtavanimike) {
         Henkilo anoja = this.henkiloRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
-        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.getCurrentUserOid()));
 
         OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = this.findOrCreateHaettuOrganisaatioHenkilo(

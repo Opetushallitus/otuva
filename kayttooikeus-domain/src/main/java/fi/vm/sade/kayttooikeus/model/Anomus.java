@@ -76,4 +76,8 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     @JoinTable(name = "anomus_myonnettykayttooikeusryhmas", joinColumns = @JoinColumn(name = "anomus_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "myonnettykayttooikeusryhma_id", referencedColumnName = "id"))
     private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<>();
+
+    public void addHaettuKayttoOikeusRyhma(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {
+        this.haettuKayttoOikeusRyhmas.add(haettuKayttoOikeusRyhma);
+    }
 }

@@ -64,14 +64,14 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
-        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, getCasRoles());
+        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
-        return personOid.equals(currentUserOid) || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
+        return personOid.equals(currentUserOid) || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
@@ -296,5 +296,14 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     public boolean notOwnData(String dataOwnderOid) {
         return !Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(() -> new NullPointerException("No user name available from SecurityContext!")).equals(dataOwnderOid);
+    }
+
+    @Override
+    public String getCurrentUserOid() {
+        String oid = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (oid == null) {
+            throw new NullPointerException("No user name available from SecurityContext!");
+        }
+        return oid;
     }
 }
