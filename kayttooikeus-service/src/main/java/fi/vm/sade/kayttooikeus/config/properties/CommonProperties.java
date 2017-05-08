@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "common")
 public class CommonProperties {
-    private String rootOrganizationOid;
+    private String rootOrganizationOid = "1.2.246.562.10.00000000001";
     private String groupOrganizationId;
     private InvitationEmail invitationEmail;
     private String organisaatioRyhmaPrefix = "1.2.246.562.28";

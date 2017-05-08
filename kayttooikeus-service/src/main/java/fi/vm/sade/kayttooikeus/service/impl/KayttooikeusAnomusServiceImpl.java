@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
@@ -18,6 +19,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,7 +132,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Event is created only when kayttooikeus has been granted.
         if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
-            this.grantKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto,
+            this.grantKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto.getAlkupvm(),
+                    updateHaettuKayttooikeusryhmaDto.getLoppupvm(),
                     anoja.getOidHenkilo(),
                     haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid(),
                     haettuKayttoOikeusRyhma.getKayttoOikeusRyhma(),
@@ -160,7 +163,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .getOrganisaatioViite();
         // Organisaatiohenkilo limitations are valid
         if(!CollectionUtils.isEmpty(organisaatioViite)
-                // root organisation does not have organisaatioviite (
+                // only root organisation should not have organisaatioviite
                 && !commonProperties.getRootOrganizationOid().equals(organisaatioOid)
                 && !this.permissionCheckerService.organisaatioLimitationCheck(organisaatioOid, organisaatioViite)) {
             throw new ForbiddenException("Target organization has invalid organization type");
@@ -208,7 +211,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Transactional
     public void grantKayttooikeusryhma(String anojaOid,
                                        String organisaatioOid,
-                                       List<UpdateHaettuKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList) {
+                                       List<GrantKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList) {
         // Permission checks
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
@@ -218,14 +221,18 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         });
 
         updateHaettuKayttooikeusryhmaDtoList.forEach(haettuKayttooikeusryhmaDto ->
-                this.grantKayttooikeusryhma(haettuKayttooikeusryhmaDto, anojaOid, organisaatioOid,
+                this.grantKayttooikeusryhma(haettuKayttooikeusryhmaDto.getAlkupvm(),
+                        haettuKayttooikeusryhmaDto.getLoppupvm(),
+                        anojaOid,
+                        organisaatioOid,
                         this.kayttooikeusryhmaDataRepository.findOne(haettuKayttooikeusryhmaDto.getId())
-                        .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
+                                .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
                         ""));
     }
 
     // Grant kayttooikeusryhma and create event. DOES NOT CONTAIN PERMISSION CHECKS SO DONT CALL DIRECTLY
-    private void grantKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto,
+    private void grantKayttooikeusryhma(LocalDate alkupvm,
+                                        LocalDate loppupvm,
                                         String anojaOid,
                                         String organisaatioOid,
                                         KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
@@ -242,8 +249,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 this.findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(anojaOid, myonnettavaOrganisaatioHenkilo,
                 myonnettavaKayttoOikeusRyhma);
 
-        myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaAlkuPvm(updateHaettuKayttooikeusryhmaDto.getAlkupvm());
-        myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaLoppuPvm(updateHaettuKayttooikeusryhmaDto.getLoppupvm());
+        myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaAlkuPvm(alkupvm);
+        myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaLoppuPvm(loppupvm);
         myonnettyKayttoOikeusRyhmaTapahtuma.setAikaleima(DateTime.now());
         myonnettyKayttoOikeusRyhmaTapahtuma.setKasittelija(kasittelija);
         myonnettyKayttoOikeusRyhmaTapahtuma.setTila(myonnettyKayttoOikeusRyhmaTapahtuma.getId() == null

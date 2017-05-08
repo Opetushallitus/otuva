@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
@@ -50,8 +51,8 @@ public class AnomusController {
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/{oidHenkilo}/{organisaatioOid}", method = RequestMethod.PUT)
     public void grantMyonnettyKayttooikeusryhmaForHenkilo(@PathVariable String oidHenkilo, @PathVariable String organisaatioOid,
-                                                          @RequestBody @Validated List<UpdateHaettuKayttooikeusryhmaDto>
-                                                                  updateHaettuKayttooikeusryhmaDtoList) {
-        this.kayttooikeusAnomusService.grantKayttooikeusryhma(oidHenkilo, organisaatioOid, updateHaettuKayttooikeusryhmaDtoList);
+                                                          @RequestBody @Validated List<GrantKayttooikeusryhmaDto>
+                                                                  grantKayttooikeusryhmaDtoList) {
+        this.kayttooikeusAnomusService.grantKayttooikeusryhma(oidHenkilo, organisaatioOid, grantKayttooikeusryhmaDtoList);
     }
 }

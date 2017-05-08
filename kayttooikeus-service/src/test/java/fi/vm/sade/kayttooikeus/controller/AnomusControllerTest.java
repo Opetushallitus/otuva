@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
@@ -78,24 +79,24 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void grantMyonnettyKayttooikeusryhmaForHenkilo() throws Exception {
-        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
-                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
+                DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
         this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(haettuKayttooikeusryhmaDto))))
+                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void grantMyonnettyKayttooikeusryhmaForHenkiloNotFound() throws Exception {
-        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
-                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
+        GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
+                DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
         willThrow(new NotFoundException(""))
                 .given(this.kayttooikeusAnomusService).grantKayttooikeusryhma(anyString(), anyString(), any());
         this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(haettuKayttooikeusryhmaDto))))
+                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))
                 .andExpect(status().isNotFound());
     }
 }
