@@ -79,7 +79,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     public boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, List<String> allowedRoles,
                                            ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
 
-        if (hasInternalAccess(personOidToAccess, allowedRoles, callingUserRoles)) {
+        if (this.hasInternalAccess(personOidToAccess, allowedRoles, callingUserRoles)) {
             return true;
         }
 
@@ -305,5 +305,10 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
             throw new NullPointerException("No user name available from SecurityContext!");
         }
         return oid;
+    }
+
+    @Override
+    public boolean currentUserIsAdmin() {
+        return isSuperUser(this.getCasRoles());
     }
 }

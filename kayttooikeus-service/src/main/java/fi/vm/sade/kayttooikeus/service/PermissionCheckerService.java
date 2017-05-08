@@ -28,4 +28,6 @@ public interface PermissionCheckerService {
     boolean notOwnData(String dataOwnderOid);
 
     String getCurrentUserOid();
+
+    boolean currentUserIsAdmin();
 }

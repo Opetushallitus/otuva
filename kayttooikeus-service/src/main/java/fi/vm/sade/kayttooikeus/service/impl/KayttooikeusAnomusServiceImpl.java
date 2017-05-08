@@ -109,7 +109,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.inSameOrParentOrganisation(haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
         this.organisaatioViiteLimitationsAreValid(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().getId(),
                 haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
-        this.kayttooikeusryhmaLimitationsAreValid();
+        this.kayttooikeusryhmaLimitationsAreValid(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().getId());
 
         // Post validation
         BindException errors = new BindException(haettuKayttoOikeusRyhma, "haettuKayttoOikeusRyhma");
@@ -188,9 +188,21 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .contains(organisaatioOid);
     }
 
-    private void kayttooikeusryhmaLimitationsAreValid() {
-        // Kayttooikeusryhma limitations are valid
-        // TODO kayttooikeus myontoviite check
+    private void kayttooikeusryhmaLimitationsAreValid(Long kayttooikeusryhmaId) {
+        // The granting person's limitations must be checked always since there there shouldn't be a situation where the
+        // the granting person doesn't have access rights limitations (except admin users who have full access)
+        if(!this.kayttooikeusMyontoviiteLimitationCheck(kayttooikeusryhmaId)) {
+            throw new ForbiddenException("User doesn't have access rights to grant this group");
+        }
+    }
+
+    private boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
+        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
+                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
+        List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
+        return this.permissionCheckerService.currentUserIsAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
     }
 
     private void updateHaettuKayttooikeusryhmaAndAnomus(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto,
@@ -230,9 +242,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Permission checks
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
-        updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto ->
-                this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId(), organisaatioOid));
-        this.kayttooikeusryhmaLimitationsAreValid();
+        updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto -> {
+                    this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId(), organisaatioOid);
+                    this.kayttooikeusryhmaLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
+        });
 
         updateHaettuKayttooikeusryhmaDtoList.forEach(haettuKayttooikeusryhmaDto ->
                 this.grantKayttooikeusryhma(haettuKayttooikeusryhmaDto, anojaOid, organisaatioOid,
