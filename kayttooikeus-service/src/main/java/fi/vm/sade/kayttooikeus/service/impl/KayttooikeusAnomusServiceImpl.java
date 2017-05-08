@@ -138,7 +138,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
     }
 
-    // TODO maybe move to permissionchecker as *withThrow() methods
     private void notEditingOwnData(String oidHenkilo) {
         // Cant edit own data
         if(!this.permissionCheckerService.notOwnData(oidHenkilo)) {
