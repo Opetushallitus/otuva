@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
@@ -12,6 +13,8 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -50,10 +53,14 @@ public class PermissionCheckerTest {
 
     private HenkiloRepository henkiloRepositoryMock;
 
+    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+
+    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private FakeRestClient fakeRestClient = new FakeRestClient();
-    
+
     @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -69,12 +76,19 @@ public class PermissionCheckerTest {
         this.myRoles = createMockedRoles(new HashSet<>());
 
         this.henkiloRepositoryMock = Mockito.mock(HenkiloRepository.class);
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository.class);
+        this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
+
+        CommonProperties commonProperties = new CommonProperties();
+
         this.organisaatioClient = Mockito.mock(OrganisaatioClient.class);
         OphProperties ophPropertiesMock = Mockito.mock(OphProperties.class);
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
-                this.henkiloRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient));
+                this.henkiloRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
+                commonProperties));
         Whitebox.setInternalState(permissionChecker, "restClient", this.fakeRestClient);
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")

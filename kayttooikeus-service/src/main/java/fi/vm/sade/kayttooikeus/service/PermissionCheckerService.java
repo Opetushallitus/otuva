@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.List;
@@ -30,4 +31,8 @@ public interface PermissionCheckerService {
     String getCurrentUserOid();
 
     boolean currentUserIsAdmin();
+
+    boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
+
+    boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet);
 }

@@ -6,14 +6,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -43,9 +44,13 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
     private HenkiloRepository henkiloRepository;
-    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private OrganisaatioClient organisaatioClient;
+
+    private CommonProperties commonProperties;
 
     private static Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
 
@@ -53,12 +58,18 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     public PermissionCheckerServiceImpl(OphProperties ophProperties,
                                         HenkiloRepository henkiloRepository,
                                         OrganisaatioClient organisaatioClient,
-                                        OppijanumerorekisteriClient oppijanumerorekisteriClient) {
+                                        OppijanumerorekisteriClient oppijanumerorekisteriClient,
+                                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                                        KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
+                                        CommonProperties commonProperties) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         this.henkiloRepository = henkiloRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+        this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
+        this.commonProperties = commonProperties;
     }
 
     @Override
@@ -310,5 +321,36 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     @Override
     public boolean currentUserIsAdmin() {
         return isSuperUser(this.getCasRoles());
+    }
+
+    @Override
+    public boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
+        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findValidMyonnettyKayttooikeus(this.getCurrentUserOid()).stream()
+                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
+        List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
+        return this.currentUserIsAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
+    }
+
+    @Override
+    public boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
+        // Group organizations have to match only as a general set since they're not separated by type or by individual groups
+        if(organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
+            return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                    .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
+        }
+        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
+        if(!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
+            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
+                    viiteSet.stream().anyMatch(organisaatioViite ->
+                            organisaatioViite.getOrganisaatioTyyppi()
+                                    .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
+                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+                                            : null)
+                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
+        }
+        return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                .contains(organisaatioOid);
     }
 }

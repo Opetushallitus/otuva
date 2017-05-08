@@ -163,46 +163,17 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         if(!CollectionUtils.isEmpty(organisaatioViite)
                 // root organisation does not have organisaatioviite (
                 && !commonProperties.getRootOrganizationOid().equals(organisaatioOid)
-                && !this.organisaatioLimitationCheck(organisaatioOid, organisaatioViite)) {
+                && !this.permissionCheckerService.organisaatioLimitationCheck(organisaatioOid, organisaatioViite)) {
             throw new ForbiddenException("Target organization has invalid organization type");
         }
-    }
-
-    private boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
-        // Group organizations have to match only as a general set since they're not separated by type or by individual groups
-        if(organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
-            return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
-                    .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
-        }
-        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
-        if(!CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
-            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
-                    viiteSet.stream().anyMatch(organisaatioViite ->
-                            organisaatioViite.getOrganisaatioTyyppi()
-                                    .equals(!StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
-                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
-                                            : null)
-                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
-        }
-        return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
-                .contains(organisaatioOid);
     }
 
     private void kayttooikeusryhmaLimitationsAreValid(Long kayttooikeusryhmaId) {
         // The granting person's limitations must be checked always since there there shouldn't be a situation where the
         // the granting person doesn't have access rights limitations (except admin users who have full access)
-        if(!this.kayttooikeusMyontoviiteLimitationCheck(kayttooikeusryhmaId)) {
+        if(!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttooikeusryhmaId)) {
             throw new ForbiddenException("User doesn't have access rights to grant this group");
         }
-    }
-
-    private boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
-        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
-                .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
-                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
-        List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
-        return this.permissionCheckerService.currentUserIsAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
     }
 
     private void updateHaettuKayttooikeusryhmaAndAnomus(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto,
