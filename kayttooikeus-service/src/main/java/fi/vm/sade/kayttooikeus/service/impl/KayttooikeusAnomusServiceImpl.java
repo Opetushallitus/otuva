@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
@@ -13,16 +14,21 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +47,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
 
+    private final CommonProperties commonProperties;
+
+    private final OrganisaatioClient organisaatioClient;
+
     @Autowired
     public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
                                          HenkiloRepository henkiloRepository,
@@ -51,7 +61,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                          LocalizationService localizationService,
                                          HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator,
                                          PermissionCheckerService permissionCheckerService,
-                                         KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository) {
+                                         KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
+                                         CommonProperties commonProperties,
+                                         OrganisaatioClient organisaatioClient) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
         this.henkiloRepository = henkiloRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -62,6 +74,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.haettuKayttooikeusryhmaValidator = haettuKayttooikeusryhmaValidator;
         this.permissionCheckerService = permissionCheckerService;
         this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
+        this.commonProperties = commonProperties;
+        this.organisaatioClient = organisaatioClient;
     }
 
     @Transactional(readOnly = true)
@@ -93,7 +107,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Permission checks for declining requisition (there are separate checks for granting)
         this.inSameOrParentOrganisation(haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
-        this.organisaatioViiteLimitationsAreValid();
+        this.organisaatioViiteLimitationsAreValid(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().getId(),
+                haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
         this.kayttooikeusryhmaLimitationsAreValid();
 
         // Post validation
@@ -140,9 +155,37 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
     }
 
-    private void organisaatioViiteLimitationsAreValid() {
+    private void organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId, String organisaatioOid) {
+        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findOne(kayttooikeusryhmaId)
+                .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
+                .getOrganisaatioViite();
         // Organisaatiohenkilo limitations are valid
-        // TODO organisaatioviite check
+        if(!CollectionUtils.isEmpty(organisaatioViite)
+                // root organisation does not have organisaatioviite (
+                && !commonProperties.getRootOrganizationOid().equals(organisaatioOid)
+                && !this.organisaatioLimitationCheck(organisaatioOid, organisaatioViite)) {
+            throw new ForbiddenException("Target organization has invalid organization type");
+        }
+    }
+
+    private boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
+        // Group organizations have to match only as a general set since they're not separated by type or by individual groups
+        if(organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
+            return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                    .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
+        }
+        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
+        if(!CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
+            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
+                    viiteSet.stream().anyMatch(organisaatioViite ->
+                            organisaatioViite.getOrganisaatioTyyppi()
+                                    .equals(!StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
+                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+                                            : null)
+                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
+        }
+        return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                .contains(organisaatioOid);
     }
 
     private void kayttooikeusryhmaLimitationsAreValid() {
@@ -187,7 +230,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Permission checks
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
-        this.organisaatioViiteLimitationsAreValid();
+        updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto ->
+                this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId(), organisaatioOid));
         this.kayttooikeusryhmaLimitationsAreValid();
 
         updateHaettuKayttooikeusryhmaDtoList.forEach(haettuKayttooikeusryhmaDto ->

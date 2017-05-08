@@ -5,10 +5,12 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.joda.time.DateTime;
@@ -68,6 +70,12 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
 
+    @MockBean
+    private CommonProperties commonProperties;
+
+    @MockBean
+    private OrganisaatioClient organisaatioClient;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
@@ -83,7 +91,10 @@ public class KayttooikeusAnomusServiceTest {
                 this.localizationService,
                 this.haettuKayttooikeusryhmaValidator,
                 this.permissionCheckerService,
-                this.kayttooikeusryhmaDataRepository));
+                this.kayttooikeusryhmaDataRepository,
+                this.commonProperties,
+                this.organisaatioClient)
+        );
     }
 
 

@@ -13,6 +13,7 @@ public class CommonProperties {
     private String rootOrganizationOid;
     private String groupOrganizationId;
     private InvitationEmail invitationEmail;
+    private String organisaatioRyhmaPrefix = "1.2.246.562.28";
     
     @Getter @Setter
     public static class InvitationEmail {
