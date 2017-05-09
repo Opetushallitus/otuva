@@ -67,9 +67,8 @@ public class AnomusControllerTest extends AbstractControllerTest {
     public void updateHaettuKayttooikeusryhmaNotFound() throws Exception {
         UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
                 KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
-        willThrow(new NotFoundException(""))
-                .given(this.kayttooikeusAnomusService)
-                .updateHaettuKayttooikeusryhma(any(UpdateHaettuKayttooikeusryhmaDto.class));
+        willThrow(new NotFoundException("")).willNothing()
+                .given(this.kayttooikeusAnomusService).updateHaettuKayttooikeusryhma(any(UpdateHaettuKayttooikeusryhmaDto.class));
         this.mvc.perform(put("/kayttooikeusanomus")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
@@ -92,7 +91,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     public void grantMyonnettyKayttooikeusryhmaForHenkiloNotFound() throws Exception {
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
                 DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
-        willThrow(new NotFoundException(""))
+        willThrow(new NotFoundException("")).willNothing()
                 .given(this.kayttooikeusAnomusService).grantKayttooikeusryhma(anyString(), anyString(), any());
         this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
