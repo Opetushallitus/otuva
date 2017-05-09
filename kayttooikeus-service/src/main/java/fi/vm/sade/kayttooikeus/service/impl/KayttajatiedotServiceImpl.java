@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
@@ -60,6 +61,24 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     public KayttajatiedotReadDto getByHenkiloOid(String henkiloOid) {
         return kayttajatiedotRepository.findByHenkiloOid(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Käyttäjätietoja ei löytynyt OID:lla " + henkiloOid));
+    }
+
+    @Override
+    @Transactional
+    public KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
+
+        kayttajatiedotRepository.findByUsername(kayttajatiedotUpdateDto.getUsername()).ifPresent((Kayttajatiedot t) -> {
+            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+        });
+
+
+
+        Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
+                .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
+
+        henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
+        henkiloRepository.save(henkilo);
+        return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
     }
 
     @Override

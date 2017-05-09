@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
@@ -52,6 +53,21 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("on jo käytössä");
+    }
+
+    @Test
+    public void updateShouldThrowOnDuplicateUsername() {
+        String oid = "1.2.3.4.5";
+        populate(henkilo(oid));
+        populate(kayttajatiedot(henkilo("toinen"), "user1"));
+        KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
+        updateDto.setUsername("user1");
+
+        Throwable throwable = catchThrowable(() -> kayttajatiedotService.updateKayttajatiedot(oid, updateDto));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Käyttäjänimi on jo käytössä");
     }
 
     @Test
