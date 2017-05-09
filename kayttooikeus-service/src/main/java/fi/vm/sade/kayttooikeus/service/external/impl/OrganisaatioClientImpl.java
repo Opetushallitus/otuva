@@ -1,10 +1,12 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -15,6 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -73,10 +76,16 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         // preventing double queued updates...
         if (cacheUpdatedAt == null || (updateMoment != null && updateMoment.isBefore(cacheUpdatedAt))) {
             String haeHierarchyUrl = urlConfiguration.url("organisaatio-service.organisaatio.hae");
-            cache = new OrganisaatioCache(fetchPerustiedot(rootOrganizationOid),
+            String haeRyhmasUrl = urlConfiguration.url("organisaatio-service.organisaatio.ryhmat");
+            // Add organisations to cache
+            List<OrganisaatioPerustieto> organisaatios =
                     retrying(io(() -> restClient.get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
-                        .get().orFail(mapper(haeHierarchyUrl)).getOrganisaatiot()
-            );
+                            .get().orFail(mapper(haeHierarchyUrl)).getOrganisaatiot();
+            // Add ryhmas to cache
+            organisaatios.addAll(Arrays.asList(retrying(io(() ->
+                    restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
+                    .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl))));
+            cache = new OrganisaatioCache(fetchPerustiedot(rootOrganizationOid), organisaatios);
             cacheUpdatedAt = DateTime.now();
         }
     }
@@ -106,7 +115,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return cached(c -> c.getByOid(oid).<NotFoundException>orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
                 () -> fetchPerustiedot(oid), mode);
     }
-    
+
     public OrganisaatioPerustieto fetchPerustiedot(String oid) {
         String url = urlConfiguration.url("organisaatio-service.organisaatio.perustiedot", oid);
         return mapToPerustieto(retrying(io(() -> (OrganisaatioRDTO) objectMapper.readerFor(OrganisaatioRDTO.class)

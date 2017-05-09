@@ -33,7 +33,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     private static final String SERVICE_CODE = "kayttooikeus.kayttooikeuspalvelu-service";
     private final ObjectMapper objectMapper;
     private final OphProperties urlProperties;
-    private final CachingRestClient restClient;
+    private final CachingRestClient proxyRestClient;
     private final CachingRestClient serviceAccountClient;
 
     @Autowired
@@ -41,10 +41,10 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                                            ServiceUsersProperties serviceUsersProperties) {
         this.objectMapper = objectMapper;
         this.urlProperties = urlProperties;
-        this.restClient = new CachingRestClient().setClientSubSystemCode(SERVICE_CODE);
-        this.restClient.setWebCasUrl(urlProperties.url("cas.url"));
-        this.restClient.setCasService(urlProperties.url("oppijanumerorekisteri-service.security-check"));
-        this.restClient.setUseProxyAuthentication(true);
+        this.proxyRestClient = new CachingRestClient().setClientSubSystemCode(SERVICE_CODE);
+        this.proxyRestClient.setWebCasUrl(urlProperties.url("cas.url"));
+        this.proxyRestClient.setCasService(urlProperties.url("oppijanumerorekisteri-service.security-check"));
+        this.proxyRestClient.setUseProxyAuthentication(true);
         
         this.serviceAccountClient = new CachingRestClient().setClientSubSystemCode(SERVICE_CODE);
         this.serviceAccountClient.setWebCasUrl(urlProperties.url("cas.url"));
@@ -61,7 +61,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHenkiloOidList");
         return retrying(FunctionalUtils.<List<HenkiloPerustietoDto>>io(
             () -> objectMapper.readerFor(new TypeReference<List<HenkiloPerustietoDto>>() {})
-                    .readValue(IOUtils.toString(restClient.post(url, MediaType.APPLICATION_JSON,
+                    .readValue(IOUtils.toString(serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
                             objectMapper.writer().writeValueAsString(henkiloOid)).getEntity().getContent()))), 2).get()
                 .orFail(mapper(url));
     }
@@ -71,7 +71,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot", henkiloOid);
         return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(
                     () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
-                .readValue(restClient.getAsString(url))), 2).get()
+                .readValue(proxyRestClient.getAsString(url))), 2).get()
                 .orFail(mapper(url));
     }
 

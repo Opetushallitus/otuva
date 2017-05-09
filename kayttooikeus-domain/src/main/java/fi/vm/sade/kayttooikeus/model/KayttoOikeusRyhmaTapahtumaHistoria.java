@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
@@ -11,6 +13,8 @@ import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "kayttooikeusryhma_tapahtuma_historia")
 public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersionedEntity {
 

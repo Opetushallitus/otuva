@@ -7,9 +7,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
 public interface OrganisaatioHenkiloDataRepository extends CrudRepository<OrganisaatioHenkilo, Long> {
     List<OrganisaatioHenkilo> findByHenkiloOidHenkilo(String oidHenkilo);
+
+    Optional<OrganisaatioHenkilo> findByHenkiloOidHenkiloAndOrganisaatioOid(String oidHenkilo, String organisaatioOid);
 }

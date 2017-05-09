@@ -2,21 +2,19 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -29,6 +27,7 @@ import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +44,13 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
     private HenkiloRepository henkiloRepository;
-    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private OrganisaatioClient organisaatioClient;
+
+    private CommonProperties commonProperties;
 
     private static Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
 
@@ -55,28 +58,31 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     public PermissionCheckerServiceImpl(OphProperties ophProperties,
                                         HenkiloRepository henkiloRepository,
                                         OrganisaatioClient organisaatioClient,
-                                        OppijanumerorekisteriClient oppijanumerorekisteriClient) {
+                                        OppijanumerorekisteriClient oppijanumerorekisteriClient,
+                                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                                        KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
+                                        CommonProperties commonProperties) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         this.henkiloRepository = henkiloRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+        this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
+        this.commonProperties = commonProperties;
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
-        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, getCasRoles());
+        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
-        if (personOid.equals(currentUserOid)) {
-            return true;
-        }
-        return isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, getCasRoles());
+        return personOid.equals(currentUserOid) || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
@@ -84,7 +90,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     public boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, List<String> allowedRoles,
                                            ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
 
-        if (hasInternalAccess(personOidToAccess, allowedRoles, callingUserRoles)) {
+        if (this.hasInternalAccess(personOidToAccess, allowedRoles, callingUserRoles)) {
             return true;
         }
 
@@ -183,23 +189,30 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                            List<String> allowedRolesWithoutPrefix) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
-            throw new IllegalArgumentException("Permissionchecker received empty input.");
+            logger.warn(this.getCurrentUserOid() + " called permission checker with empty input");
+            return true;
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream()
-                    .map(o -> ((OrganisaatioHenkiloCreateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloCreateDto.class::cast)
+                    .map(OrganisaatioHenkiloCreateDto::getOrganisaatioOid).collect(Collectors.toList());
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloUpdateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream()
-                    .map(o -> ((OrganisaatioHenkiloUpdateDto)o).getOrganisaatioOid()).collect(Collectors.toList());
+            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloUpdateDto.class::cast)
+                    .map(OrganisaatioHenkiloUpdateDto::getOrganisaatioOid).collect(Collectors.toList());
+        }
+        else if(organisaatioHenkiloDtoList.get(0) instanceof HaettuKayttooikeusryhmaDto) {
+            orgOidList = organisaatioHenkiloDtoList.stream().map(HaettuKayttooikeusryhmaDto.class::cast)
+                    .map(HaettuKayttooikeusryhmaDto::getAnomus).map(AnomusDto::getOrganisaatioOid).collect(Collectors.toList());
         }
         else {
             throw new NotImplementedException("Unsupported input type.");
         }
-        return checkRoleForOrganisation(allowedRolesWithoutPrefix, orgOidList);
+        return checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix);
     }
 
-    private boolean checkRoleForOrganisation(List<String> allowedRolesWithoutPrefix, List<String> orgOidList) {
+    @Override
+    @Transactional(readOnly = true)
+    public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
             if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
                 return false;
@@ -246,7 +259,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     private static Set<String> getPrefixedRoles(final String prefix, final List<String> rolesWithoutPrefix) {
-        return FluentIterable.from(rolesWithoutPrefix).transform(role -> prefix.concat(role)).toSet();
+        return rolesWithoutPrefix.stream().map(prefix::concat).collect(Collectors.toSet());
     }
 
     @Override
@@ -288,5 +301,59 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
 
         return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, callingUserRoles);
+    }
+
+    @Override
+    public boolean notOwnData(String dataOwnderOid) {
+        return !Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new NullPointerException("No user name available from SecurityContext!")).equals(dataOwnderOid);
+    }
+
+    @Override
+    public String getCurrentUserOid() {
+        String oid = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (oid == null) {
+            throw new NullPointerException("No user name available from SecurityContext!");
+        }
+        return oid;
+    }
+
+    @Override
+    public boolean isCurrentUserAdmin() {
+        return isSuperUser(this.getCasRoles());
+    }
+
+    @Override
+    public boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
+        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findValidMyonnettyKayttooikeus(this.getCurrentUserOid()).stream()
+                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
+        List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
+        return this.isCurrentUserAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
+    }
+
+    @Override
+    public boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
+        // Group organizations have to match only as a general set since they're not separated by type or by individual groups
+        if(organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
+            return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                    .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
+        }
+        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
+        // Organization must have child items in it, so that the institution type can be fetched and verified
+        if(!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
+            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
+                    viiteSet.stream().anyMatch(organisaatioViite ->
+                            organisaatioViite.getOrganisaatioTyyppi()
+                                    .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
+                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+                                            : null)
+                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
+        }
+        // if the organization doesn't have child items, then it must be a top level organization or some other type
+        // organization in which case the target organization OID must match the allowed-to-organization OID
+        return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
+                .contains(organisaatioOid);
     }
 }

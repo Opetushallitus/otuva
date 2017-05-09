@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
+import lombok.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
@@ -14,6 +14,9 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "anomus", schema = "public")
 public class Anomus extends IdentifiableAndVersionedEntity {
 
@@ -67,10 +70,14 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private String hylkaamisperuste;
 
     @OneToMany(mappedBy = "anomus", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = new HashSet<HaettuKayttoOikeusRyhma>();
+    private Set<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "anomus_myonnettykayttooikeusryhmas", joinColumns = @JoinColumn(name = "anomus_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "myonnettykayttooikeusryhma_id", referencedColumnName = "id"))
-    private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<MyonnettyKayttoOikeusRyhmaTapahtuma>();
+    private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<>();
+
+    public void addHaettuKayttoOikeusRyhma(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {
+        this.haettuKayttoOikeusRyhmas.add(haettuKayttoOikeusRyhma);
+    }
 }

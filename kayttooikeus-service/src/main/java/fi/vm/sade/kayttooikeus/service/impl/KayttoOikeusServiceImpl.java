@@ -12,9 +12,11 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -51,6 +53,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private OrganisaatioViiteRepository organisaatioViiteRepository;
     private LdapSynchronization ldapSynchronization;
 
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
     @Autowired
     public KayttoOikeusServiceImpl(KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository,
                                    KayttoOikeusRepository kayttoOikeusRepository,
@@ -63,7 +67,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
                                    LdapSynchronization ldapSynchronization,
                                    OrganisaatioClient organisaatioClient,
-                                   CommonProperties commonProperties) {
+                                   CommonProperties commonProperties,
+                                   OppijanumerorekisteriClient oppijanumerorekisteriClient) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.localizationService = localizationService;
@@ -77,6 +82,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.organisaatioClient = organisaatioClient;
         this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
         this.groupOrganizationId = commonProperties.getGroupOrganizationId();
+        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
     }
 
     @Override
@@ -182,7 +188,21 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository
                 .findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         all.addAll(ryhmaTapahtumaHistorias);
-        return localizationService.localize(all);
+        return this.mapKasittelijaNimiToMyonnettyKayttooikeusDto(this.localizationService.localize(all));
+    }
+
+    private List<MyonnettyKayttoOikeusDto> mapKasittelijaNimiToMyonnettyKayttooikeusDto(
+            List<MyonnettyKayttoOikeusDto> myonnettyKayttoOikeusDtoList) {
+        List<HenkiloPerustietoDto> henkiloPerustiedotDtos = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(myonnettyKayttoOikeusDtoList.stream()
+                .map(MyonnettyKayttoOikeusDto::getKasittelijaOid).collect(Collectors.toList()));
+        return myonnettyKayttoOikeusDtoList.stream()
+                .map(myonnettyKayttoOikeusDto -> {
+                    HenkiloPerustietoDto kasittelija = henkiloPerustiedotDtos.stream()
+                            .filter(henkiloPerustietoDto -> Objects.equals(henkiloPerustietoDto.getOidHenkilo(), henkiloPerustietoDto.getOidHenkilo()))
+                            .findFirst().orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + myonnettyKayttoOikeusDto.getKasittelijaOid()));
+                    myonnettyKayttoOikeusDto.setKasittelijaNimi(kasittelija.getKutsumanimi() + " " + kasittelija.getSukunimi());
+                    return myonnettyKayttoOikeusDto;
+                }).collect(Collectors.toList());
     }
 
     @Override

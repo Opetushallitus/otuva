@@ -29,4 +29,6 @@ public interface OrganisaatioHenkiloService {
 
     List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
                                                                     List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList);
+
+    void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid);
 }

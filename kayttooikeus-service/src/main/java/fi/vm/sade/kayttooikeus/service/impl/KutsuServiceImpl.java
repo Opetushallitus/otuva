@@ -16,6 +16,7 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
@@ -32,11 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static com.querydsl.core.types.Order.DESC;
@@ -152,7 +150,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                                     organizationClientState).getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
                             org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)
                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
-                                .filter(t -> t !=null).sorted().collect(toList())
+                                .filter(Objects::nonNull).sorted().collect(toList())
                         )
                     ).sorted(comparing(OranizationReplacement::getName)).collect(toList()))
         ));
