@@ -11,3 +11,9 @@ server:
   session:
     tracking-modes: cookie
     timeout: 30
+
+kayttooikeus:
+  scheduling:
+    enabled: false
+    configuration:
+      organisaatiocache: "0 0 0 * * ?"
