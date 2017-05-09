@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class OrganisaatioCache implements Serializable {
     @Id
     @Column(name = "organisaatio_oid")
-    public String organisaatioOid;
+    private String organisaatioOid;
 
     @Column(name = "organisaatio_oid_path")
     private String organisaatioOidPath;

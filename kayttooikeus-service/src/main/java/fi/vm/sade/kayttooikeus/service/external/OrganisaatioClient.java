@@ -32,7 +32,9 @@ public interface OrganisaatioClient {
             return this;
         }
     }
-    
+
+    List<OrganisaatioPerustieto> listWithoutRoot();
+
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode);
 
     OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode);
