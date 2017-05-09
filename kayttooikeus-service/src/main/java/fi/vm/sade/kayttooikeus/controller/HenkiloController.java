@@ -1,12 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.service.*;
 import io.swagger.annotations.Api;
@@ -90,6 +85,15 @@ public class HenkiloController {
     @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.GET)
     public KayttajatiedotReadDto getKayttajatiedot(@PathVariable("oid") String henkiloOid) {
         return kayttajatiedotService.getByHenkiloOid(henkiloOid);
+    }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ_UPDATE', 'CRUD'}, null)")
+    @ApiOperation(value = "Päivittää henkilön käyttäjätiedot.", notes = "Päivittää henkilön käyttäjätiedot. Virkailija voi itse vaihtaa käyttäjätietojaan, "
+    + "rekisterinpitäjä ei.")
+    @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.PUT)
+    public KayttajatiedotReadDto updateKayttajatiedot(@PathVariable("oid") String henkiloOid,
+                                                        @RequestBody @Validated KayttajatiedotUpdateDto kayttajatiedot) {
+        return kayttajatiedotService.updateKayttajatiedot(henkiloOid, kayttajatiedot);
     }
 
     @ApiOperation(value = "Hakee henkilöitä organisaatioiden ja käyttöoikeuksien mukaan.",
