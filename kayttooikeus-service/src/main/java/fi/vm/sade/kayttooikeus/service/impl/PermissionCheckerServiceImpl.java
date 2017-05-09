@@ -319,7 +319,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     @Override
-    public boolean currentUserIsAdmin() {
+    public boolean isCurrentUserAdmin() {
         return isSuperUser(this.getCasRoles());
     }
 
@@ -330,7 +330,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                 .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
                 .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
         List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
-        return this.currentUserIsAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
+        return this.isCurrentUserAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
     }
 
     @Override
@@ -341,6 +341,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
         OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
+        // Organization must have child items in it, so that the institution type can be fetched and verified
         if(!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
                     viiteSet.stream().anyMatch(organisaatioViite ->
@@ -350,6 +351,8 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                             : null)
                                     || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
         }
+        // if the organization doesn't have child items, then it must be a top level organization or some other type
+        // organization in which case the target organization OID must match the allowed-to-organization OID
         return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                 .contains(organisaatioOid);
     }

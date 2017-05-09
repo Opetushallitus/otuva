@@ -12,6 +12,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -19,6 +20,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
+import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -202,6 +205,113 @@ public class PermissionCheckerTest {
         Mockito.when(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Matchers.anyCollectionOf(String.class)))
                 .thenReturn(getDummyOrganisaatioHakutulos());
         assertThat(permissionChecker.hasRoleForOrganization("org1", Lists.newArrayList("CRUD", "READ"), this.myRoles)).isTrue();
+    }
+
+    @Test
+    public void kayttooikeusMyontoviiteLimitationCheckNoKayttajaryhmas() {
+        doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
+        doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
+
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(1L)).isFalse();
+    }
+
+    @Test
+    public void kayttooikeusMyontoviiteLimitationCheckIsAdmin() {
+        doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
+        doReturn(true).when(this.permissionChecker).isCurrentUserAdmin();
+
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(1L)).isTrue();
+    }
+
+    @Test
+    public void kayttooikeusMyontoviiteLimitationCheckCanNotGrantToSameKayttooikeusryhma() {
+        doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
+        doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
+        when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+                .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class))).willReturn(Lists.newArrayList(2002L));
+
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(2001L)).isFalse();
+    }
+
+    @Test
+    public void kayttooikeusMyontoviiteLimitationCheck() {
+        doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
+        doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
+        when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+                .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class))).willReturn(Lists.newArrayList(2002L));
+
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(2002L)).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioNoChildrenWrongOid() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5"));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.1").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet());
+        assertThat(hasPermission).isFalse();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioNoChildrenCorrectOid() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5"));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteMatchesChildTyyppi() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
+                        "oppilaitostyyppi_11#1"));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("11").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.6", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteMatchesParentOid() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
+                        "oppilaitostyyppi_11#1"));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteNoMatch() {
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
+                        "oppilaitostyyppi_11#1"));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.1").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isFalse();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioRyhmaCorrectOid() {
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.246.562.28").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.246.562.28.0.0.1", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioRyhmaWrongOid() {
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.246.562.28.0.0.1", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isFalse();
     }
 
     private static List<OrganisaatioPerustieto> getDummyOrganisaatioHakutulos() {

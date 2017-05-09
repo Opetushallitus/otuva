@@ -30,7 +30,7 @@ public interface PermissionCheckerService {
 
     String getCurrentUserOid();
 
-    boolean currentUserIsAdmin();
+    boolean isCurrentUserAdmin();
 
     boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
 
