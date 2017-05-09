@@ -19,9 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,19 +64,6 @@ public class AnomusControllerTest extends AbstractControllerTest {
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
-    public void updateHaettuKayttooikeusryhmaNotFound() throws Exception {
-        UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
-                KayttoOikeudenTila.MYONNETTY.toString(), DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
-        doThrow(new NotFoundException(""))
-                .when(this.kayttooikeusAnomusService).updateHaettuKayttooikeusryhma(any(UpdateHaettuKayttooikeusryhmaDto.class));
-        this.mvc.perform(put("/kayttooikeusanomus")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void grantMyonnettyKayttooikeusryhmaForHenkilo() throws Exception {
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
                 DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
@@ -85,18 +71,5 @@ public class AnomusControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
-    public void grantMyonnettyKayttooikeusryhmaForHenkiloNotFound() throws Exception {
-        GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
-                DateTime.now().toLocalDate(), DateTime.now().plusYears(1).toLocalDate());
-        doThrow(new NotFoundException(""))
-                .when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(anyString(), anyString(), any());
-        this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))
-                .andExpect(status().isNotFound());
     }
 }
