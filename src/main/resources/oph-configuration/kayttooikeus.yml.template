@@ -93,6 +93,8 @@ endpoints:
 
 kayttooikeus:
   uses-ssl-proxy: true
+  scheduling:
+    enabled: true
 
 auth:
   crypto-service:

@@ -140,7 +140,14 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         perustieto.setChildren(new ArrayList<>());
         return perustieto;
     }
-    
+
+    @Override
+    public List<OrganisaatioPerustieto> listWithoutRoot() {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
+        return retrying(io(() -> restClient.get(url, OrganisaatioHakutulos.class)), 2)
+                .get().orFail(mapper(url)).getOrganisaatiot();
+    }
+
     @Override
     public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode) {
         return cached(c -> c.flatWithParentsAndChildren(organisaatioOid)
