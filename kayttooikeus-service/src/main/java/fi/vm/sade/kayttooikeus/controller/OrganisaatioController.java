@@ -16,7 +16,7 @@ public class OrganisaatioController {
     private final OrganisaatioService organisaatioService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("hasRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE')")
     @ApiOperation("Päivittää organisaatiovälimuistin.")
     public synchronized void updateCache() {
         organisaatioService.updateOrganisaatioCache();
