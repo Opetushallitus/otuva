@@ -121,7 +121,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         }
     }
 
-    private KayttoOikeusRyhmaTapahtumaHistoria createHistoryEvent(
+    public static KayttoOikeusRyhmaTapahtumaHistoria createHistoryEvent(
             KayttoOikeusRyhma kor, OrganisaatioHenkilo oh, Henkilo kasittelija,
             KayttoOikeudenTila tila, String syy) {
         KayttoOikeusRyhmaTapahtumaHistoria event = new KayttoOikeusRyhmaTapahtumaHistoria();

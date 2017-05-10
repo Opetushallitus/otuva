@@ -3,9 +3,11 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import fi.vm.sade.generic.common.ValidationException;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
+import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
@@ -81,6 +83,11 @@ public class ErrorHandlerAdvice {
                 messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
     }
 
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "unauthorized") // 401 Not authorized
+    @ExceptionHandler(UnauthorizedException.class)
+    public void unauthorized() {
+    }
+
     @ResponseStatus(value = HttpStatus.GATEWAY_TIMEOUT) // 504: Gateway Timeout
     @ExceptionHandler(ExternalServiceException.class) @ResponseBody
     public Map<String,Object> errorCallingExternalService(HttpServletRequest req, ExternalServiceException exception) {
@@ -143,6 +150,12 @@ public class ErrorHandlerAdvice {
         return handleException(req, exception, "forbidden", exception.getMessage());
     }
 
+    @ExceptionHandler(DataInconsistencyException.class)
+    public ResponseEntity<Map<String, Object>> dataInconsistencyException(DataInconsistencyException exception, HttpServletRequest request) {
+        logger.error(exception.getMessage(), exception);
+        return constructErrorResponse(exception, HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal
     @ExceptionHandler(Exception.class) @ResponseBody // any other type
     public Map<String,Object> internalError(HttpServletRequest req, Exception exception) {
@@ -176,6 +189,11 @@ public class ErrorHandlerAdvice {
         body.put("field", fieldError.getField());
         body.put("rejectedValue", fieldError.getRejectedValue());
         return body;
+    }
+
+    private ResponseEntity<Map<String, Object>> constructErrorResponse(Exception exception, HttpStatus status, HttpServletRequest request) {
+        Map<String, Object> body = constructErrorBody(exception, status, request);
+        return ResponseEntity.status(status).body(body);
     }
 
     private Map<String, Object> constructErrorBody(Exception exception, HttpStatus status, HttpServletRequest request) {
