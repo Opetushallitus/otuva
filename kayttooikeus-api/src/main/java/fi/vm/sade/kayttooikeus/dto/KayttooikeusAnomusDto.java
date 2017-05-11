@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Email;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class KayttooikeusAnomusDto {
 
     @NotNull
