@@ -18,3 +18,4 @@ kayttooikeus:
     configuration:
       organisaatiocache: "0 0 0 * * ?"
       vanhentuneetkayttooikeudet: 0 0 3 * * ?
+      kayttooikeusmuistutus: "0 30 4 * * ?"
