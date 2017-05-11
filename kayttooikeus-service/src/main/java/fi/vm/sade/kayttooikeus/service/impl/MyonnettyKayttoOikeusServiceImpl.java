@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +50,9 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
         for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttoOikeudet) {
             String henkiloOid = kayttoOikeus.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo();
 
-            KayttoOikeusRyhmaTapahtumaHistoria historia = HenkiloServiceImpl.createHistoryEvent(
-                    kayttoOikeus.getKayttoOikeusRyhma(), kayttoOikeus.getOrganisaatioHenkilo(),
-                    kasittelija, KayttoOikeudenTila.SULJETTU, "Oikeuksien poisto, vanhentunut");
+            KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
+                    kasittelija, KayttoOikeudenTila.SULJETTU,
+                    DateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
             myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(kayttoOikeus);

@@ -53,4 +53,20 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
 
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
     private Set<Anomus> anomus = new HashSet<Anomus>();
+
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(DateTime aikaleima, String syy) {
+        return toHistoria(getKasittelija(), getTila(), aikaleima, syy);
+    }
+
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(Henkilo kasittelija, KayttoOikeudenTila tila, DateTime aikaleima, String syy) {
+        return new KayttoOikeusRyhmaTapahtumaHistoria(
+                getKayttoOikeusRyhma(),
+                getOrganisaatioHenkilo(),
+                syy,
+                getTila(),
+                kasittelija,
+                aikaleima
+        );
+    }
+
 }

@@ -15,6 +15,9 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
@@ -294,14 +293,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // New history event for a change on kayttooikeusryhmatapahtuma.
     private void createHistoryEvent(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, String reason) {
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(new KayttoOikeusRyhmaTapahtumaHistoria(
-                myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma(),
-                myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo(),
-                reason,
-                myonnettyKayttoOikeusRyhmaTapahtuma.getTila(),
-                myonnettyKayttoOikeusRyhmaTapahtuma.getKasittelija(),
-                DateTime.now()
-        ));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(DateTime.now(), reason));
     }
 
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,
