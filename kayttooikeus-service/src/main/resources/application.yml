@@ -17,3 +17,4 @@ kayttooikeus:
     enabled: false
     configuration:
       organisaatiocache: "0 0 0 * * ?"
+      kayttooikeusmuistutus: "0 30 4 * * ?"
