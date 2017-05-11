@@ -1,8 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,6 +33,15 @@ public class AnomusController {
                                                                         @RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
         return this.kayttooikeusAnomusService.getAllActiveAnomusByHenkiloOid(oidHenkilo, activeOnly);
     }
+
+    @ApiOperation("Tekee uuden käyttöoikeusanomuksen")
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/{anojaOid}", method = RequestMethod.POST)
+    public Long createKayttooikeusAnomus(@ApiParam("Anojan OID") @PathVariable String anojaOid,
+                                           @RequestBody @Validated KayttooikeusAnomusDto kayttooikeusAnomusDto) {
+        return this.kayttooikeusAnomusService.createKayttooikeusAnomus(anojaOid, kayttooikeusAnomusDto);
+    }
+
 
     @ApiOperation("Hyväksyy tai hylkää haetun käyttöoikeusryhmän")
     // Organisation access validated on server layer

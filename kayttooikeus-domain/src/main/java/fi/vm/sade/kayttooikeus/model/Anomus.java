@@ -8,7 +8,6 @@ import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,7 +51,8 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private DateTime anottuPvm;
 
     @Column(name = "anomustilatapahtumapvm")
-    private Date anomusTilaTapahtumaPvm;
+    @Type(type="dateTime")
+    private DateTime anomusTilaTapahtumaPvm;
 
     @Column(name = "perustelut")
     private String perustelut;

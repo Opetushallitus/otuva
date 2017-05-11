@@ -3,10 +3,8 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
@@ -16,7 +14,6 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -24,14 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
@@ -42,6 +36,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
+    private final AnomusDataRepository anomusDataRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -65,7 +60,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                          PermissionCheckerService permissionCheckerService,
                                          KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
                                          CommonProperties commonProperties,
-                                         OrganisaatioClient organisaatioClient) {
+                                         OrganisaatioClient organisaatioClient,
+                                         AnomusDataRepository anomusDataRepository) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
         this.henkiloRepository = henkiloRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -78,6 +74,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
         this.commonProperties = commonProperties;
         this.organisaatioClient = organisaatioClient;
+        this.anomusDataRepository = anomusDataRepository;
     }
 
     @Transactional(readOnly = true)
@@ -158,7 +155,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     private void organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId, String organisaatioOid) {
-        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findOne(kayttooikeusryhmaId)
+        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
                 .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
                 .getOrganisaatioViite();
         // Organisaatiohenkilo limitations are valid
@@ -189,7 +186,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                     .map(x -> AnomuksenTila.KASITELTY).findFirst()
                     .orElse(AnomuksenTila.HYLATTY));
         }
-        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(new Date());
+        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(new DateTime());
 
         // Remove the currently handled kayttooikeus from anomus
         haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().remove(haettuKayttoOikeusRyhma);
@@ -225,9 +222,37 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         haettuKayttooikeusryhmaDto.getLoppupvm(),
                         anojaOid,
                         organisaatioOid,
-                        this.kayttooikeusryhmaDataRepository.findOne(haettuKayttooikeusryhmaDto.getId())
+                        this.kayttooikeusryhmaDataRepository.findById(haettuKayttooikeusryhmaDto.getId())
                                 .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
                         ""));
+    }
+
+    @Override
+    @Transactional
+    public Long createKayttooikeusAnomus(String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto) {
+        Henkilo anoja = this.henkiloRepository.findByOidHenkilo(anojaOid)
+                .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
+
+        Anomus anomus = new Anomus();
+        anomus.setHenkilo(anoja);
+        anomus.setAnomuksenTila(AnomuksenTila.ANOTTU);
+        anomus.setSahkopostiosoite(kayttooikeusAnomusDto.getEmail());
+        anomus.setPerustelut(kayttooikeusAnomusDto.getPerustelut());
+        anomus.setAnomusTyyppi(AnomusTyyppi.UUSI);
+        anomus.setAnomusTilaTapahtumaPvm(new DateTime());
+        anomus.setAnottuPvm(new DateTime());
+        anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
+        anomus.setTehtavanimike(kayttooikeusAnomusDto.getTehtavaNimike());
+
+        Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas =  this.kayttooikeusryhmaDataRepository
+                .findAll(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
+
+        kayttoOikeusRyhmas.forEach( k -> {
+            HaettuKayttoOikeusRyhma h = new HaettuKayttoOikeusRyhma();
+            h.setKayttoOikeusRyhma(k);
+            anomus.addHaettuKayttoOikeusRyhma(h);
+        });
+        return this.anomusDataRepository.save(anomus).getId();
     }
 
     // Grant kayttooikeusryhma and create event. DOES NOT CONTAIN PERMISSION CHECKS SO DONT CALL DIRECTLY
