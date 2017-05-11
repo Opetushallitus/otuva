@@ -71,7 +71,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot", henkiloOid);
         return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(
                     () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
-                .readValue(proxyRestClient.getAsString(url))), 2).get()
+                .readValue(serviceAccountClient.getAsString(url))), 2).get()
                 .orFail(mapper(url));
     }
 
