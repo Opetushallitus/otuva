@@ -11,23 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LdapSynchronizationImpl implements LdapSynchronization {
 
-    /* These priority levels define different behavior for LDAP update process
-     * since night time batch updates are run in a different way than daytime
-     * batch updates
-     */
-    static int REALTIME_PRIORITY = -1;
-    static int BATCH_PRIORITY = 0;
-    static int ASAP_PRIORITY = 1;
-    static int NORMAL_PRIORITY = 2;
-    static int NIGHT_PRIORITY = 3;
-
     // These status values are used to identify problematic users in the queue
-    static int STATUS_IN_QUEUE = 0;
-    static int STATUS_RETRY = 1;
-    static int STATUS_FAILED = 2;
-
-    // This value is a trigger for running all users
-    private String RUN_ALL_BATCH = "runall";
+    private static final int STATUS_IN_QUEUE = 0;
+    private static final int STATUS_RETRY = 1;
+    private static final int STATUS_FAILED = 2;
 
     private LdapUpdaterRepository ldapUpdaterRepository;
 
