@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.scheduling;
 
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class ScheduledTasks {
 
     private final OrganisaatioService organisaatioService;
     private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
+    private final CommonProperties commonProperties;
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {
@@ -25,7 +27,7 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.vanhentuneetkayttooikeudet}")
     public void poistaVanhentuneetKayttoOikeudet() {
-        myonnettyKayttoOikeusService.poistaVanhentuneet("1.2.246.562.24.00000000001");
+        myonnettyKayttoOikeusService.poistaVanhentuneet(commonProperties.getAdminOid());
     }
 
 }
