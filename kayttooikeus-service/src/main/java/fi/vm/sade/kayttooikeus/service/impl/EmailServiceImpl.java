@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.joining;
 @Service
 public class EmailServiceImpl implements EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
+    private static final String PROSESSI = "kayttooikeus";
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
     private static final Locale DEFAULT_LOCALE = new Locale(DEFAULT_LANGUAGE_CODE);
     private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email";
@@ -87,7 +88,7 @@ public class EmailServiceImpl implements EmailService {
 
     protected EmailMessage getEmailMessage(String languageCode) {
         EmailMessage message = new EmailMessage();
-        message.setCallingProcess("Henkilohallinta");
+        message.setCallingProcess(PROSESSI);
         message.setFrom(expirationReminderSenderEmail);
         message.setReplyTo(expirationReminderSenderEmail);
         message.setTemplateName(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME);
