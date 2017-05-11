@@ -16,7 +16,6 @@ public class KayttooikeusAnomusDto {
     @NotNull
     private String organisaatioOrRyhmaOid;
 
-    @NotNull
     private String tehtavaNimike;
 
     @Email
@@ -26,7 +25,6 @@ public class KayttooikeusAnomusDto {
     @Size(min=1)
     private List<Long> kayttooikeusRyhmaIds;
 
-    @NotNull
     private String perustelut;
 
 }
