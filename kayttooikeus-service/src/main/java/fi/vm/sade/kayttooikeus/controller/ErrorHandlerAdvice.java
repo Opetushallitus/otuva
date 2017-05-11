@@ -18,6 +18,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.ldap.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
@@ -106,7 +107,7 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler(MethodArgumentNotValidException.class) @ResponseBody
+    @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class}) @ResponseBody
     public Map<String,Object> methodArgumentNotValidException(HttpServletRequest req, MethodArgumentNotValidException exception) {
         return handleConstraintViolations(req, exception, exception.getBindingResult());
     }
