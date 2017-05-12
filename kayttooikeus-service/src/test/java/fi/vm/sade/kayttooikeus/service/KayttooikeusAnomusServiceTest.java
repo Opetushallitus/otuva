@@ -72,6 +72,9 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private OrganisaatioClient organisaatioClient;
 
+    @MockBean
+    private AnomusDataRepository anomusDataRepository;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
@@ -90,7 +93,8 @@ public class KayttooikeusAnomusServiceTest {
                 this.permissionCheckerService,
                 this.kayttooikeusryhmaDataRepository,
                 commonProperties,
-                this.organisaatioClient)
+                this.organisaatioClient,
+                this.anomusDataRepository)
         );
     }
 
@@ -136,7 +140,7 @@ public class KayttooikeusAnomusServiceTest {
     public void grantKayttooikeusryhma() {
         given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
         given(this.permissionCheckerService.checkRoleForOrganisation(any(), any())).willReturn(true);
-        given(this.kayttooikeusryhmaDataRepository.findOne(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
@@ -186,7 +190,7 @@ public class KayttooikeusAnomusServiceTest {
     public void grantKayttooikeusryhmaUusittu() {
         given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
         given(this.permissionCheckerService.checkRoleForOrganisation(any(), any())).willReturn(true);
-        given(this.kayttooikeusryhmaDataRepository.findOne(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
@@ -227,7 +231,7 @@ public class KayttooikeusAnomusServiceTest {
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
         given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
-        given(this.kayttooikeusryhmaDataRepository.findOne(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
                 .willReturn(true);
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
@@ -256,7 +260,7 @@ public class KayttooikeusAnomusServiceTest {
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
         given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
-        given(this.kayttooikeusryhmaDataRepository.findOne(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
                 .willReturn(true);
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
@@ -286,7 +290,7 @@ public class KayttooikeusAnomusServiceTest {
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
         given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
-        given(this.kayttooikeusryhmaDataRepository.findOne(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
                 .willReturn(true);
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");

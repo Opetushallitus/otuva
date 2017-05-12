@@ -84,7 +84,7 @@ public class CreateUtil {
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
                                        String perustelut) {
         return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, null, tehtavanimike,
-                AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, DateTime.now().minusDays(5), DateTime.now().minusDays(5).toDate(),
+                AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, DateTime.now().minusDays(5), DateTime.now().minusDays(5),
                 perustelut, "", "", "", "",
                 Collections.<HaettuKayttoOikeusRyhma>emptySet(), Collections.<MyonnettyKayttoOikeusRyhmaTapahtuma>emptySet());
     }
