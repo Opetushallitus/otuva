@@ -10,30 +10,24 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final HenkiloRepository henkiloRepository;
     private final OrikaBeanMapper mapper;
     private final CryptoService cryptoService;
-
-    public KayttajatiedotServiceImpl(KayttajatiedotRepository kayttajatiedotRepository,
-                                     HenkiloRepository henkiloRepository,
-                                     OrikaBeanMapper mapper,
-                                     CryptoService cryptoService) {
-        this.kayttajatiedotRepository = kayttajatiedotRepository;
-        this.henkiloRepository = henkiloRepository;
-        this.mapper = mapper;
-        this.cryptoService = cryptoService;
-    }
+    private final LdapSynchronization ldapSynchronization;
 
     @Override
     @Transactional
@@ -52,6 +46,8 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         entity.setHenkilo(henkilo);
         entity = kayttajatiedotRepository.save(entity);
         henkilo.setKayttajatiedot(entity);
+
+        this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
 
         return mapper.map(entity, KayttajatiedotReadDto.class);
     }
