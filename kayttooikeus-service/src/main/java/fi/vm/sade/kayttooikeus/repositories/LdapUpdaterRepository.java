@@ -11,4 +11,6 @@ public interface LdapUpdaterRepository extends QueryDslPredicateExecutor, CrudRe
 
     @Query("select count(ldap) from LdapUpdateData ldap where ldap.korId = ?1")
     Long numberOfUpdatesForKor(long korId);
+
+    LdapUpdateData findByHenkiloOid(String henkiloOid);
 }

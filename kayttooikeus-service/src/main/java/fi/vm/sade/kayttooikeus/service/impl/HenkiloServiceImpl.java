@@ -104,13 +104,11 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 for (Iterator<MyonnettyKayttoOikeusRyhmaTapahtuma> mkortIterator = mkorts.iterator(); mkortIterator.hasNext();) {
                     MyonnettyKayttoOikeusRyhmaTapahtuma mkort = mkortIterator.next();
                     // Create event
-                    KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = createHistoryEvent(
-                            mkort.getKayttoOikeusRyhma(),
-                            mkort.getOrganisaatioHenkilo(),
-                            this.henkiloRepository.findByOidHenkilo(kasittelijaOid)
-                                    .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal)),
-                            KayttoOikeudenTila.SULJETTU,
-                            "Oikeuksien poisto, koko henkilön passivointi");
+                    Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(kasittelijaOid)
+                            .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
+                    KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = mkort.toHistoria(
+                            kasittelija, KayttoOikeudenTila.SULJETTU,
+                            new DateTime(), "Oikeuksien poisto, koko henkilön passivointi");
                     this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
 
                     // Remove kayttooikeus
@@ -119,20 +117,5 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 }
             }
         }
-    }
-
-    private KayttoOikeusRyhmaTapahtumaHistoria createHistoryEvent(
-            KayttoOikeusRyhma kor, OrganisaatioHenkilo oh, Henkilo kasittelija,
-            KayttoOikeudenTila tila, String syy) {
-        KayttoOikeusRyhmaTapahtumaHistoria event = new KayttoOikeusRyhmaTapahtumaHistoria();
-
-        event.setAikaleima(new DateTime());
-        event.setKayttoOikeusRyhma(kor);
-        event.setOrganisaatioHenkilo(oh);
-        event.setTila(tila);
-        event.setKasittelija(kasittelija);
-        event.setSyy(syy);
-
-        return event;
     }
 }
