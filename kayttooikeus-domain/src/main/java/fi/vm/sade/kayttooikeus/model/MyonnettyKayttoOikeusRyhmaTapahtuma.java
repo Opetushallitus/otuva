@@ -63,7 +63,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
                 getKayttoOikeusRyhma(),
                 getOrganisaatioHenkilo(),
                 syy,
-                getTila(),
+                tila,
                 kasittelija,
                 aikaleima
         );
