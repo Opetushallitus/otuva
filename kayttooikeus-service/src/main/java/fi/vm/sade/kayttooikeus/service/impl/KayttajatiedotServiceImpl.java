@@ -47,7 +47,6 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         entity = kayttajatiedotRepository.save(entity);
         henkilo.setKayttajatiedot(entity);
 
-        this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
 
         return mapper.map(entity, KayttajatiedotReadDto.class);
     }
@@ -67,13 +66,13 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
             throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
         });
 
-
-
         Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
 
         henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
         henkiloRepository.save(henkilo);
+
+        this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
     }
 
