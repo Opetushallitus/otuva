@@ -79,5 +79,6 @@ public class Anomus extends IdentifiableAndVersionedEntity {
 
     public void addHaettuKayttoOikeusRyhma(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {
         this.haettuKayttoOikeusRyhmas.add(haettuKayttoOikeusRyhma);
+        haettuKayttoOikeusRyhma.setAnomus(this);
     }
 }
