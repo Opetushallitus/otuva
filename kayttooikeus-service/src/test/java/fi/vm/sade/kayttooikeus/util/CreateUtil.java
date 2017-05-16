@@ -6,6 +6,9 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -103,4 +106,14 @@ public class CreateUtil {
         organisaatioPerustieto.setChildren(newArrayList(child));
         return organisaatioPerustieto;
     }
+
+    public static YhteystiedotRyhmaDto createYhteystietoSahkoposti(String email, String tyyppi) {
+        return YhteystiedotRyhmaDto.builder()
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoArvo(email)
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI).build())
+                .ryhmaKuvaus(tyyppi)
+                .build();
+    }
+
 }

@@ -15,7 +15,7 @@ public class CommonProperties {
     private String adminOid;
     private InvitationEmail invitationEmail;
     private String organisaatioRyhmaPrefix = "1.2.246.562.28";
-    
+
     @Getter @Setter
     public static class InvitationEmail {
         private String template;

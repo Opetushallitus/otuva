@@ -68,10 +68,6 @@ common:
     sender: opintopolku@oph.fi
     from: opintopolku@oph.fi
 
-tasks:
-  email-invitation:
-    sender-email: noreply@oph.fi
-
 endpoints:
   heapdump:
     enabled: false

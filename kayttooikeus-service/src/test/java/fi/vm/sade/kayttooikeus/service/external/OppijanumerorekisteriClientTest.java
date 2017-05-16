@@ -4,8 +4,11 @@ package fi.vm.sade.kayttooikeus.service.external;
 import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.KOTIOSOITE;
 import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.PRIORITY_ORDER;
 import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.TYOOSOITE;
+
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static net.jadler.Jadler.onRequest;
@@ -95,5 +99,23 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         Set<String> allOids = this.client.getAllOidsForSamePerson("1.2.3");
         assertEquals(1, allOids.size());
         assertTrue(allOids.containsAll(singletonList("1.2.3")));
+    }
+
+    @Test
+    public void getHenkiloByOid() {
+        casAuthenticated("test");
+        onRequest().havingMethod(is("GET"))
+                .havingPath(is("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .withBody(jsonResource("classpath:henkilo/henkiloDto.json"));
+        HenkiloDto henkiloDto = this.client.getHenkiloByOid("1.2.3.4.5");
+        assertEquals("1.2.3.4.5", henkiloDto.getOidHenkilo());
+        assertEquals("etunimi", henkiloDto.getEtunimet());
+        assertEquals("etunimi", henkiloDto.getKutsumanimi());
+        assertEquals("sukunimi", henkiloDto.getSukunimi());
+        assertEquals(1, henkiloDto.getYhteystiedotRyhma().size());
+        assertEquals("yhteystietotyyppi2email@emai.fi", henkiloDto.getYhteystiedotRyhma().iterator().next().getYhteystieto()
+                .stream().filter(yhteystietoDto -> yhteystietoDto.getYhteystietoTyyppi().equals(YHTEYSTIETO_SAHKOPOSTI))
+                .findFirst().orElse(new YhteystietoDto()).getYhteystietoArvo());
     }
 }

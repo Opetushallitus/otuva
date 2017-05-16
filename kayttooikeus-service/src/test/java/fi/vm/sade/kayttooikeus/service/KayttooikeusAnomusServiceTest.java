@@ -75,12 +75,14 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private AnomusDataRepository anomusDataRepository;
 
+    @MockBean
+    private EmailService emailService;
+
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
     public void setup() {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
-        CommonProperties commonProperties = new CommonProperties();
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
                 this.haettuKayttooikeusRyhmaDataRepository,
                 this.henkiloRepository,
@@ -92,9 +94,10 @@ public class KayttooikeusAnomusServiceTest {
                 this.haettuKayttooikeusryhmaValidator,
                 this.permissionCheckerService,
                 this.kayttooikeusryhmaDataRepository,
-                commonProperties,
+                new CommonProperties(),
                 this.organisaatioClient,
-                this.anomusDataRepository)
+                this.anomusDataRepository,
+                this.emailService)
         );
     }
 
