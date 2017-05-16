@@ -254,6 +254,9 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttoOikeusRyhma.getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.MYONNETTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomuksenTila()).isEqualByComparingTo(AnomuksenTila.KASITELTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
+        // New MyonnettyKayttooikeusRyhma has been added to the Anomus
+        assertThat(haettuKayttoOikeusRyhma.getAnomus().getMyonnettyKayttooikeusRyhmas()).hasSize(1)
+                .extracting("id").containsExactly(3001L);
     }
 
     @Test
