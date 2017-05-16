@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -39,6 +40,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
+    private final EmailService emailService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -46,6 +48,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final CommonProperties commonProperties;
 
     private final OrganisaatioClient organisaatioClient;
+
+
 
     @Autowired
     public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
@@ -60,7 +64,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                          KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
                                          CommonProperties commonProperties,
                                          OrganisaatioClient organisaatioClient,
-                                         AnomusDataRepository anomusDataRepository) {
+                                         AnomusDataRepository anomusDataRepository,
+                                         EmailService emailService) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
         this.henkiloRepository = henkiloRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -74,6 +79,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.commonProperties = commonProperties;
         this.organisaatioClient = organisaatioClient;
         this.anomusDataRepository = anomusDataRepository;
+        this.emailService = emailService;
     }
 
     @Transactional(readOnly = true)
@@ -134,6 +140,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                     haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid(),
                     haettuKayttoOikeusRyhma.getKayttoOikeusRyhma(),
                     haettuKayttoOikeusRyhma.getAnomus().getTehtavanimike());
+        }
+
+        // If everything is handled on anomus send email notification to anoja.
+        if(haettuKayttoOikeusRyhma.getAnomus().getMyonnettyKayttooikeusRyhmas().isEmpty()) {
+            this.emailService.sendEmailAnomusAccepted(haettuKayttoOikeusRyhma.getAnomus());
         }
     }
 

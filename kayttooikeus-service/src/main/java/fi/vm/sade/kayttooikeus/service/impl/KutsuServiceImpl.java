@@ -48,7 +48,7 @@ import static java.util.stream.Collectors.*;
 
 @Service
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
-    private static final String CALLING_PROCESS = "kayttooikeus.kayttooikeuspalvelu-service";
+    public static final String CALLING_PROCESS = "kayttooikeus.kayttooikeuspalvelu-service";
     private final KutsuRepository kutsuRepository;
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
