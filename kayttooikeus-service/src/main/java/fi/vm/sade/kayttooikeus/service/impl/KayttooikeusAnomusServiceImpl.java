@@ -112,6 +112,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         + updateHaettuKayttooikeusryhmaDto.getId()));
 
         // Permission checks for declining requisition (there are separate checks for granting)
+        this.notEditingOwnData(haettuKayttoOikeusRyhma.getAnomus().getHenkilo().getOidHenkilo());
         this.inSameOrParentOrganisation(haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
         this.organisaatioViiteLimitationsAreValid(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().getId(),
                 haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid());
