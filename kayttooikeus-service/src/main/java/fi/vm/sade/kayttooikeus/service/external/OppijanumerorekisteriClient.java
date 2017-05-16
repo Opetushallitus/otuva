@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 
@@ -29,6 +30,8 @@ public interface OppijanumerorekisteriClient {
     String getOidByHetu(String hetu);
 
     HenkiloPerustietoDto getPerustietoByOid(String oidHenkilo);
+
+    HenkiloDto getHenkiloByOid(String oid);
 
     HenkilonYhteystiedotViewDto getYhteystiedotByOid(String oidHenkilo);
 }
