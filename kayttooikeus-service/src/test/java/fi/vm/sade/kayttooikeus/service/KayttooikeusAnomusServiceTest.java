@@ -240,6 +240,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
         given(this.permissionCheckerService.organisaatioLimitationCheck(anyString(), anySetOf(OrganisaatioViite.class))).willReturn(true);
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.1")));
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
@@ -269,6 +270,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
         given(this.permissionCheckerService.organisaatioLimitationCheck(anyString(), anySetOf(OrganisaatioViite.class))).willReturn(true);
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.1")));
 
@@ -299,6 +301,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
         given(this.permissionCheckerService.organisaatioLimitationCheck(anyString(), anySetOf(OrganisaatioViite.class))).willReturn(true);
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.1")));
 
