@@ -2,13 +2,17 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.properties.EmailInvitation;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
@@ -26,7 +30,10 @@ import java.util.List;
 import java.util.Locale;
 
 import static java.util.Collections.singletonList;
+import java.util.Optional;
 import static java.util.Optional.ofNullable;
+import java.util.Set;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 
 @Service
@@ -36,6 +43,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
     private static final Locale DEFAULT_LOCALE = new Locale(DEFAULT_LANGUAGE_CODE);
     private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email";
+    private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME = "kayttooikeushakemusilmoitus_email";
 
     private final String expirationReminderSenderEmail;
     private final String expirationReminderPersonUrl;
@@ -62,7 +70,7 @@ public class EmailServiceImpl implements EmailService {
         String langugeCode = getLanguageCode(henkilonPerustiedot);
         
         EmailData email = new EmailData();
-        email.setEmail(getEmailMessage(langugeCode));
+        email.setEmail(getEmailMessage(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME, langugeCode));
         email.setRecipient(singletonList(getEmailRecipient(henkiloOid, langugeCode, tapahtumas)));
         ryhmasahkopostiClient.sendRyhmasahkoposti(email);
     }
@@ -86,12 +94,12 @@ public class EmailServiceImpl implements EmailService {
         return recipient;
     }
 
-    protected EmailMessage getEmailMessage(String languageCode) {
+    protected EmailMessage getEmailMessage(String templateName, String languageCode) {
         EmailMessage message = new EmailMessage();
         message.setCallingProcess(PROSESSI);
         message.setFrom(expirationReminderSenderEmail);
         message.setReplyTo(expirationReminderSenderEmail);
-        message.setTemplateName(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME);
+        message.setTemplateName(templateName);
         message.setHtml(true);
         message.setLanguageCode(languageCode);
         return message;
@@ -111,4 +119,41 @@ public class EmailServiceImpl implements EmailService {
             return String.format("%s (%s)", kayttoOikeusRyhmaNimi, voimassaLoppuPvmStr);
         }).collect(joining(", "));
     }
+
+    @Override
+    @Transactional
+    public void sendNewRequisitionNotificationEmails(Set<Henkilo> henkilot) {
+        henkilot.stream()
+                .map(henkilo -> getRecipient(henkilo.getOidHenkilo()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(groupingBy(EmailRecipient::getLanguageCode))
+                .forEach(this::sendNewRequisitionNotificationEmail);
+    }
+
+    private Optional<EmailRecipient> getRecipient(String henkiloOid) {
+        HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkilo(henkiloOid);
+        Optional<String> yhteystietoArvo = YhteystietoUtil.getYhteystietoArvo(
+                henkiloDto.getYhteystiedotRyhma(),
+                YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
+                YhteystietojenTyypit.PRIORITY_ORDER);
+        return yhteystietoArvo.map(sahkoposti -> createRecipient(henkiloDto, sahkoposti));
+    }
+
+    private EmailRecipient createRecipient(HenkiloDto henkilo, String sahkoposti) {
+        String kieliKoodi = henkilo.getAsiointiKieli() != null
+                ? henkilo.getAsiointiKieli().getKieliKoodi()
+                : DEFAULT_LANGUAGE_CODE;
+        EmailRecipient recipient = new EmailRecipient(henkilo.getOidHenkilo(), sahkoposti);
+        recipient.setLanguageCode(kieliKoodi);
+        return recipient;
+    }
+
+    private void sendNewRequisitionNotificationEmail(String kieliKoodi, List<EmailRecipient> recipients) {
+        EmailData data = new EmailData();
+        data.setEmail(getEmailMessage(KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME, kieliKoodi));
+        data.setRecipient(recipients);
+        ryhmasahkopostiClient.sendRyhmasahkoposti(data);
+    }
+
 }

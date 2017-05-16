@@ -1,11 +1,10 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.Anomus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindException;
 
 import java.util.List;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 
 public interface KayttooikeusAnomusService {
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);
@@ -17,4 +16,6 @@ public interface KayttooikeusAnomusService {
     Long createKayttooikeusAnomus(String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto);
 
     void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId);
+
+    void lahetaUusienAnomuksienIlmoitukset(Period threshold, LocalDate beforeDate);
 }

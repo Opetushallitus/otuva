@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 
@@ -11,6 +12,8 @@ import java.util.Set;
 import static java.util.Collections.singletonList;
 
 public interface OppijanumerorekisteriClient {
+
+    HenkiloDto getHenkilo(String henkiloOid);
 
     List<HenkiloPerustietoDto> getHenkilonPerustiedot(Collection<String> henkiloOid);
 

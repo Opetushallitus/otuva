@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public interface AnomusDataRepository extends CrudRepository<Anomus, Long> {
+public interface AnomusRepository extends CrudRepository<Anomus, Long>, AnomusRepositoryCustom {
 
     List<Anomus> findByHenkiloOidHenkiloAndAnomuksenTila(String oidHenkilo, AnomuksenTila anomuksenTila);
 

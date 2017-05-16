@@ -24,7 +24,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.mapper;
+import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 
@@ -52,7 +54,13 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         this.serviceAccountClient.setUsername(serviceUsersProperties.getOppijanumerorekisteri().getUsername());
         this.serviceAccountClient.setPassword(serviceUsersProperties.getOppijanumerorekisteri().getPassword());
     }
-    
+
+    @Override
+    public HenkiloDto getHenkilo(String henkiloOid) {
+        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo", henkiloOid);
+        return io(() -> objectMapper.readValue(serviceAccountClient.get(url), HenkiloDto.class)).get();
+    }
+
     @Override
     public List<HenkiloPerustietoDto> getHenkilonPerustiedot(Collection<String> henkiloOid) {
         if (henkiloOid.isEmpty()) {

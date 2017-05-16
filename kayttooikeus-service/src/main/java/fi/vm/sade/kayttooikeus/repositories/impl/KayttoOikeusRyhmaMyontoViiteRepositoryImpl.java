@@ -10,11 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhmaMyontoViite.kayttoOikeusRyhmaMyontoViite;
+import java.util.Set;
+import static java.util.stream.Collectors.toSet;
 
 @Repository
 public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl
         extends BaseRepositoryImpl<KayttoOikeusRyhmaMyontoViite>
         implements KayttoOikeusRyhmaMyontoViiteRepository {
+
+    @Override
+    public Set<Long> getMasterIdsBySlaveIds(Set<Long> slaveIds) {
+        QKayttoOikeusRyhmaMyontoViite qMyontoViite = kayttoOikeusRyhmaMyontoViite;
+
+        return jpa().from(qMyontoViite)
+                .where(qMyontoViite.slaveId.in(slaveIds))
+                .distinct().select(qMyontoViite.masterId).fetch().stream().collect(toSet());
+    }
 
     @Override
     public List<Long> getSlaveIdsByMasterIds(List<Long> masterIds) {
