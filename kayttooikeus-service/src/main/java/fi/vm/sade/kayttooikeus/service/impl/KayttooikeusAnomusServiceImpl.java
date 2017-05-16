@@ -137,12 +137,14 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Event is created only when kayttooikeus has been granted.
         if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
-            this.grantKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto.getAlkupvm(),
+            MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = this.grantKayttooikeusryhma(
+                    updateHaettuKayttooikeusryhmaDto.getAlkupvm(),
                     updateHaettuKayttooikeusryhmaDto.getLoppupvm(),
                     anoja.getOidHenkilo(),
                     haettuKayttoOikeusRyhma.getAnomus().getOrganisaatioOid(),
                     haettuKayttoOikeusRyhma.getKayttoOikeusRyhma(),
                     haettuKayttoOikeusRyhma.getAnomus().getTehtavanimike());
+            haettuKayttoOikeusRyhma.getAnomus().addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
         // If everything is handled on anomus send email notification to anoja.
@@ -269,7 +271,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     // Grant kayttooikeusryhma and create event. DOES NOT CONTAIN PERMISSION CHECKS SO DONT CALL DIRECTLY
-    private void grantKayttooikeusryhma(LocalDate alkupvm,
+    private MyonnettyKayttoOikeusRyhmaTapahtuma grantKayttooikeusryhma(LocalDate alkupvm,
                                         LocalDate loppupvm,
                                         String anojaOid,
                                         String organisaatioOid,
@@ -303,6 +305,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma);
 
         // TODO ldap sync for henkilo
+
+        return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
 
     // New history event for a change on kayttooikeusryhmatapahtuma.

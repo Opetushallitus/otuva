@@ -69,4 +69,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
         );
     }
 
+    public void addAnomus(Anomus anomus) {
+        this.anomus.add(anomus);
+    }
 }
