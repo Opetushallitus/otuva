@@ -87,7 +87,6 @@ public class KayttooikeusAnomusServiceTest {
                 this.haettuKayttooikeusRyhmaDataRepository,
                 this.henkiloRepository,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
-                this.kayttoOikeusRyhmaMyontoViiteRepository,
                 this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
@@ -95,7 +94,6 @@ public class KayttooikeusAnomusServiceTest {
                 this.permissionCheckerService,
                 this.kayttooikeusryhmaDataRepository,
                 new CommonProperties(),
-                this.organisaatioClient,
                 this.anomusDataRepository,
                 this.emailService)
         );
@@ -251,7 +249,6 @@ public class KayttooikeusAnomusServiceTest {
                 "MYONNETTY", LocalDate.now().plusYears(1));
         this.kayttooikeusAnomusService.updateHaettuKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto);
 
-        assertThat(haettuKayttoOikeusRyhma.getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.MYONNETTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomuksenTila()).isEqualByComparingTo(AnomuksenTila.KASITELTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
         // New MyonnettyKayttooikeusRyhma has been added to the Anomus
@@ -281,7 +278,6 @@ public class KayttooikeusAnomusServiceTest {
                 "HYLATTY", LocalDate.now().plusYears(1));
         this.kayttooikeusAnomusService.updateHaettuKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto);
 
-        assertThat(haettuKayttoOikeusRyhma.getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.HYLATTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomuksenTila()).isEqualByComparingTo(AnomuksenTila.HYLATTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
     }
@@ -312,7 +308,6 @@ public class KayttooikeusAnomusServiceTest {
                 "HYLATTY", LocalDate.now().plusYears(1));
         this.kayttooikeusAnomusService.updateHaettuKayttooikeusryhma(updateHaettuKayttooikeusryhmaDto);
 
-        assertThat(haettuKayttoOikeusRyhma.getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.HYLATTY);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomuksenTila()).isEqualByComparingTo(AnomuksenTila.ANOTTU);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
     }
