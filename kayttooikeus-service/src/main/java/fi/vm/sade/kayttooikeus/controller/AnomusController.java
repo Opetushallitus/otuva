@@ -63,4 +63,12 @@ public class AnomusController {
                                                                   grantKayttooikeusryhmaDtoList) {
         this.kayttooikeusAnomusService.grantKayttooikeusryhma(oidHenkilo, organisaatioOid, grantKayttooikeusryhmaDtoList);
     }
+
+    @ApiOperation("Kirjautuneen käyttäjän oman käyttöoikeusanomuksen peruminen")
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/currentuser", method = RequestMethod.PUT)
+    public void cancelKayttooikeusRyhmaAnomus(@RequestBody @Validated Long kayttooikeusRyhmaId) {
+        this.kayttooikeusAnomusService.cancelKayttooikeusAnomus(kayttooikeusRyhmaId);
+    }
+
 }

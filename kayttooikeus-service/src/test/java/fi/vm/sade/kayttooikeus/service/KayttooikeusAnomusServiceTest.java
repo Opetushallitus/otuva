@@ -229,7 +229,7 @@ public class KayttooikeusAnomusServiceTest {
                 "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
+        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
@@ -258,7 +258,7 @@ public class KayttooikeusAnomusServiceTest {
                 "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
+        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
@@ -288,7 +288,7 @@ public class KayttooikeusAnomusServiceTest {
         haettuKayttoOikeusRyhma.getAnomus().addHaettuKayttoOikeusRyhma(anotherHaettuKayttoOikeusRyhma);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findOne(1L))
+        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))

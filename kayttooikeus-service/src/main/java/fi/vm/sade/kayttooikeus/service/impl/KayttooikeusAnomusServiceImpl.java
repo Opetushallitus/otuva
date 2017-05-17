@@ -99,7 +99,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Override
     public void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaDataRepository
-                .findOne(updateHaettuKayttooikeusryhmaDto.getId())
+                .findById(updateHaettuKayttooikeusryhmaDto.getId())
                 .orElseThrow(() -> new NotFoundException("Haettua kayttooikeusryhmaa ei löytynyt id:llä "
                         + updateHaettuKayttooikeusryhmaDto.getId()));
 
@@ -305,4 +305,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         .kayttoOikeusRyhma(kayttoOikeusRyhma)
                         .organisaatioHenkilo(organisaatioHenkilo).build());
     }
+
+    @Override
+    @Transactional
+    public void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId) {
+        this.haettuKayttooikeusRyhmaDataRepository.delete(kayttooikeusRyhmaId);
+    }
+
 }

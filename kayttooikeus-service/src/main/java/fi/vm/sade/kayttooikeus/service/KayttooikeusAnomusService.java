@@ -15,4 +15,6 @@ public interface KayttooikeusAnomusService {
     void grantKayttooikeusryhma(String anojaOid, String organisaatioOid, List<GrantKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList);
 
     Long createKayttooikeusAnomus(String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto);
+
+    void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId);
 }
