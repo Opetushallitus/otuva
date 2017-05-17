@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.EmailInvitationProperties;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Anomus;
@@ -42,7 +41,6 @@ import static java.util.stream.Collectors.joining;
 @Service
 public class EmailServiceImpl implements EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
-    private static final String PROSESSI = "kayttooikeus";
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
     private static final Locale DEFAULT_LOCALE = new Locale(DEFAULT_LANGUAGE_CODE);
     private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email";
@@ -105,7 +103,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private EmailMessage generateEmailMessage(String templateName, String languageCode) {
-        return generateEmailMessage(languageCode, this.expirationReminderSenderEmail,
+        return this.generateEmailMessage(languageCode, this.expirationReminderSenderEmail,
                 this.expirationReminderSenderEmail, templateName);
     }
 
@@ -140,11 +138,11 @@ public class EmailServiceImpl implements EmailService {
         
         HenkiloPerustietoDto henkilonPerustiedot = oppijanumerorekisteriClient.getHenkilonPerustiedot(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilö not found by henkiloOid=" + henkiloOid));
-        String langugeCode = getLanguageCode(henkilonPerustiedot);
+        String languageCode = UserDetailsUtil.getLanguageCode(henkilonPerustiedot);
         
         EmailData email = new EmailData();
-        email.setEmail(getEmailMessage(langugeCode));
-        email.setRecipient(singletonList(getEmailRecipient(henkiloOid, langugeCode, tapahtumas)));
+        email.setEmail(this.generateEmailMessage(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME, languageCode));
+        email.setRecipient(singletonList(getEmailRecipient(henkiloOid, languageCode, tapahtumas)));
         ryhmasahkopostiClient.sendRyhmasahkoposti(email);
     }
 
@@ -167,22 +165,6 @@ public class EmailServiceImpl implements EmailService {
         return recipient;
     }
 
-    private EmailMessage getEmailMessage(String languageCode) {
-        EmailMessage message = new EmailMessage();
-        message.setCallingProcess(PROSESSI);
-        message.setFrom(expirationReminderSenderEmail);
-        message.setReplyTo(expirationReminderSenderEmail);
-        message.setTemplateName(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME);
-        message.setHtml(true);
-        message.setLanguageCode(languageCode);
-        return message;
-    }
-
-    private String getLanguageCode(HenkiloPerustietoDto henkilo) {
-        return ofNullable(henkilo.getAsiointiKieli()).flatMap(k -> ofNullable(k.getKieliKoodi()))
-                .orElse(DEFAULT_LANGUAGE_CODE);
-    }
-    
     private String getExpirationsText(List<ExpiringKayttoOikeusDto> kayttoOikeudet, String languageCode) {
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, DEFAULT_LOCALE);
         return kayttoOikeudet.stream().map(kayttoOikeus -> {

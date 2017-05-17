@@ -83,6 +83,24 @@ public class UserDetailsUtilTest {
     }
 
     @Test
+    public void getLanguageCodePerustieto() {
+        HenkiloPerustietoDto henkiloDto = new HenkiloPerustietoDto();
+        henkiloDto.setAsiointiKieli(new KielisyysDto("sv", "svenska"));
+
+        String kielikoodi = UserDetailsUtil.getLanguageCode(henkiloDto);
+        assertThat(kielikoodi).isEqualTo("sv");
+    }
+
+    @Test
+    public void getLanguageCodePerustietoDefault() {
+        HenkiloPerustietoDto henkiloDto = new HenkiloPerustietoDto();
+        henkiloDto.setAsiointiKieli(new KielisyysDto());
+
+        String kielikoodi = UserDetailsUtil.getLanguageCode(henkiloDto);
+        assertThat(kielikoodi).isEqualTo("fi");
+    }
+
+    @Test
     public void getEmailByPrioritySingleValue() {
         HenkiloDto henkiloDto = new HenkiloDto();
         henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
