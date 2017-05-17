@@ -14,11 +14,7 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
