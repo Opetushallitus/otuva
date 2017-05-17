@@ -15,7 +15,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +74,7 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_SCHEDULE")
     public void sendExpirationRemindersTest() throws Exception {
         given(this.taskExecutorService.sendExpirationReminders(Matchers.any(Period.class))).willReturn(1);
         this.mvc.perform(post("/kayttooikeus/expirationReminders")
