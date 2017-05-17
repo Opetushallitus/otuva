@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
@@ -19,4 +20,6 @@ public interface HaettuKayttooikeusRyhmaDataRepository extends CrudRepository<Ha
     List<HaettuKayttoOikeusRyhma> findByAnomusHenkiloOidHenkilo(String oidHenkilo);
 
     Optional<HaettuKayttoOikeusRyhma> findById(Long id);
+
+    List<HaettuKayttoOikeusRyhma> findByAnomusId(Long anomusId);
 }
