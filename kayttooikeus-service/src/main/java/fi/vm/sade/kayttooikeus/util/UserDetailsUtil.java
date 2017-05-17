@@ -2,12 +2,15 @@ package fi.vm.sade.kayttooikeus.util;
 
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 public class UserDetailsUtil {
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
@@ -42,6 +45,12 @@ public class UserDetailsUtil {
                 ? henkilo.getAsiointiKieli().getKieliKoodi()
                 : DEFAULT_LANGUAGE_CODE;
     }
+
+    public static String getLanguageCode(HenkiloPerustietoDto henkilo) {
+        return ofNullable(henkilo.getAsiointiKieli()).flatMap(k -> ofNullable(k.getKieliKoodi()))
+                .orElse(DEFAULT_LANGUAGE_CODE);
+    }
+
 
     /**
      * Emails are parsed and preferred using YhteystiedotComparator
