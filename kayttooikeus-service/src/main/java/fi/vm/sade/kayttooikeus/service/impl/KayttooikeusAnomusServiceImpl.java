@@ -18,6 +18,8 @@ import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidat
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -309,6 +311,13 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Override
     @Transactional
     public void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId) {
+        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaDataRepository.findById(kayttooikeusRyhmaId)
+                .orElseThrow( () -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId) );
+        Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
+        anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
+        if(anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
+            anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
+        }
         this.haettuKayttooikeusRyhmaDataRepository.delete(kayttooikeusRyhmaId);
     }
 
