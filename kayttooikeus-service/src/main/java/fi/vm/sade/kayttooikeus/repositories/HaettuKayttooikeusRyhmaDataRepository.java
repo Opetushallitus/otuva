@@ -21,5 +21,4 @@ public interface HaettuKayttooikeusRyhmaDataRepository extends CrudRepository<Ha
 
     Optional<HaettuKayttoOikeusRyhma> findById(Long id);
 
-    List<HaettuKayttoOikeusRyhma> findByAnomusId(Long anomusId);
 }
