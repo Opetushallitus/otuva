@@ -144,7 +144,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(tallennettuKutsuKayttoOikeusRyhma.getNimi().getTexts()).containsExactly(new AbstractMap.SimpleEntry<>("fi", "Käyttöoikeusryhmä"));
 
         Kutsu entity = em.find(Kutsu.class, id);
-        assertThat(entity.getSalsisuus()).isNotEmpty();
+        assertThat(entity.getSalaisuus()).isNotEmpty();
     }
 
     @Test

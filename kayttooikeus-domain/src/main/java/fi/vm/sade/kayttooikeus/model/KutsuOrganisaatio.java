@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,6 +13,9 @@ import java.util.Set;
  */
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "kutsu_organisaatio", schema = "public")
 public class KutsuOrganisaatio extends IdentifiableAndVersionedEntity {
 

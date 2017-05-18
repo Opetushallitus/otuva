@@ -1,15 +1,20 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.EmailInvitationProperties;
+import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.util.AnomusKasiteltySahkopostiBuilder;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
@@ -21,22 +26,31 @@ import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailRecipient;
 import fi.vm.sade.ryhmasahkoposti.api.dto.ReportedRecipientReplacementDTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Consumer;
 
-import static fi.vm.sade.kayttooikeus.service.impl.KutsuServiceImpl.CALLING_PROCESS;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -48,26 +62,37 @@ public class EmailServiceImpl implements EmailService {
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_TILA = "anomuksenTila";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_PERUSTE = "hylkaamisperuste";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLIT = "roolit";
+    private static final String CALLING_PROCESS = "kayttooikeus";
 
     private final String expirationReminderSenderEmail;
     private final String expirationReminderPersonUrl;
+
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final RyhmasahkopostiClient ryhmasahkopostiClient;
+    private final OrganisaatioClient organisaatioClient;
 
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
 
+    private final CommonProperties commonProperties;
+    private final OphProperties urlProperties;
 
     @Autowired
     public EmailServiceImpl(OppijanumerorekisteriClient oppijanumerorekisteriClient,
                             RyhmasahkopostiClient ryhmasahkopostiClient,
                             EmailInvitationProperties config,
                             OphProperties ophProperties,
-                            KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository) {
+                            KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository,
+                            CommonProperties commonProperties,
+                            OphProperties urlProperties,
+                            OrganisaatioClient organisaatioClient) {
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.ryhmasahkopostiClient = ryhmasahkopostiClient;
         this.expirationReminderSenderEmail = config.getSenderEmail();
         this.expirationReminderPersonUrl = ophProperties.url("authentication-henkiloui.expirationreminder.personurl");
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
+        this.commonProperties = commonProperties;
+        this.urlProperties = urlProperties;
+        this.organisaatioClient = organisaatioClient;
     }
 
     @Override
@@ -174,4 +199,69 @@ public class EmailServiceImpl implements EmailService {
             return String.format("%s (%s)", kayttoOikeusRyhmaNimi, voimassaLoppuPvmStr);
         }).collect(joining(", "));
     }
+
+    @Override
+    public void sendInvitationEmail(Kutsu kutsu) {
+        EmailData emailData = new EmailData();
+
+        EmailMessage email = new EmailMessage();
+        email.setTemplateName(this.commonProperties.getInvitationEmail().getTemplate());
+        email.setLanguageCode(kutsu.getKieliKoodi());
+        email.setCallingProcess(CALLING_PROCESS);
+        email.setFrom(this.commonProperties.getInvitationEmail().getFrom());
+        email.setReplyTo(this.commonProperties.getInvitationEmail().getFrom());
+        email.setCharset("UTF-8");
+        email.setHtml(true);
+        email.setSender(this.commonProperties.getInvitationEmail().getSender());
+        emailData.setEmail(email);
+
+        EmailRecipient recipient = new EmailRecipient();
+        recipient.setEmail(kutsu.getSahkoposti());
+        recipient.setLanguageCode(kutsu.getKieliKoodi());
+        recipient.setName(kutsu.getEtunimi() + " " + kutsu.getSukunimi());
+
+        OrganisaatioClient.Mode organizationClientState = OrganisaatioClient.Mode.multiple();
+        recipient.setRecipientReplacements(asList(
+                replacement("url", this.urlProperties.url("kayttooikeus-service.invitation.url", kutsu.getSalaisuus())),
+                replacement("etunimi", kutsu.getEtunimi()),
+                replacement("sukunimi", kutsu.getSukunimi()),
+                replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
+                        .map(org -> new OranizationReplacement(new TextGroupMapDto(
+                                        this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid(),
+                                                organizationClientState).getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
+                                        org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)
+                                                .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
+                                                .filter(Objects::nonNull).sorted().collect(toList())
+                                )
+                        ).sorted(comparing(OranizationReplacement::getName)).collect(toList()))
+        ));
+        emailData.setRecipient(singletonList(recipient));
+
+        logger.info("Sending invitation email to {}", kutsu.getSahkoposti());
+        HttpResponse response = this.ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
+        try {
+            logger.info("Sent invitation email to {}, ryhmasahkoposti-result: {}", kutsu.getSahkoposti(),
+                    IOUtils.toString(response.getEntity().getContent()));
+        } catch (IOException|NullPointerException e) {
+            logger.error("Could not read ryhmasahkoposti-result: " + e.getMessage(), e);
+        }
+    }
+
+    @NotNull
+    private ReportedRecipientReplacementDTO replacement(String name, Object value) {
+        ReportedRecipientReplacementDTO replacement = new ReportedRecipientReplacementDTO();
+        replacement.setName(name);
+        replacement.setValue(value);
+        return replacement;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class OranizationReplacement {
+        private final String name;
+        private final List<String> permissions;
+    }
+
+
+
 }

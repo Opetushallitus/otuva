@@ -7,6 +7,8 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
@@ -23,12 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashMap;
+
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.apache.http.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,10 +42,15 @@ import static org.mockito.Mockito.verify;
 public class EmailServiceTest extends AbstractServiceTest {
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
+
     @MockBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
     @MockBean
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+
+    @MockBean
+    private OrganisaatioClient organisaatioClient;
 
     @Autowired
     private EmailService emailService;
@@ -130,6 +140,43 @@ public class EmailServiceTest extends AbstractServiceTest {
 
         assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("sv");
         assertThat(emailData.getEmail().getFrom()).isEqualTo(emailData.getEmail().getReplyTo()).isEqualTo("noreply@oph.fi");
-        assertThat(emailData.getEmail().getCallingProcess()).isEqualTo("kayttooikeus.kayttooikeuspalvelu-service");
+        assertThat(emailData.getEmail().getCallingProcess()).isEqualTo("kayttooikeus");
+    }
+
+    @Test
+    public void sendInvitationEmail() {
+        OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
+        organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+                .willReturn(organisaatioPerustieto);
+        Kutsu kutsu = Kutsu.builder()
+                .kieliKoodi("fi")
+                .sahkoposti("arpa@kuutio.fi")
+                .salaisuus("salaisuushash")
+                .etunimi("arpa")
+                .sukunimi("kuutio")
+                .organisaatiot(Sets.newHashSet(KutsuOrganisaatio.builder()
+                        .organisaatioOid("1.2.3.4.1")
+                        .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().description(new TextGroup()).build()))
+                        .build()))
+                .build();
+
+        this.emailService.sendInvitationEmail(kutsu);
+        ArgumentCaptor<EmailData> emailDataArgumentCaptor = ArgumentCaptor.forClass(EmailData.class);
+        verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
+        EmailData emailData = emailDataArgumentCaptor.getValue();
+        assertThat(emailData.getRecipient()).hasSize(1);
+        assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(4)
+                .extracting("name").containsExactlyInAnyOrder("url", "etunimi", "sukunimi", "organisaatiot");
+        assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
+        assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
+        assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
+        assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
+        assertThat(emailData.getRecipient().get(0).getLanguageCode()).isEqualTo("fi");
+
+        assertThat(emailData.getEmail().getCallingProcess()).isEqualTo("kayttooikeus");
+        assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("fi");
+        assertThat(emailData.getEmail().getFrom()).isEqualTo(emailData.getEmail().getReplyTo()).isEqualTo("noreply@oph.fi");
+        assertThat(emailData.getEmail().getTemplateName()).isEqualTo("kayttooikeus_kutsu");
     }
 }

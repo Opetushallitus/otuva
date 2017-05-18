@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,6 +37,6 @@ public class TextGroup extends IdentifiableAndVersionedEntity {
         if (opt.isPresent()) {
             return opt;
         }
-        return texts.stream().map(Text::getText).filter(t -> t != null).findFirst();
+        return texts.stream().map(Text::getText).filter(Objects::nonNull).findFirst();
     }
 }
