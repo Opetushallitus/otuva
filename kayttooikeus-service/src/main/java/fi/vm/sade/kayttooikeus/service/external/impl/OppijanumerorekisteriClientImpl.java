@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.properties.OphProperties;
@@ -123,6 +124,23 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                         .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
                                 objectMapper.writeValueAsString(data)).getEntity().getContent())), 2).get()
                 .orFail(mapper(url));
+    }
+
+    @Override
+    public HenkiloDto getHenkiloByOid(String oid) {
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByOid", oid);
+
+        return retrying(FunctionalUtils.<HenkiloDto>io(
+                () -> this.objectMapper.readerFor(HenkiloDto.class)
+                        .readValue(this.serviceAccountClient.get(url))), 2).get()
+                .orFail((RuntimeException e) -> {
+                    if (e.getCause() instanceof CachingRestClient.HttpException) {
+                        if (((CachingRestClient.HttpException) e.getCause()).getStatusCode() == 404) {
+                            throw new NotFoundException("Could not find henkilo by oid: " + oid);
+                        }
+                    }
+                    return new ExternalServiceException(url, e.getMessage(), e);
+                });
     }
 
     @Override

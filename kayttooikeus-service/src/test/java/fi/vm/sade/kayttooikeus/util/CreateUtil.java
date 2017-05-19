@@ -6,6 +6,9 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -86,7 +89,7 @@ public class CreateUtil {
         return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, null, tehtavanimike,
                 AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, DateTime.now().minusDays(5), DateTime.now().minusDays(5),
                 perustelut, "", "", "", "",
-                Collections.<HaettuKayttoOikeusRyhma>emptySet(), Collections.<MyonnettyKayttoOikeusRyhmaTapahtuma>emptySet());
+                Sets.newHashSet(), Sets.newHashSet());
     }
 
     public static OrganisaatioPerustieto createOrganisaatioPerustietoNoChildren(String organisaatioOid) {
@@ -103,4 +106,14 @@ public class CreateUtil {
         organisaatioPerustieto.setChildren(newArrayList(child));
         return organisaatioPerustieto;
     }
+
+    public static YhteystiedotRyhmaDto createYhteystietoSahkoposti(String email, String tyyppi) {
+        return YhteystiedotRyhmaDto.builder()
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoArvo(email)
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI).build())
+                .ryhmaKuvaus(tyyppi)
+                .build();
+    }
+
 }

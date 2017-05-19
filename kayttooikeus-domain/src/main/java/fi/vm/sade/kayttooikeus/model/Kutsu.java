@@ -1,8 +1,7 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
@@ -14,6 +13,9 @@ import static org.joda.time.DateTime.now;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "kutsu", schema = "public")
 public class Kutsu extends IdentifiableAndVersionedEntity {
     
@@ -45,7 +47,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     private Set<KutsuOrganisaatio> organisaatiot = new HashSet<>(0);
     
     @Column(name = "salaisuus") 
-    private String salsisuus; // verification hash
+    private String salaisuus; // verification hash
     
     @Type(type = "dateTime")
     private DateTime kaytetty;

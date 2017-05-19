@@ -80,7 +80,7 @@ public class KutsuPopulator implements Populator<Kutsu> {
             kutsu.setAikaleima(aikaleima);
             kutsu.setTila(tila);
             kutsu.setSahkoposti(sahkoposti);
-            kutsu.setSalsisuus(salaisuus);
+            kutsu.setSalaisuus(salaisuus);
             kutsu.setKutsuja(kutsuja);
             kutsu.setLuotuHenkiloOid(luotuHenkiloOid);
             kutsu.setKieliKoodi(kieliKoodi);

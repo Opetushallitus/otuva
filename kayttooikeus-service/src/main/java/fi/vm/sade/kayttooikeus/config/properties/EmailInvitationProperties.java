@@ -10,6 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Configuration
 @ConfigurationProperties(prefix = "tasks.emailInvitation")
-public class EmailInvitation {
-    private String senderEmail;
+public class EmailInvitationProperties {
+    private String senderEmail = "noreply@oph.fi";
 }
