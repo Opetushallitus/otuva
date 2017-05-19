@@ -13,8 +13,6 @@ import static java.util.Collections.singletonList;
 
 public interface OppijanumerorekisteriClient {
 
-    HenkiloDto getHenkilo(String henkiloOid);
-
     List<HenkiloPerustietoDto> getHenkilonPerustiedot(Collection<String> henkiloOid);
 
     default Optional<HenkiloPerustietoDto> getHenkilonPerustiedot(String henkiloOid) {

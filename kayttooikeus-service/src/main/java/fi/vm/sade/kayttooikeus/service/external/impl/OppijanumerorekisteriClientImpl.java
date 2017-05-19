@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.properties.OphProperties;
@@ -25,7 +24,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.mapper;
-import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import static java.util.Collections.singletonList;
@@ -54,12 +52,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         this.serviceAccountClient.setCasService(urlProperties.url("oppijanumerorekisteri-service.security-check"));
         this.serviceAccountClient.setUsername(serviceUsersProperties.getOppijanumerorekisteri().getUsername());
         this.serviceAccountClient.setPassword(serviceUsersProperties.getOppijanumerorekisteri().getPassword());
-    }
-
-    @Override
-    public HenkiloDto getHenkilo(String henkiloOid) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo", henkiloOid);
-        return io(() -> objectMapper.readValue(serviceAccountClient.get(url), HenkiloDto.class)).get();
     }
 
     @Override

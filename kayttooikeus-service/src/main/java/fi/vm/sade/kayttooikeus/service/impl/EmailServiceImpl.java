@@ -218,7 +218,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private Optional<EmailRecipient> getRecipient(String henkiloOid) {
-        HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkilo(henkiloOid);
+        HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
         Optional<String> yhteystietoArvo = YhteystietoUtil.getYhteystietoArvo(
                 henkiloDto.getYhteystiedotRyhma(),
                 YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
