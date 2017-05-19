@@ -227,9 +227,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private EmailRecipient createRecipient(HenkiloDto henkilo, String sahkoposti) {
-        String kieliKoodi = henkilo.getAsiointiKieli() != null
-                ? henkilo.getAsiointiKieli().getKieliKoodi()
-                : DEFAULT_LANGUAGE_CODE;
+        String kieliKoodi = UserDetailsUtil.getLanguageCode(henkilo);
         EmailRecipient recipient = new EmailRecipient(henkilo.getOidHenkilo(), sahkoposti);
         recipient.setLanguageCode(kieliKoodi);
         return recipient;
