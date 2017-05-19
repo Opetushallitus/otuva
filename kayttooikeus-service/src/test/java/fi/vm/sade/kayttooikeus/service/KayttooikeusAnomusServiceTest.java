@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import org.joda.time.Period;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import org.mockito.Answers;
 import static org.mockito.BDDMockito.given;
 import org.mockito.Captor;
 import static org.mockito.Matchers.any;
@@ -55,9 +54,6 @@ public class KayttooikeusAnomusServiceTest {
 
     @MockBean
     private LocalizationService localizationService;
-
-    @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
-    private EmailService emailService;
 
     @MockBean
     private HenkiloRepository henkiloRepository;
@@ -88,6 +84,9 @@ public class KayttooikeusAnomusServiceTest {
 
     @MockBean
     private AnomusRepository anomusRepository;
+
+    @MockBean
+    private EmailService emailService;
 
     @Captor
     private ArgumentCaptor<Set<Henkilo>> henkilotCaptor;
