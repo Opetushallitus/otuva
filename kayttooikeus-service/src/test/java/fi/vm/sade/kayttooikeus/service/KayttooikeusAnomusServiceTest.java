@@ -89,7 +89,7 @@ public class KayttooikeusAnomusServiceTest {
     private EmailService emailService;
 
     @Captor
-    private ArgumentCaptor<Set<Henkilo>> henkilotCaptor;
+    private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
 
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
@@ -357,9 +357,9 @@ public class KayttooikeusAnomusServiceTest {
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("organisaatio1"))
         );
-        verify(emailService).sendNewRequisitionNotificationEmails(henkilotCaptor.capture());
-        Set<Henkilo> henkilot = henkilotCaptor.getValue();
-        assertThat(henkilot).extracting("oidHenkilo").containsExactlyInAnyOrder("user2", "user3");
+        verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
+        Set<String> henkilot = henkiloOidsCaptor.getValue();
+        assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
     }
 
     @Test
@@ -388,8 +388,8 @@ public class KayttooikeusAnomusServiceTest {
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
         );
-        verify(emailService).sendNewRequisitionNotificationEmails(henkilotCaptor.capture());
-        Set<Henkilo> henkilot = henkilotCaptor.getValue();
-        assertThat(henkilot).extracting("oidHenkilo").containsExactlyInAnyOrder("user2", "user3");
+        verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
+        Set<String> henkilot = henkiloOidsCaptor.getValue();
+        assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
     }
 }

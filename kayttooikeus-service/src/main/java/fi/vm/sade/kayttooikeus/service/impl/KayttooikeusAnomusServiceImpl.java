@@ -289,14 +289,14 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
 
-        Set<Henkilo> hyvaksyjat = anomukset.stream()
+        Set<String> hyvaksyjat = anomukset.stream()
                 .map(this::getAnomuksenHyvaksyjat)
                 .flatMap(Collection::stream)
                 .collect(toSet());
         emailService.sendNewRequisitionNotificationEmails(hyvaksyjat);
     }
 
-    private Set<Henkilo> getAnomuksenHyvaksyjat(Anomus anomus) {
+    private Set<String> getAnomuksenHyvaksyjat(Anomus anomus) {
         Set<Long> kayttoOikeusRyhmaIds = getHyvaksyjaKayttoOikeusRyhmat(anomus);
         if (kayttoOikeusRyhmaIds.isEmpty()) {
             logger.info("Ei löytynyt käyttöoikeusryhmiä, jotka voisivat hyväksyä anomuksen {}", anomus.getId());
@@ -307,15 +307,16 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             logger.info("Ei löytynyt organisaatioita, jotka voisivat hyväksyä anomuksen {}", anomus.getId());
             return emptySet();
         }
-        Set<Henkilo> henkilot = henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(kayttoOikeusRyhmaIds, organisaatioOids)
+        Set<String> henkiloOids = henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(kayttoOikeusRyhmaIds, organisaatioOids)
                 .stream()
+                .map(Henkilo::getOidHenkilo)
                 // Henkilö ei saa hyväksyä omaa käyttöoikeusanomusta
-                .filter(t -> !t.getOidHenkilo().equals(anomus.getHenkilo().getOidHenkilo()))
+                .filter(t -> !t.equals(anomus.getHenkilo().getOidHenkilo()))
                 .collect(toSet());
-        if (henkilot.isEmpty()) {
+        if (henkiloOids.isEmpty()) {
             logger.info("Anomuksella {} ei ole hyväksyjiä", anomus.getId());
         }
-        return henkilot;
+        return henkiloOids;
     }
 
     private Set<Long> getHyvaksyjaKayttoOikeusRyhmat(Anomus anomus) {

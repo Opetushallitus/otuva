@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
@@ -14,7 +13,7 @@ public interface EmailService {
 
     void sendExpirationReminder(String henkiloOid, List<ExpiringKayttoOikeusDto> tapahtumas);
 
-    void sendNewRequisitionNotificationEmails(Set<Henkilo> henkilot);
+    void sendNewRequisitionNotificationEmails(Set<String> henkiloOids);
 
     void sendInvitationEmail(Kutsu kutsu);
 

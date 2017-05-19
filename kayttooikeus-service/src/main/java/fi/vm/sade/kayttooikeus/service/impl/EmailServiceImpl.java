@@ -208,9 +208,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Transactional
-    public void sendNewRequisitionNotificationEmails(Set<Henkilo> henkilot) {
-        henkilot.stream()
-                .map(henkilo -> getRecipient(henkilo.getOidHenkilo()))
+    public void sendNewRequisitionNotificationEmails(Set<String> henkiloOids) {
+        henkiloOids.stream()
+                .map(this::getRecipient)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(groupingBy(EmailRecipient::getLanguageCode))
