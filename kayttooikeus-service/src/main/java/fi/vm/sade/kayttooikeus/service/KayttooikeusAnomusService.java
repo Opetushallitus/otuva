@@ -4,7 +4,6 @@ import fi.vm.sade.kayttooikeus.dto.*;
 
 import java.util.List;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 
 public interface KayttooikeusAnomusService {
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);
@@ -17,5 +16,5 @@ public interface KayttooikeusAnomusService {
 
     void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId);
 
-    void lahetaUusienAnomuksienIlmoitukset(Period threshold, LocalDate beforeDate);
+    void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm);
 }

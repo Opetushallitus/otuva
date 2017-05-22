@@ -23,7 +23,6 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +32,7 @@ import org.springframework.validation.BindException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.joda.time.LocalTime;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
@@ -281,10 +281,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     @Override
     @Transactional
-    public void lahetaUusienAnomuksienIlmoitukset(Period threshold, LocalDate beforeDate) {
+    public void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm) {
         AnomusCriteria criteria = AnomusCriteria.builder()
-                .anottuAlku(beforeDate.minus(threshold).toDateTimeAtStartOfDay())
-                .anottuLoppu(beforeDate.toDateTimeAtStartOfDay())
+                .anottuAlku(anottuPvm.toDateTimeAtStartOfDay())
+                .anottuLoppu(anottuPvm.toDateTime(LocalTime.MIDNIGHT.minusMillis(1)))
                 .tila(AnomuksenTila.ANOTTU)
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);

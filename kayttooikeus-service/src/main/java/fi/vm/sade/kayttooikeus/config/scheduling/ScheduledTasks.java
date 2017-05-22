@@ -42,8 +42,8 @@ public class ScheduledTasks {
     }
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.kayttooikeusanomusilmoitukset}")
-    public void kayttooikeusAnomusService() {
-        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(Period.days(1), LocalDate.now());
+    public void lahetaUusienAnomuksienIlmoitukset() {
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now().minusDays(1));
     }
 
 }

@@ -34,7 +34,6 @@ import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import org.joda.time.Period;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
 import org.mockito.Captor;
@@ -351,7 +350,7 @@ public class KayttooikeusAnomusServiceTest {
                 ));
         when(organisaatioClient.getParentOids(any())).thenReturn(Arrays.asList("rootOid", "organisaatio1"));
 
-        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(Period.ZERO, LocalDate.now());
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
 
         verify(organisaatioClient).getParentOids(eq("organisaatio1"));
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
@@ -382,7 +381,7 @@ public class KayttooikeusAnomusServiceTest {
                         Henkilo.builder().oidHenkilo("user3").build()
                 ));
 
-        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(Period.ZERO, LocalDate.now());
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
 
         verifyZeroInteractions(organisaatioClient);
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(

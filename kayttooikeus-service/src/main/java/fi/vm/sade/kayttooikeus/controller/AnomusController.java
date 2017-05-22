@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Api(tags = "Kayttooikeusanomukset")
@@ -74,7 +73,10 @@ public class AnomusController {
     }
 
     @PostMapping("/ilmoitus")
-    public void lahetaUusienAnomuksienIlmoitukset(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate localDate) {
-        this.kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(Period.days(1), localDate);
+    public void lahetaUusienAnomuksienIlmoitukset(
+            @RequestParam
+            @ApiParam("yyyy-MM-dd")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate anottuPvm) {
+        this.kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(anottuPvm);
     }
 }
