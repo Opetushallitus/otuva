@@ -73,6 +73,7 @@ public class AnomusController {
     }
 
     @PostMapping("/ilmoitus")
+    @ApiOperation("Lähettää käyttöoikeusanomuksista sähköposti-ilmoituksen anomuksien hyväksyjille")
     public void lahetaUusienAnomuksienIlmoitukset(
             @RequestParam
             @ApiParam("yyyy-MM-dd")
