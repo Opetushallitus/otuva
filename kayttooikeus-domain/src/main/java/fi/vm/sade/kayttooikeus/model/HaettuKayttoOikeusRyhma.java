@@ -9,9 +9,11 @@ import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import lombok.Builder;
 
 @Entity
 @Getter @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "haettu_kayttooikeusryhma")

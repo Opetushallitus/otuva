@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.joda.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Api(tags = "Kayttooikeusanomukset")
 @RestController
@@ -71,4 +72,12 @@ public class AnomusController {
         this.kayttooikeusAnomusService.cancelKayttooikeusAnomus(kayttooikeusRyhmaId);
     }
 
+    @PostMapping("/ilmoitus")
+    @ApiOperation("Lähettää käyttöoikeusanomuksista sähköposti-ilmoituksen anomuksien hyväksyjille")
+    public void lahetaUusienAnomuksienIlmoitukset(
+            @RequestParam
+            @ApiParam("yyyy-MM-dd")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate anottuPvm) {
+        this.kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(anottuPvm);
+    }
 }

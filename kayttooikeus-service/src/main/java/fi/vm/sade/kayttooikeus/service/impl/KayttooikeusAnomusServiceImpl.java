@@ -14,7 +14,13 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
+import java.util.Collection;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+
+import static java.util.stream.Collectors.toSet;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +32,19 @@ import org.springframework.validation.BindException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.joda.time.LocalTime;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
 
     private final HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
     private final HenkiloRepository henkiloRepository;
+    private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
-    private final AnomusDataRepository anomusDataRepository;
+    private final AnomusRepository anomusRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -46,31 +55,39 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private final CommonProperties commonProperties;
 
+    private final OrganisaatioClient organisaatioClient;
+
     @Autowired
     public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
                                          HenkiloRepository henkiloRepository,
+                                         HenkiloHibernateRepository henkiloHibernateRepository,
                                          MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
                                          KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
                                          OrikaBeanMapper orikaBeanMapper,
                                          LocalizationService localizationService,
+                                         EmailService emailService,
                                          HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator,
                                          PermissionCheckerService permissionCheckerService,
                                          KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
                                          CommonProperties commonProperties,
-                                         AnomusDataRepository anomusDataRepository,
-                                         EmailService emailService) {
+                                         OrganisaatioClient organisaatioClient,
+                                         AnomusRepository anomusRepository) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
         this.henkiloRepository = henkiloRepository;
+        this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+        this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
         this.mapper = orikaBeanMapper;
         this.localizationService = localizationService;
+        this.emailService = emailService;
         this.haettuKayttooikeusryhmaValidator = haettuKayttooikeusryhmaValidator;
         this.permissionCheckerService = permissionCheckerService;
         this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
         this.commonProperties = commonProperties;
-        this.anomusDataRepository = anomusDataRepository;
-        this.emailService = emailService;
+        this.organisaatioClient = organisaatioClient;
+        this.anomusRepository = anomusRepository;
     }
 
     @Transactional(readOnly = true)
@@ -259,7 +276,64 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             h.setKayttoOikeusRyhma(k);
             anomus.addHaettuKayttoOikeusRyhma(h);
         });
-        return this.anomusDataRepository.save(anomus).getId();
+        return this.anomusRepository.save(anomus).getId();
+    }
+
+    @Override
+    @Transactional
+    public void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm) {
+        AnomusCriteria criteria = AnomusCriteria.builder()
+                .anottuAlku(anottuPvm.toDateTimeAtStartOfDay())
+                .anottuLoppu(anottuPvm.toDateTime(LocalTime.MIDNIGHT.minusMillis(1)))
+                .tila(AnomuksenTila.ANOTTU)
+                .build();
+        List<Anomus> anomukset = anomusRepository.findBy(criteria);
+
+        Set<String> hyvaksyjat = anomukset.stream()
+                .map(this::getAnomuksenHyvaksyjat)
+                .flatMap(Collection::stream)
+                .collect(toSet());
+        emailService.sendNewRequisitionNotificationEmails(hyvaksyjat);
+    }
+
+    private Set<String> getAnomuksenHyvaksyjat(Anomus anomus) {
+        Set<Long> kayttoOikeusRyhmaIds = getHyvaksyjaKayttoOikeusRyhmat(anomus);
+        if (kayttoOikeusRyhmaIds.isEmpty()) {
+            logger.info("Ei löytynyt käyttöoikeusryhmiä, jotka voisivat hyväksyä anomuksen {}", anomus.getId());
+            return emptySet();
+        }
+        Set<String> organisaatioOids = getHyvaksyjaOrganisaatiot(anomus);
+        if (organisaatioOids.isEmpty()) {
+            logger.info("Ei löytynyt organisaatioita, jotka voisivat hyväksyä anomuksen {}", anomus.getId());
+            return emptySet();
+        }
+        Set<String> henkiloOids = henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(kayttoOikeusRyhmaIds, organisaatioOids)
+                .stream()
+                .map(Henkilo::getOidHenkilo)
+                // Henkilö ei saa hyväksyä omaa käyttöoikeusanomusta
+                .filter(t -> !t.equals(anomus.getHenkilo().getOidHenkilo()))
+                .collect(toSet());
+        if (henkiloOids.isEmpty()) {
+            logger.info("Anomuksella {} ei ole hyväksyjiä", anomus.getId());
+        }
+        return henkiloOids;
+    }
+
+    private Set<Long> getHyvaksyjaKayttoOikeusRyhmat(Anomus anomus) {
+        Set<Long> slaveIds = anomus.getHaettuKayttoOikeusRyhmas().stream()
+                .map(t -> t.getKayttoOikeusRyhma().getId())
+                .collect(toSet());
+        return kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(slaveIds);
+    }
+
+    private Set<String> getHyvaksyjaOrganisaatiot(Anomus anomus) {
+        if (commonProperties.getRootOrganizationOid().equals(anomus.getOrganisaatioOid())) {
+            return singleton(commonProperties.getRootOrganizationOid());
+        }
+        return organisaatioClient.getParentOids(anomus.getOrganisaatioOid()).stream()
+                // Ei lähetetä root-organisaation henkilöille jokaisesta anomuksesta ilmoitusta
+                .filter(t -> !commonProperties.getRootOrganizationOid().equals(t))
+                .collect(toSet());
     }
 
     // Grant kayttooikeusryhma and create event. DOES NOT CONTAIN PERMISSION CHECKS SO DONT CALL DIRECTLY

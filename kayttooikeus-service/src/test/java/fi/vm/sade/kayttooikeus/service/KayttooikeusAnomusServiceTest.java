@@ -28,9 +28,15 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.*;
+import java.util.Arrays;
+import static java.util.Collections.singleton;
+import java.util.Set;
+import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
+import org.mockito.Captor;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -50,6 +56,9 @@ public class KayttooikeusAnomusServiceTest {
 
     @MockBean
     private HenkiloRepository henkiloRepository;
+
+    @MockBean
+    private HenkiloHibernateRepository henkiloHibernateRepository;
 
     @MockBean
     private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -73,29 +82,37 @@ public class KayttooikeusAnomusServiceTest {
     private OrganisaatioClient organisaatioClient;
 
     @MockBean
-    private AnomusDataRepository anomusDataRepository;
+    private AnomusRepository anomusRepository;
 
     @MockBean
     private EmailService emailService;
+
+    @Captor
+    private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
 
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Before
     public void setup() {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
+        CommonProperties commonProperties = new CommonProperties();
+        commonProperties.setRootOrganizationOid("rootOid");
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
                 this.haettuKayttooikeusRyhmaDataRepository,
                 this.henkiloRepository,
+                this.henkiloHibernateRepository,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                this.kayttoOikeusRyhmaMyontoViiteRepository,
                 this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
+                this.emailService,
                 this.haettuKayttooikeusryhmaValidator,
                 this.permissionCheckerService,
                 this.kayttooikeusryhmaDataRepository,
-                new CommonProperties(),
-                this.anomusDataRepository,
-                this.emailService)
+                commonProperties,
+                this.organisaatioClient,
+                this.anomusRepository)
         );
     }
 
@@ -310,5 +327,68 @@ public class KayttooikeusAnomusServiceTest {
 
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomuksenTila()).isEqualByComparingTo(AnomuksenTila.ANOTTU);
         assertThat(haettuKayttoOikeusRyhma.getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
+    }
+
+    @Test
+    public void lahetaUusienAnomuksienIlmoituksetEiJuuriOrganisaatioAnomukselle() {
+        Anomus anomus = Anomus.builder()
+                .henkilo(Henkilo.builder().oidHenkilo("user1").build())
+                .organisaatioOid("organisaatio1")
+                .haettuKayttoOikeusRyhmas(Stream.of(
+                        HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build(),
+                        HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build()
+                ).collect(toSet()))
+                .build();
+        when(anomusRepository.findBy(any(AnomusCriteria.class)))
+                .thenReturn(Arrays.asList(anomus));
+        when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
+                .thenReturn(Stream.of(1L, 2L).collect(toSet()));
+        when(henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(any(), any()))
+                .thenReturn(Arrays.asList(
+                        Henkilo.builder().oidHenkilo("user2").build(),
+                        Henkilo.builder().oidHenkilo("user3").build()
+                ));
+        when(organisaatioClient.getParentOids(any())).thenReturn(Arrays.asList("rootOid", "organisaatio1"));
+
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
+
+        verify(organisaatioClient).getParentOids(eq("organisaatio1"));
+        verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
+                eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("organisaatio1"))
+        );
+        verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
+        Set<String> henkilot = henkiloOidsCaptor.getValue();
+        assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
+    }
+
+    @Test
+    public void lahetaUusienAnomuksienIlmoituksetJuuriOrganisaatioAnomukselle() {
+        Anomus anomus = Anomus.builder()
+                .henkilo(Henkilo.builder().oidHenkilo("user1").build())
+                .organisaatioOid("rootOid")
+                .haettuKayttoOikeusRyhmas(Stream.of(
+                        HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build(),
+                        HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build()
+                ).collect(toSet()))
+                .build();
+        when(anomusRepository.findBy(any(AnomusCriteria.class)))
+                .thenReturn(Arrays.asList(anomus));
+        when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
+                .thenReturn(Stream.of(1L, 2L).collect(toSet()));
+        when(henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(any(), any()))
+                .thenReturn(Arrays.asList(
+                        Henkilo.builder().oidHenkilo("user2").build(),
+                        Henkilo.builder().oidHenkilo("user3").build()
+                ));
+
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
+
+        verifyZeroInteractions(organisaatioClient);
+        verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
+                eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
+        );
+        verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
+        Set<String> henkilot = henkiloOidsCaptor.getValue();
+        assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
     }
 }

@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
@@ -28,6 +27,7 @@ import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final CachingRestClient restClient = new CachingRestClient()
@@ -171,4 +171,11 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
                 .get().orFail(mapper(url)).getOrganisaatiot();
     }
+
+    @Override
+    public List<String> getParentOids(String oid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.parentOids", oid);
+        return Stream.of(io(() -> restClient.getAsString(url)).get().split("/")).collect(toList());
+    }
+
 }

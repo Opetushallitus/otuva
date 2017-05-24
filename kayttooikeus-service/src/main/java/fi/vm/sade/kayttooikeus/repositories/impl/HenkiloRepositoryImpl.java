@@ -116,4 +116,21 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 .where(booleanBuilder)
                 .fetch();
     }
+
+    @Override
+    public List<Henkilo> findByKayttoOikeusRyhmatAndOrganisaatiot(Set<Long> kayttoOikeusRyhmaIds, Set<String> organisaatioOids) {
+        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+
+        return jpa().from(qMyonnettyKayttoOikeusRyhma)
+                .join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma)
+                .join(qMyonnettyKayttoOikeusRyhma.organisaatioHenkilo, qOrganisaatioHenkilo)
+                .join(qOrganisaatioHenkilo.henkilo, qHenkilo)
+                .where(qKayttoOikeusRyhma.id.in(kayttoOikeusRyhmaIds))
+                .where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOids))
+                .where(qOrganisaatioHenkilo.passivoitu.isFalse())
+                .select(qHenkilo).distinct().fetch();
+    }
 }

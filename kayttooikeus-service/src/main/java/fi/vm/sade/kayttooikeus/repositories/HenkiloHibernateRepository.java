@@ -29,4 +29,14 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
     List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName);
+
+    /**
+     * Palauttaa henkilöt jotka kuuluvat johonkin annettuun käyttöoikeusryhmään
+     * ja organisaatioon.
+     *
+     * @param kayttoOikeusRyhmaIds käyttöoikeusryhmät
+     * @param organisaatioOids organisaatiot
+     * @return henkilöt
+     */
+    List<Henkilo> findByKayttoOikeusRyhmatAndOrganisaatiot(Set<Long> kayttoOikeusRyhmaIds, Set<String> organisaatioOids);
 }
