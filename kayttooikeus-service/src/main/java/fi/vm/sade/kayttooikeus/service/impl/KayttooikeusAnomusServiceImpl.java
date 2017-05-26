@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -385,9 +386,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                                                 KayttoOikeusRyhma kayttoOikeusRyhma) {
         return this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
                 organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
-                .orElse(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
+                .orElseGet(() -> MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(kayttoOikeusRyhma)
-                        .organisaatioHenkilo(organisaatioHenkilo).build());
+                        .organisaatioHenkilo(organisaatioHenkilo)
+                        .anomus(Sets.newHashSet()).build());
     }
 
     @Override

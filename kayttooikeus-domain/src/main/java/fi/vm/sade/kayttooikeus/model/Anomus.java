@@ -83,6 +83,9 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     }
 
     public void addMyonnettyKayttooikeusRyhma(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
+        if(this.myonnettyKayttooikeusRyhmas == null) {
+            this.myonnettyKayttooikeusRyhmas = new HashSet<>();
+        }
         this.myonnettyKayttooikeusRyhmas.add(myonnettyKayttoOikeusRyhmaTapahtuma);
         myonnettyKayttoOikeusRyhmaTapahtuma.addAnomus(this);
     }

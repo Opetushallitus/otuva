@@ -52,7 +52,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     private LocalDate voimassaLoppuPvm;
 
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
-    private Set<Anomus> anomus = new HashSet<Anomus>();
+    private Set<Anomus> anomus = new HashSet<>();
 
     public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(DateTime aikaleima, String syy) {
         return toHistoria(getKasittelija(), getTila(), aikaleima, syy);
@@ -70,6 +70,9 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     }
 
     public void addAnomus(Anomus anomus) {
+        if(this.anomus == null) {
+            this.anomus = new HashSet<>();
+        }
         this.anomus.add(anomus);
     }
 }

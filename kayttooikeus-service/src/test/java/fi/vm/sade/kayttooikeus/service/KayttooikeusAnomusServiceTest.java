@@ -199,6 +199,8 @@ public class KayttooikeusAnomusServiceTest {
                 .isEqualTo(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getRooliRajoite())
                 .isEqualTo("10");
 
+        assertThat(myonnettyKayttoOikeusRyhmaTapahtuma.getAnomus()).isNotNull();
+
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Oikeuksien lisäys");
 
     }
@@ -236,6 +238,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(myonnettyKayttoOikeusRyhmaTapahtuma.getTila())
                 .isEqualByComparingTo(kayttoOikeusRyhmaTapahtumaHistoria.getTila())
                 .isEqualByComparingTo(KayttoOikeudenTila.UUSITTU);
+        assertThat(myonnettyKayttoOikeusRyhmaTapahtuma.getAnomus()).isNotNull();
 
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Oikeuksien päivitys");
     }
