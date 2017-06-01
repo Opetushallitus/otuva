@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +71,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
         henkiloRepository.save(henkilo);
 
-        this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
+        this.ldapSynchronization.updateHenkiloAsap(henkiloOid);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
     }
 

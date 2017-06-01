@@ -12,6 +12,9 @@ spring:
     format-sql: true
     current-session-context-class: org.springframework.orm.hibernate5.SpringSessionContext
     database-platform: org.hibernate.dialect.HSQLDialect
+  ldap:
+    embedded:
+      base-dn: dc=opintopolku,dc=fi
 
 hikari:
   datasource:
@@ -51,3 +54,12 @@ common:
 tasks:
   email-invitation:
     sender-email: noreply@oph.fi
+
+kayttooikeus:
+  ldap:
+    dayTime:
+      intervalInMinutes: -1
+      loadThresholdInSeconds: 60
+    nightTime:
+      intervalInMinutes: -1
+      loadThresholdInSeconds: 60

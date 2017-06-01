@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
+import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -18,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
-
-    private static final String STRONG_AUTHENTICATION_IDP = "vetuma";
 
     private IdentificationRepository identificationRepository;
     private HenkiloRepository henkiloRepository;

@@ -56,7 +56,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
             myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(kayttoOikeus);
-            ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.NORMAL_PRIORITY);
+            ldapSynchronization.updateHenkilo(henkiloOid);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());
     }

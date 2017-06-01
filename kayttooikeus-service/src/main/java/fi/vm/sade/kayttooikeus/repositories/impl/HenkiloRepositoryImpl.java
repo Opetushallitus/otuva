@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
+import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 import static fi.vm.sade.kayttooikeus.model.QKayttajatiedot.kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -25,6 +26,7 @@ import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHen
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import static java.util.stream.Collectors.toSet;
 
 @Repository
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
@@ -133,4 +135,34 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 .where(qOrganisaatioHenkilo.passivoitu.isFalse())
                 .select(qHenkilo).distinct().fetch();
     }
+
+    @Override
+    public Set<String> findOidsByKayttoOikeusRyhmaId(Long kayttoOikeusRyhmaId) {
+        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+
+        return jpa().from(qMyonnettyKayttoOikeusRyhma)
+                .join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma)
+                .join(qMyonnettyKayttoOikeusRyhma.organisaatioHenkilo, qOrganisaatioHenkilo)
+                .join(qOrganisaatioHenkilo.henkilo, qHenkilo)
+                .where(qKayttoOikeusRyhma.id.eq(kayttoOikeusRyhmaId))
+                .where(qOrganisaatioHenkilo.passivoitu.isFalse())
+                .select(qHenkilo.oidHenkilo).distinct()
+                .fetch().stream().collect(toSet());
+    }
+
+    @Override
+    public Set<String> findOidsByHavingUsername() {
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+
+        return jpa().from(qKayttajatiedot)
+                .join(qKayttajatiedot.henkilo, qHenkilo)
+                .where(qKayttajatiedot.username.isNotNull())
+                .select(qHenkilo.oidHenkilo).distinct()
+                .fetch().stream().collect(toSet());
+    }
+
 }
