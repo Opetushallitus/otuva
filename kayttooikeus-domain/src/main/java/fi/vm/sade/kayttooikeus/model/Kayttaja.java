@@ -36,7 +36,7 @@ public final class Kayttaja {
     @Attribute(name = "uid")
     @DnAttribute(value = "uid", index = 1)
     private String kayttajatunnus;
-    @Attribute(name = "userPassword")
+    @Attribute(name = "userPassword", type = Attribute.Type.BINARY)
     private byte[] salasana;
     @Attribute(name = "description")
     private String roolit;
