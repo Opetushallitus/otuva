@@ -122,7 +122,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
             throw new RuntimeException("Unexpected error during json processing");
         }
 
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list", params);
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
         return retrying(FunctionalUtils.<List<HenkiloHakuPerustietoDto>>io(
                 () -> objectMapper.readerFor(new TypeReference<List<HenkiloHakuPerustietoDto>>() {})
                         .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,

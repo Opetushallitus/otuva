@@ -141,17 +141,18 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Transactional(readOnly = true)
     public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto koHenkilohakuCriteriaDto) {
         return Optional.of(koHenkilohakuCriteriaDto)
-                .map(this::nimiHaku)
-                .map(this::rajaus)
+                .map(this::search)
+                .map(this::exclusion)
+                .map(this::enrich)
                 .orElseThrow(() -> new NotFoundException(""));
     }
 
     // Find nimi and oidHenkilo
-    private List<HenkilohakuResultDto> nimiHaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
+    private List<HenkilohakuResultDto> search(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
         return this.henkiloHibernateRepository.findByCriteria(this.mapper.map(henkilohakuCriteriaDto, HenkiloCriteria.class));
     }
 
-    private List<HenkilohakuResultDto> rajaus(List<HenkilohakuResultDto> henkilohakuResultDtoList) {
+    private List<HenkilohakuResultDto> exclusion(List<HenkilohakuResultDto> henkilohakuResultDtoList) {
         if(!this.permissionCheckerService.isCurrentUserAdmin()) {
             // TODO Parse oids calling user has no access
             List<OrganisaatioHenkilo> organisaatioHenkiloList = this.organisaatioHenkiloDataRepository
@@ -164,7 +165,14 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     // Find kayttajatunnus and organisaatioNimiList
     private List<HenkilohakuResultDto> enrich(List<HenkilohakuResultDto> henkilohakuResultDtoList) {
         return henkilohakuResultDtoList.stream().map(henkilohakuResultDto -> {
-            this.henkiloDataRepository.findByOidHenkilo(henkilohakuResultDto.getOidHenkilo()).
-        });
+            Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkilohakuResultDto.getOidHenkilo()).get();
+            henkilohakuResultDto.setKayttajatunnus(henkilo.getKayttajatiedot() != null
+                    ? henkilo.getKayttajatiedot().getUsername()
+                    : null);
+            henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
+                    .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                    .collect(Collectors.toList()));
+            return henkilohakuResultDto;
+        }).collect(Collectors.toList());
     }
 }
