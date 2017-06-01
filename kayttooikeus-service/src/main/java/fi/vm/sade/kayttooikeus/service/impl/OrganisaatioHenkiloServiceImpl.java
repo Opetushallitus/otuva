@@ -26,7 +26,7 @@ import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.VIRKAILIJA;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -44,7 +44,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
-    private final HenkiloRepository henkiloRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
     private final OrikaBeanMapper mapper;
     private final OrganisaatioClient organisaatioClient;
     private final PermissionCheckerService permissionCheckerService;
@@ -54,7 +54,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     public OrganisaatioHenkiloServiceImpl(OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
                                           OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                                           KayttoOikeusRepository kayttoOikeusRepository,
-                                          HenkiloRepository henkiloRepository,
+                                          HenkiloDataRepository henkiloDataRepository,
                                           OrikaBeanMapper mapper,
                                           OrganisaatioClient organisaatioClient,
                                           PermissionCheckerService permissionCheckerService,
@@ -62,7 +62,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
-        this.henkiloRepository = henkiloRepository;
+        this.henkiloDataRepository = henkiloDataRepository;
         this.mapper = mapper;
         this.organisaatioClient = organisaatioClient;
         this.permissionCheckerService = permissionCheckerService;
@@ -134,7 +134,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Override
     @Transactional(readOnly = false)
     public List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) {
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
         return findOrCreateOrganisaatioHenkilos(organisaatioHenkilot, henkilo);
     }
@@ -162,7 +162,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     public List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
                                                                            List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList) {
         final Mode clientMode = Mode.requireCache();
-        Henkilo henkilo = this.henkiloRepository.findByOidHenkilo(henkiloOid)
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
         this.findOrCreateOrganisaatioHenkilos(this.mapper.mapAsList(organisaatioHenkiloDtoList, OrganisaatioHenkiloCreateDto.class),
                 henkilo);

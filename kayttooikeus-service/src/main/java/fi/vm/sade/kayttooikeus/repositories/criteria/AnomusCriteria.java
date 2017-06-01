@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.repositories;
+package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
@@ -14,7 +14,7 @@ import org.joda.time.DateTime;
 @Setter
 @Builder
 @ToString
-public class AnomusCriteria {
+public class AnomusCriteria implements KayttooikeusCriteria<QAnomus> {
 
     private DateTime anottuAlku;
     private DateTime anottuLoppu;

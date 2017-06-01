@@ -20,3 +20,4 @@ kayttooikeus:
       vanhentuneetkayttooikeudet: 0 0 3 * * ?
       kayttooikeusmuistutus: "0 30 4 * * ?"
       kayttooikeusanomusilmoitukset: 0 0 2 * * ?
+      henkiloNimiCache: 10000

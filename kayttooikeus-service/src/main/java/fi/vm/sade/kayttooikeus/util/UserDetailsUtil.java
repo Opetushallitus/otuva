@@ -62,7 +62,7 @@ public class UserDetailsUtil {
      * @return First email by priority
      */
     public static Optional<String> getEmailByPriority(HenkiloDto henkilo) {
-        YhteystietojenTyypit.YhteystiedotComparator yhteystiedotComparator = new YhteystietojenTyypit.YhteystiedotComparator();
+        YhteystiedotComparator yhteystiedotComparator = new YhteystiedotComparator();
         return henkilo.getYhteystiedotRyhma().stream()
                 .sorted(yhteystiedotComparator)
                 .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())

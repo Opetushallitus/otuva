@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories;
 import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 
 import java.util.List;
 

@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Transactional(readOnly = true)
-public class HenkiloRepositoryTest {
+public class HenkiloDataRepositoryTest {
     @Autowired
-    HenkiloRepository henkiloRepository;
+    HenkiloDataRepository henkiloDataRepository;
 
     @Autowired
     TestEntityManager testEntityManager;
@@ -31,13 +31,13 @@ public class HenkiloRepositoryTest {
         henkilo.setOidHenkilo("1.2.3.4.5");
         this.testEntityManager.persist(henkilo);
 
-        Optional<Henkilo> returnHenkilo = this.henkiloRepository.findByOidHenkilo("1.2.3.4.5");
+        Optional<Henkilo> returnHenkilo = this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5");
         assertThat(returnHenkilo).hasValueSatisfying(h -> assertThat(h.getOidHenkilo()).isEqualTo("1.2.3.4.5"));
     }
 
     @Test
     public void findByOidHenkiloNotFound() {
-        Optional<Henkilo> returnHenkilo = this.henkiloRepository.findByOidHenkilo("1.2.3.4.5");
+        Optional<Henkilo> returnHenkilo = this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5");
         assertThat(returnHenkilo).isEmpty();
     }
 }

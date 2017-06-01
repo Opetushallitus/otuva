@@ -2,8 +2,12 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import static com.querydsl.core.types.ExpressionUtils.eq;
+
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuResultDto;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
@@ -86,6 +90,21 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         });
 
         return new LinkedHashSet<>(query.fetch());
+    }
+
+    @Override
+    public List<HenkilohakuResultDto> findByCriteria(KayttooikeusCriteria<QHenkilo> criteria) {
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+        JPAQuery<HenkilohakuResultDto> query = jpa().from(qHenkilo)
+                .select(Projections.constructor(HenkilohakuResultDto.class,
+                        qHenkilo.etunimetCached.append(", ").append(qHenkilo.sukunimiCached).as("nimi"),
+                        qHenkilo.oidHenkilo));
+
+        query.where(criteria.condition(qHenkilo));
+
+        query.orderBy(qHenkilo.sukunimiCached.asc(), qHenkilo.etunimetCached.asc());
+
+        return query.fetch();
     }
 
     @Override

@@ -40,9 +40,5 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.oppijanumerorekisteri</groupId>
-            <artifactId>oppijanumerorekisteri-api</artifactId>
-        </dependency>
     </dependencies>
 </project>

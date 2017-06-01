@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
