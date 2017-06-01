@@ -308,7 +308,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
         setKayttoOikeusRyhmas(ryhmaData, kayttoOikeusRyhma);
 
-        ldapSynchronization.updateAccessRightGroup(id);
+        ldapSynchronization.updateKayttoOikeusRyhma(id);
     }
 
     @Override

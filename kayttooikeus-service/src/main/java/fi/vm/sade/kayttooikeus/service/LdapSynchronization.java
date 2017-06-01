@@ -1,21 +1,46 @@
 package fi.vm.sade.kayttooikeus.service;
 
+/**
+ * Palvelu henkilötietojen LDAP-synkronointiin.
+ */
 public interface LdapSynchronization {
 
-    /* These priority levels define different behavior for LDAP update process
-     * since night time batch updates are run in a different way than daytime
-     * batch updates
+    /**
+     * Lisää kaikki henkilöt synkronointijonoon, joka tyhjennetään yöaikaan.
      */
-    int REALTIME_PRIORITY = -1;
-    int BATCH_PRIORITY = 0;
-    int ASAP_PRIORITY = 1;
-    int NORMAL_PRIORITY = 2;
-    int NIGHT_PRIORITY = 3;
+    void updateAllAtNight();
 
-    // This value is a trigger for running all users
-    String RUN_ALL_BATCH = "runall";
+    /**
+     * Lisää käyttöoikeusryhmän henkilöt synkronointijonoon.
+     *
+     * @param kayttoOikeusRyhmaId käyttöoikeusryhmä id
+     */
+    void updateKayttoOikeusRyhma(Long kayttoOikeusRyhmaId);
 
-    void updateAccessRightGroup(Long id);
+    /**
+     * Lisää henkilön synkronointijonoon.
+     *
+     * @param henkiloOid henkilö oid
+     */
+    void updateHenkilo(String henkiloOid);
 
-    void updateHenkilo(String henkiloOid, int priority);
+    /**
+     * Lisää henkilön synkronointijonon kärkeen.
+     *
+     * @param henkiloOid henkilö oid
+     */
+    void updateHenkiloAsap(String henkiloOid);
+
+    /**
+     * Synkronoi henkilön tiedot välittömästi.
+     *
+     * @param henkiloOid henkilö oid
+     */
+    void updateHenkiloNow(String henkiloOid);
+
+    /**
+     * Tyhjentää synkronointijonoa.
+     */
+    void runSynchronizer();
+
 }

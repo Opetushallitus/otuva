@@ -1,37 +1,52 @@
 package fi.vm.sade.kayttooikeus.model;
 
-
+import fi.vm.sade.kayttooikeus.converter.LdapPriorityTypeConverter;
+import fi.vm.sade.kayttooikeus.converter.LdapStatusTypeConverter;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-
+/**
+ * LDAP-synkronoinnin jono.
+ *
+ * @see LdapSynchronizationData statistiikka
+ */
 @Entity
 @Table(name = "ldap_update_data")
 @Getter
 @Setter
-public class LdapUpdateData extends IdentifiableAndVersionedEntity{
+@Builder
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class LdapUpdateData extends IdentifiableAndVersionedEntity {
 
     private static final long serialVersionUID = -3805645382407127555L;
 
     @Column(name = "priority", nullable = false)
-    private int priority;
+    @Convert(converter = LdapPriorityTypeConverter.class)
+    private LdapPriorityType priority;
 
     @Column(name = "henkilo_oid")
     private String henkiloOid;
 
     @Column(name = "kor_id")
-    private Long korId;
+    private Long kayttoOikeusRyhmaId;
 
     @Column(name = "status", nullable = false)
-    private int status;
-    
+    @Convert(converter = LdapStatusTypeConverter.class)
+    private LdapStatusType status;
+
     @Type(type = "dateTime")
     @Column(name = "modified", nullable = false)
     private DateTime modified;
