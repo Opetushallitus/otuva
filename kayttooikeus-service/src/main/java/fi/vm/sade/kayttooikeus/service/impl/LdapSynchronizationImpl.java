@@ -16,10 +16,14 @@ import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class LdapSynchronizationImpl implements LdapSynchronization {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapSynchronizationImpl.class);
 
     private final LdapUpdateDataRepository ldapUpdateDataRepository;
     private final TimeService timeService;
@@ -100,6 +104,9 @@ public class LdapSynchronizationImpl implements LdapSynchronization {
     @Override
     @Transactional
     public synchronized void runSynchronizer() {
+        LOGGER.info("LDAP-synkronointi aloitetaan");
+        long start = timeService.getCurrentTimeMillis();
+
         DateTime now = timeService.getDateTimeNow();
         boolean nightTime = ldapSynchronizationProperties.isNightTime(now.getHourOfDay());
         LdapSynchronizationProperties.Timed properties = ldapSynchronizationProperties.getTimedProperties(nightTime);
@@ -111,6 +118,8 @@ public class LdapSynchronizationImpl implements LdapSynchronization {
                     properties.getBatchSize(), properties.getLoadThresholdInSeconds());
             next.ifPresent(this::saveStatistics);
         }
+
+        LOGGER.info("LDAP-synkronointi päättyy, kesto: {}ms", timeService.getCurrentTimeMillis() - start);
     }
 
     private void saveStatistics(LdapSynchronizationData next) {
