@@ -41,11 +41,11 @@ public class HenkiloCriteria {
                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
-        if(this.passivoitu != null) {
-            builder.and(henkilo.passivoituCached.eq(this.passivoitu));
+        if(this.passivoitu != null && !this.passivoitu) {
+            builder.and(henkilo.passivoituCached.eq(false));
         }
-        if(this.duplikaatti != null) {
-            builder.and(henkilo.duplicateCached.eq(this.duplikaatti));
+        if(this.duplikaatti != null && !this.duplikaatti) {
+            builder.and(henkilo.duplicateCached.eq(false));
         }
         if(StringUtils.hasLength(this.nameQuery)) {
             Arrays.stream(this.nameQuery.split(" ")).forEach(queryPart ->
@@ -58,11 +58,13 @@ public class HenkiloCriteria {
         if(this.noOrganisation != null && !this.noOrganisation) {
             builder.and(henkilo.organisaatioHenkilos.isNotEmpty());
         }
-        if(this.subOrganisation != null) {
-//            builder.and()
-        }
         if(StringUtils.hasLength(this.organisaatioOid)) {
-            builder.and(organisaatioHenkilo.organisaatioOid.eq(this.organisaatioOid));
+            if(this.subOrganisation != null && this.subOrganisation) {
+                builder.and(organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(this.organisaatioOid));
+            }
+            else {
+                builder.and(organisaatioHenkilo.organisaatioOid.eq(this.organisaatioOid));
+            }
         }
         // Kayttooikeus
         if(this.kayttooikeusryhmaId != null) {
