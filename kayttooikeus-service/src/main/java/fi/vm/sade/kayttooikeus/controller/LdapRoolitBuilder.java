@@ -77,8 +77,7 @@ public final class LdapRoolitBuilder {
     public LdapRoolitBuilder identifications(Iterable<Identification> identifications) {
         long count = stream(identifications.spliterator(), false)
                 .filter(Identification::isVahvaTunniste)
-                .map(Identification::getIdpEntityId)
-                .peek(idpEntityId -> roolit.add(String.format(ROOLI_VANHA_KIRJAUTUMINEN_TEMPLATE, idpEntityId.toUpperCase())))
+                .map(identification -> roolit.add(String.format(ROOLI_VANHA_KIRJAUTUMINEN_TEMPLATE, identification.getIdpEntityId().toUpperCase())))
                 .count();
         if (count > 0) {
             roolit.add(ROOLI_VAHVA_KIRJAUTUMINEN);
