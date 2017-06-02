@@ -48,7 +48,8 @@ public class ScheduledTasks {
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now().minusDays(1));
     }
 
-    @Scheduled(cron = "${kayttooikeus.scheduling.configuration.ldapsynkronointi}")
+    @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.fixeddelayinmillis}",
+            initialDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.initialdelayinmillis}")
     public void ldapSynkronointi() {
         ldapSynchronization.runSynchronizer();
     }
