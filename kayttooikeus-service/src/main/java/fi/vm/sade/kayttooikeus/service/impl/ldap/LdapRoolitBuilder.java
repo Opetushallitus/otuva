@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.controller;
+package fi.vm.sade.kayttooikeus.service.impl.ldap;
 
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
