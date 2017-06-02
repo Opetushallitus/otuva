@@ -8,11 +8,12 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -139,40 +140,14 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
      */
     @Override
     @Transactional(readOnly = true)
-    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto koHenkilohakuCriteriaDto) {
-        return Optional.of(koHenkilohakuCriteriaDto)
-                .map(this::search)
-                .map(this::exclusion)
-                .map(this::enrich)
-                .orElseThrow(() -> new NotFoundException(""));
+    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
+        return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
+                this.organisaatioHenkiloDataRepository, this.henkiloDataRepository)
+                .builder(henkilohakuCriteriaDto)
+                .search()
+                .exclusion()
+                .enrichment()
+                .build();
     }
 
-    // Find nimi and oidHenkilo
-    private List<HenkilohakuResultDto> search(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
-        return this.henkiloHibernateRepository.findByCriteria(this.mapper.map(henkilohakuCriteriaDto, HenkiloCriteria.class));
-    }
-
-    private List<HenkilohakuResultDto> exclusion(List<HenkilohakuResultDto> henkilohakuResultDtoList) {
-        if(!this.permissionCheckerService.isCurrentUserAdmin()) {
-            // TODO Parse oids calling user has no access
-            List<OrganisaatioHenkilo> organisaatioHenkiloList = this.organisaatioHenkiloDataRepository
-                    .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid());
-//            henkilohakuResultDtoList.stream().filter(henkilohakuResultDto -> henkilohakuResultDto.getOidHenkilo());
-        }
-        return henkilohakuResultDtoList;
-    }
-
-    // Find kayttajatunnus and organisaatioNimiList
-    private List<HenkilohakuResultDto> enrich(List<HenkilohakuResultDto> henkilohakuResultDtoList) {
-        return henkilohakuResultDtoList.stream().map(henkilohakuResultDto -> {
-            Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkilohakuResultDto.getOidHenkilo()).get();
-            henkilohakuResultDto.setKayttajatunnus(henkilo.getKayttajatiedot() != null
-                    ? henkilo.getKayttajatiedot().getUsername()
-                    : null);
-            henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
-                    .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                    .collect(Collectors.toList()));
-            return henkilohakuResultDto;
-        }).collect(Collectors.toList());
-    }
 }

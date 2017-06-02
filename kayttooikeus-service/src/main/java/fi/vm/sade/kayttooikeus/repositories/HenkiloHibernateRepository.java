@@ -1,10 +1,9 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.dto.HenkilohakuResultDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.QHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import org.springframework.stereotype.Repository;
 
@@ -32,7 +31,7 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
      */
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
-    List<HenkilohakuResultDto> findByCriteria(KayttooikeusCriteria<QHenkilo> criteria);
+    List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria);
 
     List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName);
 

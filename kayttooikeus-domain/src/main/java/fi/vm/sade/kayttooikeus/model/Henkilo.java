@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import lombok.*;
 
@@ -13,6 +14,14 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "henkilo", schema = "public")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "henkilohaku",
+        attributeNodes = {
+            @NamedAttributeNode("organisaatioHenkilos"),
+        }
+    )
+})
 public class Henkilo extends IdentifiableAndVersionedEntity {
 
     @Column(nullable = false, name = "oidhenkilo")
@@ -39,6 +48,10 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
     private String etunimetCached;
 
     private String sukunimiCached;
+
+    private Boolean passivoituCached;
+
+    private Boolean duplicateCached;
 
     public Henkilo(String oidHenkilo) {
         this.oidHenkilo = oidHenkilo;

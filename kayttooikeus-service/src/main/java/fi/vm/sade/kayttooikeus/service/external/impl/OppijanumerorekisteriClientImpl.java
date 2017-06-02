@@ -106,10 +106,10 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
-    public List<HenkiloHakuPerustietoDto> getAllByOids(long page, long count, List<String> oidHenkiloList) {
+    public List<HenkiloHakuPerustietoDto> getAllByOids(long page, long limit, List<String> oidHenkiloList) {
         Map<String, String> params = new HashMap<String, String>() {{
             put("offset", Long.toString(page));
-            put("amount", Long.toString(count));
+            put("limit", Long.toString(limit));
         }};
         String data;
         try {

@@ -58,7 +58,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
     @Transactional
     public void forceUpdateHenkiloCache() {
         Long count = 1000L;
-        for(long offset = 0; offset == 0 || !this.saveAll(offset, count, null); offset++) {
+        for(long offset = 0; !this.saveAll(offset*count, count, null); offset++) {
             // Escape condition in case of inifine loop (10M+ henkilos)
             if(offset > 10000) {
                 LOG.error("Infinite loop detected with page "+ offset + " and count " + count + ". Henkilo cache might not be fully updated!");
@@ -74,16 +74,19 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         final List<Henkilo> saveList = new ArrayList<>();
         final List<HenkiloHakuPerustietoDto> onrHenkilohakuResultDto
                 = this.oppijanumerorekisteriClient.getAllByOids(offset, count, oidHenkiloList);
+        final List<Henkilo> matchingHenkiloList = this.henkiloDataRepository.findByOidHenkiloIn(
+                onrHenkilohakuResultDto.stream().map(HenkiloHakuPerustietoDto::getOidHenkilo).collect(Collectors.toList()));
 
         onrHenkilohakuResultDto.forEach(henkiloHakuDto -> {
             // Find or create matching henkilo
-            Henkilo matchingHenkilo = this.henkiloDataRepository.findByOidHenkiloIn(
-                    onrHenkilohakuResultDto.stream().map(HenkiloHakuPerustietoDto::getOidHenkilo).collect(Collectors.toList()))
-                    .stream().filter(henkilo -> henkilo.getOidHenkilo().equals(henkiloHakuDto.getOidHenkilo()))
+            Henkilo matchingHenkilo = matchingHenkiloList.stream()
+                    .filter(henkilo -> henkilo.getOidHenkilo().equals(henkiloHakuDto.getOidHenkilo()))
                     .findFirst()
                     .orElseGet(() -> this.henkiloDataRepository.save(new Henkilo(henkiloHakuDto.getOidHenkilo())));
             matchingHenkilo.setEtunimetCached(henkiloHakuDto.getEtunimet());
             matchingHenkilo.setSukunimiCached(henkiloHakuDto.getSukunimi());
+            matchingHenkilo.setDuplicateCached(henkiloHakuDto.getDuplicate());
+            matchingHenkilo.setPassivoituCached(henkiloHakuDto.getPassivoitu());
             saveList.add(matchingHenkilo);
         });
         this.henkiloDataRepository.save(saveList);
