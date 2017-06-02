@@ -12,18 +12,7 @@ public class LdapPriorityTypeConverter implements AttributeConverter<LdapPriorit
         if (attribute == null) {
             return null;
         }
-        switch (attribute) {
-            case BATCH:
-                return 0;
-            case ASAP:
-                return 1;
-            case NORMAL:
-                return 2;
-            case NIGHT:
-                return 3;
-            default:
-                throw new IllegalArgumentException("Tuntematon LdapPriorityType attribute: " + attribute);
-        }
+        return attribute.getDbData();
     }
 
     @Override
@@ -31,18 +20,7 @@ public class LdapPriorityTypeConverter implements AttributeConverter<LdapPriorit
         if (dbData == null) {
             return null;
         }
-        switch (dbData) {
-            case 0:
-                return LdapPriorityType.BATCH;
-            case 1:
-                return LdapPriorityType.ASAP;
-            case 2:
-                return LdapPriorityType.NORMAL;
-            case 3:
-                return LdapPriorityType.NIGHT;
-            default:
-                throw new IllegalArgumentException("Tuntematon LdapPriorityType dbData: " + dbData);
-        }
+        return LdapPriorityType.fromDbData(dbData);
     }
 
 }
