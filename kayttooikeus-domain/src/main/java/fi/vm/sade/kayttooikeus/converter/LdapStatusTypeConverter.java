@@ -12,16 +12,7 @@ public class LdapStatusTypeConverter implements AttributeConverter<LdapStatusTyp
         if (attribute == null) {
             return null;
         }
-        switch (attribute) {
-            case IN_QUEUE:
-                return 0;
-            case RETRY:
-                return 1;
-            case FAILED:
-                return 2;
-            default:
-                throw new IllegalArgumentException("Tuntematon LdapStatusType attribute: " + attribute);
-        }
+        return attribute.getDbData();
     }
 
     @Override
@@ -29,16 +20,7 @@ public class LdapStatusTypeConverter implements AttributeConverter<LdapStatusTyp
         if (dbData == null) {
             return null;
         }
-        switch (dbData) {
-            case 0:
-                return LdapStatusType.IN_QUEUE;
-            case 1:
-                return LdapStatusType.RETRY;
-            case 2:
-                return LdapStatusType.FAILED;
-            default:
-                throw new IllegalArgumentException("Tuntematon LdapStatusType dbData: " + dbData);
-        }
+        return LdapStatusType.fromDbData(dbData);
     }
 
 }
