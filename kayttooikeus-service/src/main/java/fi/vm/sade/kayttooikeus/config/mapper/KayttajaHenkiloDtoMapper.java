@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.controller;
+package fi.vm.sade.kayttooikeus.config.mapper;
 
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Kayttaja;
