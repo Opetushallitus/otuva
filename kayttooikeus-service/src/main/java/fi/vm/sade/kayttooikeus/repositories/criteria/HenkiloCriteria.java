@@ -25,7 +25,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class HenkiloCriteria {
     // Henkilo
-    private Set<String> henkiloOids;
     private String hetu;
     private Boolean passivoitu;
     private Boolean duplikaatti;
@@ -42,9 +41,6 @@ public class HenkiloCriteria {
                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
-        if (!CollectionUtils.isEmpty(henkiloOids)) {
-            builder.and(henkilo.oidHenkilo.in(henkiloOids));
-        }
         if(this.passivoitu != null) {
             builder.and(henkilo.passivoituCached.eq(this.passivoitu));
         }
@@ -70,7 +66,7 @@ public class HenkiloCriteria {
         }
         // Kayttooikeus
         if(this.kayttooikeusryhmaId != null) {
-            builder.and(myonnettyKayttoOikeusRyhmaTapahtuma.id.eq(this.kayttooikeusryhmaId));
+            builder.and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(this.kayttooikeusryhmaId));
         }
 
         return builder;
