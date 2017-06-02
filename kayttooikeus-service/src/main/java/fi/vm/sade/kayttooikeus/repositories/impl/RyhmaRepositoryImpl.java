@@ -14,9 +14,9 @@ public class RyhmaRepositoryImpl implements RyhmaRepositoryCustom {
     private final LdapTemplate ldapTemplate;
 
     @Override
-    public Set<String> findNimiByJasen(String jasen) {
+    public Set<String> findNimiByKayttaja(String kayttajaDn) {
         return ldapTemplate.search("ou=groups",
-                new EqualsFilter("uniqueMember", jasen).encode(),
+                new EqualsFilter("uniqueMember", kayttajaDn).encode(),
                 (Object ctx) -> ((DirContextOperations) ctx).getStringAttribute("cn"))
                 .stream().collect(toSet());
     }

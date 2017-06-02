@@ -61,16 +61,16 @@ public class LdapService {
         LOGGER.info("Tallennetaan {}", kayttaja);
 
         // päivitetään käyttäjän ryhmät
-        String jasen = kayttaja.getDnAsString();
-        List<Ryhma> ldapRyhmat = ryhmaRepository.findByJasenet(jasen);
+        String kayttajaDn = kayttaja.getDnAsString();
+        List<Ryhma> ldapRyhmat = ryhmaRepository.findByKayttajat(kayttajaDn);
         Set<String> ldapRoolit = ldapRyhmat.stream().map(Ryhma::getNimi).collect(toSet());
         Set<String> dbRoolit = roolit.asSet();
         ldapRyhmat.stream()
                 .filter(ldapRyhma -> !dbRoolit.contains(ldapRyhma.getNimi()))
-                .forEach(ldapRyhma -> deleteFromRyhma(ldapRyhma, jasen));
+                .forEach(ldapRyhma -> deleteFromRyhma(ldapRyhma, kayttajaDn));
         dbRoolit.stream()
                 .filter(dbRooli -> !ldapRoolit.contains(dbRooli))
-                .forEach(dbRooli -> addToRyhma(dbRooli, jasen));
+                .forEach(dbRooli -> addToRyhma(dbRooli, kayttajaDn));
     }
 
     /**
@@ -86,27 +86,27 @@ public class LdapService {
     private void delete(Kayttaja kayttaja) {
         LOGGER.info("Poistetaan {}", kayttaja);
         kayttajaRepository.delete(kayttaja);
-        String jasen = kayttaja.getDnAsString();
-        ryhmaRepository.findByJasenet(jasen)
-                .forEach(t -> deleteFromRyhma(t, jasen));
+        String kayttajaDn = kayttaja.getDnAsString();
+        ryhmaRepository.findByKayttajat(kayttajaDn)
+                .forEach(t -> deleteFromRyhma(t, kayttajaDn));
     }
 
-    private void addToRyhma(String ryhmaNimi, String jasen) {
+    private void addToRyhma(String ryhmaNimi, String kayttajaDn) {
         Ryhma ryhma = ryhmaRepository.findByNimi(ryhmaNimi)
                 .orElseGet(() -> Ryhma.builder().nimi(ryhmaNimi).build());
-        addToRyhma(ryhma, jasen);
+        addToRyhma(ryhma, kayttajaDn);
     }
 
-    private void addToRyhma(Ryhma ryhma, String jasen) {
-        LOGGER.info("Lisätään käyttäjä '{}' ryhmään '{}'", jasen, ryhma.getNimi());
-        if (ryhma.addJasen(jasen)) {
+    private void addToRyhma(Ryhma ryhma, String kayttajaDn) {
+        LOGGER.info("Lisätään käyttäjä '{}' ryhmään '{}'", kayttajaDn, ryhma.getNimi());
+        if (ryhma.addKayttaja(kayttajaDn)) {
             ryhmaRepository.save(ryhma);
         }
     }
 
-    private void deleteFromRyhma(Ryhma ryhma, String jasen) {
-        LOGGER.info("Poistetaan käyttäjältä '{}' ryhmä '{}'", jasen, ryhma.getNimi());
-        if (ryhma.deleteJasen(jasen)) {
+    private void deleteFromRyhma(Ryhma ryhma, String kayttajaDn) {
+        LOGGER.info("Poistetaan käyttäjältä '{}' ryhmä '{}'", kayttajaDn, ryhma.getNimi());
+        if (ryhma.deleteKayttaja(kayttajaDn)) {
             if (ryhma.isEmpty()) {
                 LOGGER.info("Poistetaan ryhmä '{}' koska sillä ei ole enää yhtään käyttäjää", ryhma.getNimi());
                 ryhmaRepository.delete(ryhma);

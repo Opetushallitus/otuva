@@ -4,6 +4,6 @@ import java.util.Set;
 
 public interface RyhmaRepositoryCustom {
 
-    Set<String> findNimiByJasen(String jasen);
+    Set<String> findNimiByKayttaja(String kayttajaDn);
 
 }
