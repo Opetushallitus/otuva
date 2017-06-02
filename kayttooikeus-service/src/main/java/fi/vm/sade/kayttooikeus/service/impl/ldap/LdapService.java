@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class LdapService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapService.class);
 
     private final KayttajaRepository kayttajaRepository;
     private final RyhmaRepository ryhmaRepository;
@@ -53,7 +57,8 @@ public class LdapService {
         mapper.map(entity, kayttaja);
         mapper.map(dto, kayttaja);
         kayttaja.setRoolit(roolit.asString());
-        kayttajaRepository.save(kayttaja);
+        kayttaja = kayttajaRepository.save(kayttaja);
+        LOGGER.info("Tallennetaan {}", kayttaja);
 
         // päivitetään käyttäjän ryhmät
         String jasen = kayttaja.getDnAsString();
@@ -79,6 +84,7 @@ public class LdapService {
     }
 
     private void delete(Kayttaja kayttaja) {
+        LOGGER.info("Poistetaan {}", kayttaja);
         kayttajaRepository.delete(kayttaja);
         String jasen = kayttaja.getDnAsString();
         ryhmaRepository.findByJasenet(jasen)
@@ -92,14 +98,17 @@ public class LdapService {
     }
 
     private void addToRyhma(Ryhma ryhma, String jasen) {
+        LOGGER.info("Lisätään käyttäjä '{}' ryhmään '{}'", jasen, ryhma.getNimi());
         if (ryhma.addJasen(jasen)) {
             ryhmaRepository.save(ryhma);
         }
     }
 
     private void deleteFromRyhma(Ryhma ryhma, String jasen) {
+        LOGGER.info("Poistetaan käyttäjältä '{}' ryhmä '{}'", jasen, ryhma.getNimi());
         if (ryhma.deleteJasen(jasen)) {
             if (ryhma.isEmpty()) {
+                LOGGER.info("Poistetaan ryhmä '{}' koska sillä ei ole enää yhtään käyttäjää", ryhma.getNimi());
                 ryhmaRepository.delete(ryhma);
             } else {
                 ryhmaRepository.save(ryhma);
