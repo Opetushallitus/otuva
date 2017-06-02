@@ -56,7 +56,7 @@ tasks:
     sender-email: noreply@oph.fi
 
 kayttooikeus:
-  ldap:
+  ldap_synchronization:
     dayTime:
       intervalInMinutes: -1
       loadThresholdInSeconds: 60
