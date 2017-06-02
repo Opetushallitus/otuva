@@ -13,6 +13,18 @@ server:
     timeout: 30
 
 kayttooikeus:
+  ldap_synchronization:
+    day_time:
+      interval_in_minutes: 1
+      batch_size: 250
+      load_threshold_in_seconds: 15
+    night_time:
+      interval_in_minutes: 9
+      batch_size: 500
+      load_threshold_in_seconds: 615
+    night_starts: 22
+    night_ends: 5
+    statistics_size: 25
   scheduling:
     enabled: false
     configuration:
