@@ -59,8 +59,8 @@ public class HenkiloCriteria {
                     )));
         }
         // Organisaatiohenkilo
-        if(this.noOrganisation != null && this.noOrganisation) {
-            builder.and(henkilo.organisaatioHenkilos.isEmpty());
+        if(this.noOrganisation != null && !this.noOrganisation) {
+            builder.and(henkilo.organisaatioHenkilos.isNotEmpty());
         }
         if(this.subOrganisation != null) {
 //            builder.and()
