@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
@@ -25,6 +26,7 @@ public class ScheduledTasks {
     private final CommonProperties commonProperties;
     private final TaskExecutorService taskExecutorService;
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
+    private final LdapSynchronization ldapSynchronization;
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {
@@ -44,6 +46,11 @@ public class ScheduledTasks {
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.kayttooikeusanomusilmoitukset}")
     public void lahetaUusienAnomuksienIlmoitukset() {
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now().minusDays(1));
+    }
+
+    @Scheduled(cron = "${kayttooikeus.scheduling.configuration.ldapsynkronointi}")
+    public void ldapSynkronointi() {
+        ldapSynchronization.runSynchronizer();
     }
 
 }
