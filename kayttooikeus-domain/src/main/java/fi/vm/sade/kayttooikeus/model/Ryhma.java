@@ -36,27 +36,27 @@ public final class Ryhma {
     private String nimi;
 
     @Attribute(name = "uniqueMember")
-    private Set<String> jasenet;
+    private Set<String> kayttajat;
 
     public boolean isEmpty() {
-        if (jasenet == null) {
+        if (kayttajat == null) {
             return true;
         }
-        return jasenet.isEmpty();
+        return kayttajat.isEmpty();
     }
 
-    public boolean addJasen(String jasen) {
-        if (jasenet == null) {
-            jasenet = new HashSet<>();
+    public boolean addKayttaja(String kayttajaDn) {
+        if (kayttajat == null) {
+            kayttajat = new HashSet<>();
         }
-        return jasenet.add(jasen);
+        return kayttajat.add(kayttajaDn);
     }
 
-    public boolean deleteJasen(String jasen) {
-        if (jasenet == null) {
+    public boolean deleteKayttaja(String kayttajaDn) {
+        if (kayttajat == null) {
             return false;
         }
-        return jasenet.remove(jasen);
+        return kayttajat.remove(kayttajaDn);
     }
 
 }

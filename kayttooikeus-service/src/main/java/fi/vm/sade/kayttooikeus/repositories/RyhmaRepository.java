@@ -9,6 +9,12 @@ public interface RyhmaRepository extends LdapRepository<Ryhma>, RyhmaRepositoryC
 
     Optional<Ryhma> findByNimi(String nimi);
 
-    List<Ryhma> findByJasenet(String jasenet);
+    /**
+     * Palauttaa käyttäjän ryhmät.
+     *
+     * @param kayttajaDn käyttäjä DN
+     * @return ryhmät
+     */
+    List<Ryhma> findByKayttajat(String kayttajaDn);
 
 }
