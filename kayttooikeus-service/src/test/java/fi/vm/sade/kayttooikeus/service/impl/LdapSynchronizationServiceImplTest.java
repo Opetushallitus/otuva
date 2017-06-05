@@ -23,9 +23,9 @@ import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
 import static org.mockito.Matchers.anyLong;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LdapSynchronizationImplTest {
+public class LdapSynchronizationServiceImplTest {
 
-    private LdapSynchronizationImpl ldapSynchronizationImpl;
+    private LdapSynchronizationServiceImpl ldapSynchronizationServiceImpl;
 
     @Mock
     private LdapUpdateDataRepository ldapUpdateDataRepositoryMock;
@@ -39,7 +39,7 @@ public class LdapSynchronizationImplTest {
     @Before
     public void setup() {
         LdapSynchronizationProperties ldapSynchronizationProperties = new LdapSynchronizationProperties();
-        ldapSynchronizationImpl = new LdapSynchronizationImpl(
+        ldapSynchronizationServiceImpl = new LdapSynchronizationServiceImpl(
                 ldapUpdateDataRepositoryMock,
                 timeService,
                 ldapSynchronizerMock,
@@ -55,7 +55,7 @@ public class LdapSynchronizationImplTest {
         when(ldapSynchronizationDataRepositoryMock.findFirstByOrderByIdDesc()).thenReturn(Optional.empty());
         when(ldapSynchronizerMock.run(any(), anyBoolean(), anyLong(), anyLong())).thenReturn(Optional.empty());
 
-        ldapSynchronizationImpl.runSynchronizer();
+        ldapSynchronizationServiceImpl.runSynchronizer();
 
         verify(ldapSynchronizerMock).run(eq(Optional.empty()), anyBoolean(), anyLong(), anyLong());
         verify(ldapSynchronizationDataRepositoryMock).findFirstByOrderByIdDesc();
@@ -71,7 +71,7 @@ public class LdapSynchronizationImplTest {
                 .thenReturn(Optional.of(LdapSynchronizationData.builder().lastRun(lastRun).build()));
         when(ldapSynchronizerMock.run(any(), anyBoolean(), anyLong(), anyLong())).thenReturn(Optional.empty());
 
-        ldapSynchronizationImpl.runSynchronizer();
+        ldapSynchronizationServiceImpl.runSynchronizer();
 
         verify(ldapSynchronizerMock).run(any(), anyBoolean(), anyLong(), anyLong());
         verify(ldapSynchronizationDataRepositoryMock).findFirstByOrderByIdDesc();
@@ -87,7 +87,7 @@ public class LdapSynchronizationImplTest {
                 .thenReturn(Optional.of(LdapSynchronizationData.builder().lastRun(lastRun).build()));
         when(ldapSynchronizerMock.run(any(), anyBoolean(), anyLong(), anyLong())).thenReturn(Optional.empty());
 
-        ldapSynchronizationImpl.runSynchronizer();
+        ldapSynchronizationServiceImpl.runSynchronizer();
 
         verifyZeroInteractions(ldapSynchronizerMock);
         verify(ldapSynchronizationDataRepositoryMock).findFirstByOrderByIdDesc();

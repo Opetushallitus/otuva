@@ -11,7 +11,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
@@ -25,6 +24,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
@@ -32,7 +32,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     private IdentificationRepository identificationRepository;
     private HenkiloRepository henkiloRepository;
     private KayttoOikeusService kayttoOikeusService;
-    private LdapSynchronization ldapSynchronization;
+    private LdapSynchronizationService ldapSynchronizationService;
     private OrikaBeanMapper mapper;
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -40,13 +40,13 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     public IdentificationServiceImpl(IdentificationRepository identificationRepository,
                                      HenkiloRepository henkiloRepository,
                                      KayttoOikeusService kayttoOikeusService,
-                                     LdapSynchronization ldapSynchronization,
+                                     LdapSynchronizationService ldapSynchronizationService,
                                      OrikaBeanMapper mapper,
                                      OppijanumerorekisteriClient oppijanumerorekisteriClient) {
         this.identificationRepository = identificationRepository;
         this.henkiloRepository = henkiloRepository;
         this.kayttoOikeusService = kayttoOikeusService;
-        this.ldapSynchronization = ldapSynchronization;
+        this.ldapSynchronizationService = ldapSynchronizationService;
         this.mapper = mapper;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
     }
@@ -160,7 +160,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         identificationRepository.delete(identifications);
         List<Identification> updatedIdentifications = hakatunnukset.stream().map(hakatunnus -> new Identification(henkilo, "haka", hakatunnus)).collect(Collectors.toList());
         identificationRepository.save(updatedIdentifications);
-        ldapSynchronization.updateHenkiloAsap(oid);
+        ldapSynchronizationService.updateHenkiloAsap(oid);
         return hakatunnukset;
     }
 

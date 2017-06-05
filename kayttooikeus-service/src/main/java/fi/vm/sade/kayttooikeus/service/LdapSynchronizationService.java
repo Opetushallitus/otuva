@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.service;
 /**
  * Palvelu henkilötietojen LDAP-synkronointiin.
  */
-public interface LdapSynchronization {
+public interface LdapSynchronizationService {
 
     /**
      * Lisää kaikki henkilöt synkronointijonoon, joka tyhjennetään yöaikaan.

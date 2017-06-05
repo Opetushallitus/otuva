@@ -88,7 +88,7 @@ public class KayttooikeusAnomusServiceTest {
     private EmailService emailService;
 
     @MockBean
-    private LdapSynchronization ldapSynchronization;
+    private LdapSynchronizationService ldapSynchronizationService;
 
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
@@ -110,7 +110,7 @@ public class KayttooikeusAnomusServiceTest {
                 this.orikaBeanMapper,
                 this.localizationService,
                 this.emailService,
-                this.ldapSynchronization,
+                this.ldapSynchronizationService,
                 this.haettuKayttooikeusryhmaValidator,
                 this.permissionCheckerService,
                 this.kayttooikeusryhmaDataRepository,

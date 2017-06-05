@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.joda.time.LocalDate;
@@ -20,6 +19,7 @@ import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 @Transactional
@@ -33,7 +33,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    private final LdapSynchronization ldapSynchronization;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     @Override
     public void poistaVanhentuneet() {
@@ -56,7 +56,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
             myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(kayttoOikeus);
-            ldapSynchronization.updateHenkilo(henkiloOid);
+            ldapSynchronizationService.updateHenkilo(henkiloOid);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());
     }
