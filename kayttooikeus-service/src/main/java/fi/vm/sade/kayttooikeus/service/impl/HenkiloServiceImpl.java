@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import org.joda.time.DateTime;
@@ -37,6 +38,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final HenkiloRepository henkiloRepository;
     private final CommonProperties commonProperties;
+    private final LdapSynchronization ldapSynchronization;
 
     @Autowired
     HenkiloServiceImpl(HenkiloHibernateRepository henkiloHibernateRepository,
@@ -46,6 +48,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                        OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
                        CommonProperties commonProperties,
+                       LdapSynchronization ldapSynchronization,
                        HenkiloRepository henkiloRepository) {
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.permissionCheckerService = permissionCheckerService;
@@ -54,6 +57,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
         this.commonProperties = commonProperties;
+        this.ldapSynchronization = ldapSynchronization;
         this.henkiloRepository = henkiloRepository;
     }
 
@@ -117,5 +121,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 }
             }
         }
+        ldapSynchronization.updateHenkiloAsap(henkiloOid);
     }
 }

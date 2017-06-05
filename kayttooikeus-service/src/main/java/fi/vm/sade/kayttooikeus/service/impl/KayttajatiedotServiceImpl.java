@@ -46,7 +46,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         entity = kayttajatiedotRepository.save(entity);
         henkilo.setKayttajatiedot(entity);
 
-
+        ldapSynchronization.updateHenkiloAsap(henkiloOid);
         return mapper.map(entity, KayttajatiedotReadDto.class);
     }
 
@@ -86,7 +86,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private void changePassword(String oid, String newPassword) {
         setPasswordForHenkilo(oid, newPassword);
         // Trigger ASAP priority update to LDAP
-//        ldapSynchronization.triggerUpdate(oid, null, LdapSynchronization.ASAP_PRIORITY);
+        ldapSynchronization.updateHenkiloAsap(oid);
     }
 
     private void setPasswordForHenkilo(String oidHenkilo, String password) {

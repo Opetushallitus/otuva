@@ -10,6 +10,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
@@ -50,6 +51,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
     private final EmailService emailService;
+    private final LdapSynchronization ldapSynchronization;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -68,6 +70,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                          OrikaBeanMapper orikaBeanMapper,
                                          LocalizationService localizationService,
                                          EmailService emailService,
+                                         LdapSynchronization ldapSynchronization,
                                          HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator,
                                          PermissionCheckerService permissionCheckerService,
                                          KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
@@ -83,6 +86,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.mapper = orikaBeanMapper;
         this.localizationService = localizationService;
         this.emailService = emailService;
+        this.ldapSynchronization = ldapSynchronization;
         this.haettuKayttooikeusryhmaValidator = haettuKayttooikeusryhmaValidator;
         this.permissionCheckerService = permissionCheckerService;
         this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
@@ -371,7 +375,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma);
 
-        // TODO ldap sync for henkilo
+        ldapSynchronization.updateHenkiloAsap(anojaOid);
 
         return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
