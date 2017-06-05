@@ -62,6 +62,7 @@ public class OrganisaatioHenkiloController {
         return this.organisaatioHenkiloService.createOrUpdateOrganisaatioHenkilos(oidHenkilo, organisaatioHenkiloList);
     }
 
+    @ApiOperation(value = "Passsivoi henkilön organisaation ja kaikki tähän liittyvät käyttöoikeudet.")
     @PreAuthorize("@permissionCheckerServiceImpl.checkRoleForOrganisation({#henkiloOrganisationOid}, {'CRUD'})")
     @RequestMapping(value = "/{oid}/{henkiloOrganisationOid}", method = RequestMethod.DELETE)
     public void passivoiHenkiloOrganisation(@PathVariable("oid") String oidHenkilo,
