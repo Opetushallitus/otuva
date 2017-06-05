@@ -107,7 +107,7 @@ public final class LdapRoolitBuilder {
     }
 
     public Set<String> asSet() {
-        return unmodifiableSet(roolit);
+        return unmodifiableSet(new TreeSet<>(roolit));
     }
 
     public String asString() {

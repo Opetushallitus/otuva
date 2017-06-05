@@ -113,11 +113,12 @@ public class LdapSynchronizationTest extends AbstractServiceIntegrationTest {
         ldapSynchronization.runSynchronizer();
 
         assertThat(kayttajaRepository.findAll())
-                .extracting("kayttajatunnus", "oid", "etunimet", "kutsumanimi", "sukunimi")
+                .extracting("kayttajatunnus", "oid", "etunimet", "kutsumanimi", "sukunimi", "roolit")
                 .containsExactly(
-                        tuple("user1", "oid1", "teppo", "teppo", "testaaja"),
-                        tuple("user2", "oid2", "teppo", "teppo", "testaaja")
+                        tuple("user1", "oid1", "teppo", "teppo", "testaaja", "[\"USER_user1\"]"),
+                        tuple("user2", "oid2", "teppo", "teppo", "testaaja", "[\"USER_user2\"]")
                 );
+        assertThat(ryhmaRepository.findAll()).isEmpty();
     }
 
     @Test
