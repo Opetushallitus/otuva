@@ -51,10 +51,12 @@ public class LdapService {
                 // oppijanumerorekisterin roolit
                 .henkiloTyyppi(dto.getHenkiloTyyppi())
                 .asiointikieli(dto.getAsiointiKieli());
+        Set<String> dbRoolit = roolit.asSet();
 
         // päivitetään käyttäjän perustiedot
         mapper.map(entity, kayttaja);
         mapper.map(dto, kayttaja);
+        roolit.kayttajatunnus(kayttajatunnus);
         kayttaja.setRoolit(roolit.asString());
         kayttaja = kayttajaRepository.save(kayttaja);
         LOGGER.info("Tallennetaan {}", kayttaja);
@@ -63,7 +65,6 @@ public class LdapService {
         String kayttajaDn = kayttaja.getDnAsString();
         List<Ryhma> ldapRyhmat = ryhmaRepository.findByKayttajat(kayttajaDn);
         Set<String> ldapRoolit = ldapRyhmat.stream().map(Ryhma::getNimi).collect(toSet());
-        Set<String> dbRoolit = roolit.asSet();
         ldapRyhmat.stream()
                 .filter(ldapRyhma -> !dbRoolit.contains(ldapRyhma.getNimi()))
                 .forEach(ldapRyhma -> deleteFromRyhma(ldapRyhma, kayttajaDn));
