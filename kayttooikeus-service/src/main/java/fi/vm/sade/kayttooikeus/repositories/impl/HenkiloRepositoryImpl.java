@@ -1,33 +1,29 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
-import static com.querydsl.core.group.GroupBy.groupBy;
-import static com.querydsl.core.types.ExpressionUtils.eq;
-
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
-import org.joda.time.LocalDate;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static com.querydsl.core.types.ExpressionUtils.list;
+import static com.querydsl.core.types.ExpressionUtils.eq;
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QKayttajatiedot.kayttajatiedot;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
@@ -128,9 +124,9 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
 
         BooleanBuilder voimassa = new BooleanBuilder()
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(new LocalDate())
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(LocalDate.now())
                         .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.isNull()))
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.gt(new LocalDate())
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.gt(LocalDate.now())
                         .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.isNull()));
         booleanBuilder.and(voimassa);
 

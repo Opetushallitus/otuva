@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import lombok.*;
 

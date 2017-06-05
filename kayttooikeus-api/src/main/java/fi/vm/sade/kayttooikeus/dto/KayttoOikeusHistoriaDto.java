@@ -1,10 +1,10 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import lombok.*;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterById;
@@ -19,7 +19,7 @@ public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
     private KayttoOikeudenTila tila;
     private LocalDate voimassaAlkuPvm;
     private LocalDate voimassaLoppuPvm;
-    private DateTime aikaleima;
+    private ZonedDateTime aikaleima;
     private String kasittelija;
     private String organisaatioOid;
     private String tehtavanimike;

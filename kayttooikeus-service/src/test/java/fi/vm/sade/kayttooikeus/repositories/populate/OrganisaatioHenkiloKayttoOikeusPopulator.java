@@ -4,16 +4,16 @@ import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<MyonnettyKayttoOikeusRyhmaTapahtuma> {
     private final Populator<OrganisaatioHenkilo> henkilo;
     private final Populator<KayttoOikeusRyhma> kayttoOikeusRyhma;
-    private LocalDate voimassaAlkaen = new LocalDate();
-    private LocalDate voimassaPaattyen = new LocalDate();
+    private LocalDate voimassaAlkaen = LocalDate.now();
+    private LocalDate voimassaPaattyen = LocalDate.now();
 
     public OrganisaatioHenkiloKayttoOikeusPopulator(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         this.henkilo = henkilo;
@@ -39,7 +39,7 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = new MyonnettyKayttoOikeusRyhmaTapahtuma();
         OrganisaatioHenkilo organisaatioHenkilo = henkilo.apply(entityManager);
         tapahtuma.setOrganisaatioHenkilo(henkilo.apply(entityManager));
-        tapahtuma.setAikaleima(new DateTime());
+        tapahtuma.setAikaleima(ZonedDateTime.now());
         tapahtuma.setSyy("syy");
         tapahtuma.setKasittelija(organisaatioHenkilo.getHenkilo());
         tapahtuma.setTila(KayttoOikeudenTila.MYONNETTY);

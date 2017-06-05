@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -11,6 +10,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -87,8 +90,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("234", "123", "1.2.3.4.5"))
                 .willReturn(singletonList(MyonnettyKayttoOikeusDto.builder()
                         .ryhmaId(234L)
-                        .alkuPvm(new LocalDate(2015, 1, 2))
-                        .kasitelty(new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay())
+                        .alkuPvm(LocalDate.of(2015, 1, 2))
+                        .kasitelty(ZonedDateTime.of(2015, 1, 1, 0, 0 , 0, 0, ZoneId.systemDefault()))
                         .kasittelijaNimi("Käsittelijä nimi")
                         .kasittelijaOid("123456.234")
                         .muutosSyy("syy muutokselle")
@@ -100,7 +103,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .myonnettyTapahtumaId(43L)
                         .selected(true)
                         .tehtavanimike("joku nimike")
-                        .voimassaPvm(new LocalDate(2015, 1, 22))
+                        .voimassaPvm(LocalDate.of(2015, 1, 22))
                         .build()));
 
         this.mvc.perform(get("/kayttooikeusryhma/234/123").accept(MediaType.APPLICATION_JSON_UTF8))
@@ -328,12 +331,12 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .ryhmaId(234243L)
                 .ryhmaNames(new TextGroupListDto(1L).put("FI", "Ryhmänimi test"))
                 .tyyppi("joku tyyppi")
-                .voimassaPvm(new LocalDate(2016, 2, 22))
+                .voimassaPvm(LocalDate.of(2016, 2, 22))
                 .tehtavanimike("joku tehtävä")
                 .selected(true)
                 .myonnettyTapahtumaId(234234L)
-                .alkuPvm(new LocalDate(2016, 1, 1))
-                .kasitelty(new LocalDate(2016, 1, 1).toDateTimeAtStartOfDay())
+                .alkuPvm(LocalDate.of(2016, 1, 1))
+                .kasitelty(LocalDate.of(2016, 1, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .kasittelijaNimi("joku käsittelijä")
                 .kasittelijaOid("234.2434.546.234")
                 .muutosSyy("testaillaan")

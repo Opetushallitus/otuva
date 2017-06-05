@@ -8,7 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.joda.time.DateTime;
+
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -16,8 +17,8 @@ import org.joda.time.DateTime;
 @ToString
 public class AnomusCriteria implements KayttooikeusCriteria<QAnomus> {
 
-    private DateTime anottuAlku;
-    private DateTime anottuLoppu;
+    private ZonedDateTime anottuAlku;
+    private ZonedDateTime anottuLoppu;
     private AnomuksenTila tila;
 
     public Predicate condition(QAnomus qAnomus) {

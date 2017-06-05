@@ -5,12 +5,12 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import org.joda.time.DateTime;
 
 import javax.persistence.EntityManager;
+import java.time.ZonedDateTime;
 
 public class KayttoOikeusRyhmaTapahtumaHistoriaPopulator implements Populator<KayttoOikeusRyhmaTapahtumaHistoria> {
-    private DateTime aikaleima = new DateTime();
+    private ZonedDateTime aikaleima = ZonedDateTime.now();
     private Populator<Henkilo> henkilo = Populator.constant(new Henkilo());
     private Populator<KayttoOikeusRyhma> kayttoOikeusRyhma = Populator.constant(new KayttoOikeusRyhma());
     private Populator<OrganisaatioHenkilo> organisaatioHenkilo = Populator.constant(new OrganisaatioHenkilo());

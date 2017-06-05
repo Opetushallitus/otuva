@@ -1,7 +1,8 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import lombok.*;
-import org.joda.time.DateTime;
+
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class HaettuKayttooikeusryhmaDto {
 
     private KayttoOikeusRyhmaDto kayttoOikeusRyhma;
 
-    private DateTime kasittelyPvm;
+    private ZonedDateTime kasittelyPvm;
 
     private KayttoOikeudenTila tyyppi;
 }

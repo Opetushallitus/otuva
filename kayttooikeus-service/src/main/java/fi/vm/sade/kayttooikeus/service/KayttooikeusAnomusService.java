@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 
+import java.time.LocalDate;
 import java.util.List;
-import org.joda.time.LocalDate;
 
 public interface KayttooikeusAnomusService {
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);

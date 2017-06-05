@@ -9,10 +9,11 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -27,7 +28,7 @@ public class CreateUtil {
                 .name(korName)
                 .hidden(false)
                 .build();
-        return new HaettuKayttoOikeusRyhma(anomus, kayttoOikeusRyhma, DateTime.now(), KayttoOikeudenTila.ANOTTU);
+        return new HaettuKayttoOikeusRyhma(anomus, kayttoOikeusRyhma, ZonedDateTime.now(), KayttoOikeudenTila.ANOTTU);
     }
 
     public static UpdateHaettuKayttooikeusryhmaDto createUpdateHaettuKayttooikeusryhmaDto(Long id, String tila, LocalDate loppupvm) {
@@ -42,11 +43,11 @@ public class CreateUtil {
                                                                                KayttoOikeudenTila tila) {
         KayttoOikeusRyhmaDto kayttoOikeusRyhmaDto = new KayttoOikeusRyhmaDto(1001L, "Kayttooikeusryhma x",
                 "10", newArrayList(), new TextGroupDto(2001L));
-        return new HaettuKayttooikeusryhmaDto(haettuRyhmaId, createAnomusDto(organisaatioOid), kayttoOikeusRyhmaDto, DateTime.now(), tila);
+        return new HaettuKayttooikeusryhmaDto(haettuRyhmaId, createAnomusDto(organisaatioOid), kayttoOikeusRyhmaDto, ZonedDateTime.now(), tila);
     }
 
     public static AnomusDto createAnomusDto(String organisaatioOid) {
-        return new AnomusDto(organisaatioOid, DateTime.now().minusDays(1), LocalDate.now().toDate(), AnomusTyyppi.UUSI);
+        return new AnomusDto(organisaatioOid, ZonedDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI);
     }
 
     public static KayttoOikeusRyhma createKayttoOikeusRyhma(Long id) {
@@ -78,7 +79,7 @@ public class CreateUtil {
                                                                          String perustelut, Long kayttooikeusryhmaId) {
         Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike, perustelut);
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = new HaettuKayttoOikeusRyhma(anomus, createKayttoOikeusRyhma(kayttooikeusryhmaId),
-                DateTime.now().minusDays(5), KayttoOikeudenTila.ANOTTU);
+                ZonedDateTime.now().minusDays(5), KayttoOikeudenTila.ANOTTU);
         haettuKayttoOikeusRyhma.setAnomus(anomus);
         anomus.setHaettuKayttoOikeusRyhmas(Sets.newHashSet(haettuKayttoOikeusRyhma));
         return haettuKayttoOikeusRyhma;
@@ -97,7 +98,7 @@ public class CreateUtil {
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
                                        String perustelut) {
         return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, null, tehtavanimike,
-                AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, DateTime.now().minusDays(5), DateTime.now().minusDays(5),
+                AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, ZonedDateTime.now().minusDays(5), ZonedDateTime.now().minusDays(5),
                 perustelut, "", "", "", "",
                 Sets.newHashSet(), Sets.newHashSet());
     }

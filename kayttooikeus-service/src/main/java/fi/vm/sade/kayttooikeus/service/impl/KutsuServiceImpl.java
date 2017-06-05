@@ -14,11 +14,11 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Stream;
@@ -87,7 +87,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         Kutsu entity = mapper.map(dto, Kutsu.class);
 
         entity.setId(null);
-        entity.setAikaleima(DateTime.now());
+        entity.setAikaleima(ZonedDateTime.now());
         entity.setKutsuja(getCurrentUserOid());
         entity.setSalaisuus(UUID.randomUUID().toString());
         entity.setTila(AVOIN);

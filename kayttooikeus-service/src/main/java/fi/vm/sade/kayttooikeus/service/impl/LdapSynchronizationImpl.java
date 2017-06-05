@@ -3,10 +3,11 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdaterRepository;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZonedDateTime;
 
 @Service
 public class LdapSynchronizationImpl implements LdapSynchronization {
@@ -31,7 +32,7 @@ public class LdapSynchronizationImpl implements LdapSynchronization {
             newData.setKorId(id);
             newData.setPriority(BATCH_PRIORITY);
             newData.setStatus(STATUS_IN_QUEUE);
-            newData.setModified(DateTime.now());
+            newData.setModified(ZonedDateTime.now());
             ldapUpdaterRepository.save(newData);
         }
     }
@@ -49,7 +50,7 @@ public class LdapSynchronizationImpl implements LdapSynchronization {
                 && priority != BATCH_PRIORITY) {
             existingData.setStatus(STATUS_IN_QUEUE);
             existingData.setPriority(priority);
-            existingData.setModified(DateTime.now());
+            existingData.setModified(ZonedDateTime.now());
         }
         // If the update has failed for some reason, it can be re-queued since
         // the failure could have been caused by a simple timeout or other
@@ -63,7 +64,7 @@ public class LdapSynchronizationImpl implements LdapSynchronization {
                 newData.setPriority(priority);
             }
             newData.setStatus(STATUS_IN_QUEUE);
-            newData.setModified(DateTime.now());
+            newData.setModified(ZonedDateTime.now());
             ldapUpdaterRepository.save(newData);
         }
     }

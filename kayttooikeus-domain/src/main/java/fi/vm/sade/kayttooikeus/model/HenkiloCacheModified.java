@@ -2,12 +2,11 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.*;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import static org.joda.time.DateTime.now;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter @Setter
@@ -17,7 +16,6 @@ import static org.joda.time.DateTime.now;
 @Table(name = "henkilo_cache_modified", schema = "public")
 public class HenkiloCacheModified extends IdentifiableAndVersionedEntity {
     
-    @Type(type = "dateTime")
-    private DateTime modified = now();
+    private ZonedDateTime modified = ZonedDateTime.now();
     
 }

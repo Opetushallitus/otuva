@@ -13,8 +13,6 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +22,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,7 +126,7 @@ public class KayttooikeusAnomusServiceTest {
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
                 .getAllActiveAnomusByHenkiloOid("1.2.3.4.5", false);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(DateTime.now());
+        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(ZonedDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKayttoOikeusRyhma().getName()).isEqualTo("kayttooikeusryhma1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
@@ -145,7 +145,7 @@ public class KayttooikeusAnomusServiceTest {
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
                 .getAllActiveAnomusByHenkiloOid("1.2.3.4.5", true);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(DateTime.now());
+        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(ZonedDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKayttoOikeusRyhma().getName()).isEqualTo("kayttooikeusryhma1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");

@@ -9,9 +9,9 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ public class OrganisaatioHenkiloRepositoryImpl extends BaseRepositoryImpl<Organi
     public List<String> findDistinctOrganisaatiosForHenkiloOid(String henkiloOid) {
         return jpa().from(organisaatioHenkilo)
                 .innerJoin(organisaatioHenkilo.henkilo, henkilo)
-                .where(voimassa(organisaatioHenkilo, new LocalDate())
+                .where(voimassa(organisaatioHenkilo, LocalDate.now())
                         .and(henkilo.oidHenkilo.eq(henkiloOid)))
                 .select(organisaatioHenkilo.organisaatioOid).distinct().fetch();
     }
@@ -39,7 +39,7 @@ public class OrganisaatioHenkiloRepositoryImpl extends BaseRepositoryImpl<Organi
     public List<OrganisaatioHenkiloWithOrganisaatioDto> findActiveOrganisaatioHenkiloListDtos(String henkiloOoid) {
         return jpa().from(organisaatioHenkilo)
                 .innerJoin(organisaatioHenkilo.henkilo, henkilo)
-                .where(voimassa(organisaatioHenkilo, new LocalDate())
+                .where(voimassa(organisaatioHenkilo, LocalDate.now())
                         .and(henkilo.oidHenkilo.eq(henkiloOoid)))
                 .select(organisaatioHenkiloDtoProjection(OrganisaatioHenkiloWithOrganisaatioDto.class))
                 .orderBy(organisaatioHenkilo.organisaatioOid.asc()).fetch();

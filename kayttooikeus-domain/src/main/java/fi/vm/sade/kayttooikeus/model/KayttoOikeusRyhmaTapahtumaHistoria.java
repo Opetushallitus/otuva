@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter @Setter
@@ -41,6 +40,5 @@ public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersioned
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
-    @Type(type = "dateTime")
-    private DateTime aikaleima;
+    private ZonedDateTime aikaleima;
 }

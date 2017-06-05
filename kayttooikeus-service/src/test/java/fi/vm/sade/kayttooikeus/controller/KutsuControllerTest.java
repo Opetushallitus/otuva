@@ -4,13 +4,15 @@ import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.endsWith;
@@ -33,7 +35,7 @@ public class KutsuControllerTest extends AbstractControllerTest {
     public void listAvoinKutsusTest() throws Exception {
         given(this.kutsuService.listAvoinKutsus(any()))
                 .willReturn(singletonList(KutsuListDto.builder()
-                        .id(1L).aikaleima(new DateTime(2016,1,1,0,0,0))
+                        .id(1L).aikaleima(ZonedDateTime.of(2016,1,1, 0, 0, 0, 0, ZoneId.systemDefault()))
                         .sahkoposti("posti@example.com")
                         .organisaatiot(singletonList(
                             KutsuOrganisaatioListDto.builder()

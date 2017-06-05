@@ -3,12 +3,12 @@ package fi.vm.sade.kayttooikeus.repositories;
 import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -61,8 +61,8 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "1.0.0.102.0"),
                 kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
-        ).voimassaAlkaen(new LocalDate().minusMonths(3))
-                .voimassaPaattyen(new LocalDate().plusMonths(3)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(3))
+                .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
         List<Tuple> list = this.kayttoOikeusRyhmaRepository.findOrganisaatioOidAndRyhmaIdByHenkiloOid(
                 tapahtuma.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo());

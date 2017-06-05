@@ -8,13 +8,13 @@ import fi.vm.sade.kayttooikeus.service.HenkiloCacheService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
                 this.saveAll(0, amount, modifiedOidHenkiloList);
             }
         }
-        henkiloCacheModified.setModified(DateTime.now());
+        henkiloCacheModified.setModified(ZonedDateTime.now());
     }
 
     // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
@@ -67,7 +67,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         }
         this.henkiloCacheModifiedDataRepository.findFirstBy()
                 .orElseThrow(DataInconsistencyException::new)
-                .setModified(DateTime.now());
+                .setModified(ZonedDateTime.now());
     }
 
     private boolean saveAll(long offset, long count, List<String> oidHenkiloList) {

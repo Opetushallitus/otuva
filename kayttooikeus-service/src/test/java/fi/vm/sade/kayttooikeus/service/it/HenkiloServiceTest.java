@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,32 +50,32 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-        ).voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-        ).voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
-        ).voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.7"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
-        ).voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.8"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
-        ).voimassaAlkaen(new LocalDate().minusMonths(2)).voimassaPaattyen(new LocalDate().minusMonths(1)));
+        ).voimassaAlkaen(LocalDate.now().minusMonths(2)).voimassaPaattyen(LocalDate.now().minusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.9"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
-        ).voimassaAlkaen(new LocalDate().plusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(2)));
+        ).voimassaAlkaen(LocalDate.now().plusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(2)));
 
         list = henkiloService.findHenkilos(new OrganisaatioOidsSearchDto(HenkiloTyyppi.VIRKAILIJA, Collections.singletonList("1.1.1.1.1"), null));
         assertEquals(0, list.size());
@@ -106,7 +106,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                         .tehtavanimike("testaaja"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
-                .voimassaAlkaen(new LocalDate().minusMonths(1)).voimassaPaattyen(new LocalDate().plusMonths(1)));
+                .voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));
         myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet(myonnettyKayttoOikeusRyhmaTapahtuma));
         this.em.persist(myonnettyKayttoOikeusRyhmaTapahtuma);
         this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus("1.2.3.4.5", "1.2.3.4.1");

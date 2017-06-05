@@ -9,10 +9,10 @@ import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -3,10 +3,10 @@ package fi.vm.sade.kayttooikeus.model;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import lombok.*;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,29 +36,26 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     @JoinColumn(name = "kasittelija_henkilo_id")
     private Henkilo kasittelija;
 
-    @Temporal(TemporalType.TIMESTAMP)
+//    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
-    @Type(type = "dateTime")
-    private DateTime aikaleima = new DateTime();
+    private ZonedDateTime aikaleima = ZonedDateTime.now();
 
     @Temporal(TemporalType.DATE)
     @Column(name = "voimassaalkupvm", nullable = false)
-    @Type(type = "localDate")
     private LocalDate voimassaAlkuPvm;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "voimassaloppupvm")
-    @Type(type = "localDate")
     private LocalDate voimassaLoppuPvm;
 
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
     private Set<Anomus> anomus = new HashSet<>();
 
-    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(DateTime aikaleima, String syy) {
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(ZonedDateTime aikaleima, String syy) {
         return toHistoria(getKasittelija(), getTila(), aikaleima, syy);
     }
 
-    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(Henkilo kasittelija, KayttoOikeudenTila tila, DateTime aikaleima, String syy) {
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(Henkilo kasittelija, KayttoOikeudenTila tila, ZonedDateTime aikaleima, String syy) {
         return new KayttoOikeusRyhmaTapahtumaHistoria(
                 getKayttoOikeusRyhma(),
                 getOrganisaatioHenkilo(),

@@ -5,9 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,12 +47,10 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private AnomuksenTila anomuksenTila;
 
     @Column(name = "anottupvm")
-    @Type(type="dateTime")
-    private DateTime anottuPvm;
+    private ZonedDateTime anottuPvm;
 
     @Column(name = "anomustilatapahtumapvm")
-    @Type(type="dateTime")
-    private DateTime anomusTilaTapahtumaPvm;
+    private ZonedDateTime anomusTilaTapahtumaPvm;
 
     @Column(name = "perustelut")
     private String perustelut;

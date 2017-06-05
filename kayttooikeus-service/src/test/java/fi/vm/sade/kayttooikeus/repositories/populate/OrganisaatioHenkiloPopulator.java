@@ -4,10 +4,10 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
-import org.joda.time.LocalDate;
 
 import javax.persistence.EntityManager;
+
+import java.time.LocalDate;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 import static java.util.Optional.ofNullable;
@@ -15,7 +15,7 @@ import static java.util.Optional.ofNullable;
 public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenkilo> {
     private final Populator<Henkilo> henkilo;
     private final String organisaatioOid;
-    private LocalDate voimassaAlku = new LocalDate();
+    private LocalDate voimassaAlku = LocalDate.now();
     private LocalDate voimassaAsti;
     private String tehtavanimike;
     private OrganisaatioHenkiloTyyppi tyyppi = OrganisaatioHenkiloTyyppi.VIRKAILIJA;

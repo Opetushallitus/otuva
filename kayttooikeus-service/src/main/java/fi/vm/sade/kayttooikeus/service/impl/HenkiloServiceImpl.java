@@ -14,13 +14,13 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,7 +117,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                             .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
                     KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = mkort.toHistoria(
                             kasittelija, KayttoOikeudenTila.SULJETTU,
-                            new DateTime(), "Oikeuksien poisto, koko henkilön passivointi");
+                            ZonedDateTime.now(), "Oikeuksien poisto, koko henkilön passivointi");
                     this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
 
                     // Remove kayttooikeus

@@ -4,12 +4,12 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,8 +42,8 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     public void findOrganisaatioHenkiloListDtosTest() {
         OrganisaatioHenkilo oh1 = populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"));
         OrganisaatioHenkilo oh2 =populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.8")
-                .voimassaAlkaen(new LocalDate().minusDays(2)).tyyppi(OPISKELIJA)
-                .voimassaAsti(new LocalDate().plusYears(1))
+                .voimassaAlkaen(LocalDate.now().minusDays(2)).tyyppi(OPISKELIJA)
+                .voimassaAsti(LocalDate.now().plusYears(1))
                 .tehtavanimike("Devaaja"));
         populate(organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.9"));
 

@@ -4,8 +4,6 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -14,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     public void listKayttoOikeusCurrentUserTest() throws Exception {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser())
                 .willReturn(singletonList(KayttoOikeusHistoriaDto.builder()
-                        .aikaleima(new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay())
+                        .aikaleima(LocalDate.of(2015, 1, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                         .kasittelija("kasittelija")
                         .kayttoOikeusRyhmaId(5L)
                         .kayttoOikeusId(1L)
@@ -65,8 +66,8 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
                         .tehtavanimike("nimike")
                         .tila(KayttoOikeudenTila.HYLATTY)
                         .tyyppi(KayttoOikeusTyyppi.KOOSTEROOLI)
-                        .voimassaAlkuPvm(new LocalDate(2015, 1, 1))
-                        .voimassaLoppuPvm(new LocalDate(2015, 12, 31))
+                        .voimassaAlkuPvm(LocalDate.of(2015, 1, 1))
+                        .voimassaLoppuPvm(LocalDate.of(2015, 12, 31))
                 .build()));
         this.mvc.perform(get("/kayttooikeus/kayttaja/current").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())

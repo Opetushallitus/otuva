@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -74,10 +74,10 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
         });
         given(this.organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
                 asList(OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L).passivoitu(false)
-                                .voimassaAlkuPvm(new LocalDate()).voimassaLoppuPvm(new LocalDate().plusYears(1))
+                                .voimassaAlkuPvm(LocalDate.now()).voimassaLoppuPvm(LocalDate.now().plusYears(1))
                                 .tehtavanimike("Devaaja")
                                 .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.1").build()).build(),
-                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(2L).voimassaAlkuPvm(new LocalDate().minusYears(1))
+                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(2L).voimassaAlkuPvm(LocalDate.now().minusYears(1))
                                 .passivoitu(true).tehtavanimike("Opettaja")
                                 .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build()
                 ));
@@ -91,8 +91,8 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
         assertEquals("1.2.3.4.1", result.get(1).getOrganisaatio().getOid());
         assertEquals("Suomeksi", result.get(1).getOrganisaatio().getNimi().get("fi"));
         assertEquals(asList("Tyyppi1", "Tyyppi2"), result.get(1).getOrganisaatio().getTyypit());
-        assertEquals(new LocalDate(), result.get(1).getVoimassaAlkuPvm());
-        assertEquals(new LocalDate().plusYears(1), result.get(1).getVoimassaLoppuPvm());
+        assertEquals(LocalDate.now(), result.get(1).getVoimassaAlkuPvm());
+        assertEquals(LocalDate.now().plusYears(1), result.get(1).getVoimassaLoppuPvm());
         assertEquals("Devaaja", result.get(1).getTehtavanimike());
     }
 

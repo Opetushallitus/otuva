@@ -15,12 +15,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -131,7 +131,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
-    public List<String> getModifiedSince(DateTime dateTime, long offset, long amount) {
+    public List<String> getModifiedSince(ZonedDateTime dateTime, long offset, long amount) {
         Map<String, String> params = new HashMap<String, String>() {{
             put("offset", Long.toString(offset));
             put("amount", Long.toString(amount));

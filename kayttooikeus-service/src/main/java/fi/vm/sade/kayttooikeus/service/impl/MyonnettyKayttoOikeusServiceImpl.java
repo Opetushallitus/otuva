@@ -9,15 +9,16 @@ import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDa
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
 
             KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
                     kasittelija, KayttoOikeudenTila.SULJETTU,
-                    DateTime.now(), "Oikeuksien poisto, vanhentunut");
+                    ZonedDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
             myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(kayttoOikeus);

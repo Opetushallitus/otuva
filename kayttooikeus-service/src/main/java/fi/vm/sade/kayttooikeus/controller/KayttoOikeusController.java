@@ -8,13 +8,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.core.MediaType;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @RestController
@@ -67,7 +67,7 @@ public class KayttoOikeusController {
     public String sendExpirationReminders(@ApiParam(value = "Vuosi", required = true) @RequestParam("year") int year,
                                        @ApiParam(value = "Kuukausi", required = true) @RequestParam("month") int month,
                                        @ApiParam(value = "Päivä", required = true) @RequestParam("day") int day) {
-        Period expireThreshold = new Period(LocalDate.now(), new LocalDate(year, month, day));
+        Period expireThreshold = Period.between(LocalDate.now(), LocalDate.of(year, month, day));
         return String.format("%d", taskExecutorService.sendExpirationReminders(expireThreshold));
     }
 }

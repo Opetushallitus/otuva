@@ -4,12 +4,13 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * Ajastusten konfigurointi.
@@ -43,7 +44,7 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.kayttooikeusmuistutus}")
     public void sendExpirationReminders() {
-        taskExecutorService.sendExpirationReminders(Period.weeks(4), Period.weeks(1));
+        taskExecutorService.sendExpirationReminders(Period.ofWeeks(4), Period.ofWeeks(1));
     }
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.kayttooikeusanomusilmoitukset}")

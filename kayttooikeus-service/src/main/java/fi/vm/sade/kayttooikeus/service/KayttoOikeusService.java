@@ -2,9 +2,9 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Map;
 
