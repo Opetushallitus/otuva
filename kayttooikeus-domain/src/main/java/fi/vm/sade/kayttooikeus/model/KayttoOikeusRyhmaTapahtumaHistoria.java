@@ -38,7 +38,6 @@ public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersioned
     @JoinColumn(name = "kasittelija_henkilo_id")
     private Henkilo kasittelija;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
     private ZonedDateTime aikaleima;
 }

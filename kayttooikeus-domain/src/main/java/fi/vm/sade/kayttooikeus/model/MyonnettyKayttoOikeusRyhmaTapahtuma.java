@@ -36,15 +36,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     @JoinColumn(name = "kasittelija_henkilo_id")
     private Henkilo kasittelija;
 
-//    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
     private ZonedDateTime aikaleima = ZonedDateTime.now();
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassaalkupvm", nullable = false)
     private LocalDate voimassaAlkuPvm;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassaloppupvm")
     private LocalDate voimassaLoppuPvm;
 

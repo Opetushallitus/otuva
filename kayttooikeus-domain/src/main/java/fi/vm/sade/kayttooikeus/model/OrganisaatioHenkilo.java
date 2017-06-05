@@ -45,11 +45,9 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "passivoitu", nullable = false)
     private boolean passivoitu;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassa_alku_pvm")
     private LocalDate voimassaAlkuPvm;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassa_loppu_pvm")
     private LocalDate voimassaLoppuPvm;
 
