@@ -28,7 +28,7 @@ public class HenkiloController {
     private final HenkiloService henkiloService;
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
-    private final LdapSynchronization ldapSynchronization;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai ryhmien tiedoilla rekursiiisesti.",
@@ -179,7 +179,7 @@ public class HenkiloController {
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Lisää henkilön LDAP-synkronointijonoon")
     public void updateHenkiloToLdap(@PathVariable String oid) {
-        ldapSynchronization.updateHenkilo(oid);
+        ldapSynchronizationService.updateHenkilo(oid);
     }
 
 }

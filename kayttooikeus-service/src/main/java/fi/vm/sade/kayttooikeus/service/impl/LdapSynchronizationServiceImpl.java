@@ -7,7 +7,6 @@ import fi.vm.sade.kayttooikeus.model.LdapStatusType;
 import fi.vm.sade.kayttooikeus.model.LdapSynchronizationData;
 import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.repositories.LdapSynchronizationDataRepository;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.TimeService;
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 @RequiredArgsConstructor
-public class LdapSynchronizationImpl implements LdapSynchronization {
+public class LdapSynchronizationServiceImpl implements LdapSynchronizationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LdapSynchronizationImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapSynchronizationServiceImpl.class);
 
     private final LdapUpdateDataRepository ldapUpdateDataRepository;
     private final TimeService timeService;

@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
@@ -11,6 +10,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 /**
  * Ajastusten konfigurointi.
@@ -26,7 +26,7 @@ public class ScheduledTasks {
     private final CommonProperties commonProperties;
     private final TaskExecutorService taskExecutorService;
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
-    private final LdapSynchronization ldapSynchronization;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {
@@ -51,7 +51,7 @@ public class ScheduledTasks {
     @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.fixeddelayinmillis}",
             initialDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.initialdelayinmillis}")
     public void ldapSynkronointi() {
-        ldapSynchronization.runSynchronizer();
+        ldapSynchronizationService.runSynchronizer();
     }
 
 }

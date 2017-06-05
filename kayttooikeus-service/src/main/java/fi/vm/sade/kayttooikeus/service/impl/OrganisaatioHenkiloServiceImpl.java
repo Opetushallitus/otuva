@@ -27,12 +27,12 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
@@ -45,7 +45,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloRepository henkiloRepository;
-    private final LdapSynchronization ldapSynchronization;
+    private final LdapSynchronizationService ldapSynchronizationService;
     private final OrikaBeanMapper mapper;
     private final OrganisaatioClient organisaatioClient;
     private final PermissionCheckerService permissionCheckerService;
@@ -56,7 +56,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                                           OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                                           KayttoOikeusRepository kayttoOikeusRepository,
                                           HenkiloRepository henkiloRepository,
-                                          LdapSynchronization ldapSynchronization,
+                                          LdapSynchronizationService ldapSynchronizationService,
                                           OrikaBeanMapper mapper,
                                           OrganisaatioClient organisaatioClient,
                                           PermissionCheckerService permissionCheckerService,
@@ -65,7 +65,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.henkiloRepository = henkiloRepository;
-        this.ldapSynchronization = ldapSynchronization;
+        this.ldapSynchronizationService = ldapSynchronizationService;
         this.mapper = mapper;
         this.organisaatioClient = organisaatioClient;
         this.permissionCheckerService = permissionCheckerService;
@@ -202,7 +202,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         organisaatioHenkilo.setPassivoitu(true);
         organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().forEach(myonnettyKayttoOikeusRyhmaTapahtuma ->
                 myonnettyKayttoOikeusRyhmaTapahtuma.setTila(KayttoOikeudenTila.SULJETTU));
-        ldapSynchronization.updateHenkiloAsap(oidHenkilo);
+        ldapSynchronizationService.updateHenkiloAsap(oidHenkilo);
     }
 
     private OrganisaatioHenkilo findFirstMatching(OrganisaatioHenkiloUpdateDto organisaatioHenkilo,
