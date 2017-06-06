@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +35,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final UrlConfiguration urlConfiguration;
     private final String rootOrganizationOid;
     private final ObjectMapper objectMapper;
-    private ZonedDateTime cacheUpdatedAt;
+    private LocalDateTime cacheUpdatedAt;
     private LocalDate latestChanges;
     private OrganisaatioCache cache;
     
@@ -72,7 +72,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return fromCache.apply(cache);
     }
 
-    private synchronized void refreshCache(ZonedDateTime updateMoment) {
+    private synchronized void refreshCache(LocalDateTime updateMoment) {
         // preventing double queued updates...
         if (cacheUpdatedAt == null || (updateMoment != null && updateMoment.isBefore(cacheUpdatedAt))) {
             String haeHierarchyUrl = urlConfiguration.url("organisaatio-service.organisaatio.hae");
@@ -86,7 +86,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
                     .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl))));
             cache = new OrganisaatioCache(fetchPerustiedot(rootOrganizationOid), organisaatios);
-            cacheUpdatedAt = ZonedDateTime.now();
+            cacheUpdatedAt = LocalDateTime.now();
         }
     }
     

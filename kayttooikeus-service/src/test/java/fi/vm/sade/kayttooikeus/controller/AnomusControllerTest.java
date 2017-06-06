@@ -16,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.mockito.BDDMockito.given;
@@ -55,7 +55,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void updateHaettuKayttooikeusryhma() throws Exception {
         UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
-                KayttoOikeudenTila.MYONNETTY.toString(), ZonedDateTime.now().toLocalDate(), ZonedDateTime.now().plusYears(1).toLocalDate());
+                KayttoOikeudenTila.MYONNETTY.toString(), LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate());
         this.mvc.perform(put("/kayttooikeusanomus")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
@@ -66,7 +66,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void grantMyonnettyKayttooikeusryhmaForHenkilo() throws Exception {
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
-                ZonedDateTime.now().toLocalDate(), ZonedDateTime.now().plusYears(1).toLocalDate());
+                LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate());
         this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))

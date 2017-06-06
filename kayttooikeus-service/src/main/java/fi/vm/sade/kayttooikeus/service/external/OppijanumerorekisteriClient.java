@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.service.external;
 
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public interface OppijanumerorekisteriClient {
 
     List<HenkiloHakuPerustietoDto> getAllByOids(long page, long count, List<String> oidHenkiloList);
 
-    List<String> getModifiedSince(ZonedDateTime dateTime, long offset, long amount);
+    List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount);
 
     HenkiloPerustietoDto getPerustietoByOid(String oidHenkilo);
 

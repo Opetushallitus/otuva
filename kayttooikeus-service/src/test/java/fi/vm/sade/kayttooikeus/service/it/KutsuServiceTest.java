@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -63,12 +63,12 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsus() {
         Kutsu kutsu1 = populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
-                .kutsuja("1.2.3").aikaleima(ZonedDateTime.of(2016,1,1,0,0,0, 0, ZoneId.systemDefault()))
+                .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1"))
                 )),
             kutsu2 = populate(kutsu("Matti", "Meikäläinen", "b@eaxmple.com")
-                .kutsuja("1.2.4").aikaleima(ZonedDateTime.of(2016,2,1,0,0,0,0,ZoneId.systemDefault()))
+                .kutsuja("1.2.4").aikaleima(LocalDateTime.of(2016,2,1,0,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.6")
@@ -76,7 +76,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
             ),
             kutsu3 = populate(kutsu("Eero", "Esimerkki", "c@eaxmple.com")
                 .tila(KutsunTila.POISTETTU)
-                .kutsuja("1.2.4").aikaleima(ZonedDateTime.of(2016,1,1,0,0,0,0,ZoneId.systemDefault()))
+                .kutsuja("1.2.4").aikaleima(LocalDateTime.of(2016,1,1,0,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5").ryhma(kayttoOikeusRyhma("RYHMA1"))
             ));
 
@@ -91,7 +91,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         
         List<KutsuListDto> kutsus = kutsuService.listAvoinKutsus(new OrderBy<>(KutsuOrganisaatioOrder.ORGANISAATIO, Order.ASC));
         assertEquals(1, kutsus.size());
-        assertEquals(ZonedDateTime.of(2016,2,1,0,0,0,0,ZoneId.systemDefault()), kutsus.get(0).getAikaleima());
+        assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
         assertEquals("b@eaxmple.com", kutsus.get(0).getSahkoposti());
         assertEquals(2, kutsus.get(0).getOrganisaatiot().size());

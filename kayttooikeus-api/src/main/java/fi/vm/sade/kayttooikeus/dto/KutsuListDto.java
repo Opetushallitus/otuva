@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.dto;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +17,6 @@ public class KutsuListDto implements Serializable {
     private String etunimi;
     private String sukunimi;
     private String sahkoposti;
-    private ZonedDateTime aikaleima;
+    private LocalDateTime aikaleima;
     private List<KutsuOrganisaatioListDto> organisaatiot = new ArrayList<>();
 }

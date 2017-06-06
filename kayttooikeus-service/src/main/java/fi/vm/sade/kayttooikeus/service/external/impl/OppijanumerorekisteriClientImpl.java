@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -131,7 +131,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
-    public List<String> getModifiedSince(ZonedDateTime dateTime, long offset, long amount) {
+    public List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount) {
         Map<String, String> params = new HashMap<String, String>() {{
             put("offset", Long.toString(offset));
             put("amount", Long.toString(amount));

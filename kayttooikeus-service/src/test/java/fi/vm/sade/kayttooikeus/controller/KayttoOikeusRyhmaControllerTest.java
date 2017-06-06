@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -91,7 +91,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .willReturn(singletonList(MyonnettyKayttoOikeusDto.builder()
                         .ryhmaId(234L)
                         .alkuPvm(LocalDate.of(2015, 1, 2))
-                        .kasitelty(ZonedDateTime.of(2015, 1, 1, 0, 0 , 0, 0, ZoneId.systemDefault()))
+                        .kasitelty(LocalDateTime.of(2015, 1, 1, 0, 0 , 0, 0))
                         .kasittelijaNimi("Käsittelijä nimi")
                         .kasittelijaOid("123456.234")
                         .muutosSyy("syy muutokselle")
@@ -336,7 +336,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .selected(true)
                 .myonnettyTapahtumaId(234234L)
                 .alkuPvm(LocalDate.of(2016, 1, 1))
-                .kasitelty(LocalDate.of(2016, 1, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .kasitelty(LocalDate.of(2016, 1, 1).atStartOfDay())
                 .kasittelijaNimi("joku käsittelijä")
                 .kasittelijaOid("234.2434.546.234")
                 .muutosSyy("testaillaan")

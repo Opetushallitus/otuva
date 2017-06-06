@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.dto;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -15,7 +15,7 @@ public class AnomusDto {
 
     private String organisaatioOid;
 
-    private ZonedDateTime anottuPvm;
+    private LocalDateTime anottuPvm;
 
     private Date anomusTilaTapahtumaPvm;
 

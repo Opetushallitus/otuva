@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -39,5 +39,5 @@ public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersioned
     private Henkilo kasittelija;
 
     @Column(name = "aikaleima", nullable = false)
-    private ZonedDateTime aikaleima;
+    private LocalDateTime aikaleima;
 }

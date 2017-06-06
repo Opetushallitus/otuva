@@ -53,7 +53,7 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     public void listKayttoOikeusCurrentUserTest() throws Exception {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser())
                 .willReturn(singletonList(KayttoOikeusHistoriaDto.builder()
-                        .aikaleima(LocalDate.of(2015, 1, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                        .aikaleima(LocalDate.of(2015, 1, 1).atStartOfDay())
                         .kasittelija("kasittelija")
                         .kayttoOikeusRyhmaId(5L)
                         .kayttoOikeusId(1L)

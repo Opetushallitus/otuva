@@ -21,8 +21,7 @@ import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidat
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -213,7 +212,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                             ? AnomuksenTila.KASITELTY
                             : AnomuksenTila.HYLATTY);
         }
-        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(ZonedDateTime.now());
+        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(LocalDateTime.now());
 
         // Remove the currently handled kayttooikeus from anomus
         haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().remove(haettuKayttoOikeusRyhma);
@@ -270,8 +269,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         anomus.setSahkopostiosoite(kayttooikeusAnomusDto.getEmail());
         anomus.setPerustelut(kayttooikeusAnomusDto.getPerustelut());
         anomus.setAnomusTyyppi(AnomusTyyppi.UUSI);
-        anomus.setAnomusTilaTapahtumaPvm(ZonedDateTime.now());
-        anomus.setAnottuPvm(ZonedDateTime.now());
+        anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
+        anomus.setAnottuPvm(LocalDateTime.now());
         anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
         anomus.setTehtavanimike(kayttooikeusAnomusDto.getTehtavaNimike());
 
@@ -290,8 +289,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Transactional
     public void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm) {
         AnomusCriteria criteria = AnomusCriteria.builder()
-                .anottuAlku(anottuPvm.atStartOfDay().atZone(ZoneId.systemDefault()))
-                .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)).atZone(ZoneId.systemDefault()))
+                .anottuAlku(anottuPvm.atStartOfDay())
+                .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
                 .tila(AnomuksenTila.ANOTTU)
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
@@ -364,7 +363,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaAlkuPvm(alkupvm);
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaLoppuPvm(loppupvm);
-        myonnettyKayttoOikeusRyhmaTapahtuma.setAikaleima(ZonedDateTime.now());
+        myonnettyKayttoOikeusRyhmaTapahtuma.setAikaleima(LocalDateTime.now());
         myonnettyKayttoOikeusRyhmaTapahtuma.setKasittelija(kasittelija);
         myonnettyKayttoOikeusRyhmaTapahtuma.setTila(myonnettyKayttoOikeusRyhmaTapahtuma.getId() == null
                 ? KayttoOikeudenTila.MYONNETTY
@@ -384,7 +383,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // New history event for a change on kayttooikeusryhmatapahtuma.
     private void createGrantedHistoryEvent(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, String reason) {
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(ZonedDateTime.now(), reason));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(LocalDateTime.now(), reason));
     }
 
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,

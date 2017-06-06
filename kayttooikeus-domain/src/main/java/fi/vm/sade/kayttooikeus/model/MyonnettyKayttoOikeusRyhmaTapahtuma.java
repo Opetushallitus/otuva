@@ -6,7 +6,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +37,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     private Henkilo kasittelija;
 
     @Column(name = "aikaleima", nullable = false)
-    private ZonedDateTime aikaleima = ZonedDateTime.now();
+    private LocalDateTime aikaleima = LocalDateTime.now();
 
     @Column(name = "voimassaalkupvm", nullable = false)
     private LocalDate voimassaAlkuPvm;
@@ -48,11 +48,11 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
     private Set<Anomus> anomus = new HashSet<>();
 
-    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(ZonedDateTime aikaleima, String syy) {
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(LocalDateTime aikaleima, String syy) {
         return toHistoria(getKasittelija(), getTila(), aikaleima, syy);
     }
 
-    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(Henkilo kasittelija, KayttoOikeudenTila tila, ZonedDateTime aikaleima, String syy) {
+    public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(Henkilo kasittelija, KayttoOikeudenTila tila, LocalDateTime aikaleima, String syy) {
         return new KayttoOikeusRyhmaTapahtumaHistoria(
                 getKayttoOikeusRyhma(),
                 getOrganisaatioHenkilo(),

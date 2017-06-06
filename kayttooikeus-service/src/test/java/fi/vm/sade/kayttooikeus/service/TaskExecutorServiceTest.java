@@ -29,7 +29,7 @@ public class TaskExecutorServiceTest extends AbstractServiceTest {
     @Test
     public void sendExpirationRemindersTest() {
         given(kayttoOikeusService.findToBeExpiringMyonnettyKayttoOikeus(LocalDate.now(),
-                Period.between(LocalDate.now().plusWeeks(3), LocalDate.now().plusWeeks(2)))).willReturn(asList(
+                Period.ofWeeks(3), Period.ofWeeks(2))).willReturn(asList(
             ExpiringKayttoOikeusDto.builder()
                 .henkiloOid("1.2.3.4.5")
                 .myonnettyTapahtumaId(1L)

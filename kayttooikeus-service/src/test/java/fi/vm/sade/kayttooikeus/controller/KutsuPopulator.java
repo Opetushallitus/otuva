@@ -7,7 +7,7 @@ import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.repositories.populate.Populator;
 
 import javax.persistence.EntityManager;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public class KutsuPopulator implements Populator<Kutsu> {
     private String kieliKoodi = "FI";
     private String kutsuja = "kutsuja";
     private String luotuHenkiloOid;
-    private ZonedDateTime aikaleima = ZonedDateTime.now();
+    private LocalDateTime aikaleima = LocalDateTime.now();
 
     public KutsuPopulator(String etunimi, String sukunimi, String sahkoposti) {
         this.etunimi = etunimi;
@@ -44,7 +44,7 @@ public class KutsuPopulator implements Populator<Kutsu> {
         return this;
     }
     
-    public KutsuPopulator aikaleima(ZonedDateTime aikaleima) {
+    public KutsuPopulator aikaleima(LocalDateTime aikaleima) {
         this.aikaleima = aikaleima;
         return this;
     }

@@ -1,12 +1,11 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import lombok.*;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -16,6 +15,6 @@ import java.time.ZonedDateTime;
 @Table(name = "henkilo_cache_modified", schema = "public")
 public class HenkiloCacheModified extends IdentifiableAndVersionedEntity {
     
-    private ZonedDateTime modified = ZonedDateTime.now();
+    private LocalDateTime modified = LocalDateTime.now();
     
 }

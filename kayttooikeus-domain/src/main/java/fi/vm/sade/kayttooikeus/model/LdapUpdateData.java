@@ -8,7 +8,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -32,6 +32,6 @@ public class LdapUpdateData extends IdentifiableAndVersionedEntity{
     private int status;
     
     @Column(name = "modified", nullable = false)
-    private ZonedDateTime modified;
+    private LocalDateTime modified;
 
 }

@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
                 this.saveAll(0, amount, modifiedOidHenkiloList);
             }
         }
-        henkiloCacheModified.setModified(ZonedDateTime.now());
+        henkiloCacheModified.setModified(LocalDateTime.now());
     }
 
     // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
@@ -67,7 +67,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         }
         this.henkiloCacheModifiedDataRepository.findFirstBy()
                 .orElseThrow(DataInconsistencyException::new)
-                .setModified(ZonedDateTime.now());
+                .setModified(LocalDateTime.now());
     }
 
     private boolean saveAll(long offset, long count, List<String> oidHenkiloList) {

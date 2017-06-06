@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class CachedDateTimeConverter extends PassThroughConverter {
+public class DateTimeConverter extends PassThroughConverter {
 
-    public CachedDateTimeConverter() {
+    public DateTimeConverter() {
         super(LocalDateTime.class);
     }
 

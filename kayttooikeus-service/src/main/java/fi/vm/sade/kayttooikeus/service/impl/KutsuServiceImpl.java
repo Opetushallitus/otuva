@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Stream;
@@ -87,7 +87,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         Kutsu entity = mapper.map(dto, Kutsu.class);
 
         entity.setId(null);
-        entity.setAikaleima(ZonedDateTime.now());
+        entity.setAikaleima(LocalDateTime.now());
         entity.setKutsuja(getCurrentUserOid());
         entity.setSalaisuus(UUID.randomUUID().toString());
         entity.setTila(AVOIN);

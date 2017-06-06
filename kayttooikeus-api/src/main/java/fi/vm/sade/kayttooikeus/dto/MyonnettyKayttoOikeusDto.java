@@ -4,7 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
@@ -25,7 +25,7 @@ public class MyonnettyKayttoOikeusDto implements LocalizableDto, Serializable{
     private String tyyppi = "KORyhma";
     private LocalDate alkuPvm;
     private LocalDate voimassaPvm;
-    private ZonedDateTime kasitelty;
+    private LocalDateTime kasitelty;
     private String kasittelijaOid;
     private String kasittelijaNimi;
     private boolean selected;

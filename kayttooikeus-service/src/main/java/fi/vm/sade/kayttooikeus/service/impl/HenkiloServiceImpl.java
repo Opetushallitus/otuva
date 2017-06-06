@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,7 +117,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                             .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
                     KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = mkort.toHistoria(
                             kasittelija, KayttoOikeudenTila.SULJETTU,
-                            ZonedDateTime.now(), "Oikeuksien poisto, koko henkilön passivointi");
+                            LocalDateTime.now(), "Oikeuksien poisto, koko henkilön passivointi");
                     this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
 
                     // Remove kayttooikeus
