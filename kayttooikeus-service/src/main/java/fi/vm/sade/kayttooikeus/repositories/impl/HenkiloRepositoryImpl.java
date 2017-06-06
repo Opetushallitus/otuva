@@ -102,7 +102,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 .leftJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
                 // Organisaatiohenkilos need to be added later (enrichment)
                 .select(Projections.constructor(HenkilohakuResultDto.class,
-                        qHenkilo.etunimetCached.append(", ").append(qHenkilo.sukunimiCached),
+                        qHenkilo.sukunimiCached.append(", ").append(qHenkilo.etunimetCached),
                         qHenkilo.oidHenkilo,
                         qKayttajatiedot.username));
 

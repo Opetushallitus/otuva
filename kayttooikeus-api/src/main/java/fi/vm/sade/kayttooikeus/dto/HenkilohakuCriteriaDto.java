@@ -1,13 +1,13 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class HenkilohakuCriteriaDto {
 
     private Boolean subOrganisation;

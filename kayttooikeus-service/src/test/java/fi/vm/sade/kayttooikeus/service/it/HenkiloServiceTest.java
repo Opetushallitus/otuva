@@ -2,11 +2,13 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,4 +119,70 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
         assertThat(mkrt).isNull();
     }
+
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void henkilohakuAsAdminSearchByName() {
+        populate(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio").withPassive(false).withDuplikate(true));
+        populate(henkilo("1.2.3.4.3").withNimet("arpa", "kuutio").withPassive(true).withDuplikate(false));
+
+        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, true,
+                false, true, "arpa", null, null);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getNimi).containsExactly("kuutio, arpa");
+    }
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void henkilohakuAsAdminSearchOrganisationRequired() {
+        populate(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio").withPassive(false).withDuplikate(true));
+        populate(henkilo("1.2.3.4.3").withNimet("arpa", "kuutio").withPassive(true).withDuplikate(false));
+
+        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, false,
+                false, true, "arpa", null, null);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        assertThat(henkilohakuResultDtoList).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void henkilohakuAsAdminByOrganisation() {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+        ));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.8"),
+                kayttoOikeusRyhma("RYHMA")
+        ));
+
+        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
+                null, null, null, "3.4.5.6.7", null);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
+    }
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void henkilohakuAsAdminByKayttooikeusryhma() {
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+        ));
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.8"),
+                kayttoOikeusRyhma("RYHMA2")
+        ));
+
+        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
+                null, null, null, null,
+                myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId());
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
+    }
+
+
 }

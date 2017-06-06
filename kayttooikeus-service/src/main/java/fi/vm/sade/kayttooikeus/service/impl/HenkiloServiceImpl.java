@@ -128,16 +128,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         }
     }
 
-    /*
-    admin:
-        ONR (mahd. iso query) -> rikastus (x)
-    OPH-virkailija:
-        1) ONR (mahd. iso query) -> rajaus -> rikastus (x)
-        2) rajaustiedot (~100k query) -> ONR (oidrajauksella) -> rikastus
-    muu:
-        1) ONR (mahd. iso query) -> rajaus -> rikastus
-        2) rajaustiedot -> ONR (oidrajauksella) -> rikastus (x)
-     */
     @Override
     @Transactional(readOnly = true)
     public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
