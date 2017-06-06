@@ -56,7 +56,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
     // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
     @Override
     @Transactional
-    public void forceUpdateHenkiloCache() {
+    public void forceCleanUpdateHenkiloCache() {
         Long count = 1000L;
         for(long offset = 0; !this.saveAll(offset*count, count, null); offset++) {
             // Escape condition in case of inifine loop (10M+ henkilos)
@@ -78,7 +78,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
                 onrHenkilohakuResultDto.stream().map(HenkiloHakuPerustietoDto::getOidHenkilo).collect(Collectors.toList()));
 
         onrHenkilohakuResultDto.forEach(henkiloHakuDto -> {
-            // Find or create matching henkilo
+            // Find or create matching henkilo. Henkilo might not exist after kayttooikeus has separate database.
             Henkilo matchingHenkilo = matchingHenkiloList.stream()
                     .filter(henkilo -> henkilo.getOidHenkilo().equals(henkiloHakuDto.getOidHenkilo()))
                     .findFirst()

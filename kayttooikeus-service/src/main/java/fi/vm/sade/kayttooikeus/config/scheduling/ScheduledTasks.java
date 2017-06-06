@@ -59,7 +59,7 @@ public class ScheduledTasks {
         }
         // Fetch whole henkilo nimi cache
         else {
-            this.henkiloCacheService.forceUpdateHenkiloCache();
+            this.henkiloCacheService.forceCleanUpdateHenkiloCache();
         }
     }
 

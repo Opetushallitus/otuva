@@ -6,5 +6,5 @@ public interface HenkiloCacheService {
     void updateHenkiloCache();
 
     // Update whole cache
-    void forceUpdateHenkiloCache();
+    void forceCleanUpdateHenkiloCache();
 }
