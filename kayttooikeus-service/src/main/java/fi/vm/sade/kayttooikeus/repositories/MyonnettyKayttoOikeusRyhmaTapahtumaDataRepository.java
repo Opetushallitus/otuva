@@ -15,12 +15,12 @@ import java.util.Optional;
 public interface MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository extends CrudRepository<MyonnettyKayttoOikeusRyhmaTapahtuma, Long> {
 
     List<MyonnettyKayttoOikeusRyhmaTapahtuma>
-    findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmBeforeAndVoimassaLoppuPvmAfterAndOrganisaatioHenkiloPassivoituAndOrganisaatioHenkiloHenkiloPassivoitu(
+    findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmLessThanEqualAndVoimassaLoppuPvmGreaterThanEqualAndOrganisaatioHenkiloPassivoituAndOrganisaatioHenkiloHenkiloPassivoitu(
             String oidHenkilo, LocalDate voimassaAlkuPvm, LocalDate voimassaLoppuPvm, boolean organisaatiohenkiloPassivoitu, boolean henkiloPassivoitu);
     default List<MyonnettyKayttoOikeusRyhmaTapahtuma> findValidMyonnettyKayttooikeus(String oidHenkilo) {
-        return findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmBeforeAndVoimassaLoppuPvmAfterAndOrganisaatioHenkiloPassivoituAndOrganisaatioHenkiloHenkiloPassivoitu(
+        return findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmLessThanEqualAndVoimassaLoppuPvmGreaterThanEqualAndOrganisaatioHenkiloPassivoituAndOrganisaatioHenkiloHenkiloPassivoitu(
                 oidHenkilo, LocalDate.now(), LocalDate.now(), false, false);
-    };
+    }
 
     Optional<MyonnettyKayttoOikeusRyhmaTapahtuma> findFirstByKayttoOikeusRyhmaIdAndOrganisaatioHenkiloOrganisaatioOidAndOrganisaatioHenkiloHenkiloOidHenkilo(
             Long kayttooikeusryhmaId, String organisaatioOid, String oidHenkilo
