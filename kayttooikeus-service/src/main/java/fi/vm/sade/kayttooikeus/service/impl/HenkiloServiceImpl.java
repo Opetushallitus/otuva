@@ -1,11 +1,11 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -21,9 +21,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class HenkiloServiceImpl extends AbstractService implements HenkiloService {
@@ -87,19 +88,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
         // perustapauksena henkilöllä on oikeus omien organisaatioiden henkilötietoihin
         return KayttooikeudetDto.user(henkiloHibernateRepository.findOidsBySamaOrganisaatio(henkiloOid, criteria));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<String> findHenkilos(OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
-        ArrayList<String> allowedRoles = Lists.newArrayList("READ", "READ_UPDATE", "CRUD");
-        Set<String> roles = getCasRoles();
-
-        return henkiloHibernateRepository.findHenkiloOids(organisaatioOidsSearchDto.getHenkiloTyyppi(),
-                organisaatioOidsSearchDto.getOrganisaatioOids(), organisaatioOidsSearchDto.getGroupName())
-                .stream()
-                .filter(henkiloOid -> permissionCheckerService.hasInternalAccess(henkiloOid, allowedRoles, roles))
-                .collect(Collectors.toList());
     }
 
     @Override
