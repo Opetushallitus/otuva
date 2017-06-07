@@ -13,7 +13,7 @@ public interface LdapUpdateDataRepository extends QueryDslPredicateExecutor, Jpa
 
     Long countByKayttoOikeusRyhmaId(Long kayttoOikeusRyhmaId);
 
-    LdapUpdateData findByHenkiloOid(String henkiloOid);
+    Optional<LdapUpdateData> findByHenkiloOid(String henkiloOid);
 
     Iterable<LdapUpdateData> findByHenkiloOidIsNotNull();
 }

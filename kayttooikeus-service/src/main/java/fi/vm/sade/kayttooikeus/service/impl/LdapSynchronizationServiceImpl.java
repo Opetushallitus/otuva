@@ -34,8 +34,8 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     @Override
     @Transactional
     public void updateAllAtNight() {
-        LdapUpdateData existingData = ldapUpdateDataRepository.findByHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
-        if (existingData == null) {
+        Optional<LdapUpdateData> existingData = ldapUpdateDataRepository.findByHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
+        if (!existingData.isPresent()) {
             LdapUpdateData newData = new LdapUpdateData();
             newData.setHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
             newData.setPriority(LdapPriorityType.NIGHT);
@@ -75,8 +75,7 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
             updateAllAtNight();
             return;
         }
-        LdapUpdateData existingData = ldapUpdateDataRepository.findByHenkiloOid(henkiloOid);
-        if (existingData != null) {
+        ldapUpdateDataRepository.findByHenkiloOid(henkiloOid).map(existingData -> {
             if (existingData.getPriority() != LdapPriorityType.ASAP) {
                 existingData.setPriority(priority);
                 existingData.setModified(timeService.getDateTimeNow());
@@ -85,14 +84,15 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
                 existingData.setStatus(LdapStatusType.IN_QUEUE);
                 existingData.setModified(timeService.getDateTimeNow());
             }
-        } else {
+            return existingData;
+        }).orElseGet(() -> {
             LdapUpdateData newData = new LdapUpdateData();
             newData.setHenkiloOid(henkiloOid);
             newData.setPriority(priority);
             newData.setStatus(LdapStatusType.IN_QUEUE);
             newData.setModified(timeService.getDateTimeNow());
-            ldapUpdateDataRepository.save(newData);
-        }
+            return ldapUpdateDataRepository.save(newData);
+        });
     }
 
     @Override
