@@ -38,8 +38,9 @@ public class LdapService {
      */
     public void upsert(Henkilo entity, HenkiloDto dto, List<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnetyt) {
         String kayttajatunnus = entity.getKayttajatiedot().getUsername();
-        Kayttaja kayttaja = kayttajaRepository.findByKayttajatunnus(kayttajatunnus).orElseGet(()
-                -> Kayttaja.builder().kayttajatunnus(kayttajatunnus).build());
+        Kayttaja kayttaja = kayttajaRepository.findByKayttajatunnus(kayttajatunnus)
+                .orElseGet(() -> kayttajaRepository.findByOid(dto.getOidHenkilo())
+                        .orElseGet(() -> new Kayttaja()));
 
         // muodostetaan henkilön ldap-roolit
         LdapRoolitBuilder roolit = new LdapRoolitBuilder()

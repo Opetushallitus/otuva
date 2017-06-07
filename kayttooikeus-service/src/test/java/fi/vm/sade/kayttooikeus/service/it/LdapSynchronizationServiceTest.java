@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.KayttajaRepository;
 import fi.vm.sade.kayttooikeus.repositories.LdapSynchronizationDataRepository;
@@ -119,6 +120,29 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
                         tuple("user2", "oid2", "teppo", "teppo", "testaaja", "[\"USER_user2\"]")
                 );
         assertThat(ryhmaRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    public void updateHenkiloKayttajatunnus() {
+        Kayttajatiedot kayttajatiedot = populate(kayttajatiedot(henkilo("oid1"), "user1"));
+        HenkiloDto henkiloDto = createValidHenkiloDto("oid1");
+        when(oppijanumerorekisteriClientMock.getHenkiloByOid(any())).thenReturn(henkiloDto);
+
+        ldapSynchronizationService.updateHenkilo("oid1");
+        ldapSynchronizationService.runSynchronizer();
+
+        assertThat(kayttajaRepository.findAll())
+                .extracting("kayttajatunnus", "oid")
+                .containsExactly(tuple("user1", "oid1"));
+
+        kayttajatiedot.setUsername("user1-updated");
+
+        ldapSynchronizationService.updateHenkilo("oid1");
+        ldapSynchronizationService.runSynchronizer();
+
+        assertThat(kayttajaRepository.findAll())
+                .extracting("kayttajatunnus", "oid")
+                .containsExactly(tuple("user1-updated", "oid1"));
     }
 
     @Test

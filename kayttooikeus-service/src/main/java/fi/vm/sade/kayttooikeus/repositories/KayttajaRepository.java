@@ -8,4 +8,6 @@ public interface KayttajaRepository extends LdapRepository<Kayttaja> {
 
     Optional<Kayttaja> findByKayttajatunnus(String kayttajatunnus);
 
+    Optional<Kayttaja> findByOid(String oid);
+
 }
