@@ -84,6 +84,16 @@ public class CreateUtil {
         return haettuKayttoOikeusRyhma;
     }
 
+    public static Henkilo createHenkiloWithOrganisaatio(String oidHenkilo, String organisaatioOid, boolean passivoitu) {
+        Henkilo henkilo = createHenkilo(oidHenkilo);
+        OrganisaatioHenkilo organisaatioHenkilo = new OrganisaatioHenkilo();
+        organisaatioHenkilo.setHenkilo(henkilo);
+        organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
+        organisaatioHenkilo.setPassivoitu(passivoitu);
+        henkilo.setOrganisaatioHenkilos(Sets.newHashSet(organisaatioHenkilo));
+        return henkilo;
+    }
+
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
                                        String perustelut) {
         return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, null, tehtavanimike,

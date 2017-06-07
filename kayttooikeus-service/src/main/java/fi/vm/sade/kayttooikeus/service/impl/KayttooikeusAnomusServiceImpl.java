@@ -217,8 +217,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.haettuKayttooikeusRyhmaDataRepository.delete(haettuKayttoOikeusRyhma);
     }
 
+    // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
-        return anoja.getOrganisaatioHenkilos().stream()
+        OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = anoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
@@ -227,6 +228,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         .tehtavanimike(tehtavanimike)
                         .henkilo(anoja)
                         .build()));
+        foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
+        return foundOrCreatedOrganisaatioHenkilo;
     }
 
     @Override
