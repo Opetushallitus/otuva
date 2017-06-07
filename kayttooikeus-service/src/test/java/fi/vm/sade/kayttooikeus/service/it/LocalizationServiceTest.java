@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
 
+import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.Localizable;
 import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
@@ -11,6 +12,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
@@ -46,4 +51,5 @@ public class LocalizationServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("Testi1-fi", localizable1.get("fi"));
         assertEquals("Test", localizable2.get("en"));
     }
+
 }

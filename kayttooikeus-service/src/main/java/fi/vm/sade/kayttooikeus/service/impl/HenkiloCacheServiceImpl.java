@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.HenkiloCacheModified;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloCacheModifiedDataRepository;
+import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
+import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloCacheService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
@@ -25,32 +25,32 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final HenkiloCacheModifiedDataRepository henkiloCacheModifiedDataRepository;
+    private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
     @Autowired
     public HenkiloCacheServiceImpl(OppijanumerorekisteriClient oppijanumerorekisteriClient,
                                    HenkiloDataRepository henkiloDataRepository,
-                                   HenkiloCacheModifiedDataRepository henkiloCacheModifiedDataRepository) {
+                                   ScheduleTimestampsDataRepository scheduleTimestampsDataRepository) {
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.henkiloDataRepository = henkiloDataRepository;
-        this.henkiloCacheModifiedDataRepository = henkiloCacheModifiedDataRepository;
+        this.scheduleTimestampsDataRepository = scheduleTimestampsDataRepository;
     }
 
     @Override
     @Transactional
     public void updateHenkiloCache() {
-        HenkiloCacheModified henkiloCacheModified = this.henkiloCacheModifiedDataRepository.findFirstBy()
+        ScheduleTimestamps scheduleTimestamps = this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
                 .orElseThrow(DataInconsistencyException::new);
         List<String> modifiedOidHenkiloList = new ArrayList<>();
         long amount = 1000L;
         for(long offset = 0; offset == 0 || !modifiedOidHenkiloList.isEmpty() || !(modifiedOidHenkiloList.size() < amount); offset++) {
-            modifiedOidHenkiloList = this.oppijanumerorekisteriClient.getModifiedSince(henkiloCacheModified.getModified(),
+            modifiedOidHenkiloList = this.oppijanumerorekisteriClient.getModifiedSince(scheduleTimestamps.getModified(),
                     offset*amount, amount);
             if(!modifiedOidHenkiloList.isEmpty()) {
                 this.saveAll(0, amount, modifiedOidHenkiloList);
             }
         }
-        henkiloCacheModified.setModified(LocalDateTime.now());
+        scheduleTimestamps.setModified(LocalDateTime.now());
     }
 
     // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
@@ -58,14 +58,14 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
     @Transactional
     public void forceCleanUpdateHenkiloCache() {
         Long count = 1000L;
-        for(long offset = 0; !this.saveAll(offset*count, count, null); offset++) {
+        for(long page = 0; !this.saveAll(page*count, count, null); page++) {
             // Escape condition in case of inifine loop (10M+ henkilos)
-            if(offset > 10000) {
-                LOG.error("Infinite loop detected with page "+ offset + " and count " + count + ". Henkilo cache might not be fully updated!");
+            if(page > 10000) {
+                LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
                 break;
             }
         }
-        this.henkiloCacheModifiedDataRepository.findFirstBy()
+        this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
                 .orElseThrow(DataInconsistencyException::new)
                 .setModified(LocalDateTime.now());
     }

@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.HenkiloCacheModified;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloCacheModifiedDataRepository;
+import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
+import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -36,7 +35,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     private HenkiloDataRepository henkiloDataRepository;
 
     @MockBean
-    private HenkiloCacheModifiedDataRepository henkiloCacheModifiedDataRepository;
+    private ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
     @Autowired
     private HenkiloCacheService henkiloCacheService;
@@ -45,8 +44,8 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     public void updateHenkiloCache() throws Exception {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("1.2.3.4.5").build();
         LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
-        Optional<HenkiloCacheModified> henkiloCacheModified = Optional.of(new HenkiloCacheModified(timestamp));
-        given(this.henkiloCacheModifiedDataRepository.findFirstBy())
+        Optional<ScheduleTimestamps> henkiloCacheModified = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
+        given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
                 .willReturn(henkiloCacheModified);
         given(this.oppijanumerorekisteriClient.getModifiedSince(timestamp, 0L, 1000L))
                 .willReturn(Lists.newArrayList("1.2.3.4.5"));
@@ -70,14 +69,14 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     public void forceCleanUpdateHenkiloCache() throws Exception {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("1.2.3.4.5").build();
         LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
-        Optional<HenkiloCacheModified> henkiloCacheModified = Optional.of(new HenkiloCacheModified(timestamp));
+        Optional<ScheduleTimestamps> scheduleTimestamps = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
         given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyListOf(String.class)))
         .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
                 "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
         given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
                 .willReturn(Lists.newArrayList(henkilo));
-        given(this.henkiloCacheModifiedDataRepository.findFirstBy())
-                .willReturn(henkiloCacheModified);
+        given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
+                .willReturn(scheduleTimestamps);
 
         this.henkiloCacheService.forceCleanUpdateHenkiloCache();
 
@@ -86,19 +85,19 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
         assertThat(henkilo.getPassivoituCached()).isFalse();
         assertThat(henkilo.getDuplicateCached()).isFalse();
 
-        assertThat(henkiloCacheModified.get().getModified()).isNotEqualByComparingTo(timestamp);
+        assertThat(scheduleTimestamps.get().getModified()).isNotEqualByComparingTo(timestamp);
     }
 
     @Test
     public void forceCleanUpdateHenkiloCacheHenkiloNotExist() throws Exception {
         LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
-        Optional<HenkiloCacheModified> henkiloCacheModified = Optional.of(new HenkiloCacheModified(timestamp));
+        Optional<ScheduleTimestamps> henkiloCacheModified = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
         given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyListOf(String.class)))
         .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
                 "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
         given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
                 .willReturn(Lists.newArrayList());
-        given(this.henkiloCacheModifiedDataRepository.findFirstBy())
+        given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
                 .willReturn(henkiloCacheModified);
         doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
         this.henkiloCacheService.forceCleanUpdateHenkiloCache();

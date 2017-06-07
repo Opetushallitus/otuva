@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "henkilo_cache_modified", schema = "public")
-public class HenkiloCacheModified extends IdentifiableAndVersionedEntity {
+@Table(name = "schedule_timestamps", schema = "public")
+public class ScheduleTimestamps extends IdentifiableAndVersionedEntity {
     
     private LocalDateTime modified = LocalDateTime.now();
-    
+
+    private String identifier;
+
 }

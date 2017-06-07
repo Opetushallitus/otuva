@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioViiteDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import ma.glasnost.orika.CustomConverter;
+import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 public class KayttoOikeusRyhmaConverter extends CustomConverter<KayttoOikeusRyhma, KayttoOikeusRyhmaDto> {
 
     @Override
-    public KayttoOikeusRyhmaDto convert(KayttoOikeusRyhma source, Type<? extends KayttoOikeusRyhmaDto> destinationType) {
+    public KayttoOikeusRyhmaDto convert(KayttoOikeusRyhma source, Type<? extends KayttoOikeusRyhmaDto> destinationType, MappingContext mappingContext) {
         return KayttoOikeusRyhmaDto.builder()
                 .id(source.getId())
                 .name(source.getName())
