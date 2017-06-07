@@ -41,7 +41,7 @@ public class KayttajaHenkiloDtoMapper extends CustomMapper<Kayttaja, HenkiloDto>
     }
 
     private String createOletusSahkoposti(Kayttaja kayttaja) {
-        return kayttaja.getKayttajatunnus() + "@epavaldi.local";
+        return kayttaja.getKayttajatunnus() + "@epavalidi.local";
     }
 
     @Override
