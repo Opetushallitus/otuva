@@ -51,7 +51,7 @@ public class LdapSynchronizationData extends IdentifiableAndVersionedEntity {
 
     public void setAverageUpdateTime(long totalTimeInMillis, int dataSize) {
         if (totalTimeInMillis > 0 && dataSize > 0) {
-            setAverageUpdateTimeInMillis((int) totalTimeInMillis / dataSize);
+            setAverageUpdateTimeInMillis((int) (totalTimeInMillis / dataSize));
         } else {
             setAverageUpdateTimeInMillis(0);
         }

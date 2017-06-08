@@ -230,7 +230,7 @@ public class LdapSynchronizer {
             LdapSynchronizationData ldapSynchronizationData = new LdapSynchronizationData();
             ldapSynchronizationData.setLastRun(timeService.getDateTimeNow());
             ldapSynchronizationData.setAverageUpdateTime(totalTime, dataSize);
-            ldapSynchronizationData.setTotalRuntimeInSeconds((int) totalTime / 1000);
+            ldapSynchronizationData.setTotalRuntimeInSeconds((int) (totalTime / 1000));
             ldapSynchronizationData.setTotalAmount(dataSize);
             ldapSynchronizationData.setCoolOff(coolOff);
             ldapSynchronizationData.setRunBatch(runBatch);
