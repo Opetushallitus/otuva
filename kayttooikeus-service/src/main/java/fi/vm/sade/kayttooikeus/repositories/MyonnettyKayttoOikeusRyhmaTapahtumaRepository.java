@@ -5,8 +5,8 @@ import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 
+import java.time.LocalDate;
 import java.util.List;
-import org.joda.time.LocalDate;
 
 public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
     List<Long> findMasterIdsByHenkilo(String henkiloOid);

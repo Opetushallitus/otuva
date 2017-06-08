@@ -2,10 +2,9 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * Class that contains {@link Henkilo}'s password hash and salt. Only on may
@@ -45,8 +44,7 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
      * Can be used to invalidate password for being too old
      */
     @Column(name = "createdat")
-    @Type(type = "dateTime")
-    private DateTime createdAt;
+    private LocalDateTime createdAt;
 
     /**
      * Manually invalidated password
@@ -57,7 +55,7 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
     @PrePersist
     @PreUpdate
     public void setPersistDate() {
-        createdAt = new DateTime();
+        createdAt = LocalDateTime.now();
     }
 
     @Override

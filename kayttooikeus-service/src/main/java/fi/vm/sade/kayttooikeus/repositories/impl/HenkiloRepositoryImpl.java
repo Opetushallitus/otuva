@@ -1,27 +1,29 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import static com.querydsl.core.types.ExpressionUtils.eq;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.QHenkilo;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
-import org.joda.time.LocalDate;
+import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import static com.querydsl.core.types.ExpressionUtils.eq;
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 import static fi.vm.sade.kayttooikeus.model.QKayttajatiedot.kayttajatiedot;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -91,6 +93,30 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria) {
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+
+        JPAQuery<HenkilohakuResultDto> query = jpa().from(qHenkilo)
+                // Not excluding henkilos without organisation (different condition on where)
+                .leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
+                .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma)
+                .leftJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
+                // Organisaatiohenkilos need to be added later (enrichment)
+                .select(Projections.constructor(HenkilohakuResultDto.class,
+                        qHenkilo.sukunimiCached.append(", ").append(qHenkilo.etunimetCached),
+                        qHenkilo.oidHenkilo,
+                        qKayttajatiedot.username));
+
+        query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+
+        return query.distinct().fetch();
+    }
+
+    @Override
     public List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName) {
         BooleanBuilder booleanBuilder = new BooleanBuilder()
                 .and(henkilo.henkiloTyyppi.eq(henkiloTyyppi));
@@ -103,9 +129,9 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
 
         BooleanBuilder voimassa = new BooleanBuilder()
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(new LocalDate())
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(LocalDate.now())
                         .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.isNull()))
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.gt(new LocalDate())
+                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.gt(LocalDate.now())
                         .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.isNull()));
         booleanBuilder.and(voimassa);
 

@@ -1,9 +1,9 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import lombok.*;
-import org.joda.time.LocalDate;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Getter
 @Setter

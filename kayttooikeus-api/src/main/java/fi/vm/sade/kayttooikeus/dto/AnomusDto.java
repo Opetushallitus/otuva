@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.dto;
 
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.*;
-import org.joda.time.DateTime;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -15,7 +15,7 @@ public class AnomusDto {
 
     private String organisaatioOid;
 
-    private DateTime anottuPvm;
+    private LocalDateTime anottuPvm;
 
     private Date anomusTilaTapahtumaPvm;
 

@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrderBy;
 import org.springframework.stereotype.Repository;

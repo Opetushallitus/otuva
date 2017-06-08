@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.generic.rest.CachingRestClient;
@@ -8,8 +9,7 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.properties.OphProperties;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.mapper;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 
@@ -104,6 +104,45 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                     return new ExternalServiceException(url, e.getMessage(), e);
                 });
     }
+
+    @Override
+    public List<HenkiloHakuPerustietoDto> getAllByOids(long page, long limit, List<String> oidHenkiloList) {
+        Map<String, String> params = new HashMap<String, String>() {{
+            put("offset", Long.toString(page));
+            put("limit", Long.toString(limit));
+        }};
+        String data;
+        try {
+            data = oidHenkiloList == null || oidHenkiloList.isEmpty()
+                    ? "{}"
+                    : this.objectMapper.writeValueAsString(new HashMap<String, List<String>>() {{
+                        put("henkiloOids", oidHenkiloList);
+                    }});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Unexpected error during json processing");
+        }
+
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
+        return retrying(FunctionalUtils.<List<HenkiloHakuPerustietoDto>>io(
+                () -> objectMapper.readerFor(new TypeReference<List<HenkiloHakuPerustietoDto>>() {})
+                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                                data).getEntity().getContent())), 2).get()
+                .orFail(mapper(url));
+    }
+
+    @Override
+    public List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount) {
+        Map<String, String> params = new HashMap<String, String>() {{
+            put("offset", Long.toString(offset));
+            put("amount", Long.toString(amount));
+        }};
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.modified-since", dateTime, params);
+        return retrying(FunctionalUtils.<List<String>>io(
+                () -> this.objectMapper.readerFor(new TypeReference<List<String>>() {})
+                        .readValue(this.serviceAccountClient.get(url))), 2).get()
+                .orFail((RuntimeException e) -> new ExternalServiceException(url, e.getMessage(), e));
+    }
+
 
     @Override
     public HenkiloPerustietoDto getPerustietoByOid(String oid) {

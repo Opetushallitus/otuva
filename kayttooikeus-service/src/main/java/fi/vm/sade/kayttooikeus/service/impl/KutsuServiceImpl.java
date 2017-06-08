@@ -4,7 +4,7 @@ import com.google.gson.internal.LinkedHashTreeMap;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.repositories.OrderBy;
@@ -14,13 +14,11 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Stream;
@@ -89,7 +87,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         Kutsu entity = mapper.map(dto, Kutsu.class);
 
         entity.setId(null);
-        entity.setAikaleima(DateTime.now());
+        entity.setAikaleima(LocalDateTime.now());
         entity.setKutsuja(getCurrentUserOid());
         entity.setSalaisuus(UUID.randomUUID().toString());
         entity.setTila(AVOIN);

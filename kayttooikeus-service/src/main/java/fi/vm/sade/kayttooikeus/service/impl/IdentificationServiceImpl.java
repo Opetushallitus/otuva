@@ -7,7 +7,7 @@ import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
@@ -30,7 +30,7 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 public class IdentificationServiceImpl extends AbstractService implements IdentificationService {
 
     private IdentificationRepository identificationRepository;
-    private HenkiloRepository henkiloRepository;
+    private HenkiloDataRepository henkiloDataRepository;
     private KayttoOikeusService kayttoOikeusService;
     private LdapSynchronizationService ldapSynchronizationService;
     private OrikaBeanMapper mapper;
@@ -38,13 +38,13 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Autowired
     public IdentificationServiceImpl(IdentificationRepository identificationRepository,
-                                     HenkiloRepository henkiloRepository,
+                                     HenkiloDataRepository henkiloDataRepository,
                                      KayttoOikeusService kayttoOikeusService,
                                      LdapSynchronizationService ldapSynchronizationService,
                                      OrikaBeanMapper mapper,
                                      OppijanumerorekisteriClient oppijanumerorekisteriClient) {
         this.identificationRepository = identificationRepository;
-        this.henkiloRepository = henkiloRepository;
+        this.henkiloDataRepository = henkiloDataRepository;
         this.kayttoOikeusService = kayttoOikeusService;
         this.ldapSynchronizationService = ldapSynchronizationService;
         this.mapper = mapper;
@@ -55,7 +55,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Transactional
     public String generateAuthTokenForHenkilo(String oid, String idpKey, String idpIdentifier) {
         logger.info("generateAuthTokenForHenkilo henkilo:[{}] idp:[{}] identifier:[{}]", oid, idpKey, idpIdentifier);
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("no henkilo found with oid:[" + oid + "]"));
 
         Optional<Identification> identification = henkilo.getIdentifications().stream()
@@ -121,7 +121,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Transactional
     public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
         String oid = oppijanumerorekisteriClient.getOidByHetu(hetu);
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(()
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(()
                 -> new NotFoundException("henkilo not found"));
         String token = generateToken();
         Optional<Identification> henkiloIdentification = henkilo.getIdentifications().stream()
@@ -155,7 +155,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Override
     @Transactional
     public Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, String idpKey, Set<String> hakatunnukset) {
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseThrow(() -> new NotFoundException("Henkilo not found"));
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(() -> new NotFoundException("Henkilo not found"));
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, "haka");
         identificationRepository.delete(identifications);
         List<Identification> updatedIdentifications = hakatunnukset.stream().map(hakatunnus -> new Identification(henkilo, "haka", hakatunnus)).collect(Collectors.toList());

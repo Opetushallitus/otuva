@@ -5,9 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,14 +45,10 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "passivoitu", nullable = false)
     private boolean passivoitu;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassa_alku_pvm")
-    @Type(type = "localDate")
     private LocalDate voimassaAlkuPvm;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "voimassa_loppu_pvm")
-    @Type(type = "localDate")
     private LocalDate voimassaLoppuPvm;
 
     @Column(name = "tehtavanimike")

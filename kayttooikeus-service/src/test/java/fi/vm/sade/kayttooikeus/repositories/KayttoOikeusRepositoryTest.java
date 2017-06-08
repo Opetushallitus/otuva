@@ -8,13 +8,13 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,13 +49,13 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertFalse(kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "PALVELU", "UPDATE"));
         assertFalse(kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.6", "HENKILOHALLINTA", "CRUD"));
         
-        tapahtuma.setVoimassaAlkuPvm(new LocalDate().plusDays(1));
+        tapahtuma.setVoimassaAlkuPvm(LocalDate.now().plusDays(1));
         em.merge(tapahtuma);
 
         assertFalse(kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILOHALLINTA", "CRUD"));
         
         populate(myonnettyKayttoOikeus(
-            organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.7").voimassaAlkaen(new LocalDate().plusMonths(1)),
+            organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.7").voimassaAlkaen(LocalDate.now().plusMonths(1)),
             kayttoOikeusRyhma("RYHMA").withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
         ));
         assertFalse(kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.6", "HENKILOHALLINTA", "CRUD"));
@@ -68,18 +68,18 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
                 kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ"))
-        ).voimassaPaattyen(new LocalDate().plusMonths(3)));
+        ).voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
-        List<ExpiringKayttoOikeusDto> expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(new LocalDate(), Period.weeks(1));
+        List<ExpiringKayttoOikeusDto> expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(LocalDate.now(), Period.ofWeeks(1));
         assertTrue(expiring.isEmpty());
 
-        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(new LocalDate());
+        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(LocalDate.now());
         assertTrue(expiring.isEmpty());
 
-        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(new LocalDate(), Period.months(4), Period.months(2));
+        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(LocalDate.now(), Period.ofMonths(4), Period.ofMonths(2));
         assertTrue(expiring.isEmpty());
         
-        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(new LocalDate(), Period.months(3), Period.months(1));
+        expiring = kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(LocalDate.now(), Period.ofMonths(3), Period.ofMonths(1));
         assertFalse(expiring.isEmpty());
         assertEquals(1, expiring.size());
         assertEquals(tapahtuma.getVoimassaLoppuPvm(), expiring.get(0).getVoimassaLoppuPvm());
@@ -113,12 +113,12 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
                     kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
                             .withOikeus(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Luku-muokkaus")))
                             .withOikeus(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Palvelukuvaus")), "READ")))
-                        .voimassaPaattyen(new LocalDate())),
+                        .voimassaPaattyen(LocalDate.now())),
             tapahtuma2 = populate(myonnettyKayttoOikeus(
                     organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8").tehtavanimike("testaaja"),
                     kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Ryhmäkuvaus"))
                             .withOikeus(oikeus("KOODISTO", "WRITE").kuvaus(text("FI", "Kirjoitusoikeus"))))
-                    .voimassaPaattyen(new LocalDate().plusMonths(3)));
+                    .voimassaPaattyen(LocalDate.now().plusMonths(3)));
         
         List<KayttoOikeusHistoriaDto> historia = kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo("1.2.3.4.5");
         assertEquals(3, historia.size());
@@ -129,8 +129,8 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, historia.get(0).getTyyppi());
         assertEquals("4.5.6.7.8", historia.get(0).getOrganisaatioOid());
         assertEquals("testaaja", historia.get(0).getTehtavanimike());
-        assertEquals(new LocalDate().plusMonths(3), historia.get(0).getVoimassaLoppuPvm());
-        assertEquals(new LocalDate(), historia.get(0).getVoimassaAlkuPvm());
+        assertEquals(LocalDate.now().plusMonths(3), historia.get(0).getVoimassaLoppuPvm());
+        assertEquals(LocalDate.now(), historia.get(0).getVoimassaAlkuPvm());
         assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), historia.get(0).getKasittelija());
         assertEquals(tapahtuma2.getKayttoOikeusRyhma().getDescription().getId(), historia.get(0).getKuvaus().getId());
         assertEquals("KOODISTO", historia.get(0).getPalvelu());

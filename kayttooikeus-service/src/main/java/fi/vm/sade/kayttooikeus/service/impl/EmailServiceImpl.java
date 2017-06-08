@@ -40,7 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.text.DateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -201,7 +203,7 @@ public class EmailServiceImpl implements EmailService {
         return kayttoOikeudet.stream().map(kayttoOikeus -> {
             String kayttoOikeusRyhmaNimi = ofNullable(kayttoOikeus.getRyhmaDescription())
                     .flatMap(d -> d.getOrAny(languageCode)).orElse(kayttoOikeus.getRyhmaName());
-            String voimassaLoppuPvmStr = dateFormat.format(kayttoOikeus.getVoimassaLoppuPvm().toDate());
+            String voimassaLoppuPvmStr = dateFormat.format(Date.from(kayttoOikeus.getVoimassaLoppuPvm().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             return String.format("%s (%s)", kayttoOikeusRyhmaNimi, voimassaLoppuPvmStr);
         }).collect(joining(", "));
     }

@@ -10,6 +10,10 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 public class HenkiloPopulator implements Populator<Henkilo> {
     private final String oid;
     private boolean passivoitu;
+    private String etunimetCached;
+    private String sukunimiCached;
+    private Boolean passivoituCached;
+    private Boolean duplikaattiCached;
 
     public HenkiloPopulator(String oid) {
         this.passivoitu = false;
@@ -25,6 +29,22 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         return this;
     }
 
+    public HenkiloPopulator withNimet(String etunimi, String sukunimi) {
+        this.etunimetCached = etunimi;
+        this.sukunimiCached = sukunimi;
+        return this;
+    }
+
+    public HenkiloPopulator withPassive(Boolean passivoitu) {
+        this.passivoituCached = passivoitu;
+        return this;
+    }
+
+    public HenkiloPopulator withDuplikate(Boolean duplikaatti) {
+        this.duplikaattiCached = duplikaatti;
+        return this;
+    }
+
     @Override
     public Henkilo apply(EntityManager entityManager) {
         Henkilo existing = first(entityManager.createQuery("select h from Henkilo h where h.oidHenkilo = :oid")
@@ -36,6 +56,10 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         henkilo.setOidHenkilo(oid);
         henkilo.setPassivoitu(passivoitu);
         henkilo.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
+        henkilo.setEtunimetCached(this.etunimetCached);
+        henkilo.setSukunimiCached(this.sukunimiCached);
+        henkilo.setPassivoituCached(this.passivoituCached);
+        henkilo.setDuplicateCached(this.duplikaattiCached);
         entityManager.persist(henkilo);
         return entityManager.find(Henkilo.class, henkilo.getId());
     }

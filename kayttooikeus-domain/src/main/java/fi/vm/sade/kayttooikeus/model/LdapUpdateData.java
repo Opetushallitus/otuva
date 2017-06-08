@@ -4,8 +4,7 @@ import fi.vm.sade.kayttooikeus.converter.LdapPriorityTypeConverter;
 import fi.vm.sade.kayttooikeus.converter.LdapStatusTypeConverter;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -21,6 +20,8 @@ import lombok.ToString;
  *
  * @see LdapSynchronizationData statistiikka
  */
+
+
 @Entity
 @Table(name = "ldap_update_data")
 @Getter
@@ -47,8 +48,7 @@ public class LdapUpdateData extends IdentifiableAndVersionedEntity {
     @Convert(converter = LdapStatusTypeConverter.class)
     private LdapStatusType status;
 
-    @Type(type = "dateTime")
     @Column(name = "modified", nullable = false)
-    private DateTime modified;
+    private LocalDateTime modified;
 
 }

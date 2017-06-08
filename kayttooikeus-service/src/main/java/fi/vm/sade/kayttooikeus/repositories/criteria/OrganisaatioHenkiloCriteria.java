@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.repositories;
+package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import java.util.Set;
 import lombok.Getter;

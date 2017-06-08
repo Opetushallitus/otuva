@@ -226,11 +226,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-        </dependency>
-
         <!-- For java 8 datetime -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>

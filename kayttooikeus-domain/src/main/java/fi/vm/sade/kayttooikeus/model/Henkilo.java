@@ -1,15 +1,11 @@
 package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Getter @Setter
@@ -17,6 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "henkilo", schema = "public")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "henkilohaku",
+        attributeNodes = {
+            @NamedAttributeNode("organisaatioHenkilos"),
+        }
+    )
+})
 public class Henkilo extends IdentifiableAndVersionedEntity {
 
     @Column(nullable = false, name = "oidhenkilo")
@@ -40,9 +44,20 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
             CascadeType.REFRESH })
     private Set<Identification> identifications = new HashSet<>();
 
+    private String etunimetCached;
+
+    private String sukunimiCached;
+
+    private Boolean passivoituCached;
+
+    private Boolean duplicateCached;
+
+    public Henkilo(String oidHenkilo) {
+        this.oidHenkilo = oidHenkilo;
+    }
+
     public OrganisaatioHenkilo addOrganisaatioHenkilo(OrganisaatioHenkilo organisaatioHenkilo) {
         this.organisaatioHenkilos.add(organisaatioHenkilo);
         return organisaatioHenkilo;
     }
-
 }

@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.beans.BeansException;
@@ -15,6 +16,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 // example from https://github.com/dlizarra/orika-spring-integration
@@ -56,6 +59,8 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .fieldAToB("description", "nimi")
                 .byDefault()
                 .register();
+        factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDate.class));
+        factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDateTime.class));
     }
 
     /**

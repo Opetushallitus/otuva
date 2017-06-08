@@ -1,44 +1,49 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioOidsSearchDto;
+import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import org.joda.time.DateTime;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class HenkiloServiceImpl extends AbstractService implements HenkiloService {
 
-    private HenkiloHibernateRepository henkiloHibernateRepository;
 
     private PermissionCheckerService permissionCheckerService;
 
+    private HenkiloHibernateRepository henkiloHibernateRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    private final HenkiloRepository henkiloRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
+
     private final CommonProperties commonProperties;
     private final LdapSynchronizationService ldapSynchronizationService;
+
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
+    private final OrikaBeanMapper mapper;
 
     @Autowired
     HenkiloServiceImpl(HenkiloHibernateRepository henkiloHibernateRepository,
@@ -49,7 +54,9 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
                        CommonProperties commonProperties,
                        LdapSynchronizationService ldapSynchronizationService,
-                       HenkiloRepository henkiloRepository) {
+                       HenkiloDataRepository henkiloDataRepository,
+                       OppijanumerorekisteriClient oppijanumerorekisteriClient,
+                       OrikaBeanMapper mapper) {
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.permissionCheckerService = permissionCheckerService;
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
@@ -58,7 +65,9 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
         this.commonProperties = commonProperties;
         this.ldapSynchronizationService = ldapSynchronizationService;
-        this.henkiloRepository = henkiloRepository;
+        this.henkiloDataRepository = henkiloDataRepository;
+        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
+        this.mapper = mapper;
     }
 
     @Override
@@ -108,11 +117,11 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 for (Iterator<MyonnettyKayttoOikeusRyhmaTapahtuma> mkortIterator = mkorts.iterator(); mkortIterator.hasNext();) {
                     MyonnettyKayttoOikeusRyhmaTapahtuma mkort = mkortIterator.next();
                     // Create event
-                    Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(kasittelijaOid)
+                    Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
                             .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
                     KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = mkort.toHistoria(
                             kasittelija, KayttoOikeudenTila.SULJETTU,
-                            new DateTime(), "Oikeuksien poisto, koko henkilön passivointi");
+                            LocalDateTime.now(), "Oikeuksien poisto, koko henkilön passivointi");
                     this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
 
                     // Remove kayttooikeus
@@ -123,4 +132,17 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         }
         ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
+        return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
+                this.organisaatioHenkiloDataRepository, this.henkiloDataRepository)
+                .builder(henkilohakuCriteriaDto)
+                .search()
+                .exclusion()
+                .enrichment()
+                .build();
+    }
+
 }

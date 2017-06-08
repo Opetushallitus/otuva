@@ -9,7 +9,6 @@ import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulato
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,8 +33,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.pal
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static org.joda.time.LocalDate.now;
-import static org.joda.time.Period.months;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -122,12 +121,12 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ"))
-            ).voimassaPaattyen(now().plusMonths(1)));
-        List<ExpiringKayttoOikeusDto> oikeus = kayttoOikeusService.findToBeExpiringMyonnettyKayttoOikeus(now(), months(1));
+            ).voimassaPaattyen(LocalDate.now().plusMonths(1)));
+        List<ExpiringKayttoOikeusDto> oikeus = kayttoOikeusService.findToBeExpiringMyonnettyKayttoOikeus(LocalDate.now(), Period.ofMonths(1));
         assertEquals(1, oikeus.size());
         assertEquals(tapahtuma.getId(), oikeus.get(0).getMyonnettyTapahtumaId());
         assertEquals("1.2.3.4.5", oikeus.get(0).getHenkiloOid());
-        assertEquals(now().plusMonths(1), oikeus.get(0).getVoimassaLoppuPvm());
+        assertEquals(LocalDate.now().plusMonths(1), oikeus.get(0).getVoimassaLoppuPvm());
         assertEquals("kuvaus", oikeus.get(0).getRyhmaDescription().get("FI"));
         assertEquals("RYHMA", oikeus.get(0).getRyhmaName());
     }
@@ -214,17 +213,17 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .withOikeus(oikeus("KOODISTO", "CRUD"));
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop).voimassaPaattyen(new LocalDate().plusMonths(3)).voimassaAlkaen(new LocalDate().minusMonths(1)));
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop).voimassaPaattyen(LocalDate.now().plusMonths(3)).voimassaAlkaen(LocalDate.now().minusMonths(1)));
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("5.6.7.8.9"), "3.4.5.6.7"), pop).voimassaPaattyen(new LocalDate().plusMonths(2)).voimassaAlkaen(new LocalDate().minusMonths(1)));
+                organisaatioHenkilo(henkilo("5.6.7.8.9"), "3.4.5.6.7"), pop).voimassaPaattyen(LocalDate.now().plusMonths(2)).voimassaAlkaen(LocalDate.now().minusMonths(1)));
 
         KayttoOikeusRyhmaPopulator pop2 = kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "testiryhma")
                 .put("EN", "testgroup"))
                 .withOikeus(oikeus("HAKUAPP", "CRUD"));
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop2).voimassaPaattyen(new LocalDate().minusMonths(1)).voimassaAlkaen(new LocalDate().minusMonths(2)));
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"), pop2).voimassaPaattyen(LocalDate.now().minusMonths(1)).voimassaAlkaen(LocalDate.now().minusMonths(2)));
 
         RyhmanHenkilotDto henkilot = kayttoOikeusService.findHenkilotByKayttoOikeusRyhma(populate(pop).getId());
         assertEquals(2, henkilot.getPersonOids().size());
@@ -426,13 +425,13 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
         populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA4")
                 .withOikeus(oikeus("HENKILOHALLINTA", "READ2")))
-                .voimassaAlkaen(new LocalDate().plusDays(1))
-                .voimassaPaattyen(new LocalDate().plusDays(2)));
+                .voimassaAlkaen(LocalDate.now().plusDays(1))
+                .voimassaPaattyen(LocalDate.now().plusDays(2)));
 
         populate(myonnettyKayttoOikeus(orgHenkilo, kayttoOikeusRyhma("RYHMA4")
                 .withOikeus(oikeus("HENKILOHALLINTA", "READ3")))
-                .voimassaAlkaen(new LocalDate().minusDays(2))
-                .voimassaPaattyen(new LocalDate().minusDays(1)));
+                .voimassaAlkaen(LocalDate.now().minusDays(2))
+                .voimassaPaattyen(LocalDate.now().minusDays(1)));
 
         AuthorizationDataDto authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
         List<AccessRightTypeDto> accessRights = authData.getAccessrights().getAccessRight();

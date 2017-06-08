@@ -8,10 +8,10 @@ import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
@@ -28,7 +28,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
         implements MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
 
     private BooleanBuilder getValidKayttoOikeusRyhmaCriteria(String oid) {
-        LocalDate now = new LocalDate();
+        LocalDate now = LocalDate.now();
         return new BooleanBuilder()
                 .and(organisaatioHenkilo.henkilo.oidHenkilo.eq(oid))
                 .and(organisaatioHenkilo.passivoitu.eq(false))

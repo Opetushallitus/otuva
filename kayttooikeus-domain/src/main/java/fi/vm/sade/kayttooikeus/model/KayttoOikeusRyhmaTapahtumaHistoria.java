@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -39,8 +38,6 @@ public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersioned
     @JoinColumn(name = "kasittelija_henkilo_id")
     private Henkilo kasittelija;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "aikaleima", nullable = false)
-    @Type(type = "dateTime")
-    private DateTime aikaleima;
+    private LocalDateTime aikaleima;
 }

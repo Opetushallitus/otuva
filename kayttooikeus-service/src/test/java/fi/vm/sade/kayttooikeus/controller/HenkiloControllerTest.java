@@ -5,7 +5,6 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
@@ -27,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static java.util.Collections.singletonList;
@@ -88,8 +88,8 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     public void listOrganisatioHenkilosTest() throws Exception {
         given(this.service.listOrganisaatioHenkilos("1.2.3.4.5", "fi")).willReturn(singletonList(
                 OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L)
-                        .voimassaAlkuPvm(new LocalDate(2016,1,1))
-                        .voimassaLoppuPvm(new LocalDate(2016,12,31))
+                        .voimassaAlkuPvm(LocalDate.of(2016,1,1))
+                        .voimassaLoppuPvm(LocalDate.of(2016,12,31))
                         .tyyppi(OrganisaatioHenkiloTyyppi.HAKIJA)
                         .passivoitu(false)
                         .tehtavanimike("Devaaja")

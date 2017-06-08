@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.repositories;
+package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;

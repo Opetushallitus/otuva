@@ -10,12 +10,6 @@ import javax.persistence.*;
 @Getter
 @Setter
 @MappedSuperclass
-@TypeDefs({
-        @TypeDef(name = "localTime", typeClass = org.jadira.usertype.dateandtime.joda.PersistentLocalTime.class),
-        @TypeDef(name = "localDate", typeClass = org.jadira.usertype.dateandtime.joda.PersistentLocalDate.class),
-        @TypeDef(name = "dateTime", typeClass = org.jadira.usertype.dateandtime.joda.PersistentDateTime.class,
-                parameters = {@org.hibernate.annotations.Parameter(name = "databaseZone", value = "jvm")})
-})
 public class IdentifiableAndVersionedEntity implements Identifiable {
     @Id
     @Column(name = "id", unique = true, nullable = false)

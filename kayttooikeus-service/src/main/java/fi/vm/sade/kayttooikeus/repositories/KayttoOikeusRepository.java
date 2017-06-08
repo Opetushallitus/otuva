@@ -5,9 +5,9 @@ import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 public interface KayttoOikeusRepository extends BaseRepository<KayttoOikeus> {

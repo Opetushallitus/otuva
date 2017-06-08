@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
@@ -17,13 +18,15 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 import static java.util.stream.Collectors.toSet;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,14 +36,13 @@ import org.springframework.validation.BindException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.joda.time.LocalTime;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
 
     private final HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
-    private final HenkiloRepository henkiloRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
@@ -62,7 +64,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     @Autowired
     public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
-                                         HenkiloRepository henkiloRepository,
+                                         HenkiloDataRepository henkiloDataRepository,
                                          HenkiloHibernateRepository henkiloHibernateRepository,
                                          MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
                                          KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
@@ -78,7 +80,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                          OrganisaatioClient organisaatioClient,
                                          AnomusRepository anomusRepository) {
         this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
-        this.henkiloRepository = henkiloRepository;
+        this.henkiloDataRepository = henkiloDataRepository;
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
@@ -138,11 +140,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             throw new UnprocessableEntityException(errors);
         }
 
-        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.permissionCheckerService.getCurrentUserOid()));
         anojanAnomus.setKasittelija(kasittelija);
 
-        Henkilo anoja = this.henkiloRepository.findByOidHenkilo(anojanAnomus.getHenkilo().getOidHenkilo())
+        Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojanAnomus.getHenkilo().getOidHenkilo())
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid "
                         + anojanAnomus.getHenkilo().getOidHenkilo()));
 
@@ -214,7 +216,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                             ? AnomuksenTila.KASITELTY
                             : AnomuksenTila.HYLATTY);
         }
-        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(new DateTime());
+        haettuKayttoOikeusRyhma.getAnomus().setAnomusTilaTapahtumaPvm(LocalDateTime.now());
 
         // Remove the currently handled kayttooikeus from anomus
         haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().remove(haettuKayttoOikeusRyhma);
@@ -262,7 +264,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Override
     @Transactional
     public Long createKayttooikeusAnomus(String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto) {
-        Henkilo anoja = this.henkiloRepository.findByOidHenkilo(anojaOid)
+        Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
 
         Anomus anomus = new Anomus();
@@ -271,8 +273,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         anomus.setSahkopostiosoite(kayttooikeusAnomusDto.getEmail());
         anomus.setPerustelut(kayttooikeusAnomusDto.getPerustelut());
         anomus.setAnomusTyyppi(AnomusTyyppi.UUSI);
-        anomus.setAnomusTilaTapahtumaPvm(new DateTime());
-        anomus.setAnottuPvm(new DateTime());
+        anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
+        anomus.setAnottuPvm(LocalDateTime.now());
         anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
         anomus.setTehtavanimike(kayttooikeusAnomusDto.getTehtavaNimike());
 
@@ -291,8 +293,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Transactional
     public void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm) {
         AnomusCriteria criteria = AnomusCriteria.builder()
-                .anottuAlku(anottuPvm.toDateTimeAtStartOfDay())
-                .anottuLoppu(anottuPvm.toDateTime(LocalTime.MIDNIGHT.minusMillis(1)))
+                .anottuAlku(anottuPvm.atStartOfDay())
+                .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
                 .tila(AnomuksenTila.ANOTTU)
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
@@ -351,9 +353,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                         String organisaatioOid,
                                         KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
                                         String tehtavanimike) {
-        Henkilo anoja = this.henkiloRepository.findByOidHenkilo(anojaOid)
+        Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
-        Henkilo kasittelija = this.henkiloRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.getCurrentUserOid()));
 
         OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = this.findOrCreateHaettuOrganisaatioHenkilo(
@@ -365,7 +367,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaAlkuPvm(alkupvm);
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaLoppuPvm(loppupvm);
-        myonnettyKayttoOikeusRyhmaTapahtuma.setAikaleima(DateTime.now());
+        myonnettyKayttoOikeusRyhmaTapahtuma.setAikaleima(LocalDateTime.now());
         myonnettyKayttoOikeusRyhmaTapahtuma.setKasittelija(kasittelija);
         myonnettyKayttoOikeusRyhmaTapahtuma.setTila(myonnettyKayttoOikeusRyhmaTapahtuma.getId() == null
                 ? KayttoOikeudenTila.MYONNETTY
@@ -385,7 +387,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // New history event for a change on kayttooikeusryhmatapahtuma.
     private void createGrantedHistoryEvent(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, String reason) {
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(DateTime.now(), reason));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(LocalDateTime.now(), reason));
     }
 
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,

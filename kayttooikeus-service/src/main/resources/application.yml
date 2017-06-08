@@ -32,6 +32,7 @@ kayttooikeus:
       vanhentuneetkayttooikeudet: 0 0 3 * * ?
       kayttooikeusmuistutus: "0 30 4 * * ?"
       kayttooikeusanomusilmoitukset: 0 0 2 * * ?
-    ldapsynkronointi:
-      fixeddelayinmillis: 60000
-      initialdelayinmillis: 30000
+      henkiloNimiCache: 100000
+      ldapsynkronointi:
+        fixeddelayinmillis: 60000
+        initialdelayinmillis: 30000
