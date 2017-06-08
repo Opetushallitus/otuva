@@ -75,7 +75,7 @@ public class LdapSynchronizer {
             return;
         }
         if (dto.isPassivoitu()) {
-            ldapService.delete(entity.getKayttajatiedot().getUsername());
+            ldapService.deleteByOid(dto.getOidHenkilo());
         } else {
             ldapService.upsert(entity, dto, getMyonnetyt(dto.getOidHenkilo()));
         }

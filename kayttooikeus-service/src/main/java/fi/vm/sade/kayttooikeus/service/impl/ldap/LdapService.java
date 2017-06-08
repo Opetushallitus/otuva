@@ -7,9 +7,12 @@ import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.Ryhma;
 import fi.vm.sade.kayttooikeus.repositories.KayttajaRepository;
 import fi.vm.sade.kayttooikeus.repositories.RyhmaRepository;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toSet;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -38,8 +41,9 @@ public class LdapService {
      */
     public void upsert(Henkilo entity, HenkiloDto dto, List<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnetyt) {
         String kayttajatunnus = entity.getKayttajatiedot().getUsername();
-        Kayttaja kayttaja = kayttajaRepository.findByKayttajatunnus(kayttajatunnus).orElseGet(()
-                -> Kayttaja.builder().kayttajatunnus(kayttajatunnus).build());
+        Map<Boolean, List<Kayttaja>> kayttajat = kayttajaRepository.findByOid(dto.getOidHenkilo()).stream()
+                .collect(partitioningBy(kayttaja -> kayttaja.getKayttajatunnus().equals(kayttajatunnus)));
+        Kayttaja kayttaja = getOrCreateKayttaja(kayttajat.get(true), kayttajatunnus);
 
         // muodostetaan henkilön ldap-roolit
         LdapRoolitBuilder roolit = new LdapRoolitBuilder()
@@ -69,16 +73,28 @@ public class LdapService {
         dbRoolit.stream()
                 .filter(dbRooli -> !ldapRoolit.contains(dbRooli))
                 .forEach(dbRooli -> addToRyhma(dbRooli, kayttajaDn));
+
+        // käyttäjätunnuksen muuttuessa poistetaan myös vanhat käyttäjät
+        kayttajat.get(false).forEach(this::delete);
+    }
+
+    private Kayttaja getOrCreateKayttaja(List<Kayttaja> kayttajat, String kayttajatunnus) {
+        if (kayttajat.isEmpty()) {
+            return new Kayttaja();
+        }
+        if (kayttajat.size() == 1) {
+            return kayttajat.get(0);
+        }
+        throw new DataInconsistencyException("Käyttäjätunnuksella " + kayttajatunnus + " löytyi useampi käyttäjä");
     }
 
     /**
      * Poistaa henkilön tiedot.
      *
-     * @param kayttajatunnus käyttäjätunnus
+     * @param oid henkilö oid
      */
-    public void delete(String kayttajatunnus) {
-        kayttajaRepository.findByKayttajatunnus(kayttajatunnus)
-                .ifPresent(this::delete);
+    public void deleteByOid(String oid) {
+        kayttajaRepository.findByOid(oid).forEach(this::delete);
     }
 
     private void delete(Kayttaja kayttaja) {
