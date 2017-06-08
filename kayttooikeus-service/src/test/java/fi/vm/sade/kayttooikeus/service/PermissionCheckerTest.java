@@ -13,7 +13,7 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -54,7 +54,7 @@ public class PermissionCheckerTest {
     @Mock
     private BasicHttpEntity entity;
 
-    private HenkiloRepository henkiloRepositoryMock;
+    private HenkiloDataRepository henkiloDataRepositoryMock;
 
     private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 
@@ -78,7 +78,7 @@ public class PermissionCheckerTest {
     public void setup() {
         this.myRoles = createMockedRoles(new HashSet<>());
 
-        this.henkiloRepositoryMock = Mockito.mock(HenkiloRepository.class);
+        this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
 
@@ -89,7 +89,7 @@ public class PermissionCheckerTest {
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
-                this.henkiloRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
+                this.henkiloDataRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
                 commonProperties));
         Whitebox.setInternalState(permissionChecker, "restClient", this.fakeRestClient);
@@ -115,7 +115,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void testThatPermissionIsDeniedWhenUserIsNotFound() {
-        when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
+        when(this.henkiloDataRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
                 ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
     }
@@ -132,7 +132,7 @@ public class PermissionCheckerTest {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
             setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
         }});
-        when(henkiloRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
+        when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
                 ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
     }
@@ -149,7 +149,7 @@ public class PermissionCheckerTest {
                 );
             }}));
         }});
-        Mockito.when(henkiloRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
+        Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD", "READ"),
                 null, this.myRoles)).isTrue();
     }
@@ -166,7 +166,7 @@ public class PermissionCheckerTest {
                 );
             }}));
         }});
-        Mockito.when(henkiloRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
+        Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson",
                 Lists.newArrayList("CRUD", "READ"), null, this.myRoles)).isFalse();
     }
@@ -175,7 +175,7 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsDeniedWhenExternalServiceDeniesAccess() throws IOException {
         doReturn(getDummyOrganisaatioHakutulos()).when(this.permissionChecker).listOrganisaatiosByHenkiloOid(anyString());
         this.fakeRestClient.setAllowAccess(false);
-        when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
+        when(this.henkiloDataRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
                 ExternalPermissionService.HAKU_APP, this.myRoles)).isFalse();
     }
@@ -184,7 +184,7 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsAllowedWhenExternalServiceAllowsAccess() throws IOException {
         doReturn(getDummyOrganisaatioHakutulos()).when(this.permissionChecker).listOrganisaatiosByHenkiloOid(anyString());
         this.fakeRestClient.setAllowAccess(false);
-        when(this.henkiloRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
+        when(this.henkiloDataRepositoryMock.findByOidHenkilo(anyString())).thenReturn(Optional.empty());
         this.fakeRestClient.setAllowAccess(true);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson",
                 Lists.newArrayList("CRUD"), ExternalPermissionService.HAKU_APP, this.myRoles))

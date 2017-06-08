@@ -12,7 +12,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -43,7 +43,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     private static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
-    private HenkiloRepository henkiloRepository;
+    private HenkiloDataRepository henkiloDataRepository;
     private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
@@ -56,7 +56,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
 
     @Autowired
     public PermissionCheckerServiceImpl(OphProperties ophProperties,
-                                        HenkiloRepository henkiloRepository,
+                                        HenkiloDataRepository henkiloDataRepository,
                                         OrganisaatioClient organisaatioClient,
                                         OppijanumerorekisteriClient oppijanumerorekisteriClient,
                                         MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
@@ -64,7 +64,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                         CommonProperties commonProperties) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
-        this.henkiloRepository = henkiloRepository;
+        this.henkiloDataRepository = henkiloDataRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -156,7 +156,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
 
         Set<String> allowedRoles = getPrefixedRoles(ROLE_HENKILONHALLINTA_PREFIX, allowedRolesWithoutPrefix);
 
-        Optional<Henkilo> henkilo = henkiloRepository.findByOidHenkilo(personOid);
+        Optional<Henkilo> henkilo = henkiloDataRepository.findByOidHenkilo(personOid);
         if (!henkilo.isPresent()) {
             return false;
         }
@@ -266,7 +266,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid) {
         List<OrganisaatioPerustieto> organisaatios = new ArrayList<>();
-        Optional<Henkilo> tempHenkilo = henkiloRepository.findByOidHenkilo(oid);
+        Optional<Henkilo> tempHenkilo = henkiloDataRepository.findByOidHenkilo(oid);
         if (tempHenkilo.isPresent()) {
             Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());

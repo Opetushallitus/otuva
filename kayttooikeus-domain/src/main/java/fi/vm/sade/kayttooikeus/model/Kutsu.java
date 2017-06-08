@@ -2,14 +2,12 @@ package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import lombok.*;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.joda.time.DateTime.now;
 
 @Entity
 @Getter @Setter
@@ -19,9 +17,8 @@ import static org.joda.time.DateTime.now;
 @Table(name = "kutsu", schema = "public")
 public class Kutsu extends IdentifiableAndVersionedEntity {
     
-    @Type(type = "dateTime")
     @Column(name = "aikaleima", nullable = false)
-    private DateTime aikaleima = now();
+    private LocalDateTime aikaleima = LocalDateTime.now();
     
     @Column(name = "kutsuja_oid", nullable = false)
     private String kutsuja;
@@ -49,11 +46,9 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Column(name = "salaisuus") 
     private String salaisuus; // verification hash
     
-    @Type(type = "dateTime")
-    private DateTime kaytetty;
+    private LocalDateTime kaytetty;
     
-    @Type(type = "dateTime")
-    private DateTime poistettu;
+    private LocalDateTime poistettu;
     
     @Column(name = "poistaja_oid")
     private String poistaja;
@@ -65,7 +60,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
         if (this.tila != KutsunTila.AVOIN) {
             throw new IllegalStateException("Can not delete kutsu in state " + tila);
         }
-        this.setPoistettu(now());
+        this.setPoistettu(LocalDateTime.now());
         this.setPoistaja(poistaja);
         this.setTila(KutsunTila.POISTETTU);
     }

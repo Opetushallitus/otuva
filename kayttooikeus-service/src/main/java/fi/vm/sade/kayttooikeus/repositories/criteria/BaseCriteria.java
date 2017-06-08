@@ -1,4 +1,4 @@
-package fi.vm.sade.kayttooikeus.repositories;
+package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import java.util.ArrayList;
 import java.util.Collection;

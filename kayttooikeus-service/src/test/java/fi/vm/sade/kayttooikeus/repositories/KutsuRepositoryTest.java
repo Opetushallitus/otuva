@@ -5,12 +5,14 @@ import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
-import org.joda.time.DateTime;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.querydsl.core.types.Order.ASC;
@@ -33,7 +35,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void listKutsuListDtosTest() {
         Kutsu kutsu = populate(kutsu("Aapo", "Esimerkki", "a@eaxmple.com")
-            .kutsuja("1.2.3").aikaleima(new DateTime(2016,1,1,0,0,0))
+            .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
             .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                 .ryhma(kayttoOikeusRyhma("RYHMA")
                     .withKuvaus(text("FI", "Kuvaus")))
@@ -44,7 +46,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .withTila(KutsunTila.AVOIN));
         assertEquals(1, results.size());
         KutsuListDto dto = results.get(0);
-        assertEquals(new DateTime(2016,1,1,0,0,0), dto.getAikaleima());
+        assertEquals(LocalDateTime.of(2016,1,1,0,0,0, 0), dto.getAikaleima());
         assertEquals("a@eaxmple.com", dto.getSahkoposti());
         assertEquals(AVOIN, dto.getTila());
         assertEquals(kutsu.getId(), dto.getId());
@@ -60,14 +62,14 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void listKutsuOrganisaatioListDtosTest() {
         Kutsu kutsu1 = populate(kutsu("Aapo", "Esimerkki", "a@eaxmple.com")
-                .kutsuja("1.2.3").aikaleima(new DateTime(2016,1,1,0,0,0))
+                .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                     .ryhma(kayttoOikeusRyhma("RYHMA1")
                         .withKuvaus(text("FI", "B")))
                 )),
             kutsu2 = populate(kutsu("Essi", "Esimerkki", "b@eaxmple.com")
                 .tila(KutsunTila.KAYTETTY)
-                .kutsuja("1.2.4").aikaleima(new DateTime(2016,2,1,0,0,0))
+                .kutsuja("1.2.4").aikaleima(LocalDateTime.of(2016,2,1,0,0,0,0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                     .ryhma(kayttoOikeusRyhma("RYHMA2")
                             .withKuvaus(text("FI", "A"))))

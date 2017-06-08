@@ -17,7 +17,6 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 
 import static java.util.Arrays.asList;
@@ -73,7 +73,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                     .ryhmaName("RYHMA")
                     .ryhmaDescription(new TextGroupDto(2L).put("FI", "Kuvaus")
                             .put("EN", "Desc"))
-                    .voimassaLoppuPvm(new LocalDate().plusMonths(3))
+                    .voimassaLoppuPvm(LocalDate.now().plusMonths(3))
                 .build(),
                 ExpiringKayttoOikeusDto.builder()
                     .henkiloOid("1.2.3.4.5")
@@ -81,7 +81,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                     .ryhmaName("RYHMA2")
                     .ryhmaDescription(new TextGroupDto(3L).put("FI", "Kuvaus2")
                             .put("EN", "Desc2"))
-                    .voimassaLoppuPvm(new LocalDate().plusMonths(3))
+                    .voimassaLoppuPvm(LocalDate.now().plusMonths(3))
                 .build()
             ));
         verify(ryhmasahkopostiClient, times(1)).sendRyhmasahkoposti(

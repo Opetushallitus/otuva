@@ -2,22 +2,20 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.model.*;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
 import javax.persistence.EntityManager;
-
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
-
-import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 
 public class MyonnettyKayttooikeusRyhmaTapahtumaPopulator implements Populator<MyonnettyKayttoOikeusRyhmaTapahtuma> {
     private final OrganisaatioHenkilo organisaatioHenkilo;
     private final KayttoOikeusRyhma kayttoOikeusRyhma;
     private Optional<KayttoOikeudenTila> kayttoOikeudenTila;
-    private Optional<DateTime> aikaleima;
+    private Optional<LocalDateTime> aikaleima;
     private Optional<LocalDate> voimassaAlkuPvm;
 
     private MyonnettyKayttooikeusRyhmaTapahtumaPopulator(OrganisaatioHenkilo organisaatioHenkilo, KayttoOikeusRyhma kayttoOikeusRyhma) {
@@ -38,7 +36,7 @@ public class MyonnettyKayttooikeusRyhmaTapahtumaPopulator implements Populator<M
         return this;
     }
 
-    public MyonnettyKayttooikeusRyhmaTapahtumaPopulator withAikaleima(DateTime aikaleima) {
+    public MyonnettyKayttooikeusRyhmaTapahtumaPopulator withAikaleima(LocalDateTime aikaleima) {
         this.aikaleima = Optional.ofNullable(aikaleima);
         return this;
     }
@@ -55,7 +53,7 @@ public class MyonnettyKayttooikeusRyhmaTapahtumaPopulator implements Populator<M
         mkrt.getOrganisaatioHenkilo().setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet(mkrt));
         mkrt.setKayttoOikeusRyhma(this.kayttoOikeusRyhma);
         mkrt.setTila(this.kayttoOikeudenTila.orElse(KayttoOikeudenTila.MYONNETTY));
-        mkrt.setAikaleima(this.aikaleima.orElse(DateTime.now()));
+        mkrt.setAikaleima(this.aikaleima.orElse(LocalDateTime.now()));
         mkrt.setVoimassaAlkuPvm(this.voimassaAlkuPvm.orElse(LocalDate.now()));
         entityManager.persist(mkrt);
         return mkrt;

@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
 import lombok.Builder;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -30,8 +30,7 @@ public class HaettuKayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     private KayttoOikeusRyhma kayttoOikeusRyhma;
 
     @Column(name = "kasittelypvm")
-    @Type(type = "dateTime")
-    private DateTime kasittelyPvm;
+    private LocalDateTime kasittelyPvm;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tyyppi")

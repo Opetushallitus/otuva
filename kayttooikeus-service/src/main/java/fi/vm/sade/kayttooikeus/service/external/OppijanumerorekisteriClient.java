@@ -1,9 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -22,12 +21,16 @@ public interface OppijanumerorekisteriClient {
         return getHenkilonPerustiedot(singletonList(henkiloOid)).stream()
                 .filter(h -> henkiloOid.equals(h.getOidHenkilo())).findFirst();
     }
-    
+
     HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid);
 
     Set<String> getAllOidsForSamePerson(String personOid);
 
     String getOidByHetu(String hetu);
+
+    List<HenkiloHakuPerustietoDto> getAllByOids(long page, long count, List<String> oidHenkiloList);
+
+    List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount);
 
     HenkiloPerustietoDto getPerustietoByOid(String oidHenkilo);
 

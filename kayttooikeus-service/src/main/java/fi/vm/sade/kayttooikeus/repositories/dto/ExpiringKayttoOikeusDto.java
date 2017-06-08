@@ -4,9 +4,9 @@ import fi.vm.sade.kayttooikeus.dto.Localizable;
 import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import lombok.*;
-import org.joda.time.LocalDate;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;

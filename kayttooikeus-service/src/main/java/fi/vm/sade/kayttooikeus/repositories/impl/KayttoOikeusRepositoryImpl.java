@@ -8,11 +8,10 @@ import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -41,8 +40,8 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
                 .where(tapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
                     .and(oikeus.rooli.eq(role))
                     .and(palvelu.name.eq(palveluName))
-                    .and(voimassa(tapahtuma, new LocalDate()))
-                    .and(OrganisaatioHenkiloRepositoryImpl.voimassa(tapahtuma.organisaatioHenkilo, new LocalDate()))
+                    .and(voimassa(tapahtuma, LocalDate.now()))
+                    .and(OrganisaatioHenkiloRepositoryImpl.voimassa(tapahtuma.organisaatioHenkilo, LocalDate.now()))
                 ).select(tapahtuma.id));
     }
 
@@ -110,7 +109,7 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
 
     @Override
     public List<String> findHenkilosByRyhma(long id) {
-        LocalDate now = new LocalDate();
+        LocalDate now = LocalDate.now();
         return jpa().from(myonnettyKayttoOikeusRyhmaTapahtuma)
                 .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
                 .innerJoin(organisaatioHenkilo.henkilo, henkilo)

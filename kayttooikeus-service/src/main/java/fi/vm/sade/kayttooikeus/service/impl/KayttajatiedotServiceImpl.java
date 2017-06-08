@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
@@ -17,14 +17,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     private final KayttajatiedotRepository kayttajatiedotRepository;
-    private final HenkiloRepository henkiloRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
     private final OrikaBeanMapper mapper;
     private final CryptoService cryptoService;
     private final LdapSynchronization ldapSynchronization;
@@ -34,7 +32,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto dto) {
         Kayttajatiedot entity = mapper.map(dto, Kayttajatiedot.class);
 
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
         if (henkilo.getKayttajatiedot() != null) {
             throw new IllegalArgumentException("Käyttäjätiedot on jo luotu henkilölle");
@@ -66,11 +64,11 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
             throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
         });
 
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(henkiloOid)
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
 
         henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
-        henkiloRepository.save(henkilo);
+        henkiloDataRepository.save(henkilo);
 
         this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
@@ -93,7 +91,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private void setPasswordForHenkilo(String oidHenkilo, String password) {
         Kayttajatiedot kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo).orElseGet(() -> {
             Kayttajatiedot newKayttajatiedot = new Kayttajatiedot();
-            Henkilo henkilo = this.henkiloRepository.findByOidHenkilo(oidHenkilo)
+            Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
                     .orElseThrow(() -> new NotFoundException("Henkilo not found by oid " + oidHenkilo + " when creating kayttajatiedot"));
             henkilo.setKayttajatiedot(newKayttajatiedot);
             newKayttajatiedot.setHenkilo(henkilo);

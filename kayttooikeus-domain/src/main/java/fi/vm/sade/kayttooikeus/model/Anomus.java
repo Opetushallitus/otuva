@@ -4,10 +4,9 @@ import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.*;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,12 +46,10 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private AnomuksenTila anomuksenTila;
 
     @Column(name = "anottupvm")
-    @Type(type="dateTime")
-    private DateTime anottuPvm;
+    private LocalDateTime anottuPvm;
 
     @Column(name = "anomustilatapahtumapvm")
-    @Type(type="dateTime")
-    private DateTime anomusTilaTapahtumaPvm;
+    private LocalDateTime anomusTilaTapahtumaPvm;
 
     @Column(name = "perustelut")
     private String perustelut;
