@@ -5,8 +5,9 @@ import fi.vm.sade.kayttooikeus.config.properties.LdapSynchronizationProperties;
 import fi.vm.sade.kayttooikeus.model.LdapSynchronizationData;
 import fi.vm.sade.kayttooikeus.repositories.LdapSynchronizationDataRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +51,7 @@ public class LdapSynchronizationServiceImplTest {
 
     @Test
     public void runSynchronizerShouldExecuteFirstTime() {
-        DateTime now = DateTime.parse("2017-05-26T08:04:06");
+        LocalDateTime now = LocalDateTime.parse("2017-05-26T08:04:06");
         when(timeService.getDateTimeNow()).thenReturn(now);
         when(ldapSynchronizationDataRepositoryMock.findFirstByOrderByIdDesc()).thenReturn(Optional.empty());
         when(ldapSynchronizerMock.run(any(), anyBoolean(), anyLong(), anyLong())).thenReturn(Optional.empty());
@@ -64,8 +65,8 @@ public class LdapSynchronizationServiceImplTest {
 
     @Test
     public void runSynchronizerShouldExecute() {
-        DateTime lastRun = DateTime.parse("2017-05-26T08:04:06");
-        DateTime now = DateTime.parse("2017-05-26T08:05:07");
+        LocalDateTime lastRun = LocalDateTime.parse("2017-05-26T08:04:06");
+        LocalDateTime now = LocalDateTime.parse("2017-05-26T08:05:07");
         when(timeService.getDateTimeNow()).thenReturn(now);
         when(ldapSynchronizationDataRepositoryMock.findFirstByOrderByIdDesc())
                 .thenReturn(Optional.of(LdapSynchronizationData.builder().lastRun(lastRun).build()));
@@ -80,8 +81,8 @@ public class LdapSynchronizationServiceImplTest {
 
     @Test
     public void runSynchronizerShouldSkip() {
-        DateTime lastRun = DateTime.parse("2017-05-26T08:04:06");
-        DateTime now = DateTime.parse("2017-05-26T08:05:06");
+        LocalDateTime lastRun = LocalDateTime.parse("2017-05-26T08:04:06");
+        LocalDateTime now = LocalDateTime.parse("2017-05-26T08:05:06");
         when(timeService.getDateTimeNow()).thenReturn(now);
         when(ldapSynchronizationDataRepositoryMock.findFirstByOrderByIdDesc())
                 .thenReturn(Optional.of(LdapSynchronizationData.builder().lastRun(lastRun).build()));

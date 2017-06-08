@@ -8,10 +8,11 @@ import fi.vm.sade.kayttooikeus.model.LdapSynchronizationData;
 import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.repositories.LdapSynchronizationDataRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
@@ -107,10 +108,10 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
         LOGGER.info("LDAP-synkronointi aloitetaan");
         long start = timeService.getCurrentTimeMillis();
 
-        DateTime now = timeService.getDateTimeNow();
-        boolean nightTime = ldapSynchronizationProperties.isNightTime(now.getHourOfDay());
+        LocalDateTime now = timeService.getDateTimeNow();
+        boolean nightTime = ldapSynchronizationProperties.isNightTime(now.getHour());
         LdapSynchronizationProperties.Timed properties = ldapSynchronizationProperties.getTimedProperties(nightTime);
-        DateTime dateTime = now.minusMinutes(properties.getIntervalInMinutes());
+        LocalDateTime dateTime = now.minusMinutes(properties.getIntervalInMinutes());
 
         Optional<LdapSynchronizationData> previous = ldapSynchronizationDataRepository.findFirstByOrderByIdDesc();
         if (previous.map(t -> t.getLastRun().isBefore(dateTime)).orElse(true)) {

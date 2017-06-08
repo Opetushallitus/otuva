@@ -7,7 +7,7 @@ import fi.vm.sade.kayttooikeus.model.LdapSynchronizationData;
 import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataCriteria;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
@@ -38,7 +38,7 @@ public class LdapSynchronizer {
     private final TimeService timeService;
     private final LdapService ldapService;
     private final LdapUpdateDataRepository ldapUpdateDataRepository;
-    private final HenkiloRepository henkiloRepository;
+    private final HenkiloDataRepository henkiloRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;

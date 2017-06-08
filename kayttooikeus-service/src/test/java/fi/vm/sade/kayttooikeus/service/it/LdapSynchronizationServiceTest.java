@@ -22,8 +22,6 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +33,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import static java.util.stream.Collectors.toSet;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.stream.Stream;
 
 @RunWith(SpringRunner.class)
@@ -82,12 +83,12 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
 
     private void setDayTime() {
         when(timeService.getDateTimeNow()).thenReturn(LocalDate.now()
-                .toDateTime(new LocalTime(12, 38)));
+                .atTime(LocalTime.of(12, 38)));
     }
 
     private void setNightTime() {
         when(timeService.getDateTimeNow()).thenReturn(LocalDate.now()
-                .toDateTime(new LocalTime(2, 5)));
+                .atTime(LocalTime.of(2, 5)));
     }
 
     @Before

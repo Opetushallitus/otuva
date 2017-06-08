@@ -10,8 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 /**
  * LDAP-synkronoinnin statistiikka.
@@ -31,8 +31,7 @@ public class LdapSynchronizationData extends IdentifiableAndVersionedEntity {
     private static final long serialVersionUID = -2268331380676699523L;
 
     @Column(name = "last_run", nullable = false)
-    @Type(type = "dateTime")
-    private DateTime lastRun;
+    private LocalDateTime lastRun;
 
     @Column(name = "avg_update_time", nullable = false)
     private int averageUpdateTimeInMillis;

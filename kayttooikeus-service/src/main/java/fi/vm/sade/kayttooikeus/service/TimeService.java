@@ -1,11 +1,12 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 public interface TimeService {
 
     long getCurrentTimeMillis();
 
-    DateTime getDateTimeNow();
+    LocalDateTime getDateTimeNow();
 
 }

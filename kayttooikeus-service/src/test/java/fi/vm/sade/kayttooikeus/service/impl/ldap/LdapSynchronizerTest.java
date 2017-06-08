@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.model.LdapPriorityType;
 import fi.vm.sade.kayttooikeus.model.LdapSynchronizationData;
 import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataCriteria;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
@@ -46,7 +46,7 @@ public class LdapSynchronizerTest {
     @Mock
     private LdapUpdateDataRepository ldapUpdateDataRepositoryMock;
     @Mock
-    private HenkiloRepository henkiloRepositoryMock;
+    private HenkiloDataRepository henkiloRepositoryMock;
     @Mock
     private HenkiloHibernateRepository henkiloHibernateRepository;
     @Mock
