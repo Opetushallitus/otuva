@@ -12,6 +12,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.stream.Stream;
 
 public class OrganisaatioClientImpl implements OrganisaatioClient {
+    private static final Logger LOG = LoggerFactory.getLogger(OrganisaatioClientImpl.class);
     private final CachingRestClient restClient = new CachingRestClient()
             .setClientSubSystemCode("kayttooikeus.kayttooikeuspalvelu-service");
     private final UrlConfiguration urlConfiguration;
@@ -48,27 +51,33 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     protected<T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode) {
         if (!mode.isExpectMultiple()) {
+            LOG.error("direct1");
             return direct.get();
         }
         if (mode.isChangeChecked()) {
             if (latestChanges != null && latestChanges.equals(LocalDate.now())) {
+                LOG.error("direct2");
                 return direct.get();
             }
+            LOG.error("cache2");
             return fromCache.apply(cache);
         }
         if (cacheUpdatedAt == null || (LocalDate.now().isAfter(cacheUpdatedAt.toLocalDate())
                 && changesSince(LocalDate.now().minusDays(2)))) {
             refreshCache(cacheUpdatedAt);
             mode.checked();
+            LOG.error("cache3");
             return fromCache.apply(cache);
         } else if (cacheUpdatedAt.toLocalDate().equals(LocalDate.now())
                 && changesSince(LocalDate.now().minusDays(1))) {
             // changes today (since the modification date is known only in date precision, 
             // we can't be sure if the modifications today have happened before/after last update) => no cache
             mode.checked();
+            LOG.error("direct 4");
             return direct.get();
         }
         mode.checked();
+        LOG.error("cache5");
         return fromCache.apply(cache);
     }
 
