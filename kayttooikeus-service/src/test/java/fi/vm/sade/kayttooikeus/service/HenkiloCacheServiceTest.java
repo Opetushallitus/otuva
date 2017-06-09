@@ -78,7 +78,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
         given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
                 .willReturn(scheduleTimestamps);
 
-        this.henkiloCacheService.forceCleanUpdateHenkiloCache();
+        this.henkiloCacheService.forceCleanUpdateHenkiloCacheInSingleTransaction();
 
         assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
         assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
@@ -100,7 +100,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
         given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
                 .willReturn(henkiloCacheModified);
         doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
-        this.henkiloCacheService.forceCleanUpdateHenkiloCache();
+        this.henkiloCacheService.forceCleanUpdateHenkiloCacheInSingleTransaction();
 
         ArgumentCaptor<Henkilo> henkiloArgumentCaptor = ArgumentCaptor.forClass(Henkilo.class);
         verify(this.henkiloDataRepository, times(1)).save(henkiloArgumentCaptor.capture());

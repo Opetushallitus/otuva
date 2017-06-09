@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -56,7 +57,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
     // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
     @Override
     @Transactional
-    public void forceCleanUpdateHenkiloCache() {
+    public void forceCleanUpdateHenkiloCacheInSingleTransaction() {
         Long count = 1000L;
         for(long page = 0; !this.saveAll(page*count, count, null); page++) {
             // Escape condition in case of inifine loop (10M+ henkilos)
@@ -70,7 +71,9 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
                 .setModified(LocalDateTime.now());
     }
 
-    private boolean saveAll(long offset, long count, List<String> oidHenkiloList) {
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean saveAll(long offset, long count, List<String> oidHenkiloList) {
         final List<Henkilo> saveList = new ArrayList<>();
         final List<HenkiloHakuPerustietoDto> onrHenkilohakuResultDto
                 = this.oppijanumerorekisteriClient.getAllByOids(offset, count, oidHenkiloList);

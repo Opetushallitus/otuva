@@ -2,14 +2,18 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 
 /**
@@ -29,6 +33,7 @@ public class ScheduledTasks {
     private final HenkiloCacheService henkiloCacheService;
 
     private final HenkiloDataRepository henkiloDataRepository;
+    private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
     private final CommonProperties commonProperties;
 
@@ -53,14 +58,24 @@ public class ScheduledTasks {
     }
 
     @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.henkiloNimiCache}")
+    @Transactional
     public void updateHenkiloNimiCache() {
         if(this.henkiloDataRepository.countByEtunimetCachedNotNull() > 0L) {
             this.henkiloCacheService.updateHenkiloCache();
         }
         // Fetch whole henkilo nimi cache
         else {
-            this.henkiloCacheService.forceCleanUpdateHenkiloCache();
+            Long count = 1000L;
+            for(long page = 0; !this.henkiloCacheService.saveAll(page*count, count, null); page++) {
+                // Escape condition in case of inifine loop (10M+ henkilos)
+                if(page > 10000) {
+                    LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
+                    break;
+                }
+            }
+            this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
+                    .orElseThrow(DataInconsistencyException::new)
+                    .setModified(LocalDateTime.now());
         }
     }
-
 }
