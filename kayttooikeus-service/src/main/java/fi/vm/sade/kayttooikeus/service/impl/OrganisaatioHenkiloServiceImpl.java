@@ -11,6 +11,8 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,7 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
+    private static final Logger LOG = LoggerFactory.getLogger(OrganisaatioServiceImpl.class);
     private final String HENKILOHALLINTA_PALVELUNAME = "HENKILONHALLINTA";
     private final String ROOLI_OPH_REKISTERINPITAJA = "OPHREKISTERI";
     private final String ROOLI_CRUD = "CRUD";
@@ -89,6 +92,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     }
 
     protected OrganisaatioDto mapOrganisaatioDtoRecursive(OrganisaatioPerustieto perustiedot, String compareByLang) {
+        LOG.error("oid: " + perustiedot.getOid() + " parentpath" + perustiedot.getParentOidPath() + " childrensize:" + perustiedot.getChildren().size());
         OrganisaatioDto dto = new OrganisaatioDto();
         dto.setOid(perustiedot.getOid());
         dto.setNimi(new TextGroupMapDto(null, perustiedot.getNimi()));
@@ -97,6 +101,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         dto.setChildren(perustiedot.getChildren().stream().map(child -> mapOrganisaatioDtoRecursive(child, compareByLang))
             .sorted(Comparator.comparing(OrganisaatioDto::getNimi, comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE))))
             .collect(toList()));
+        LOG.error("oid: " + dto.getOid() + " parentpath" + dto.getParentOidPath() + " childrensize:" + dto.getChildren().size());
         return dto;
     }
     
