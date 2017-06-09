@@ -27,6 +27,7 @@ kayttooikeus:
     statistics_size: 25
   scheduling:
     enabled: false
+    pool_size: 2
     configuration:
       organisaatiocache: "0 0 0 * * ?"
       vanhentuneetkayttooikeudet: 0 0 3 * * ?
