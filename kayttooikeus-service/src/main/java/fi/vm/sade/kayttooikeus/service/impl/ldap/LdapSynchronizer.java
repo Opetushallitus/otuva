@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
+import java.util.Iterator;
 
 @Service
 @Transactional
@@ -150,12 +151,14 @@ public class LdapSynchronizer {
         private LdapSynchronizationData synchronize(Iterable<LdapUpdateData> updateDatas) {
             boolean coolOff = false;
             int i = 0;
-            for (LdapUpdateData updateData : updateDatas) {
+            Iterator<LdapUpdateData> iterator = updateDatas.iterator();
+            while (iterator.hasNext()) {
+                LdapUpdateData updateData = iterator.next();
                 long startTime = timeService.getCurrentTimeMillis();
                 synchrorize(updateData);
                 i++;
                 long time = (timeService.getCurrentTimeMillis() - startTime) / 1000;
-                if (time > loadThresholdInSeconds) {
+                if (time > loadThresholdInSeconds && iterator.hasNext()) {
                     coolOff = true;
                     break;
                 }
