@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -95,7 +94,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
         HenkiloDto perustiedot = oppijanumerorekisteriClient.getHenkiloByOid(identification.getHenkilo().getOidHenkilo());
         IdentifiedHenkiloTypeDto dto = mapper.map(identification, IdentifiedHenkiloTypeDto.class);
-        dto.setHenkiloTyyppi(HenkiloTyyppi.valueOf(perustiedot.getHenkiloTyyppi().name()));
+        dto.setHenkiloTyyppi(perustiedot.getHenkiloTyyppi().name());
         dto.setPassivoitu(perustiedot.isPassivoitu());
         dto.setAuthorizationData(kayttoOikeusService.findAuthorizationDataByOid(dto.getOidHenkilo()));
 

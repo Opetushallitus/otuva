@@ -20,6 +20,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -167,7 +168,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         // the person is attached to an organisation
         if (henkilo.get().getOrganisaatioHenkilos().isEmpty()) {
             HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkiloByOid(personOid);
-            if (!fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.OPPIJA.equals(henkiloDto.getHenkiloTyyppi())
+            if (!HenkiloTyyppi.OPPIJA.equals(henkiloDto.getHenkiloTyyppi())
                     && CollectionUtils.containsAny(callingUserRoles, allowedRoles)) {
                 return true;
             }

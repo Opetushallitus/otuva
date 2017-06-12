@@ -11,7 +11,7 @@ import lombok.*;
 public class IdentifiedHenkiloTypeDto {
     private Long id;
     private String oidHenkilo;
-    private HenkiloTyyppi henkiloTyyppi;
+    private String henkiloTyyppi;
     private long version;
     private boolean passivoitu;
     private String idpEntityId;

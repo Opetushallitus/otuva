@@ -30,6 +30,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Java6Assertions.assertThat;

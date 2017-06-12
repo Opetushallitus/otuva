@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,7 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 
-import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.VIRKAILIJA;
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

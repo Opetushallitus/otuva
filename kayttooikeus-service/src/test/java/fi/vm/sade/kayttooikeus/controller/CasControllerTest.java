@@ -58,7 +58,7 @@ public class CasControllerTest extends AbstractControllerTest {
                         .idpEntityId("idpent")
                         .version(1)
                         .identifier("identif")
-                        .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
+                        .henkiloTyyppi("VIRKAILIJA")
                         .passivoitu(false)
                         .asiointiKieli(AsiointikieliDto.builder()
                                 .kieliKoodi("fi")
