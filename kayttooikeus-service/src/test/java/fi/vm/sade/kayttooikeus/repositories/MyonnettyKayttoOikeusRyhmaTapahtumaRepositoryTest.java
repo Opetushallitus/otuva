@@ -49,14 +49,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .voimassaPaattyen(LocalDate.now().plusMonths(3))).getKayttoOikeusRyhma().getId();
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.8")
-                        .withPassivoitu(true), "4.5.6.7.8")
-                        .tehtavanimike("testaaja"),
-                kayttoOikeusRyhma("RYHMA2")
-                        .withOikeus(oikeus("KOODISTO", "WRITE")))
-                .voimassaPaattyen(LocalDate.now().plusMonths(3)));
-
-        populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.9"), "4.5.6.7.8")
                         .tehtavanimike("testaaja"),
                 kayttoOikeusRyhma("RYHMA2")
@@ -73,9 +65,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         tapahtumas = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo("1.2.3.4.7");
         assertEquals(1, tapahtumas.size());
         assertEquals(id3, tapahtumas.get(0));
-
-        tapahtumas = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo("1.2.3.4.8");
-        assertEquals(0, tapahtumas.size());
 
         tapahtumas = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo("1.2.3.4.9");
         assertEquals(0, tapahtumas.size());
@@ -147,12 +136,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.12"),
                 kayttoOikeusRyhma("EIVOIMASSA2").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaAlkaen(LocalDate.now().plusDays(3)));
-        populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.6").withPassivoitu(true), "4.5.6.7.9"),
-                kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
-                .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
-        assertEquals(0, myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.3.4.6").size());
         assertEquals(0, myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.madeup.4").size());
         List<AccessRightTypeDto> list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.3.4.5");
         assertEquals(3, list.size());
@@ -196,7 +180,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 kayttoOikeusRyhma("EIVOIMASSA2").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaAlkaen(LocalDate.now().plusDays(3)));
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.6").withPassivoitu(true), "4.5.6.7.9"),
+                organisaatioHenkilo(henkilo("1.2.3.4.6"), "4.5.6.7.9"),
                 kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 

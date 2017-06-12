@@ -16,13 +16,11 @@ public class IdentificationConverter extends CustomConverter<Identification, Ide
     public IdentifiedHenkiloTypeDto convert(Identification identification, Type<? extends IdentifiedHenkiloTypeDto> destinationType, MappingContext mappingContext) {
         Henkilo henkilo = identification.getHenkilo();
         return IdentifiedHenkiloTypeDto.builder()
-                .henkiloTyyppi(henkilo.getHenkiloTyyppi())
                 .identifier(identification.getIdentifier())
                 .idpEntityId(identification.getIdpEntityId())
                 .oidHenkilo(henkilo.getOidHenkilo())
                 .version(identification.getVersion())
                 .id(henkilo.getId())
-                .passivoitu(henkilo.isPassivoitu())
                 .kayttajatiedot(henkilo.getKayttajatiedot() != null ? new KayttajatiedotReadDto(henkilo.getKayttajatiedot().getUsername()) : null)
                 .build();
     }

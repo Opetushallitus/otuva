@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.AsiointikieliDto;
+import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -13,8 +14,9 @@ import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,9 +93,10 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
                 .orElseThrow(() -> new NotFoundException("identification not found"));
         identification.setAuthtoken(null);
 
-        HenkiloPerustietoDto perustiedot = oppijanumerorekisteriClient.getPerustietoByOid(identification.getHenkilo().getOidHenkilo());
-        HenkilonYhteystiedotViewDto yhteystiedotDto = oppijanumerorekisteriClient.getYhteystiedotByOid(identification.getHenkilo().getOidHenkilo());
+        HenkiloDto perustiedot = oppijanumerorekisteriClient.getHenkiloByOid(identification.getHenkilo().getOidHenkilo());
         IdentifiedHenkiloTypeDto dto = mapper.map(identification, IdentifiedHenkiloTypeDto.class);
+        dto.setHenkiloTyyppi(HenkiloTyyppi.valueOf(perustiedot.getHenkiloTyyppi().name()));
+        dto.setPassivoitu(perustiedot.isPassivoitu());
         dto.setAuthorizationData(kayttoOikeusService.findAuthorizationDataByOid(dto.getOidHenkilo()));
 
         dto.setEtunimet(perustiedot.getEtunimet());
@@ -107,13 +110,12 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
             dto.setAsiointiKieli(new AsiointikieliDto(perustiedot.getAsiointiKieli().getKieliKoodi(), perustiedot.getAsiointiKieli().getKieliTyyppi()));
         }
 
-        if (yhteystiedotDto != null) {
-            String email = yhteystiedotDto.get(YhteystietojenTyypit.PRIORITY_ORDER).getSahkoposti();
-            if (!StringUtils.isEmpty(email)) {
-                dto.setEmail(email);
-                identification.setEmail(email);
-            }
-        }
+        YhteystietoUtil.getYhteystietoArvo(perustiedot.getYhteystiedotRyhma(),
+                YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
+                YhteystietojenTyypit.PRIORITY_ORDER).ifPresent(email -> {
+                    dto.setEmail(email);
+                    identification.setEmail(email);
+                });
         return dto;
     }
 

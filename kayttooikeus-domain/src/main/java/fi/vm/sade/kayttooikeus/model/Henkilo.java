@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,13 +24,6 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
 
     @Column(nullable = false, name = "oidhenkilo")
     private String oidHenkilo;
-
-    @Column(name = "passivoitu", nullable = false)
-    private boolean passivoitu;
-
-    @Column(name = "henkilotyyppi", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private HenkiloTyyppi henkiloTyyppi;
 
     @OneToOne(mappedBy = "henkilo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Kayttajatiedot kayttajatiedot;

@@ -19,6 +19,7 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -164,10 +165,12 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         // If person doesn't have any organisation (and is not of type "OPPIJA") -> access is granted
         // Otherwise creating persons wouldn't work, as first the person is created and only after that
         // the person is attached to an organisation
-        if (henkilo.get().getOrganisaatioHenkilos().isEmpty()
-                && !HenkiloTyyppi.OPPIJA.equals(henkilo.get().getHenkiloTyyppi())
-                && CollectionUtils.containsAny(callingUserRoles, allowedRoles)) {
-            return true;
+        if (henkilo.get().getOrganisaatioHenkilos().isEmpty()) {
+            HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkiloByOid(personOid);
+            if (!fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.OPPIJA.equals(henkiloDto.getHenkiloTyyppi())
+                    && CollectionUtils.containsAny(callingUserRoles, allowedRoles)) {
+                return true;
+            }
         }
 
         Set<String> candidateRoles = new HashSet<>();

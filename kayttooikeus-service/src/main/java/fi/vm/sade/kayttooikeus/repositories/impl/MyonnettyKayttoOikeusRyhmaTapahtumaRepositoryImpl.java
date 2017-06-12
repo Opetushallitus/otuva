@@ -32,7 +32,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
         return new BooleanBuilder()
                 .and(organisaatioHenkilo.henkilo.oidHenkilo.eq(oid))
                 .and(organisaatioHenkilo.passivoitu.eq(false))
-                .and(organisaatioHenkilo.henkilo.passivoitu.eq(false))
                 .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(now))
                 .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.goe(now));
     }

@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +26,6 @@ public class HenkiloDataRepositoryTest {
     @Test
     public void findByOidHenkilo() {
         Henkilo henkilo = new Henkilo();
-        henkilo.setHenkiloTyyppi(HenkiloTyyppi.OPPIJA);
         henkilo.setOidHenkilo("1.2.3.4.5");
         this.testEntityManager.persist(henkilo);
 

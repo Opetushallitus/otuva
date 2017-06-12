@@ -4,16 +4,12 @@ import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotDto;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -34,7 +30,13 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 
@@ -116,20 +118,24 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2").withOikeus(oikeus("KOODISTO", "CRUD"))));
 
-        given(oppijanumerorekisteriClient.getPerustietoByOid("1.2.3.4.5"))
-                .willReturn(HenkiloPerustietoDto.builder()
+        YhteystietoDto yhteystieto = YhteystietoDto.builder()
+                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                .yhteystietoArvo("test@test.com")
+                .build();
+        YhteystiedotRyhmaDto yhteystietoRyhma = YhteystiedotRyhmaDto.builder()
+                .yhteystieto(yhteystieto)
+                .build();
+        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5"))
+                .willReturn(HenkiloDto.builder()
                         .etunimet("Teemu")
                         .kutsumanimi("Teemu")
                         .sukunimi("Testi")
                         .hetu("11111-1111")
                         .sukupuoli("1")
+                        .henkiloTyyppi(fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA)
+                        .passivoitu(false)
+                        .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
                         .build());
-
-        HenkilonYhteystiedotViewDto tiedot = new HenkilonYhteystiedotViewDto();
-        YhteystiedotDto yhteystiedotDto = new YhteystiedotDto();
-        yhteystiedotDto.setSahkoposti("test@test.com");
-        tiedot.put(YhteystietojenTyypit.TYOOSOITE, yhteystiedotDto);
-        given(oppijanumerorekisteriClient.getYhteystiedotByOid("1.2.3.4.5")).willReturn(tiedot);
 
         IdentifiedHenkiloTypeDto dto = identificationService.findByTokenAndInvalidateToken("12345");
         assertEquals("1.2.3.4.5", dto.getOidHenkilo());
@@ -175,20 +181,24 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @Test(expected = NotFoundException.class)
     public void validateAuthTokenUsedTest() {
-        given(oppijanumerorekisteriClient.getPerustietoByOid("1.2.3.4.5"))
-                .willReturn(HenkiloPerustietoDto.builder()
+        YhteystietoDto yhteystieto = YhteystietoDto.builder()
+                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                .yhteystietoArvo("test@test.com")
+                .build();
+        YhteystiedotRyhmaDto yhteystietoRyhma = YhteystiedotRyhmaDto.builder()
+                .yhteystieto(yhteystieto)
+                .build();
+        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5"))
+                .willReturn(HenkiloDto.builder()
                         .etunimet("Teemu")
                         .kutsumanimi("Teemu")
                         .sukunimi("Testi")
                         .hetu("11111-1111")
                         .sukupuoli("1")
+                        .henkiloTyyppi(fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA)
+                        .passivoitu(false)
+                        .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
                         .build());
-
-        HenkilonYhteystiedotViewDto tiedot = new HenkilonYhteystiedotViewDto();
-        YhteystiedotDto yhteystiedotDto = new YhteystiedotDto();
-        yhteystiedotDto.setSahkoposti("test@test.com");
-        tiedot.put(YhteystietojenTyypit.TYOOSOITE, yhteystiedotDto);
-        given(oppijanumerorekisteriClient.getYhteystiedotByOid("1.2.3.4.5")).willReturn(tiedot);
 
         populate(identification("haka", "identifier", henkilo("1.2.3.4.5")).withAuthToken("12345"));
         identificationService.findByTokenAndInvalidateToken("12345");
