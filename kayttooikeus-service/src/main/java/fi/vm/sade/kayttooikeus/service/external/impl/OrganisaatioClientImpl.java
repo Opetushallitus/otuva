@@ -55,7 +55,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         this.orikaBeanMapper = orikaBeanMapper;
     }
 
-    protected<T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode, String organisaatioOid) {
+    protected<T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode) {
         if (!mode.isExpectMultiple()) {
             return direct.get();
         }
@@ -66,12 +66,12 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
             return fromCache.apply(cache);
         }
         if (cacheUpdatedAt == null || (LocalDate.now().isAfter(cacheUpdatedAt.toLocalDate())
-                && changesSince(LocalDate.now().minusDays(2), organisaatioOid))) {
+                && changesSince(LocalDate.now().minusDays(2)))) {
             refreshCache(cacheUpdatedAt);
             mode.checked();
             return fromCache.apply(cache);
         } else if (cacheUpdatedAt.toLocalDate().equals(LocalDate.now())
-                && changesSince(LocalDate.now().minusDays(1), null)) {
+                && changesSince(LocalDate.now().minusDays(1))) {
             // changes today (since the modification date is known only in date precision, 
             // we can't be sure if the modifications today have happened before/after last update) => no cache
             mode.checked();
@@ -104,14 +104,11 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         private List<String> oids;
     }
 
-    private boolean changesSince(LocalDate date, String organisaatioOid) {
+    private boolean changesSince(LocalDate date) {
         String url = urlConfiguration.url("organisaatio-service.organisaatio.muutetut.oid", date.toString());
         List<String> changedOrganisations = retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
                 .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids();
         boolean result = !isReallyEmpty(changedOrganisations);
-        if(StringUtils.hasLength(organisaatioOid)) {
-            result = result && changedOrganisations.contains(organisaatioOid);
-        }
         if (result && (latestChanges == null || latestChanges.isBefore(date.plusDays(1)))) {
             latestChanges = date.plusDays(1);
         }
@@ -126,7 +123,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     @Override
     public OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode) {
         return cached(c -> c.getByOid(oid).<NotFoundException>orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
-                () -> fetchPerustiedotWithChildren(oid), mode, oid);
+                () -> fetchPerustiedotWithChildren(oid), mode);
     }
 
     public OrganisaatioPerustieto fetchPerustiedot(String oid) {
@@ -169,8 +166,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
                             .get().orFail(mapper(url)).getOrganisaatiot();
                 },
-                mode,
-                organisaatioOid);
+                mode);
     }
 
     @Override
