@@ -10,11 +10,14 @@ import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +97,9 @@ public class KayttooikeusAnomusServiceTest {
 
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
@@ -214,6 +220,33 @@ public class KayttooikeusAnomusServiceTest {
 
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Oikeuksien lisäys");
 
+    }
+
+    @Test
+    @WithMockUser("1.2.3.4.1")
+    public void grantKayttooikeusryhmaWithoutActiveOrganisations() {
+        this.expectedException.expect(ForbiddenException.class);
+        this.expectedException.expectMessage("Target organization has invalid organization type");
+
+        given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
+        given(this.permissionCheckerService.checkRoleForOrganisation(any(), any())).willReturn(true);
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
+        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
+        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
+                .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").passivoitu(true).build()));
+        given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+                "1.2.0.0.1", "1.2.3.4.5"))
+                .willReturn(Optional.empty());
+        // Passivoitu organisation
+        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1"))
+                .willReturn(Optional.of(createHenkiloWithOrganisaatio("1.2.3.4.5", "1.2.0.0.1", true)));
+
+        GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
+                LocalDate.now().plusYears(1));
+        this.kayttooikeusAnomusService.grantKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1",
+                Lists.newArrayList(grantKayttooikeusryhmaDto));
     }
 
     // MyonnettyKayttooikeusryhmaTapahtuma already exists

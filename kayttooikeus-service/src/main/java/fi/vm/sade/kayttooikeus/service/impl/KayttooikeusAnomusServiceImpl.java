@@ -161,8 +161,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
                 .getOrganisaatioViite();
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloDataRepository
-                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid())
-                .stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
+                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid()).stream()
+                .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
+                .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                .collect(Collectors.toList());
 
         // Organisaatiohenkilo limitations are valid
         if(!CollectionUtils.isEmpty(organisaatioViite)
