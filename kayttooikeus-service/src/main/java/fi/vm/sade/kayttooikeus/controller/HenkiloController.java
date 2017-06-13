@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -29,6 +30,13 @@ public class HenkiloController {
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
     private final LdapSynchronizationService ldapSynchronizationService;
+
+    @GetMapping("/kayttajatunnus={kayttajatunnus}")
+    @PostAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(returnObject.oid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
+    @ApiOperation("Hakee henkilön käyttäjätunnuksen perusteella")
+    public HenkiloReadDto getByKayttajatunnus(@PathVariable String kayttajatunnus) {
+        return henkiloService.getByKayttajatunnus(kayttajatunnus);
+    }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai ryhmien tiedoilla rekursiiisesti.",

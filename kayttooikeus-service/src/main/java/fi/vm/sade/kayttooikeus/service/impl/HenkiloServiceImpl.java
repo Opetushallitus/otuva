@@ -73,6 +73,14 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional(readOnly = true)
+    public HenkiloReadDto getByKayttajatunnus(String kayttajatunnus) {
+        return henkiloDataRepository.findByKayttajatiedotUsername(kayttajatunnus)
+                .map(entity -> mapper.map(entity, HenkiloReadDto.class))
+                .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt käyttäjätunnuksella " + kayttajatunnus));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public KayttooikeudetDto getKayttooikeudet(String henkiloOid, OrganisaatioHenkiloCriteria criteria) {
         // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
         String rootOrganizationOid = commonProperties.getRootOrganizationOid();

@@ -1,13 +1,13 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -43,7 +42,19 @@ public class HenkiloControllerTest extends AbstractControllerTest {
 
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
-    
+
+    @MockBean
+    private HenkiloService henkiloService;
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void getByKayttajatunnus() throws Exception {
+        given(this.henkiloService.getByKayttajatunnus(any())).willReturn(HenkiloReadDto.builder().oid("oid1").build());
+        this.mvc.perform(get("/henkilo/kayttajatunnus=user1").accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk()).andExpect(content().json("{\"oid\":\"oid1\"}"));
+        verify(this.henkiloService).getByKayttajatunnus(eq("user1"));
+    }
+
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void listOrganisaatioPerustiedotForCurrentUserTest() throws Exception {
