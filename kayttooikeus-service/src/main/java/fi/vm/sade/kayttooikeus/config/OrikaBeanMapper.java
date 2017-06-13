@@ -5,6 +5,8 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import ma.glasnost.orika.Converter;
 import ma.glasnost.orika.Mapper;
 import ma.glasnost.orika.MapperFactory;
@@ -57,6 +59,11 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
         factory.classMap(KayttoOikeusRyhma.class, KutsuReadDto.KayttoOikeusRyhmaDto.class)
                 .fieldAToB("description", "nimi")
+                .byDefault()
+                .register();
+        factory.classMap(OrganisaatioRDTO.class, OrganisaatioPerustieto.class)
+                .fieldAToB("tyypit", "organisaatiotyypit")
+                .fieldAToB("oppilaitosTyyppiUri", "oppilaitostyyppi")
                 .byDefault()
                 .register();
         factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDate.class));

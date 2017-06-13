@@ -14,16 +14,21 @@ public class ExternalClientsConfig {
     private final UrlConfiguration urlConfiguration;
     private final ObjectMapper objectMapper;
     private final CommonProperties commonProperties;
+    private final OrikaBeanMapper orikaBeanMapper;
     
     @Autowired
-    public ExternalClientsConfig(UrlConfiguration urlConfiguration, ObjectMapper objectMapper, CommonProperties commonProperties) {
+    public ExternalClientsConfig(UrlConfiguration urlConfiguration,
+                                 ObjectMapper objectMapper,
+                                 CommonProperties commonProperties,
+                                 OrikaBeanMapper orikaBeanMapper) {
         this.urlConfiguration = urlConfiguration;
         this.objectMapper = objectMapper;
         this.commonProperties = commonProperties;
+        this.orikaBeanMapper = orikaBeanMapper;
     }
 
     @Bean
     public OrganisaatioClient organisaatioClient() {
-        return new OrganisaatioClientImpl(urlConfiguration, objectMapper, commonProperties);
+        return new OrganisaatioClientImpl(urlConfiguration, objectMapper, commonProperties, orikaBeanMapper);
     }
 }
