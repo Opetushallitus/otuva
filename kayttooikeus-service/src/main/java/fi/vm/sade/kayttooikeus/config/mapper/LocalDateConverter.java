@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.config.mapper;
 
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
-import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.springframework.stereotype.Component;
 

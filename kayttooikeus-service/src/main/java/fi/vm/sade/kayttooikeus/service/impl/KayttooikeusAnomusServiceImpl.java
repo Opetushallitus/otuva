@@ -27,6 +27,9 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 import static java.util.stream.Collectors.toSet;
+
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +40,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
 
     private final HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
@@ -49,6 +56,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
+    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -61,41 +69,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final CommonProperties commonProperties;
 
     private final OrganisaatioClient organisaatioClient;
-
-    @Autowired
-    public KayttooikeusAnomusServiceImpl(HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository,
-                                         HenkiloDataRepository henkiloDataRepository,
-                                         HenkiloHibernateRepository henkiloHibernateRepository,
-                                         MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
-                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
-                                         KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
-                                         OrikaBeanMapper orikaBeanMapper,
-                                         LocalizationService localizationService,
-                                         EmailService emailService,
-                                         LdapSynchronizationService ldapSynchronizationService,
-                                         HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator,
-                                         PermissionCheckerService permissionCheckerService,
-                                         KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository,
-                                         CommonProperties commonProperties,
-                                         OrganisaatioClient organisaatioClient,
-                                         AnomusRepository anomusRepository) {
-        this.haettuKayttooikeusRyhmaDataRepository = haettuKayttooikeusRyhmaDataRepository;
-        this.henkiloDataRepository = henkiloDataRepository;
-        this.henkiloHibernateRepository = henkiloHibernateRepository;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-        this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-        this.mapper = orikaBeanMapper;
-        this.localizationService = localizationService;
-        this.emailService = emailService;
-        this.ldapSynchronizationService = ldapSynchronizationService;
-        this.haettuKayttooikeusryhmaValidator = haettuKayttooikeusryhmaValidator;
-        this.permissionCheckerService = permissionCheckerService;
-        this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
-        this.commonProperties = commonProperties;
-        this.organisaatioClient = organisaatioClient;
-        this.anomusRepository = anomusRepository;
-    }
 
     @Transactional(readOnly = true)
     @Override
@@ -129,8 +102,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Permission checks for declining requisition (there are separate checks for granting)
         this.notEditingOwnData(anojanAnomus.getHenkilo().getOidHenkilo());
         this.inSameOrParentOrganisation(anojanAnomus.getOrganisaatioOid());
-        this.organisaatioViiteLimitationsAreValid(anottuKayttoOikeusRyhma.getId(),
-                anojanAnomus.getOrganisaatioOid());
+        this.organisaatioViiteLimitationsAreValid(anottuKayttoOikeusRyhma.getId());
         this.kayttooikeusryhmaLimitationsAreValid(anottuKayttoOikeusRyhma.getId());
 
         // Post validation
@@ -186,15 +158,21 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
     }
 
-    private void organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId, String organisaatioOid) {
+    private void organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
         Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
                 .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
                 .getOrganisaatioViite();
+        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloDataRepository
+                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid()).stream()
+                .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
+                .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                .collect(Collectors.toList());
+
         // Organisaatiohenkilo limitations are valid
         if(!CollectionUtils.isEmpty(organisaatioViite)
                 // only root organisation should not have organisaatioviite
-                && !commonProperties.getRootOrganizationOid().equals(organisaatioOid)
-                && !this.permissionCheckerService.organisaatioLimitationCheck(organisaatioOid, organisaatioViite)) {
+                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> commonProperties.getRootOrganizationOid().equals(orgOid))
+                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> this.permissionCheckerService.organisaatioLimitationCheck(orgOid, organisaatioViite))) {
             throw new ForbiddenException("Target organization has invalid organization type");
         }
     }
@@ -247,7 +225,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
         updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto -> {
-                    this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId(), organisaatioOid);
+                    this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
                     this.kayttooikeusryhmaLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
         });
 
