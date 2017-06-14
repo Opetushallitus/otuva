@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +26,16 @@ public class AnomusController {
     @Autowired
     AnomusController(KayttooikeusAnomusService kayttooikeusAnomusService) {
         this.kayttooikeusAnomusService = kayttooikeusAnomusService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee anomuksia",
+            notes = "Tällä hetkellä toteutus vain rekisterinpitäjälle")
+    public List<AnomusHakuDto> listAnomukset(AnomusCriteria criteria,
+            @RequestParam(required = false, defaultValue = "20") Long limit,
+            @RequestParam(required = false) Long offset) {
+        return kayttooikeusAnomusService.list(criteria, limit, offset);
     }
 
     @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")

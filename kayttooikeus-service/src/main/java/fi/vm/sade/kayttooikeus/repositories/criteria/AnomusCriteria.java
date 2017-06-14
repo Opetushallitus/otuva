@@ -10,25 +10,43 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Setter
 @Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class AnomusCriteria implements KayttooikeusCriteria<QAnomus> {
 
+    private String q;
     private LocalDateTime anottuAlku;
     private LocalDateTime anottuLoppu;
-    private AnomuksenTila tila;
+    private Set<AnomuksenTila> tilat;
+    private Set<String> organisaatioOids;
 
     public Predicate condition(QAnomus qAnomus) {
         BooleanBuilder builder = new BooleanBuilder();
 
+        if (q != null) {
+            builder.andAnyOf(
+                    qAnomus.henkilo.oidHenkilo.eq(q),
+                    qAnomus.henkilo.etunimetCached.containsIgnoreCase(q),
+                    qAnomus.henkilo.sukunimiCached.containsIgnoreCase(q),
+                    qAnomus.henkilo.kayttajatiedot.username.containsIgnoreCase(q)
+            );
+        }
         if (anottuAlku != null || anottuLoppu != null) {
             builder.and(qAnomus.anottuPvm.between(anottuAlku, anottuLoppu));
         }
-        if (tila != null) {
-            builder.and(qAnomus.anomuksenTila.eq(tila));
+        if (tilat != null) {
+            builder.and(qAnomus.anomuksenTila.in(tilat));
+        }
+        if (organisaatioOids != null) {
+            builder.and(qAnomus.organisaatioOid.in(organisaatioOids));
         }
 
         return builder;

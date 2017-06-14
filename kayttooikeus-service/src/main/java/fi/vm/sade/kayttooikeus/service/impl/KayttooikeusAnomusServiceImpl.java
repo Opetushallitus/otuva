@@ -17,6 +17,8 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 
 import java.time.LocalDate;
@@ -29,6 +31,7 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,10 +45,15 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KayttooikeusAnomusServiceImpl.class);
 
     private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
     private final HenkiloDataRepository henkiloDataRepository;
@@ -68,6 +76,28 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final CommonProperties commonProperties;
 
     private final OrganisaatioClient organisaatioClient;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AnomusHakuDto> list(AnomusCriteria criteria, Long limit, Long offset) {
+        return anomusRepository.findBy(criteria, limit, offset).stream().map(entity -> {
+            AnomusHakuDto dto = mapper.map(entity, AnomusHakuDto.class);
+            dto.setOrganisaatio(mapOrganisaatio(entity.getOrganisaatioOid()));
+            return dto;
+        }).collect(toList());
+    }
+
+    private AnomusHakuDto.OrganisaatioDto mapOrganisaatio(String organisaatioOid) {
+        AnomusHakuDto.OrganisaatioDto dto = new AnomusHakuDto.OrganisaatioDto();
+        dto.setOid(organisaatioOid);
+        try {
+            OrganisaatioPerustieto organisaatio = organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, Mode.multiple());
+            dto.setNimi(organisaatio.getNimi());
+        } catch (Exception e) {
+            LOGGER.error("Organisaation {} tietojen lataaminen epäonnistui", organisaatioOid, e);
+        }
+        return dto;
+    }
 
     @Transactional(readOnly = true)
     @Override
@@ -272,7 +302,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         AnomusCriteria criteria = AnomusCriteria.builder()
                 .anottuAlku(anottuPvm.atStartOfDay())
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
-                .tila(AnomuksenTila.ANOTTU)
+                .tilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
 

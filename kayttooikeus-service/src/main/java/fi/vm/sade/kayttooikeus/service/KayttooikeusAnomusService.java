@@ -1,11 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface KayttooikeusAnomusService {
+
+    List<AnomusHakuDto> list(AnomusCriteria criteria, Long limit, Long offset);
+
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);
 
     void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto);
