@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.*;
 import java.util.Arrays;
 import static java.util.Collections.singleton;
@@ -186,6 +187,7 @@ public class KayttooikeusAnomusServiceTest {
 
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
                 LocalDate.now().plusYears(1));
+        // Service call
         this.kayttooikeusAnomusService.grantKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1",
                 Lists.newArrayList(grantKayttooikeusryhmaDto));
 
@@ -449,5 +451,39 @@ public class KayttooikeusAnomusServiceTest {
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
+    }
+
+    @Test
+    @WithMockUser("1.2.3.4.1")
+    public void removePrivilege() {
+        // Pass permission check
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhma(2001L)));
+        given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
+                .willReturn(true);
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
+        given(this.permissionCheckerService.organisaatioLimitationCheck(eq("1.2.0.0.1"), anySetOf(OrganisaatioViite.class))).willReturn(true);
+        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
+                .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
+        given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
+        // Actual mocks
+        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(new Henkilo()));
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+                "1.2.0.0.1", "1.2.3.4.5"))
+                .willReturn(Optional.of(createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L)));
+        // Service call
+        this.kayttooikeusAnomusService.removePrivilege("1.2.3.4.5", 2001L, "1.2.0.0.1");
+        // Capture
+        ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
+                ArgumentCaptor.forClass(KayttoOikeusRyhmaTapahtumaHistoria.class);
+        verify(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1))
+                .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
+        KayttoOikeusRyhmaTapahtumaHistoria kayttoOikeusRyhmaTapahtumaHistoria = myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.getValue();
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(1))
+                .delete(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
+
+        assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getTila()).isEqualTo(SULJETTU);
+        assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Käyttöoikeuden sulkeminen");
+        assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getAikaleima()).isNotNull();
     }
 }
