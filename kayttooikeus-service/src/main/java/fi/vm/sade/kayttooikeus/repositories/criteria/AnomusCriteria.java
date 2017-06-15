@@ -27,6 +27,7 @@ public class AnomusCriteria implements KayttooikeusCriteria<QAnomus> {
     private LocalDateTime anottuLoppu;
     private Set<AnomuksenTila> tilat;
     private Set<String> organisaatioOids;
+    private String anojaOid;
 
     public Predicate condition(QAnomus qAnomus) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -47,6 +48,9 @@ public class AnomusCriteria implements KayttooikeusCriteria<QAnomus> {
         }
         if (organisaatioOids != null) {
             builder.and(qAnomus.organisaatioOid.in(organisaatioOids));
+        }
+        if (anojaOid != null) {
+            builder.and(qAnomus.henkilo.oidHenkilo.eq(anojaOid));
         }
 
         return builder;

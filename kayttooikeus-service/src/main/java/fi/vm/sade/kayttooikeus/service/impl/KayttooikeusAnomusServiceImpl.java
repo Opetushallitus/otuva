@@ -106,18 +106,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .findBy(criteria, limit, offset), HaettuKayttooikeusryhmaDto.class));
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly) {
-        if(activeOnly) {
-            return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                    .findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(oidHenkilo, AnomuksenTila.ANOTTU), HaettuKayttooikeusryhmaDto.class));
-        }
-        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                .findByAnomusHenkiloOidHenkilo(oidHenkilo), HaettuKayttooikeusryhmaDto.class));
-
-    }
-
     private List<HaettuKayttooikeusryhmaDto> localizeKayttooikeusryhma(List<HaettuKayttooikeusryhmaDto> unlocalizedDtos) {
         unlocalizedDtos
                 .forEach(haettuKayttooikeusryhmaDto -> haettuKayttooikeusryhmaDto

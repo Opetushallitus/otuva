@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import io.swagger.annotations.Api;
@@ -13,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -48,12 +50,19 @@ public class AnomusController {
         return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset);
     }
 
-    @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
+    @ApiOperation(value = "Palauttaa henkilön kaikki haetut käyttöoikeusryhmät",
+            notes = "Käytä /kayttooikeusanomus/haettuKayttoOikeusRyhma")
     @PostAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(returnObject, {'READ', 'READ_UPDATE', 'CRUD'})")
     @RequestMapping(value = "/{oidHenkilo}", method = RequestMethod.GET)
+    @Deprecated
     public List<HaettuKayttooikeusryhmaDto> getActiveAnomuksetByHenkilo(@ApiParam("Henkilön OID") @PathVariable String oidHenkilo,
                                                                         @RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
-        return this.kayttooikeusAnomusService.getAllActiveAnomusByHenkiloOid(oidHenkilo, activeOnly);
+        AnomusCriteria criteria = new AnomusCriteria();
+        criteria.setAnojaOid(oidHenkilo);
+        if (activeOnly) {
+            criteria.setTilat(EnumSet.of(AnomuksenTila.ANOTTU));
+        }
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null);
     }
 
     @ApiOperation("Tekee uuden käyttöoikeusanomuksen")
