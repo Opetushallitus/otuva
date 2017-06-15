@@ -99,6 +99,13 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         return dto;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset) {
+        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
+                .findBy(criteria, limit, offset), HaettuKayttooikeusryhmaDto.class));
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly) {

@@ -38,6 +38,16 @@ public class AnomusController {
         return kayttooikeusAnomusService.list(criteria, limit, offset);
     }
 
+    @GetMapping("/haettuKayttoOikeusRyhma")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee haetut käyttöoikeusryhmät",
+            notes = "Tällä hetkellä toteutus vain rekisterinpitäjälle")
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
+            @RequestParam(required = false, defaultValue = "20") Long limit,
+            @RequestParam(required = false) Long offset) {
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset);
+    }
+
     @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
     @PostAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(returnObject, {'READ', 'READ_UPDATE', 'CRUD'})")
     @RequestMapping(value = "/{oidHenkilo}", method = RequestMethod.GET)
