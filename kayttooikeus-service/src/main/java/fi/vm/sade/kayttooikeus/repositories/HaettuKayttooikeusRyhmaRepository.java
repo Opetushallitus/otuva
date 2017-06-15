@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public interface HaettuKayttooikeusRyhmaDataRepository extends CrudRepository<HaettuKayttoOikeusRyhma, Long> {
+public interface HaettuKayttooikeusRyhmaRepository extends CrudRepository<HaettuKayttoOikeusRyhma, Long> {
 
     List<HaettuKayttoOikeusRyhma> findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(String oidHenkilo, AnomuksenTila anomuksenTila);
 

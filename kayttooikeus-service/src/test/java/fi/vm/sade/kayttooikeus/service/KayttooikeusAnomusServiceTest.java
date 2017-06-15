@@ -54,7 +54,7 @@ public class KayttooikeusAnomusServiceTest {
     private OrikaBeanMapper orikaBeanMapper;
 
     @MockBean
-    private HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
+    private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
 
     @MockBean
     private LocalizationService localizationService;
@@ -109,7 +109,7 @@ public class KayttooikeusAnomusServiceTest {
         CommonProperties commonProperties = new CommonProperties();
         commonProperties.setRootOrganizationOid("rootOid");
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
-                this.haettuKayttooikeusRyhmaDataRepository,
+                this.haettuKayttooikeusRyhmaRepository,
                 this.henkiloDataRepository,
                 this.henkiloHibernateRepository,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
@@ -131,7 +131,7 @@ public class KayttooikeusAnomusServiceTest {
 
     @Test
     public void getAllActiveAnomusByHenkiloOid() {
-        given(this.haettuKayttooikeusRyhmaDataRepository.findByAnomusHenkiloOidHenkilo("1.2.3.4.5"))
+        given(this.haettuKayttooikeusRyhmaRepository.findByAnomusHenkiloOidHenkilo("1.2.3.4.5"))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
@@ -143,13 +143,13 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
-        verify(this.haettuKayttooikeusRyhmaDataRepository, never()).findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(any(), any());
+        verify(this.haettuKayttooikeusRyhmaRepository, never()).findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(any(), any());
         verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
     @Test
     public void getAllActiveAnomusByHenkiloOidOnlyActive() {
-        given(this.haettuKayttooikeusRyhmaDataRepository
+        given(this.haettuKayttooikeusRyhmaRepository
                 .findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila("1.2.3.4.5", AnomuksenTila.ANOTTU))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
@@ -162,7 +162,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
-        verify(this.haettuKayttooikeusRyhmaDataRepository, never()).findByAnomusHenkiloOidHenkilo(any());
+        verify(this.haettuKayttooikeusRyhmaRepository, never()).findByAnomusHenkiloOidHenkilo(any());
         verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
@@ -298,7 +298,7 @@ public class KayttooikeusAnomusServiceTest {
                 "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
+        given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
@@ -333,7 +333,7 @@ public class KayttooikeusAnomusServiceTest {
                 "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
+        given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
@@ -366,7 +366,7 @@ public class KayttooikeusAnomusServiceTest {
         haettuKayttoOikeusRyhma.getAnomus().addHaettuKayttoOikeusRyhma(anotherHaettuKayttoOikeusRyhma);
         // this has it's own test
         doNothing().when(this.kayttooikeusAnomusService).grantKayttooikeusryhma(any(), anyString(), anyListOf(GrantKayttooikeusryhmaDto.class));
-        given(this.haettuKayttooikeusRyhmaDataRepository.findById(1L))
+        given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
         given(this.permissionCheckerService.checkRoleForOrganisation(anyListOf(String.class), anyListOf(String.class)))
