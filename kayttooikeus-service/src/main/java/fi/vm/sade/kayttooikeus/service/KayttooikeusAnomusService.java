@@ -17,4 +17,6 @@ public interface KayttooikeusAnomusService {
     void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId);
 
     void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm);
+
+    void removePrivilege(String oidHenkilo, Long id, String organisaatioOid);
 }

@@ -9,11 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public interface HaettuKayttooikeusRyhmaDataRepository extends CrudRepository<HaettuKayttoOikeusRyhma, Long> {
+public interface HaettuKayttooikeusRyhmaRepository extends CrudRepository<HaettuKayttoOikeusRyhma, Long>, HaettuKayttooikeusRyhmaRepositoryCustom {
 
     List<HaettuKayttoOikeusRyhma> findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(String oidHenkilo, AnomuksenTila anomuksenTila);
 

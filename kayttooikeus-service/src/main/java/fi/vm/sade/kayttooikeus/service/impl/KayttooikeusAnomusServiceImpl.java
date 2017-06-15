@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.toSet;
 
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KayttooikeusAnomusServiceImpl extends AbstractService implements KayttooikeusAnomusService {
 
-    private final HaettuKayttooikeusRyhmaDataRepository haettuKayttooikeusRyhmaDataRepository;
+    private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -74,10 +73,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Override
     public List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly) {
         if(activeOnly) {
-            return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaDataRepository
+            return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
                     .findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(oidHenkilo, AnomuksenTila.ANOTTU), HaettuKayttooikeusryhmaDto.class));
         }
-        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaDataRepository
+        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
                 .findByAnomusHenkiloOidHenkilo(oidHenkilo), HaettuKayttooikeusryhmaDto.class));
 
     }
@@ -92,7 +91,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Transactional
     @Override
     public void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
-        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaDataRepository
+        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository
                 .findById(updateHaettuKayttooikeusryhmaDto.getId())
                 .orElseThrow(() -> new NotFoundException("Haettua kayttooikeusryhmaa ei löytynyt id:llä "
                         + updateHaettuKayttooikeusryhmaDto.getId()));
@@ -198,7 +197,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Remove the currently handled kayttooikeus from anomus
         haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().remove(haettuKayttoOikeusRyhma);
-        this.haettuKayttooikeusRyhmaDataRepository.delete(haettuKayttoOikeusRyhma);
+        this.haettuKayttooikeusRyhmaRepository.delete(haettuKayttoOikeusRyhma);
     }
 
     // Sets organisaatiohenkilo active since it might be passive
@@ -382,14 +381,34 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Override
     @Transactional
     public void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId) {
-        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaDataRepository.findById(kayttooikeusRyhmaId)
+        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository.findById(kayttooikeusRyhmaId)
                 .orElseThrow( () -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId) );
         Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
         anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
         if(anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }
-        this.haettuKayttooikeusRyhmaDataRepository.delete(kayttooikeusRyhmaId);
+        this.haettuKayttooikeusRyhmaRepository.delete(kayttooikeusRyhmaId);
     }
 
+    @Override
+    @Transactional
+    public void removePrivilege(String oidHenkilo, Long kayttooikeusryhmaId, String organisaatioOid) {
+        // Permission checks
+        this.notEditingOwnData(oidHenkilo);
+        this.inSameOrParentOrganisation(organisaatioOid);
+        this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId);
+        this.kayttooikeusryhmaLimitationsAreValid(kayttooikeusryhmaId);
+
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
+                .orElseThrow(() -> new NotFoundException("Current user not found with oid " + UserDetailsUtil.getCurrentUserOid()));
+
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttooikeusryhmaId, organisaatioOid, oidHenkilo)
+                        .orElseThrow(() -> new NotFoundException("Myonnettykayttooikeusryhma not found with KayttooikeusryhmaId "
+                                + kayttooikeusryhmaId + " organisaatioOid " + organisaatioOid + " oidHenkilo " + oidHenkilo));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma
+                .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(),"Käyttöoikeuden sulkeminen"));
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
+    }
 }
