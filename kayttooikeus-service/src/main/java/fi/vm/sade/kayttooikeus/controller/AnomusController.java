@@ -81,11 +81,13 @@ public class AnomusController {
         this.kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(anottuPvm);
     }
 
-    @ApiOperation("")
+    @ApiOperation("Poistaa henkilöltä käyttöoikeuden halutusta organisaatiosta")
     @PreAuthorize("hasAnyRole('ROLE_APP_ANOMUSTENHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/{oidHenkilo}/{organisaatioOid}/{id}", method = RequestMethod.DELETE)
-    public void removePrivilege(@PathVariable String oidHenkilo, @PathVariable String organisaatioOid, @PathVariable Long id) {
+    public void removePrivilege(@PathVariable String oidHenkilo,
+                                @PathVariable String organisaatioOid,
+                                @ApiParam(value = "Käyttöoikeusryhmä id", required = true) @PathVariable Long id) {
         this.kayttooikeusAnomusService.removePrivilege(oidHenkilo, id, organisaatioOid);
     }
 }
