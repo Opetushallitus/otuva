@@ -80,4 +80,14 @@ public class AnomusController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate anottuPvm) {
         this.kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(anottuPvm);
     }
+
+    @ApiOperation("Poistaa henkilöltä käyttöoikeuden halutusta organisaatiosta")
+    @PreAuthorize("hasAnyRole('ROLE_APP_ANOMUSTENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @RequestMapping(value = "/{oidHenkilo}/{organisaatioOid}/{id}", method = RequestMethod.DELETE)
+    public void removePrivilege(@PathVariable String oidHenkilo,
+                                @PathVariable String organisaatioOid,
+                                @ApiParam(value = "Käyttöoikeusryhmä id", required = true) @PathVariable Long id) {
+        this.kayttooikeusAnomusService.removePrivilege(oidHenkilo, id, organisaatioOid);
+    }
 }

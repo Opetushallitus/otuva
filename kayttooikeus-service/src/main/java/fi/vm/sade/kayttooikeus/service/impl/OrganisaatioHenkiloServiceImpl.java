@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -12,14 +13,18 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.PALVELU;
 import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.VIRKAILIJA;
@@ -33,8 +38,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
 
 @Service
+@RequiredArgsConstructor
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
     private final String HENKILOHALLINTA_PALVELUNAME = "HENKILONHALLINTA";
     private final String ROOLI_OPH_REKISTERINPITAJA = "OPHREKISTERI";
@@ -49,25 +57,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final OrganisaatioClient organisaatioClient;
     private final PermissionCheckerService permissionCheckerService;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-
-    @Autowired
-    public OrganisaatioHenkiloServiceImpl(OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
-                                          OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
-                                          KayttoOikeusRepository kayttoOikeusRepository,
-                                          HenkiloDataRepository henkiloDataRepository,
-                                          OrikaBeanMapper mapper,
-                                          OrganisaatioClient organisaatioClient,
-                                          PermissionCheckerService permissionCheckerService,
-                                          MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository) {
-        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
-        this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
-        this.kayttoOikeusRepository = kayttoOikeusRepository;
-        this.henkiloDataRepository = henkiloDataRepository;
-        this.mapper = mapper;
-        this.organisaatioClient = organisaatioClient;
-        this.permissionCheckerService = permissionCheckerService;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-    }
+    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -193,13 +183,20 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Transactional
     @Override
     public void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid) {
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
+                .orElseThrow(() -> new NotFoundException("Could not find current henkilo with oid " + UserDetailsUtil.getCurrentUserOid()));
         OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloDataRepository
                 .findByHenkiloOidHenkiloAndOrganisaatioOid(oidHenkilo, henkiloOrganisationOid)
                 .orElseThrow(() -> new NotFoundException("Unknown organisation" + henkiloOrganisationOid + "for henkilo" + oidHenkilo));
         organisaatioHenkilo.setPassivoitu(true);
-
-        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().forEach(myonnettyKayttoOikeusRyhmaTapahtuma ->
-                myonnettyKayttoOikeusRyhmaTapahtuma.setTila(KayttoOikeudenTila.SULJETTU));
+        Set<KayttoOikeusRyhmaTapahtumaHistoria> historia = organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().stream()
+                .map(myonnettyKayttoOikeusRyhmaTapahtuma -> myonnettyKayttoOikeusRyhmaTapahtuma
+                        .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), "Henkilön passivointi"))
+                .collect(toSet());
+        organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(historia);
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
+        organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
     }
 
     private OrganisaatioHenkilo findFirstMatching(OrganisaatioHenkiloUpdateDto organisaatioHenkilo,

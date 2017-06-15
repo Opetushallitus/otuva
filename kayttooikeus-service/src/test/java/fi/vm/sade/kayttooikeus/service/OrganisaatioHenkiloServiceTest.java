@@ -2,9 +2,11 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -24,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
@@ -152,6 +155,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @WithMockUser(username = "1.2.3.4.5")
     public void passivoiHenkiloOrganisation() {
         OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("henkilo1").withPassivoitu(false), "1.1.1.1.1"));
+        populate(henkilo("1.2.3.4.5"));
         given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.of(organisaatioHenkilo));
         KayttoOikeusRyhma kayttoOikeusRyhma = populate(kayttoOikeusRyhma("käyttöoikeusryhmä"));
@@ -159,7 +163,8 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
 
         this.organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1");
         assertThat(organisaatioHenkilo.isPassivoitu()).isTrue();
-        assertThat(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas()).extracting("tila").containsExactly(KayttoOikeudenTila.SULJETTU);
+        assertThat(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas()).isEmpty();
+        assertThat(organisaatioHenkilo.getKayttoOikeusRyhmaHistorias()).extracting("tila").containsExactly(SULJETTU);
     }
 
     @Test(expected = NotFoundException.class)

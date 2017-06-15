@@ -388,4 +388,24 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.haettuKayttooikeusRyhmaRepository.delete(kayttooikeusRyhmaId);
     }
 
+    @Override
+    @Transactional
+    public void removePrivilege(String oidHenkilo, Long kayttooikeusryhmaId, String organisaatioOid) {
+        // Permission checks
+        this.notEditingOwnData(oidHenkilo);
+        this.inSameOrParentOrganisation(organisaatioOid);
+        this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId);
+        this.kayttooikeusryhmaLimitationsAreValid(kayttooikeusryhmaId);
+
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
+                .orElseThrow(() -> new NotFoundException("Current user not found with oid " + UserDetailsUtil.getCurrentUserOid()));
+
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttooikeusryhmaId, organisaatioOid, oidHenkilo)
+                        .orElseThrow(() -> new NotFoundException("Myonnettykayttooikeusryhma not found with KayttooikeusryhmaId "
+                                + kayttooikeusryhmaId + " organisaatioOid " + organisaatioOid + " oidHenkilo " + oidHenkilo));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma
+                .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(),"Käyttöoikeuden sulkeminen"));
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
+    }
 }
