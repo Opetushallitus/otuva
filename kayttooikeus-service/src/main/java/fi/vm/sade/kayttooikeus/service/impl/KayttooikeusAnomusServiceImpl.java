@@ -22,7 +22,8 @@ import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidat
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.*;
+
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
@@ -407,4 +408,51 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(),"Käyttöoikeuden sulkeminen"));
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public KayttooikeusHenkiloCanGrantDto findCurrentHenkiloCanGrant() {
+        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = new KayttooikeusHenkiloCanGrantDto();
+
+        if(this.permissionCheckerService.isCurrentUserAdmin()) {
+            kayttooikeusHenkiloCanGrantDto.setAdmin(true);
+            return kayttooikeusHenkiloCanGrantDto;
+        }
+
+        // Organisaatiot, joihin on READ_UPDATE / CRUD oikat (ANOMUSTENHALLINTA)
+        List<String> allowedRoles = this.permissionCheckerService.getCasRoles().stream()
+                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD")
+                        || role.contains("ANOMUSTENHALLINTA_READ_UPDATE")).collect(Collectors.toList());
+
+        // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
+        List<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaList =
+                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findValidMyonnettyKayttooikeus(UserDetailsUtil.getCurrentUserOid()).stream()
+                .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedRoles.stream()
+                        .anyMatch(allowedRole -> allowedRole.contains(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())))
+                .collect(Collectors.toList());
+
+        // Myöntöviite slave idt (myönnettävissä olevat ryhmät, samaan ryhmään ei voi myöntää)
+        myonnettyKayttoOikeusRyhmaTapahtumaList.forEach(myonnettyKayttoOikeusRyhmaTapahtuma -> {
+            List<Long> allowedIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
+                    Lists.newArrayList(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId()));
+            if(!allowedIds.isEmpty()) {
+                kayttooikeusHenkiloCanGrantDto.addToOrganisation(
+                        myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(),
+                        allowedIds);
+                // Näiden aliorganisaatiot lisätään listaan, koska myös näihin on automaattisesti sama oikeus
+                this.organisaatioClient.getOrganisaatioPerustiedotCached(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), OrganisaatioClient.Mode.requireCache())
+                        .getChildren().forEach(organisaatio -> kayttooikeusHenkiloCanGrantDto.addToOrganisation(
+                        organisaatio.getOid(), allowedIds));
+            }
+        });
+
+        // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
+//        Map<String, List<Long>> allowedKayttooikeusryhmasByOrganisation = kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation();
+//        allowedKayttooikeusryhmasByOrganisation.replaceAll((organisaatioOid, kayttooikeusryhmaIdList) -> this.permissionCheckerService.organisaatioLimitationCheck(organisaatioOid, this.));
+
+        return kayttooikeusHenkiloCanGrantDto;
+    }
+
+
 }

@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,4 +22,7 @@ public interface KayttooikeusAnomusService {
     void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm);
 
     void removePrivilege(String oidHenkilo, Long id, String organisaatioOid);
+
+    @Transactional(readOnly = true)
+    KayttooikeusHenkiloCanGrantDto findCurrentHenkiloCanGrant();
 }

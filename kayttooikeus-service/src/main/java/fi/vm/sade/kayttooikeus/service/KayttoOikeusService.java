@@ -44,4 +44,5 @@ public interface KayttoOikeusService {
     List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusList(Map<String, String> kayttoOikeusList);
 
     AuthorizationDataDto findAuthorizationDataByOid(String oid);
+
 }

@@ -108,4 +108,12 @@ public class AnomusController {
                                 @ApiParam(value = "Käyttöoikeusryhmä id", required = true) @PathVariable Long id) {
         this.kayttooikeusAnomusService.removePrivilege(oidHenkilo, id, organisaatioOid);
     }
+
+    @ApiOperation("Listaa ryhmät, joita käyttäjällä on oikeus myöntää")
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/henkilo/current/canGrant", method = RequestMethod.GET)
+    public KayttooikeusHenkiloCanGrantDto currentHenkiloCanGrant() {
+        return this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant();
+    }
+
 }
