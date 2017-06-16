@@ -9,12 +9,14 @@ import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private PalveluRepository palveluRepository;
     private OrganisaatioViiteRepository organisaatioViiteRepository;
     private LdapSynchronizationService ldapSynchronizationService;
+    private PermissionCheckerService permissionCheckerService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -68,7 +71,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    LdapSynchronizationService ldapSynchronizationService,
                                    OrganisaatioClient organisaatioClient,
                                    CommonProperties commonProperties,
-                                   OppijanumerorekisteriClient oppijanumerorekisteriClient) {
+                                   OppijanumerorekisteriClient oppijanumerorekisteriClient,
+                                   PermissionCheckerService permissionCheckerService) {
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.kayttoOikeusRepository = kayttoOikeusRepository;
         this.localizationService = localizationService;
@@ -83,6 +87,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
         this.groupOrganizationId = commonProperties.getGroupOrganizationId();
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
+        this.permissionCheckerService = permissionCheckerService;
     }
 
     @Override
