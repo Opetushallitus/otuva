@@ -102,7 +102,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Permission checks for declining requisition (there are separate checks for granting)
         this.notEditingOwnData(anojanAnomus.getHenkilo().getOidHenkilo());
         this.inSameOrParentOrganisation(anojanAnomus.getOrganisaatioOid());
-        this.organisaatioViiteLimitationsAreValid(anottuKayttoOikeusRyhma.getId());
+        this.organisaatioViiteLimitationsAreValidThrows(anottuKayttoOikeusRyhma.getId());
         this.kayttooikeusryhmaLimitationsAreValid(anottuKayttoOikeusRyhma.getId());
 
         // Post validation
@@ -159,7 +159,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     private void organisaatioViiteLimitationsAreValidThrows(Long kayttooikeusryhmaId) {
-        if(this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
+        if(!this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
             throw new ForbiddenException("Target organization has invalid organization type");
         }
     }
@@ -229,7 +229,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
         updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto -> {
-                    this.organisaatioViiteLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
+                    this.organisaatioViiteLimitationsAreValidThrows(updateHaettuKayttooikeusryhmaDto.getId());
                     this.kayttooikeusryhmaLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
         });
 
@@ -402,7 +402,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Permission checks
         this.notEditingOwnData(oidHenkilo);
         this.inSameOrParentOrganisation(organisaatioOid);
-        this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId);
+        this.organisaatioViiteLimitationsAreValidThrows(kayttooikeusryhmaId);
         this.kayttooikeusryhmaLimitationsAreValid(kayttooikeusryhmaId);
 
         Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
