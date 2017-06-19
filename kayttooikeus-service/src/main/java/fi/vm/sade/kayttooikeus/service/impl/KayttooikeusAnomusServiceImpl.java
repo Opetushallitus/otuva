@@ -154,7 +154,13 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
     }
 
-    private void organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
+    private void organisaatioViiteLimitationsAreValidThrows(Long kayttooikeusryhmaId) {
+        if(this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
+            throw new ForbiddenException("Target organization has invalid organization type");
+        }
+    }
+
+    private boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
         Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
                 .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
                 .getOrganisaatioViite();
@@ -165,12 +171,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .collect(Collectors.toList());
 
         // Organisaatiohenkilo limitations are valid
-        if(!CollectionUtils.isEmpty(organisaatioViite)
+        return !(!CollectionUtils.isEmpty(organisaatioViite)
                 // only root organisation should not have organisaatioviite
                 && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> commonProperties.getRootOrganizationOid().equals(orgOid))
-                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> this.permissionCheckerService.organisaatioLimitationCheck(orgOid, organisaatioViite))) {
-            throw new ForbiddenException("Target organization has invalid organization type");
-        }
+                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> this.permissionCheckerService.organisaatioLimitationCheck(orgOid, organisaatioViite)));
     }
 
     private void kayttooikeusryhmaLimitationsAreValid(Long kayttooikeusryhmaId) {
@@ -448,11 +452,13 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         });
 
         // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
-//        Map<String, List<Long>> allowedKayttooikeusryhmasByOrganisation = kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation();
-//        allowedKayttooikeusryhmasByOrganisation.replaceAll((organisaatioOid, kayttooikeusryhmaIdList) -> this.permissionCheckerService.organisaatioLimitationCheck(organisaatioOid, this.));
+        kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()
+                .replaceAll((organisaatioOid, kayttooikeusryhmaIdList) ->
+                        kayttooikeusryhmaIdList.stream()
+                                .filter(this::organisaatioViiteLimitationsAreValid)
+                                .collect(Collectors.toList()));
 
         return kayttooikeusHenkiloCanGrantDto;
     }
-
 
 }
