@@ -67,6 +67,13 @@ public class CreateUtil {
         return henkilo;
     }
 
+    public static MyonnettyKayttoOikeusRyhmaTapahtuma createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(
+            Long id, Long kayttooikeusryhmaId, String organisaatioOid) {
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(id, kayttooikeusryhmaId);
+        myonnettyKayttoOikeusRyhmaTapahtuma.setOrganisaatioHenkilo(createOrganisaatioHenkilo(organisaatioOid, false));
+        return myonnettyKayttoOikeusRyhmaTapahtuma;
+    }
+
     public static MyonnettyKayttoOikeusRyhmaTapahtuma createMyonnettyKayttoOikeusRyhmaTapahtuma(Long id, Long kayttooikeusryhmaId) {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = new MyonnettyKayttoOikeusRyhmaTapahtuma();
         myonnettyKayttoOikeusRyhmaTapahtuma.setId(id);
@@ -87,12 +94,17 @@ public class CreateUtil {
 
     public static Henkilo createHenkiloWithOrganisaatio(String oidHenkilo, String organisaatioOid, boolean passivoitu) {
         Henkilo henkilo = createHenkilo(oidHenkilo);
-        OrganisaatioHenkilo organisaatioHenkilo = new OrganisaatioHenkilo();
+        OrganisaatioHenkilo organisaatioHenkilo = createOrganisaatioHenkilo(organisaatioOid, passivoitu);
         organisaatioHenkilo.setHenkilo(henkilo);
-        organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
-        organisaatioHenkilo.setPassivoitu(passivoitu);
         henkilo.setOrganisaatioHenkilos(Sets.newHashSet(organisaatioHenkilo));
         return henkilo;
+    }
+
+    public static OrganisaatioHenkilo createOrganisaatioHenkilo(String organisaatioOid, boolean passivoitu) {
+        OrganisaatioHenkilo organisaatioHenkilo = new OrganisaatioHenkilo();
+        organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
+        organisaatioHenkilo.setPassivoitu(passivoitu);
+        return organisaatioHenkilo;
     }
 
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
