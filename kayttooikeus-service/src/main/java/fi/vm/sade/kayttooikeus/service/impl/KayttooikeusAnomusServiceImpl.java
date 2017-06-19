@@ -425,8 +425,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Organisaatiot, joihin on READ_UPDATE / CRUD oikat (ANOMUSTENHALLINTA)
         List<String> allowedRoles = this.permissionCheckerService.getCasRoles().stream()
-                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD")
-                        || role.contains("ANOMUSTENHALLINTA_READ_UPDATE")).collect(Collectors.toList());
+                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD") || role.contains("ANOMUSTENHALLINTA_READ_UPDATE"))
+                .collect(Collectors.toList());
 
         // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaList =
@@ -457,7 +457,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         kayttooikeusryhmaIdList.stream()
                                 .filter(this::organisaatioViiteLimitationsAreValid)
                                 .collect(Collectors.toList()));
-
+        // Filter off empty keys
+        kayttooikeusHenkiloCanGrantDto.setKayttooikeusByOrganisation(
+                kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation().entrySet().stream()
+                        .filter(entity -> !entity.getValue().isEmpty())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         return kayttooikeusHenkiloCanGrantDto;
     }
 

@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
@@ -14,6 +15,8 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -472,4 +475,69 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Käyttöoikeuden sulkeminen");
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getAikaleima()).isNotNull();
     }
+
+    @Test
+    @WithMockUser("1.2.3.4.5")
+    public void findCurrentHenkiloCanGrantNoRoles() {
+        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant();
+        assertThat(kayttooikeusHenkiloCanGrantDto.isAdmin()).isFalse();
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.5", roles = "HENKILONHALLINTA_OPHREKISTERI")
+    public void findCurrentHenkiloCanGrantAsAdmin() {
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
+
+        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant();
+        assertThat(kayttooikeusHenkiloCanGrantDto.isAdmin()).isTrue();
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("1.2.3.4.5")
+    public void findCurrentHenkiloCanGrantWithNegativeOrganisaatioviite() {
+        given(this.permissionCheckerService.getCasRoles()).willReturn(Sets.newHashSet("ANOMUSTENHALLINTA_CRUD_1.2.0.0.1"));
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+                .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1"),
+                        createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1002L, 2002L, "1.2.0.0.2")));
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class)))
+                .willReturn(Lists.newArrayList(1003L));
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.0.0.1"), anyObject()))
+                .willReturn(createOrganisaatioPerustietoWithChild("1.2.0.0.1", "1.2.0.0.2", "oppilaitostyyppi"));
+
+        // organisaatioviite mock
+        given(this.kayttooikeusryhmaDataRepository.findById(1003L)).willReturn(Optional.of(createKayttoOikeusRyhma(1003L)));
+
+        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant();
+        assertThat(kayttooikeusHenkiloCanGrantDto.isAdmin()).isFalse();
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("1.2.3.4.5")
+    public void findCurrentHenkiloCanGrant() {
+        given(this.permissionCheckerService.getCasRoles()).willReturn(Sets.newHashSet("ANOMUSTENHALLINTA_CRUD_1.2.0.0.1"));
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+                .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1"),
+                        createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1002L, 2002L, "1.2.0.0.2")));
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class)))
+                .willReturn(Lists.newArrayList(1003L));
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.0.0.1"), anyObject()))
+                .willReturn(createOrganisaatioPerustietoWithChild("1.2.0.0.1", "1.2.0.0.2", "oppilaitostyyppi"));
+
+        // organisaatioviite mock
+        KayttoOikeusRyhma kayttoOikeusRyhma = createKayttoOikeusRyhma(1003L);
+        given(this.kayttooikeusryhmaDataRepository.findById(1003L)).willReturn(Optional.of(kayttoOikeusRyhma));
+        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.5"))
+                .willReturn(Lists.newArrayList(createOrganisaatioHenkilo("1.2.0.0.1", false)));
+        given(this.permissionCheckerService.organisaatioLimitationCheck("1.2.0.0.1", kayttoOikeusRyhma.getOrganisaatioViite()))
+                .willReturn(true);
+        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant();
+        assertThat(kayttooikeusHenkiloCanGrantDto.isAdmin()).isFalse();
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()).containsOnlyKeys("1.2.0.0.1", "1.2.0.0.2");
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation().get("1.2.0.0.1")).containsExactly(1003L);
+        assertThat(kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation().get("1.2.0.0.2")).containsExactly(1003L);
+    }
+
 }
