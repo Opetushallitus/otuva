@@ -12,7 +12,6 @@ import io.swagger.annotations.Authorization;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -88,21 +87,6 @@ public class HenkiloController {
                                                         @RequestBody @Validated KayttajatiedotUpdateDto kayttajatiedot) {
         return kayttajatiedotService.updateKayttajatiedot(henkiloOid, kayttajatiedot);
     }
-
-    @ApiOperation(value = "Hakee henkilöitä organisaatioiden ja käyttöoikeuksien mukaan.",
-            notes = "Tämä toteutus on tehty Osoitepalvelua varten, jonka pitää pystyä "
-                    + "hakemaan henkilöitä henkilötyyppien, organisaatioiden sekä"
-                    + "käyttöoikeusryhmien mukaan, tämä toteutus ei ole UI:n käytössä.")
-    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
-            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
-            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
-            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @RequestMapping(value = "/byOoids", method = RequestMethod.POST)
-    public List<String> findHenkilosByOrganisaatioOids(@RequestBody @Valid OrganisaatioOidsSearchDto organisaatioOidsSearchDto) {
-        return henkiloService.findHenkilos(organisaatioOidsSearchDto);
-    }
-
-
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'CRUD'}, null)")
     @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST)

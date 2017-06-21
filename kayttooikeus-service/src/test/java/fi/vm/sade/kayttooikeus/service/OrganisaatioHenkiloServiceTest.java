@@ -2,11 +2,9 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -32,6 +30,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -154,7 +153,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void passivoiHenkiloOrganisation() {
-        OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("henkilo1").withPassivoitu(false), "1.1.1.1.1"));
+        OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("henkilo1"), "1.1.1.1.1"));
         populate(henkilo("1.2.3.4.5"));
         given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.of(organisaatioHenkilo));

@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -21,6 +20,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -129,9 +130,10 @@ public class PermissionCheckerTest {
 
     @Test
     public void testThatPermissionIsAllowedWhenUserIsNotOppijaAndHasNoOrganization() {
-        Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
-            setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
-        }});
+        Optional<Henkilo> henkilo = Optional.of(new Henkilo());
+        when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
+                .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
+                .build());
         when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD"),
                 ExternalPermissionService.HAKU_APP, this.myRoles)).isTrue();
@@ -140,7 +142,6 @@ public class PermissionCheckerTest {
     @Test
     public void testThatPermissionIsAllowedWhenUserBelongsToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
-            setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
                 setOrganisaatioCache(
                         new OrganisaatioCache(){{
@@ -157,7 +158,6 @@ public class PermissionCheckerTest {
     @Test
     public void testThatPermissionIsDeniedWhenUserDoesNotBelongToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
-            setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
                 setOrganisaatioCache(
                         new OrganisaatioCache(){{

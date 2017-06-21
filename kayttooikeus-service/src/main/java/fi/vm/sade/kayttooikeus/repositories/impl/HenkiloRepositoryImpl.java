@@ -1,34 +1,26 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQuery;
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
-import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
+import com.querydsl.jpa.impl.JPAQuery;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.QHenkilo;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.querydsl.core.types.ExpressionUtils.eq;
-import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
-import static fi.vm.sade.kayttooikeus.model.QKayttajatiedot.kayttajatiedot;
-import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
-import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
+import static java.util.stream.Collectors.toSet;
+import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import static java.util.stream.Collectors.toSet;
 
 @Repository
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
@@ -114,35 +106,6 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
         return query.distinct().fetch();
-    }
-
-    @Override
-    public List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName) {
-        BooleanBuilder booleanBuilder = new BooleanBuilder()
-                .and(henkilo.henkiloTyyppi.eq(henkiloTyyppi));
-
-        if (!CollectionUtils.isEmpty(ooids)) {
-            booleanBuilder.and(organisaatioHenkilo.organisaatioOid.in(ooids));
-        }
-        if (!StringUtils.isEmpty(groupName)) {
-            booleanBuilder.and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.name.eq(groupName));
-        }
-
-        BooleanBuilder voimassa = new BooleanBuilder()
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.loe(LocalDate.now())
-                        .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.isNull()))
-                .and(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.gt(LocalDate.now())
-                        .or(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.isNull()));
-        booleanBuilder.and(voimassa);
-
-        return jpa().from(henkilo)
-                .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
-                .leftJoin(henkilo.organisaatioHenkilos, organisaatioHenkilo)
-                .leftJoin(organisaatioHenkilo.myonnettyKayttoOikeusRyhmas, myonnettyKayttoOikeusRyhmaTapahtuma)
-                .distinct()
-                .select(henkilo.oidHenkilo)
-                .where(booleanBuilder)
-                .fetch();
     }
 
     @Override

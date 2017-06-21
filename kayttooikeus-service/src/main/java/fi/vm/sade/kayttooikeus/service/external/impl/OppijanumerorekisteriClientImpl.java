@@ -174,15 +174,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 });
     }
 
-    @Override
-    public HenkilonYhteystiedotViewDto getYhteystiedotByOid(String oid) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.yhteystiedotByOid", oid);
-        return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(
-                () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
-                        .readValue(serviceAccountClient.getAsString(url))), 2).get()
-                .orFail(mapper(url));
-    }
-
     //ONR uses java.time.LocalDate
     public static class HenkiloPerustiedotDto extends HenkiloPerustietoDto {
         public void setSyntymaaika(String localDate) {

@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 
 import java.util.List;
 

@@ -462,11 +462,6 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals(3, authData.getAccessrights().getAccessRight().size());
         assertEquals(2, authData.getGroups().getGroup().size());
 
-        organisaatioHenkilo.getHenkilo().setPassivoitu(true);
-        authData = kayttoOikeusService.findAuthorizationDataByOid("1.2.3.4.5");
-        assertEquals(0, authData.getAccessrights().getAccessRight().size());
-        assertEquals(0, authData.getGroups().getGroup().size());
-
         authData = kayttoOikeusService.findAuthorizationDataByOid("1.1.1.madeup.1");
         assertEquals(0, authData.getAccessrights().getAccessRight().size());
         assertEquals(0, authData.getGroups().getGroup().size());

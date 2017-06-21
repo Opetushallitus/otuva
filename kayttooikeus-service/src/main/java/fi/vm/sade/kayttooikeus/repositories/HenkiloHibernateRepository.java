@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
@@ -32,8 +31,6 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
     List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria);
-
-    List<String> findHenkiloOids(HenkiloTyyppi henkiloTyyppi, List<String> ooids, String groupName);
 
     /**
      * Palauttaa henkilöt jotka kuuluvat johonkin annettuun käyttöoikeusryhmään
