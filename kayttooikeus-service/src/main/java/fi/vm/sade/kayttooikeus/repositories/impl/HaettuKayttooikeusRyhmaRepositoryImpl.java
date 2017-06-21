@@ -28,7 +28,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
                 .join(qHaettuKayttoOikeusRyhma.anomus, qAnomus)
                 .where(criteria.condition(qAnomus))
                 .select(qHaettuKayttoOikeusRyhma)
-                .orderBy(qAnomus.anomusTilaTapahtumaPvm.desc());
+                .orderBy(qAnomus.anottuPvm.desc());
         if (limit != null) {
             query.limit(limit);
         }
