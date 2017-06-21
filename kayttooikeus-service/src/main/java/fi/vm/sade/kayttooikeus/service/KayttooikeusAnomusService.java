@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface KayttooikeusAnomusService {
 
-    List<AnomusHakuDto> list(AnomusCriteria criteria, Long limit, Long offset);
-
     List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset);
 
     void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto);

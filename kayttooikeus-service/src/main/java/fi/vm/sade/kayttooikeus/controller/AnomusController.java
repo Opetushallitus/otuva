@@ -30,16 +30,6 @@ public class AnomusController {
         this.kayttooikeusAnomusService = kayttooikeusAnomusService;
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @ApiOperation(value = "Hakee anomuksia",
-            notes = "Tällä hetkellä toteutus vain rekisterinpitäjälle")
-    public List<AnomusHakuDto> listAnomukset(AnomusCriteria criteria,
-            @RequestParam(required = false, defaultValue = "20") Long limit,
-            @RequestParam(required = false) Long offset) {
-        return kayttooikeusAnomusService.list(criteria, limit, offset);
-    }
-
     @GetMapping("/haettuKayttoOikeusRyhma")
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee haetut käyttöoikeusryhmät",
