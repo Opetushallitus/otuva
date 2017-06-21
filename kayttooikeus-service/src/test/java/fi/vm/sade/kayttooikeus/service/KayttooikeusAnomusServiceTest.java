@@ -94,6 +94,9 @@ public class KayttooikeusAnomusServiceTest {
     private EmailService emailService;
 
     @MockBean
+    private LdapSynchronizationService ldapSynchronizationService;
+
+    @MockBean
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @Captor
@@ -122,6 +125,7 @@ public class KayttooikeusAnomusServiceTest {
                 this.orikaBeanMapper,
                 this.localizationService,
                 this.emailService,
+                this.ldapSynchronizationService,
                 this.haettuKayttooikeusryhmaValidator,
                 this.permissionCheckerService,
                 commonProperties,

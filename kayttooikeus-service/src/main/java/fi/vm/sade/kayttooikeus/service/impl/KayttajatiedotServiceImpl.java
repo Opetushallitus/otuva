@@ -10,12 +10,12 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final OrikaBeanMapper mapper;
     private final CryptoService cryptoService;
-    private final LdapSynchronization ldapSynchronization;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     @Override
     @Transactional
@@ -45,7 +45,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         entity = kayttajatiedotRepository.save(entity);
         henkilo.setKayttajatiedot(entity);
 
-
+        ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return mapper.map(entity, KayttajatiedotReadDto.class);
     }
 
@@ -70,7 +70,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
         henkiloDataRepository.save(henkilo);
 
-        this.ldapSynchronization.updateHenkilo(henkiloOid, LdapSynchronization.ASAP_PRIORITY);
+        this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
     }
 
@@ -85,7 +85,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private void changePassword(String oid, String newPassword) {
         setPasswordForHenkilo(oid, newPassword);
         // Trigger ASAP priority update to LDAP
-//        ldapSynchronization.triggerUpdate(oid, null, LdapSynchronization.ASAP_PRIORITY);
+        ldapSynchronizationService.updateHenkiloAsap(oid);
     }
 
     private void setPasswordForHenkilo(String oidHenkilo, String password) {

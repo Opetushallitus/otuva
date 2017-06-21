@@ -38,6 +38,8 @@ import org.springframework.validation.BindException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
     private final EmailService emailService;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -354,7 +357,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma);
 
-        // TODO ldap sync for henkilo
+        ldapSynchronizationService.updateHenkiloAsap(anojaOid);
 
         return myonnettyKayttoOikeusRyhmaTapahtuma;
     }

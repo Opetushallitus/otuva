@@ -45,5 +45,18 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
      */
     List<Henkilo> findByKayttoOikeusRyhmatAndOrganisaatiot(Set<Long> kayttoOikeusRyhmaIds, Set<String> organisaatioOids);
 
+    /**
+     * Palauttaa henkilöt joilla on myönnettynä annettu käyttöoikeusryhmä.
+     *
+     * @param kayttoOikeusRyhmaId käyttöoikeusryhmän id
+     * @return henkilöt
+     */
+    Set<String> findOidsByKayttoOikeusRyhmaId(Long kayttoOikeusRyhmaId);
 
+    /**
+     * Palauttaa henkilöiden oid:t joilta löytyy käyttäjätunnus.
+     *
+     * @return henkilö oid:t
+     */
+    Set<String> findOidsByHavingUsername();
 }

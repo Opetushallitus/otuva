@@ -9,35 +9,27 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/henkilo")
 @Api(value = "/henkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
+@RequiredArgsConstructor
 public class HenkiloController {
+
     private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final HenkiloService henkiloService;
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
-
-    @Autowired
-    public HenkiloController(OrganisaatioHenkiloService organisaatioHenkiloService,
-                             HenkiloService henkiloService,
-                             KayttajatiedotService kayttajatiedotService,
-                             IdentificationService identificationService) {
-        this.organisaatioHenkiloService = organisaatioHenkiloService;
-        this.henkiloService = henkiloService;
-        this.kayttajatiedotService = kayttajatiedotService;
-        this.identificationService = identificationService;
-    }
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai ryhmien tiedoilla rekursiiisesti.",
@@ -181,6 +173,14 @@ public class HenkiloController {
     @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
     public KayttooikeudetDto postKayttooikeudet(@PathVariable String oid, @RequestBody OrganisaatioHenkiloCriteria criteria) {
         return henkiloService.getKayttooikeudet(oid, criteria);
+    }
+
+    @PutMapping("/{oid}/ldap")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Lisää henkilön LDAP-synkronointijonoon")
+    public void updateHenkiloToLdap(@PathVariable String oid) {
+        ldapSynchronizationService.updateHenkilo(oid);
     }
 
     @PostMapping("/henkilohaku")

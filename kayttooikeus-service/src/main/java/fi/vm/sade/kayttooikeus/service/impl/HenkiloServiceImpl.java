@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class HenkiloServiceImpl extends AbstractService implements HenkiloService {
@@ -38,6 +39,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final HenkiloDataRepository henkiloDataRepository;
 
     private final CommonProperties commonProperties;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -51,6 +53,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                        OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
                        CommonProperties commonProperties,
+                       LdapSynchronizationService ldapSynchronizationService,
                        HenkiloDataRepository henkiloDataRepository,
                        OppijanumerorekisteriClient oppijanumerorekisteriClient,
                        OrikaBeanMapper mapper) {
@@ -61,6 +64,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
         this.commonProperties = commonProperties;
+        this.ldapSynchronizationService = ldapSynchronizationService;
         this.henkiloDataRepository = henkiloDataRepository;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.mapper = mapper;
@@ -126,6 +130,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 }
             }
         }
+        ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
     }
 
     @Override

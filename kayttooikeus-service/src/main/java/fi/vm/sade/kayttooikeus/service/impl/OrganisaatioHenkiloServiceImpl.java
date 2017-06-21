@@ -5,8 +5,11 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -15,7 +18,6 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,14 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.PALVELU;
 import static fi.vm.sade.kayttooikeus.dto.HenkiloTyyppi.VIRKAILIJA;
-
-import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -39,7 +36,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +48,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
+    private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final OrikaBeanMapper mapper;
     private final OrganisaatioClient organisaatioClient;
@@ -197,6 +194,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
         organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
+        ldapSynchronizationService.updateHenkiloAsap(oidHenkilo);
     }
 
     private OrganisaatioHenkilo findFirstMatching(OrganisaatioHenkiloUpdateDto organisaatioHenkilo,

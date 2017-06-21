@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronization;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -32,6 +31,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
 @Service
 public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOikeusService {
@@ -51,7 +51,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
     private PalveluRepository palveluRepository;
     private OrganisaatioViiteRepository organisaatioViiteRepository;
-    private LdapSynchronization ldapSynchronization;
+    private LdapSynchronizationService ldapSynchronizationService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -65,7 +65,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                    KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository,
                                    PalveluRepository palveluRepository,
                                    OrganisaatioViiteRepository organisaatioViiteRepository,
-                                   LdapSynchronization ldapSynchronization,
+                                   LdapSynchronizationService ldapSynchronizationService,
                                    OrganisaatioClient organisaatioClient,
                                    CommonProperties commonProperties,
                                    OppijanumerorekisteriClient oppijanumerorekisteriClient) {
@@ -78,7 +78,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         this.kayttoOikeusRyhmaTapahtumaHistoriaRepository = kayttoOikeusRyhmaTapahtumaHistoriaRepository;
         this.palveluRepository = palveluRepository;
         this.organisaatioViiteRepository = organisaatioViiteRepository;
-        this.ldapSynchronization = ldapSynchronization;
+        this.ldapSynchronizationService = ldapSynchronizationService;
         this.organisaatioClient = organisaatioClient;
         this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
         this.groupOrganizationId = commonProperties.getGroupOrganizationId();
@@ -308,7 +308,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
         setKayttoOikeusRyhmas(ryhmaData, kayttoOikeusRyhma);
 
-        ldapSynchronization.updateAccessRightGroup(id);
+        ldapSynchronizationService.updateKayttoOikeusRyhma(id);
     }
 
     @Override

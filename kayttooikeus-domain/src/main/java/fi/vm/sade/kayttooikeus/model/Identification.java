@@ -10,10 +10,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name = "identification")
-public class Identification extends IdentifiableAndVersionedEntity{
+public class Identification extends IdentifiableAndVersionedEntity {
 
+    public static final String WEAK_AUTHENTICATION_IDP = "email";
+    public static final String STRONG_AUTHENTICATION_IDP = "vetuma";
 
-    public Identification() {}
+    public Identification() {
+    }
 
     public Identification(Henkilo henkilo, String idpEntityId, String identifier) {
         this.henkilo = henkilo;
@@ -21,7 +24,7 @@ public class Identification extends IdentifiableAndVersionedEntity{
         this.identifier = identifier;
     }
 
-    @ManyToOne( fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "henkilo_id", nullable = false)
     private Henkilo henkilo;
 
@@ -47,4 +50,8 @@ public class Identification extends IdentifiableAndVersionedEntity{
 
     @Column(name = "email")
     private String email;
+
+    public boolean isVahvaTunniste() {
+        return !idpEntityId.equals(WEAK_AUTHENTICATION_IDP);
+    }
 }

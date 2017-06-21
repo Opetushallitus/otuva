@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ public class ScheduledTasks {
     private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
     private final TaskExecutorService taskExecutorService;
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
+    private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloCacheService henkiloCacheService;
 
     private final HenkiloDataRepository henkiloDataRepository;
@@ -55,6 +57,12 @@ public class ScheduledTasks {
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.kayttooikeusanomusilmoitukset}")
     public void lahetaUusienAnomuksienIlmoitukset() {
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now().minusDays(1));
+    }
+
+    @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.fixeddelayinmillis}",
+            initialDelayString = "${kayttooikeus.scheduling.ldapsynkronointi.initialdelayinmillis}")
+    public void ldapSynkronointi() {
+        ldapSynchronizationService.runSynchronizer();
     }
 
     @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.henkiloNimiCache}")
