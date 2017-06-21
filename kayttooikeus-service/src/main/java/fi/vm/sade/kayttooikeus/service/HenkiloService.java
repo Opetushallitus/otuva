@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
@@ -9,6 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface HenkiloService {
+
+    /**
+     * Palauttaa henkilön tiedot käyttäjätunnuksen perusteella.
+     *
+     * @param kayttajatunnus käyttäjätunnus
+     * @return henkilö
+     */
+    HenkiloReadDto getByKayttajatunnus(String kayttajatunnus);
 
     /**
      * Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on

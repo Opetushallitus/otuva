@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
 import com.google.common.collect.Sets;
+import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
@@ -38,6 +40,15 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 
     @Test
+    @WithMockUser(value = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void getByKayttajatunnus() {
+        populate(kayttajatiedot(henkilo("oid1"), "user1"));
+
+        HenkiloReadDto dto = henkiloService.getByKayttajatunnus("user1");
+
+        assertThat(dto.getOid()).isEqualTo("oid1");
+    }
+
     @Transactional
     @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void passivoiHenkiloOrganisationsAndKayttooikeus() {

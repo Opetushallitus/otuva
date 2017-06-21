@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.config;
 
+import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
@@ -64,6 +66,10 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
         factory.classMap(OrganisaatioRDTO.class, OrganisaatioPerustieto.class)
                 .fieldAToB("tyypit", "organisaatiotyypit")
                 .fieldAToB("oppilaitosTyyppiUri", "oppilaitostyyppi")
+                .byDefault()
+                .register();
+        factory.classMap(Henkilo.class, HenkiloReadDto.class)
+                .fieldAToB("oidHenkilo", "oid")
                 .byDefault()
                 .register();
         factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDate.class));

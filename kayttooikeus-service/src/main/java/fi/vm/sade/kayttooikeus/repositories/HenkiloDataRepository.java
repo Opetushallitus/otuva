@@ -2,8 +2,6 @@ package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,6 +14,8 @@ import java.util.Optional;
 @Repository
 public interface HenkiloDataRepository extends CrudRepository<Henkilo, Long> {
     Optional<Henkilo> findByOidHenkilo(String oidHenkilo);
+
+    Optional<Henkilo> findByKayttajatiedotUsername(String kayttajatunnus);
 
     @Transactional(propagation = Propagation.SUPPORTS)
     Long countByEtunimetCachedNotNull();
