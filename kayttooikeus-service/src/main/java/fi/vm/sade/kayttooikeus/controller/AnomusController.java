@@ -40,11 +40,9 @@ public class AnomusController {
         return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset);
     }
 
-    @ApiOperation(value = "Palauttaa henkilön kaikki haetut käyttöoikeusryhmät",
-            notes = "Käytä /kayttooikeusanomus/haettuKayttoOikeusRyhma")
+    @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
     @PostAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(returnObject, {'READ', 'READ_UPDATE', 'CRUD'})")
     @RequestMapping(value = "/{oidHenkilo}", method = RequestMethod.GET)
-    @Deprecated
     public List<HaettuKayttooikeusryhmaDto> getActiveAnomuksetByHenkilo(@ApiParam("Henkilön OID") @PathVariable String oidHenkilo,
                                                                         @RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
         AnomusCriteria criteria = new AnomusCriteria();
