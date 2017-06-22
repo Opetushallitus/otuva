@@ -187,4 +187,15 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return Stream.of(io(() -> restClient.getAsString(url)).get().split("/")).collect(toList());
     }
 
+    @Override
+    public List<String> getChildOids(String oid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.childOids", oid);
+        return cached(c -> c.flatWithChildrenByOid(oid)
+                        .map(OrganisaatioPerustieto::getOid)
+                        .collect(toList()),
+                () -> retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
+                        .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids(),
+                Mode.requireCache());
+    }
+
 }

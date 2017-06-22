@@ -9,10 +9,7 @@ import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
-import fi.vm.sade.kayttooikeus.service.EmailService;
-import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
-import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
@@ -25,11 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
-import java.util.function.Function;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -441,18 +433,23 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             return kayttooikeusByOrganisation;
         }
 
-        // Organisaatiot, joihin on READ_UPDATE / CRUD oikat (ANOMUSTENHALLINTA)
-        List<String> allowedRoles = this.permissionCheckerService.getCasRoles().stream()
-                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD"))
+        List<String> allowedOrganisaatioOids = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findCrudAnomustenhallinta(this.permissionCheckerService.getCurrentUserOid()).stream()
+                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getOrganisaatioHenkilo)
+                .map(OrganisaatioHenkilo::getOrganisaatioOid)
                 .collect(Collectors.toList());
 
-        if(allowedRoles.stream().noneMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()))) {
-            kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid -> !allowedRoles.contains(organisaatioOid));
+        if(!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+            allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream().flatMap(organisaatioOid ->
+                    this.organisaatioClient.getChildOids(organisaatioOid).stream()).collect(Collectors.toList()));
+
+            kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
+                    !allowedOrganisaatioOids.contains(organisaatioOid));
 
             // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
             this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
                     .findValidMyonnettyKayttooikeus(UserDetailsUtil.getCurrentUserOid()).stream()
-                    .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedRoles.stream()
+                    .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedOrganisaatioOids.stream()
                             .anyMatch(allowedRole -> allowedRole.contains(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())))
                     // Tarkista myöntöviite slave idt (myönnettävissä olevat ryhmät, samaan ryhmään ei voi myöntää)
                     .forEach(myonnettyKayttoOikeusRyhmaTapahtuma ->
