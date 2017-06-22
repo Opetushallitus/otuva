@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface KayttooikeusAnomusService {
     List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly);
@@ -21,6 +23,5 @@ public interface KayttooikeusAnomusService {
 
     void removePrivilege(String oidHenkilo, Long id, String organisaatioOid);
 
-    @Transactional(readOnly = true)
-    KayttooikeusHenkiloCanGrantDto findCurrentHenkiloCanGrant();
+    Map<String, Set<Long>> findCurrentHenkiloCanGrant(String accessedHenkiloOid);
 }
