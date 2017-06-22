@@ -53,7 +53,6 @@
 
         <springfox.version>2.7.0</springfox.version>
 
-
         <!-- buildversion.txt generation plugin -->
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 

@@ -18,17 +18,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-
-import static java.util.stream.Collectors.toSet;
-
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +31,17 @@ import java.util.Objects;
 import java.util.Set;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import java.util.function.Function;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -207,11 +205,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
-                anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
-                        .organisaatioOid(organisaatioOid)
-                        .tehtavanimike(tehtavanimike)
-                        .henkilo(anoja)
-                        .build()));
+                        anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                                .organisaatioOid(organisaatioOid)
+                                .tehtavanimike(tehtavanimike)
+                                .henkilo(anoja)
+                                .build()));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
         return foundOrCreatedOrganisaatioHenkilo;
     }
@@ -225,8 +223,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.notEditingOwnData(anojaOid);
         this.inSameOrParentOrganisation(organisaatioOid);
         updateHaettuKayttooikeusryhmaDtoList.forEach(updateHaettuKayttooikeusryhmaDto -> {
-                    this.organisaatioViiteLimitationsAreValidThrows(updateHaettuKayttooikeusryhmaDto.getId());
-                    this.kayttooikeusryhmaLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
+            this.organisaatioViiteLimitationsAreValidThrows(updateHaettuKayttooikeusryhmaDto.getId());
+            this.kayttooikeusryhmaLimitationsAreValid(updateHaettuKayttooikeusryhmaDto.getId());
         });
 
         updateHaettuKayttooikeusryhmaDtoList.forEach(haettuKayttooikeusryhmaDto ->
@@ -326,11 +324,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // Grant kayttooikeusryhma and create event. DOES NOT CONTAIN PERMISSION CHECKS SO DONT CALL DIRECTLY
     private MyonnettyKayttoOikeusRyhmaTapahtuma grantKayttooikeusryhma(LocalDate alkupvm,
-                                        LocalDate loppupvm,
-                                        String anojaOid,
-                                        String organisaatioOid,
-                                        KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
-                                        String tehtavanimike) {
+                                                                       LocalDate loppupvm,
+                                                                       String anojaOid,
+                                                                       String organisaatioOid,
+                                                                       KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
+                                                                       String tehtavanimike) {
         Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
         Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
@@ -341,7 +339,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =
                 this.findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(anojaOid, myonnettavaOrganisaatioHenkilo,
-                myonnettavaKayttoOikeusRyhma);
+                        myonnettavaKayttoOikeusRyhma);
 
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaAlkuPvm(alkupvm);
         myonnettyKayttoOikeusRyhmaTapahtuma.setVoimassaLoppuPvm(loppupvm);
@@ -413,56 +411,76 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
     }
 
+    // Olettaa, että ennestään olleet ja haetut oikeudet voidaan myöntää uudelleen kyseiseen organisaatioon.
     @Override
     @Transactional(readOnly = true)
-    public KayttooikeusHenkiloCanGrantDto findCurrentHenkiloCanGrant() {
-        KayttooikeusHenkiloCanGrantDto kayttooikeusHenkiloCanGrantDto = new KayttooikeusHenkiloCanGrantDto();
+    public Map<String, Set<Long>> findCurrentHenkiloCanGrant(String accessedHenkiloOid) {
+        final Map<String, Set<Long>> kayttooikeusByOrganisation = new HashMap<>();
+
+        // Haetun henkilön anumukset, voimassa olevat käyttöoikeudet ja joskus voimassa olleet oikeudet
+        this.anomusRepository.findByHenkiloOidHenkilo(accessedHenkiloOid)
+                .forEach(anomus -> kayttooikeusByOrganisation.put(anomus.getOrganisaatioOid(),
+                        anomus.getHaettuKayttoOikeusRyhmas().stream()
+                                .map(HaettuKayttoOikeusRyhma::getKayttoOikeusRyhma)
+                                .map(KayttoOikeusRyhma::getId)
+                                .collect(toSet())));
+
+        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(accessedHenkiloOid)
+                .forEach(mkrt -> kayttooikeusByOrganisation.compute(mkrt.getOrganisaatioHenkilo().getOrganisaatioOid(),
+                        this.addIfNotExists(mkrt.getKayttoOikeusRyhma().getId())));
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository
+                .findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila(accessedHenkiloOid, KayttoOikeudenTila.SULJETTU)
+                .forEach(krth -> kayttooikeusByOrganisation.compute(krth.getOrganisaatioHenkilo().getOrganisaatioOid(),
+                        this.addIfNotExists(krth.getKayttoOikeusRyhma().getId())));
 
         if(this.permissionCheckerService.isCurrentUserAdmin()) {
-            kayttooikeusHenkiloCanGrantDto.setAdmin(true);
-            return kayttooikeusHenkiloCanGrantDto;
+            return kayttooikeusByOrganisation;
         }
 
         // Organisaatiot, joihin on READ_UPDATE / CRUD oikat (ANOMUSTENHALLINTA)
         List<String> allowedRoles = this.permissionCheckerService.getCasRoles().stream()
-                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD") || role.contains("ANOMUSTENHALLINTA_READ_UPDATE"))
+                .filter(role -> role.contains("ANOMUSTENHALLINTA_CRUD"))
                 .collect(Collectors.toList());
 
-        // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
-        List<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaList =
-                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
-                .findValidMyonnettyKayttooikeus(UserDetailsUtil.getCurrentUserOid()).stream()
-                .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedRoles.stream()
-                        .anyMatch(allowedRole -> allowedRole.contains(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())))
-                .collect(Collectors.toList());
+        if(allowedRoles.stream().noneMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()))) {
+            kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid -> !allowedRoles.contains(organisaatioOid));
 
-        // Myöntöviite slave idt (myönnettävissä olevat ryhmät, samaan ryhmään ei voi myöntää)
-        myonnettyKayttoOikeusRyhmaTapahtumaList.forEach(myonnettyKayttoOikeusRyhmaTapahtuma -> {
-            List<Long> allowedIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
-                    Lists.newArrayList(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId()));
-            if(!allowedIds.isEmpty()) {
-                kayttooikeusHenkiloCanGrantDto.addToOrganisation(
-                        myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(),
-                        allowedIds);
-                // Näiden aliorganisaatiot lisätään listaan, koska myös näihin on automaattisesti sama oikeus
-                this.organisaatioClient.getOrganisaatioPerustiedotCached(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), OrganisaatioClient.Mode.requireCache())
-                        .getChildren().forEach(organisaatio -> kayttooikeusHenkiloCanGrantDto.addToOrganisation(
-                        organisaatio.getOid(), allowedIds));
-            }
-        });
+            // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
+            this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                    .findValidMyonnettyKayttooikeus(UserDetailsUtil.getCurrentUserOid()).stream()
+                    .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedRoles.stream()
+                            .anyMatch(allowedRole -> allowedRole.contains(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())))
+                    // Tarkista myöntöviite slave idt (myönnettävissä olevat ryhmät, samaan ryhmään ei voi myöntää)
+                    .forEach(myonnettyKayttoOikeusRyhmaTapahtuma ->
+                            Optional.ofNullable(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
+                                    Lists.newArrayList(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId())))
+                                    .filter(kayttooikeusIdList -> !kayttooikeusByOrganisation.isEmpty())
+                                    .ifPresent(allowedIds -> Optional.ofNullable(kayttooikeusByOrganisation
+                                            .get(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid()))
+                                            .ifPresent(kayttooikeusIdList -> kayttooikeusIdList.removeIf(ryhmaId ->
+                                                    !allowedIds.contains(ryhmaId)))));
+        }
 
         // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
-        kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation()
-                .replaceAll((organisaatioOid, kayttooikeusryhmaIdList) ->
-                        kayttooikeusryhmaIdList.stream()
-                                .filter(this::organisaatioViiteLimitationsAreValid)
-                                .collect(Collectors.toList()));
+        kayttooikeusByOrganisation.replaceAll((organisaatioOid, kayttooikeusryhmaIdList) ->
+                kayttooikeusryhmaIdList.stream()
+                        .filter(this::organisaatioViiteLimitationsAreValid)
+                        .collect(Collectors.toSet()));
         // Filter off empty keys
-        kayttooikeusHenkiloCanGrantDto.setKayttooikeusByOrganisation(
-                kayttooikeusHenkiloCanGrantDto.getKayttooikeusByOrganisation().entrySet().stream()
-                        .filter(entity -> !entity.getValue().isEmpty())
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        return kayttooikeusHenkiloCanGrantDto;
+        return kayttooikeusByOrganisation.entrySet().stream()
+                .filter(entity -> !entity.getValue().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    private BiFunction<String, Set<Long>, Set<Long>> addIfNotExists(Long ryhmaId) {
+        return (key, value) -> {
+            if(value == null) {
+                value = new HashSet<>();
+            }
+            if(!value.contains(ryhmaId)) {
+                value.add(ryhmaId);
+            }
+            return value;
+        };
+    }
 }
