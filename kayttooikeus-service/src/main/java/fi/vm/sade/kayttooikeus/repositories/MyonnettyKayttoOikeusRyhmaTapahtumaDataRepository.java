@@ -30,4 +30,6 @@ public interface MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository extends CrudR
                 kayttooikeusryhmaId, organisaatioOid, oidHenkilo);
     }
 
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkiloHenkiloOidHenkilo(String oidHenkilo);
+
 }
