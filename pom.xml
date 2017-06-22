@@ -45,7 +45,7 @@
 
         <!-- Sade utils -->
         <generic.version>9.6-SNAPSHOT</generic.version>
-        <auditlog.api.version>5.0.0-SNAPSHOT</auditlog.api.version>
+        <auditlog.api.version>7.0.0-SNAPSHOT</auditlog.api.version>
 
         <!-- Hibernate -->
         <hibernate.version>4.3.5.Final</hibernate.version>

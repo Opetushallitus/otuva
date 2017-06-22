@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.repositories.OrderBy;
 
@@ -15,5 +16,5 @@ public interface KutsuService {
 
     KutsuReadDto getKutsu(Long id);
 
-    void deleteKutsu(long id);
+    Kutsu deleteKutsu(long id);
 }

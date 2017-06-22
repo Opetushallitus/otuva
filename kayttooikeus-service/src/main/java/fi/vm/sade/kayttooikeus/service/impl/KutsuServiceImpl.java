@@ -114,9 +114,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional
-    public void deleteKutsu(long id) {
-        kutsuRepository.findById(id).filter(kutsu -> kutsu.getKutsuja().equals(getCurrentUserOid()))
-            .orElseThrow(() -> new NotFoundException("Kutsu not found"))
-            .poista(getCurrentUserOid());
+    public Kutsu deleteKutsu(long id) {
+        Kutsu deletedKutsu = kutsuRepository.findById(id).filter(kutsu -> kutsu.getKutsuja().equals(getCurrentUserOid()))
+            .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        deletedKutsu.poista(getCurrentUserOid());
+        return deletedKutsu;
     }
 }
