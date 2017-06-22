@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.util;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
@@ -50,11 +49,18 @@ public class CreateUtil {
         return new AnomusDto(organisaatioOid, LocalDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI);
     }
 
-    public static KayttoOikeusRyhma createKayttoOikeusRyhma(Long id) {
+    public static KayttoOikeusRyhma createKayttooikeusryhma(Long id) {
         KayttoOikeusRyhma kayttoOikeusRyhma = new KayttoOikeusRyhma("Kayttooikeusryhma x", Collections.<KayttoOikeus>emptySet(),
-                new TextGroup(), Collections.singleton(createOrganisaatioViite()), false, "10");
+                new TextGroup(), Sets.newHashSet(), false, "10");
         kayttoOikeusRyhma.setId(id);
         return kayttoOikeusRyhma;
+    }
+
+    public static KayttoOikeusRyhma createKayttoOikeusRyhmaWithViite(Long id) {
+        KayttoOikeusRyhma kayttoOikeusRyhma = createKayttooikeusryhma(id);
+        kayttoOikeusRyhma.setOrganisaatioViite(Sets.newHashSet(createOrganisaatioViite()));
+        return kayttoOikeusRyhma;
+
     }
 
     public static OrganisaatioViite createOrganisaatioViite() {
@@ -67,6 +73,11 @@ public class CreateUtil {
         return henkilo;
     }
 
+    public static KayttoOikeusRyhmaTapahtumaHistoria createKayttooikeusryhmaTapahtumaHistoria(Long kayttooikeusryhmaId, String organisaatioOid, KayttoOikeudenTila tila) {
+        return new KayttoOikeusRyhmaTapahtumaHistoria(createKayttoOikeusRyhmaWithViite(kayttooikeusryhmaId),
+                createOrganisaatioHenkilo(organisaatioOid, false), "syy", tila, null, LocalDateTime.now());
+    }
+
     public static MyonnettyKayttoOikeusRyhmaTapahtuma createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(
             Long id, Long kayttooikeusryhmaId, String organisaatioOid) {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(id, kayttooikeusryhmaId);
@@ -77,7 +88,7 @@ public class CreateUtil {
     public static MyonnettyKayttoOikeusRyhmaTapahtuma createMyonnettyKayttoOikeusRyhmaTapahtuma(Long id, Long kayttooikeusryhmaId) {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = new MyonnettyKayttoOikeusRyhmaTapahtuma();
         myonnettyKayttoOikeusRyhmaTapahtuma.setId(id);
-        myonnettyKayttoOikeusRyhmaTapahtuma.setKayttoOikeusRyhma(createKayttoOikeusRyhma(kayttooikeusryhmaId));
+        myonnettyKayttoOikeusRyhmaTapahtuma.setKayttoOikeusRyhma(createKayttoOikeusRyhmaWithViite(kayttooikeusryhmaId));
         return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
 
@@ -85,7 +96,7 @@ public class CreateUtil {
                                                                          String organisaatioOid, String tehtavanimike,
                                                                          String perustelut, Long kayttooikeusryhmaId) {
         Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike, perustelut);
-        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = new HaettuKayttoOikeusRyhma(anomus, createKayttoOikeusRyhma(kayttooikeusryhmaId),
+        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = new HaettuKayttoOikeusRyhma(anomus, createKayttoOikeusRyhmaWithViite(kayttooikeusryhmaId),
                 LocalDateTime.now().minusDays(5), KayttoOikeudenTila.ANOTTU);
         haettuKayttoOikeusRyhma.setAnomus(anomus);
         anomus.setHaettuKayttoOikeusRyhmas(Sets.newHashSet(haettuKayttoOikeusRyhma));
@@ -105,6 +116,15 @@ public class CreateUtil {
         organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
         organisaatioHenkilo.setPassivoitu(passivoitu);
         return organisaatioHenkilo;
+    }
+
+    public static Anomus createAnomusWithHaettuKayttooikeusryhma(String anojaOid, String kasittelijaOid,
+                                                                 String organisaatioOid, String tehtavanimike,
+                                                                 String perustelut, Long kayttooikeusryhmaId) {
+        Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike, perustelut);
+        anomus.setHaettuKayttoOikeusRyhmas(Sets.newHashSet(createHaettuKayttoOikeusRyhma(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike,
+                perustelut, kayttooikeusryhmaId)));
+        return anomus;
     }
 
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,

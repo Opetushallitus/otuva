@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 public interface OrganisaatioClient {
+    List<String> getChildOids(String oid);
+
     @Getter
     class Mode {
         private final boolean expectMultiple;

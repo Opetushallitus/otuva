@@ -96,8 +96,8 @@ public class AnomusController {
 
     @ApiOperation("Listaa organisaatioittain ne ryhmät, joita käyttäjällä on oikeus myöntää kyseiselle henkilölle")
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/henkilo/current/{henkiloOid}/canGrant", method = RequestMethod.POST)
-    public Map<String, Set<Long>> currentHenkiloCanGrant(@RequestParam String henkiloOid) {
+    @RequestMapping(value = "/henkilo/current/{henkiloOid}/canGrant", method = RequestMethod.GET)
+    public Map<String, Set<Long>> currentHenkiloCanGrant(@PathVariable String henkiloOid) {
         return this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant(henkiloOid);
     }
 

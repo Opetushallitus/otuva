@@ -32,4 +32,9 @@ public interface MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository extends CrudR
 
     List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkiloHenkiloOidHenkilo(String oidHenkilo);
 
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkiloHenkiloOidHenkiloAndKayttoOikeusRyhmaKayttoOikeusRooliAndKayttoOikeusRyhmaKayttoOikeusPalveluName(String oidHenkilo, String role, String name);
+    default List<MyonnettyKayttoOikeusRyhmaTapahtuma> findCrudAnomustenhallinta(String henkiloOid) {
+        return this.findByOrganisaatioHenkiloHenkiloOidHenkiloAndKayttoOikeusRyhmaKayttoOikeusRooliAndKayttoOikeusRyhmaKayttoOikeusPalveluName(
+                henkiloOid, "CRUD", "ANOMUSTENHALLINTA");
+    }
 }
