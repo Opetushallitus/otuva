@@ -112,7 +112,9 @@ public class AnomusController {
         this.kayttooikeusAnomusService.removePrivilege(oidHenkilo, id, organisaatioOid);
     }
 
-    @ApiOperation("Listaa organisaatioittain ne ryhmät, joita käyttäjällä on oikeus myöntää kyseiselle henkilölle")
+    @ApiOperation(value = "Listaa organisaatioittain ne käyttöoikeusryhmät, joita käyttäjällä on oikeus myöntää kyseiselle henkilölle",
+            notes = "Ei sisällä kaikkia mahdollisia ryhmiä vaan vain henkilön anomukset, jo olemassa olevat käyttöoikeudet ja " +
+                    "joskus voimassa olleet käyttöoikeudet.")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/henkilo/current/{henkiloOid}/canGrant", method = RequestMethod.GET)
     public Map<String, Set<Long>> currentHenkiloCanGrant(@PathVariable String henkiloOid) {
