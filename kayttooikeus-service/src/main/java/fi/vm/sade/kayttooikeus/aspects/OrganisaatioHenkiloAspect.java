@@ -21,7 +21,7 @@ public class OrganisaatioHenkiloAspect {
         organisaatioHenkiloHelper = helper;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.passivoiHenkiloOrganisation(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.passivoiHenkiloOrganisation(..))" +
             "&& args(oidHenkilo, henkiloOrganisationOid)", argNames = "proceedingJoinPoint, oidHenkilo, henkiloOrganisationOid")
     private Object logPassivoiHenkiloOrganisaatio(ProceedingJoinPoint proceedingJoinPoint, String oidHenkilo, String henkiloOrganisationOid) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
@@ -29,7 +29,7 @@ public class OrganisaatioHenkiloAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.createOrUpdateOrganisaatioHenkilos(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.createOrUpdateOrganisaatioHenkilos(..))" +
             "&& args(henkiloOid, organisaatioHenkiloDtoList)", argNames = "proceedingJoinPoint, henkiloOid, organisaatioHenkiloDtoList")
     private Object logCreateOrUpdateHenkilos(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid,
                                         List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList) throws Throwable {
@@ -38,7 +38,7 @@ public class OrganisaatioHenkiloAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.addOrganisaatioHenkilot(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService.addOrganisaatioHenkilot(..))" +
             "&& args(henkiloOid, organisaatioHenkilot)", argNames = "proceedingJoinPoint, henkiloOid, organisaatioHenkilot")
     private Object logFindOrCreateOrganisaatioHenkilo(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) throws Throwable {
         Object result = proceedingJoinPoint.proceed();

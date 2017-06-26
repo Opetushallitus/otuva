@@ -21,15 +21,15 @@ public class HenkiloAspect {
         henkiloHelper = helper;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.HenkiloService.disableHenkiloOrganisationsAndKayttooikeus(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.HenkiloService.disableHenkiloOrganisationsAndKayttooikeus(..))" +
             "&& args(henkiloOid, kasittelijaOid)", argNames = "proceedingJoinPoint, henkiloOid, kasittelijaOid")
-    private Object logCreateHenkilo(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, String kasittelijaOid) throws Throwable {
+    private Object logPassivoiHenkilo(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, String kasittelijaOid) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
         henkiloHelper.logPassivoiHenkilo(henkiloOid, kasittelijaOid, result);
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.changePasswordAsAdmin(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.changePasswordAsAdmin(..))" +
             "&& args(oid, newPassword)", argNames = "proceedingJoinPoint, oid, newPassword")
     private Object logChangePassword(ProceedingJoinPoint proceedingJoinPoint, String oid, String newPassword) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
@@ -37,7 +37,7 @@ public class HenkiloAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.IdentificationService.updateHakatunnuksetByHenkiloAndIdp(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.IdentificationService.updateHakatunnuksetByHenkiloAndIdp(..))" +
             "&& args(oid, ipdKey, hakatunnisteet)", argNames = "proceedingJoinPoint, oid, ipdKey, hakatunnisteet")
     private Object logUpdateHakatunnisteet(ProceedingJoinPoint proceedingJoinPoint, String oid, String ipdKey, Set<String> hakatunnisteet) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
@@ -45,7 +45,7 @@ public class HenkiloAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.create(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.create(..))" +
             "&& args(henkiloOid, kayttajatiedot)", argNames = "proceedingJoinPoint, henkiloOid, kayttajatiedot")
     private Object logCreateKayttajatiedot(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, KayttajatiedotCreateDto kayttajatiedot) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
@@ -53,7 +53,7 @@ public class HenkiloAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.updateKayttajatiedot(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttajatiedotService.updateKayttajatiedot(..))" +
             "&& args(henkiloOid, kayttajatiedot)", argNames = "proceedingJoinPoint, henkiloOid, kayttajatiedot")
     private Object logUpdateKayttajatiedot(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, KayttajatiedotUpdateDto kayttajatiedot) throws Throwable {
         Object result = proceedingJoinPoint.proceed();

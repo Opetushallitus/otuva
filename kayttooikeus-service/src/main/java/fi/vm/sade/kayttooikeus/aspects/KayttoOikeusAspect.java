@@ -20,7 +20,7 @@ public class KayttoOikeusAspect {
         kayttoOikeusHelper = helper;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.EmailService.sendExpirationReminder(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.EmailService.sendExpirationReminder(..))" +
             "&& args(henkiloOid, tapahtumas)", argNames = "proceedingJoinPoint, henkiloOid, tapahtumas")
     private Object logSendKayttooikeusReminder(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, List<ExpiringKayttoOikeusDto> tapahtumas) throws Throwable {
         Object result = proceedingJoinPoint.proceed();

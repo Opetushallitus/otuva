@@ -47,7 +47,7 @@ public class KayttoOikeusAnomusAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService.createKayttooikeusAnomus(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService.createKayttooikeusAnomus(..))" +
             "&& args(anojaOid, kayttooikeusAnomusDto)", argNames = "proceedingJoinPoint, anojaOid, kayttooikeusAnomusDto")
     private Object logCreateKayttooikeusAnomus(ProceedingJoinPoint proceedingJoinPoint, String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
@@ -55,7 +55,7 @@ public class KayttoOikeusAnomusAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService.updateHaettuKayttooikeusryhma(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService.grantKayttooikeusryhma(..))" +
             "&& args(anojaOid, organisaatioOid, updateHaettuKayttooikeusryhmaDtoList)", argNames = "proceedingJoinPoint, anojaOid, organisaatioOid, updateHaettuKayttooikeusryhmaDtoList")
     private Object logGrantKayttooikeusryhma(ProceedingJoinPoint proceedingJoinPoint, String anojaOid, String organisaatioOid, List<GrantKayttooikeusryhmaDto> updateHaettuKayttooikeusryhmaDtoList) throws Throwable {
         Object result = proceedingJoinPoint.proceed();

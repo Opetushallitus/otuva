@@ -35,7 +35,7 @@ public class KayttoOikeusRyhmaAspect {
         return result;
     }
 
-    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(*))" +
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(..))" +
             "&& args(id, ryhmaData)", argNames = "proceedingJoinPoint, id, ryhmaData")
     private Object logUpdateKayttoOikeusForKayttoOikeusRyhma(ProceedingJoinPoint proceedingJoinPoint, long id, KayttoOikeusRyhmaModifyDto ryhmaData) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
