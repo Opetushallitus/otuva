@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
@@ -21,6 +20,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,17 +30,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.*;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
-import java.util.stream.Stream;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
-import org.mockito.Captor;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -387,7 +386,7 @@ public class KayttooikeusAnomusServiceTest {
                 ).collect(toSet()))
                 .build();
         when(anomusRepository.findBy(any(AnomusCriteria.class)))
-                .thenReturn(Arrays.asList(anomus));
+                .thenReturn(Collections.singletonList(anomus));
         when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
                 .thenReturn(Stream.of(1L, 2L).collect(toSet()));
         when(henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(any(), any()))
@@ -419,7 +418,7 @@ public class KayttooikeusAnomusServiceTest {
                 ).collect(toSet()))
                 .build();
         when(anomusRepository.findBy(any(AnomusCriteria.class)))
-                .thenReturn(Arrays.asList(anomus));
+                .thenReturn(Collections.singletonList(anomus));
         when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
                 .thenReturn(Stream.of(1L, 2L).collect(toSet()));
         when(henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(any(), any()))
@@ -483,7 +482,12 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     @WithMockUser(value = "1.2.3.4.5", roles = "HENKILONHALLINTA_OPHREKISTERI")
     public void findCurrentHenkiloCanGrantAsAdmin() {
-        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
+        this.commonProperties.setRootOrganizationOid("1.2.0.0.1");
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findCrudAnomustenhallinta("1.2.3.4.5"))
+                .willReturn(Lists.newArrayList(
+                        createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1")));
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
