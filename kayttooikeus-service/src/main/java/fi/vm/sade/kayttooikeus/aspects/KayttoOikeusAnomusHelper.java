@@ -17,13 +17,13 @@ public class KayttoOikeusAnomusHelper extends AuditlogAspectHelper {
         KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
                 .kohdeTunniste(String.valueOf(kayttooikeusryhma.getId()))
                 .newValue(kayttooikeusryhma.getKayttoOikeudenTila())
-                .lisatieto("Haettu käyttöoikeusryhmä käsitelty.") //TODO: tunnista hyväksyminen tai hylkääminen
+                .lisatieto("Haettu käyttöoikeusryhmä käsitelty.")
                 .setOperaatio(KayttoOikeusOperation.APPROVE_OR_REJECT_KAYTTOOIKEUSANOMUS);
         finishLogging(logMessage);
     }
 
     void logSendKayttooikeusAnomusNotification(LocalDate anottuPvm, Object result) {
-        KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder() // TODO: tarvitaanko ?. nämä logitetaan todennäköisesti viestintäpalvelussa
+        KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
                 .lisatieto("Avoimista käyttöoikeusanomuksista lähetetty muistutukset hyväksyjille.")
                 .setOperaatio(KayttoOikeusOperation.SEND_KAYTTOOIKEUSANOMUS_NOTIFICATION);
         finishLogging(logMessage);

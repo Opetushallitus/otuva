@@ -33,7 +33,7 @@ public class KayttoOikeusAnomusAspect {
 
     @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(*))" +
             "&& args(anottuPvm)", argNames = "proceedingJoinPoint, anottuPvm")
-    private Object logSendKayttooikeusAnomusNotification(ProceedingJoinPoint proceedingJoinPoint, LocalDate anottuPvm) throws Throwable { // TODO: tarvitaanko ?. nämä logitetaan todennäköisesti viestintäpalvelussa
+    private Object logSendKayttooikeusAnomusNotification(ProceedingJoinPoint proceedingJoinPoint, LocalDate anottuPvm) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
         kayttoOikeusAnomusHelper.logSendKayttooikeusAnomusNotification(anottuPvm, result);
         return result;
