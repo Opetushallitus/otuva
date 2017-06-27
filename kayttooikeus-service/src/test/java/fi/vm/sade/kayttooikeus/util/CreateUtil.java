@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -107,6 +108,12 @@ public class CreateUtil {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setOid(organisaatioOid);
         return organisaatioPerustieto;
+    }
+
+    public static OrganisaatioPerustieto creaetOrganisaatioPerustietoWithNimi(String organisaatioOid, String nimi) {
+        OrganisaatioPerustieto organisaatio = createOrganisaatioPerustietoNoChildren(organisaatioOid);
+        organisaatio.setNimi(new HashMap<String, String>(){{put("fi", nimi);}});
+        return organisaatio;
     }
 
     public static OrganisaatioPerustieto createOrganisaatioPerustietoWithChild(String organisaatioOid, String childOid,

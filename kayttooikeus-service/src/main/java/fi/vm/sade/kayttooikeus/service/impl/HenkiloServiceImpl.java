@@ -13,7 +13,9 @@ import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,49 +29,27 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class HenkiloServiceImpl extends AbstractService implements HenkiloService {
 
 
-    private PermissionCheckerService permissionCheckerService;
+    private final HenkiloHibernateRepository henkiloHibernateRepository;
 
-    private HenkiloHibernateRepository henkiloHibernateRepository;
+    private final PermissionCheckerService permissionCheckerService;
+
+    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    private final HenkiloDataRepository henkiloDataRepository;
-
     private final CommonProperties commonProperties;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final HenkiloDataRepository henkiloDataRepository;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OrikaBeanMapper mapper;
 
-    @Autowired
-    HenkiloServiceImpl(HenkiloHibernateRepository henkiloHibernateRepository,
-                       PermissionCheckerService permissionCheckerService,
-                       KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
-                       OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
-                       OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
-                       MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
-                       CommonProperties commonProperties,
-                       LdapSynchronizationService ldapSynchronizationService,
-                       HenkiloDataRepository henkiloDataRepository,
-                       OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                       OrikaBeanMapper mapper) {
-        this.henkiloHibernateRepository = henkiloHibernateRepository;
-        this.permissionCheckerService = permissionCheckerService;
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository = kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
-        this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-        this.commonProperties = commonProperties;
-        this.ldapSynchronizationService = ldapSynchronizationService;
-        this.henkiloDataRepository = henkiloDataRepository;
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-        this.mapper = mapper;
-    }
+    private final OrganisaatioClient organisaatioClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -133,7 +113,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Transactional(readOnly = true)
     public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
         return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
-                this.organisaatioHenkiloDataRepository, this.henkiloDataRepository)
+                this.organisaatioHenkiloDataRepository, this.henkiloDataRepository, this.organisaatioClient)
                 .builder(henkilohakuCriteriaDto)
                 .search()
                 .exclusion()
