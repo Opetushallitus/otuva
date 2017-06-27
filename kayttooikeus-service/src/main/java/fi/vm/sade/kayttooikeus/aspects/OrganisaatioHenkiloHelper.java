@@ -16,7 +16,7 @@ public class OrganisaatioHenkiloHelper extends AuditlogAspectHelper {
                                               Object result) {
         KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
                 .kohdeTunniste(henkiloOid)
-                .lisatieto("Henkilön hakatunnisteet muutettu.")
+                .lisatieto("Henkilön organisaatiot päivitetty.")
                 .setOperaatio(KayttoOikeusOperation.CREATE_OR_UPDATE_ORGANISAATIO_HENKILO);
         finishLogging(logMessage);
     }
@@ -24,7 +24,7 @@ public class OrganisaatioHenkiloHelper extends AuditlogAspectHelper {
     void logFindOrCreateOrganisaatioHenkilot(String henkiloOid, List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot, Object result) {
         KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
                 .kohdeTunniste(henkiloOid)
-                .lisatieto("Henkilön hakatunnisteet muutettu.")
+                .lisatieto("Henkilön organisaatiot päivitetty.")
                 .setOperaatio(KayttoOikeusOperation.FIND_OR_CREATE_ORGANISAATIO_HENKILOT);
         finishLogging(logMessage);
     }
@@ -32,7 +32,7 @@ public class OrganisaatioHenkiloHelper extends AuditlogAspectHelper {
     void logPassivoiOrganisaatioHenkilo(String oidHenkilo, String henkiloOrganisationOid, Object result) {
         KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
                 .kohdeTunniste(oidHenkilo)
-                .lisatieto("Henkilön hakatunnisteet muutettu.")
+                .lisatieto(String.format("Henkilön organisaatio %s passivoitu.", henkiloOrganisationOid))
                 .setOperaatio(KayttoOikeusOperation.PASSIVOI_ORGANISAATIO_HENKILO);
         finishLogging(logMessage);
     }
