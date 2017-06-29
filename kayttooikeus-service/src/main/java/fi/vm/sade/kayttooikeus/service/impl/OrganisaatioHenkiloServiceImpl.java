@@ -68,7 +68,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                         mapOrganisaatioDtoRecursive(
                             this.organisaatioClient.getOrganisaatioPerustiedotCached(
                                     organisaatioHenkilo.getOrganisaatio().getOid(),
-                                    organisaatioClientMode),
+                                    organisaatioClientMode)
+                                    .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioHenkilo.getOrganisaatio().getOid())),
                             compareByLang))
                 ).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());
@@ -137,7 +138,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                             .noneMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(t.getOrganisaatioOid()))
                 )
                 .forEach((OrganisaatioHenkiloCreateDto t) -> {
-                    this.organisaatioClient.getOrganisaatioPerustiedotCached(t.getOrganisaatioOid(), clientMode);
+                    this.organisaatioClient.getOrganisaatioPerustiedotCached(t.getOrganisaatioOid(), clientMode)
+                            .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + t.getOrganisaatioOid()));
                     OrganisaatioHenkilo organisaatioHenkilo = mapper.map(t, OrganisaatioHenkilo.class);
                     organisaatioHenkilo.setHenkilo(henkilo);
                     henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.persist(organisaatioHenkilo));
@@ -166,8 +168,10 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                         this.permissionCheckerService.hasRoleForOrganisations(Collections.singletonList(organisaatioHenkiloUpdateDto),
                                 Lists.newArrayList("CRUD", "READ_UPDATE"));
                     }
+                    // Make sure organisation exists.
                     this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioHenkiloUpdateDto.getOrganisaatioOid(),
-                            clientMode);
+                            clientMode)
+                            .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioHenkiloUpdateDto.getOrganisaatioOid()));
                     OrganisaatioHenkilo savedOrgHenkilo = this.findFirstMatching(organisaatioHenkiloUpdateDto,
                             henkilo.getOrganisaatioHenkilos());
                     // Do not allow updating organisation oid (should never happen since organisaatiohenkilo is found by this value)

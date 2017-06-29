@@ -11,10 +11,12 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -82,11 +84,17 @@ public class HenkilohakuBuilder {
                     .orElseThrow(IllegalStateException::new);
             henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                    .map(organisaatioOid -> {
-                        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient
-                                .getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
-                        return new IdentifierLocalisableLabelDto(organisaatioOid, organisaatioPerustieto.getNimi());
-                    })
+                    .map(organisaatioOid -> new IdentifierLocalisableLabelDto(organisaatioOid,
+                            this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
+                                    OrganisaatioClient.Mode.requireCache())
+                                    .orElseGet(() -> OrganisaatioPerustieto.builder()
+                                            .oid(organisaatioOid)
+                                            .nimi(new HashMap<String, String>() {{
+                                                put("fi", "Tuntematon organisaatio");
+                                                put("sv", "Okänd organisation");
+                                                put("en", "Unknown organisation");
+                                            }}).build())
+                                    .getNimi()))
                     .collect(Collectors.toList()));
             return henkilohakuResultDto;
         }).collect(Collectors.toList());

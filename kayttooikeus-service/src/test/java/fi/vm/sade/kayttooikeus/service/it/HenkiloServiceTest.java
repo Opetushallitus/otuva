@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
@@ -123,7 +124,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         ));
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
-                .willReturn(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi"));
+                .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, "3.4.5.6.7", null);
@@ -149,7 +150,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         ));
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
-                .willReturn(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi"));
+                .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
                 null, null, null, null,

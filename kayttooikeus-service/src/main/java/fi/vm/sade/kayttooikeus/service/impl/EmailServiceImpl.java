@@ -269,7 +269,9 @@ public class EmailServiceImpl implements EmailService {
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
                         .map(org -> new OranizationReplacement(new TextGroupMapDto(
                                         this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid(),
-                                                organizationClientState).getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
+                                                organizationClientState)
+                                                .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + org.getOrganisaatioOid()))
+                                                .getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
                                         org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)
                                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
                                                 .filter(Objects::nonNull).sorted().collect(toList())

@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrganisaatioClient {
     List<String> getChildOids(String oid);
@@ -39,7 +40,7 @@ public interface OrganisaatioClient {
 
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode);
 
-    OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode);
+    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode);
 
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 

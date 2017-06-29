@@ -1,14 +1,16 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrganisaatioPerustieto {
     private String oid;
     private String parentOid;

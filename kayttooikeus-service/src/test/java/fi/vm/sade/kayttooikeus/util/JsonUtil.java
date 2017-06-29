@@ -58,12 +58,12 @@ public class JsonUtil {
         }
     }
 
-    public static<T> T readJson(@Language("JSON") String json, Class<T> type) {
-        try {
+    public static<T> T readJson(@Language("JSON") String json, Class<T> type) throws IOException {
+//        try {
             return getObjectMapper().readerFor(type).without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).readValue(json);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Reading JSON failed: " + e.getMessage(), e);
-        }
+//        } catch (IOException e) {
+//            throw new IllegalArgumentException("Reading JSON failed: " + e.getMessage(), e);
+//        }
     }
     
     public static<T> T readJson(@Language("JSON") String json, TypeReference<T> type) {
