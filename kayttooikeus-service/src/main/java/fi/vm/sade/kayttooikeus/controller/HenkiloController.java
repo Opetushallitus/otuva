@@ -179,9 +179,11 @@ public class HenkiloController {
     @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta. EI tarkoitettu palveluiden käyttöön. Muutosaltis.",
             notes = "Palauttaa suppean setin henkilöiden tietoja ennetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
-                    "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija)")
-    public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
-        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+                    "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija) Hakua rajoitetaan näille ryhmille joten ei tarvitse " +
+                    "erillisiä käyttöoikeuksia.")
+    public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto,
+                                                  @RequestParam(defaultValue = "0") Long offset) {
+        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset);
     }
 
 }

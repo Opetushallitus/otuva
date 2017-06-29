@@ -16,7 +16,6 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -111,12 +110,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional(readOnly = true)
-    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
+    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset) {
         return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
                 this.organisaatioHenkiloDataRepository, this.henkiloDataRepository, this.organisaatioClient)
                 .builder(henkilohakuCriteriaDto)
-                .search()
                 .exclusion()
+                .search(offset)
                 .enrichment()
                 .build();
     }

@@ -93,7 +93,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, true,
                 false, true, "arpa", null, null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, );
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getNimi).containsExactly("kuutio, arpa");
     }
 
@@ -105,7 +105,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, false,
                 false, true, "arpa", null, null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, );
         assertThat(henkilohakuResultDtoList).isEmpty();
     }
 
@@ -127,7 +127,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, "3.4.5.6.7", null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, );
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
                 .extracting(OrganisaatioMinimalDto::getLocalisedLabels)
@@ -154,7 +154,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
                 null, null, null, null,
                 myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId());
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, );
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
                 .extracting(OrganisaatioMinimalDto::getLocalisedLabels)

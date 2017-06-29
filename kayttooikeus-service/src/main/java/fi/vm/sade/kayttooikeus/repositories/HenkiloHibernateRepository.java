@@ -30,7 +30,7 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
      */
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
-    List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria);
+    List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, List<String> organisaatioOidRestrictionList);
 
     /**
      * Palauttaa henkilöt jotka kuuluvat johonkin annettuun käyttöoikeusryhmään

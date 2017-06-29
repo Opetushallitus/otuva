@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 
 public class HenkilohakuBuilder {
     private HenkilohakuCriteriaDto henkilohakuCriteriaDto;
-    private List<HenkilohakuResultDto> henkilohakuResultDtoList;
+    private List<HenkilohakuResultDto> henkilohakuResultDtoList = new ArrayList<>();
+    private List<String> organisationRestrictionList = new ArrayList<>();
 
     private HenkiloHibernateRepository henkiloHibernateRepository;
     private OrikaBeanMapper mapper;
@@ -59,9 +60,11 @@ public class HenkilohakuBuilder {
     }
 
     // Find nimi, kayttajatunnus and oidHenkilo
-    public HenkilohakuBuilder search() {
+    public HenkilohakuBuilder search(Long offset) {
         this.henkilohakuResultDtoList = this.henkiloHibernateRepository
-                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class));
+                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
+                        offset,
+                        this.organisationRestrictionList);
         return this;
     }
 

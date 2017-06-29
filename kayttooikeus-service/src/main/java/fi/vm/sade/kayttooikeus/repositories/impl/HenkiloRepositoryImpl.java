@@ -85,7 +85,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria) {
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, List<String> organisaatioOidRestrictionList) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
@@ -102,6 +102,15 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.sukunimiCached.append(", ").append(qHenkilo.etunimetCached),
                         qHenkilo.oidHenkilo,
                         qKayttajatiedot.username));
+
+        if(offset != null) {
+            query.offset(offset);
+        }
+        query.limit(100L);
+
+        if(organisaatioOidRestrictionList != null && !organisaatioOidRestrictionList.isEmpty()) {
+            query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOidRestrictionList));
+        }
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
