@@ -1,10 +1,13 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeusAnomusDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +15,10 @@ import java.util.List;
 
 @Component
 public class KayttoOikeusAnomusHelper extends AuditlogAspectHelper {
+
+    public KayttoOikeusAnomusHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+        super(omatTiedotService, audit, mapper);
+    }
 
     void logApproveOrRejectKayttooikeusAnomus(UpdateHaettuKayttooikeusryhmaDto kayttooikeusryhma, Object result) {
         KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()

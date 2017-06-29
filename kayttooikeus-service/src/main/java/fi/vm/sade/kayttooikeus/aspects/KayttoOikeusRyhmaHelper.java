@@ -2,14 +2,20 @@ package fi.vm.sade.kayttooikeus.aspects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaModifyDto;
+import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KayttoOikeusRyhmaHelper extends AuditlogAspectHelper {
+
+    public KayttoOikeusRyhmaHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+        super(omatTiedotService, audit, mapper);
+    }
 
     void logCreateKayttooikeusryhma(KayttoOikeusRyhmaModifyDto ryhma, Object result) {
         String newGroup;

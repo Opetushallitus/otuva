@@ -1,9 +1,12 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
+import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,6 +14,10 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganisaatioHenkiloHelper extends AuditlogAspectHelper {
+
+    public OrganisaatioHenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+        super(omatTiedotService, audit, mapper);
+    }
 
     void logCreateOrUpdateOrganisaatioHenkilo(String henkiloOid, List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList,
                                               Object result) {
