@@ -22,15 +22,11 @@ import java.util.Map;
 public class KayttoOikeusRyhmaController {
     private KayttoOikeusService kayttoOikeusService;
 
-    private AccessRightAuditLogger accessRightAuditLogger;
-
     private static final Logger logger = LoggerFactory.getLogger(KayttoOikeusRyhmaController.class);
 
     @Autowired
-    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService,
-                                       AccessRightAuditLogger accessRightAuditLogger) {
+    public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService) {
         this.kayttoOikeusService = kayttoOikeusService;
-        this.accessRightAuditLogger = accessRightAuditLogger;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -152,9 +148,7 @@ public class KayttoOikeusRyhmaController {
             notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
     @ResponseBody
     public Long createKayttoOikeusRyhma(@RequestBody @Validated KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        long createdId = kayttoOikeusService.createKayttoOikeusRyhma(uusiRyhma);
-        accessRightAuditLogger.auditModifyAccessRightGroupData(UserDetailsUtil.getCurrentUserOid(), "NEW", true);
-        return createdId;
+        return kayttoOikeusService.createKayttoOikeusRyhma(uusiRyhma);
     }
 
 
@@ -176,7 +170,6 @@ public class KayttoOikeusRyhmaController {
             notes = "Päivittää käyttöoikeusryhmän tiedot annetun DTO:n avulla.")
     public KayttoOikeusRyhmaDto updateKayttoOikeusRyhma(@PathVariable("id") Long id, @RequestBody @Validated KayttoOikeusRyhmaModifyDto ryhmaData) {
         kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(id, ryhmaData);
-        accessRightAuditLogger.auditModifyAccessRightGroupData(UserDetailsUtil.getCurrentUserOid(), Long.toString(id), false);
         return kayttoOikeusService.findKayttoOikeusRyhma(id);
     }
 

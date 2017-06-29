@@ -6,7 +6,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.hen
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
-import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
+import org.springframework.security.test.context.support.WithMockUser;
 
 @RunWith(SpringRunner.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
@@ -29,6 +29,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     private KayttajatiedotRepository kayttajatiedotRepository;
 
     @Test
+    @WithMockUser(username = "user1")
     public void createShouldReturn() {
         String oid = "1.2.3.4.5";
         populate(henkilo(oid));
@@ -71,6 +72,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "user1")
     public void testValidateUsernamePassword() throws Exception {
         final String henkiloOid = "1.2.246.562.24.27470134096";
         String username = "eetu.esimerkki@geemail.fi";

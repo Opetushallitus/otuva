@@ -37,6 +37,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.springframework.security.test.context.support.WithMockUser;
 
 @RunWith(SpringRunner.class)
 public class EmailServiceTest extends AbstractServiceTest {
@@ -56,6 +57,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     private EmailService emailService;
 
     @Test
+    @WithMockUser(username = "user1")
     public void sendExpirationReminderTest() {
         HenkiloPerustietoDto perustiedot = new HenkiloPerustietoDto();
         KielisyysDto kielisyys = new KielisyysDto();

@@ -34,6 +34,7 @@ public class OrganisaatioHenkiloTest extends AbstractServiceIntegrationTest {
     private OrganisaatioHenkiloService organisaatioHenkiloService;
 
     @Test
+    @WithMockUser(username = "user1")
     public void addOrganisaatioHenkilotShouldOnlyAddNewOrganisaatio() {
         populate(organisaatioCache("organisaatio1"));
         populate(organisaatioCache("organisaatio2"));
