@@ -29,6 +29,7 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,16 +70,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private final OrganisaatioClient organisaatioClient;
 
-    @Transactional(readOnly = true)
     @Override
-    public List<HaettuKayttooikeusryhmaDto> getAllActiveAnomusByHenkiloOid(String oidHenkilo, boolean activeOnly) {
-        if(activeOnly) {
-            return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                    .findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(oidHenkilo, AnomuksenTila.ANOTTU), HaettuKayttooikeusryhmaDto.class));
-        }
+    @Transactional(readOnly = true)
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset) {
         return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                .findByAnomusHenkiloOidHenkilo(oidHenkilo), HaettuKayttooikeusryhmaDto.class));
-
+                .findBy(criteria, limit, offset), HaettuKayttooikeusryhmaDto.class));
     }
 
     private List<HaettuKayttooikeusryhmaDto> localizeKayttooikeusryhma(List<HaettuKayttooikeusryhmaDto> unlocalizedDtos) {
@@ -272,7 +268,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         AnomusCriteria criteria = AnomusCriteria.builder()
                 .anottuAlku(anottuPvm.atStartOfDay())
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
-                .tila(AnomuksenTila.ANOTTU)
+                .tilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
 

@@ -19,13 +19,25 @@ public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
 
     @Override
     public List<Anomus> findBy(AnomusCriteria criteria) {
+        return findBy(criteria, null, null);
+    }
+
+    @Override
+    public List<Anomus> findBy(AnomusCriteria criteria, Long limit, Long offset) {
         QAnomus qAnomus = QAnomus.anomus;
 
-        return new JPAQuery<>(entityManager)
+        JPAQuery<Anomus> query = new JPAQuery<>(entityManager)
                 .from(qAnomus)
                 .where(criteria.condition(qAnomus))
                 .select(qAnomus)
-                .fetch();
+                .orderBy(qAnomus.anomusTilaTapahtumaPvm.desc());
+        if (limit != null) {
+            query.limit(limit);
+        }
+        if (offset != null) {
+            query.offset(offset);
+        }
+        return query.fetch();
     }
 
 }

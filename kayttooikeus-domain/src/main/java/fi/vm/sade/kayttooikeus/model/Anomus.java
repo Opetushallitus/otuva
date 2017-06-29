@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Käyttöoikeusanomus.
+ */
 @Entity
 @Getter @Setter
 @Builder
@@ -18,6 +21,9 @@ import java.util.Set;
 @Table(name = "anomus", schema = "public")
 public class Anomus extends IdentifiableAndVersionedEntity {
 
+    /**
+     * Anoja.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "henkilo_id")
     private Henkilo henkilo;

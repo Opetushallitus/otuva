@@ -9,4 +9,6 @@ public interface AnomusRepositoryCustom {
 
     List<Anomus> findBy(AnomusCriteria criteria);
 
+    List<Anomus> findBy(AnomusCriteria criteria, Long limit, Long offset);
+
 }

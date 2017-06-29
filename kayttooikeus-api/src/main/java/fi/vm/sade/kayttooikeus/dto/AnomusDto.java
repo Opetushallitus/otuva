@@ -21,4 +21,6 @@ public class AnomusDto {
 
     private AnomusTyyppi anomusTyyppi;
 
+    private HenkiloNimiDto henkilo;
+
 }

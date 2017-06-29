@@ -135,12 +135,13 @@ public class KayttooikeusAnomusServiceTest {
 
 
     @Test
-    public void getAllActiveAnomusByHenkiloOid() {
-        given(this.haettuKayttooikeusRyhmaRepository.findByAnomusHenkiloOidHenkilo("1.2.3.4.5"))
+    public void listHaetutKayttoOikeusRyhmat() {
+        given(this.haettuKayttooikeusRyhmaRepository.findBy(any(AnomusCriteria.class), anyLong(), anyLong()))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
+        AnomusCriteria criteria = AnomusCriteria.builder().anojaOid("1.2.3.4.5").build();
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
-                .getAllActiveAnomusByHenkiloOid("1.2.3.4.5", false);
+                .listHaetutKayttoOikeusRyhmat(criteria, null, null);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(LocalDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
@@ -148,26 +149,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
-        verify(this.haettuKayttooikeusRyhmaRepository, never()).findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila(any(), any());
-        verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
-    }
-
-    @Test
-    public void getAllActiveAnomusByHenkiloOidOnlyActive() {
-        given(this.haettuKayttooikeusRyhmaRepository
-                .findByAnomusHenkiloOidHenkiloAndAnomusAnomuksenTila("1.2.3.4.5", AnomuksenTila.ANOTTU))
-                .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
-
-        List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
-                .getAllActiveAnomusByHenkiloOid("1.2.3.4.5", true);
-        assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(LocalDateTime.now());
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKayttoOikeusRyhma().getName()).isEqualTo("kayttooikeusryhma1");
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
-
-        verify(this.haettuKayttooikeusRyhmaRepository, never()).findByAnomusHenkiloOidHenkilo(any());
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(eq(criteria), eq(null), eq(null));
         verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
