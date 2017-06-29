@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
@@ -14,6 +15,8 @@ import java.util.List;
 
 import static com.querydsl.core.types.ExpressionUtils.eq;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
+
+import static com.querydsl.core.types.ExpressionUtils.or;
 import static java.util.stream.Collectors.toSet;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -85,7 +88,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, List<String> organisaatioOidRestrictionList) {
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
+                                                     Long offset,
+                                                     List<String> organisaatioOidRestrictionList,
+                                                     List<OrderSpecifier> orderBy) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
@@ -112,9 +118,13 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOidRestrictionList));
         }
 
+        if(orderBy != null) {
+            orderBy.forEach(query::orderBy);
+        }
+
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
-        return query.distinct().fetch();
+        return query.fetch();
     }
 
     @Override

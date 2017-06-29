@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -182,8 +183,9 @@ public class HenkiloController {
                     "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija) Hakua rajoitetaan näille ryhmille joten ei tarvitse " +
                     "erillisiä käyttöoikeuksia.")
     public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto,
-                                                  @RequestParam(defaultValue = "0") Long offset) {
-        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset);
+                                                  @RequestParam(defaultValue = "0") Long offset,
+                                                  @RequestParam(required = false) HenkilohakuOrderBy orderBy) {
+        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
     }
 
 }
