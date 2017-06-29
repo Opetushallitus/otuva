@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class HenkiloHelper extends AuditlogAspectHelper {
+public class HenkiloHelper extends AbstractAuditlogAspectHelper {
 
     public HenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);

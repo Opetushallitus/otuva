@@ -7,7 +7,7 @@ import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class AuditlogAspectHelper {
+public abstract class AbstractAuditlogAspectHelper {
 
     private final OmatTiedotService omatTiedotService;
     private final Audit audit;

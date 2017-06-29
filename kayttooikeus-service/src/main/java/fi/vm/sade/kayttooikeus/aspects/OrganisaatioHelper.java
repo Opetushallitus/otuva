@@ -8,7 +8,7 @@ import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OrganisaatioHelper extends AuditlogAspectHelper {
+public class OrganisaatioHelper extends AbstractAuditlogAspectHelper {
 
     public OrganisaatioHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);

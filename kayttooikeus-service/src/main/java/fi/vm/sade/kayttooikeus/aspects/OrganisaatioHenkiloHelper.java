@@ -13,7 +13,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 @Component
-public class OrganisaatioHenkiloHelper extends AuditlogAspectHelper {
+public class OrganisaatioHenkiloHelper extends AbstractAuditlogAspectHelper {
 
     public OrganisaatioHenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);

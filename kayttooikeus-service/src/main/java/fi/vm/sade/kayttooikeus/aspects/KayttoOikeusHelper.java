@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class KayttoOikeusHelper extends AuditlogAspectHelper {
+public class KayttoOikeusHelper extends AbstractAuditlogAspectHelper {
 
     public KayttoOikeusHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);
