@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.service.it;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.IdentifierLocalisableLabelDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -30,7 +30,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.creaetOrganisaatioPerustietoWithNimi;
-import static fi.vm.sade.kayttooikeus.util.CreateUtil.createOrganisaatioPerustietoNoChildren;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyObject;
@@ -131,7 +130,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
-                .extracting(IdentifierLocalisableLabelDto::getLocalisedLabels)
+                .extracting(OrganisaatioMinimalDto::getLocalisedLabels)
                 .extracting("fi")
                 .containsExactly("nimiFi");
     }
@@ -158,7 +157,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
-                .extracting(IdentifierLocalisableLabelDto::getLocalisedLabels)
+                .extracting(OrganisaatioMinimalDto::getLocalisedLabels)
                 .extracting("fi")
                 .containsExactly("nimiFi");
     }

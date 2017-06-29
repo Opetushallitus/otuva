@@ -1,8 +1,9 @@
 package fi.vm.sade.kayttooikeus.util;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.IdentifierLocalisableLabelDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -11,7 +12,6 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
@@ -84,17 +84,20 @@ public class HenkilohakuBuilder {
                     .orElseThrow(IllegalStateException::new);
             henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                    .map(organisaatioOid -> new IdentifierLocalisableLabelDto(organisaatioOid,
-                            this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
-                                    OrganisaatioClient.Mode.requireCache())
-                                    .orElseGet(() -> OrganisaatioPerustieto.builder()
-                                            .oid(organisaatioOid)
-                                            .nimi(new HashMap<String, String>() {{
-                                                put("fi", "Tuntematon organisaatio");
-                                                put("sv", "Okänd organisation");
-                                                put("en", "Unknown organisation");
-                                            }}).build())
-                                    .getNimi()))
+                    .map(organisaatioOid -> {
+                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
+                                OrganisaatioClient.Mode.requireCache())
+                                .orElseGet(() -> OrganisaatioPerustieto.builder()
+                                        .oid(organisaatioOid)
+                                        .nimi(new HashMap<String, String>() {{
+                                            put("fi", "Tuntematon organisaatio");
+                                            put("sv", "Okänd organisation");
+                                            put("en", "Unknown organisation");
+                                        }})
+                                        .tyypit(Lists.newArrayList())
+                                        .build());
+                        return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getTyypit(), organisaatio.getNimi());
+                    })
                     .collect(Collectors.toList()));
             return henkilohakuResultDto;
         }).collect(Collectors.toList());

@@ -31,7 +31,7 @@ public class OrganisaatioPerustieto {
     private OrganisaatioPerustieto parent;
     
     public List<String> getTyypit() {
-        if(!this.organisaatiotyypit.isEmpty()) {
+        if(this.organisaatiotyypit != null && !this.organisaatiotyypit.isEmpty()) {
             return this.organisaatiotyypit;
         }
         return this.tyypit;
