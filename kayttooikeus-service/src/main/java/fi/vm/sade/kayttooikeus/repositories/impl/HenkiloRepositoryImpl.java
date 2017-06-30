@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
@@ -24,6 +25,7 @@ import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
@@ -98,16 +100,17 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
-        JPAQuery<HenkilohakuResultDto> query = jpa().from(qHenkilo)
+        JPAQuery<Tuple> query = jpa().from(qHenkilo)
                 // Not excluding henkilos without organisation (different condition on where)
                 .leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
                 .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma)
                 .leftJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
                 // Organisaatiohenkilos need to be added later (enrichment)
-                .select(Projections.constructor(HenkilohakuResultDto.class,
-                        qHenkilo.sukunimiCached.append(", ").append(qHenkilo.etunimetCached),
+                .select(qHenkilo.sukunimiCached,
+                        qHenkilo.etunimetCached,
                         qHenkilo.oidHenkilo,
-                        qKayttajatiedot.username));
+                        qKayttajatiedot.username)
+                .distinct();
 
         if(offset != null) {
             query.offset(offset);
@@ -124,7 +127,11 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
-        return query.fetch();
+        return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
+                tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
+                tuple.get(qHenkilo.oidHenkilo),
+                tuple.get(qHenkilo.kayttajatiedot.username)
+        )).collect(Collectors.toList());
     }
 
     @Override
