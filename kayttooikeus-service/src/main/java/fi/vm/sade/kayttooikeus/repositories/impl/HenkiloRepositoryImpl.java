@@ -109,7 +109,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 .select(qHenkilo.sukunimiCached,
                         qHenkilo.etunimetCached,
                         qHenkilo.oidHenkilo,
-                        qKayttajatiedot.username)
+                        qHenkilo.kayttajatiedot.username)
                 .distinct();
 
         if(offset != null) {

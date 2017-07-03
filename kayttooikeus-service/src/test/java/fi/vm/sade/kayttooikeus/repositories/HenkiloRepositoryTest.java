@@ -20,9 +20,9 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void findByCriteriaNameQuery() {
-        populate(HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etunimi1", "sukunimi1"));
-        populate(HenkiloPopulator.henkilo("1.2.3.4.6").withNimet("etunimi2", "sukunimi2"));
-        populate(HenkiloPopulator.henkilo("1.2.3.4.7").withNimet("etunimi3", "sukunimi3"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etunimi1", "sukunimi1").withUsername("arpa1"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.6").withNimet("etunimi2", "sukunimi2").withUsername("arpa2"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.7").withNimet("etunimi3", "sukunimi3").withUsername("arpa3"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.8").withNimet("etunimi4", "sukunimi4"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.9").withNimet("etunimi5", "sukunimi5"));
 
@@ -38,5 +38,7 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
                         "sukunimi1, etunimi1");
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo)
                 .containsExactly("1.2.3.4.8", "1.2.3.4.7", "1.2.3.4.6", "1.2.3.4.5");
+        assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getKayttajatunnus)
+                .containsExactly(null, "arpa3", "arpa2", "arpa1");
     }
 }
