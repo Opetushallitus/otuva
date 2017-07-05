@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
@@ -150,7 +151,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
-                .willReturn(organisaatioPerustieto);
+                .willReturn(Optional.of(organisaatioPerustieto));
         Kutsu kutsu = Kutsu.builder()
                 .kieliKoodi("fi")
                 .sahkoposti("arpa@kuutio.fi")

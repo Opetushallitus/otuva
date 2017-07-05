@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
@@ -16,7 +17,6 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -111,12 +111,14 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional(readOnly = true)
-    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
+    public List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto,
+                                                  Long offset,
+                                                  HenkilohakuOrderBy orderBy) {
         return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
                 this.organisaatioHenkiloDataRepository, this.henkiloDataRepository, this.organisaatioClient)
                 .builder(henkilohakuCriteriaDto)
-                .search()
                 .exclusion()
+                .search(offset, orderBy)
                 .enrichment()
                 .build();
     }

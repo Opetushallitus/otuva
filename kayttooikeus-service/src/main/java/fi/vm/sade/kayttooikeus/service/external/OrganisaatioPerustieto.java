@@ -1,14 +1,16 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrganisaatioPerustieto {
     private String oid;
     private String parentOid;
@@ -29,7 +31,7 @@ public class OrganisaatioPerustieto {
     private OrganisaatioPerustieto parent;
     
     public List<String> getTyypit() {
-        if(!this.organisaatiotyypit.isEmpty()) {
+        if(this.organisaatiotyypit != null && !this.organisaatiotyypit.isEmpty()) {
             return this.organisaatiotyypit;
         }
         return this.tyypit;

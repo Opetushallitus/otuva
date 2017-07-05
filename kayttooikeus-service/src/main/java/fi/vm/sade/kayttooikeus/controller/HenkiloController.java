@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -39,7 +40,7 @@ public class HenkiloController {
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
-    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai ryhmien tiedoilla rekursiiisesti.",
+    @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai ryhmien tiedoilla rekursiivisesti.",
             notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tai ryhmän tiedoilla siten, että roganisaatio sisältää myös lapsiroganisaationsa rekursiivisesti.")
     @RequestMapping(value = "/{oid}/organisaatio", method = RequestMethod.GET)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisatioHenkilos(
@@ -176,12 +177,16 @@ public class HenkiloController {
     }
 
     @PostMapping("/henkilohaku")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')") // Only until results are limited for non admin users
+//    @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta. EI tarkoitettu palveluiden käyttöön. Muutosaltis.",
             notes = "Palauttaa suppean setin henkilöiden tietoja ennetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
-                    "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija)")
-    public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
-        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+                    "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija) Hakua rajoitetaan näille ryhmille joten ei tarvitse " +
+                    "erillisiä käyttöoikeuksia.")
+    public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto,
+                                                  @RequestParam(defaultValue = "0") Long offset,
+                                                  @RequestParam(required = false) HenkilohakuOrderBy orderBy) {
+        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
     }
 
 }

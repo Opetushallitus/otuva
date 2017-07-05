@@ -62,7 +62,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         List<KutsuOrganisaatioListDto> kutsuOrganisaatios = kutsuRepository.listKutsuOrganisaatioListDtos(criteria, orderBy);
         Map<String,List<KutsuOrganisaatioListDto>> byOrganisaatioOids = kutsuOrganisaatios.stream()
                 .collect(groupingBy(KutsuOrganisaatioListDto::getOid));
-        byOrganisaatioOids.keySet().stream().map(oid -> organisaatioClient.getOrganisaatioPerustiedotCached(oid, organizationClientState))
+        byOrganisaatioOids.keySet().stream().map(oid -> organisaatioClient.getOrganisaatioPerustiedotCached(oid, organizationClientState)
+                .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + oid)))
                 .filter(perustiedot -> byOrganisaatioOids.containsKey(perustiedot.getOid()))
                 .map(perustiedot -> new SimpleEntry<>(perustiedot.getOid(), new TextGroupMapDto(perustiedot.getNimi())))
                 .forEach(e -> byOrganisaatioOids.get(e.getKey()).forEach(dto -> dto.setNimi(e.getValue())));

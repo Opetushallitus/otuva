@@ -3,7 +3,8 @@ package fi.vm.sade.kayttooikeus.service.it;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.IdentifierLocalisableLabelDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
+import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
@@ -29,7 +31,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.creaetOrganisaatioPerustietoWithNimi;
-import static fi.vm.sade.kayttooikeus.util.CreateUtil.createOrganisaatioPerustietoNoChildren;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyObject;
@@ -93,7 +94,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, true,
                 false, true, "arpa", null, null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, HenkilohakuOrderBy.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getNimi).containsExactly("kuutio, arpa");
     }
 
@@ -105,7 +106,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, false,
                 false, true, "arpa", null, null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, HenkilohakuOrderBy.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).isEmpty();
     }
 
@@ -123,14 +124,14 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         ));
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
-                .willReturn(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi"));
+                .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, "3.4.5.6.7", null);
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, HenkilohakuOrderBy.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
-                .extracting(IdentifierLocalisableLabelDto::getLocalisedLabels)
+                .extracting(OrganisaatioMinimalDto::getLocalisedLabels)
                 .extracting("fi")
                 .containsExactly("nimiFi");
     }
@@ -149,15 +150,15 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         ));
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
-                .willReturn(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi"));
+                .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
                 null, null, null, null,
                 myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId());
-        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto);
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, HenkilohakuOrderBy.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
-                .extracting(IdentifierLocalisableLabelDto::getLocalisedLabels)
+                .extracting(OrganisaatioMinimalDto::getLocalisedLabels)
                 .extracting("fi")
                 .containsExactly("nimiFi");
     }

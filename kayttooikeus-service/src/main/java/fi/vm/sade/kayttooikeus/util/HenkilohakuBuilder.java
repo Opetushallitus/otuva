@@ -1,8 +1,10 @@
 package fi.vm.sade.kayttooikeus.util;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.IdentifierLocalisableLabelDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
+import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -14,14 +16,13 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HenkilohakuBuilder {
     private HenkilohakuCriteriaDto henkilohakuCriteriaDto;
-    private List<HenkilohakuResultDto> henkilohakuResultDtoList;
+    private List<HenkilohakuResultDto> henkilohakuResultDtoList = new ArrayList<>();
+    private List<String> organisationRestrictionList = new ArrayList<>();
 
     private HenkiloHibernateRepository henkiloHibernateRepository;
     private OrikaBeanMapper mapper;
@@ -57,9 +58,12 @@ public class HenkilohakuBuilder {
     }
 
     // Find nimi, kayttajatunnus and oidHenkilo
-    public HenkilohakuBuilder search() {
+    public HenkilohakuBuilder search(Long offset, HenkilohakuOrderBy orderBy) {
         this.henkilohakuResultDtoList = this.henkiloHibernateRepository
-                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class));
+                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
+                        offset,
+                        this.organisationRestrictionList,
+                        orderBy != null ? orderBy.getValue() : null);
         return this;
     }
 
@@ -83,9 +87,18 @@ public class HenkilohakuBuilder {
             henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
                     .map(organisaatioOid -> {
-                        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient
-                                .getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
-                        return new IdentifierLocalisableLabelDto(organisaatioOid, organisaatioPerustieto.getNimi());
+                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
+                                OrganisaatioClient.Mode.requireCache())
+                                .orElseGet(() -> OrganisaatioPerustieto.builder()
+                                        .oid(organisaatioOid)
+                                        .nimi(new HashMap<String, String>() {{
+                                            put("fi", "Tuntematon organisaatio");
+                                            put("sv", "Okänd organisation");
+                                            put("en", "Unknown organisation");
+                                        }})
+                                        .tyypit(Lists.newArrayList())
+                                        .build());
+                        return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getTyypit(), organisaatio.getNimi());
                     })
                     .collect(Collectors.toList()));
             return henkilohakuResultDto;

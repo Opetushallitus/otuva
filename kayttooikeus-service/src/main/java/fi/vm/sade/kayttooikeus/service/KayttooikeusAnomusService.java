@@ -5,6 +5,8 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface KayttooikeusAnomusService {
 
@@ -21,4 +23,6 @@ public interface KayttooikeusAnomusService {
     void lahetaUusienAnomuksienIlmoitukset(LocalDate anottuPvm);
 
     void removePrivilege(String oidHenkilo, Long id, String organisaatioOid);
+
+    Map<String, Set<Long>> findCurrentHenkiloCanGrant(String accessedHenkiloOid);
 }

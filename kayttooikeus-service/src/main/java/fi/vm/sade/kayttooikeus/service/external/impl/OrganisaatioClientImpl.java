@@ -19,10 +19,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -121,9 +118,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public OrganisaatioPerustieto getOrganisaatioPerustiedotCached(String oid, Mode mode) {
-        return cached(c -> c.getByOid(oid).<NotFoundException>orElseThrow(() -> new NotFoundException("Organization not found by oid " + oid)),
-                () -> fetchPerustiedotWithChildren(oid), mode);
+    public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode) {
+        return cached(c -> c.getByOid(oid),
+                () -> Optional.ofNullable(fetchPerustiedotWithChildren(oid)), mode);
     }
 
     public OrganisaatioPerustieto fetchPerustiedot(String oid) {
@@ -185,6 +182,17 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     public List<String> getParentOids(String oid) {
         String url = urlConfiguration.url("organisaatio-service.organisaatio.parentOids", oid);
         return Stream.of(io(() -> restClient.getAsString(url)).get().split("/")).collect(toList());
+    }
+
+    @Override
+    public List<String> getChildOids(String oid) {
+        String url = urlConfiguration.url("organisaatio-service.organisaatio.childOids", oid);
+        return cached(c -> c.flatWithChildrenByOid(oid)
+                        .map(OrganisaatioPerustieto::getOid)
+                        .collect(toList()),
+                () -> retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
+                        .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids(),
+                Mode.requireCache());
     }
 
 }

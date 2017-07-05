@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 
 import javax.persistence.EntityManager;
 
@@ -12,6 +13,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
     private String sukunimiCached;
     private Boolean passivoituCached;
     private Boolean duplikaattiCached;
+    private Kayttajatiedot kayttajatiedot;
 
     public HenkiloPopulator(String oid) {
         this.oid = oid;
@@ -37,6 +39,12 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         return this;
     }
 
+    public HenkiloPopulator withUsername(String username) {
+        this.kayttajatiedot = new Kayttajatiedot();
+        this.kayttajatiedot.setUsername(username);
+        return this;
+    }
+
     @Override
     public Henkilo apply(EntityManager entityManager) {
         Henkilo existing = first(entityManager.createQuery("select h from Henkilo h where h.oidHenkilo = :oid")
@@ -50,6 +58,10 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         henkilo.setSukunimiCached(this.sukunimiCached);
         henkilo.setPassivoituCached(this.passivoituCached);
         henkilo.setDuplicateCached(this.duplikaattiCached);
+        if(this.kayttajatiedot != null) {
+            this.kayttajatiedot.setHenkilo(henkilo);
+            henkilo.setKayttajatiedot(this.kayttajatiedot);
+        }
         entityManager.persist(henkilo);
         return entityManager.find(Henkilo.class, henkilo.getId());
     }

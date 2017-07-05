@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -16,6 +17,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -29,6 +31,7 @@ import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class PermissionCheckerServiceImpl extends AbstractService implements PermissionCheckerService {
+public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final Logger LOG = LoggerFactory.getLogger(PermissionCheckerService.class);
     private static CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode("henkilo.authentication-service");
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -193,7 +196,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
                                            List<String> allowedRolesWithoutPrefix) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
-            logger.warn(this.getCurrentUserOid() + " called permission checker with empty input");
+            LOG.warn(this.getCurrentUserOid() + " called permission checker with empty input");
             return true;
         }
         else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
@@ -323,10 +326,17 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
     }
 
     @Override
+    public Set<String> getCasRoles(){
+        Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        return Sets.newHashSet(Iterables.transform(authorities, (Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
+    }
+
+    @Override
     public boolean isCurrentUserAdmin() {
         return isSuperUser(this.getCasRoles());
     }
 
+    // Check that current user MKRT can grant wanted KOR
     @Override
     public boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
         List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
@@ -337,6 +347,7 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
         return this.isCurrentUserAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
     }
 
+    // Check that wanted KOR can be added to the wanted organisation
     @Override
     public boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
         // Group organizations have to match only as a general set since they're not separated by type or by individual groups
@@ -344,7 +355,8 @@ public class PermissionCheckerServiceImpl extends AbstractService implements Per
             return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
-        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache());
+        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache())
+                .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioOid));
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if(!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->

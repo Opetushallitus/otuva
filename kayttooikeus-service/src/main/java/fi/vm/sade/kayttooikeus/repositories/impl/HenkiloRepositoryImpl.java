@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
@@ -14,6 +16,8 @@ import java.util.List;
 
 import static com.querydsl.core.types.ExpressionUtils.eq;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
+
+import static com.querydsl.core.types.ExpressionUtils.or;
 import static java.util.stream.Collectors.toSet;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -21,6 +25,7 @@ import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
@@ -85,27 +90,48 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria) {
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
+                                                     Long offset,
+                                                     List<String> organisaatioOidRestrictionList,
+                                                     List<OrderSpecifier> orderBy) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
                 = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
-        JPAQuery<HenkilohakuResultDto> query = jpa().from(qHenkilo)
+        JPAQuery<Tuple> query = jpa().from(qHenkilo)
                 // Not excluding henkilos without organisation (different condition on where)
                 .leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
                 .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma)
                 .leftJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
                 // Organisaatiohenkilos need to be added later (enrichment)
-                .select(Projections.constructor(HenkilohakuResultDto.class,
-                        qHenkilo.sukunimiCached.append(", ").append(qHenkilo.etunimetCached),
+                .select(qHenkilo.sukunimiCached,
+                        qHenkilo.etunimetCached,
                         qHenkilo.oidHenkilo,
-                        qKayttajatiedot.username));
+                        qHenkilo.kayttajatiedot.username)
+                .distinct();
+
+        if(offset != null) {
+            query.offset(offset);
+        }
+        query.limit(100L);
+
+        if(organisaatioOidRestrictionList != null && !organisaatioOidRestrictionList.isEmpty()) {
+            query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOidRestrictionList));
+        }
+
+        if(orderBy != null) {
+            orderBy.forEach(query::orderBy);
+        }
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
-        return query.distinct().fetch();
+        return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
+                tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
+                tuple.get(qHenkilo.oidHenkilo),
+                tuple.get(qHenkilo.kayttajatiedot.username)
+        )).collect(Collectors.toList());
     }
 
     @Override

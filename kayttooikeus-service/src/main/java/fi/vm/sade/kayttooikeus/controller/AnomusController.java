@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Api(tags = "Kayttooikeusanomukset")
@@ -91,7 +94,7 @@ public class AnomusController {
     }
 
     @PostMapping("/ilmoitus")
-    @ApiOperation("Lähettää käyttöoikeusanomuksista sähköposti-ilmoituksen anomuksien hyväksyjille")
+    @ApiOperation(value = "Lähettää käyttöoikeusanomuksista sähköposti-ilmoituksen anomuksien hyväksyjille")
     public void lahetaUusienAnomuksienIlmoitukset(
             @RequestParam
             @ApiParam("yyyy-MM-dd")
@@ -108,4 +111,14 @@ public class AnomusController {
                                 @ApiParam(value = "Käyttöoikeusryhmä id", required = true) @PathVariable Long id) {
         this.kayttooikeusAnomusService.removePrivilege(oidHenkilo, id, organisaatioOid);
     }
+
+    @ApiOperation(value = "Listaa organisaatioittain ne käyttöoikeusryhmät, joita käyttäjällä on oikeus myöntää kyseiselle henkilölle",
+            notes = "Ei sisällä kaikkia mahdollisia ryhmiä vaan vain henkilön anomukset, jo olemassa olevat käyttöoikeudet ja " +
+                    "joskus voimassa olleet käyttöoikeudet.")
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/henkilo/current/{henkiloOid}/canGrant", method = RequestMethod.GET)
+    public Map<String, Set<Long>> currentHenkiloCanGrant(@PathVariable String henkiloOid) {
+        return this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant(henkiloOid);
+    }
+
 }

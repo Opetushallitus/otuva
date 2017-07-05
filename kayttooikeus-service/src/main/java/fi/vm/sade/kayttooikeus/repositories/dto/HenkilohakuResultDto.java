@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.dto;
 
-import fi.vm.sade.kayttooikeus.dto.IdentifierLocalisableLabelDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ public class HenkilohakuResultDto {
 
     String kayttajatunnus;
 
-    private List<IdentifierLocalisableLabelDto> organisaatioNimiList = new ArrayList<>();
+    private List<OrganisaatioMinimalDto> organisaatioNimiList = new ArrayList<>();
 
     public HenkilohakuResultDto(String nimi, String oidHenkilo, String kayttajatunnus) {
         this.nimi = nimi;

@@ -65,14 +65,14 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
             orgDto.setOid("1.2.3.4.1");
             orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
             orgDto.setOrganisaatiotyypit(asList("Tyyppi1", "Tyyppi2"));
-            return orgDto;
+            return Optional.of(orgDto);
         });
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.2"), any())).willAnswer(invocation -> {
             OrganisaatioPerustieto orgDto = new OrganisaatioPerustieto();
             orgDto.setOid("1.2.3.4.2");
             orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());
             orgDto.setOrganisaatiotyypit(singletonList("Tyyppi1"));
-            return orgDto;
+            return Optional.of(orgDto);
         });
         given(this.organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
                 asList(OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L).passivoitu(false)
@@ -100,7 +100,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
 
     @Test
     @WithMockUser(username = "1.2.3.4.5")
-    public void listOrganisaatioPerustiedotForCurrentUserTest() {
+    public void listOrganisaatioPerustiedotForCurrentUserTest() throws Exception {
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("1.2.3.4.5"))
                 .willReturn(singletonList("2.3.4.5.6"));
         given(this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(singletonList("2.3.4.5.6")))
