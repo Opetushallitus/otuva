@@ -17,6 +17,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class HenkilohakuBuilder {
@@ -85,6 +86,7 @@ public class HenkilohakuBuilder {
                     .findFirst()
                     .orElseThrow(IllegalStateException::new);
             henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
+                    .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
                     .map(organisaatioOid -> {
                         OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
