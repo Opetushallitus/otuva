@@ -41,8 +41,9 @@ public class AnomusController {
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
             @RequestParam(required = false, defaultValue = "20") Long limit,
             @RequestParam(required = false) Long offset,
-            @RequestParam(required = false) OrderByAnomus orderBy) {
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset, orderBy);
+            @RequestParam(required = false) OrderByAnomus orderBy,
+            @RequestParam(defaultValue = "true") boolean showOwnAnomus) {
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset, orderBy, showOwnAnomus);
     }
 
     @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
@@ -55,7 +56,7 @@ public class AnomusController {
         if (activeOnly) {
             criteria.setTilat(EnumSet.of(AnomuksenTila.ANOTTU));
         }
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
     }
 
     @ApiOperation("Tekee uuden käyttöoikeusanomuksen")

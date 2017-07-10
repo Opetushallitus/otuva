@@ -140,7 +140,7 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().anojaOid("1.2.3.4.5").build();
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
-                .listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
+                .listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(LocalDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);

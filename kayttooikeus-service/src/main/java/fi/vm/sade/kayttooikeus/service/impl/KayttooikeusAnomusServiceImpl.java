@@ -64,7 +64,19 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     @Override
     @Transactional(readOnly = true)
-    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset, OrderByAnomus orderBy) {
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
+                                                                         Long limit,
+                                                                         Long offset,
+                                                                         OrderByAnomus orderBy,
+                                                                         boolean showOwnAnomus) {
+        if(!showOwnAnomus) {
+            if(criteria.getHenkiloOidRestrictionList() != null) {
+                criteria.getHenkiloOidRestrictionList().add(UserDetailsUtil.getCurrentUserOid());
+            }
+            else {
+                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(UserDetailsUtil.getCurrentUserOid()));
+            }
+        }
         return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
                 .findBy(criteria, limit, offset, orderBy), HaettuKayttooikeusryhmaDto.class));
     }
