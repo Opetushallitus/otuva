@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
-import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
+import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -59,7 +59,7 @@ public class HenkilohakuBuilder {
     }
 
     // Find nimi, kayttajatunnus and oidHenkilo
-    public HenkilohakuBuilder search(Long offset, HenkilohakuOrderBy orderBy) {
+    public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
         this.henkilohakuResultDtoList = this.henkiloHibernateRepository
                 .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
                         offset,

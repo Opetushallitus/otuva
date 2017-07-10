@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
@@ -21,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Api(tags = "Kayttooikeusanomukset")
+@Api(tags = "Käyttöoikeusanomukset ja käyttöoikeuksien hallinta")
 @RestController
 @RequestMapping("/kayttooikeusanomus")
 public class AnomusController {
@@ -39,8 +40,9 @@ public class AnomusController {
             notes = "Tällä hetkellä toteutus vain rekisterinpitäjälle")
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
             @RequestParam(required = false, defaultValue = "20") Long limit,
-            @RequestParam(required = false) Long offset) {
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset);
+            @RequestParam(required = false) Long offset,
+            @RequestParam(required = false) OrderByAnomus orderBy) {
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset, orderBy);
     }
 
     @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
@@ -53,7 +55,7 @@ public class AnomusController {
         if (activeOnly) {
             criteria.setTilat(EnumSet.of(AnomuksenTila.ANOTTU));
         }
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null);
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
     }
 
     @ApiOperation("Tekee uuden käyttöoikeusanomuksen")

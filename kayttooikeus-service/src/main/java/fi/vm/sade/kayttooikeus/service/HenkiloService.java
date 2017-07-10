@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
+import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
@@ -33,5 +33,5 @@ public interface HenkiloService {
     void disableHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid);
 
     @Transactional(readOnly = true)
-    List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, HenkilohakuOrderBy orderBy);
+    List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
 }

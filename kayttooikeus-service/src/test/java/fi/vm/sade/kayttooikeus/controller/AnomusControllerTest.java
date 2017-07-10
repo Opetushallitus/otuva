@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,7 +38,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void getActiveAnomuksetByHenkilo() throws Exception {
-        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class), anyLong(), anyLong()))
+        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class), anyLong(), anyLong(), anyObject()))
                 .willReturn(new ArrayList<>());
         this.mvc.perform(get("/kayttooikeusanomus/1.2.3.4.5").param("activeOnly", "true"))
                 .andExpect(status().isOk());
@@ -46,7 +47,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void getActiveAnomuksetByHenkiloNotFound() throws Exception {
-        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class), anyLong(), anyLong()))
+        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class), anyLong(), anyLong(), anyObject()))
                 .willThrow(new NotFoundException("message"));
         this.mvc.perform(get("/kayttooikeusanomus/1.2.3.4.5").param("activeOnly", "true"))
                 .andExpect(status().isNotFound());

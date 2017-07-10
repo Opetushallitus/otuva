@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.enumeration.HenkilohakuOrderBy;
+import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
@@ -30,7 +30,7 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
                 HenkiloCriteria.builder().nameQuery("etunimi").build(),
                 1L,
                 null,
-                HenkilohakuOrderBy.HENKILO_NIMI_DESC.getValue());
+                OrderByHenkilohaku.HENKILO_NIMI_DESC.getValue());
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getNimi)
                 .containsExactly("sukunimi4, etunimi4",
                         "sukunimi3, etunimi3",

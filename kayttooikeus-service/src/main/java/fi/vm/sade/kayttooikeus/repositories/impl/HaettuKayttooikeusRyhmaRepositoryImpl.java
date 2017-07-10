@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.jpa.impl.JPAQuery;
+import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QAnomus;
 import fi.vm.sade.kayttooikeus.model.QHaettuKayttoOikeusRyhma;
@@ -19,7 +20,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
     }
 
     @Override
-    public List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria criteria, Long limit, Long offset) {
+    public List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria criteria, Long limit, Long offset, OrderByAnomus orderBy) {
         QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma = QHaettuKayttoOikeusRyhma.haettuKayttoOikeusRyhma;
         QAnomus qAnomus = QAnomus.anomus;
 
@@ -27,13 +28,15 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
                 .from(qHaettuKayttoOikeusRyhma)
                 .join(qHaettuKayttoOikeusRyhma.anomus, qAnomus)
                 .where(criteria.condition(qAnomus))
-                .select(qHaettuKayttoOikeusRyhma)
-                .orderBy(qAnomus.anottuPvm.desc());
+                .select(qHaettuKayttoOikeusRyhma);
         if (limit != null) {
             query.limit(limit);
         }
         if (offset != null) {
             query.offset(offset);
+        }
+        if(orderBy != null && orderBy.getValue() != null) {
+            query.orderBy(orderBy.getValue());
         }
         return query.fetch();
     }
