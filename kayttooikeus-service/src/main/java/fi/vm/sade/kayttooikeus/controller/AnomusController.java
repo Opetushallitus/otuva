@@ -54,9 +54,9 @@ public class AnomusController {
         AnomusCriteria criteria = new AnomusCriteria();
         criteria.setAnojaOid(oidHenkilo);
         if (activeOnly) {
-            criteria.setTilat(EnumSet.of(AnomuksenTila.ANOTTU));
+            criteria.setAnomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU));
         }
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
+        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria);
     }
 
     @ApiOperation("Tekee uuden käyttöoikeusanomuksen")

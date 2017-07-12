@@ -45,7 +45,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void getActiveAnomuksetByHenkiloNotFound() throws Exception {
-        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class), anyLong(), anyLong(), anyObject(), anyBoolean()))
+        given(this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(any(AnomusCriteria.class)))
                 .willThrow(new NotFoundException("message"));
         this.mvc.perform(get("/kayttooikeusanomus/1.2.3.4.5").param("activeOnly", "true"))
                 .andExpect(status().isNotFound());

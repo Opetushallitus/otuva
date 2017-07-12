@@ -64,6 +64,12 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     @Override
     @Transactional(readOnly = true)
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria) {
+        return this.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
                                                                          Long limit,
                                                                          Long offset,
@@ -277,7 +283,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         AnomusCriteria criteria = AnomusCriteria.builder()
                 .anottuAlku(anottuPvm.atStartOfDay())
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
-                .tilat(EnumSet.of(AnomuksenTila.ANOTTU))
+                .anomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
         List<Anomus> anomukset = anomusRepository.findBy(criteria);
 

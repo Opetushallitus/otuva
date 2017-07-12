@@ -8,7 +8,9 @@ import fi.vm.sade.kayttooikeus.repositories.AnomusRepositoryCustom;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.springframework.data.jpa.repository.JpaContext;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
 
     private final EntityManager entityManager;
