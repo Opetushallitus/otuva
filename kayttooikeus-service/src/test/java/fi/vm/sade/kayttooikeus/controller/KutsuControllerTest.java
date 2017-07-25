@@ -1,29 +1,26 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
+import com.google.common.collect.Sets;
+import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
+import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.ZoneId;
 import java.time.LocalDateTime;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 public class KutsuControllerTest extends AbstractControllerTest {
@@ -33,15 +30,13 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsusTest() throws Exception {
-        given(this.kutsuService.listAvoinKutsus(any()))
-                .willReturn(singletonList(KutsuListDto.builder()
+
+        given(this.kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, null))
+                .willReturn(singletonList(KutsuReadDto.builder()
                         .id(1L).aikaleima(LocalDateTime.of(2016,1,1, 0, 0, 0, 0))
                         .sahkoposti("posti@example.com")
-                        .organisaatiot(singletonList(
-                            KutsuOrganisaatioListDto.builder()
-                                .id(2L).nimi(new TextGroupMapDto(3L).put("FI", "Oikeus"))
-                                .oid("OID")
-                            .build()
+                        .organisaatiot(Sets.newHashSet(
+                                new KutsuReadDto.KutsuOrganisaatioDto(new TextGroupMapDto(3L).put("FI", "Oikeus"), "OID", null)
                         ))
                     .build()));
         this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON_UTF8))

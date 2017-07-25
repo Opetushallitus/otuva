@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toMap;
@@ -59,7 +61,7 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
         if (opt.isPresent()) {
             return opt;
         }
-        return texts.values().stream().filter(t -> t != null).findFirst();
+        return texts.values().stream().filter(Objects::nonNull).findFirst();
     }
 
     @Override
@@ -73,7 +75,7 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
     }
     
     @Override
-    public int compareTo(TextGroupMapDto o) {
+    public int compareTo(@NotNull TextGroupMapDto o) {
         int result = Localizable.compareLangs(this, o, "fi");
         if (result != 0) {
             return result;

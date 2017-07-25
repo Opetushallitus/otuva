@@ -1,9 +1,14 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.dto.LocalizableOrganisaatio;
+import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.repositories.TextGroupRepository;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.dto.Localizable;
 import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +21,12 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
+@RequiredArgsConstructor
 public class LocalizationServiceImpl implements LocalizationService {
     private final TextGroupRepository textGroupRepository;
-    
-    @Autowired
-    public LocalizationServiceImpl(TextGroupRepository textGroupRepository) {
-        this.textGroupRepository = textGroupRepository;
-    }
 
+    private final OrganisaatioClient organisaatioClient;
+    
     @Override
     @Transactional(readOnly = true)
     public <T extends LocalizableDto, C extends Collection<T>> C localize(C list) {
@@ -48,5 +51,15 @@ public class LocalizationServiceImpl implements LocalizationService {
             localize(dto.localizableTexts());
         }
         return dto;
+    }
+
+    @Override
+    public <T extends LocalizableOrganisaatio, C extends Collection<T>> C localizeOrgs(C list) {
+        list.forEach(localizableOrganisaatio -> localizableOrganisaatio.setNimi(
+                new TextGroupMapDto(null, this.organisaatioClient
+                        .getOrganisaatioPerustiedotCached(localizableOrganisaatio.getOrganisaatioOid(), OrganisaatioClient.Mode.requireCache())
+                        .orElseThrow(() -> new NotFoundException("Organisaatio not found by oid " + localizableOrganisaatio.getOrganisaatioOid()))
+                        .getNimi())));
+        return list;
     }
 }

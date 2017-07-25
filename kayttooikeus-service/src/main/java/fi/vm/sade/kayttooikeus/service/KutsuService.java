@@ -1,16 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.repositories.OrderBy;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
 public interface KutsuService {
-    List<KutsuListDto> listAvoinKutsus(OrderBy<KutsuOrganisaatioOrder> orderBy);
+    List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction);
 
     long createKutsu(KutsuCreateDto dto);
 
