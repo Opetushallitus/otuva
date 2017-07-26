@@ -38,8 +38,9 @@ public class KutsuController {
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public List<KutsuReadDto> listAvoinKutsus(
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
-            @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Sort.Direction direction) {
-        return kutsuService.listAvoinKutsus(sortBy, direction);
+            @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Sort.Direction direction,
+            @RequestParam(required = false, defaultValue = "true") Boolean onlyOwnKutsus) {
+        return kutsuService.listAvoinKutsus(sortBy, direction, onlyOwnKutsus);
     }
 
     @RequestMapping(method = RequestMethod.POST)
