@@ -18,6 +18,6 @@ public interface KutsuDataRepository extends JpaRepository<Kutsu, Long> {
 
     List<Kutsu> findByTila(Sort sort, KutsunTila tila);
 
-    Optional<Kutsu> findByTemporaryToken(String temporaryToken);
+    Optional<Kutsu> findByTemporaryTokenAndTila(String temporaryToken, KutsunTila kutsunTila);
 
 }
