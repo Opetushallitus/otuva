@@ -35,10 +35,10 @@ public class SecurityConfigDev extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/cas/auth/token/*").permitAll()
                 .antMatchers("/cas/henkilo/*").permitAll()
+                .antMatchers("/kutsu/token/*").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
                 .antMatchers("/v2/api-docs").permitAll()
-                .antMatchers("/invite/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

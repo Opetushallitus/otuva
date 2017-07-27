@@ -73,5 +73,4 @@ public class KutsuController {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
     }
 
-
 }

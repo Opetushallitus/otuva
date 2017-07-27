@@ -114,6 +114,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .antMatchers("/buildversion.txt").permitAll()
                 .antMatchers("/cas/auth/token/*").permitAll()
                 .antMatchers("/cas/henkilo/*").permitAll()
+                .antMatchers("/kutsu/token/*").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
