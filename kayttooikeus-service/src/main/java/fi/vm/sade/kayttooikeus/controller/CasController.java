@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -63,6 +64,17 @@ public class CasController {
     public String updateIdentificationAndGenerateTokenForHenkiloByHetu(@PathVariable("hetu") String hetu) throws IOException {
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
     }
+
+    @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, mahdollinen kirjautuminen suomi.fi:n kautta.)",
+            notes = "", response = ResponseEntity.class)
+    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
+    public ResponseEntity<String> requestGet(@RequestParam(value="loginToken", required = false) String loginToken,
+                                             @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                                             @RequestHeader HttpHeaders headers) {
+        return new ResponseEntity<>("Got headers from shibboleth:" + headers.toString(), HttpStatus.OK);
+    }
+
+
 
     @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
             notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +
