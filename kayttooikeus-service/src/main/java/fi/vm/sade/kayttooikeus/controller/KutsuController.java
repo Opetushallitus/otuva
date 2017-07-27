@@ -74,4 +74,6 @@ public class KutsuController {
     public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
     }
+
+
 }
