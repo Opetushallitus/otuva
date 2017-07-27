@@ -92,4 +92,14 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         deletedKutsu.poista(getCurrentUserOid());
         return deletedKutsu;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public KutsuReadDto getByTemporaryToken(String temporaryToken) {
+        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryToken(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken));
+        KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
+        this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
+        return kutsuReadDto;
+    }
 }
