@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
@@ -96,7 +97,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional(readOnly = true)
     public KutsuReadDto getByTemporaryToken(String temporaryToken) {
-        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryToken(temporaryToken)
+        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenAndTila(temporaryToken, KutsunTila.AVOIN)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken));
         KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
         this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
