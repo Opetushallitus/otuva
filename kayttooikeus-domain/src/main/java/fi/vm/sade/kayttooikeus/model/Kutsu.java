@@ -52,8 +52,10 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Column(name = "poistaja_oid")
     private String poistaja;
 
-    @Column(name = "luotu_henkilo_oid", nullable = true)
+    @Column(name = "luotu_henkilo_oid")
     private String luotuHenkiloOid;
+
+    private String temporaryToken;
     
     public void poista(String poistaja) {
         if (this.tila != KutsunTila.AVOIN) {

@@ -17,4 +17,6 @@ public interface KutsuService {
     KutsuReadDto getKutsu(Long id);
 
     Kutsu deleteKutsu(long id);
+
+    KutsuReadDto getByTemporaryToken(String temporaryToken);
 }
