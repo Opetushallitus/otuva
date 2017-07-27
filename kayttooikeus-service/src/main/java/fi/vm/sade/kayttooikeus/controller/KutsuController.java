@@ -66,4 +66,10 @@ public class KutsuController {
     public void delete(@PathVariable Long id) {
         kutsuService.deleteKutsu(id);
     }
+
+    // Consumes temporary tokens so not authenticated
+    @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.GET)
+    public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
+        return this.kutsuService.getByTemporaryToken(temporaryToken);
+    }
 }
