@@ -71,6 +71,21 @@ public class CasController {
     public ResponseEntity<String> requestGet(@RequestParam(value="loginToken", required = false) String loginToken,
                                              @RequestParam(value="kutsuToken", required = false) String kutsuToken,
                                              @RequestHeader HttpHeaders headers) {
+
+        // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
+
+        if(kutsuToken != null) {
+            // Tallenna valitut headerit kutsu token kannan tauluun
+            //displayname=[Anna Testi], cn=[Testi Anna Osuuspankki], givenname=[Anna], firstname=[Anna Osuuspankki], sn=[Testi], nationalidentificationnumber=[081181-9984], kotikuntakuntanumero=[019], kotikuntakuntas=[Helsinki], kotikuntakuntar=[], vakinainenkotimainenlahiosoites=[Osuuspankkitie 2], vakinainenkotimainenlahiosoiter=[], vakinainenkotimainenlahiosoitepostinumero=[00120], vakinainenkotimainenlahiosoitepostitoimipaikkas=[Helsinki], vakinainenkotimainenlahiosoitepostitoimipaikkar=[], vakinainenulkomainenlahiosoite=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltios=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltior=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltioselvakielinen=[], vakinainenulkomainenlahiosoitevaltiokoodi3=[], tilapainenkotimainenlahiosoitelahiosoites=[], tilapainenkotimainenlahiosoitelahiosoiter=[], tilapainenkotimainenlahiosoitepostinumero=[], tilapainenkotimainenlahiosoitepostitoimipaikkas=[], tilapainenkotimainenlahiosoitepostitoimipaikkar=[]
+            // Vaihda kutsutoken, lyhyeen tunnin "session" tokeniin
+            // Tee redirect henkilo-ui:seen "session" tokeni query parametrinä
+        } else if(loginToken != null) {
+            // Hae henkilön tiedot jotka liittyvät logintokeniin
+            // Päivitä henkilölle hetu ja merkitse se vahvistetuksi
+            // Luo auth token
+            // Redirectaa CAS:iin auth tokenin kanssa.
+        }
+
         return new ResponseEntity<>("Got headers from shibboleth:" + headers.toString(), HttpStatus.OK);
     }
 
