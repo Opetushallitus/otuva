@@ -185,7 +185,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByOid");
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
 
         return retrying(FunctionalUtils.<String>io(
                 () -> objectMapper.readerFor(String.class)
