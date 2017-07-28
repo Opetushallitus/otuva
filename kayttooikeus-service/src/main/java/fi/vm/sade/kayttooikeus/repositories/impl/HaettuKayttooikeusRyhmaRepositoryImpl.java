@@ -31,7 +31,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
                 .from(qHaettuKayttoOikeusRyhma)
                 .leftJoin(qHaettuKayttoOikeusRyhma.anomus, qAnomus)
                 .leftJoin(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
-        if(criteria.getAdminView() != null && criteria.getAdminView()) {
+        if (criteria.getAdminView() != null && criteria.getAdminView()) {
             query.leftJoin(qKayttoOikeusRyhma.kayttoOikeus, qKayttoOikeus);
         }
         query.where(criteria.condition(qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma));
@@ -43,7 +43,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
         if (offset != null) {
             query.offset(offset);
         }
-        if(orderBy != null && orderBy.getValue() != null) {
+        if (orderBy != null && orderBy.getValue() != null) {
             query.orderBy(orderBy.getValue());
         }
         return query.fetch();

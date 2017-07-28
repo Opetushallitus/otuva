@@ -141,7 +141,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             ).isAccessAllowed();
         }
 
-        if(!response.isAccessAllowed()) {
+        if (!response.isAccessAllowed()) {
             LOG.error("Insufficient roles. permission check done from external service:"+ permissionCheckService + " Logged in user:" + callingUserOid + " accessed personId:" + personOidToAccess + " loginuser orgs:" + flattedOrgs.stream().collect(Collectors.joining(",")) + " roles needed:" + allowedRoles.stream().collect(Collectors.joining(",")), " user cas roles:" + callingUserRoles.stream().collect(Collectors.joining(",")) + " personOidsForSamePerson:" + personOidsForSamePerson.stream().collect(Collectors.joining(",")) + " external service error message:" + response.getErrorMessage());
         }
 
@@ -207,7 +207,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloUpdateDto.class::cast)
                     .map(OrganisaatioHenkiloUpdateDto::getOrganisaatioOid).collect(Collectors.toList());
         }
-        else if(organisaatioHenkiloDtoList.get(0) instanceof HaettuKayttooikeusryhmaDto) {
+        else if (organisaatioHenkiloDtoList.get(0) instanceof HaettuKayttooikeusryhmaDto) {
             orgOidList = organisaatioHenkiloDtoList.stream().map(HaettuKayttooikeusryhmaDto.class::cast)
                     .map(HaettuKayttooikeusryhmaDto::getAnomus).map(AnomusDto::getOrganisaatioOid).collect(Collectors.toList());
         }
@@ -221,7 +221,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
-            if(!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
+            if (!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
                 return false;
             }
         }
@@ -351,14 +351,14 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     public boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet) {
         // Group organizations have to match only as a general set since they're not separated by type or by individual groups
-        if(organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
+        if (organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
             return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
         OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache())
                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioOid));
         // Organization must have child items in it, so that the institution type can be fetched and verified
-        if(!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
+        if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
                     viiteSet.stream().anyMatch(organisaatioViite ->
                             organisaatioViite.getOrganisaatioTyyppi()

@@ -70,7 +70,7 @@ public class HenkilohakuBuilder {
 
     // Remove henkilos the user has no access (and who have organisation)
     public HenkilohakuBuilder exclusion() {
-        if(!this.permissionCheckerService.isCurrentUserAdmin()) {
+        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
 
         }
 

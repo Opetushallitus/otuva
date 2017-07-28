@@ -26,7 +26,7 @@ public class HaettuKayttooikeusryhmaValidator implements Validator {
     public void validate(Object object, Errors errors) {
         HaettuKayttoOikeusRyhma haettuKayttooikeusryhma = (HaettuKayttoOikeusRyhma) object;
 
-        if(haettuKayttooikeusryhma.getAnomus().getAnomuksenTila() != AnomuksenTila.ANOTTU) {
+        if (haettuKayttooikeusryhma.getAnomus().getAnomuksenTila() != AnomuksenTila.ANOTTU) {
             errors.reject("Anomus already handled");
         }
 
