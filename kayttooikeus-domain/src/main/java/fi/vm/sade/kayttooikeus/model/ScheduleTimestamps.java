@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Table(name = "schedule_timestamps", schema = "public")
 public class ScheduleTimestamps extends IdentifiableAndVersionedEntity {
 
-    @Builder.Default
     private LocalDateTime modified = LocalDateTime.now();
 
     private String identifier;

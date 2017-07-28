@@ -18,6 +18,5 @@ public class KutsuListDto implements Serializable {
     private String sukunimi;
     private String sahkoposti;
     private LocalDateTime aikaleima;
-    @Builder.Default
     private List<KutsuOrganisaatioListDto> organisaatiot = new ArrayList<>();
 }
