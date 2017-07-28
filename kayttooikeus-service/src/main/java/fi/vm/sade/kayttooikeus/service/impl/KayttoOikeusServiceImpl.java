@@ -135,7 +135,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                     .orElseThrow(() -> new NullPointerException("null_ryhma_id")).intValue();
 
             List<Integer> ryhmasInOrganisaatio = kayttooikeusRyhmasByOrganisation.get(organisaatioOid);
-            if(ryhmasInOrganisaatio == null) {
+            if (ryhmasInOrganisaatio == null) {
                 ryhmasInOrganisaatio = new ArrayList<>();
                 kayttooikeusRyhmasByOrganisation.put(organisaatioOid, ryhmasInOrganisaatio);
             }

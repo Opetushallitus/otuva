@@ -14,13 +14,13 @@ public class UrlConfiguration extends OphProperties {
         addFiles("/kayttooikeus-service-oph.properties");
         addOverride("host-cas", environment.getRequiredProperty("host.host-cas"));
         addOverride("host-virkailija", environment.getRequiredProperty("host.host-virkailija"));
-        if(!StringUtils.isEmpty(environment.getProperty("front.lokalisointi.baseUrl"))) {
+        if (!StringUtils.isEmpty(environment.getProperty("front.lokalisointi.baseUrl"))) {
             frontProperties.put("lokalisointi.baseUrl", environment.getProperty("front.lokalisointi.baseUrl"));
         }
-        if(!StringUtils.isEmpty(environment.getProperty("front.organisaatio.baseUrl"))) {
+        if (!StringUtils.isEmpty(environment.getProperty("front.organisaatio.baseUrl"))) {
             frontProperties.put("organisaatio-service.baseUrl", environment.getProperty("front.organisaatio.baseUrl"));
         }
-        if(!StringUtils.isEmpty(environment.getProperty("front.koodisto.baseUrl"))) {
+        if (!StringUtils.isEmpty(environment.getProperty("front.koodisto.baseUrl"))) {
             frontProperties.put("koodisto-service.baseUrl", environment.getProperty("front.koodisto.baseUrl"));
         }
     }

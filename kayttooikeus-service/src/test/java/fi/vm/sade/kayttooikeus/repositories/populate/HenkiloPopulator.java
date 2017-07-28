@@ -58,7 +58,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         henkilo.setSukunimiCached(this.sukunimiCached);
         henkilo.setPassivoituCached(this.passivoituCached);
         henkilo.setDuplicateCached(this.duplikaattiCached);
-        if(this.kayttajatiedot != null) {
+        if (this.kayttajatiedot != null) {
             this.kayttajatiedot.setHenkilo(henkilo);
             henkilo.setKayttajatiedot(this.kayttajatiedot);
         }
