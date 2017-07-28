@@ -75,8 +75,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          Long offset,
                                                                          OrderByAnomus orderBy,
                                                                          boolean showOwnAnomus) {
-        if(!showOwnAnomus) {
-            if(criteria.getHenkiloOidRestrictionList() != null) {
+        if (!showOwnAnomus) {
+            if (criteria.getHenkiloOidRestrictionList() != null) {
                 criteria.getHenkiloOidRestrictionList().add(UserDetailsUtil.getCurrentUserOid());
             }
             else {
@@ -113,7 +113,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Post validation
         BindException errors = new BindException(haettuKayttoOikeusRyhma, "haettuKayttoOikeusRyhma");
         this.haettuKayttooikeusryhmaValidator.validate(haettuKayttoOikeusRyhma, errors);
-        if(errors.hasErrors()) {
+        if (errors.hasErrors()) {
             throw new UnprocessableEntityException(errors);
         }
 
@@ -129,7 +129,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()));
 
         // Event is created only when kayttooikeus has been granted.
-        if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
+        if (KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
             MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = this.grantKayttooikeusryhma(
                     updateHaettuKayttooikeusryhmaDto.getAlkupvm(),
                     updateHaettuKayttooikeusryhmaDto.getLoppupvm(),
@@ -141,7 +141,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
 
         // If everything is handled and something is granted on anomus send email notification to anoja.
-        if(anojanAnomus.getHaettuKayttoOikeusRyhmas().isEmpty()
+        if (anojanAnomus.getHaettuKayttoOikeusRyhmas().isEmpty()
                 && !anojanAnomus.getMyonnettyKayttooikeusRyhmas().isEmpty()) {
             this.emailService.sendEmailAnomusAccepted(anojanAnomus);
         }
@@ -149,14 +149,14 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private void notEditingOwnData(String oidHenkilo) {
         // Cant edit own data
-        if(!this.permissionCheckerService.notOwnData(oidHenkilo)) {
+        if (!this.permissionCheckerService.notOwnData(oidHenkilo)) {
             throw new ForbiddenException("User can't edit his own data.");
         }
     }
 
     private void inSameOrParentOrganisation(String organisaatioOid) {
         // User has to be in the same or one of the parent organisations
-        if(!this.permissionCheckerService.checkRoleForOrganisation(
+        if (!this.permissionCheckerService.checkRoleForOrganisation(
                 Lists.newArrayList(organisaatioOid),
                 Lists.newArrayList("READ_UPDATE", "CRUD"))) {
             throw new ForbiddenException("No access through organisation hierarchy.");
@@ -164,7 +164,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     private void organisaatioViiteLimitationsAreValidThrows(Long kayttooikeusryhmaId) {
-        if(!this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
+        if (!this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
             throw new ForbiddenException("Target organization has invalid organization type");
         }
     }
@@ -190,14 +190,14 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private void kayttooikeusryhmaLimitationsAreValid(Long kayttooikeusryhmaId) {
         // The granting person's limitations must be checked always since there there shouldn't be a situation where the
         // the granting person doesn't have access rights limitations (except admin users who have full access)
-        if(!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttooikeusryhmaId)) {
+        if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttooikeusryhmaId)) {
             throw new ForbiddenException("User doesn't have access rights to grant this group");
         }
     }
 
     private void updateAnomusAndRemoveHaettuKayttooikeusRyhma(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma,
                                                               KayttoOikeudenTila newKayttooikeudenTila) {
-        if(haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().size() == 1) {
+        if (haettuKayttoOikeusRyhma.getAnomus().getHaettuKayttoOikeusRyhmas().size() == 1) {
             // This is the last kayttooikeus on anomus so we mark anomus as KASITELTY or HYLATTY
             haettuKayttoOikeusRyhma.getAnomus().setAnomuksenTila(
                     newKayttooikeudenTila == KayttoOikeudenTila.MYONNETTY || newKayttooikeudenTila == KayttoOikeudenTila.UUSITTU
@@ -395,8 +395,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository.findById(kayttooikeusRyhmaId)
                 .orElseThrow( () -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId) );
         Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
-        anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
-        if(anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
+        anomus.getHaettuKayttoOikeusRyhmas().removeif ( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
+        if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }
         this.haettuKayttooikeusRyhmaRepository.delete(kayttooikeusRyhmaId);
@@ -451,11 +451,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .map(OrganisaatioHenkilo::getOrganisaatioOid)
                 .collect(Collectors.toList());
 
-        if(!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+        if (!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
             allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream().flatMap(organisaatioOid ->
                     this.organisaatioClient.getChildOids(organisaatioOid).stream()).collect(Collectors.toList()));
 
-            kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
+            kayttooikeusByOrganisation.keySet().removeif (organisaatioOid ->
                     !allowedOrganisaatioOids.contains(organisaatioOid));
 
             regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
@@ -480,7 +480,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                 .filter(kayttooikeusIdList -> !kayttooikeusByOrganisation.isEmpty())
                                 .ifPresent(allowedIds -> Optional.ofNullable(kayttooikeusByOrganisation
                                         .get(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid()))
-                                        .ifPresent(kayttooikeusIdList -> kayttooikeusIdList.removeIf(ryhmaId ->
+                                        .ifPresent(kayttooikeusIdList -> kayttooikeusIdList.removeif (ryhmaId ->
                                                 !allowedIds.contains(ryhmaId)))));
 
         // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
@@ -492,10 +492,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private BiFunction<String, Set<Long>, Set<Long>> addIfNotExists(Long ryhmaId) {
         return (key, value) -> {
-            if(value == null) {
+            if (value == null) {
                 value = new HashSet<>();
             }
-            if(!value.contains(ryhmaId)) {
+            if (!value.contains(ryhmaId)) {
                 value.add(ryhmaId);
             }
             return value;

@@ -112,16 +112,16 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.kayttajatiedot.username)
                 .distinct();
 
-        if(offset != null) {
+        if (offset != null) {
             query.offset(offset);
         }
         query.limit(100L);
 
-        if(organisaatioOidRestrictionList != null && !organisaatioOidRestrictionList.isEmpty()) {
+        if (organisaatioOidRestrictionList != null && !organisaatioOidRestrictionList.isEmpty()) {
             query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOidRestrictionList));
         }
 
-        if(orderBy != null) {
+        if (orderBy != null) {
             orderBy.forEach(query::orderBy);
         }
 

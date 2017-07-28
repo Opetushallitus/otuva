@@ -45,12 +45,12 @@ public class AnomusCriteria {
 
         builder = this.condition(qAnomus, builder);
 
-        if(this.adminView != null && this.adminView) {
+        if (this.adminView != null && this.adminView) {
             builder.andAnyOf(ophConditions.stream().map(condition -> qKayttoOikeusRyhma.name.contains(condition)
                     .and(qKayttoOikeusRyhma.hidden.isFalse())).toArray(BooleanExpression[]::new));
         }
 
-        if(this.onlyActive != null) {
+        if (this.onlyActive != null) {
             builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                     .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
         }
