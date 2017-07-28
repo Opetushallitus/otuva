@@ -1,12 +1,14 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -14,7 +16,7 @@ import java.util.Set;
 @Component
 public class HenkiloHelper extends AbstractAuditlogAspectHelper {
 
-    public HenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+    public HenkiloHelper(PermissionCheckerService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);
     }
 
@@ -55,6 +57,19 @@ public class HenkiloHelper extends AbstractAuditlogAspectHelper {
                 .kohdeTunniste(henkiloOid)
                 .lisatieto("Henkilön käyttäjätietoja muokattu.")
                 .setOperaatio(KayttoOikeusOperation.UPDATE_KAYTTAJATIEDOT);
+        finishLogging(logMessage);
+    }
+
+    void logCreateHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Object result)
+            throws JsonProcessingException {
+        henkiloCreateByKutsuDto.setPassword(null);
+        KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
+                .kohdeTunniste((String)result)
+                .lisatieto("Henkilön rekisteröityminen kutsun kautta väliaikaisella tokenilla.")
+                .setOperaatio(KayttoOikeusOperation.CREATE_HENKILO_BY_KUTSU)
+                .newValue(this.getObjectMapper().writeValueAsString(henkiloCreateByKutsuDto))
+                .add("temporaryToken", temporaryToken)
+                ;
         finishLogging(logMessage);
     }
 

@@ -7,13 +7,13 @@ import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaModifyDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KayttoOikeusRyhmaHelper extends AbstractAuditlogAspectHelper {
 
-    public KayttoOikeusRyhmaHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+    public KayttoOikeusRyhmaHelper(PermissionCheckerService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);
     }
 
