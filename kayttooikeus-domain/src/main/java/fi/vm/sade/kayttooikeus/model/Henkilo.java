@@ -30,12 +30,10 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "henkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH })
-    @Builder.Default
     private Set<OrganisaatioHenkilo> organisaatioHenkilos = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "henkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH })
-    @Builder.Default
     private Set<Identification> identifications = new HashSet<>();
 
     private String etunimetCached;
