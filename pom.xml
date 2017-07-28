@@ -44,7 +44,7 @@
 
         <!-- Sade utils -->
         <generic.version>9.6-SNAPSHOT</generic.version>
-        <auditlog.api.version>7.0.0-SNAPSHOT</auditlog.api.version>
+        <auditlog.api.version>7.2.0-SNAPSHOT</auditlog.api.version>
 
         <!-- Utils -->
         <commons.io.version>1.3.2</commons.io.version>

@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
+import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,5 +144,11 @@ public class CryptoServiceImpl implements CryptoService {
             }
         }
         return errors;
+    }
+
+    @Override
+    public void throwIfNotStrongPassword(String password) {
+        isStrongPassword(password)
+                .stream().findFirst().ifPresent((error) -> {throw new PasswordException(error);});
     }
 }

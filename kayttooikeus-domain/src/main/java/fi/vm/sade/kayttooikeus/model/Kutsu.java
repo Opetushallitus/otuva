@@ -18,6 +18,7 @@ import java.util.Set;
 public class Kutsu extends IdentifiableAndVersionedEntity {
     
     @Column(name = "aikaleima", nullable = false)
+    @Builder.Default
     private LocalDateTime aikaleima = LocalDateTime.now();
     
     @Column(name = "kutsuja_oid", nullable = false)
@@ -28,6 +29,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "tila", nullable = false)
+    @Builder.Default
     private KutsunTila tila = KutsunTila.AVOIN;
     
     @Column(name = "etunimi", nullable = false)
@@ -40,6 +42,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     private String sahkoposti;
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "kutsu")
+    @Builder.Default
     private Set<KutsuOrganisaatio> organisaatiot = new HashSet<>(0);
     
     @Column(name = "salaisuus") 

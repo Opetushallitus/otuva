@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
@@ -19,4 +20,6 @@ public interface KutsuService {
     Kutsu deleteKutsu(long id);
 
     KutsuReadDto getByTemporaryToken(String temporaryToken);
+
+    String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 }

@@ -37,4 +37,6 @@ public interface CryptoService {
     String generateSalt();
 
     List<String> isStrongPassword(String password);
+
+    void throwIfNotStrongPassword(String password);
 }

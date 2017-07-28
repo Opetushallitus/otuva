@@ -20,7 +20,7 @@ public abstract class AbstractAuditlogAspectHelper {
     }
 
     void finishLogging(KayttoOikeusLogMessage.LogMessageBuilder builder) {
-        getAuthenticationName().ifPresent(oid -> builder.id(oid));
+        getAuthenticationName().ifPresent(builder::id);
         audit.log(builder.build());
     }
 
