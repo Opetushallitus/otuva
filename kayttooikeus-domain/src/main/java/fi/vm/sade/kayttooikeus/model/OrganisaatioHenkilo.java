@@ -37,11 +37,9 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     private OrganisaatioCache organisaatioCache;
     
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-    @Builder.Default
     private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmas = new HashSet<>();
 
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = CascadeType.ALL)
-    @Builder.Default
     private Set<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaHistorias = new HashSet<>();
     
     @Column(name = "passivoitu", nullable = false)

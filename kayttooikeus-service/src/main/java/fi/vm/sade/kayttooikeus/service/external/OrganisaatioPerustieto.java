@@ -19,18 +19,13 @@ public class OrganisaatioPerustieto {
     private String virastotunnus;
     private String oppilaitosKoodi;
     private String oppilaitostyyppi;
-    @Builder.Default
     private Map<String, String> nimi = new HashMap<>();
-    @Builder.Default
     private List<String> organisaatiotyypit = new ArrayList<>();
-    @Builder.Default
     private List<String> tyypit = new ArrayList<>();
-    @Builder.Default
     private List<String> kieletUris = new ArrayList<>();
     private String kotipaikkaUri;
     private Date alkuPvm;
     private Date lakkautusPvm;
-    @Builder.Default
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
     @JsonIgnore // avoid recursion if this is returned in JSON
     private OrganisaatioPerustieto parent;

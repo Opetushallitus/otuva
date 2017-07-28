@@ -15,7 +15,6 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterBy
 @NoArgsConstructor
 @AllArgsConstructor
 public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
-    @Builder.Default
     private KayttoOikeusTyyppi tyyppi = KayttoOikeusTyyppi.KOOSTEROOLI;
     private KayttoOikeudenTila tila;
     private LocalDate voimassaAlkuPvm;
