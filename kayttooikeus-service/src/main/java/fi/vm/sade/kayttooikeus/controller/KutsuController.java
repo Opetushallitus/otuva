@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
@@ -71,6 +72,14 @@ public class KutsuController {
     @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.GET)
     public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
+    }
+
+    // Consumes temporary tokens so not authenticated
+    @ApiOperation("Create henkilö by temporary token")
+    @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.POST)
+    public String createByToken(@PathVariable String temporaryToken,
+                                @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+        return this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
     }
 
 }

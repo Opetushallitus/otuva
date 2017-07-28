@@ -73,11 +73,13 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     private String hylkaamisperuste;
 
     @OneToMany(mappedBy = "anomus", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+    @Builder.Default
     private Set<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "anomus_myonnettykayttooikeusryhmas", joinColumns = @JoinColumn(name = "anomus_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "myonnettykayttooikeusryhma_id", referencedColumnName = "id"))
+    @Builder.Default
     private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttooikeusRyhmas = new HashSet<>();
 
     public void addHaettuKayttoOikeusRyhma(HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma) {

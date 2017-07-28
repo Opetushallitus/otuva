@@ -18,6 +18,7 @@ public class KayttoOikeusRyhmaDto implements Serializable, LocalizableDto {
     private Long id;
     private String name;
     private String rooliRajoite;
+    @Builder.Default
     private List<OrganisaatioViiteDto> organisaatioViite = new ArrayList<>();
     private TextGroupDto description;
 

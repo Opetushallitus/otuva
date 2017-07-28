@@ -1,6 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
@@ -9,11 +13,11 @@ import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
-import fi.vm.sade.kayttooikeus.service.EmailService;
-import fi.vm.sade.kayttooikeus.service.KutsuService;
-import fi.vm.sade.kayttooikeus.service.LocalizationService;
+import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -36,6 +40,12 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     private final EmailService emailService;
     private final LocalizationService localizationService;
+    private final CryptoService cryptoService;
+    private final KayttajatiedotService kayttajatiedotService;
+
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
+    private final CommonProperties commonProperties;
 
     @Override
     @Transactional(readOnly = true)
@@ -102,5 +112,43 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
         this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
         return kutsuReadDto;
+    }
+
+    @Override
+    @Transactional
+    public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenAndTila(temporaryToken, KutsunTila.AVOIN)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken));
+        // Validation
+        this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
+        this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
+
+        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
+//        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
+        henkiloCreateDto.setAsiointiKieli(henkiloCreateByKutsuDto.getAsiointiKieli());
+        henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
+        henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());
+        henkiloCreateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
+        henkiloCreateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
+        henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
+                .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
+                .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoArvo(kutsuByToken.getSahkoposti())
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                        .build()).build()));
+
+        String createdHenkiloOid = this.oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
+        // Create username/password
+        this.kayttajatiedotService.create(createdHenkiloOid, new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()));
+        this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
+
+        // Update kutsu
+        kutsuByToken.setKaytetty(LocalDateTime.now());
+        kutsuByToken.setTemporaryToken(null);
+        kutsuByToken.setLuotuHenkiloOid(createdHenkiloOid);
+        kutsuByToken.setTila(KutsunTila.KAYTETTY);
+
+        return createdHenkiloOid;
     }
 }

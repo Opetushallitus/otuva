@@ -178,8 +178,19 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     public Set<String> listOidByYhteystieto(String arvo) {
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.oidByYhteystieto", arvo);
         return retrying(FunctionalUtils.<Set<String>>io(
-                () -> this.objectMapper.readerFor(new TypeReference<Set<String>>() {})
-                        .readValue(this.serviceAccountClient.get(url))), 2).get()
+                () -> this.objectMapper.readerFor(new TypeReference<Set<String>>() {
+                }).readValue(this.serviceAccountClient.get(url))), 2).get()
+                .orFail(mapper(url));
+    }
+
+    @Override
+    public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByOid");
+
+        return retrying(FunctionalUtils.<String>io(
+                () -> objectMapper.readerFor(String.class)
+                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                                objectMapper.writeValueAsString(henkiloCreateDto)).getEntity().getContent())), 2).get()
                 .orFail(mapper(url));
     }
 
