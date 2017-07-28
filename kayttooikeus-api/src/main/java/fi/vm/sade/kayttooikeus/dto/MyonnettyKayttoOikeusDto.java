@@ -22,6 +22,7 @@ public class MyonnettyKayttoOikeusDto implements LocalizableDto, Serializable{
     private String tehtavanimike;
     private TextGroupDto ryhmaNames;
     private KayttoOikeudenTila tila;
+    @Builder.Default
     private String tyyppi = "KORyhma";
     private LocalDate alkuPvm;
     private LocalDate voimassaPvm;

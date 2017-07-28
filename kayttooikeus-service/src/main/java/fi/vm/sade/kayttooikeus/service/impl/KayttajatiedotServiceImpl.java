@@ -12,6 +12,7 @@ import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
+import fi.vm.sade.kayttooikeus.service.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,9 +78,17 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public void changePasswordAsAdmin(String oid, String newPassword) {
-        this.cryptoService.isStrongPassword(newPassword)
-                .stream().findFirst().ifPresent((error) -> {throw new PasswordException(error);});
+        this.cryptoService.throwIfNotStrongPassword(newPassword);
         this.changePassword(oid, newPassword);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void throwIfUsernameExists(String username) {
+        this.kayttajatiedotRepository.findByUsername(username)
+                .ifPresent(foundUsername -> {
+                    throw new UsernameAlreadyExistsException(String.format("Username %s already exists", foundUsername));
+                });
     }
 
     private void changePassword(String oid, String newPassword) {

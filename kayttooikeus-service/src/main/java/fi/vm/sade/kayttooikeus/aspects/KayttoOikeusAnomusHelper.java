@@ -7,7 +7,7 @@ import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeusAnomusDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class KayttoOikeusAnomusHelper extends AbstractAuditlogAspectHelper {
 
-    public KayttoOikeusAnomusHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
+    public KayttoOikeusAnomusHelper(PermissionCheckerService omatTiedotService, Audit audit, ObjectMapper mapper) {
         super(omatTiedotService, audit, mapper);
     }
 

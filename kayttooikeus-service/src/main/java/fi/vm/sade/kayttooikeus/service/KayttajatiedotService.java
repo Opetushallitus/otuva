@@ -13,4 +13,6 @@ public interface KayttajatiedotService {
     KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedot);
 
     void changePasswordAsAdmin(String oid, String newPassword);
+
+    void throwIfUsernameExists(String username);
 }

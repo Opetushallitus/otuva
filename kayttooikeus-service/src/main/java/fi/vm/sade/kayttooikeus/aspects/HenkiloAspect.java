@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.aspects;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -58,6 +59,16 @@ public class HenkiloAspect {
     private Object logUpdateKayttajatiedot(ProceedingJoinPoint proceedingJoinPoint, String henkiloOid, KayttajatiedotUpdateDto kayttajatiedot) throws Throwable {
         Object result = proceedingJoinPoint.proceed();
         henkiloHelper.logUpdateKayttajatiedot(henkiloOid, kayttajatiedot, result);
+        return result;
+    }
+
+    @Around(value = "execution(public * fi.vm.sade.kayttooikeus.service.KutsuService.createHenkilo(..))" +
+            "&& args(temporaryToken, henkiloCreateByKutsuDto)", argNames = "proceedingJoinPoint, temporaryToken, henkiloCreateByKutsuDto")
+    private Object logUpdateKayttajatiedot(ProceedingJoinPoint proceedingJoinPoint,
+                                           String temporaryToken,
+                                           HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) throws Throwable {
+        Object result = proceedingJoinPoint.proceed();
+        henkiloHelper.logCreateHenkilo(temporaryToken, henkiloCreateByKutsuDto, result);
         return result;
     }
 
