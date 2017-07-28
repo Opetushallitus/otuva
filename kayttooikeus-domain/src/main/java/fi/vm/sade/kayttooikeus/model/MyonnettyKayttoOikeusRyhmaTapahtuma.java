@@ -37,7 +37,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     private Henkilo kasittelija;
 
     @Column(name = "aikaleima", nullable = false)
-    @Builder.Default
     private LocalDateTime aikaleima = LocalDateTime.now();
 
     @Column(name = "voimassaalkupvm", nullable = false)
@@ -47,7 +46,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     private LocalDate voimassaLoppuPvm;
 
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
-    @Builder.Default
     private Set<Anomus> anomus = new HashSet<>();
 
     public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(LocalDateTime aikaleima, String syy) {

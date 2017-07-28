@@ -25,6 +25,5 @@ public class KutsuOrganisaatio extends IdentifiableAndVersionedEntity {
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "kutsu_organisaatio_ryhma", joinColumns = @JoinColumn(name = "kutsu_organisaatio", nullable = false, updatable = false),
             inverseJoinColumns = @JoinColumn(name = "ryhma", nullable = false, updatable = false))
-    @Builder.Default
     private Set<KayttoOikeusRyhma> ryhmat = new HashSet<>(0);
 }
