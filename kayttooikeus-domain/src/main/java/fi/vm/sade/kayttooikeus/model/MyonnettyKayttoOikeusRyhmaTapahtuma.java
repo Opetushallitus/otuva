@@ -64,7 +64,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     }
 
     public void addAnomus(Anomus anomus) {
-        if(this.anomus == null) {
+        if (this.anomus == null) {
             this.anomus = new HashSet<>();
         }
         this.anomus.add(anomus);

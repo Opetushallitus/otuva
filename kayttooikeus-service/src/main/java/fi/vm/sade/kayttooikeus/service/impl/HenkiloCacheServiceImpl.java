@@ -47,7 +47,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         for(long offset = 0; offset == 0 || !modifiedOidHenkiloList.isEmpty() || !(modifiedOidHenkiloList.size() < amount); offset++) {
             modifiedOidHenkiloList = this.oppijanumerorekisteriClient.getModifiedSince(scheduleTimestamps.getModified(),
                     offset*amount, amount);
-            if(!modifiedOidHenkiloList.isEmpty()) {
+            if (!modifiedOidHenkiloList.isEmpty()) {
                 this.saveAll(0, amount, modifiedOidHenkiloList);
             }
         }
@@ -61,7 +61,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         Long count = 1000L;
         for(long page = 0; !this.saveAll(page*count, count, null); page++) {
             // Escape condition in case of inifine loop (10M+ henkilos)
-            if(page > 10000) {
+            if (page > 10000) {
                 LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
                 break;
             }
