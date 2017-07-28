@@ -5,25 +5,25 @@ import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
 public class HenkiloCreateByKutsuDto {
     @NotNull
-    @Min(1)
+    @Size(min = 1)
     private String kutsumanimi;
 
     private KielisyysDto asiointiKieli;
 
     @NotNull
-    @Min(1)
+    @Size(min = 1)
     @Pattern(regexp = Constants.USERNAME_REGEXP)
     private String kayttajanimi;
 
     @NotNull
-    @Min(1)
+    @Size(min = 1)
     private String password;
 }
