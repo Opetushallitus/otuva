@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -186,12 +187,16 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     @Override
     public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
         String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
-
-        return retrying(FunctionalUtils.<String>io(
-                () -> objectMapper.readerFor(String.class)
-                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
-                                objectMapper.writeValueAsString(henkiloCreateDto)).getEntity().getContent())), 2).get()
-                .orFail(mapper(url));
+        return retrying(
+                FunctionalUtils.<String>io(() -> {
+                    try {
+                        return IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                                objectMapper.writeValueAsString(henkiloCreateDto)).getEntity().getContent());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException("Unexpected error during json processing");
+                    }
+                }),
+                2).get().orFail(mapper(url));
     }
 
     //ONR uses java.time.LocalDate
