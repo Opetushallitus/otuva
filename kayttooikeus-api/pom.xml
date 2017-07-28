@@ -19,6 +19,7 @@
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
+    <!-- No external dependencies here so api can be compiled independently -->
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>

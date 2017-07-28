@@ -18,6 +18,7 @@ public class KayttoOikeusDto {
     private Long id;
     private String rooli;
     private TextGroupDto textGroup;
+    @Builder.Default
     private Set<KayttoOikeusRyhmaDto> kayttoOikeusRyhmas = new HashSet<>();
     private PalveluDto palvelu;
 }
