@@ -136,7 +136,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                     anoja.getOidHenkilo(),
                     anojanAnomus.getOrganisaatioOid(),
                     anottuKayttoOikeusRyhma,
-                    anojanAnomus.getTehtavanimike());
+                    anojanAnomus.getTehtavanimike(),
+                    this.permissionCheckerService.getCurrentUserOid());
             anojanAnomus.addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
@@ -246,7 +247,24 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         organisaatioOid,
                         this.kayttooikeusryhmaDataRepository.findById(haettuKayttooikeusryhmaDto.getId())
                                 .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
-                        ""));
+                        "",
+                        this.permissionCheckerService.getCurrentUserOid()));
+    }
+
+    // For internal calls when permission checks are redundant.
+    @Override
+    @Transactional
+    public void grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(String anoja,
+                                                                    String organisaatioOid,
+                                                                    Collection<KayttoOikeusRyhma> kayttooikeusryhmas) {
+        kayttooikeusryhmas.forEach(kayttooikeusryhma -> this.grantKayttooikeusryhma(
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                anoja,
+                organisaatioOid,
+                kayttooikeusryhma,
+                "",
+                anoja)); // anoja == kasittelija in this case
     }
 
     @Override
@@ -340,10 +358,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                        String anojaOid,
                                                                        String organisaatioOid,
                                                                        KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
-                                                                       String tehtavanimike) {
+                                                                       String tehtavanimike,
+                                                                       String kasittelijaOid) {
         Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
-        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.getCurrentUserOid()));
 
         OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = this.findOrCreateHaettuOrganisaatioHenkilo(
