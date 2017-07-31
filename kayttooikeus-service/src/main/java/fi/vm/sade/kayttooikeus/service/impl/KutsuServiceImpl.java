@@ -3,11 +3,8 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
-import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
@@ -22,9 +19,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -39,6 +39,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final LocalizationService localizationService;
     private final CryptoService cryptoService;
     private final KayttajatiedotService kayttajatiedotService;
+    private final KayttooikeusAnomusService kayttooikeusAnomusService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -143,6 +144,15 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         // Create username/password
         this.kayttajatiedotService.create(createdHenkiloOid, new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()));
         this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
+
+        // Add privileges
+        kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio ->
+                this.kayttooikeusAnomusService.grantKayttooikeusryhma(createdHenkiloOid,
+                        kutsuOrganisaatio.getOrganisaatioOid(),
+                        kutsuOrganisaatio.getRyhmat().stream().map(kayttoOikeusRyhma ->
+                                new GrantKayttooikeusryhmaDto(kayttoOikeusRyhma.getId(),
+                                        LocalDate.now(),
+                                        LocalDate.now().plusYears(1))).collect(Collectors.toList())));
 
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());
