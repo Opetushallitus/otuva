@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
@@ -51,6 +52,7 @@ public class CasController {
         return identificationService.getHenkiloOidByIdpAndIdentifier(idpKey, idpIdentifier);
     }
 
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
@@ -58,6 +60,7 @@ public class CasController {
         return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen autentikointitokenin.",
             notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen autentikointitokenin.")
     @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
@@ -65,31 +68,38 @@ public class CasController {
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
     }
 
-    @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, mahdollinen kirjautuminen suomi.fi:n kautta.)",
-            notes = "", response = ResponseEntity.class)
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
+    @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
+            "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
-    public ResponseEntity<String> requestGet(@RequestParam(value="loginToken", required = false) String loginToken,
-                                             @RequestParam(value="kutsuToken", required = false) String kutsuToken,
-                                             @RequestHeader HttpHeaders headers) {
+    public void requestGet(HttpServletResponse response,
+                             @RequestParam(value="loginToken", required = false) String loginToken,
+                             @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                             @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
+                             @RequestHeader(value = "firstname", required = false) String etunimet,
+                             @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
 
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
 
         if (kutsuToken != null) {
             // Tallenna valitut headerit kutsu token kannan tauluun
             //displayname=[Anna Testi], cn=[Testi Anna Osuuspankki], givenname=[Anna], firstname=[Anna Osuuspankki], sn=[Testi], nationalidentificationnumber=[081181-9984], kotikuntakuntanumero=[019], kotikuntakuntas=[Helsinki], kotikuntakuntar=[], vakinainenkotimainenlahiosoites=[Osuuspankkitie 2], vakinainenkotimainenlahiosoiter=[], vakinainenkotimainenlahiosoitepostinumero=[00120], vakinainenkotimainenlahiosoitepostitoimipaikkas=[Helsinki], vakinainenkotimainenlahiosoitepostitoimipaikkar=[], vakinainenulkomainenlahiosoite=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltios=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltior=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltioselvakielinen=[], vakinainenulkomainenlahiosoitevaltiokoodi3=[], tilapainenkotimainenlahiosoitelahiosoites=[], tilapainenkotimainenlahiosoitelahiosoiter=[], tilapainenkotimainenlahiosoitepostinumero=[], tilapainenkotimainenlahiosoitepostitoimipaikkas=[], tilapainenkotimainenlahiosoitepostitoimipaikkar=[]
-            // Vaihda kutsutoken, lyhyeen tunnin "session" tokeniin
+            String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
+                    kutsuToken, hetu, etunimet, sukunimi);
+            // Vaihda kutsutoken, lyhyeen tunnin kertakäyttöiseen "session" tokeniin
             // Tee redirect henkilo-ui:seen "session" tokeni query parametrinä
-        } else if (loginToken != null) {
+            response.sendRedirect("/henkilo-ui/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken);
+        }
+        else if (loginToken != null) {
             // Hae henkilön tiedot jotka liittyvät logintokeniin
-            // Päivitä henkilölle hetu ja merkitse se vahvistetuksi
+            // Päivitä henkilölle hetu jos ei ole ennestään olemassa ja merkitse se vahvistetuksi. Muuten tarkista, että hetu täsmää.
             // Luo auth token
             // Redirectaa CAS:iin auth tokenin kanssa.
+            String authToken = this.identificationService
+                    .updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
+            response.sendRedirect("/cas/login?authToken=" + authToken);
         }
-
-        return new ResponseEntity<>("Got headers from shibboleth:" + headers.toString(), HttpStatus.OK);
     }
-
-
 
     @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
             notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +

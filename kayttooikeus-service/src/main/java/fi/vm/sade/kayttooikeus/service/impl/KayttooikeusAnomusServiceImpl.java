@@ -395,7 +395,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository.findById(kayttooikeusRyhmaId)
                 .orElseThrow( () -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId) );
         Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
-        anomus.getHaettuKayttoOikeusRyhmas().removeif ( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
+        anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
         if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }
@@ -455,7 +455,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream().flatMap(organisaatioOid ->
                     this.organisaatioClient.getChildOids(organisaatioOid).stream()).collect(Collectors.toList()));
 
-            kayttooikeusByOrganisation.keySet().removeif (organisaatioOid ->
+            kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
                     !allowedOrganisaatioOids.contains(organisaatioOid));
 
             regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
@@ -480,7 +480,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                 .filter(kayttooikeusIdList -> !kayttooikeusByOrganisation.isEmpty())
                                 .ifPresent(allowedIds -> Optional.ofNullable(kayttooikeusByOrganisation
                                         .get(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid()))
-                                        .ifPresent(kayttooikeusIdList -> kayttooikeusIdList.removeif (ryhmaId ->
+                                        .ifPresent(kayttooikeusIdList -> kayttooikeusIdList.removeIf(ryhmaId ->
                                                 !allowedIds.contains(ryhmaId)))));
 
         // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
