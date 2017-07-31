@@ -21,6 +21,8 @@ import org.springframework.security.access.prepost.PostAuthorize;
 
 import org.springframework.validation.annotation.Validated;
 
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
+
 @RestController
 @RequestMapping("/henkilo")
 @Api(value = "/henkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
@@ -137,7 +139,7 @@ public class HenkiloController {
     public Set<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.getHakatunnuksetByHenkiloAndIdp(oid, "haka");
+        return identificationService.getHakatunnuksetByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'CRUD', 'KKVASTUU'}, #permissionService)")
@@ -152,7 +154,7 @@ public class HenkiloController {
                                                  @RequestBody Set<String> hakatunnisteet,
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, "haka", hakatunnisteet);
+        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP, hakatunnisteet);
 
     }
 

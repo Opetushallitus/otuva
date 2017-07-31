@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.model.Identification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +12,11 @@ import java.util.Optional;
 public interface IdentificationRepository extends CrudRepository<Identification, Long> {
     Optional<Identification> findByidpEntityIdAndIdentifier(String idpKey, String idpIdentifier);
 
-    Optional<Identification> findByAuthtoken(String token);
+    Optional<Identification> findByAuthtokenAndAuthTokenCreatedGreaterThan(String token, LocalDateTime created);
+
+    default Optional<Identification> findByAuthtokenIsValid(String token) {
+        return findByAuthtokenAndAuthTokenCreatedGreaterThan(token, LocalDateTime.now().minusMinutes(1));
+    }
 
     List<Identification> findByHenkiloOidHenkiloAndIdpEntityId(String oid, String idpKey);
 }
