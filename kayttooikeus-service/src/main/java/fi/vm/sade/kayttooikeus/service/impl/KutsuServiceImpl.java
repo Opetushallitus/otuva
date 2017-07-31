@@ -107,8 +107,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional(readOnly = true)
     public KutsuReadDto getByTemporaryToken(String temporaryToken) {
-        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenAndTila(temporaryToken, KutsunTila.AVOIN)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken));
+        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
         this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
         return kutsuReadDto;
@@ -117,14 +117,15 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
-        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenAndTila(temporaryToken, KutsunTila.AVOIN)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken));
+        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         // Validation
         this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
         this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
 
+        // Create henkilo
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
-//        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
+        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
         henkiloCreateDto.setAsiointiKieli(henkiloCreateByKutsuDto.getAsiointiKieli());
         henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
         henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());

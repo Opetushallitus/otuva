@@ -70,7 +70,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         String token = identificationService.generateAuthTokenForHenkilo("1.2.3.4.5",
                 "key", "identifier");
         assertTrue(token.length() > 20);
-        Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
+        Optional<Identification> identification = identificationRepository.findByAuthtokenIsValid(token);
         assertTrue(identification.isPresent());
         assertEquals("identifier", identification.get().getIdentifier());
         assertEquals("key", identification.get().getIdpEntityId());
@@ -79,7 +79,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         // expiration date should be set for haka
         token = identificationService.generateAuthTokenForHenkilo("1.2.3.4.6", "haka", "hakaidentifier");
         assertTrue(token.length() > 20);
-        identification = identificationRepository.findByAuthtoken(token);
+        identification = identificationRepository.findByAuthtokenIsValid(token);
         assertTrue(identification.isPresent());
         assertEquals("hakaidentifier", identification.get().getIdentifier());
         assertEquals("haka", identification.get().getIdpEntityId());
@@ -220,7 +220,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         //create new
         String token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
         assertTrue(token.length() > 20);
-        Optional<Identification> identification = identificationRepository.findByAuthtoken(token);
+        Optional<Identification> identification = identificationRepository.findByAuthtokenIsValid(token);
         assertTrue(identification.isPresent());
         assertEquals("vetuma", identification.get().getIdpEntityId());
         assertEquals("user1", identification.get().getIdentifier());
@@ -229,7 +229,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         //update old
         token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
         assertTrue(token.length() > 20);
-        identification = identificationRepository.findByAuthtoken(token);
+        identification = identificationRepository.findByAuthtokenIsValid(token);
         assertTrue(identification.isPresent());
         assertEquals("vetuma", identification.get().getIdpEntityId());
         assertEquals("user1", identification.get().getIdentifier());
