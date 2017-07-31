@@ -57,6 +57,10 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     private String luotuHenkiloOid;
 
     private String temporaryToken;
+
+    private LocalDateTime temporaryTokenCreated;
+
+    private String hetu;
     
     public void poista(String poistaja) {
         if (this.tila != KutsunTila.AVOIN) {
