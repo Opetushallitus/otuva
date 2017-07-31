@@ -148,12 +148,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
         // Add privileges
         kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio ->
-                this.kayttooikeusAnomusService.grantKayttooikeusryhma(createdHenkiloOid,
+                this.kayttooikeusAnomusService.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(
+                        createdHenkiloOid,
                         kutsuOrganisaatio.getOrganisaatioOid(),
-                        kutsuOrganisaatio.getRyhmat().stream().map(kayttoOikeusRyhma ->
-                                new GrantKayttooikeusryhmaDto(kayttoOikeusRyhma.getId(),
-                                        LocalDate.now(),
-                                        LocalDate.now().plusYears(1))).collect(Collectors.toList())));
+                        kutsuOrganisaatio.getRyhmat()));
 
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());
