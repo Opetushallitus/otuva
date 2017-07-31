@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -37,10 +38,12 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction) {
-        Sort sort = sortBy.getSortWithDirection(direction);
-        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuDataRepository
-                .findByTilaAndKutsuja(sort, AVOIN, getCurrentUserOid()), KutsuReadDto.class);
+    public List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, boolean onlyOwnKutsus) {
+        final Sort sort = sortBy.getSortWithDirection(direction);
+        Supplier<List<Kutsu>> findMethod = onlyOwnKutsus
+                ? () -> this.kutsuDataRepository.findByTilaAndKutsuja(sort, AVOIN, getCurrentUserOid())
+                : () -> this.kutsuDataRepository.findByTila(sort, AVOIN);
+        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(findMethod.get(), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
 
         return kutsuReadDtoList;

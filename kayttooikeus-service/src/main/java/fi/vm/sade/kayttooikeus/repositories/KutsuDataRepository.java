@@ -15,4 +15,6 @@ import java.util.List;
 public interface KutsuDataRepository extends JpaRepository<Kutsu, Long> {
     List<Kutsu> findByTilaAndKutsuja(Sort sort, KutsunTila tila, String kutsujaOid);
 
+    List<Kutsu> findByTila(Sort sort, KutsunTila tila);
+
 }
