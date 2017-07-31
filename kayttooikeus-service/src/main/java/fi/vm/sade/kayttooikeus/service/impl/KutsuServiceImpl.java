@@ -42,6 +42,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final CryptoService cryptoService;
     private final KayttajatiedotService kayttajatiedotService;
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
+    private final IdentificationService identificationService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -159,6 +160,6 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         kutsuByToken.setLuotuHenkiloOid(createdHenkiloOid);
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
-        return createdHenkiloOid;
+        return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(kutsuByToken.getHetu());
     }
 }
