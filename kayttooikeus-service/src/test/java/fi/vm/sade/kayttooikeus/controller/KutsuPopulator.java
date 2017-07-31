@@ -19,7 +19,7 @@ public class KutsuPopulator implements Populator<Kutsu> {
     private final String sahkoposti;
     private String salaisuus = UUID.randomUUID().toString();
     private KutsunTila tila = KutsunTila.AVOIN;
-    private String kieliKoodi = "FI";
+    private String kieliKoodi = "fi";
     private String kutsuja = "kutsuja";
     private String luotuHenkiloOid;
     private LocalDateTime aikaleima = LocalDateTime.now();

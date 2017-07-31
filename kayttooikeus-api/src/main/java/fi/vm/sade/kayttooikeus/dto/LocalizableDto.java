@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @FunctionalInterface
@@ -29,7 +30,7 @@ public interface LocalizableDto {
         return and(notNull(and.stream()).flatMap(LocalizableDto::localizableTexts));
     }
     static<T> Stream<T> notNull(Stream<T> stream) {
-        return stream.filter(v -> v != null);
+        return stream.filter(Objects::nonNull);
     }
     default LocalizableDto and(Stream<Localizable> stream) {
         return () -> Stream.concat(localizableTexts(), stream);

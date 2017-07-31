@@ -53,6 +53,7 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
         factory.classMap(Kutsu.class, KutsuReadDto.class)
                 .fieldAToB("kieliKoodi", "asiointikieli")
+                .fieldBToA("asiointikieli", "kieliKoodi")
                 .byDefault()
                 .register();
         factory.classMap(KutsuOrganisaatio.class, KutsuReadDto.KutsuOrganisaatioDto.class)
@@ -72,6 +73,7 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .fieldAToB("oidHenkilo", "oid")
                 .byDefault()
                 .register();
+        // PassThroughConverter is fine since these are immutable
         factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDate.class));
         factory.getConverterFactory().registerConverter(new PassThroughConverter(LocalDateTime.class));
     }

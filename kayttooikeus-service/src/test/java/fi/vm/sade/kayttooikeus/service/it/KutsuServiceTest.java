@@ -1,12 +1,9 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
-
-import com.querydsl.core.types.Order;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.repositories.OrderBy;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -22,11 +19,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
-import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
@@ -37,6 +34,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -79,24 +77,29 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
         org1.setOid("1.2.3.4.5");
-        org1.setNimi(new TextGroupMapDto().put("FI", "Nimi2").asMap());
+        org1.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
         OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
         org2.setOid("1.2.3.4.6");
-        org2.setNimi(new TextGroupMapDto().put("FI", "Nimi1").asMap());
+        org2.setNimi(new TextGroupMapDto().put("fi", "Nimi1").asMap());
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), Matchers.any()))
                 .willReturn(Optional.of(org1));
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any()))
                 .willReturn(Optional.of(org2));
         
-        List<KutsuListDto> kutsus = kutsuService.listAvoinKutsus(new OrderBy<>(KutsuOrganisaatioOrder.ORGANISAATIO, Order.ASC));
+        List<KutsuReadDto> kutsus = kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC);
         assertEquals(1, kutsus.size());
         assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
         assertEquals("b@eaxmple.com", kutsus.get(0).getSahkoposti());
         assertEquals(2, kutsus.get(0).getOrganisaatiot().size());
-        assertEquals("1.2.3.4.6", kutsus.get(0).getOrganisaatiot().get(0).getOid());
-        assertEquals("Nimi1", kutsus.get(0).getOrganisaatiot().get(0).getNimi().get("FI"));
-        assertEquals("Nimi2", kutsus.get(0).getOrganisaatiot().get(1).getNimi().get("FI"));
+        assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
+                .extracting(KutsuReadDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                .containsExactlyInAnyOrder("1.2.3.4.5", "1.2.3.4.6");
+        assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
+                .extracting(KutsuReadDto.KutsuOrganisaatioDto::getNimi)
+                .extracting(TextGroupMapDto::getTexts)
+                .extracting(map -> map.get("fi"))
+                .containsExactlyInAnyOrder("Nimi1", "Nimi2");
     }
 
     @Test

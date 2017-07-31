@@ -5,8 +5,7 @@
     "sahkoposti": "posti@example.com",
     "organisaatiot": [
       {
-        "id": 2,
-        "oid": "OID",
+        "organisaatioOid": "OID",
         "nimi": {
           "fi": "Oikeus"
         }
