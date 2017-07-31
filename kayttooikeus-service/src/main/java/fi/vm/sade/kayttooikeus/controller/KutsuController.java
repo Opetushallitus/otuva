@@ -77,7 +77,7 @@ public class KutsuController {
     }
 
     // Consumes temporary tokens so not authenticated
-    @ApiOperation("Create henkilö by temporary token")
+    @ApiOperation("Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
     @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.POST)
     public String createByToken(@PathVariable String temporaryToken,
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
