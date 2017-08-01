@@ -188,6 +188,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     private void updateToken(Identification identification, String token) {
         identification.setAuthtoken(token);
+        identification.setAuthTokenCreated(LocalDateTime.now());
         logger.info("old identification found, setting new token:[{}]", token);
     }
 
