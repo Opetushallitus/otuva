@@ -116,7 +116,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
         String oid = oppijanumerorekisteriClient.getOidByHetu(hetu);
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(()
-                -> new NotFoundException("henkilo not found"));
+                -> new NotFoundException("henkilo not found with oid " + oid));
         String token = generateToken();
         Identification identification = henkilo.getIdentifications().stream()
                 .filter(ident -> STRONG_AUTHENTICATION_IDP.equals(ident.getIdpEntityId()))
@@ -157,7 +157,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Transactional
     public String updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi) {
         Kutsu kutsu = this.kutsuDataRepository.findBySalaisuusIsValid(kutsuToken)
-                .orElseThrow(() -> new NotFoundException("Kutsu not found with token " + kutsuToken));
+                .orElseThrow(() -> new NotFoundException("Kutsu not found with token " + kutsuToken + " or token is invalid"));
         kutsu.setHetu(hetu);
         kutsu.setEtunimi(etunimet);
         kutsu.setSukunimi(sukunimi);
