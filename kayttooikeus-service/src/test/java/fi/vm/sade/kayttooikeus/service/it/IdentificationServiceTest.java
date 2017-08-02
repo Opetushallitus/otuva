@@ -1,10 +1,12 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +42,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.stream.Stream;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
@@ -234,5 +238,19 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("vetuma", identification.get().getIdpEntityId());
         assertEquals("user1", identification.get().getIdentifier());
         assertEquals(id, identification.get().getId());
+    }
+
+    @Test
+    public void updateKutsuAndGenerateTemporaryKutsuToken() {
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi").salaisuus("123"));
+        String temporaryToken = this.identificationService
+                .updateKutsuAndGenerateTemporaryKutsuToken("123", "hetu", "arpa arpa2", "kuutio");
+        assertThat(kutsu.getEtunimi()).isEqualTo("arpa arpa2");
+        assertThat(kutsu.getSukunimi()).isEqualTo("kuutio");
+        assertThat(kutsu.getSahkoposti()).isEqualTo("arpa@kuutio.fi");
+        assertThat(kutsu.getKieliKoodi()).isEqualTo("fi");
+        assertThat(kutsu.getHetu()).isEqualTo("hetu");
+        assertThat(kutsu.getTemporaryToken()).isEqualTo(temporaryToken);
+        assertThat(kutsu.getTemporaryTokenCreated()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 }

@@ -49,6 +49,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+    private final OrganisaatioCacheRepository organisaatioCacheRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -214,15 +215,19 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
+        this.henkiloDataRepository.save(anoja);
+
         OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = anoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
-                        anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                        this.organisaatioHenkiloDataRepository.save(anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
                                 .henkilo(anoja)
-                                .build()));
+                                .organisaatioCache(this.organisaatioCacheRepository.findByOrganisaatioOid(organisaatioOid)
+                                        .orElseThrow(() -> new NotFoundException("Organisaatio not found from cache by oid " + organisaatioOid)))
+                                .build())));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
         return foundOrCreatedOrganisaatioHenkilo;
     }
@@ -385,8 +390,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         ? "Oikeuksien lisäys"
                         : "Oikeuksien päivitys");
 
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma);
-
         ldapSynchronizationService.updateHenkiloAsap(anojaOid);
 
         return myonnettyKayttoOikeusRyhmaTapahtuma;
@@ -400,12 +403,18 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,
                                                                                                 OrganisaatioHenkilo organisaatioHenkilo,
                                                                                                 KayttoOikeusRyhma kayttoOikeusRyhma) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
-                organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
-                .orElseGet(() -> MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =  this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
+                        organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
+                .orElseGet(() -> this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(kayttoOikeusRyhma)
                         .organisaatioHenkilo(organisaatioHenkilo)
-                        .anomus(Sets.newHashSet()).build());
+                        .anomus(Sets.newHashSet())
+                        .aikaleima(LocalDateTime.now())
+                        .tila(KayttoOikeudenTila.ANOTTU)
+                        .voimassaAlkuPvm(LocalDate.now()).build()));
+        organisaatioHenkilo.addMyonnettyKayttooikeusryhmaTapahtuma(myonnettyKayttoOikeusRyhmaTapahtuma);
+        return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
 
     @Override
