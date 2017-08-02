@@ -24,7 +24,7 @@ public interface KayttooikeusAnomusService {
 
     void grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(String anoja,
                                                              String organisaatioOid,
-                                                             Collection<KayttoOikeusRyhma> kayttooikeusryhmaIds);
+                                                             Collection<KayttoOikeusRyhma> kayttooikeusryhmas);
 
     Long createKayttooikeusAnomus(String anojaOid, KayttooikeusAnomusDto kayttooikeusAnomusDto);
 
