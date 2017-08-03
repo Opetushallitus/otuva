@@ -15,6 +15,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,22 +127,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
 
         // Create henkilo
-        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
-        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
-        henkiloCreateDto.setAsiointiKieli(henkiloCreateByKutsuDto.getAsiointiKieli());
-        henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
-        henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());
-        henkiloCreateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
-        henkiloCreateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
-        henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
-                .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
-                .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
-                .yhteystieto(YhteystietoDto.builder()
-                        .yhteystietoArvo(kutsuByToken.getSahkoposti())
-                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .build()).build()));
-
-        String createdHenkiloOid = this.oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
+        String createdHenkiloOid = this.oppijanumerorekisteriClient
+                .createHenkilo(getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken));
         // Create username/password
         this.kayttajatiedotService.create(createdHenkiloOid, new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()));
         this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
@@ -160,5 +147,24 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(kutsuByToken.getHetu());
+    }
+
+    @NotNull
+    private HenkiloCreateDto getHenkiloCreateDto(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
+        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
+        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
+        henkiloCreateDto.setAsiointiKieli(henkiloCreateByKutsuDto.getAsiointiKieli());
+        henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
+        henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());
+        henkiloCreateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
+        henkiloCreateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
+        henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
+                .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
+                .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoArvo(kutsuByToken.getSahkoposti())
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                        .build()).build()));
+        return henkiloCreateDto;
     }
 }

@@ -76,7 +76,7 @@ public class KutsuController {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
     }
 
-    // Consumes temporary tokens so not authenticated
+    // Consumes single use temporary tokens so not authenticated
     @ApiOperation("Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
     @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.POST)
     public String createByToken(@PathVariable String temporaryToken,
