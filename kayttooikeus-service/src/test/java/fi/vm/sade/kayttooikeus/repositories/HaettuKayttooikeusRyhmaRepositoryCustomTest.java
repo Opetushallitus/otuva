@@ -26,14 +26,14 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
     public void setup() {
         populate(haettuKayttooikeusryhma(null)
                 .withRyhma(kayttoOikeusRyhma("Rekisterinpitäjä (vain OPHn käytössä)")
-                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))));
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName()))));
         populate(haettuKayttooikeusryhma(KayttoOikeudenTila.ANOTTU)
                 .withRyhma(kayttoOikeusRyhma("Pääkäyttäjä (kk)")
-                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))));
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName()))));
         // Hidden kayttooikeusryhmas are not fetched
         populate(haettuKayttooikeusryhma(null)
                 .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä")
-                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName()))
                         .asHidden()));
         populate(haettuKayttooikeusryhma(KayttoOikeudenTila.MYONNETTY)
                 .withRyhma(kayttoOikeusRyhma("Granted ryhmä")));

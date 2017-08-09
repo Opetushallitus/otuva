@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
@@ -40,7 +41,7 @@ public class AnomusCriteria {
         builder = this.condition(qAnomus, builder);
 
         if(BooleanUtils.isTrue(this.adminView)) {
-            builder.and(qKayttoOikeus.rooli.eq("VASTUUKAYTTAJAT"));
+            builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
         }
 
         if(BooleanUtils.isTrue(this.onlyActive)) {
