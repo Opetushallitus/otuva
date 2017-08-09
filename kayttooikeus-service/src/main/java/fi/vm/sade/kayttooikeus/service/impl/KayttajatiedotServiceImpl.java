@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     @Override
     @Transactional
-    public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto dto) {
+    public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto dto, LdapSynchronizationType ldapSynchronization) {
         Kayttajatiedot entity = mapper.map(dto, Kayttajatiedot.class);
 
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
@@ -45,7 +46,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         entity = kayttajatiedotRepository.save(entity);
         henkilo.setKayttajatiedot(entity);
 
-        ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
+        ldapSynchronization.getAction().accept(ldapSynchronizationService, henkiloOid);
         return mapper.map(entity, KayttajatiedotReadDto.class);
     }
 

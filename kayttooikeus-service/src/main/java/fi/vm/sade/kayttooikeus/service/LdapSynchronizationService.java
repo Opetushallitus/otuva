@@ -1,5 +1,8 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import static java.util.Objects.requireNonNull;
+import java.util.function.BiConsumer;
+
 /**
  * Palvelu henkilötietojen LDAP-synkronointiin.
  */
@@ -42,5 +45,23 @@ public interface LdapSynchronizationService {
      * Tyhjentää synkronointijonoa.
      */
     void runSynchronizer();
+
+    enum LdapSynchronizationType {
+
+        NORMAL((service, oid) -> service.updateHenkilo(oid)),
+        ASAP((service, oid) -> service.updateHenkiloAsap(oid)),
+        NOW((service, oid) -> service.updateHenkiloNow(oid));
+
+        private final BiConsumer<LdapSynchronizationService, String> action;
+
+        private LdapSynchronizationType(BiConsumer<LdapSynchronizationService, String> action) {
+            this.action = requireNonNull(action);
+        }
+
+        public BiConsumer<LdapSynchronizationService, String> getAction() {
+            return action;
+        }
+
+    }
 
 }

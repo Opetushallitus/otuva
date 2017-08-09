@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -76,8 +77,9 @@ public class HenkiloController {
             notes = "Luo henkilön käyttäjätiedot.")
     @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.POST)
     public KayttajatiedotReadDto createKayttajatiedot(@PathVariable("oid") String henkiloOid,
-                                                      @RequestBody @Validated KayttajatiedotCreateDto kayttajatiedot) {
-        return kayttajatiedotService.create(henkiloOid, kayttajatiedot);
+                                                      @RequestBody @Validated KayttajatiedotCreateDto kayttajatiedot,
+                                                      @RequestParam(required = false, defaultValue = "ASAP") LdapSynchronizationType ldapSynchronization) {
+        return kayttajatiedotService.create(henkiloOid, kayttajatiedot, ldapSynchronization);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
