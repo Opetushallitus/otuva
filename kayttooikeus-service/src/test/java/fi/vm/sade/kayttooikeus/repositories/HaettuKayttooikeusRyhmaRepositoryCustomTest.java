@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import org.junit.Before;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HaettuKayttoOikeusRyhmaPopulator.haettuKayttooikeusryhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
+import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -23,11 +25,16 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
     @Before
     public void setup() {
         populate(haettuKayttooikeusryhma(null)
-                .withRyhma(kayttoOikeusRyhma("Rekisterinpitäjä (vain OPHn käytössä)")));
+                .withRyhma(kayttoOikeusRyhma("Rekisterinpitäjä (vain OPHn käytössä)")
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))));
         populate(haettuKayttooikeusryhma(KayttoOikeudenTila.ANOTTU)
-                .withRyhma(kayttoOikeusRyhma("Pääkäyttäjä (kk)")));
+                .withRyhma(kayttoOikeusRyhma("Pääkäyttäjä (kk)")
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))));
+        // Hidden kayttooikeusryhmas are not fetched
         populate(haettuKayttooikeusryhma(null)
-                .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä").asHidden()));
+                .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä")
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getGroupName()))
+                        .asHidden()));
         populate(haettuKayttooikeusryhma(KayttoOikeudenTila.MYONNETTY)
                 .withRyhma(kayttoOikeusRyhma("Granted ryhmä")));
         populate(haettuKayttooikeusryhma(null)
@@ -44,7 +51,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
-                .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)", "Koodiston ylläpitäjä",
+                .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)",
                         "Some random ryhmä");
     }
 
@@ -58,7 +65,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
-                .containsExactlyInAnyOrder("Pääkäyttäjä (kk)", "Koodiston ylläpitäjä");
+                .containsExactlyInAnyOrder("Pääkäyttäjä (kk)", "Some random ryhmä");
     }
 
     @Test

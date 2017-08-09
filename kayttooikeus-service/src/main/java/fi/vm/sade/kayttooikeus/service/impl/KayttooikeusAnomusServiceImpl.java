@@ -77,7 +77,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          boolean showOwnAnomus) {
         if(!showOwnAnomus) {
             if(criteria.getHenkiloOidRestrictionList() != null) {
-                criteria.getHenkiloOidRestrictionList().add(UserDetailsUtil.getCurrentUserOid());
+                criteria.addHenkiloOidRestriction(UserDetailsUtil.getCurrentUserOid());
             }
             else {
                 criteria.setHenkiloOidRestrictionList(Sets.newHashSet(UserDetailsUtil.getCurrentUserOid()));

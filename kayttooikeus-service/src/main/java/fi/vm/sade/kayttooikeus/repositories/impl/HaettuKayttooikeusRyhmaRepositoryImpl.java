@@ -2,10 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
-import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QAnomus;
-import fi.vm.sade.kayttooikeus.model.QHaettuKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HaettuKayttooikeusRyhmaRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import java.util.List;
@@ -27,15 +24,18 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
         QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma = QHaettuKayttoOikeusRyhma.haettuKayttoOikeusRyhma;
         QAnomus qAnomus = QAnomus.anomus;
         QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QKayttoOikeus qKayttoOikeus = QKayttoOikeus.kayttoOikeus;
 
         JPAQuery<HaettuKayttoOikeusRyhma> query = new JPAQuery<>(entityManager)
                 .select(qHaettuKayttoOikeusRyhma)
                 .from(qHaettuKayttoOikeusRyhma)
-                .leftJoin(qHaettuKayttoOikeusRyhma.anomus, qAnomus);
+                .leftJoin(qHaettuKayttoOikeusRyhma.anomus, qAnomus)
+                .leftJoin(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
         if(criteria.getAdminView() != null && criteria.getAdminView()) {
-            query.leftJoin(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
+            query.leftJoin(qKayttoOikeusRyhma.kayttoOikeus, qKayttoOikeus);
         }
-        query.where(criteria.condition(qAnomus, qKayttoOikeusRyhma, qHaettuKayttoOikeusRyhma));
+        query.where(criteria.condition(qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma));
+        query.where(qKayttoOikeusRyhma.hidden.isFalse());
 
         if (limit != null) {
             query.limit(limit);

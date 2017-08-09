@@ -2,17 +2,13 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.enumeration.AdminGrantsGroups;
-import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
-import fi.vm.sade.kayttooikeus.model.QAnomus;
-import fi.vm.sade.kayttooikeus.model.QHaettuKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
+import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
+import org.apache.commons.lang.BooleanUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -33,24 +29,21 @@ public class AnomusCriteria {
     private Set<String> henkiloOidRestrictionList;
     private Boolean adminView;
 
-    final static List<String> ophConditions = AdminGrantsGroups.allValuesAsList();
-
     public Predicate condition(QAnomus qAnomus) {
         BooleanBuilder builder = new BooleanBuilder();
         return this.condition(qAnomus, builder);
     }
 
-    public Predicate condition(QAnomus qAnomus, QKayttoOikeusRyhma qKayttoOikeusRyhma, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma) {
+    public Predicate condition(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma) {
         BooleanBuilder builder = new BooleanBuilder();
 
         builder = this.condition(qAnomus, builder);
 
-        if(this.adminView != null && this.adminView) {
-            builder.andAnyOf(ophConditions.stream().map(condition -> qKayttoOikeusRyhma.name.contains(condition)
-                    .and(qKayttoOikeusRyhma.hidden.isFalse())).toArray(BooleanExpression[]::new));
+        if(BooleanUtils.isTrue(this.adminView)) {
+            builder.and(qKayttoOikeus.rooli.eq("VASTUUKAYTTAJAT"));
         }
 
-        if(this.onlyActive != null) {
+        if(BooleanUtils.isTrue(this.onlyActive)) {
             builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                     .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
         }
@@ -83,6 +76,13 @@ public class AnomusCriteria {
             builder.and(qAnomus.henkilo.oidHenkilo.notIn(this.henkiloOidRestrictionList));
         }
         return builder;
+    }
+
+    public void addHenkiloOidRestriction(String henkiloOid) {
+        if (this.henkiloOidRestrictionList == null) {
+            this.henkiloOidRestrictionList = new HashSet<>();
+        }
+        this.henkiloOidRestrictionList.add(henkiloOid);
     }
 
 }
