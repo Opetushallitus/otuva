@@ -44,6 +44,7 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -58,6 +59,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import org.apache.commons.codec.binary.Base64;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -70,6 +72,10 @@ public class EmailServiceImpl implements EmailService {
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_TILA = "anomuksenTila";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_PERUSTE = "hylkaamisperuste";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLIT = "roolit";
+    private static final String UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME = "salasanareset_email";
+    private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_LINKKI = "linkki";
+    private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_ETUNIMI = "etunimi";
+    private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_SUKUNIMI = "sukunimi";
     private static final String CALLING_PROCESS = "kayttooikeus";
 
     private final String expirationReminderSenderEmail;
@@ -303,6 +309,35 @@ public class EmailServiceImpl implements EmailService {
     public static class OranizationReplacement {
         private final String name;
         private final List<String> permissions;
+    }
+
+    @Override
+    public void sendEmailReset(HenkiloDto henkilo, String sahkoposti, String poletti) {
+        String linkki = urlProperties.url("registration-ui.passwordReset", encode(poletti));
+
+        EmailRecipient recipient = new EmailRecipient(henkilo.getOidHenkilo(), sahkoposti);
+        recipient.setRecipientReplacements(Arrays.asList(
+                new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_LINKKI, linkki),
+                new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_ETUNIMI, henkilo.getKutsumanimi()),
+                new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_SUKUNIMI, henkilo.getSukunimi()),
+                // TODO: otsikko voisi olla suoraan templatessa kielistettynä
+                new ReportedRecipientReplacementDTO("subject", "Salasanan nollaus")
+        ));
+
+        // TODO: kun kaikkiin kieliin on templatet niin ota käyttöön
+        //String kieliKoodi = UserDetailsUtil.getLanguageCode(henkilo);
+        String kieliKoodi = "fi"; //UserDetailsUtil.getLanguageCode(henkilo);
+        EmailMessage emailMessage = generateEmailMessage(UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME, kieliKoodi);
+
+        EmailData emailData = new EmailData();
+        emailData.setEmail(emailMessage);
+        emailData.setRecipient(singletonList(recipient));
+        ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
+    }
+
+    private static String encode(String value) {
+        Base64 base64 = new Base64(true);
+        return new String(base64.encode(value.getBytes())).replaceAll("(?:\\r\\n|\\n\\r|\\n|\\r)", "");
     }
 
 }
