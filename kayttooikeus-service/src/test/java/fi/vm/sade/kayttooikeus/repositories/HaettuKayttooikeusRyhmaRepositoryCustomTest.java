@@ -1,6 +1,9 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
+import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import org.junit.Before;
@@ -11,7 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static fi.vm.sade.kayttooikeus.repositories.populate.AnomusPopulator.anomus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HaettuKayttoOikeusRyhmaPopulator.haettuKayttooikeusryhma;
+import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,29 +27,42 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
 
     @Before
     public void setup() {
-        populate(haettuKayttooikeusryhma(null)
-                .withRyhma(kayttoOikeusRyhma("Rekisterinpitäjä (vain OPHn käytössä)")));
+        populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
+                .withHaettuRyhma(haettuKayttooikeusryhma(null)
+                        .withRyhma(kayttoOikeusRyhma("Rekisterinpitäjä (vain OPHn käytössä)")
+                                .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName())))));
+        populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
+                .withHaettuRyhma(haettuKayttooikeusryhma(KayttoOikeudenTila.ANOTTU)
+                .withRyhma(kayttoOikeusRyhma("Pääkäyttäjä (kk)")
+                        .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName())))));
+        // Hidden kayttooikeusryhmas are not fetched
+        populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
+                .withHaettuRyhma(haettuKayttooikeusryhma(null)
+                        .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä")
+                                .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName()))
+                                .asHidden())));
+        populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
+                .withHaettuRyhma(haettuKayttooikeusryhma(KayttoOikeudenTila.MYONNETTY)
+                        .withRyhma(kayttoOikeusRyhma("Granted ryhmä"))));
+        populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
+                .withHaettuRyhma(haettuKayttooikeusryhma(null)
+                        .withRyhma(kayttoOikeusRyhma("Some random ryhmä"))));
         populate(haettuKayttooikeusryhma(KayttoOikeudenTila.ANOTTU)
-                .withRyhma(kayttoOikeusRyhma("Pääkäyttäjä (kk)")));
-        populate(haettuKayttooikeusryhma(null)
-                .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä").asHidden()));
-        populate(haettuKayttooikeusryhma(KayttoOikeudenTila.MYONNETTY)
-                .withRyhma(kayttoOikeusRyhma("Granted ryhmä")));
-        populate(haettuKayttooikeusryhma(null)
-                .withRyhma(kayttoOikeusRyhma("Some random ryhmä")));
+                .withRyhma(kayttoOikeusRyhma("Ryhmä without anomus")));
     }
 
     @Test
     public void findByBasic() throws Exception {
         AnomusCriteria anomusCriteria = AnomusCriteria.builder()
                 .onlyActive(true)
+                .anomuksenTilat(Sets.newHashSet(AnomuksenTila.ANOTTU))
                 .build();
         List<HaettuKayttoOikeusRyhma> haetutResult = this.haettuKayttooikeusRyhmaRepository
                 .findBy(anomusCriteria, null, null, null);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
-                .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)", "Koodiston ylläpitäjä",
+                .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)",
                         "Some random ryhmä");
     }
 
@@ -58,7 +76,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
-                .containsExactlyInAnyOrder("Pääkäyttäjä (kk)", "Koodiston ylläpitäjä");
+                .containsExactlyInAnyOrder("Pääkäyttäjä (kk)", "Some random ryhmä");
     }
 
     @Test
