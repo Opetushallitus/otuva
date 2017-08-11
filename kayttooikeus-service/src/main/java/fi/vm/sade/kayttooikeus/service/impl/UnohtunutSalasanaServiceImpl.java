@@ -68,7 +68,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
 
         // varmistetaan että sähköpostiosoite on käytössä vain yhdellä henkilöllä
         Set<String> oids = oppijanumerorekisteriClient.listOidByYhteystieto(sahkoposti);
-        if (oids.size() > 1) {
+        if (oids.size() > 1 || !oids.contains(oid)) {
             throw new DataInconsistencyException("Sähköpostiosoite " + sahkoposti + " on käytössä useammalla henkilöllä: " + oids);
         }
 
