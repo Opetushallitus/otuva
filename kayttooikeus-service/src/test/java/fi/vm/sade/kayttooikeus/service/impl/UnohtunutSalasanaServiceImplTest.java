@@ -60,7 +60,7 @@ public class UnohtunutSalasanaServiceImplTest {
                 .thenReturn(Optional.of(Henkilo.builder().oidHenkilo("oid1").build()));
         when(timeService.getDateTimeNow())
                 .thenReturn(now);
-        when(varmennusPolettiRepository.saveAndFlush(any()))
+        when(varmennusPolettiRepository.save(any(VarmennusPoletti.class)))
                 .thenReturn(VarmennusPoletti.builder()
                         .poletti("poletti1")
                         .build());
@@ -80,7 +80,7 @@ public class UnohtunutSalasanaServiceImplTest {
         impl.lahetaPoletti("kayttajatunnus1");
 
         ArgumentCaptor<VarmennusPoletti> varmennusPolettiCaptor = ArgumentCaptor.forClass(VarmennusPoletti.class);
-        verify(varmennusPolettiRepository).saveAndFlush(varmennusPolettiCaptor.capture());
+        verify(varmennusPolettiRepository).save(varmennusPolettiCaptor.capture());
         VarmennusPoletti varmennusPoletti = varmennusPolettiCaptor.getValue();
         assertThat(varmennusPoletti.getPoletti()).isNotNull();
         assertThat(varmennusPoletti.getTyyppi()).isEqualByComparingTo(VarmennusPoletti.VarmennusPolettiTyyppi.HAVINNYT_SALASANA);
@@ -97,7 +97,7 @@ public class UnohtunutSalasanaServiceImplTest {
                 .thenReturn(Optional.of(Henkilo.builder().oidHenkilo("oid1").build()));
         when(timeService.getDateTimeNow())
                 .thenReturn(now);
-        when(varmennusPolettiRepository.saveAndFlush(any()))
+        when(varmennusPolettiRepository.save(any(VarmennusPoletti.class)))
                 .thenReturn(VarmennusPoletti.builder()
                         .poletti("poletti1")
                         .build());
@@ -128,7 +128,7 @@ public class UnohtunutSalasanaServiceImplTest {
                 .thenReturn(Optional.of(Henkilo.builder().oidHenkilo("oid1").build()));
         when(timeService.getDateTimeNow())
                 .thenReturn(now);
-        when(varmennusPolettiRepository.saveAndFlush(any()))
+        when(varmennusPolettiRepository.save(any(VarmennusPoletti.class)))
                 .thenReturn(VarmennusPoletti.builder()
                         .poletti("poletti1")
                         .build());

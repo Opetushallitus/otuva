@@ -43,7 +43,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
 
     private void lahetaPoletti(Henkilo henkilo) {
         long poistetut = varmennusPolettiRepository.deleteByHenkiloAndTyyppi(henkilo, VarmennusPoletti.VarmennusPolettiTyyppi.HAVINNYT_SALASANA);
-        VarmennusPoletti varmennusPoletti = varmennusPolettiRepository.saveAndFlush(VarmennusPoletti.builder()
+        VarmennusPoletti varmennusPoletti = varmennusPolettiRepository.save(VarmennusPoletti.builder()
                 .poletti(UUID.randomUUID().toString())
                 .tyyppi(VarmennusPoletti.VarmennusPolettiTyyppi.HAVINNYT_SALASANA)
                 .voimassa(timeService.getDateTimeNow().plusMinutes(60))
