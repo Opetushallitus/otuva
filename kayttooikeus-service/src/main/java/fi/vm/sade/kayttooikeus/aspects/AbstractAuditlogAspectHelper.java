@@ -3,20 +3,25 @@ package fi.vm.sade.kayttooikeus.aspects;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RequiredArgsConstructor
 public abstract class AbstractAuditlogAspectHelper {
 
-    private final OmatTiedotService omatTiedotService;
     private final Audit audit;
     private final ObjectMapper mapper;
 
+    private Optional<String> getAuthenticationName() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Authentication::getName);
+    }
+
     void finishLogging(KayttoOikeusLogMessage.LogMessageBuilder builder) {
-        String oid = omatTiedotService.getCurrentUserOid();
-        KayttoOikeusLogMessage message = builder.id(oid).build();
-        audit.log(message);
+        getAuthenticationName().ifPresent(oid -> builder.id(oid));
+        audit.log(builder.build());
     }
 
     ObjectMapper getObjectMapper() {

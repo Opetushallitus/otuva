@@ -6,7 +6,6 @@ import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -14,8 +13,8 @@ import java.util.Set;
 @Component
 public class HenkiloHelper extends AbstractAuditlogAspectHelper {
 
-    public HenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
-        super(omatTiedotService, audit, mapper);
+    public HenkiloHelper(Audit audit, ObjectMapper mapper) {
+        super(audit, mapper);
     }
 
     public void logPassivoiHenkilo(String henkiloOid, String kasittelijaOid, Object returnHenkilo) {

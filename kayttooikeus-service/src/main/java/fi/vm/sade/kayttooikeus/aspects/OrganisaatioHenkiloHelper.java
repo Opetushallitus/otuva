@@ -6,7 +6,6 @@ import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,8 +14,8 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class OrganisaatioHenkiloHelper extends AbstractAuditlogAspectHelper {
 
-    public OrganisaatioHenkiloHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
-        super(omatTiedotService, audit, mapper);
+    public OrganisaatioHenkiloHelper(Audit audit, ObjectMapper mapper) {
+        super(audit, mapper);
     }
 
     void logCreateOrUpdateOrganisaatioHenkilo(String henkiloOid, List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList,
