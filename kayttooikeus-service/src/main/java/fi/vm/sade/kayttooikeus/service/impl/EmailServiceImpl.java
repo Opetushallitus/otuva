@@ -320,11 +320,11 @@ public class EmailServiceImpl implements EmailService {
                 new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_LINKKI, linkki),
                 new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_ETUNIMI, henkilo.getKutsumanimi()),
                 new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_SUKUNIMI, henkilo.getSukunimi()),
-                // TODO: otsikko voisi olla suoraan templatessa kielistettynä
+                // TODO KJHH-1070: kielistä otsikko suoraan templatessa
                 new ReportedRecipientReplacementDTO("subject", "Salasanan nollaus")
         ));
 
-        // TODO: kun kaikkiin kieliin on templatet niin ota käyttöön
+        // TODO KJHH-1070: kun kaikkiin kieliin on templatet niin ota käyttöön
         //String kieliKoodi = UserDetailsUtil.getLanguageCode(henkilo);
         String kieliKoodi = "fi"; //UserDetailsUtil.getLanguageCode(henkilo);
         EmailMessage emailMessage = generateEmailMessage(UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME, kieliKoodi);
