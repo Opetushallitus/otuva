@@ -20,12 +20,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -130,7 +128,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         String createdHenkiloOid = this.oppijanumerorekisteriClient
                 .createHenkilo(getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken));
         // Create username/password
-        this.kayttajatiedotService.create(createdHenkiloOid, new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()));
+        this.kayttajatiedotService
+                .create(createdHenkiloOid,
+                        new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()),
+                        LdapSynchronizationService.LdapSynchronizationType.ASAP);
         this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
 
         // Add privileges
@@ -166,5 +167,13 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                         .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .build()).build()));
         return henkiloCreateDto;
+    }
+
+    @Override
+    @Transactional
+    public void updateIdentifierToKutsu(String temporaryToken, String identifier) {
+        Kutsu kutsu = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
+        kutsu.setIdentifier(identifier);
     }
 }

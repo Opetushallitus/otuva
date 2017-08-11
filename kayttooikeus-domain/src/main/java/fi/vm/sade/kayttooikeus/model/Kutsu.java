@@ -60,7 +60,9 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     private LocalDateTime temporaryTokenCreated;
 
     private String hetu;
-    
+
+    private String identifier;
+
     public void poista(String poistaja) {
         if (this.tila != KutsunTila.AVOIN) {
             throw new IllegalStateException("Can not delete kutsu in state " + tila);

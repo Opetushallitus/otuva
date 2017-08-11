@@ -70,7 +70,18 @@ public class KutsuController {
         kutsuService.deleteKutsu(id);
     }
 
-    // Consumes temporary tokens so not authenticated
+    @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    public void updateIdentifierByToken(@PathVariable String temporaryToken, @RequestBody String identifier) {
+        this.kutsuService.updateIdentifierToKutsu(temporaryToken, identifier);
+    }
+
+    /**
+     *  /kutsu is open to non-authenticated use.
+     */
+
+    // Uses temporary tokens so not authenticated
+    @ApiOperation("Get kutsu by temporary token")
     @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.GET)
     public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
