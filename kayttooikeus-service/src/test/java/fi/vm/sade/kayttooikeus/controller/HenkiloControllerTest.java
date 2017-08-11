@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -70,7 +71,19 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .content("{\"username\": \"user1\"}").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         ArgumentCaptor<KayttajatiedotCreateDto> captor = ArgumentCaptor.forClass(KayttajatiedotCreateDto.class);
-        verify(kayttajatiedotService).create(eq("1.2.3.4.5"), captor.capture());
+        verify(kayttajatiedotService).create(eq("1.2.3.4.5"), captor.capture(), eq(LdapSynchronizationType.ASAP));
+        KayttajatiedotCreateDto kayttajatiedot = captor.getValue();
+        assertThat(kayttajatiedot.getUsername()).isEqualTo("user1");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    public void postHenkiloKayttajatiedotWorkWithLdapSynchronizationQueryParam() throws Exception {
+        mvc.perform(post("/henkilo/{henkiloOid}/kayttajatiedot?ldapSynchronization={type}", "1.2.3.4.5", "NOW")
+                .content("{\"username\": \"user1\"}").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        ArgumentCaptor<KayttajatiedotCreateDto> captor = ArgumentCaptor.forClass(KayttajatiedotCreateDto.class);
+        verify(kayttajatiedotService).create(eq("1.2.3.4.5"), captor.capture(), eq(LdapSynchronizationType.NOW));
         KayttajatiedotCreateDto kayttajatiedot = captor.getValue();
         assertThat(kayttajatiedot.getUsername()).isEqualTo("user1");
     }

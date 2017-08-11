@@ -99,7 +99,12 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     @Override
     @Transactional
     public void updateHenkiloNow(String henkiloOid) {
+        LOGGER.info("LDAP-synkronointi henkilölle {} aloitetaan", henkiloOid);
+        long start = timeService.getCurrentTimeMillis();
+
         ldapSynchronizer.run(henkiloOid);
+
+        LOGGER.info("LDAP-synkronointi henkilölle {} päättyy, kesto: {}ms", henkiloOid, timeService.getCurrentTimeMillis() - start);
     }
 
     @Override

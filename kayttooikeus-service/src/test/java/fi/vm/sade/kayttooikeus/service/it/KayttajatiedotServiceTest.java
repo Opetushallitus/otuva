@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto();
         createDto.setUsername("user1");
 
-        KayttajatiedotReadDto readDto = kayttajatiedotService.create(oid, createDto);
+        KayttajatiedotReadDto readDto = kayttajatiedotService.create(oid, createDto, LdapSynchronizationType.ASAP);
 
         assertThat(readDto).isNotNull();
     }
@@ -49,7 +50,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto();
         createDto.setUsername("user1");
 
-        Throwable throwable = catchThrowable(() -> kayttajatiedotService.create(oid, createDto));
+        Throwable throwable = catchThrowable(() -> kayttajatiedotService.create(oid, createDto, LdapSynchronizationType.ASAP));
 
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)

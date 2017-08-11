@@ -174,6 +174,15 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 });
     }
 
+    @Override
+    public Set<String> listOidByYhteystieto(String arvo) {
+        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.oidByYhteystieto", arvo);
+        return retrying(FunctionalUtils.<Set<String>>io(
+                () -> this.objectMapper.readerFor(new TypeReference<Set<String>>() {})
+                        .readValue(this.serviceAccountClient.get(url))), 2).get()
+                .orFail(mapper(url));
+    }
+
     //ONR uses java.time.LocalDate
     public static class HenkiloPerustiedotDto extends HenkiloPerustietoDto {
         public void setSyntymaaika(String localDate) {

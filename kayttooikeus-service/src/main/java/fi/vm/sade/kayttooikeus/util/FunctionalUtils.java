@@ -6,9 +6,18 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.Optional.ofNullable;
+import java.util.function.Consumer;
 
 public class FunctionalUtils {
     private FunctionalUtils() {
+    }
+
+    public static <T> void ifPresentOrElse(Optional<T> optional, Consumer<T> consumer, Runnable runnable) {
+        if (optional.isPresent()) {
+            consumer.accept(optional.get());
+        } else {
+            runnable.run();
+        }
     }
 
     public static <F,T> Function<F,T> or(Function<F,T> a, Function<F,T> b) {
