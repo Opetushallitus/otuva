@@ -38,7 +38,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
     @Override
     public void lahetaPoletti(String kayttajatunnus) {
         ifPresentOrElse(henkiloDataRepository.findByKayttajatiedotUsername(kayttajatunnus), this::lahetaPoletti,
-                () -> LOGGER.warn("Unohtunut salasana -sähköpostia ei lähetetty koska käyttäjätunnuksella {} ei löytynyt henkilöä", kayttajatunnus));
+                () -> LOGGER.warn("Unohtunut salasana -sähköpostia ei lähetetty koska käyttäjätunnuksella {} ei löytynyt henkilöä", kayttajatunnus));
     }
 
     private void lahetaPoletti(Henkilo henkilo) {
@@ -49,7 +49,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
                 .voimassa(timeService.getDateTimeNow().plusMinutes(60))
                 .henkilo(henkilo)
                 .build());
-        LOGGER.info("Luotiin henkilölle {} uusi {}-poletti, voimassa {} asti. Poistettin vanhat poletit ({}kpl)",
+        LOGGER.info("Luotiin henkilölle {} uusi {}-poletti, voimassa {} asti. Poistettin vanhat poletit ({}kpl)",
                 henkilo.getOidHenkilo(), varmennusPoletti.getTyyppi(), varmennusPoletti.getVoimassa(), poistetut);
 
         try {
@@ -69,7 +69,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
         // varmistetaan että sähköpostiosoite on käytössä vain yhdellä henkilöllä
         Set<String> oids = oppijanumerorekisteriClient.listOidByYhteystieto(sahkoposti);
         if (oids.size() > 1 || !oids.contains(oid)) {
-            throw new DataInconsistencyException("Sähköpostiosoite " + sahkoposti + " on käytössä useammalla henkilöllä: " + oids);
+            throw new DataInconsistencyException("Sähköpostiosoite " + sahkoposti + " on käytössä useammalla henkilöllä: " + oids);
         }
 
         emailService.sendEmailReset(henkilo, sahkoposti, poletti);
