@@ -6,14 +6,13 @@ import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KutsuHelper extends AbstractAuditlogAspectHelper {
 
-    public KutsuHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
-        super(omatTiedotService, audit, mapper);
+    public KutsuHelper(Audit audit, ObjectMapper mapper) {
+        super(audit, mapper);
     }
 
     void logCreateKutsu(KutsuCreateDto dto, Object result) {

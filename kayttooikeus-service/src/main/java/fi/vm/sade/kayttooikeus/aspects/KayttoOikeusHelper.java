@@ -5,7 +5,6 @@ import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,8 +12,8 @@ import java.util.List;
 @Component
 public class KayttoOikeusHelper extends AbstractAuditlogAspectHelper {
 
-    public KayttoOikeusHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
-        super(omatTiedotService, audit, mapper);
+    public KayttoOikeusHelper(Audit audit, ObjectMapper mapper) {
+        super(audit, mapper);
     }
 
     /* Käyttöoikeus */

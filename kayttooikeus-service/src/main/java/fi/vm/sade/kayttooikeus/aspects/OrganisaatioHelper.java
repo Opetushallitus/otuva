@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
-import fi.vm.sade.kayttooikeus.service.OmatTiedotService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OrganisaatioHelper extends AbstractAuditlogAspectHelper {
 
-    public OrganisaatioHelper(OmatTiedotService omatTiedotService, Audit audit, ObjectMapper mapper) {
-        super(omatTiedotService, audit, mapper);
+    public OrganisaatioHelper(Audit audit, ObjectMapper mapper) {
+        super(audit, mapper);
     }
 
     void logUpdateOrganisationCache() {
