@@ -143,11 +143,12 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, String idpKey, Set<String> hakatunnukset) {
+    public Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnukset) {
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(() -> new NotFoundException("Henkilo not found"));
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
         identificationRepository.delete(identifications);
-        List<Identification> updatedIdentifications = hakatunnukset.stream().map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus)).collect(Collectors.toList());
+        List<Identification> updatedIdentifications = hakatunnukset.stream()
+                .map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus)).collect(Collectors.toList());
         identificationRepository.save(updatedIdentifications);
         ldapSynchronizationService.updateHenkiloAsap(oid);
         return hakatunnukset;
