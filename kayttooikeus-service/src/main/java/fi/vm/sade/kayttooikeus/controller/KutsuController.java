@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,9 +71,11 @@ public class KutsuController {
     }
 
     @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.PUT)
+    @ApiOperation("Kutsun päivittäminen väliaikaisella tokenilla. Sallii osittaisen päivittämisen.")
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    public void updateIdentifierByToken(@PathVariable String temporaryToken, @RequestBody String hakaIdentifier) {
-        this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, hakaIdentifier);
+    public void updateIdentifierByToken(@PathVariable String temporaryToken,
+                                        @RequestBody KutsuUpdateDto kutsuUpdateDto) {
+        this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, kutsuUpdateDto);
     }
 
     /**
