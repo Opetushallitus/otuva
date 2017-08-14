@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.dto.Constants;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
+
+import java.security.InvalidParameterException;
+import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -90,6 +94,13 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
                 .ifPresent(foundUsername -> {
                     throw new UsernameAlreadyExistsException(String.format("Username %s already exists", foundUsername));
                 });
+    }
+
+    @Override
+    public void throwIfUsernameIsNotValid(String username) {
+        if(!username.matches(Constants.USERNAME_REGEXP)) {
+            throw new IllegalArgumentException("Username is not valid with pattern " + Constants.USERNAME_REGEXP);
+        }
     }
 
     private void changePassword(String oid, String newPassword) {
