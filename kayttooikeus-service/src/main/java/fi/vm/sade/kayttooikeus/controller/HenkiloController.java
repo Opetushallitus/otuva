@@ -154,7 +154,7 @@ public class HenkiloController {
                                                  @RequestBody Set<String> hakatunnisteet,
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP, hakatunnisteet);
+        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, hakatunnisteet);
 
     }
 
