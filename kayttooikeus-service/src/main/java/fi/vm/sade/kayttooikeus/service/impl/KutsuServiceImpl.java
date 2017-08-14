@@ -170,9 +170,9 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional
-    public void updateIdentifierToKutsu(String temporaryToken, String identifier) {
+    public void updateHakaIdentifierToKutsu(String temporaryToken, String hakaIdentifier) {
         Kutsu kutsu = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        kutsu.setIdentifier(identifier);
+        kutsu.setHakaIdentifier(hakaIdentifier);
     }
 }
