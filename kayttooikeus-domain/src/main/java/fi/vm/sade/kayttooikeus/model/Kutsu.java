@@ -62,7 +62,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
 
     private String hetu;
 
-    private String identifier;
+    private String hakaIdentifier;
 
     public void poista(String poistaja) {
         if (this.tila != KutsunTila.AVOIN) {
