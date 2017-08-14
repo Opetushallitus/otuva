@@ -81,6 +81,7 @@ public class CasController {
 
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
 
+        // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
         if (kutsuToken != null) {
             // Tallenna valitut headerit kutsu token kannan tauluun
             //displayname=[Anna Testi], cn=[Testi Anna Osuuspankki], givenname=[Anna], firstname=[Anna Osuuspankki], sn=[Testi], nationalidentificationnumber=[081181-9984], kotikuntakuntanumero=[019], kotikuntakuntas=[Helsinki], kotikuntakuntar=[], vakinainenkotimainenlahiosoites=[Osuuspankkitie 2], vakinainenkotimainenlahiosoiter=[], vakinainenkotimainenlahiosoitepostinumero=[00120], vakinainenkotimainenlahiosoitepostitoimipaikkas=[Helsinki], vakinainenkotimainenlahiosoitepostitoimipaikkar=[], vakinainenulkomainenlahiosoite=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltios=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltior=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltioselvakielinen=[], vakinainenulkomainenlahiosoitevaltiokoodi3=[], tilapainenkotimainenlahiosoitelahiosoites=[], tilapainenkotimainenlahiosoitelahiosoiter=[], tilapainenkotimainenlahiosoitepostinumero=[], tilapainenkotimainenlahiosoitepostitoimipaikkas=[], tilapainenkotimainenlahiosoitepostitoimipaikkar=[]
@@ -90,14 +91,16 @@ public class CasController {
             // Tee redirect henkilo-ui:seen "session" tokeni query parametrinä
             response.sendRedirect("/henkilo-ui/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken);
         }
+        // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (loginToken != null) {
             // Hae henkilön tiedot jotka liittyvät logintokeniin
             // Päivitä henkilölle hetu jos ei ole ennestään olemassa ja merkitse se vahvistetuksi. Muuten tarkista, että hetu täsmää.
             // Luo auth token
             // Redirectaa CAS:iin auth tokenin kanssa.
-            String authToken = this.identificationService
-                    .updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
-            response.sendRedirect("/cas/login?authToken=" + authToken);
+            throw new UnsupportedOperationException();
+//            String authToken = this.identificationService
+//                    .updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
+//            response.sendRedirect("/cas/login?authToken=" + authToken);
         }
     }
 

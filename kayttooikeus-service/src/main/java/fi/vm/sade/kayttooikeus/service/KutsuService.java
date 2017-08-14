@@ -23,5 +23,5 @@ public interface KutsuService {
 
     String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 
-    void updateIdentifierToKutsu(String temporaryToken, String identifier);
+    void updateHakaIdentifierToKutsu(String temporaryToken, String hakaIdentifier);
 }
