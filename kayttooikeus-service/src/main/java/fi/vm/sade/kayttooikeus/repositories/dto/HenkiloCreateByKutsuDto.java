@@ -22,12 +22,7 @@ public class HenkiloCreateByKutsuDto {
 
     private KielisyysDto asiointiKieli;
 
-    @NotNull
-    @Size(min = 1)
-    @Pattern(regexp = Constants.USERNAME_REGEXP)
     private String kayttajanimi;
 
-    @NotNull
-    @Size(min = 1)
     private String password;
 }

@@ -16,4 +16,6 @@ public interface KayttajatiedotService {
     void changePasswordAsAdmin(String oid, String newPassword);
 
     void throwIfUsernameExists(String username);
+
+    void throwIfUsernameIsNotValid(String username);
 }

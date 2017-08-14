@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -121,19 +122,19 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        // Validation
-        this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
-        this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
+        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+            // Validation
+            this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
+            this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
+            this.kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
+        }
 
         // Create henkilo
         String createdHenkiloOid = this.oppijanumerorekisteriClient
                 .createHenkilo(getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken));
-        // Create username/password
-        this.kayttajatiedotService
-                .create(createdHenkiloOid,
-                        new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()),
-                        LdapSynchronizationService.LdapSynchronizationType.ASAP);
-        this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
+
+        // Create credentials
+        createCredentials(henkiloCreateByKutsuDto, kutsuByToken, createdHenkiloOid);
 
         // Add privileges
         kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio ->
@@ -142,12 +143,6 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                         kutsuOrganisaatio.getOrganisaatioOid(),
                         kutsuOrganisaatio.getRyhmat()));
 
-        // If haka identifier is provided add it to henkilo identifiers
-        if(StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
-            this.identificationService.updateHakatunnuksetByHenkiloAndIdp(createdHenkiloOid,
-                    Sets.newHashSet(kutsuByToken.getHakaIdentifier()));
-        }
-
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());
         kutsuByToken.setTemporaryToken(null);
@@ -155,6 +150,31 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(kutsuByToken.getHetu());
+    }
+
+    private void createCredentials(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String createdHenkiloOid) {
+        // Create username/password and haka identifier if provided
+        if(StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
+            // If haka identifier is provided add it to henkilo identifiers
+            this.identificationService.updateHakatunnuksetByHenkiloAndIdp(createdHenkiloOid,
+                    Sets.newHashSet(kutsuByToken.getHakaIdentifier()));
+            createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
+        }
+        this.kayttajatiedotService.create(
+                createdHenkiloOid,
+                new KayttajatiedotCreateDto(henkiloCreateByKutsuDto.getKayttajanimi()),
+                LdapSynchronizationService.LdapSynchronizationType.ASAP);
+        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+            this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
+        }
+    }
+
+    private void createHakaUsername(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
+        String parsedIdentifier = kutsuByToken.getHakaIdentifier().replaceAll("[^A-Za-z0-9]", "");
+        String username = parsedIdentifier + (new Random().nextInt(900) + 100); // 100-999
+        // This username that is not meant to be used for CAS authentication
+        // CAS does not accept empty password authentication so this is fine without password
+        henkiloCreateByKutsuDto.setKayttajanimi(username);
     }
 
     @NotNull
