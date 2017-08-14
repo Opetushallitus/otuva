@@ -70,7 +70,7 @@ public class KutsuController {
         kutsuService.deleteKutsu(id);
     }
 
-    @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.GET)
+    @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.PUT)
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public void updateIdentifierByToken(@PathVariable String temporaryToken, @RequestBody String hakaIdentifier) {
         this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, hakaIdentifier);
