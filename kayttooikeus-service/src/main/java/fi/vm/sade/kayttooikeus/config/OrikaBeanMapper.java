@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.config;
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
@@ -71,6 +72,10 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
         factory.classMap(Henkilo.class, HenkiloReadDto.class)
                 .fieldAToB("oidHenkilo", "oid")
+                .byDefault()
+                .register();
+        factory.classMap(KutsuUpdateDto.class, Kutsu.class)
+                .mapNulls(false)
                 .byDefault()
                 .register();
         // PassThroughConverter is fine since these are immutable
