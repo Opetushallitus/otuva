@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.dto;
 
 import fi.vm.sade.kayttooikeus.dto.Constants;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
+import fi.vm.sade.oppijanumerorekisteri.validation.ValidateAsiointikieli;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class HenkiloCreateByKutsuDto {
     @Size(min = 1)
     private String kutsumanimi;
 
+    @ValidateAsiointikieli
     private KielisyysDto asiointiKieli;
 
     private String kayttajanimi;
