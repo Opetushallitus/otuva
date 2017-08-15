@@ -17,6 +17,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -121,6 +122,14 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 .search(offset, orderBy)
                 .enrichment()
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isVahvastiTunnistettu(String oidHenkilo) {
+        return BooleanUtils.isTrue(this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo))
+                .getVahvastiTunnistettu());
     }
 
 }
