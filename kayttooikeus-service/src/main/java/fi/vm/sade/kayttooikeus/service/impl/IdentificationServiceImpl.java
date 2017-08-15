@@ -11,9 +11,11 @@ import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_I
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
 
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -39,11 +41,15 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     private final IdentificationRepository identificationRepository;
     private final HenkiloDataRepository henkiloDataRepository;
+    private final KutsuDataRepository kutsuDataRepository;
+    private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
+
     private final KayttoOikeusService kayttoOikeusService;
     private final LdapSynchronizationService ldapSynchronizationService;
+
     private final OrikaBeanMapper mapper;
+
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-    private final KutsuDataRepository kutsuDataRepository;
 
     @Override
     @Transactional
@@ -165,6 +171,16 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         kutsu.setTemporaryToken(this.generateToken());
         kutsu.setTemporaryTokenCreated(LocalDateTime.now());
         return kutsu.getTemporaryToken();
+    }
+
+    @Override
+    @Transactional
+    public String createLoginToken(String oidHenkilo) {
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
+        TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null);
+        this.tunnistusTokenDataRepository.save(tunnistusToken);
+        return tunnistusToken.getLoginToken();
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
