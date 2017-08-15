@@ -34,4 +34,7 @@ public interface HenkiloService {
 
     @Transactional(readOnly = true)
     List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
+
+    @Transactional(readOnly = true)
+    boolean isVahvastiTunnistettu(String oidHenkilo);
 }
