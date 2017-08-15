@@ -1,13 +1,16 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +21,11 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/cas")
 @Api(value = "/cas", description = "CAS:a varten olevat rajapinnat.")
+@RequiredArgsConstructor
 public class CasController {
 
-    private IdentificationService identificationService;
-
-    @Autowired
-    public CasController(IdentificationService identificationService){
-        this.identificationService = identificationService;
-    }
+    private final IdentificationService identificationService;
+    private final HenkiloService henkiloService;
 
     @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
             notes = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -50,6 +50,13 @@ public class CasController {
     public String getHenkiloOidByIdPAndIdentifier(@PathVariable("idpkey") String idpKey,
                                                   @RequestParam("idpid") String idpIdentifier) {
         return identificationService.getHenkiloOidByIdpAndIdentifier(idpKey, idpIdentifier);
+    }
+
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/vahvastiTunnistettu", method = RequestMethod.GET)
+    public boolean isVahvastiTunnistettu(@PathVariable String oidHenkilo) {
+        return this.henkiloService.isVahvastiTunnistettu(oidHenkilo);
     }
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
