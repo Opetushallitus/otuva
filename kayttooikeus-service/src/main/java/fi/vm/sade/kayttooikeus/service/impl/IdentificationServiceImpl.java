@@ -55,8 +55,14 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Transactional
     public String generateAuthTokenForHenkilo(String oid, String idpKey, String idpIdentifier) {
         logger.info("generateAuthTokenForHenkilo henkilo:[{}] idp:[{}] identifier:[{}]", oid, idpKey, idpIdentifier);
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(()
-                -> new NotFoundException("no henkilo found with oid:[" + oid + "]"));
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
+                .orElseThrow(() -> new NotFoundException("no henkilo found with oid:[" + oid + "]"));
+        return this.generateAuthTokenForHenkilo(henkilo, idpKey, idpIdentifier);
+    }
+
+    @Override
+    @Transactional
+    public String generateAuthTokenForHenkilo(Henkilo henkilo, String idpKey, String idpIdentifier) {
 
         Optional<Identification> identification = henkilo.getIdentifications().stream()
                 .filter(henkiloIdentification ->
@@ -181,6 +187,23 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null);
         this.tunnistusTokenDataRepository.save(tunnistusToken);
         return tunnistusToken.getLoginToken();
+    }
+
+    // Hae henkilön tiedot jotka liittyvät logintokeniin
+    // Päivitä henkilölle hetu jos ei ole ennestään olemassa ja merkitse se vahvistetuksi. Muuten tarkista, että hetu täsmää.
+    // Luo auth token
+    // Redirectaa CAS:iin auth tokenin kanssa.
+    @Override
+    @Transactional
+    public String handleStrongIdentification(String hetu, String loginToken) {
+        TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
+                .orElseThrow(() -> new NotFoundException("Login token not found " + loginToken));
+        Henkilo henkilo = tunnistusToken.getHenkilo();
+        // Hetu logig
+//        this.oppijanumerorekisteriClient.
+
+        tunnistusToken.setKaytetty(LocalDateTime.now());
+        return this.generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, henkilo.getKayttajatiedot().getUsername());
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {

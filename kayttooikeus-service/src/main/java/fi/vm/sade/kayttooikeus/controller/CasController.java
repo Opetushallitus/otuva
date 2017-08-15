@@ -60,7 +60,7 @@ public class CasController {
     }
 
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
     public String createLoginToken(@PathVariable String oidHenkilo) {
         return this.identificationService.createLoginToken(oidHenkilo);
@@ -87,34 +87,25 @@ public class CasController {
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
     public void requestGet(HttpServletResponse response,
-                             @RequestParam(value="loginToken", required = false) String loginToken,
-                             @RequestParam(value="kutsuToken", required = false) String kutsuToken,
-                             @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
-                             @RequestHeader(value = "firstname", required = false) String etunimet,
-                             @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
-
-        // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
-
+                           @RequestParam(value="loginToken", required = false) String loginToken,
+                           @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                           @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
+                           @RequestHeader(value = "firstname", required = false) String etunimet,
+                           @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
         // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
         if (kutsuToken != null) {
-            // Tallenna valitut headerit kutsu token kannan tauluun
-            //displayname=[Anna Testi], cn=[Testi Anna Osuuspankki], givenname=[Anna], firstname=[Anna Osuuspankki], sn=[Testi], nationalidentificationnumber=[081181-9984], kotikuntakuntanumero=[019], kotikuntakuntas=[Helsinki], kotikuntakuntar=[], vakinainenkotimainenlahiosoites=[Osuuspankkitie 2], vakinainenkotimainenlahiosoiter=[], vakinainenkotimainenlahiosoitepostinumero=[00120], vakinainenkotimainenlahiosoitepostitoimipaikkas=[Helsinki], vakinainenkotimainenlahiosoitepostitoimipaikkar=[], vakinainenulkomainenlahiosoite=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltios=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltior=[], vakinainenulkomainenlahiosoitepaikkakuntajavaltioselvakielinen=[], vakinainenulkomainenlahiosoitevaltiokoodi3=[], tilapainenkotimainenlahiosoitelahiosoites=[], tilapainenkotimainenlahiosoitelahiosoiter=[], tilapainenkotimainenlahiosoitepostinumero=[], tilapainenkotimainenlahiosoitepostitoimipaikkas=[], tilapainenkotimainenlahiosoitepostitoimipaikkar=[]
             String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
                     kutsuToken, hetu, etunimet, sukunimi);
-            // Vaihda kutsutoken, lyhyeen tunnin kertakäyttöiseen "session" tokeniin
-            // Tee redirect henkilo-ui:seen "session" tokeni query parametrinä
             response.sendRedirect("/henkilo-ui/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken);
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (loginToken != null) {
-            // Hae henkilön tiedot jotka liittyvät logintokeniin
-            // Päivitä henkilölle hetu jos ei ole ennestään olemassa ja merkitse se vahvistetuksi. Muuten tarkista, että hetu täsmää.
-            // Luo auth token
-            // Redirectaa CAS:iin auth tokenin kanssa.
-            throw new UnsupportedOperationException();
-//            String authToken = this.identificationService
-//                    .updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
-//            response.sendRedirect("/cas/login?authToken=" + authToken);
+            String authToken = this.identificationService.handleStrongIdentification(hetu, loginToken);
+            response.sendRedirect("/cas/login?authToken=" + authToken);
+        }
+        // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
+        else {
+            throw new UnsupportedOperationException("Provide loginToken or kutsuToken");
         }
     }
 
