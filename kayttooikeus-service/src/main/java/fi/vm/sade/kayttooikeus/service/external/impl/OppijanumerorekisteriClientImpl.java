@@ -16,10 +16,9 @@ import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -63,7 +62,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHenkiloOidList");
         return retrying(FunctionalUtils.<List<HenkiloPerustietoDto>>io(
             () -> objectMapper.readerFor(new TypeReference<List<HenkiloPerustietoDto>>() {})
-                    .readValue(IOUtils.toString(serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                    .readValue(IOUtils.toString(serviceAccountClient.post(url, MediaType.APPLICATION_JSON_VALUE,
                             objectMapper.writer().writeValueAsString(henkiloOid)).getEntity().getContent()))), 2).get()
                 .orFail(mapper(url));
     }
@@ -85,7 +84,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         return Stream.concat(Stream.of(personOid),
             retrying(FunctionalUtils.<List<HenkiloViiteDto>>io(
                 () ->  objectMapper.readerFor(new TypeReference<List<HenkiloViiteDto>>() {})
-                    .readValue(IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                    .readValue(IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON_VALUE,
                         objectMapper.writeValueAsString(criteria)).getEntity().getContent()))), 2).get()
             .orFail(mapper(url)).stream().flatMap(viite -> Stream.of(viite.getHenkiloOid(), viite.getMasterOid()))
         ).collect(toSet());
@@ -126,7 +125,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
         return retrying(FunctionalUtils.<List<HenkiloHakuPerustietoDto>>io(
                 () -> objectMapper.readerFor(new TypeReference<List<HenkiloHakuPerustietoDto>>() {})
-                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON_VALUE,
                                 data).getEntity().getContent())), 2).get()
                 .orFail(mapper(url));
     }
@@ -153,7 +152,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
         return retrying(FunctionalUtils.<HenkiloPerustiedotDto>io(
                 () -> objectMapper.readerFor(HenkiloPerustiedotDto.class)
-                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                        .readValue(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(data)).getEntity().getContent())), 2).get()
                 .orFail(mapper(url));
     }
@@ -190,13 +189,24 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         return retrying(
                 FunctionalUtils.<String>io(() -> {
                     try {
-                        return IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON,
+                        return IOUtils.toString(this.serviceAccountClient.post(url, MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(henkiloCreateDto)).getEntity().getContent());
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException("Unexpected error during json processing");
                     }
                 }),
                 2).get().orFail(mapper(url));
+    }
+
+    @Override
+    public void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto) {
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.cas.vahva-tunnistus", oidHenkilo);
+        retrying(
+                FunctionalUtils.io(() -> this.serviceAccountClient.put(url,
+                        MediaType.APPLICATION_JSON_VALUE,
+                        this.objectMapper.writeValueAsString(henkiloVahvaTunnistusDto))), 2)
+                .get()
+                .orFail(mapper(url));
     }
 
     //ONR uses java.time.LocalDate

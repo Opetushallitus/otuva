@@ -26,5 +26,5 @@ public interface IdentificationService {
 
     String createLoginToken(String oidHenkilo);
 
-    String handleStrongIdentification(String hetu, String loginToken);
+    String handleStrongIdentification(String hetu, String etunimet, String sukunimi, String loginToken);
 }

@@ -1,11 +1,13 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusLogMessage;
 import fi.vm.sade.auditlog.kayttooikeus.KayttoOikeusOperation;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -57,4 +59,12 @@ public class HenkiloHelper extends AbstractAuditlogAspectHelper {
         finishLogging(logMessage);
     }
 
+    void logCreateHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Object result) throws JsonProcessingException {
+        KayttoOikeusLogMessage.LogMessageBuilder logMessage = KayttoOikeusLogMessage.builder()
+                .kohdeTunniste(temporaryToken)
+                .lisatieto("Henkilön luonti.")
+                .newValue(this.getObjectMapper().writeValueAsString(henkiloCreateByKutsuDto))
+                .setOperaatio(KayttoOikeusOperation.CREATE_HENKILO_BY_KUTSU);
+        finishLogging(logMessage);
+    }
 }
