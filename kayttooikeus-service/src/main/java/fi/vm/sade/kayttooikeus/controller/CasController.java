@@ -7,10 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -100,7 +97,7 @@ public class CasController {
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (loginToken != null) {
-            String authToken = this.identificationService.handleStrongIdentification(hetu, loginToken);
+            String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
             response.sendRedirect("/cas/login?authToken=" + authToken);
         }
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
