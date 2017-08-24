@@ -27,5 +27,4 @@ public class TunnistusToken extends IdentifiableAndVersionedEntity {
     @Column(name = "kaytetty")
     private LocalDateTime kaytetty;
 
-
 }

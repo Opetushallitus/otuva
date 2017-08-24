@@ -35,4 +35,6 @@ public interface HenkiloService {
     List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
 
     boolean isVahvastiTunnistettu(String oidHenkilo);
+
+    boolean isVahvastiTunnistettuByUsername(String username);
 }
