@@ -16,6 +16,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -51,6 +52,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     private final OrikaBeanMapper mapper;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final HenkiloService henkiloService;
 
     @Override
     @Transactional
@@ -207,6 +209,12 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
         tunnistusToken.setKaytetty(LocalDateTime.now());
         return this.generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, henkilo.getKayttajatiedot().getUsername());
+    }
+
+    @Override
+    @Transactional
+    public String createLoginTokenByUsername(String username) {
+        return this.createLoginToken(this.henkiloService.getByKayttajatunnus(username).getOid());
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {

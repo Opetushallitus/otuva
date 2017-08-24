@@ -70,6 +70,13 @@ public class CasController {
         return this.identificationService.createLoginToken(oidHenkilo);
     }
 
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
+    @RequestMapping(value = "/auth/henkilo/username/{username}/loginToken", method = RequestMethod.GET)
+    public String createLoginTokenByUsername(@PathVariable String username) {
+        return this.identificationService.createLoginTokenByUsername(username);
+    }
+
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
