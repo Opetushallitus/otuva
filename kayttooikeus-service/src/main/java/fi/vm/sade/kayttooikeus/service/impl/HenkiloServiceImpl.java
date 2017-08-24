@@ -132,4 +132,11 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 .getVahvastiTunnistettu());
     }
 
+    @Override
+    public boolean isVahvastiTunnistettuByUsername(String username) {
+        return BooleanUtils.isTrue(this.henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username))
+                .getVahvastiTunnistettu());
+    }
+
 }

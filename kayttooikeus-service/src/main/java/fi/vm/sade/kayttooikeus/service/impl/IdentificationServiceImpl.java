@@ -157,7 +157,8 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Override
     @Transactional
     public Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnukset) {
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(() -> new NotFoundException("Henkilo not found"));
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found"));
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
         identificationRepository.delete(identifications);
         List<Identification> updatedIdentifications = hakatunnukset.stream()

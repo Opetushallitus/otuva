@@ -57,6 +57,13 @@ public class CasController {
     }
 
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @RequestMapping(value = "/auth/henkilo/username/{username}/vahvastiTunnistettu", method = RequestMethod.GET)
+    public boolean isVahvastiTunnistettuByUsername(@PathVariable String username) {
+        return this.henkiloService.isVahvastiTunnistettuByUsername(username);
+    }
+
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
     public String createLoginToken(@PathVariable String oidHenkilo) {
