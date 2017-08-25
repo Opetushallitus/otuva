@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.util;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
@@ -10,6 +11,7 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -31,21 +33,29 @@ public class HenkilohakuBuilder {
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private HenkiloDataRepository henkiloDataRepository;
     private OrganisaatioClient organisaatioClient;
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private CommonProperties commonProperties;
 
-    private HenkilohakuBuilder() {}
+    private HenkilohakuBuilder() {
+    }
 
     public HenkilohakuBuilder(HenkiloHibernateRepository henkiloHibernateRepository,
                               OrikaBeanMapper mapper,
                               PermissionCheckerService permissionCheckerService,
                               OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository,
+                              OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
                               HenkiloDataRepository henkiloDataRepository,
-                              OrganisaatioClient organisaatioClient) {
+                              OrganisaatioClient organisaatioClient,
+                              CommonProperties commonProperties) {
         this.henkiloHibernateRepository = henkiloHibernateRepository;
         this.mapper = mapper;
         this.permissionCheckerService = permissionCheckerService;
         this.organisaatioHenkiloDataRepository = organisaatioHenkiloDataRepository;
         this.henkiloDataRepository = henkiloDataRepository;
         this.organisaatioClient = organisaatioClient;
+        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
+        this.commonProperties = commonProperties;
+
     }
 
     public HenkilohakuBuilder builder(HenkilohakuCriteriaDto henkilohakuCriteriaDto) {
@@ -70,10 +80,22 @@ public class HenkilohakuBuilder {
 
     // Remove henkilos the user has no access (and who have organisation)
     public HenkilohakuBuilder exclusion() {
-        if(!this.permissionCheckerService.isCurrentUserAdmin()) {
+        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
+            List<String> organisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
 
+            if (!organisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+                if (henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
+                    henkilohakuCriteriaDto.setOrganisaatioOids(organisaatioOids);
+                } else {
+                    List<String> allCurrentUserOrganisaatioOids = organisaatioOids.stream()
+                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .collect(Collectors.toList());
+
+                    allCurrentUserOrganisaatioOids.retainAll(henkilohakuCriteriaDto.getOrganisaatioOids());
+                    henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
+                }
+            }
         }
-
         return this;
     }
 

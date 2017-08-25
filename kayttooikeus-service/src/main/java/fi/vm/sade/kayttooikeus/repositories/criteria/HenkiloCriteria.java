@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
@@ -11,7 +12,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Henkilöiden hakemiseen oppijanumerorekisteristä henkilön perustietojen
@@ -33,7 +35,7 @@ public class HenkiloCriteria {
     // Organisaatiohenkilo
     private Boolean noOrganisation;
     private Boolean subOrganisation;
-    private String organisaatioOid;
+    private List<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
     public Predicate condition(QHenkilo henkilo,
@@ -58,12 +60,15 @@ public class HenkiloCriteria {
         if(this.noOrganisation != null && !this.noOrganisation) {
             builder.and(henkilo.organisaatioHenkilos.isNotEmpty());
         }
-        if(StringUtils.hasLength(this.organisaatioOid)) {
+        if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
             if(this.subOrganisation != null && this.subOrganisation) {
-                builder.and(organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(this.organisaatioOid));
+                List<Predicate> predicates = this.organisaatioOids.stream()
+                        .map(oid -> organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(oid))
+                        .collect(Collectors.toList());
+                builder.and(ExpressionUtils.anyOf(predicates));
             }
             else {
-                builder.and(organisaatioHenkilo.organisaatioOid.eq(this.organisaatioOid));
+                builder.and(organisaatioHenkilo.organisaatioOid.in(this.organisaatioOids));
             }
         }
         // Kayttooikeus

@@ -41,9 +41,9 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
-    private final CommonProperties commonProperties;
     private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
+    private final CommonProperties commonProperties;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -115,7 +115,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                                                   Long offset,
                                                   OrderByHenkilohaku orderBy) {
         return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
-                this.organisaatioHenkiloDataRepository, this.henkiloDataRepository, this.organisaatioClient)
+                this.organisaatioHenkiloDataRepository, this.organisaatioHenkiloRepository, this.henkiloDataRepository, this.organisaatioClient, this.commonProperties)
                 .builder(henkilohakuCriteriaDto)
                 .exclusion()
                 .search(offset, orderBy)
