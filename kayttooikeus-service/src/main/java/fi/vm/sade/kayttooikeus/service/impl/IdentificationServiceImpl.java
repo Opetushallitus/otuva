@@ -211,12 +211,6 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         return this.generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, henkilo.getKayttajatiedot().getUsername());
     }
 
-    @Override
-    @Transactional
-    public String createLoginTokenByUsername(String username) {
-        return this.createLoginToken(this.henkiloService.getByKayttajatunnus(username).getOid());
-    }
-
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
         return identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, idp);
     }
