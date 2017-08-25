@@ -28,5 +28,4 @@ public interface IdentificationService {
 
     String handleStrongIdentification(String hetu, String etunimet, String sukunimi, String loginToken);
 
-    String createLoginTokenByUsername(String username);
 }
