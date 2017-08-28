@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 
 public interface KutsuService {
-    List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, boolean onlyOwnKutsus);
+    List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, boolean onlyOwnKutsus, String queryTerm);
 
     long createKutsu(KutsuCreateDto dto);
 

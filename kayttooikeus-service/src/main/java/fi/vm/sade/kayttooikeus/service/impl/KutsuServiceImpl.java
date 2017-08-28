@@ -38,11 +38,15 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, boolean onlyOwnKutsus) {
+    public List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy,
+                                              Sort.Direction direction,
+                                              boolean onlyOwnKutsus,
+                                              String queryTerm) {
+        String nonNullQueryTerm = queryTerm == null ? "" : queryTerm;
         final Sort sort = sortBy.getSortWithDirection(direction);
         Supplier<List<Kutsu>> findMethod = onlyOwnKutsus
-                ? () -> this.kutsuDataRepository.findByTilaAndKutsuja(sort, AVOIN, getCurrentUserOid())
-                : () -> this.kutsuDataRepository.findByTila(sort, AVOIN);
+                ? () -> this.kutsuDataRepository.findByTilaAndKutsujaAndNimetContaining(sort, AVOIN, getCurrentUserOid(), nonNullQueryTerm)
+                : () -> this.kutsuDataRepository.findByTilaAndNimetContaining(sort, AVOIN, nonNullQueryTerm);
         List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(findMethod.get(), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
 

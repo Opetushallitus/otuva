@@ -85,7 +85,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any()))
                 .willReturn(Optional.of(org2));
         
-        List<KutsuReadDto> kutsus = kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, true);
+        List<KutsuReadDto> kutsus = kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC,
+                true, "meikäläinen matti");
         assertEquals(1, kutsus.size());
         assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
@@ -94,6 +95,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .extracting(KutsuReadDto.KutsuOrganisaatioDto::getOrganisaatioOid)
                 .containsExactlyInAnyOrder("1.2.3.4.5", "1.2.3.4.6");
+        assertThat(kutsus).extracting(KutsuReadDto::getEtunimi).containsExactlyInAnyOrder("Matti");
+        assertThat(kutsus).extracting(KutsuReadDto::getSukunimi).containsExactlyInAnyOrder("Meikäläinen");
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .extracting(KutsuReadDto.KutsuOrganisaatioDto::getNimi)
                 .extracting(TextGroupMapDto::getTexts)

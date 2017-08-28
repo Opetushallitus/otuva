@@ -30,14 +30,14 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsusTest() throws Exception {
 
-        given(this.kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, null, true))
+        given(this.kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, null, true, null))
                 .willReturn(singletonList(KutsuReadDto.builder()
                         .id(1L).aikaleima(LocalDateTime.of(2016,1,1, 0, 0, 0, 0))
                         .sahkoposti("posti@example.com")
                         .organisaatiot(Sets.newHashSet(
                                 new KutsuReadDto.KutsuOrganisaatioDto(new TextGroupMapDto(3L).put("FI", "Oikeus"), "OID", null)
                         ))
-                    .build()));
+                        .build()));
         this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kutsu/simpleKutsuListaus.json")));

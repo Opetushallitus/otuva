@@ -39,8 +39,9 @@ public class KutsuController {
     public List<KutsuReadDto> listAvoinKutsus(
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
             @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Sort.Direction direction,
-            @RequestParam(required = false, defaultValue = "true") Boolean onlyOwnKutsus) {
-        return kutsuService.listAvoinKutsus(sortBy, direction, onlyOwnKutsus);
+            @RequestParam(required = false, defaultValue = "true") Boolean onlyOwnKutsus,
+            @RequestParam(required = false) String queryTerm) {
+        return kutsuService.listAvoinKutsus(sortBy, direction, onlyOwnKutsus, queryTerm);
     }
 
     @RequestMapping(method = RequestMethod.POST)

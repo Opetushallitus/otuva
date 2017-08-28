@@ -4,17 +4,24 @@ import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
 public interface KutsuDataRepository extends JpaRepository<Kutsu, Long> {
-    List<Kutsu> findByTilaAndKutsuja(Sort sort, KutsunTila tila, String kutsujaOid);
+    @Query("select k from Kutsu k where k.tila = ?1 AND k.kutsuja = ?2 " +
+            "AND (?3 = '' OR LOWER(CONCAT(k.etunimi, ' ', k.sukunimi, ' ', k.etunimi)) like CONCAT('%', LOWER(?3), '%')) ")
+    List<Kutsu> findByTilaAndKutsujaAndNimetContaining(Sort sort, KutsunTila tila, String kutsujaOid, String queryTerm);
 
-    List<Kutsu> findByTila(Sort sort, KutsunTila tila);
+    @Query("select k from Kutsu k where k.tila = ?1 " +
+            "AND (?2 = '' OR LOWER(CONCAT(k.etunimi, ' ', k.sukunimi, ' ', k.etunimi)) like CONCAT('%', LOWER(?2), '%')) ")
+    List<Kutsu> findByTilaAndNimetContaining(Sort sort, KutsunTila tila, String queryTerm);
 
 }
