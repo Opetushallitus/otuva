@@ -41,7 +41,7 @@ public class KutsuCriteria extends BaseCriteria {
                             .or(kutsu.sukunimi.containsIgnoreCase(searchTerm))));
         }
         if(BooleanUtils.isTrue(this.onlyOwnKutsus)) {
-            kutsu.kutsuja.eq(currentUserOid);
+            builder.and(kutsu.kutsuja.eq(currentUserOid));
         }
 
         return builder;
