@@ -1,12 +1,14 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,9 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private KutsuRepository kutsuRepository;
 
+    @MockBean
+    private PermissionCheckerService permissionCheckerService;
+
     @Test
     public void listKutsuListDtosTest() {
         Kutsu kutsu = populate(kutsu("Aapo", "Esimerkki", "a@eaxmple.com")
@@ -34,20 +39,20 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
             )
         );
 
-        List<KutsuListDto> results = kutsuRepository.listKutsuListDtos(new KutsuCriteria().withKutsuja("1.2.3")
-                .withTila(KutsunTila.AVOIN));
+        List<Kutsu> results = kutsuRepository.listKutsuListDtos(new KutsuCriteria().withKutsuja("1.2.3")
+                .withTila(KutsunTila.AVOIN), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection());
         assertEquals(1, results.size());
-        KutsuListDto dto = results.get(0);
+        Kutsu dto = results.get(0);
         assertEquals(LocalDateTime.of(2016,1,1,0,0,0, 0), dto.getAikaleima());
         assertEquals("a@eaxmple.com", dto.getSahkoposti());
         assertEquals(AVOIN, dto.getTila());
         assertEquals(kutsu.getId(), dto.getId());
 
         results = kutsuRepository.listKutsuListDtos(new KutsuCriteria().withKutsuja("1.2.3")
-                .withTila(KutsunTila.POISTETTU, KutsunTila.KAYTETTY));
+                .withTila(KutsunTila.POISTETTU, KutsunTila.KAYTETTY), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection());
         assertEquals(0, results.size());
 
-        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria());
+        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection());
         assertEquals(1, results.size());
     }
 

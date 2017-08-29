@@ -39,8 +39,7 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Column(name = "sahkoposti", nullable = false) 
     private String sahkoposti;
     
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "kutsu", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "kutsu")
     private Set<KutsuOrganisaatio> organisaatiot = new HashSet<>(0);
     
     @Column(name = "salaisuus") 

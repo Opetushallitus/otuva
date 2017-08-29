@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,17 +32,15 @@ public class KutsuController {
         this.kutsuService = kutsuService;
     }
 
-    @ResponseBody
     @RequestMapping(value = "", method = RequestMethod.GET)
-    @ApiOperation("Hakee omat avoimet kutsut.")
+    @ApiOperation("Hakee kutsut annettujen hakuehtojen perusteella.")
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    public List<KutsuReadDto> listAvoinKutsus(
+    public List<KutsuReadDto> listAvoinKutsus(KutsuCriteria kutsuCriteria,
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
-            @ApiParam("Järjestyksen suunta") @RequestParam(required = false) Sort.Direction direction,
-            @RequestParam(required = false, defaultValue = "true") Boolean onlyOwnKutsus,
-            @RequestParam(required = false) String queryTerm) {
-        return kutsuService.listAvoinKutsus(sortBy, direction, onlyOwnKutsus, queryTerm);
+            @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction
+    ) {
+        return kutsuService.listKutsus(sortBy, direction, kutsuCriteria);
     }
 
     @RequestMapping(method = RequestMethod.POST)

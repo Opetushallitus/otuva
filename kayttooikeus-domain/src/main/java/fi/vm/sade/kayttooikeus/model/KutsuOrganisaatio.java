@@ -22,6 +22,10 @@ public class KutsuOrganisaatio extends IdentifiableAndVersionedEntity {
     @Column(name = "organisaatio_oid", nullable = false)
     private String organisaatioOid;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "kutsu", nullable = false)
+    private Kutsu kutsu;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "kutsu_organisaatio_ryhma", joinColumns = @JoinColumn(name = "kutsu_organisaatio", nullable = false, updatable = false),
             inverseJoinColumns = @JoinColumn(name = "ryhma", nullable = false, updatable = false))

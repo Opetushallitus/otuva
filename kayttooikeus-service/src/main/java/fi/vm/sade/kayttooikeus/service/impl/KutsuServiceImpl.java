@@ -1,8 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
@@ -24,6 +26,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
+import static fi.vm.sade.kayttooikeus.model.QKutsu.kutsu;
 
 @Service
 @RequiredArgsConstructor
@@ -38,16 +41,11 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<KutsuReadDto> listAvoinKutsus(KutsuOrganisaatioOrder sortBy,
-                                              Sort.Direction direction,
-                                              boolean onlyOwnKutsus,
-                                              String queryTerm) {
-        String nonNullQueryTerm = queryTerm == null ? "" : queryTerm;
-        final Sort sort = sortBy.getSortWithDirection(direction);
-        Supplier<List<Kutsu>> findMethod = onlyOwnKutsus
-                ? () -> this.kutsuDataRepository.findByTilaAndKutsujaAndNimetContaining(sort, AVOIN, getCurrentUserOid(), nonNullQueryTerm)
-                : () -> this.kutsuDataRepository.findByTilaAndNimetContaining(sort, AVOIN, nonNullQueryTerm);
-        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(findMethod.get(), KutsuReadDto.class);
+    public List<KutsuReadDto> listKutsus(KutsuOrganisaatioOrder sortBy,
+                                         Sort.Direction direction,
+                                         KutsuCriteria kutsuListCriteria) {
+        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
+                sortBy.getSortWithDirection(direction)), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
 
         return kutsuReadDtoList;
@@ -56,25 +54,27 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public long createKutsu(KutsuCreateDto dto) {
-         if (!kutsuRepository.listKutsuListDtos(new KutsuCriteria().withTila(AVOIN).withSahkoposti(dto.getSahkoposti())).isEmpty()) {
+         if (!kutsuRepository.listKutsuListDtos(new KutsuCriteria().withTila(AVOIN).withSahkoposti(dto.getSahkoposti()),
+                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection()).isEmpty()) {
              throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
          }
+
+        final Kutsu newKutsu = mapper.map(dto, Kutsu.class);
+
+        newKutsu.setId(null);
+        newKutsu.setAikaleima(LocalDateTime.now());
+        newKutsu.setKutsuja(getCurrentUserOid());
+        newKutsu.setSalaisuus(UUID.randomUUID().toString());
+        newKutsu.setTila(AVOIN);
+        newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
+
+        validator.validate(newKutsu);
+
+        this.kutsuDataRepository.save(newKutsu);
         
-        Kutsu entity = mapper.map(dto, Kutsu.class);
+        this.emailService.sendInvitationEmail(newKutsu);
 
-        entity.setId(null);
-        entity.setAikaleima(LocalDateTime.now());
-        entity.setKutsuja(getCurrentUserOid());
-        entity.setSalaisuus(UUID.randomUUID().toString());
-        entity.setTila(AVOIN);
-
-        validator.validate(entity);
-
-        entity = kutsuRepository.persist(entity);
-        
-        this.emailService.sendInvitationEmail(entity);
-
-        return entity.getId();
+        return newKutsu.getId();
     }
 
 
