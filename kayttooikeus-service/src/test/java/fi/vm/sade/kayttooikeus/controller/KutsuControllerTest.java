@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,7 +34,7 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsusTest() throws Exception {
 
-        given(this.kutsuService.listKutsus(eq(KutsuOrganisaatioOrder.AIKALEIMA), eq(null), anyObject()))
+        given(this.kutsuService.listKutsus(eq(KutsuOrganisaatioOrder.AIKALEIMA), eq(Sort.Direction.DESC), anyObject()))
                 .willReturn(singletonList(KutsuReadDto.builder()
                         .id(1L).aikaleima(LocalDateTime.of(2016,1,1, 0, 0, 0, 0))
                         .sahkoposti("posti@example.com")
