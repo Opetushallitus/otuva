@@ -179,10 +179,9 @@ public class HenkiloController {
     }
 
     @PostMapping("/henkilohaku")
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')") // Only until results are limited for non admin users
-//    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta. EI tarkoitettu palveluiden käyttöön. Muutosaltis.",
-            notes = "Palauttaa suppean setin henkilöiden tietoja ennetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
+            notes = "Palauttaa suppean setin henkilöiden tietoja annetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
                     "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija) Hakua rajoitetaan näille ryhmille joten ei tarvitse " +
                     "erillisiä käyttöoikeuksia.")
     public List<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto,
