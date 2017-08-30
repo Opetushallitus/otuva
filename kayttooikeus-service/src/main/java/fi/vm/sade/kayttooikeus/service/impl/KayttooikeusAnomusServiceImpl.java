@@ -49,6 +49,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -83,8 +84,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 criteria.setHenkiloOidRestrictionList(Sets.newHashSet(UserDetailsUtil.getCurrentUserOid()));
             }
         }
-        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria, limit, offset, orderBy), HaettuKayttooikeusryhmaDto.class));
+
+        List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
+                .findBy(criteria, limit, offset, orderBy);
+        return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
     private List<HaettuKayttooikeusryhmaDto> localizeKayttooikeusryhma(List<HaettuKayttooikeusryhmaDto> unlocalizedDtos) {
