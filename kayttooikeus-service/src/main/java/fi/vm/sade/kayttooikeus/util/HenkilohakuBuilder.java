@@ -81,16 +81,16 @@ public class HenkilohakuBuilder {
     // Remove henkilos the user has no access (and who have organisation)
     public HenkilohakuBuilder exclusion() {
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            List<String> organisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+            List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
 
-            if (!organisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+            if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
                 if (henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
-                    henkilohakuCriteriaDto.setOrganisaatioOids(organisaatioOids);
+                    henkilohakuCriteriaDto.setOrganisaatioOids(currentUserOrganisaatioOids);
                 } else {
-                    List<String> allCurrentUserOrganisaatioOids = organisaatioOids.stream()
+                    List<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
                             .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
                             .collect(Collectors.toList());
-
+                    allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
                     allCurrentUserOrganisaatioOids.retainAll(henkilohakuCriteriaDto.getOrganisaatioOids());
                     henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
                 }
