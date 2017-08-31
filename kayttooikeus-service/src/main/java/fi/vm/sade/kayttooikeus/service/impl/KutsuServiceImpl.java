@@ -1,10 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
-import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
@@ -23,10 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
-import static fi.vm.sade.kayttooikeus.model.QKutsu.kutsu;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +39,11 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Transactional(readOnly = true)
     public List<KutsuReadDto> listKutsus(KutsuOrganisaatioOrder sortBy,
                                          Sort.Direction direction,
-                                         KutsuCriteria kutsuListCriteria) {
+                                         KutsuCriteria kutsuListCriteria,
+                                         Long offset,
+                                         Long amount) {
         List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
-                sortBy.getSortWithDirection(direction)), KutsuReadDto.class);
+                sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
 
         return kutsuReadDtoList;

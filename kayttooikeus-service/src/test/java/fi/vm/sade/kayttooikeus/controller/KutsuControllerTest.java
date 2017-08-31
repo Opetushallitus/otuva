@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +33,7 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsusTest() throws Exception {
 
-        given(this.kutsuService.listKutsus(eq(KutsuOrganisaatioOrder.AIKALEIMA), eq(Sort.Direction.DESC), anyObject()))
+        given(this.kutsuService.listKutsus(eq(KutsuOrganisaatioOrder.AIKALEIMA), eq(Sort.Direction.DESC), anyObject(), eq(null), eq(20l)))
                 .willReturn(singletonList(KutsuReadDto.builder()
                         .id(1L).aikaleima(LocalDateTime.of(2016,1,1, 0, 0, 0, 0))
                         .sahkoposti("posti@example.com")

@@ -22,6 +22,11 @@ public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements Ku
 
     @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier) {
+        return this.listKutsuListDtos(criteria, orderSpecifier, null, null);
+    }
+
+    @Override
+    public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
         JPAQuery<Kutsu> query = jpa().from(kutsuOrganisaatio)
@@ -29,6 +34,12 @@ public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements Ku
                 .select(kutsu)
                 .where(criteria.onCondition(kutsu, kutsuOrganisaatio, this.permissionCheckerService.getCurrentUserOid()));
         query.orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
+        if(offset != null) {
+            query.offset(offset);
+        }
+        if(amount != null) {
+            query.limit(amount);
+        }
         return query.distinct().fetch();
     }
 }

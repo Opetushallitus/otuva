@@ -36,10 +36,13 @@ public class KutsuController {
     @ApiOperation("Hakee kutsut annettujen hakuehtojen perusteella.")
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    public List<KutsuReadDto> listAvoinKutsus(KutsuCriteria kutsuCriteria,
+    public List<KutsuReadDto> listAvoinKutsus(
+            KutsuCriteria kutsuCriteria,
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
-            @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction) {
-        return kutsuService.listKutsus(sortBy, direction, kutsuCriteria);
+            @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false) Long offset,
+            @RequestParam(required = false, defaultValue = "20") Long amount) {
+        return kutsuService.listKutsus(sortBy, direction, kutsuCriteria, offset, amount);
     }
 
     @RequestMapping(method = RequestMethod.POST)

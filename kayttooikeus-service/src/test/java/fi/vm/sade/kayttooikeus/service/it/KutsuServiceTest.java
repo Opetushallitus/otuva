@@ -86,7 +86,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any()))
                 .willReturn(Optional.of(org2));
         
-        List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, new KutsuCriteria().withQuery("matti meikäläinen"));
+        List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, new KutsuCriteria().withQuery("matti meikäläinen"), null, null);
         assertEquals(1, kutsus.size());
         assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
