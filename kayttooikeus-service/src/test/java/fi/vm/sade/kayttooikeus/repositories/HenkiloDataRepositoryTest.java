@@ -1,11 +1,13 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,9 @@ public class HenkiloDataRepositoryTest {
 
     @Autowired
     TestEntityManager testEntityManager;
+
+    @MockBean
+    PermissionCheckerService permissionCheckerService;
 
     @Test
     public void findByOidHenkilo() {

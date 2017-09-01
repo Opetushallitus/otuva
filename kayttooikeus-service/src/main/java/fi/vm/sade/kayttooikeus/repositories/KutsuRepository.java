@@ -1,13 +1,15 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.KutsuListDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuOrganisaatioListDto;
-import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface KutsuRepository extends BaseRepository<Kutsu> {
-    List<KutsuListDto> listKutsuListDtos(KutsuCriteria criteria);
+@Repository
+@Transactional(propagation = Propagation.MANDATORY)
+public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepositoryCustom {
+    Optional<Kutsu> findById(Long id);
 }
