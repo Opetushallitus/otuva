@@ -68,11 +68,11 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
         validator.validate(newKutsu);
 
-        this.kutsuDataRepository.save(newKutsu);
+       Kutsu persistedNewKutsu = this.kutsuDataRepository.save(newKutsu);
         
-        this.emailService.sendInvitationEmail(newKutsu);
+        this.emailService.sendInvitationEmail(persistedNewKutsu);
 
-        return newKutsu.getId();
+        return persistedNewKutsu.getId();
     }
 
 
