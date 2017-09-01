@@ -2,23 +2,35 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.QKutsu;
 import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
+import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
-public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements KutsuRepository {
-    @Autowired
+@Transactional(propagation = Propagation.MANDATORY)
+public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
+
     private final PermissionCheckerService permissionCheckerService;
+
+    private final EntityManager em;
+
+    @Autowired
+    public KutsuRepositoryImpl(JpaContext context, PermissionCheckerService permissionCheckerService) {
+        this.em = context.getEntityManagerByManagedType(Kutsu.class);
+        this.permissionCheckerService = permissionCheckerService;
+    }
 
     @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier) {
@@ -29,7 +41,7 @@ public class KutsuRepositoryImpl extends BaseRepositoryImpl<Kutsu> implements Ku
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
-        JPAQuery<Kutsu> query = jpa().from(kutsuOrganisaatio)
+        JPAQuery<Kutsu> query = new JPAQueryFactory(this.em).from(kutsuOrganisaatio)
                 .rightJoin(kutsuOrganisaatio.kutsu, kutsu)
                 .select(kutsu)
                 .where(criteria.onCondition(kutsu, kutsuOrganisaatio, this.permissionCheckerService.getCurrentUserOid()));

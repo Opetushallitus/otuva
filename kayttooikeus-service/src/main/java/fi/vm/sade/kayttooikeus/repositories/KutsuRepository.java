@@ -1,15 +1,15 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import com.querydsl.core.types.OrderSpecifier;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface KutsuRepository extends BaseRepository<Kutsu> {
-    List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier);
-
-    List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount);
-
-
+@Repository
+@Transactional(propagation = Propagation.MANDATORY)
+public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepositoryCustom {
+    Optional<Kutsu> findById(Long id);
 }

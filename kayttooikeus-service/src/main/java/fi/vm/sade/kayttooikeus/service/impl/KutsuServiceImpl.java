@@ -5,7 +5,6 @@ import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.EmailService;
@@ -28,7 +27,6 @@ import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 @RequiredArgsConstructor
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final KutsuRepository kutsuRepository;
-    private final KutsuDataRepository kutsuDataRepository;
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
 
@@ -68,7 +66,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
         validator.validate(newKutsu);
 
-       Kutsu persistedNewKutsu = this.kutsuDataRepository.save(newKutsu);
+        Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
         
         this.emailService.sendInvitationEmail(persistedNewKutsu);
 

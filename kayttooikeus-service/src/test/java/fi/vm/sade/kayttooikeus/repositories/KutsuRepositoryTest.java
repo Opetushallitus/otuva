@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 public class KutsuRepositoryTest extends AbstractRepositoryTest {
     @Autowired
-    private KutsuRepository kutsuRepository;
+    private KutsuRepositoryCustom kutsuRepository;
 
     @MockBean
     private PermissionCheckerService permissionCheckerService;
