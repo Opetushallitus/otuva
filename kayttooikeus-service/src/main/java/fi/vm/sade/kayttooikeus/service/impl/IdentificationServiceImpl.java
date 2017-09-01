@@ -203,6 +203,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new NotFoundException("Login token not found " + loginToken));
         Henkilo henkilo = tunnistusToken.getHenkilo();
+        henkilo.setVahvastiTunnistettu(true);
 
         this.oppijanumerorekisteriClient.setStrongIdentifiedHetu(henkilo.getOidHenkilo(),
                 new HenkiloVahvaTunnistusDto(hetu, etunimet, sukunimi));

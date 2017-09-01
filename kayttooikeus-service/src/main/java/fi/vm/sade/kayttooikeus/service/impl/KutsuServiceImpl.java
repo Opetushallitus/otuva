@@ -5,7 +5,9 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
@@ -32,6 +34,8 @@ import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 @RequiredArgsConstructor
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final KutsuRepository kutsuRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
+
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
 
@@ -141,6 +145,11 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                         createdHenkiloOid,
                         kutsuOrganisaatio.getOrganisaatioOid(),
                         kutsuOrganisaatio.getRyhmat()));
+
+        // Set henkilo strongly identified
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(createdHenkiloOid)
+                .orElseGet(() -> this.henkiloDataRepository.save(new Henkilo()));
+        henkilo.setVahvastiTunnistettu(true);
 
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());

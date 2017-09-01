@@ -3,18 +3,22 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
+import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequestMapping("/cas")
 @Api(value = "/cas", description = "CAS:a varten olevat rajapinnat.")
@@ -93,19 +97,25 @@ public class CasController {
     public void requestGet(HttpServletResponse response,
                            @RequestParam(value="loginToken", required = false) String loginToken,
                            @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                           @RequestParam(value = "kielisyys", required = false) String kielisyys,
                            @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
                            @RequestHeader(value = "firstname", required = false) String etunimet,
                            @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
         // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
-        if (kutsuToken != null) {
+        if (StringUtils.hasLength(kutsuToken)) {
             String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
                     kutsuToken, hetu, etunimet, sukunimi);
             response.sendRedirect("/henkilo-ui/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken);
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
-        else if (loginToken != null) {
-            String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
-            response.sendRedirect("/cas/login?authToken=" + authToken);
+        else if (StringUtils.hasLength(loginToken)) {
+            try {
+                String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
+                response.sendRedirect("/cas/login?authToken=" + authToken);
+            } catch (FunctionalUtils.RuntimeIOExceptionWrapper e) {
+                log.warn("User failed strong identification", e);
+                response.sendRedirect("/henkilo-ui/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken);
+            }
         }
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
         else {
