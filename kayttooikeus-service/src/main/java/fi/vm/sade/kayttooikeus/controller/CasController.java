@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
-import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -112,7 +112,7 @@ public class CasController {
             try {
                 String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
                 response.sendRedirect("/cas/login?authToken=" + authToken);
-            } catch (FunctionalUtils.RuntimeIOExceptionWrapper e) {
+            } catch (ExternalServiceException e) {
                 log.warn("User failed strong identification", e);
                 response.sendRedirect("/henkilo-ui/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken);
             }
