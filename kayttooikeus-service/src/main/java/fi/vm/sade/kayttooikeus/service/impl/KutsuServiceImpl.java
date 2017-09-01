@@ -4,11 +4,11 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -110,7 +109,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional(readOnly = true)
     public KutsuReadDto getByTemporaryToken(String temporaryToken) {
-        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
         this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
@@ -120,7 +119,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
-        Kutsu kutsuByToken = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             // Validation
@@ -200,7 +199,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Transactional
     // Nulls are not mapped for KutsuUpdateDto -> Kutsu
     public void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto) {
-        Kutsu kutsu = this.kutsuDataRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+        Kutsu kutsu = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         this.mapper.map(kutsuUpdateDto, kutsu);
     }

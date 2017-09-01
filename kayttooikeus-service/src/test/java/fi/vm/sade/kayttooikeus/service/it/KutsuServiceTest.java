@@ -4,11 +4,9 @@ import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
 import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioCacheRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
@@ -20,7 +18,6 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
-import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpVersion;
@@ -52,9 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 
 @RunWith(SpringRunner.class)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {

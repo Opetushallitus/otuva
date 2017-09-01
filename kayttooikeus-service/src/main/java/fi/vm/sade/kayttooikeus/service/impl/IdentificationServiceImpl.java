@@ -14,7 +14,7 @@ import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
-import fi.vm.sade.kayttooikeus.repositories.KutsuDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -43,7 +43,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     private final IdentificationRepository identificationRepository;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final KutsuDataRepository kutsuDataRepository;
+    private final KutsuRepository kutsuRepository;
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
 
     private final KayttoOikeusService kayttoOikeusService;
@@ -173,7 +173,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Override
     @Transactional
     public String updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi) {
-        Kutsu kutsu = this.kutsuDataRepository.findBySalaisuusIsValid(kutsuToken)
+        Kutsu kutsu = this.kutsuRepository.findBySalaisuusIsValid(kutsuToken)
                 .orElseThrow(() -> new NotFoundException("Kutsu not found with token " + kutsuToken + " or token is invalid"));
         kutsu.setHetu(hetu);
         kutsu.setEtunimi(etunimet);
