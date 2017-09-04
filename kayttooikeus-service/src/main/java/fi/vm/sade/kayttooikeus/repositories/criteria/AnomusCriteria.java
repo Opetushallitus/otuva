@@ -35,6 +35,7 @@ public class AnomusCriteria {
     private String anojaOid;
     private Set<String> henkiloOidRestrictionList;
     private Boolean adminView;
+    private Set<Long> kayttooikeusRyhmaIds;
 
     public Predicate condition(QAnomus qAnomus) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -53,6 +54,10 @@ public class AnomusCriteria {
         if(BooleanUtils.isTrue(this.onlyActive)) {
             builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                     .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
+        }
+
+        if(this.kayttooikeusRyhmaIds != null) {
+            builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
         }
 
         return builder;
@@ -75,9 +80,8 @@ public class AnomusCriteria {
         }
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
             List<Predicate> predicates = this.organisaatioOids.stream()
-                    .map(oid -> organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(oid))
+                    .map(oid -> qAnomus.organisaatioCache.organisaatioOidPath.contains(oid))
                     .collect(Collectors.toList());
-            builder.and(qAnomus.organisaatioOid.in(organisaatioOids));
             builder.and(ExpressionUtils.anyOf(predicates));
         }
         if (anojaOid != null) {
@@ -86,6 +90,7 @@ public class AnomusCriteria {
         if (this.henkiloOidRestrictionList != null) {
             builder.and(qAnomus.henkilo.oidHenkilo.notIn(this.henkiloOidRestrictionList));
         }
+
         return builder;
     }
 

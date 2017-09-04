@@ -35,7 +35,7 @@ public class AnomusController {
     }
 
     @GetMapping("/haettuKayttoOikeusRyhma")
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "Hakee haetut käyttöoikeusryhmät",
             notes = "Tällä hetkellä toteutus vain rekisterinpitäjälle")
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,

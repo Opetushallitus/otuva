@@ -11,6 +11,8 @@ public interface KayttoOikeusRyhmaMyontoViiteRepository extends BaseRepository<K
 
     List<Long> getSlaveIdsByMasterIds(List<Long> masterIds);
 
+    List<Long> getSlaveIdsByMasterHenkiloOid(String oid);
+
     boolean isCyclicMyontoViite(Long id, List<Long> slaveIds);
 
     List<KayttoOikeusRyhmaMyontoViite> getMyontoViites(Long id);

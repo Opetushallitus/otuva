@@ -96,6 +96,9 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
+    @MockBean
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
 
@@ -121,6 +124,7 @@ public class KayttooikeusAnomusServiceTest {
                 this.kayttooikeusryhmaDataRepository,
                 this.anomusRepository,
                 this.organisaatioHenkiloDataRepository,
+                this.organisaatioHenkiloRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
                 this.emailService,
