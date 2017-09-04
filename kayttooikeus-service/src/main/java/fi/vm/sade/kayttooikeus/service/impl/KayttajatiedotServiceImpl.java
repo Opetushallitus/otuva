@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.dto.Constants;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
@@ -12,11 +13,15 @@ import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
+import fi.vm.sade.kayttooikeus.service.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
+
+import java.security.InvalidParameterException;
+import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -78,9 +83,24 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public void changePasswordAsAdmin(String oid, String newPassword) {
-        this.cryptoService.isStrongPassword(newPassword)
-                .stream().findFirst().ifPresent((error) -> {throw new PasswordException(error);});
+        this.cryptoService.throwIfNotStrongPassword(newPassword);
         this.changePassword(oid, newPassword);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void throwIfUsernameExists(String username) {
+        this.kayttajatiedotRepository.findByUsername(username)
+                .ifPresent(foundUsername -> {
+                    throw new UsernameAlreadyExistsException(String.format("Username %s already exists", foundUsername));
+                });
+    }
+
+    @Override
+    public void throwIfUsernameIsNotValid(String username) {
+        if(!username.matches(Constants.USERNAME_REGEXP)) {
+            throw new IllegalArgumentException("Username is not valid with pattern " + Constants.USERNAME_REGEXP);
+        }
     }
 
     private void changePassword(String oid, String newPassword) {

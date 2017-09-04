@@ -52,9 +52,17 @@ public class Kutsu extends IdentifiableAndVersionedEntity {
     @Column(name = "poistaja_oid")
     private String poistaja;
 
-    @Column(name = "luotu_henkilo_oid", nullable = true)
+    @Column(name = "luotu_henkilo_oid")
     private String luotuHenkiloOid;
-    
+
+    private String temporaryToken;
+
+    private LocalDateTime temporaryTokenCreated;
+
+    private String hetu;
+
+    private String hakaIdentifier;
+
     public void poista(String poistaja) {
         if (this.tila != KutsunTila.AVOIN) {
             throw new IllegalStateException("Can not delete kutsu in state " + tila);

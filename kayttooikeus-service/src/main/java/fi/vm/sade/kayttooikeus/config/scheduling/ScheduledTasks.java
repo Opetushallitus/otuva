@@ -68,7 +68,7 @@ public class ScheduledTasks {
     @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.henkiloNimiCache}")
     @Transactional
     public void updateHenkiloNimiCache() {
-        if(this.henkiloDataRepository.countByEtunimetCachedNotNull() > 0L) {
+        if (this.henkiloDataRepository.countByEtunimetCachedNotNull() > 0L) {
             this.henkiloCacheService.updateHenkiloCache();
         }
         // Fetch whole henkilo nimi cache
@@ -76,7 +76,7 @@ public class ScheduledTasks {
             Long count = 1000L;
             for(long page = 0; !this.henkiloCacheService.saveAll(page*count, count, null); page++) {
                 // Escape condition in case of inifine loop (10M+ henkilos)
-                if(page > 10000) {
+                if (page > 10000) {
                     LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
                     break;
                 }

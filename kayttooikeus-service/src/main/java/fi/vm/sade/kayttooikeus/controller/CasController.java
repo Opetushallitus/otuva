@@ -1,29 +1,37 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
+import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/cas")
-@Api(value = "/cas", description = "CAS:a varten olevat rajapinnat.")
+@Api(tags = "CAS:a varten olevat rajapinnat.")
+@RequiredArgsConstructor
 public class CasController {
 
-    private IdentificationService identificationService;
+    private final IdentificationService identificationService;
+    private final HenkiloService henkiloService;
 
-    @Autowired
-    public CasController(IdentificationService identificationService){
-        this.identificationService = identificationService;
-    }
+    private final OphProperties ophProperties;
 
     @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
             notes = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -50,6 +58,28 @@ public class CasController {
         return identificationService.getHenkiloOidByIdpAndIdentifier(idpKey, idpIdentifier);
     }
 
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/vahvastiTunnistettu", method = RequestMethod.GET)
+    public boolean isVahvastiTunnistettu(@PathVariable String oidHenkilo) {
+        return this.henkiloService.isVahvastiTunnistettu(oidHenkilo);
+    }
+
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @RequestMapping(value = "/auth/henkilo/username/{username}/vahvastiTunnistettu", method = RequestMethod.GET)
+    public boolean isVahvastiTunnistettuByUsername(@PathVariable String username) {
+        return this.henkiloService.isVahvastiTunnistettuByUsername(username);
+    }
+
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
+    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
+    public String createLoginToken(@PathVariable String oidHenkilo) {
+        return this.identificationService.createLoginToken(oidHenkilo);
+    }
+
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
@@ -57,11 +87,53 @@ public class CasController {
         return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen autentikointitokenin.",
             notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen autentikointitokenin.")
     @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
     public String updateIdentificationAndGenerateTokenForHenkiloByHetu(@PathVariable("hetu") String hetu) throws IOException {
         return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
+    }
+
+    // Palomuurilla rajoitettu pääsy vain verkon sisältä
+    @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
+            "mahdollinen kirjautuminen suomi.fi:n kautta.)")
+    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
+    public void requestGet(HttpServletResponse response,
+                           @RequestParam(value="loginToken", required = false) String loginToken,
+                           @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                           @RequestParam(value = "kielisyys", required = false) String kielisyys,
+                           @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
+                           @RequestHeader(value = "firstname", required = false) String etunimet,
+                           @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
+        // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
+        Map<String, String> queryParams;
+        if (StringUtils.hasLength(kutsuToken)) {
+            String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
+                    kutsuToken, hetu, etunimet, sukunimi);
+            queryParams = new HashMap<String, String>() {{
+                put("temporaryKutsuToken", temporaryKutsuToken);
+            }};
+            response.sendRedirect(this.ophProperties.url("henkilo-ui.rekisteroidy", queryParams));
+        }
+        // Kirjataan henkilön vahva tunnistautuminen järjestelmään
+        else if (StringUtils.hasLength(loginToken)) {
+            try {
+                String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
+                queryParams = new HashMap<String, String>() {{
+                    put("authToken", authToken);
+                    put("service", ophProperties.url("virkailijan-tyopoyta"));
+                }};
+                response.sendRedirect(this.ophProperties.url("cas.login", queryParams));
+            } catch (ExternalServiceException e) {
+                log.warn("User failed strong identification", e);
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken));
+            }
+        }
+        // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
+        else {
+            throw new UnsupportedOperationException("Provide loginToken or kutsuToken");
+        }
     }
 
     @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",

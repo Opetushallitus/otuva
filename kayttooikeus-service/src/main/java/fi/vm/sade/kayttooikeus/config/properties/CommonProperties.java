@@ -15,6 +15,8 @@ public class CommonProperties {
     private String adminOid;
     private InvitationEmail invitationEmail;
     private String organisaatioRyhmaPrefix = "1.2.246.562.28";
+    private String yhteystiedotRyhmaAlkuperaVirkailijaUi = "alkupera2";
+    private String yhteystiedotRyhmaKuvausTyoosoite = "yhteystietotyyppi2";
 
     @Getter @Setter
     public static class InvitationEmail {

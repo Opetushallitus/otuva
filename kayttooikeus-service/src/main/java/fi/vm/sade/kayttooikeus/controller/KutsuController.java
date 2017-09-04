@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +26,7 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 @RestController
 @RequestMapping("/kutsu")
-@Api(value = "/kutsu", description = "Virkailijan kutsumiseen liittyvät toiminnot")
+@Api(tags = "Virkailijan kutsumiseen liittyvät toiminnot")
 public class KutsuController {
     private final KutsuService kutsuService;
     
@@ -68,4 +71,32 @@ public class KutsuController {
     public void delete(@PathVariable Long id) {
         kutsuService.deleteKutsu(id);
     }
+
+    @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.PUT)
+    @ApiOperation("Kutsun päivittäminen väliaikaisella tokenilla. Sallii osittaisen päivittämisen.")
+    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    public void updateIdentifierByToken(@PathVariable String temporaryToken,
+                                        @RequestBody KutsuUpdateDto kutsuUpdateDto) {
+        this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, kutsuUpdateDto);
+    }
+
+    /**
+     *  /kutsu is open to non-authenticated use.
+     */
+
+    // Uses temporary tokens so not authenticated
+    @ApiOperation("Get kutsu by temporary token")
+    @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.GET)
+    public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
+        return this.kutsuService.getByTemporaryToken(temporaryToken);
+    }
+
+    // Consumes single use temporary tokens so not authenticated
+    @ApiOperation("Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
+    @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.POST)
+    public String createByToken(@PathVariable String temporaryToken,
+                                @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+        return this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
+    }
+
 }

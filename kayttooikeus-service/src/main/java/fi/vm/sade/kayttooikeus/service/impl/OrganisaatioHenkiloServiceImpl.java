@@ -164,7 +164,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                                 .anyMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(t.getOrganisaatioOid()))
                 )
                 .forEach(organisaatioHenkiloUpdateDto -> {
-                    if(!this.getCurrentUserOid().equals(henkiloOid)) {
+                    if (!this.getCurrentUserOid().equals(henkiloOid)) {
                         this.permissionCheckerService.hasRoleForOrganisations(Collections.singletonList(organisaatioHenkiloUpdateDto),
                                 Lists.newArrayList("CRUD", "READ_UPDATE"));
                     }
