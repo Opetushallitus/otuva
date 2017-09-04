@@ -26,7 +26,7 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 @RestController
 @RequestMapping("/kutsu")
-@Api(value = "/kutsu", description = "Virkailijan kutsumiseen liittyvät toiminnot")
+@Api(tags = "Virkailijan kutsumiseen liittyvät toiminnot")
 public class KutsuController {
     private final KutsuService kutsuService;
     

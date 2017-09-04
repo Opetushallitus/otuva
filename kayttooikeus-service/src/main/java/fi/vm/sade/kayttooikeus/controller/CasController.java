@@ -21,7 +21,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequestMapping("/cas")
-@Api(value = "/cas", description = "CAS:a varten olevat rajapinnat.")
+@Api(tags = "CAS:a varten olevat rajapinnat.")
 @RequiredArgsConstructor
 public class CasController {
 
@@ -111,7 +111,7 @@ public class CasController {
         else if (StringUtils.hasLength(loginToken)) {
             try {
                 String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
-                response.sendRedirect("/cas/login?authToken=" + authToken);
+                response.sendRedirect("/cas/login?authToken=" + authToken + "&service=/virkailijan-tyopoyta/");
             } catch (ExternalServiceException e) {
                 log.warn("User failed strong identification", e);
                 response.sendRedirect("/henkilo-ui/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken);
