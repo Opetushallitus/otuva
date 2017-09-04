@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
+import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -27,6 +30,8 @@ public class CasController {
 
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
+
+    private final OphProperties ophProperties;
 
     @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
             notes = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -102,19 +107,27 @@ public class CasController {
                            @RequestHeader(value = "firstname", required = false) String etunimet,
                            @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
         // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
+        Map<String, String> queryParams;
         if (StringUtils.hasLength(kutsuToken)) {
             String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
                     kutsuToken, hetu, etunimet, sukunimi);
-            response.sendRedirect("/henkilo-ui/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken);
+            queryParams = new HashMap<String, String>() {{
+                put("temporaryKutsuToken", temporaryKutsuToken);
+            }};
+            response.sendRedirect(this.ophProperties.url("henkilo-ui.rekisteroidy", queryParams));
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (StringUtils.hasLength(loginToken)) {
             try {
                 String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
-                response.sendRedirect("/cas/login?authToken=" + authToken + "&service=/virkailijan-tyopoyta/");
+                queryParams = new HashMap<String, String>() {{
+                    put("authToken", authToken);
+                    put("service", ophProperties.url("virkailijan-tyopoyta"));
+                }};
+                response.sendRedirect(this.ophProperties.url("cas.login", queryParams));
             } catch (ExternalServiceException e) {
                 log.warn("User failed strong identification", e);
-                response.sendRedirect("/henkilo-ui/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken);
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken));
             }
         }
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
