@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
+import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
@@ -128,6 +129,8 @@ public class CasController {
             } catch (ExternalServiceException e) {
                 log.warn("User failed strong identification", e);
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken));
+            } catch (LoginTokenNotFoundException e) {
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
             }
         }
         // Tarkista että vaaditut tokenit ja tiedot löytyvät (riippuen casesta) -> Error sivu
