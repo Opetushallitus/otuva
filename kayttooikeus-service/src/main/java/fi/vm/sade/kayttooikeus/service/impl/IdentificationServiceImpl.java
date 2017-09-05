@@ -16,9 +16,9 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
-import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
@@ -52,7 +52,6 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     private final OrikaBeanMapper mapper;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-    private final HenkiloService henkiloService;
 
     @Override
     @Transactional
@@ -201,7 +200,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Transactional
     public String handleStrongIdentification(String hetu, String etunimet, String sukunimi, String loginToken) {
         TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
-                .orElseThrow(() -> new NotFoundException("Login token not found " + loginToken));
+                .orElseThrow(() -> new LoginTokenNotFoundException("Login token not found " + loginToken));
         Henkilo henkilo = tunnistusToken.getHenkilo();
         henkilo.setVahvastiTunnistettu(true);
 
