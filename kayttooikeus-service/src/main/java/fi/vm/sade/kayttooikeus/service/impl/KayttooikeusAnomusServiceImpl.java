@@ -81,17 +81,17 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          boolean showOwnAnomus) {
         if (!showOwnAnomus) {
             if (criteria.getHenkiloOidRestrictionList() != null) {
-                criteria.addHenkiloOidRestriction(UserDetailsUtil.getCurrentUserOid());
+                criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
             } else {
-                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(UserDetailsUtil.getCurrentUserOid()));
+                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(this.permissionCheckerService.getCurrentUserOid()));
             }
         }
 
-        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(UserDetailsUtil.getCurrentUserOid());
+        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
 
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             // käyttöoikeusryhma filtering
-            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(UserDetailsUtil.getCurrentUserOid());
+            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
             criteria.setKayttooikeusRyhmaIds(new HashSet<Long>(slaveIds));
 
             // organisaatio filtering
