@@ -21,6 +21,7 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import java.util.EnumSet;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -86,16 +87,30 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             }
         }
 
-        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(UserDetailsUtil.getCurrentUserOid());
 
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.getCurrentUserOid());
-
+            // käyttöoikeusryhma filtering
+            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(UserDetailsUtil.getCurrentUserOid());
             criteria.setKayttooikeusRyhmaIds(new HashSet<Long>(slaveIds));
 
             // organisaatio filtering
             if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
-                // TODO: KJHH-1019
+                if(criteria.getOrganisaatioOids() == null) {
+                    criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                } else {
+                    Set<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
+                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .collect(Collectors.toSet());
+                    allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
+                    allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
+
+                    criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
+                    if(allCurrentUserOrganisaatioOids.isEmpty()) {
+                        criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                    }
+                }
+
             }
         }
 
