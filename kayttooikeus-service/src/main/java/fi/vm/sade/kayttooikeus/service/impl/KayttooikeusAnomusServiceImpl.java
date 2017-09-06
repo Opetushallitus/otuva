@@ -52,7 +52,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+<<<<<<< HEAD
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+=======
+    private final OrganisaatioCacheRepository organisaatioCacheRepository;
+>>>>>>> master
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -169,7 +173,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                     anoja.getOidHenkilo(),
                     anojanAnomus.getOrganisaatioOid(),
                     anottuKayttoOikeusRyhma,
-                    anojanAnomus.getTehtavanimike());
+                    anojanAnomus.getTehtavanimike(),
+                    this.permissionCheckerService.getCurrentUserOid());
             anojanAnomus.addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
@@ -246,15 +251,19 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
+        this.henkiloDataRepository.save(anoja);
+
         OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = anoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
-                        anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                        this.organisaatioHenkiloDataRepository.save(anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
                                 .henkilo(anoja)
-                                .build()));
+                                .organisaatioCache(this.organisaatioCacheRepository.findByOrganisaatioOid(organisaatioOid)
+                                        .orElseThrow(() -> new NotFoundException("Organisaatio not found from cache by oid " + organisaatioOid)))
+                                .build())));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
         return foundOrCreatedOrganisaatioHenkilo;
     }
@@ -279,7 +288,24 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         organisaatioOid,
                         this.kayttooikeusryhmaDataRepository.findById(haettuKayttooikeusryhmaDto.getId())
                                 .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
-                        ""));
+                        "",
+                        this.permissionCheckerService.getCurrentUserOid()));
+    }
+
+    // For internal calls when permission checks are redundant.
+    @Override
+    @Transactional
+    public void grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(String anoja,
+                                                                    String organisaatioOid,
+                                                                    Collection<KayttoOikeusRyhma> kayttooikeusryhmas) {
+        kayttooikeusryhmas.forEach(kayttooikeusryhma -> this.grantKayttooikeusryhma(
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                anoja,
+                organisaatioOid,
+                kayttooikeusryhma,
+                "",
+                anoja)); // anoja == kasittelija in this case
     }
 
     @Override
@@ -373,10 +399,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                        String anojaOid,
                                                                        String organisaatioOid,
                                                                        KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
-                                                                       String tehtavanimike) {
+                                                                       String tehtavanimike,
+                                                                       String kasittelijaOid) {
         Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
-        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.getCurrentUserOid()));
 
         OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = this.findOrCreateHaettuOrganisaatioHenkilo(
@@ -399,8 +426,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         ? "Oikeuksien lisäys"
                         : "Oikeuksien päivitys");
 
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma);
-
         ldapSynchronizationService.updateHenkiloAsap(anojaOid);
 
         return myonnettyKayttoOikeusRyhmaTapahtuma;
@@ -414,12 +439,18 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,
                                                                                                 OrganisaatioHenkilo organisaatioHenkilo,
                                                                                                 KayttoOikeusRyhma kayttoOikeusRyhma) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
-                organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
-                .orElseGet(() -> MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =  this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+                .findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
+                        organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
+                .orElseGet(() -> this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(kayttoOikeusRyhma)
                         .organisaatioHenkilo(organisaatioHenkilo)
-                        .anomus(Sets.newHashSet()).build());
+                        .anomus(Sets.newHashSet())
+                        .aikaleima(LocalDateTime.now())
+                        .tila(KayttoOikeudenTila.ANOTTU)
+                        .voimassaAlkuPvm(LocalDate.now()).build()));
+        organisaatioHenkilo.addMyonnettyKayttooikeusryhmaTapahtuma(myonnettyKayttoOikeusRyhmaTapahtuma);
+        return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
 
     @Override
@@ -428,7 +459,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository.findById(kayttooikeusRyhmaId)
                 .orElseThrow(() -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId));
         Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
-        anomus.getHaettuKayttoOikeusRyhmas().removeIf(h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()));
+        anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
         if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }

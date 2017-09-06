@@ -53,4 +53,11 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
 
     @Column(name = "tehtavanimike")
     private String tehtavanimike;
+
+    public void addMyonnettyKayttooikeusryhmaTapahtuma(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
+        if(this.myonnettyKayttoOikeusRyhmas == null) {
+            this.myonnettyKayttoOikeusRyhmas = new HashSet<>();
+        }
+        this.myonnettyKayttoOikeusRyhmas.add(myonnettyKayttoOikeusRyhmaTapahtuma);
+    }
 }

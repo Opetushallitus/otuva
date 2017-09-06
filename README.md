@@ -4,6 +4,9 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 
 ## Teknologiat
 
+## Vaatimukset
+- Java 1.8.0_92 (ei toiminut 1.8.0_60)
+
 ### Palvelin
 * Tomcat 7
 * Java 8

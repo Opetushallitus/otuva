@@ -23,6 +23,9 @@ public class KutsuPopulator implements Populator<Kutsu> {
     private String kutsuja = "kutsuja";
     private String luotuHenkiloOid;
     private LocalDateTime aikaleima = LocalDateTime.now();
+    private String temporaryToken;
+    private String hetu;
+    private String hakaIdentifier;
 
     public KutsuPopulator(String etunimi, String sukunimi, String sahkoposti) {
         this.etunimi = etunimi;
@@ -32,6 +35,11 @@ public class KutsuPopulator implements Populator<Kutsu> {
     
     public static KutsuPopulator kutsu(String etunimi, String sukunimi, String sahkoposti) {
         return new KutsuPopulator(etunimi, sukunimi, sahkoposti);
+    }
+
+    public KutsuPopulator hetu(String hetu) {
+        this.hetu = hetu;
+        return this;
     }
     
     public KutsuPopulator kutsuja(String kutsuja) {
@@ -68,6 +76,16 @@ public class KutsuPopulator implements Populator<Kutsu> {
         this.kieliKoodi = koodi;
         return this;
     }
+
+    public KutsuPopulator temporaryToken(String temporaryToken) {
+        this.temporaryToken = temporaryToken;
+        return this;
+    }
+
+    public KutsuPopulator hakaIdentifier(String hakaIdentifier) {
+        this.hakaIdentifier = hakaIdentifier;
+        return this;
+    }
     
     @Override
     public Kutsu apply(EntityManager entityManager) {
@@ -84,11 +102,16 @@ public class KutsuPopulator implements Populator<Kutsu> {
             kutsu.setKutsuja(kutsuja);
             kutsu.setLuotuHenkiloOid(luotuHenkiloOid);
             kutsu.setKieliKoodi(kieliKoodi);
+            kutsu.setTemporaryToken(this.temporaryToken);
+            kutsu.setTemporaryTokenCreated(LocalDateTime.now());
+            kutsu.setHetu(this.hetu);
+            kutsu.setHakaIdentifier(this.hakaIdentifier);
             entityManager.persist(kutsu);
             
             organisaatiot.forEach(organisaatioPopulator -> {
                 KutsuOrganisaatio kutsuOrganisaatio = organisaatioPopulator.apply(entityManager);
                 kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
+                kutsuOrganisaatio.setKutsu(kutsu);
             });
             
             return kutsu;

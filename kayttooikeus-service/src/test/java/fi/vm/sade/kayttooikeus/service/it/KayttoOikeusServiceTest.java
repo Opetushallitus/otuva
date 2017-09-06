@@ -97,21 +97,22 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         
         List<KayttoOikeusHistoriaDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
         assertEquals(3, list.size());
-        assertEquals(tapahtuma.getAikaleima(), list.get(0).getAikaleima());
-        assertEquals(tapahtuma.getKasittelija().getOidHenkilo(), list.get(0).getKasittelija());
-        assertEquals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), list.get(0).getOrganisaatioOid());
-        assertEquals(tapahtuma.getOrganisaatioHenkilo().getTehtavanimike(), list.get(0).getTehtavanimike());
-        assertEquals(KayttoOikeudenTila.MYONNETTY, list.get(0).getTila());
-        assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, list.get(0).getTyyppi());
-        assertEquals(tapahtuma.getVoimassaAlkuPvm(), list.get(0).getVoimassaAlkuPvm());
-        assertEquals(tapahtuma.getVoimassaLoppuPvm(), list.get(0).getVoimassaLoppuPvm());
+        KayttoOikeusHistoriaDto kayttoOikeusHistoriaResult = list.stream().filter(kayttoOikeusHistoriaDto -> kayttoOikeusHistoriaDto.getOrganisaatioOid().equals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())).findFirst().orElseThrow(RuntimeException::new);
+        assertEquals(tapahtuma.getAikaleima(), kayttoOikeusHistoriaResult.getAikaleima());
+        assertEquals(tapahtuma.getKasittelija().getOidHenkilo(), kayttoOikeusHistoriaResult.getKasittelija());
+        assertEquals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), kayttoOikeusHistoriaResult.getOrganisaatioOid());
+        assertEquals(tapahtuma.getOrganisaatioHenkilo().getTehtavanimike(), kayttoOikeusHistoriaResult.getTehtavanimike());
+        assertEquals(KayttoOikeudenTila.MYONNETTY, kayttoOikeusHistoriaResult.getTila());
+        assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, kayttoOikeusHistoriaResult.getTyyppi());
+        assertEquals(tapahtuma.getVoimassaAlkuPvm(), kayttoOikeusHistoriaResult.getVoimassaAlkuPvm());
+        assertEquals(tapahtuma.getVoimassaLoppuPvm(), kayttoOikeusHistoriaResult.getVoimassaLoppuPvm());
         assertEquals(tapahtuma.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
-                list.get(0).getKayttoOikeusId());
-        assertEquals("CRUD", list.get(0).getRooli());
-        assertEquals("KOODISTO", list.get(0).getPalvelu());
-        assertEquals("Koodistonhallinta", list.get(0).getKuvaus().get("FI"));
-        assertEquals("Kirjoitusoikeus", list.get(0).getKayttoOikeusKuvaus().get("FI"));
-        assertEquals("Palvelukuvaus", list.get(0).getPalveluKuvaus().get("FI"));
+                kayttoOikeusHistoriaResult.getKayttoOikeusId());
+        assertEquals("CRUD", kayttoOikeusHistoriaResult.getRooli());
+        assertEquals("KOODISTO", kayttoOikeusHistoriaResult.getPalvelu());
+        assertEquals("Koodistonhallinta", kayttoOikeusHistoriaResult.getKuvaus().get("FI"));
+        assertEquals("Kirjoitusoikeus", kayttoOikeusHistoriaResult.getKayttoOikeusKuvaus().get("FI"));
+        assertEquals("Palvelukuvaus", kayttoOikeusHistoriaResult.getPalveluKuvaus().get("FI"));
     }
 
     @Test

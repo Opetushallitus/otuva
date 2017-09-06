@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public class Identification extends IdentifiableAndVersionedEntity {
 
     public static final String WEAK_AUTHENTICATION_IDP = "email";
     public static final String STRONG_AUTHENTICATION_IDP = "vetuma";
+    public static final String HAKA_AUTHENTICATION_IDP = "haka";
 
     public Identification() {
     }
@@ -36,6 +38,8 @@ public class Identification extends IdentifiableAndVersionedEntity {
 
     @Column(name = "authtoken")
     private String authtoken;
+
+    private LocalDateTime authTokenCreated;
 
     /**
      * Voimassaoloaika.

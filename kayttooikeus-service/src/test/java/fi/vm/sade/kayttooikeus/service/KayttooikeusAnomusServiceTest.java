@@ -97,7 +97,11 @@ public class KayttooikeusAnomusServiceTest {
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @MockBean
+<<<<<<< HEAD
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+=======
+    private OrganisaatioCacheRepository organisaatioCacheRepository;
+>>>>>>> master
 
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
@@ -114,6 +118,10 @@ public class KayttooikeusAnomusServiceTest {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
         this.commonProperties = new CommonProperties();
         commonProperties.setRootOrganizationOid("rootOid");
+        given(this.organisaatioCacheRepository.findByOrganisaatioOid(anyString()))
+                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
+       doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
+       doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
                 this.haettuKayttooikeusRyhmaRepository,
                 this.henkiloDataRepository,
@@ -125,6 +133,7 @@ public class KayttooikeusAnomusServiceTest {
                 this.anomusRepository,
                 this.organisaatioHenkiloDataRepository,
                 this.organisaatioHenkiloRepository,
+                this.organisaatioCacheRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
                 this.emailService,
@@ -254,9 +263,10 @@ public class KayttooikeusAnomusServiceTest {
         given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L);
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
-                .willReturn(Optional.of(createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L)));
+                .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
 
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
                 LocalDate.now().plusYears(1));
@@ -265,9 +275,47 @@ public class KayttooikeusAnomusServiceTest {
 
         ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
                 ArgumentCaptor.forClass(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
-        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(1))
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(0))
                 .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
-        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.getValue();
+        ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor =
+                ArgumentCaptor.forClass(KayttoOikeusRyhmaTapahtumaHistoria.class);
+        verify(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1))
+                .save(kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor.capture());
+        KayttoOikeusRyhmaTapahtumaHistoria kayttoOikeusRyhmaTapahtumaHistoria = kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor.getValue();
+        assertThat(myonnettyKayttoOikeusRyhmaTapahtuma.getTila())
+                .isEqualByComparingTo(kayttoOikeusRyhmaTapahtumaHistoria.getTila())
+                .isEqualByComparingTo(KayttoOikeudenTila.UUSITTU);
+        assertThat(myonnettyKayttoOikeusRyhmaTapahtuma.getAnomus()).isNotNull();
+
+        assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getSyy()).isEqualTo("Oikeuksien päivitys");
+    }
+
+    // Grant kayttooikeus internally as unauthorized user.
+    @Test
+    public void grantKayttooikeusryhmaAsAdmin() {
+        given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
+        given(this.permissionCheckerService.checkRoleForOrganisation(any(), any())).willReturn(true);
+        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhmaWithViite(2001L)));
+        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
+        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
+        given(this.permissionCheckerService.organisaatioLimitationCheck(eq("1.2.0.0.1"), anySetOf(OrganisaatioViite.class))).willReturn(true);
+        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
+                .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
+        given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L);
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+                "1.2.0.0.1", "1.2.3.4.5"))
+                .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
+
+        KayttoOikeusRyhma grantKayttooikeusryhma = createKayttooikeusryhma(2001L);
+        this.kayttooikeusAnomusService.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck("1.2.3.4.5", "1.2.0.0.1",
+                Lists.newArrayList(grantKayttooikeusryhma));
+
+        ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
+                ArgumentCaptor.forClass(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(0))
+                .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
         ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor =
                 ArgumentCaptor.forClass(KayttoOikeusRyhmaTapahtumaHistoria.class);
         verify(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1))

@@ -32,6 +32,9 @@ public interface HenkiloService {
 
     void disableHenkiloOrganisationsAndKayttooikeus(String henkiloOid, String kasittelijaOid);
 
-    @Transactional(readOnly = true)
     List<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
+
+    boolean isVahvastiTunnistettu(String oidHenkilo);
+
+    boolean isVahvastiTunnistettuByUsername(String username);
 }

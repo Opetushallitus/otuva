@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -18,6 +19,8 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -30,14 +33,14 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsusTest() throws Exception {
 
-        given(this.kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, null, true))
+        given(this.kutsuService.listKutsus(eq(KutsuOrganisaatioOrder.AIKALEIMA), eq(Sort.Direction.DESC), anyObject(), eq(null), eq(20l)))
                 .willReturn(singletonList(KutsuReadDto.builder()
                         .id(1L).aikaleima(LocalDateTime.of(2016,1,1, 0, 0, 0, 0))
                         .sahkoposti("posti@example.com")
                         .organisaatiot(Sets.newHashSet(
                                 new KutsuReadDto.KutsuOrganisaatioDto(new TextGroupMapDto(3L).put("FI", "Oikeus"), "OID", null)
                         ))
-                    .build()));
+                        .build()));
         this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kutsu/simpleKutsuListaus.json")));

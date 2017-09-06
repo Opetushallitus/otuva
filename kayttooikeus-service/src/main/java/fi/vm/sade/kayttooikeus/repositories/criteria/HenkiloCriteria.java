@@ -43,13 +43,13 @@ public class HenkiloCriteria {
                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
-        if(this.passivoitu != null && !this.passivoitu) {
+        if (this.passivoitu != null && !this.passivoitu) {
             builder.and(henkilo.passivoituCached.eq(false));
         }
-        if(this.duplikaatti != null && !this.duplikaatti) {
+        if (this.duplikaatti != null && !this.duplikaatti) {
             builder.and(henkilo.duplicateCached.eq(false));
         }
-        if(StringUtils.hasLength(this.nameQuery)) {
+        if (StringUtils.hasLength(this.nameQuery)) {
             Arrays.stream(this.nameQuery.split(" ")).forEach(queryPart ->
                     builder.and(Expressions.anyOf(
                             henkilo.etunimetCached.containsIgnoreCase(queryPart),
@@ -57,10 +57,10 @@ public class HenkiloCriteria {
                     )));
         }
         // Organisaatiohenkilo
-        if(this.noOrganisation != null && !this.noOrganisation) {
+        if (this.noOrganisation != null && !this.noOrganisation) {
             builder.and(henkilo.organisaatioHenkilos.isNotEmpty());
         }
-        if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
+        if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
             if(this.subOrganisation != null && this.subOrganisation) {
                 List<Predicate> predicates = this.organisaatioOids.stream()
                         .map(oid -> organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(oid))
@@ -72,7 +72,7 @@ public class HenkiloCriteria {
             }
         }
         // Kayttooikeus
-        if(this.kayttooikeusryhmaId != null) {
+        if (this.kayttooikeusryhmaId != null) {
             builder.and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(this.kayttooikeusryhmaId));
         }
 

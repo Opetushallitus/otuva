@@ -1,14 +1,24 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
+import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioCacheRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
+import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
+import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
+import fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpVersion;
 import org.apache.http.entity.StringEntity;
@@ -39,8 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 
 @RunWith(SpringRunner.class)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
@@ -52,6 +61,18 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
+
+    @MockBean
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
+    @MockBean
+    private HenkiloHelper henkiloHelper;
+
+    @MockBean
+    private OrganisaatioCacheRepository organisaatioCacheRepository;
+
+    @MockBean
+    private LdapSynchronizationService ldapSynchronizationService;
 
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
@@ -85,7 +106,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any()))
                 .willReturn(Optional.of(org2));
         
-        List<KutsuReadDto> kutsus = kutsuService.listAvoinKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, true);
+        List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, new KutsuCriteria().withQuery("matti meikäläinen"), null, null);
         assertEquals(1, kutsus.size());
         assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
@@ -94,6 +115,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .extracting(KutsuReadDto.KutsuOrganisaatioDto::getOrganisaatioOid)
                 .containsExactlyInAnyOrder("1.2.3.4.5", "1.2.3.4.6");
+        assertThat(kutsus).extracting(KutsuReadDto::getEtunimi).containsExactlyInAnyOrder("Matti");
+        assertThat(kutsus).extracting(KutsuReadDto::getSukunimi).containsExactlyInAnyOrder("Meikäläinen");
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .extracting(KutsuReadDto.KutsuOrganisaatioDto::getNimi)
                 .extracting(TextGroupMapDto::getTexts)
@@ -174,5 +197,82 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
         );
         kutsuService.deleteKutsu(kutsu.getId());
+    }
+
+    @Test
+    public void getByTemporaryToken() {
+        populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi").temporaryToken("123"));
+        KutsuReadDto kutsu = this.kutsuService.getByTemporaryToken("123");
+        assertThat(kutsu.getAsiointikieli()).isEqualTo(Asiointikieli.fi);
+        assertThat(kutsu.getEtunimi()).isEqualTo("arpa");
+        assertThat(kutsu.getSukunimi()).isEqualTo("kuutio");
+        assertThat(kutsu.getSahkoposti()).isEqualTo("arpa@kuutio.fi");
+    }
+
+    @Test
+    public void createHenkilo() {
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .temporaryToken("123")
+                .hetu("hetu")
+                .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+        Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
+        given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
+        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
+                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
+        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
+                new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
+
+        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        assertThat(henkilo.getKayttajatiedot().getUsername()).isEqualTo("arpauser");
+        assertThat(henkilo.getKayttajatiedot().getPassword()).isNotEmpty();
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .extracting(KayttoOikeusRyhma::getName)
+                .containsExactly("ryhma");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
+                .containsExactly("1.2.0.0.1");
+
+        assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
+        assertThat(kutsu.getTemporaryToken()).isNull();
+        assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
+    }
+
+    @Test
+    public void createHenkiloWithHakaIdentifier() {
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .hakaIdentifier("!haka%Identifier1/")
+                .temporaryToken("123")
+                .hetu("hetu")
+                .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+        Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
+        given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
+        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
+                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
+        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
+                new KielisyysDto("fi", null), null, null);
+
+        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
+        assertThat(henkilo.getKayttajatiedot().getPassword()).isNull();
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .extracting(KayttoOikeusRyhma::getName)
+                .containsExactly("ryhma");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
+                .containsExactly("1.2.0.0.1");
+
+        assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
+        assertThat(kutsu.getTemporaryToken()).isNull();
+        assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
     }
 }

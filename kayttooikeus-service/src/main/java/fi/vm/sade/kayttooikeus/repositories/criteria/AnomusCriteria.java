@@ -47,11 +47,11 @@ public class AnomusCriteria {
 
         builder = this.condition(qAnomus, builder);
 
-        if(BooleanUtils.isTrue(this.adminView)) {
+        if (BooleanUtils.isTrue(this.adminView)) {
             builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
         }
 
-        if(BooleanUtils.isTrue(this.onlyActive)) {
+        if (BooleanUtils.isTrue(this.onlyActive)) {
             builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                     .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
         }
