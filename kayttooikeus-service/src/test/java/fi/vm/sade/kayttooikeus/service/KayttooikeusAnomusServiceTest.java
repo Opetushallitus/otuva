@@ -97,11 +97,10 @@ public class KayttooikeusAnomusServiceTest {
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @MockBean
-<<<<<<< HEAD
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-=======
+
+    @MockBean
     private OrganisaatioCacheRepository organisaatioCacheRepository;
->>>>>>> master
 
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;

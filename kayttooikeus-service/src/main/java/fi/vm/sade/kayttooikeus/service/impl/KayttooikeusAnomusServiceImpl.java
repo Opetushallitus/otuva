@@ -52,11 +52,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
-<<<<<<< HEAD
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-=======
     private final OrganisaatioCacheRepository organisaatioCacheRepository;
->>>>>>> master
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
