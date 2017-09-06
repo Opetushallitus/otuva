@@ -43,19 +43,13 @@ import java.io.IOException;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import java.util.Optional;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
-import java.util.Set;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -268,8 +262,18 @@ public class EmailServiceImpl implements EmailService {
         recipient.setName(kutsu.getEtunimi() + " " + kutsu.getSukunimi());
 
         OrganisaatioClient.Mode organizationClientState = OrganisaatioClient.Mode.multiple();
+        Map<String, String> targetUrlQueryParams = new HashMap<String, String>() {{
+            put("kutsuToken", kutsu.getSalaisuus());
+            put("kielisyys", kutsu.getKieliKoodi());
+        }};
+        String shibbolethKayttooikeusTunnistusUrl = this.urlProperties
+                .url("shibboleth.kayttooikeus-service.cas.tunnistus", targetUrlQueryParams);
+        Map<String, String> urlQueryParams = new HashMap<String, String>() {{
+            put("target", shibbolethKayttooikeusTunnistusUrl);
+        }};
         recipient.setRecipientReplacements(asList(
-                replacement("url", this.urlProperties.url("kayttooikeus-service.invitation.url", kutsu.getSalaisuus())),
+                replacement("url", this.urlProperties
+                        .url("shibboleth.identification", kutsu.getKieliKoodi().toUpperCase(), urlQueryParams)),
                 replacement("etunimi", kutsu.getEtunimi()),
                 replacement("sukunimi", kutsu.getSukunimi()),
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
