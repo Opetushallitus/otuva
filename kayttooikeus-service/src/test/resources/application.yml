@@ -34,6 +34,7 @@ cas:
 host:
   host-virkailija: localhost
   host-cas: localhost
+  host-shibboleth: localhost
 
 service-users:
   viestinta:
