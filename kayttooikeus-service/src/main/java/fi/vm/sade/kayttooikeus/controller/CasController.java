@@ -119,7 +119,7 @@ public class CasController {
                 }};
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.rekisteroidy", queryParams));
             } catch (NotFoundException e) {
-                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanhakutsu"));
             }
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
