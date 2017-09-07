@@ -21,9 +21,9 @@ public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepos
                 temporaryToken, KutsunTila.AVOIN, LocalDateTime.now().minusHours(1));
     }
 
-    Optional<Kutsu> findBySalaisuusAndAikaleimaGreaterThan(String salaisuus, LocalDateTime created);
+    Optional<Kutsu> findBySalaisuusAndAikaleimaGreaterThanAndTila(String salaisuus, LocalDateTime created, KutsunTila kutsunTila);
 
     default Optional<Kutsu> findBySalaisuusIsValid(String salaisuus) {
-        return findBySalaisuusAndAikaleimaGreaterThan(salaisuus, LocalDateTime.now().minusMonths(1));
+        return findBySalaisuusAndAikaleimaGreaterThanAndTila(salaisuus, LocalDateTime.now().minusMonths(1), KutsunTila.AVOIN);
     }
 }
