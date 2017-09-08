@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
 import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -8,19 +9,15 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioCacheRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
-import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
-import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
-import fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator;
+import fi.vm.sade.kayttooikeus.repositories.populate.*;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpVersion;
+import org.apache.http.ProtocolVersion;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
@@ -29,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,6 +37,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
@@ -50,6 +49,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @RunWith(SpringRunner.class)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
@@ -62,7 +63,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
 
-    @MockBean
+    @SpyBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @MockBean
@@ -219,8 +220,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
-        given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
                 .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
@@ -249,6 +250,54 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
     }
 
+    // Existing henkilo username changes to the new one
+    @Test
+    public void createHenkiloHetuExistsKayttajatiedotExists() {
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .temporaryToken("123")
+                .hetu("hetu")
+                .kutsuja("1.2.3.4.1")
+                .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        Henkilo henkilo = populate(OrganisaatioHenkiloPopulator.organisaatioHenkilo(
+                HenkiloPopulator.henkilo("1.2.0.0.2").withUsername("old_username"),
+                "2.1.0.1"))
+                .getHenkilo();
+        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
+                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
+        doThrow(new ExternalServiceException("",
+                new CachingRestClient.HttpException(null,
+                        new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 400, "reason"),
+                        "message"))).when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.0.0.2").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
+        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
+                new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
+
+        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.0.0.2");
+        assertThat(henkilo.getKayttajatiedot().getUsername()).isEqualTo("arpauser");
+        assertThat(henkilo.getKayttajatiedot().getPassword()).isNotEmpty();
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .extracting(KayttoOikeusRyhma::getName)
+                .containsExactly("ryhma");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKasittelija)
+                .extracting(Henkilo::getOidHenkilo)
+                .containsExactly("1.2.3.4.1");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
+                .containsExactlyInAnyOrder("1.2.0.0.1", "2.1.0.1");
+
+        assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
+        assertThat(kutsu.getTemporaryToken()).isNull();
+        assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
+    }
+
     @Test
     public void createHenkiloWithHakaIdentifier() {
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
@@ -260,8 +309,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
-        given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
                 .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
@@ -284,6 +333,61 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");
+
+        assertThat(henkilo.getIdentifications())
+                .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
+                .extracting(Identification::getIdentifier)
+                .containsExactlyInAnyOrder("!haka%Identifier1/");
+
+        assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
+        assertThat(kutsu.getTemporaryToken()).isNull();
+        assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
+    }
+
+    // Another haka identifier will be added to an existing user credentials
+    @Test
+    public void createHenkiloWithHakaIdentifierHetuExists() {
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .hakaIdentifier("!haka%Identifier1/")
+                .temporaryToken("123")
+                .hetu("hetu")
+                .kutsuja("1.2.3.4.1")
+                .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+        Henkilo henkilo = populate(IdentificationPopulator.identification(HAKA_AUTHENTICATION_IDP,
+                "old_identifier",
+                HenkiloPopulator.henkilo("1.2.3.4.5")))
+                .getHenkilo();
+        populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
+        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
+                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
+        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
+                new KielisyysDto("fi", null), null, null);
+
+        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
+        assertThat(henkilo.getKayttajatiedot().getPassword()).isNull();
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                .extracting(KayttoOikeusRyhma::getName)
+                .containsExactly("ryhma");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKasittelija)
+                .extracting(Henkilo::getOidHenkilo)
+                .containsExactly("1.2.3.4.1");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
+                .containsExactly("1.2.0.0.1");
+
+        assertThat(henkilo.getIdentifications())
+                .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
+                .extracting(Identification::getIdentifier)
+                .containsExactlyInAnyOrder("!haka%Identifier1/", "old_identifier");
 
         assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
         assertThat(kutsu.getTemporaryToken()).isNull();
