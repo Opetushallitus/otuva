@@ -16,9 +16,12 @@ public interface IdentificationService {
 
     IdentifiedHenkiloTypeDto findByTokenAndInvalidateToken(String authToken);
 
+    @Transactional
+    String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo);
+
     String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu);
 
-    Set<String> getHakatunnuksetByHenkiloAndIdp(String oid, String idpKey);
+    Set<String> getHakatunnuksetByHenkiloAndIdp(String oid);
 
     Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnisteet);
 

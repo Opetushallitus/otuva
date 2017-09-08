@@ -122,6 +122,7 @@ public class KayttooikeusAnomusServiceTest {
                 .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
        doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
        doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
+       doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
                 this.haettuKayttooikeusRyhmaRepository,
                 this.henkiloDataRepository,

@@ -127,10 +127,9 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
-        String oid = oppijanumerorekisteriClient.getOidByHetu(hetu);
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(()
-                -> new NotFoundException("henkilo not found with oid " + oid));
+    public String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo) {
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("henkilo not found with oid " + oidHenkilo));
         String token = generateToken();
         Identification identification = henkilo.getIdentifications().stream()
                 .filter(ident -> STRONG_AUTHENTICATION_IDP.equals(ident.getIdpEntityId()))
@@ -149,8 +148,14 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     }
 
     @Override
+    @Transactional
+    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
+        return this.updateIdentificationAndGenerateTokenForHenkiloByOid(oppijanumerorekisteriClient.getOidByHetu(hetu));
+    }
+
+    @Override
     @Transactional(readOnly = true)
-    public Set<String> getHakatunnuksetByHenkiloAndIdp(String oid, String ipdKey) {
+    public Set<String> getHakatunnuksetByHenkiloAndIdp(String oid) {
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
         return identifications.stream().map(Identification::getIdentifier).collect(Collectors.toSet());
     }
@@ -162,8 +167,9 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
                 .orElseThrow(() -> new NotFoundException("Henkilo not found"));
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
         identificationRepository.delete(identifications);
-        List<Identification> updatedIdentifications = hakatunnukset.stream()
-                .map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus)).collect(Collectors.toList());
+        Set<Identification> updatedIdentifications = hakatunnukset.stream()
+                .map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus)).collect(Collectors.toSet());
+        henkilo.setIdentifications(updatedIdentifications);
         identificationRepository.save(updatedIdentifications);
         ldapSynchronizationService.updateHenkiloAsap(oid);
         return hakatunnukset;

@@ -38,6 +38,8 @@ public interface OppijanumerorekisteriClient {
 
     Set<String> listOidByYhteystieto(String arvo);
 
+    Optional<String> createHenkiloForKutsu(HenkiloCreateDto henkiloCreateDto);
+
     String createHenkilo(HenkiloCreateDto henkiloCreateDto);
 
     void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto);

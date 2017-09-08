@@ -248,16 +248,16 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
-        this.henkiloDataRepository.save(anoja);
+        Henkilo savedAnoja = this.henkiloDataRepository.save(anoja);
 
-        OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = anoja.getOrganisaatioHenkilos().stream()
+        OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = savedAnoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
-                        this.organisaatioHenkiloDataRepository.save(anoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                        this.organisaatioHenkiloDataRepository.save(savedAnoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
-                                .henkilo(anoja)
+                                .henkilo(savedAnoja)
                                 .organisaatioCache(this.organisaatioCacheRepository.findByOrganisaatioOid(organisaatioOid)
                                         .orElseThrow(() -> new NotFoundException("Organisaatio not found from cache by oid " + organisaatioOid)))
                                 .build())));
