@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 
@@ -40,7 +41,7 @@ public class IdentificationPopulator implements Populator<Identification> {
         identification.setAuthTokenCreated(authTokenCreated);
         identification.setHenkilo(henkiloo);
         entityManager.persist(identification);
-        henkiloo.setIdentifications(Collections.singleton(identification));
+        henkiloo.setIdentifications(Sets.newHashSet(identification));
         return entityManager.find(Identification.class, identification.getId());
     }
 }

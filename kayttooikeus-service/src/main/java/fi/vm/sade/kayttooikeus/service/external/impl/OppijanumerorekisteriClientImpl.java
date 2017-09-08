@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -181,6 +182,20 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 () -> this.objectMapper.readerFor(new TypeReference<Set<String>>() {
                 }).readValue(this.serviceAccountClient.get(url))), 2).get()
                 .orFail(mapper(url));
+    }
+
+    @Override
+    public Optional<String> createHenkiloForKutsu(HenkiloCreateDto henkiloCreateDto) {
+        try {
+            return Optional.ofNullable(this.createHenkilo(henkiloCreateDto));
+        } catch (ExternalServiceException e) {
+            if(e.getCause() instanceof CachingRestClient.HttpException
+                    && ((CachingRestClient.HttpException)e.getCause()).getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+                return Optional.empty();
+            }
+            throw e;
+        }
+
     }
 
     @Override
