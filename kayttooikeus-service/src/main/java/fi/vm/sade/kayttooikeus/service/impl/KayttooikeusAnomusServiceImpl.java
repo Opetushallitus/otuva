@@ -295,7 +295,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
         anomus.setAnottuPvm(LocalDateTime.now());
         anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
-        anomus.setTehtavanimike(kayttooikeusAnomusDto.getTehtavaNimike());
+
 
         Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas =  this.kayttooikeusryhmaDataRepository
                 .findAll(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
