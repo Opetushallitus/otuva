@@ -18,8 +18,6 @@ public class KayttooikeusAnomusDto {
     @NotNull
     private String organisaatioOrRyhmaOid;
 
-    private String tehtavaNimike;
-
     @Email
     private String email;
 

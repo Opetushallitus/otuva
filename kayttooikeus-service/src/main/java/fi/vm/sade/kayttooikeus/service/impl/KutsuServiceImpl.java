@@ -144,7 +144,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                 this.kayttooikeusAnomusService.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(
                         createdHenkiloOid,
                         kutsuOrganisaatio.getOrganisaatioOid(),
-                        kutsuOrganisaatio.getRyhmat()));
+                        kutsuOrganisaatio.getRyhmat(),
+                        kutsuByToken.getKutsuja()));
 
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(createdHenkiloOid)

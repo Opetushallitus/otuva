@@ -214,9 +214,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
                 .hetu("hetu")
+                .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
         given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
         given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
@@ -234,6 +236,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .extracting(KayttoOikeusRyhma::getName)
                 .containsExactly("ryhma");
         assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKasittelija)
+                .extracting(Henkilo::getOidHenkilo)
+                .containsExactly("1.2.3.4.1");
+        assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");
 
@@ -248,9 +255,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
                 .hetu("hetu")
+                .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         given(this.oppijanumerorekisteriClient.createHenkilo(anyObject())).willReturn("1.2.3.4.5");
         given(this.oppijanumerorekisteriClient.getOidByHetu("hetu")).willReturn("1.2.3.4.5");
         given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
@@ -267,6 +276,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
                 .extracting(KayttoOikeusRyhma::getName)
                 .containsExactly("ryhma");
+        assertThat(henkilo.getOrganisaatioHenkilos())
+                .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
+                .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKasittelija)
+                .extracting(Henkilo::getOidHenkilo)
+                .containsExactly("1.2.3.4.1");
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");

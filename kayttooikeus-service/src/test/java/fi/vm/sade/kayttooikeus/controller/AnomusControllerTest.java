@@ -79,7 +79,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
         ArrayList<Long> oids = new ArrayList<Long>();
         oids.add(1L);
         KayttooikeusAnomusDto kayttooikeusAnomusDto = new KayttooikeusAnomusDto("1.2.3.4.5",
-                "Tehtävänimike", "email@domain.com", oids, "perustelut");
+                 "email@domain.com", oids, "perustelut");
         this.mvc.perform(post("/kayttooikeusanomus/1.2.3.4.5")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(kayttooikeusAnomusDto)))

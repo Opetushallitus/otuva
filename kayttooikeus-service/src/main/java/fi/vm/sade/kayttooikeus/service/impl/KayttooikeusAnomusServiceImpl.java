@@ -295,6 +295,14 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     public void grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(String anoja,
                                                                     String organisaatioOid,
                                                                     Collection<KayttoOikeusRyhma> kayttooikeusryhmas) {
+        this.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(anoja,
+                organisaatioOid,
+                kayttooikeusryhmas,
+                this.permissionCheckerService.getCurrentUserOid());
+    }
+
+    @Override
+    public void grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(String anoja, String organisaatioOid, Collection<KayttoOikeusRyhma> kayttooikeusryhmas, String myontajaOid) {
         kayttooikeusryhmas.forEach(kayttooikeusryhma -> this.grantKayttooikeusryhma(
                 LocalDate.now(),
                 LocalDate.now().plusYears(1),
@@ -302,7 +310,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 organisaatioOid,
                 kayttooikeusryhma,
                 "",
-                anoja)); // anoja == kasittelija in this case
+                myontajaOid)); // anoja == kasittelija in this case
     }
 
     @Override
@@ -320,7 +328,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
         anomus.setAnottuPvm(LocalDateTime.now());
         anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
-        anomus.setTehtavanimike(kayttooikeusAnomusDto.getTehtavaNimike());
+
 
         Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas = this.kayttooikeusryhmaDataRepository
                 .findAll(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
