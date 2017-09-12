@@ -17,8 +17,11 @@ import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
+
 import java.util.EnumSet;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -49,6 +52,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioCacheRepository organisaatioCacheRepository;
 
     private final OrikaBeanMapper mapper;
@@ -78,14 +82,43 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          boolean showOwnAnomus) {
         if (!showOwnAnomus) {
             if (criteria.getHenkiloOidRestrictionList() != null) {
-                criteria.addHenkiloOidRestriction(UserDetailsUtil.getCurrentUserOid());
-            }
-            else {
-                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(UserDetailsUtil.getCurrentUserOid()));
+                criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
+            } else {
+                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(this.permissionCheckerService.getCurrentUserOid()));
             }
         }
-        return localizeKayttooikeusryhma(mapper.mapAsList(this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria, limit, offset, orderBy), HaettuKayttooikeusryhmaDto.class));
+
+        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+
+        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
+            // käyttöoikeusryhma filtering
+            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+            criteria.setKayttooikeusRyhmaIds(new HashSet<Long>(slaveIds));
+
+            // organisaatio filtering
+            if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+                if(criteria.getOrganisaatioOids() == null) {
+                    criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                } else {
+                    Set<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
+                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .collect(Collectors.toSet());
+                    allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
+                    allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
+
+                    criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
+                    if(allCurrentUserOrganisaatioOids.isEmpty()) {
+                        criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                    }
+                }
+
+            }
+        }
+
+
+        List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
+                .findBy(criteria, limit, offset, orderBy);
+        return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
     private List<HaettuKayttooikeusryhmaDto> localizeKayttooikeusryhma(List<HaettuKayttooikeusryhmaDto> unlocalizedDtos) {
@@ -297,10 +330,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         anomus.setOrganisaatioOid(kayttooikeusAnomusDto.getOrganisaatioOrRyhmaOid());
 
 
-        Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas =  this.kayttooikeusryhmaDataRepository
+        Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas = this.kayttooikeusryhmaDataRepository
                 .findAll(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
 
-        kayttoOikeusRyhmas.forEach( k -> {
+        kayttoOikeusRyhmas.forEach(k -> {
             HaettuKayttoOikeusRyhma h = new HaettuKayttoOikeusRyhma();
             h.setKayttoOikeusRyhma(k);
             anomus.addHaettuKayttoOikeusRyhma(h);
@@ -429,7 +462,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     @Transactional
     public void cancelKayttooikeusAnomus(Long kayttooikeusRyhmaId) {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = this.haettuKayttooikeusRyhmaRepository.findById(kayttooikeusRyhmaId)
-                .orElseThrow( () -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId) );
+                .orElseThrow(() -> new NotFoundException("HaettuKayttooikeusRyhma not found with id " + kayttooikeusRyhmaId));
         Anomus anomus = haettuKayttoOikeusRyhma.getAnomus();
         anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
         if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
@@ -455,7 +488,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         .orElseThrow(() -> new NotFoundException("Myonnettykayttooikeusryhma not found with KayttooikeusryhmaId "
                                 + kayttooikeusryhmaId + " organisaatioOid " + organisaatioOid + " oidHenkilo " + oidHenkilo));
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma
-                .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(),"Käyttöoikeuden sulkeminen"));
+                .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), "Käyttöoikeuden sulkeminen"));
         this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
     }
 

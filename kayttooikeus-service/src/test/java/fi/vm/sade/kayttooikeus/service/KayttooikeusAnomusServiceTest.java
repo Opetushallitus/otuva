@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
+import org.hibernate.validator.constraints.br.TituloEleitoral;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -97,6 +98,9 @@ public class KayttooikeusAnomusServiceTest {
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @MockBean
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+
+    @MockBean
     private OrganisaatioCacheRepository organisaatioCacheRepository;
 
     @Captor
@@ -128,6 +132,7 @@ public class KayttooikeusAnomusServiceTest {
                 this.kayttooikeusryhmaDataRepository,
                 this.anomusRepository,
                 this.organisaatioHenkiloDataRepository,
+                this.organisaatioHenkiloRepository,
                 this.organisaatioCacheRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
@@ -159,6 +164,83 @@ public class KayttooikeusAnomusServiceTest {
         verify(this.haettuKayttooikeusRyhmaRepository).findBy(eq(criteria), eq(null), eq(null), eq(null));
         verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForAdmin() {
+        Set<String> organisaatioOids = Stream.of("1.2.3.4.5").collect(toSet());
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(organisaatioOids).build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
+        AnomusCriteria captorValue = captor.getValue();
+
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
+    }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForOphVirkailija() {
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "rootOid");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
+        AnomusCriteria captorValue = captor.getValue();
+
+        assertThat(captorValue.getOrganisaatioOids()).isNull();
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+    }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForVirkailijaWithNoCriteriaOrganisaatios() {
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
+        AnomusCriteria captorValue = captor.getValue();
+
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+    }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatios() {
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3", "2.3.4");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.organisaatioClient.getChildOids(any())).willReturn(userOrganisaatioChildOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
+        AnomusCriteria captorValue = captor.getValue();
+
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+    }
+
+
 
     @Test
     @WithMockUser("1.2.3.4.1")

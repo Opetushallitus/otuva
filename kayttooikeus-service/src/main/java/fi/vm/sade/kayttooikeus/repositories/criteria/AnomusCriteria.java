@@ -1,16 +1,22 @@
 package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Getter
 @Setter
@@ -29,6 +35,7 @@ public class AnomusCriteria {
     private String anojaOid;
     private Set<String> henkiloOidRestrictionList;
     private Boolean adminView;
+    private Set<Long> kayttooikeusRyhmaIds;
 
     public Predicate condition(QAnomus qAnomus) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -49,6 +56,10 @@ public class AnomusCriteria {
                     .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
         }
 
+        if(this.kayttooikeusRyhmaIds != null) {
+            builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
+        }
+
         return builder;
     }
 
@@ -67,8 +78,11 @@ public class AnomusCriteria {
         if (anomuksenTilat != null) {
             builder.and(qAnomus.anomuksenTila.in(anomuksenTilat));
         }
-        if (organisaatioOids != null) {
-            builder.and(qAnomus.organisaatioOid.in(organisaatioOids));
+        if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
+            List<Predicate> predicates = this.organisaatioOids.stream()
+                    .map(oid -> qAnomus.organisaatioCache.organisaatioOidPath.contains(oid))
+                    .collect(Collectors.toList());
+            builder.and(ExpressionUtils.anyOf(predicates));
         }
         if (anojaOid != null) {
             builder.and(qAnomus.henkilo.oidHenkilo.eq(anojaOid));
@@ -76,6 +90,7 @@ public class AnomusCriteria {
         if (this.henkiloOidRestrictionList != null) {
             builder.and(qAnomus.henkilo.oidHenkilo.notIn(this.henkiloOidRestrictionList));
         }
+
         return builder;
     }
 
