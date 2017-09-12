@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
@@ -110,12 +111,16 @@ public class CasController {
         // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
         Map<String, String> queryParams;
         if (StringUtils.hasLength(kutsuToken)) {
-            String temporaryKutsuToken = this.identificationService.updateKutsuAndGenerateTemporaryKutsuToken(
-                    kutsuToken, hetu, etunimet, sukunimi);
-            queryParams = new HashMap<String, String>() {{
-                put("temporaryKutsuToken", temporaryKutsuToken);
-            }};
-            response.sendRedirect(this.ophProperties.url("henkilo-ui.rekisteroidy", queryParams));
+            try {
+                String temporaryKutsuToken = this.identificationService
+                        .updateKutsuAndGenerateTemporaryKutsuToken(kutsuToken, hetu, etunimet, sukunimi);
+                queryParams = new HashMap<String, String>() {{
+                    put("temporaryKutsuToken", temporaryKutsuToken);
+                }};
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.rekisteroidy", queryParams));
+            } catch (NotFoundException e) {
+                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanhakutsu"));
+            }
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (StringUtils.hasLength(loginToken)) {
