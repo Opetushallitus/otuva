@@ -237,7 +237,7 @@ public class KayttooikeusAnomusServiceTest {
         AnomusCriteria captorValue = captor.getValue();
 
         assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+        assertThat(captorValue.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");
     }
 
 
