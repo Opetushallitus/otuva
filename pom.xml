@@ -43,7 +43,7 @@
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
 
         <!-- Sade utils -->
-        <generic.version>9.6-SNAPSHOT</generic.version>
+        <generic.version>9.7-SNAPSHOT</generic.version>
         <auditlog.api.version>7.2.0-SNAPSHOT</auditlog.api.version>
 
         <!-- Utils -->

@@ -43,4 +43,6 @@ public interface OppijanumerorekisteriClient {
     String createHenkilo(HenkiloCreateDto henkiloCreateDto);
 
     void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto);
+
+    void updateHenkilo(HenkiloUpdateDto henkiloUpdateDto);
 }
