@@ -6,10 +6,6 @@ import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
-
-import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
-import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
-
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -18,6 +14,7 @@ import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -33,9 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
+import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
 
 @Service
 @RequiredArgsConstructor
@@ -128,12 +130,13 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Override
     @Transactional
     public String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo) {
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oidHenkilo)
-                .orElseThrow(() -> new NotFoundException("henkilo not found with oid " + oidHenkilo));
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
         String token = generateToken();
         Identification identification = henkilo.getIdentifications().stream()
                 .filter(ident -> STRONG_AUTHENTICATION_IDP.equals(ident.getIdpEntityId()))
-                .findFirst().orElseGet(() -> {
+                .findFirst()
+                .orElseGet(() -> {
                     Identification ident = new Identification();
                     henkilo.getIdentifications().add(ident);
                     ident.setHenkilo(henkilo);
@@ -143,6 +146,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         identification.setIdentifier(henkilo.getKayttajatiedot().getUsername());
         identification.setAuthtoken(token);
         identification.setAuthTokenCreated(LocalDateTime.now());
+        this.identificationRepository.save(identification);
 
         return token;
     }
@@ -150,7 +154,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     @Override
     @Transactional
     public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
-        return this.updateIdentificationAndGenerateTokenForHenkiloByOid(oppijanumerorekisteriClient.getOidByHetu(hetu));
+        return this.updateIdentificationAndGenerateTokenForHenkiloByOid(this.oppijanumerorekisteriClient.getOidByHetu(hetu));
     }
 
     @Override

@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpVersion;
@@ -21,8 +22,10 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
 import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,7 +51,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -74,6 +79,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private LdapSynchronizationService ldapSynchronizationService;
+
+    @Before
+    public void setup() {
+        doNothing().when(this.oppijanumerorekisteriClient).updateHenkilo(any(HenkiloUpdateDto.class));
+    }
 
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")

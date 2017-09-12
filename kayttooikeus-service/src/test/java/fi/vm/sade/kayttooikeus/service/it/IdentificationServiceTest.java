@@ -212,8 +212,8 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateIdentificationAndGenerateTokenForHenkiloByHetuNotFoundTest() throws Exception {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("henkilo not found");
-        identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("1.2.3");
+        thrown.expectMessage("Henkilo not found with oid 1.2.3");
+        identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid("1.2.3");
     }
 
     @Test
