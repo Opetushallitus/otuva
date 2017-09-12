@@ -35,7 +35,6 @@ import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final KutsuRepository kutsuRepository;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final KayttajatiedotRepository kayttajatiedotRepository;
 
     private final OrikaBeanMapper mapper;
     private final KutsuValidator validator;
@@ -46,6 +45,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final KayttajatiedotService kayttajatiedotService;
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
     private final IdentificationService identificationService;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -138,21 +138,13 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                 .createHenkiloForKutsu(this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken))
                 .orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
 
-        // Create credentials
-        this.createOrUpdateCredentials(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
-
-        // Add privileges
-        kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio ->
-                this.kayttooikeusAnomusService.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(
-                        henkiloOid,
-                        kutsuOrganisaatio.getOrganisaatioOid(),
-                        kutsuOrganisaatio.getRyhmat(),
-                        kutsuByToken.getKutsuja()));
-
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseGet(() -> this.henkiloDataRepository.save(Henkilo.builder().oidHenkilo(henkiloOid).build()));
         henkilo.setVahvastiTunnistettu(true);
+
+        // Create or update credentials and add privileges
+        this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
 
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());
@@ -160,27 +152,36 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         kutsuByToken.setLuotuHenkiloOid(henkiloOid);
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
-        return identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloOid);
+        LdapSynchronizationService.LdapSynchronizationType.ASAP.getAction().accept(this.ldapSynchronizationService, henkiloOid);
+        return henkiloOid;
     }
 
     // In case virkailija already exists
-    private void createOrUpdateCredentials(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String createdHenkiloOid) {
-        Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(createdHenkiloOid);
+    private void createOrUpdateCredentialsAndPrivileges(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String henkiloOid) {
+        Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(henkiloOid);
         // Create username/password and haka identifier if provided
         if(StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             // If haka identifier is provided add it to henkilo identifiers
-            Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(createdHenkiloOid);
+            Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
-            this.identificationService.updateHakatunnuksetByHenkiloAndIdp(createdHenkiloOid, hakaIdentifiers);
+            this.identificationService.updateHakatunnuksetByHenkiloAndIdp(henkiloOid, hakaIdentifiers);
             if(!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
                 this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
             }
         }
-        this.kayttajatiedotService.createOrUpdateUsername(createdHenkiloOid, henkiloCreateByKutsuDto.getKayttajanimi(),
+        this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi(),
                 LdapSynchronizationService.LdapSynchronizationType.ASAP);
         if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
-            this.kayttajatiedotService.changePasswordAsAdmin(createdHenkiloOid, henkiloCreateByKutsuDto.getPassword());
+            this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, henkiloCreateByKutsuDto.getPassword());
         }
+
+        kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio ->
+                this.kayttooikeusAnomusService.grantKayttooikeusryhmaAsAdminWithoutPermissionCheck(
+                        henkiloOid,
+                        kutsuOrganisaatio.getOrganisaatioOid(),
+                        kutsuOrganisaatio.getRyhmat(),
+                        kutsuByToken.getKutsuja()));
+
     }
 
     private void createHakaUsername(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
