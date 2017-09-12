@@ -167,8 +167,7 @@ public class KayttooikeusAnomusServiceTest {
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForAdmin() {
-        HashSet<String> organisaatioOids = new HashSet<>();
-        organisaatioOids.add("1.2.3.4.5");
+        Set<String> organisaatioOids = Stream.of("1.2.3.4.5").collect(toSet());
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
 
@@ -178,20 +177,13 @@ public class KayttooikeusAnomusServiceTest {
         verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
         AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getOrganisaatioOids() != null);
-        assertThat(captorValue.getOrganisaatioOids().size() == 1);
-        assertThat(captorValue.getOrganisaatioOids().containsAll(organisaatioOids));
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForOphVirkailija() {
-        List<String> userOrganisaatioOids = new ArrayList<String>();
-        userOrganisaatioOids.add("1.2.3.4.5");
-        userOrganisaatioOids.add("rootOid");
-
-        List<Long> kayttooikeusRyhmas = new ArrayList<Long>();
-        kayttooikeusRyhmas.add(12345L);
-        kayttooikeusRyhmas.add(23456L);
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "rootOid");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
@@ -204,19 +196,13 @@ public class KayttooikeusAnomusServiceTest {
         AnomusCriteria captorValue = captor.getValue();
 
         assertThat(captorValue.getOrganisaatioOids()).isNull();
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsExactlyInAnyOrder(12345L, 23456L);
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithNoCriteriaOrganisaatios() {
-        List<String> userOrganisaatioOids = new ArrayList<String>();
-        userOrganisaatioOids.add("1.2.3.4.5");
-        userOrganisaatioOids.add("2.3.4.5.6");
-
-        List<Long> kayttooikeusRyhmas = new ArrayList<Long>();
-        kayttooikeusRyhmas.add(12345L);
-        kayttooikeusRyhmas.add(23456L);
-        kayttooikeusRyhmas.add(34567L);
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
@@ -228,28 +214,16 @@ public class KayttooikeusAnomusServiceTest {
         verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
         AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsExactlyInAnyOrder(12345L, 23456L, 34567L);
-        assertThat(captorValue.getOrganisaatioOids()).containsExactlyInAnyOrder("1.2.3.4.5", "2.3.4.5.6");
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatios() {
-        List<String> userOrganisaatioOids = new ArrayList<String>();
-        userOrganisaatioOids.add("1.2.3.4.5");
-        userOrganisaatioOids.add("2.3.4.5.6");
-
-        List<String> userOrganisaatioChildOids = new ArrayList<String>();
-        userOrganisaatioChildOids.add("1.2.3");
-        userOrganisaatioChildOids.add("2.3.4");
-
-        List<Long> kayttooikeusRyhmas = new ArrayList<Long>();
-        kayttooikeusRyhmas.add(12345L);
-        kayttooikeusRyhmas.add(23456L);
-        kayttooikeusRyhmas.add(34567L);
-
-        Set<String> criteriaOrganisaatioOids = new HashSet<String>();
-        criteriaOrganisaatioOids.add("2.3.4.5.6");
-        criteriaOrganisaatioOids.add("2.3.4");
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3", "2.3.4");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
@@ -262,8 +236,8 @@ public class KayttooikeusAnomusServiceTest {
         verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
         AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsExactlyInAnyOrder(12345L, 23456L, 34567L);
-        assertThat(captorValue.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4.5.6", "2.3.4");
+        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
     }
 
 
