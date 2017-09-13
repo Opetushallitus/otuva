@@ -4,6 +4,9 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
@@ -58,7 +61,12 @@ public class HenkiloCriteria {
         }
         // Organisaatiohenkilo
         if (this.noOrganisation != null && !this.noOrganisation) {
-            builder.and(henkilo.organisaatioHenkilos.isNotEmpty());
+            QOrganisaatioHenkilo subOrganisaatioHenkilo = new QOrganisaatioHenkilo("subOrganisaatioHenkilo");
+            JPQLQuery<Henkilo> subquery = JPAExpressions.select(subOrganisaatioHenkilo.henkilo)
+                    .from(subOrganisaatioHenkilo)
+                    .where(subOrganisaatioHenkilo.passivoitu.isFalse()
+                            .and(subOrganisaatioHenkilo.henkilo.eq(henkilo)));
+            builder.and(subquery.exists());
         }
         if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
             if(this.subOrganisation != null && this.subOrganisation) {
