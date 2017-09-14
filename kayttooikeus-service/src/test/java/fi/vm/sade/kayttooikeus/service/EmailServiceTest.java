@@ -25,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -152,6 +153,8 @@ public class EmailServiceTest extends AbstractServiceTest {
         organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(anyString()))
+                .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());
         Kutsu kutsu = Kutsu.builder()
                 .kieliKoodi("fi")
                 .sahkoposti("arpa@kuutio.fi")
@@ -162,6 +165,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                         .organisaatioOid("1.2.3.4.1")
                         .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().description(new TextGroup()).build()))
                         .build()))
+                .aikaleima(LocalDateTime.now())
                 .build();
 
         this.emailService.sendInvitationEmail(kutsu);
@@ -169,8 +173,9 @@ public class EmailServiceTest extends AbstractServiceTest {
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
-        assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(4)
-                .extracting("name").containsExactlyInAnyOrder("url", "etunimi", "sukunimi", "organisaatiot");
+        assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(6)
+                .extracting("name")
+                .containsExactlyInAnyOrder("url", "etunimi", "sukunimi", "organisaatiot", "kutsuja", "voimassa");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
