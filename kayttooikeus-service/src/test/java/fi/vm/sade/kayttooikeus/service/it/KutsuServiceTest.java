@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import org.apache.http.HttpEntity;
@@ -53,9 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
@@ -142,7 +141,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn(response);
-        
+        doReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build())
+                .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
+
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
         org1.setOid("1.2.246.562.10.00000000001");
         org1.setNimi(new TextGroupMapDto().put("FI", "Opetushallitus").asMap());
