@@ -53,32 +53,6 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         this.orikaBeanMapper = orikaBeanMapper;
     }
 
-    private <T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode) {
-        if (!mode.isExpectMultiple()) {
-            return direct.get();
-        }
-        if (mode.isChangeChecked()) {
-            if (latestChanges != null && latestChanges.equals(LocalDate.now())) {
-                return direct.get();
-            }
-            return fromCache.apply(cache);
-        }
-        if (cacheUpdatedAt == null || (LocalDate.now().isAfter(cacheUpdatedAt.toLocalDate())
-                && changesSince(LocalDate.now().minusDays(2)))) {
-            refreshCache();
-            mode.checked();
-            return fromCache.apply(cache);
-        } else if (cacheUpdatedAt.toLocalDate().equals(LocalDate.now())
-                && changesSince(LocalDate.now().minusDays(1))) {
-            // changes today (since the modification date is known only in date precision, 
-            // we can't be sure if the modifications today have happened before/after last update) => no cache
-            mode.checked();
-            return direct.get();
-        }
-        mode.checked();
-        return fromCache.apply(cache);
-    }
-
     @Override
     public synchronized List<OrganisaatioPerustieto> refreshCache() {
         // preventing double queued updates...
@@ -94,9 +68,10 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     this.restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
                     .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl)))
                     .map(ryhma -> {
+                        // Make ryhma oidpath look same as normal organisations.
                         ryhma.setParentOidPath(ryhma.getParentOidPath()
                                 .replaceAll("^\\||\\|$", "")
-                                .replace("|", "/"));
+                                .replace("|", "/") + "/" + ryhma.getOid());
                         return ryhma;
                     }).collect(Collectors.toSet()));
             this.cache = new OrganisaatioCache(this.fetchPerustiedot(this.rootOrganizationOid), organisaatiosWithoutRootOrg);
@@ -128,9 +103,8 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode) {
-        return cached(c -> c.getByOid(oid),
-                () -> Optional.ofNullable(fetchPerustiedotWithChildren(oid)), mode);
+    public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid) {
+        return this.cache.getByOid(oid);
     }
 
     public OrganisaatioPerustieto fetchPerustiedot(String oid) {
@@ -164,16 +138,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode) {
-        return cached(c -> c.flatWithParentsAndChildren(organisaatioOid)
+        return this.cache.flatWithParentsAndChildren(organisaatioOid)
                 .filter(org -> !rootOrganizationOid.equals(org.getOid())) // the resource never returns the root
-                .collect(toList()),
-                () -> {
-                    String url = urlConfiguration.url("organisaatio-service.organisaatio.hae");
-                    String params = "?oid="+organisaatioOid + "&aktiiviset=true";
-                    return retrying(io(() -> restClient.get(url+params,OrganisaatioHakutulos.class)), 2)
-                            .get().orFail(mapper(url)).getOrganisaatiot();
-                },
-                mode);
+                .collect(toList());
     }
 
     @Override
@@ -196,13 +163,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public List<String> getChildOids(String oid) {
-        String url = urlConfiguration.url("organisaatio-service.organisaatio.childOids", oid);
-        return cached(c -> c.flatWithChildrenByOid(oid)
+        return this.cache.flatWithChildrenByOid(oid)
                         .map(OrganisaatioPerustieto::getOid)
-                        .collect(toList()),
-                () -> retrying(io(() -> (MuutetutOidListContainer) objectMapper.readerFor(MuutetutOidListContainer.class)
-                        .readValue(restClient.getAsString(url))), 2).get().orFail(mapper(url)).getOids(),
-                Mode.requireCache());
+                        .collect(toList());
     }
 
 }

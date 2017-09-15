@@ -151,7 +151,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     public void sendInvitationEmail() {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString()))
                 .willReturn(Optional.of(organisaatioPerustieto));
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(anyString()))
                 .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());

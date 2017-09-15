@@ -111,8 +111,7 @@ public class HenkilohakuBuilder {
                     .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
                     .map(organisaatioOid -> {
-                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
-                                OrganisaatioClient.Mode.requireCache())
+                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
                                 .orElseGet(() -> OrganisaatioPerustieto.builder()
                                         .oid(organisaatioOid)
                                         .nimi(new HashMap<String, String>() {{

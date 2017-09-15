@@ -281,8 +281,8 @@ public class EmailServiceImpl implements EmailService {
                 replacement("sukunimi", kutsu.getSukunimi()),
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
                         .map(org -> new OranizationReplacement(new TextGroupMapDto(
-                                        this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid(),
-                                                organizationClientState)
+                                        this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid()
+                                        )
                                                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + org.getOrganisaatioOid()))
                                                 .getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
                                         org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)

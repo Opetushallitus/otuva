@@ -41,7 +41,7 @@ public class OrganisaatioHenkiloTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "user1")
     public void addOrganisaatioHenkilotShouldOnlyAddNewOrganisaatio() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), anyObject()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString()))
                 .willReturn(Optional.of(new OrganisaatioPerustieto()));
         populate(organisaatioCache("organisaatio1"));
         populate(organisaatioCache("organisaatio2"));
@@ -71,7 +71,7 @@ public class OrganisaatioHenkiloTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser("henkilo1")
     public void CreateOrUpdateOrganisaatioHenkilos() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString(), anyObject()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString()))
                 .willReturn(Optional.of(new OrganisaatioPerustieto()));
         populate(organisaatioCache("organisaatio1"));
         populate(organisaatioCache("organisaatio2"));

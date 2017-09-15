@@ -42,7 +42,7 @@ public interface OrganisaatioClient {
 
     List<OrganisaatioPerustieto> refreshCache();
 
-    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode);
+    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid);
 
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 

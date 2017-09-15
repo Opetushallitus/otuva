@@ -124,7 +124,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("RYHMA")
         ));
 
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
@@ -151,7 +151,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("RYHMA2")
         ));
 
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7"), anyObject()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
