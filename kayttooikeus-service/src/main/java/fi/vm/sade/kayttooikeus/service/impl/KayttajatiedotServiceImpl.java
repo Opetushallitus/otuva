@@ -19,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
+import org.springframework.util.StringUtils;
 
 import java.security.InvalidParameterException;
+import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
@@ -56,6 +58,29 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     @Override
+    @Transactional
+    public void createOrUpdateUsername(String oidHenkilo, String username, LdapSynchronizationType ldapSynchronization) {
+        Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo);
+        if(kayttajatiedot.isPresent()) {
+            this.kayttajatiedotRepository.findByUsername(username)
+                    .ifPresent((Kayttajatiedot t) -> {
+                        throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+                    });
+            kayttajatiedot.get().setUsername(username);
+            ldapSynchronization.getAction().accept(this.ldapSynchronizationService, oidHenkilo);
+        }
+        else {
+            this.create(oidHenkilo, new KayttajatiedotCreateDto(username), ldapSynchronization);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Kayttajatiedot> getKayttajatiedotByOidHenkilo(String oidHenkilo) {
+        return this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public KayttajatiedotReadDto getByHenkiloOid(String henkiloOid) {
         return kayttajatiedotRepository.findByHenkiloOid(henkiloOid)
@@ -74,7 +99,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
 
         henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
-        henkiloDataRepository.save(henkilo);
+        henkilo = henkiloDataRepository.save(henkilo);
 
         this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);

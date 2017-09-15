@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -184,6 +185,20 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
+    public Optional<String> createHenkiloForKutsu(HenkiloCreateDto henkiloCreateDto) {
+        try {
+            return Optional.ofNullable(this.createHenkilo(henkiloCreateDto));
+        } catch (ExternalServiceException e) {
+            if(e.getCause() instanceof CachingRestClient.HttpException
+                    && ((CachingRestClient.HttpException)e.getCause()).getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+                return Optional.empty();
+            }
+            throw e;
+        }
+
+    }
+
+    @Override
     public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
         String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
         return retrying(
@@ -205,6 +220,17 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 FunctionalUtils.io(() -> this.serviceAccountClient.put(url,
                         MediaType.APPLICATION_JSON_VALUE,
                         this.objectMapper.writeValueAsString(henkiloVahvaTunnistusDto))), 2)
+                .get()
+                .orFail(mapper(url));
+    }
+
+    @Override
+    public void updateHenkilo(HenkiloUpdateDto henkiloUpdateDto) {
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
+        retrying(
+                FunctionalUtils.io(() -> this.serviceAccountClient.put(url,
+                        MediaType.APPLICATION_JSON_VALUE,
+                        this.objectMapper.writeValueAsString(henkiloUpdateDto))), 2)
                 .get()
                 .orFail(mapper(url));
     }
