@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient.Mode;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +60,6 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Override
     @Transactional(readOnly = true)
     public List<OrganisaatioHenkiloWithOrganisaatioDto> listOrganisaatioHenkilos(String henkiloOid, String compareByLang) {
-        Mode organisaatioClientMode = Mode.requireCache();
         return organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos(henkiloOid)
                 .stream().peek(organisaatioHenkilo ->
                     organisaatioHenkilo.setOrganisaatio(
@@ -130,8 +128,6 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     }
 
     private List<OrganisaatioHenkiloDto> findOrCreateOrganisaatioHenkilos(List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot, Henkilo henkilo) {
-        final Mode clientMode = Mode.requireCache();
-
         organisaatioHenkilot.stream()
                 .filter((OrganisaatioHenkiloCreateDto t) ->
                     henkilo.getOrganisaatioHenkilos().stream()
@@ -152,7 +148,6 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Transactional
     public List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
                                                                            List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList) {
-        final Mode clientMode = Mode.requireCache();
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
         this.findOrCreateOrganisaatioHenkilos(this.mapper.mapAsList(organisaatioHenkiloDtoList, OrganisaatioHenkiloCreateDto.class),

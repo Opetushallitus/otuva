@@ -264,7 +264,6 @@ public class EmailServiceImpl implements EmailService {
         recipient.setLanguageCode(kutsu.getKieliKoodi());
         recipient.setName(kutsu.getEtunimi() + " " + kutsu.getSukunimi());
 
-        OrganisaatioClient.Mode organizationClientState = OrganisaatioClient.Mode.multiple();
         Map<String, String> targetUrlQueryParams = new HashMap<String, String>() {{
             put("kutsuToken", kutsu.getSalaisuus());
             put("kielisyys", kutsu.getKieliKoodi());

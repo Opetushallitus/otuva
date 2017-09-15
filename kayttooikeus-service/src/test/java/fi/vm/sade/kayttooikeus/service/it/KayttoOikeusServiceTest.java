@@ -136,7 +136,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3.4.6")
     public void listPossibleRyhmasByOrganizationTest(){
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(any(), any()))
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
         Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
