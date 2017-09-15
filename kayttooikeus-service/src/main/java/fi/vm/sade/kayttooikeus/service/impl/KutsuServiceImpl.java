@@ -154,7 +154,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         kutsuByToken.setLuotuHenkiloOid(henkiloOid);
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
-        LdapSynchronizationService.LdapSynchronizationType.ASAP.getAction().accept(this.ldapSynchronizationService, henkiloOid);
+        this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return henkiloOid;
     }
 
