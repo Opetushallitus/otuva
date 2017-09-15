@@ -48,6 +48,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final KayttooikeusAnomusService kayttooikeusAnomusService;
     private final IdentificationService identificationService;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final PermissionCheckerService permissionCheckerService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -107,8 +108,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public Kutsu deleteKutsu(long id) {
-        Kutsu deletedKutsu = kutsuRepository.findById(id).filter(kutsu -> kutsu.getKutsuja().equals(getCurrentUserOid()))
-            .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        Kutsu deletedKutsu = kutsuRepository.findById(id)
+                .filter(kutsu -> this.permissionCheckerService.isCurrentUserAdmin()
+                        || kutsu.getKutsuja().equals(getCurrentUserOid()))
+                .orElseThrow(() -> new NotFoundException("Kutsu not found"));
         deletedKutsu.poista(getCurrentUserOid());
         return deletedKutsu;
     }
