@@ -40,6 +40,8 @@ public interface OrganisaatioClient {
 
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode);
 
+    List<OrganisaatioPerustieto> refreshCache();
+
     Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode);
 
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);

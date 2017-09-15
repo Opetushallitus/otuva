@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -38,6 +39,11 @@ public class ScheduledTasks {
     private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
     private final CommonProperties commonProperties;
+
+    @PostConstruct
+    public void onStartup() {
+        organisaatioService.updateOrganisaatioCache();
+    }
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {

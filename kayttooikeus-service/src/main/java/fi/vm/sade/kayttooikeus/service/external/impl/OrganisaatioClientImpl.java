@@ -2,11 +2,11 @@ package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
@@ -15,7 +15,6 @@ import fi.vm.sade.kayttooikeus.util.FunctionalUtils;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +27,8 @@ import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OrganisaatioClientImpl implements OrganisaatioClient {
@@ -52,7 +53,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         this.orikaBeanMapper = orikaBeanMapper;
     }
 
-    protected<T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode) {
+    private <T> T cached(Function<OrganisaatioCache, T> fromCache, Supplier<T> direct, Mode mode) {
         if (!mode.isExpectMultiple()) {
             return direct.get();
         }
@@ -64,7 +65,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         }
         if (cacheUpdatedAt == null || (LocalDate.now().isAfter(cacheUpdatedAt.toLocalDate())
                 && changesSince(LocalDate.now().minusDays(2)))) {
-            refreshCache(cacheUpdatedAt);
+            refreshCache();
             mode.checked();
             return fromCache.apply(cache);
         } else if (cacheUpdatedAt.toLocalDate().equals(LocalDate.now())
@@ -78,22 +79,31 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return fromCache.apply(cache);
     }
 
-    private synchronized void refreshCache(LocalDateTime updateMoment) {
+    @Override
+    public synchronized List<OrganisaatioPerustieto> refreshCache() {
         // preventing double queued updates...
-        if (cacheUpdatedAt == null || (updateMoment != null && updateMoment.isBefore(cacheUpdatedAt))) {
-            String haeHierarchyUrl = urlConfiguration.url("organisaatio-service.organisaatio.hae");
-            String haeRyhmasUrl = urlConfiguration.url("organisaatio-service.organisaatio.ryhmat");
+        if (this.cacheUpdatedAt == null) {
+            String haeHierarchyUrl = this.urlConfiguration.url("organisaatio-service.organisaatio.hae");
+            String haeRyhmasUrl = this.urlConfiguration.url("organisaatio-service.organisaatio.ryhmat");
             // Add organisations to cache
-            List<OrganisaatioPerustieto> organisaatios =
-                    retrying(io(() -> restClient.get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
+            List<OrganisaatioPerustieto> organisaatiosWithoutRootOrg =
+                    retrying(io(() -> this.restClient.get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
                             .get().orFail(mapper(haeHierarchyUrl)).getOrganisaatiot();
             // Add ryhmas to cache
-            organisaatios.addAll(Arrays.asList(retrying(io(() ->
-                    restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
-                    .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl))));
-            cache = new OrganisaatioCache(fetchPerustiedot(rootOrganizationOid), organisaatios);
-            cacheUpdatedAt = LocalDateTime.now();
+            organisaatiosWithoutRootOrg.addAll(Arrays.stream(retrying(io(() ->
+                    this.restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
+                    .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl)))
+                    .map(ryhma -> {
+                        ryhma.setParentOidPath(ryhma.getParentOidPath()
+                                .replaceAll("^\\||\\|$", "")
+                                .replace("|", "/"));
+                        return ryhma;
+                    }).collect(Collectors.toSet()));
+            this.cache = new OrganisaatioCache(this.fetchPerustiedot(this.rootOrganizationOid), organisaatiosWithoutRootOrg);
+            this.cacheUpdatedAt = LocalDateTime.now();
+            return organisaatiosWithoutRootOrg;
         }
+        return Lists.newArrayList();
     }
     
     @Getter @Setter

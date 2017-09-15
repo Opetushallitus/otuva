@@ -10,6 +10,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.joining;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,10 +34,10 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     @Override
     public void updateOrganisaatioCache() {
         LOGGER.info("Organisaatiocachen päivitys aloitetaan");
-        List<OrganisaatioPerustieto> organisaatiot = organisaatioClient.listWithoutRoot();
+        List<OrganisaatioPerustieto> organisaatiotWithoutRootOrg = organisaatioClient.refreshCache();
+        // The only reason keeping this is if old authentication-service still uses this.
         List<OrganisaatioCache> entities = toEntities(
-                commonProperties.getRootOrganizationOid(), organisaatiot,
-                new ArrayDeque<>());
+                commonProperties.getRootOrganizationOid(), organisaatiotWithoutRootOrg, new ArrayDeque<>());
 
         organisaatioCacheRepository.deleteAllInBatch();
         organisaatioCacheRepository.persistInBatch(entities, BATCH_SIZE);
@@ -53,8 +55,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         List<OrganisaatioCache> entities = new ArrayList<>();
         entities.add(entity);
         children.forEach(child -> entities.addAll(toEntities(
-                child.getOid(), child.getChildren(),
-                new ArrayDeque<>(parentOidPath))));
+                child.getOid(), child.getChildren(), new ArrayDeque<>(parentOidPath))));
         return entities;
     }
 
