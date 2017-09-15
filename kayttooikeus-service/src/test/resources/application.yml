@@ -64,3 +64,7 @@ kayttooikeus:
     nightTime:
       intervalInMinutes: -1
       loadThresholdInSeconds: 60
+  scheduling:
+    enabled: false
+    run-on-startup: false
+

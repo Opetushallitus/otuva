@@ -58,14 +58,14 @@ public class OrganisaatioServiceImplTest {
 
     @Test
     public void updateOrganisaatioCache() {
-        when(organisaatioClientMock.listWithoutRoot()).thenReturn(
+        when(organisaatioClientMock.refreshCache()).thenReturn(
                 Arrays.asList(organisaatio("1.2.246.562.10.48349941889",
                         Arrays.asList(organisaatio("1.2.246.562.10.23893528846"), organisaatio("1.2.246.562.10.11762519889")))
                 ));
 
         organisaatioServiceImpl.updateOrganisaatioCache();
 
-        verify(organisaatioClientMock).listWithoutRoot();
+        verify(organisaatioClientMock).refreshCache();
         verify(organisaatioCacheRepositoryMock).deleteAllInBatch();
         verify(organisaatioCacheRepositoryMock).persistInBatch(organisaatioCachesCaptor.capture(), anyInt());
         Collection<OrganisaatioCache> organisaatiot = organisaatioCachesCaptor.getValue();

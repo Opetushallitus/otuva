@@ -6,8 +6,10 @@ import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
@@ -39,10 +41,14 @@ public class ScheduledTasks {
     private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
     private final CommonProperties commonProperties;
+    @Value("${kayttooikeus.scheduling.run-on-startup}")
+    private Boolean schedulingEnabledOnStartup;
 
     @PostConstruct
     public void onStartup() {
-        organisaatioService.updateOrganisaatioCache();
+        if(BooleanUtils.isTrue(this.schedulingEnabledOnStartup)) {
+            organisaatioService.updateOrganisaatioCache();
+        }
     }
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")

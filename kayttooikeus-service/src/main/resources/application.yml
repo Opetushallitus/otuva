@@ -27,6 +27,7 @@ kayttooikeus:
     statistics_size: 25
   scheduling:
     enabled: false
+    run-on-startup: true
     pool_size: 2
     configuration:
       organisaatiocache: "0 0 0 * * ?"
