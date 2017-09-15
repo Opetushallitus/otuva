@@ -106,8 +106,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public List<String> getParentOids(String oid) {
-        String url = urlConfiguration.url("organisaatio-service.organisaatio.parentOids", oid);
-        return Stream.of(io(() -> restClient.getAsString(url)).get().split("/")).collect(toList());
+        return this.cache.flatWithParentsByOid(oid).map(OrganisaatioPerustieto::getOid).collect(toList());
     }
 
     @Override
