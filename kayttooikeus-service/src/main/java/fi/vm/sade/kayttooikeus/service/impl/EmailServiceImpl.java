@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -243,6 +244,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public void sendInvitationEmail(Kutsu kutsu) {
+        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsu.getKutsuja());
+
         EmailData emailData = new EmailData();
 
         EmailMessage email = new EmailMessage();
@@ -286,7 +289,9 @@ public class EmailServiceImpl implements EmailService {
                                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
                                                 .filter(Objects::nonNull).sorted().collect(toList())
                                 )
-                        ).sorted(comparing(OranizationReplacement::getName)).collect(toList()))
+                        ).sorted(comparing(OranizationReplacement::getName)).collect(toList())),
+                replacement("kutsuja", kutsuja.getKutsumanimi() + " " + kutsuja.getSukunimi()),
+                replacement("voimassa", kutsu.getAikaleima().plusMonths(1).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
         ));
         emailData.setRecipient(singletonList(recipient));
 
