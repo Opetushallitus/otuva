@@ -1,11 +1,14 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +26,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
+
 @Slf4j
 @RestController
 @RequestMapping("/cas")
@@ -32,6 +37,8 @@ public class CasController {
 
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
+
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OphProperties ophProperties;
 
@@ -125,7 +132,14 @@ public class CasController {
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (StringUtils.hasLength(loginToken)) {
             try {
-                String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
+                Henkilo henkilo = this.identificationService.validateTokenAndSetHenkiloStronglyIdentified(hetu, etunimet, sukunimi, loginToken);
+                // This needs to be in separate transaction from validateTokenAndSetHenkiloStronglyIdentified() because ONR uses same db
+                // which causes OptimisticLockExceptions.
+                this.oppijanumerorekisteriClient.setStrongIdentifiedHetu(henkilo.getOidHenkilo(),
+                        new HenkiloVahvaTunnistusDto(hetu, etunimet, sukunimi));
+                String authToken = this.generateAuthTokenForHenkilo(henkilo.getOidHenkilo(), STRONG_AUTHENTICATION_IDP,
+                        henkilo.getKayttajatiedot().getUsername());
+
                 queryParams = new HashMap<String, String>() {{
                     put("authToken", authToken);
                     put("service", ophProperties.url("virkailijan-tyopoyta"));
