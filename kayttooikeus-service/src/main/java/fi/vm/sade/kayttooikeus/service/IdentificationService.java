@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.service.dto.StrongIdentificationInternalDto;
 
 import java.util.Set;
 
@@ -27,6 +26,6 @@ public interface IdentificationService {
 
     String createLoginToken(String oidHenkilo);
 
-    StrongIdentificationInternalDto handleStrongIdentification(String hetu, String etunimet, String sukunimi, String loginToken);
+    Henkilo validateTokenAndSetHenkiloStronglyIdentified(String hetu, String etunimet, String sukunimi, String loginToken);
 
 }

@@ -21,7 +21,6 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
@@ -209,15 +208,14 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     // Redirectaa CAS:iin auth tokenin kanssa.
     @Override
     @Transactional
-    public StrongIdentificationInternalDto handleStrongIdentification(String hetu, String etunimet, String sukunimi, String loginToken) {
+    public Henkilo validateTokenAndSetHenkiloStronglyIdentified(String hetu, String etunimet, String sukunimi, String loginToken) {
         TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new LoginTokenNotFoundException("Login token not found " + loginToken));
         Henkilo henkilo = tunnistusToken.getHenkilo();
         henkilo.setVahvastiTunnistettu(true);
 
         tunnistusToken.setKaytetty(LocalDateTime.now());
-        String authToken = this.generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, henkilo.getKayttajatiedot().getUsername());
-        return new StrongIdentificationInternalDto(authToken, henkilo.getOidHenkilo());
+        return henkilo;
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
