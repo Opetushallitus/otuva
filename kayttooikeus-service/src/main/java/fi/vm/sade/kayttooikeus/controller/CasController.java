@@ -3,9 +3,12 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
+import fi.vm.sade.kayttooikeus.service.dto.StrongIdentificationInternalDto;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +35,8 @@ public class CasController {
 
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
+
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OphProperties ophProperties;
 
@@ -125,9 +130,15 @@ public class CasController {
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään
         else if (StringUtils.hasLength(loginToken)) {
             try {
-                String authToken = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
+                StrongIdentificationInternalDto strongIdentificationInternalDto
+                        = this.identificationService.handleStrongIdentification(hetu, etunimet, sukunimi, loginToken);
+                // This needs to be in separate transaction from handleStrongIdentification() because ONR uses same db.
+                // This causes OptimisticLockExceptions.
+                this.oppijanumerorekisteriClient.setStrongIdentifiedHetu(strongIdentificationInternalDto.getHenkiloOid(),
+                        new HenkiloVahvaTunnistusDto(hetu, etunimet, sukunimi));
+
                 queryParams = new HashMap<String, String>() {{
-                    put("authToken", authToken);
+                    put("authToken", strongIdentificationInternalDto.getAuthToken());
                     put("service", ophProperties.url("virkailijan-tyopoyta"));
                 }};
                 response.sendRedirect(this.ophProperties.url("cas.login", queryParams));
