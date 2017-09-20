@@ -5,6 +5,7 @@ import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
@@ -80,9 +81,20 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
+    public void throwIfActiveNotFound(String organisaatioOid) {
+        if(!this.getOrganisaatioPerustiedotCached(organisaatioOid)
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
+                .isPresent()) {
+            throw new NotFoundException("Active organisation not found with oid " + organisaatioOid);
+        }
+    }
+
+    @Override
     public List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid) {
         return this.cache.flatWithParentsAndChildren(organisaatioOid)
-                .filter(org -> !rootOrganizationOid.equals(org.getOid())) // the resource never returns the root
+                // the resource never returns the root
+                .filter(org -> !rootOrganizationOid.equals(org.getOid()))
+                .filter(org -> OrganisaatioStatus.AKTIIVINEN.name().equals(org.getStatus()))
                 .collect(toList());
     }
 
@@ -93,21 +105,27 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
-                .filter(organisaatioPerustieto -> organisaatioPerustieto.getAlkuPvm() == null || organisaatioPerustieto.getAlkuPvm().before(new Date()))
-                .filter(organisaatioPerustieto -> organisaatioPerustieto.getLakkautusPvm() == null || organisaatioPerustieto.getLakkautusPvm().after(new Date()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<String> getParentOids(String oid) {
-        return this.cache.flatWithParentsByOid(oid).map(OrganisaatioPerustieto::getOid).collect(toList());
+    public List<String> getParentOids(String organisaatioOid) {
+        return this.cache.flatWithParentsByOid(organisaatioOid).map(OrganisaatioPerustieto::getOid).collect(toList());
     }
 
     @Override
-    public List<String> getChildOids(String oid) {
-        return this.cache.flatWithChildrenByOid(oid)
+    public List<String> getChildOids(String organisaatioOid) {
+        return this.cache.flatWithChildrenByOid(organisaatioOid)
                         .map(OrganisaatioPerustieto::getOid)
                         .collect(toList());
+    }
+
+    @Override
+    public List<String> getActiveChildOids(String organisaatioOid) {
+        return this.cache.flatWithChildrenByOid(organisaatioOid)
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
+                .map(OrganisaatioPerustieto::getOid)
+                .collect(toList());
     }
 
 }

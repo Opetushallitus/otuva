@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface OrganisaatioClient {
     List<String> getChildOids(String oid);
 
+    void throwIfActiveNotFound(String oid);
+
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid);
 
     List<OrganisaatioPerustieto> refreshCache();
@@ -16,4 +18,6 @@ public interface OrganisaatioClient {
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 
     List<String> getParentOids(String oid);
+
+    List<String> getActiveChildOids(String organisaatioOid);
 }

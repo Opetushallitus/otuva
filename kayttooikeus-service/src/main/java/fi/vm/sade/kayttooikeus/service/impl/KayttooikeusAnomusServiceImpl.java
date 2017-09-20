@@ -93,22 +93,23 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             // käyttöoikeusryhma filtering
             List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
-            criteria.setKayttooikeusRyhmaIds(new HashSet<Long>(slaveIds));
+            criteria.setKayttooikeusRyhmaIds(new HashSet<>(slaveIds));
 
             // organisaatio filtering
             if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
                 if(criteria.getOrganisaatioOids() == null) {
-                    criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                    criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                 } else {
                     Set<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
-                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .flatMap(currentUserOrganisaatioOid ->
+                                    this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
                             .collect(Collectors.toSet());
                     allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
                     allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
 
                     criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
                     if(allCurrentUserOrganisaatioOids.isEmpty()) {
-                        criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                        criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                     }
                 }
 
@@ -521,8 +522,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .collect(Collectors.toList());
 
         if (!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
-            allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream().flatMap(organisaatioOid ->
-                    this.organisaatioClient.getChildOids(organisaatioOid).stream()).collect(Collectors.toList()));
+            allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream()
+                    .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())
+                    .collect(Collectors.toList()));
 
             kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
                     !allowedOrganisaatioOids.contains(organisaatioOid));

@@ -23,6 +23,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -291,7 +292,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
         final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
 
-        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
+        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient
+                .listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
                 .stream().findFirst();
         if (!oh.isPresent()) {
             LOG.warn("Organization " + orgOid + " not found!");
@@ -359,13 +361,16 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioOid));
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
-            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
-                    viiteSet.stream().anyMatch(organisaatioViite ->
-                            organisaatioViite.getOrganisaatioTyyppi()
-                                    .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
-                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
-                                            : null)
-                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
+            return organisaatioPerustieto.getChildren().stream()
+                    .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.name().equals(childOrganisation.getStatus()))
+                    .anyMatch(childOrganisation ->
+                            viiteSet.stream().anyMatch(organisaatioViite ->
+                                    organisaatioViite.getOrganisaatioTyyppi()
+                                            .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
+                                                    // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+                                                    ? childOrganisation.getOppilaitostyyppi().substring(17, 19)
+                                                    : null)
+                                            || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
         }
         // if the organization doesn't have child items, then it must be a top level organization or some other type
         // organization in which case the target organization OID must match the allowed-to-organization OID
