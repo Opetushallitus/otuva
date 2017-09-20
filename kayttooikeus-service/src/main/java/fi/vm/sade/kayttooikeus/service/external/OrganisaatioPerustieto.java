@@ -29,6 +29,7 @@ public class OrganisaatioPerustieto {
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
     @JsonIgnore // avoid recursion if this is returned in JSON
     private OrganisaatioPerustieto parent;
+    private String status;
     
     public List<String> getTyypit() {
         if (this.organisaatiotyypit != null && !this.organisaatiotyypit.isEmpty()) {

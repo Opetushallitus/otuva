@@ -112,15 +112,7 @@ public class HenkilohakuBuilder {
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
                     .map(organisaatioOid -> {
                         OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
-                                .orElseGet(() -> OrganisaatioPerustieto.builder()
-                                        .oid(organisaatioOid)
-                                        .nimi(new HashMap<String, String>() {{
-                                            put("fi", "Tuntematon organisaatio");
-                                            put("sv", "Okänd organisation");
-                                            put("en", "Unknown organisation");
-                                        }})
-                                        .tyypit(Lists.newArrayList())
-                                        .build());
+                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(organisaatioOid));
                         return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getTyypit(), organisaatio.getNimi());
                     })
                     .collect(Collectors.toList()));

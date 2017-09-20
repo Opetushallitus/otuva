@@ -21,9 +21,18 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void listOganisaatioPerustiedotTest() throws Exception {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/hae"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/1.2.246.562.10.00000000001/children"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
+        onRequest().havingMethod(is("GET"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/1.2.246.562.10.00000000001"))
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
+        onRequest().havingMethod(is("GET"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .withBody("[]");
+        this.client.refreshCache();
         List<OrganisaatioPerustieto> results = this.client.listActiveOrganisaatioPerustiedotByOidRestrictionList(singletonList("1.2.246.562.10.14175756379"));
         assertEquals(1, results.size());
         assertEquals("1.2.246.562.10.14175756379", results.get(0).getOid());

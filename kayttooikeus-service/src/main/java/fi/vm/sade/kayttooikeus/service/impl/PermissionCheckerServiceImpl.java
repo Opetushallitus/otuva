@@ -274,12 +274,11 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid) {
         List<OrganisaatioPerustieto> organisaatios = new ArrayList<>();
-        Optional<Henkilo> tempHenkilo = henkiloDataRepository.findByOidHenkilo(oid);
-        if (tempHenkilo.isPresent()) {
-            Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
+        this.henkiloDataRepository.findByOidHenkilo(oid).ifPresent(henkilo -> {
+            Set<OrganisaatioHenkilo> orgHenkilos = henkilo.getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
-        }
+            organisaatios.addAll(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids));
+        });
         return organisaatios;
     }
 

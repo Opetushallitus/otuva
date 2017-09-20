@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.util;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
@@ -8,6 +10,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -70,5 +73,17 @@ public class UserDetailsUtil {
                         && !StringUtils.isEmpty(yhteystietoDto.getYhteystietoArvo()))
 
                 .map(YhteystietoDto::getYhteystietoArvo).findFirst();
+    }
+
+    public static OrganisaatioPerustieto createUnknownOrganisation(String organisaatioOid) {
+        return OrganisaatioPerustieto.builder()
+                .oid(organisaatioOid)
+                .nimi(new HashMap<String, String>() {{
+                    put("fi", "Tuntematon organisaatio");
+                    put("sv", "Okänd organisation");
+                    put("en", "Unknown organisation");
+                }})
+                .tyypit(Lists.newArrayList())
+                .build();
     }
 }

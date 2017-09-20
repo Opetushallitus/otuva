@@ -39,7 +39,7 @@
         <assertj.version>3.7.0</assertj.version> <!-- java8 assertions -->
 
         <oppijanumerorekisteri.version>0.1.1-SNAPSHOT</oppijanumerorekisteri.version>
-        <organisaatio.version>2015-09</organisaatio.version>
+        <organisaatio.version>2016-9-SNAPSHOT</organisaatio.version>
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
 
         <!-- Sade utils -->
