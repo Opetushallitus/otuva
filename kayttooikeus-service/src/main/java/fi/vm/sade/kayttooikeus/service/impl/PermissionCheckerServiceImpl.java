@@ -362,7 +362,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream()
-                    .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.name().equals(childOrganisation.getStatus()))
+                    .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.equals(childOrganisation.getStatus()))
                     .anyMatch(childOrganisation ->
                             viiteSet.stream().anyMatch(organisaatioViite ->
                                     organisaatioViite.getOrganisaatioTyyppi()

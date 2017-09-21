@@ -21,7 +21,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void listOganisaatioPerustiedotTest() throws Exception {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/1.2.246.562.10.00000000001/children"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/hierarkia/hae"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))

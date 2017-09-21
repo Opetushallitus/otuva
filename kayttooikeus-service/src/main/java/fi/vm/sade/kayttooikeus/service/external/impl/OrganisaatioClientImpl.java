@@ -83,7 +83,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     @Override
     public void throwIfActiveNotFound(String organisaatioOid) {
         if(!this.getOrganisaatioPerustiedotCached(organisaatioOid)
-                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
                 .isPresent()) {
             throw new NotFoundException("Active organisation not found with oid " + organisaatioOid);
         }
@@ -94,7 +94,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
         return this.cache.flatWithParentsAndChildren(organisaatioOid)
                 // the resource never returns the root
                 .filter(org -> !rootOrganizationOid.equals(org.getOid()))
-                .filter(org -> OrganisaatioStatus.AKTIIVINEN.name().equals(org.getStatus()))
+                .filter(org -> OrganisaatioStatus.AKTIIVINEN.equals(org.getStatus()))
                 .collect(toList());
     }
 
@@ -104,7 +104,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                 .map(this.cache::getByOid)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
                 .collect(Collectors.toList());
     }
 
@@ -123,7 +123,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     @Override
     public List<String> getActiveChildOids(String organisaatioOid) {
         return this.cache.flatWithChildrenByOid(organisaatioOid)
-                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.name().equals(organisaatioPerustieto.getStatus()))
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
                 .map(OrganisaatioPerustieto::getOid)
                 .collect(toList());
     }

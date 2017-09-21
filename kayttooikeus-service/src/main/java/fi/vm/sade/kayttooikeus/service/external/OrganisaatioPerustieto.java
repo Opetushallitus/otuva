@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import lombok.*;
 
 import java.util.*;
@@ -29,7 +30,7 @@ public class OrganisaatioPerustieto {
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
     @JsonIgnore // avoid recursion if this is returned in JSON
     private OrganisaatioPerustieto parent;
-    private String status;
+    private OrganisaatioStatus status;
     
     public List<String> getTyypit() {
         if (this.organisaatiotyypit != null && !this.organisaatiotyypit.isEmpty()) {

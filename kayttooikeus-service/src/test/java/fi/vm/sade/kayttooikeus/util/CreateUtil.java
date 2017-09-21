@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -139,6 +140,7 @@ public class CreateUtil {
     public static OrganisaatioPerustieto createOrganisaatioPerustietoNoChildren(String organisaatioOid) {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setOid(organisaatioOid);
+        organisaatioPerustieto.setStatus(OrganisaatioStatus.AKTIIVINEN);
         return organisaatioPerustieto;
     }
 
@@ -154,6 +156,7 @@ public class CreateUtil {
         OrganisaatioPerustieto child = createOrganisaatioPerustietoNoChildren(childOid);
         child.setOppilaitostyyppi(childOppilaitostyyppi);
         organisaatioPerustieto.setChildren(newArrayList(child));
+        child.setStatus(OrganisaatioStatus.AKTIIVINEN);
         return organisaatioPerustieto;
     }
 

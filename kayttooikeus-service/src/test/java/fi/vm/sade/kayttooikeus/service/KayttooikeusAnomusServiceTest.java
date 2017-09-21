@@ -228,7 +228,7 @@ public class KayttooikeusAnomusServiceTest {
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
-        given(this.organisaatioClient.getChildOids(any())).willReturn(userOrganisaatioChildOids);
+        given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
