@@ -14,19 +14,11 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class OrganisaatioPerustieto {
     private String oid;
-    private String parentOid;
     private String parentOidPath;
-    private String ytunnus;
-    private String virastotunnus;
-    private String oppilaitosKoodi;
     private String oppilaitostyyppi;
     private Map<String, String> nimi = new HashMap<>();
     private List<String> organisaatiotyypit = new ArrayList<>();
     private List<String> tyypit = new ArrayList<>();
-    private List<String> kieletUris = new ArrayList<>();
-    private String kotipaikkaUri;
-    private Date alkuPvm;
-    private Date lakkautusPvm;
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
     @JsonIgnore // avoid recursion if this is returned in JSON
     private OrganisaatioPerustieto parent;
