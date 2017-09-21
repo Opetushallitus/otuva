@@ -131,7 +131,7 @@ public class CreateUtil {
 
     public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
                                        String perustelut) {
-        return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, null, tehtavanimike,
+        return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, tehtavanimike,
                 AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(5),
                 perustelut, "", "", "", "",
                 Sets.newHashSet(), Sets.newHashSet());
@@ -147,6 +147,7 @@ public class CreateUtil {
     public static OrganisaatioPerustieto creaetOrganisaatioPerustietoWithNimi(String organisaatioOid, String nimi) {
         OrganisaatioPerustieto organisaatio = createOrganisaatioPerustietoNoChildren(organisaatioOid);
         organisaatio.setNimi(new HashMap<String, String>(){{put("fi", nimi);}});
+        organisaatio.setStatus(OrganisaatioStatus.AKTIIVINEN);
         return organisaatio;
     }
 

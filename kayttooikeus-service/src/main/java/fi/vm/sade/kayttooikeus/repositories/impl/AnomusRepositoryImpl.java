@@ -7,6 +7,8 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.AnomusRepositoryCustom;
 import java.util.List;
 import javax.persistence.EntityManager;
+
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
@@ -15,8 +17,11 @@ public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
 
     private final EntityManager entityManager;
 
-    public AnomusRepositoryImpl(JpaContext jpaContext) {
+    private final OrganisaatioClient organisaatioClient;
+
+    public AnomusRepositoryImpl(JpaContext jpaContext, OrganisaatioClient organisaatioClient) {
         this.entityManager = jpaContext.getEntityManagerByManagedType(Anomus.class);
+        this.organisaatioClient = organisaatioClient;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
 
         JPAQuery<Anomus> query = new JPAQuery<>(entityManager)
                 .from(qAnomus)
-                .where(criteria.condition(qAnomus))
+                .where(criteria.condition(qAnomus, this.organisaatioClient))
                 .select(qAnomus)
                 .orderBy(qAnomus.anomusTilaTapahtumaPvm.desc());
         if (limit != null) {

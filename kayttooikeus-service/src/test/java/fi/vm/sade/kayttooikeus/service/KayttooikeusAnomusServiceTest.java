@@ -14,7 +14,6 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
-import org.hibernate.validator.constraints.br.TituloEleitoral;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,9 +99,6 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
-    @MockBean
-    private OrganisaatioCacheRepository organisaatioCacheRepository;
-
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
 
@@ -118,11 +114,9 @@ public class KayttooikeusAnomusServiceTest {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
         this.commonProperties = new CommonProperties();
         commonProperties.setRootOrganizationOid("rootOid");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid(anyString()))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
-       doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
-       doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
-       doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
+        doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
+        doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
+        doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
         this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
                 this.haettuKayttooikeusRyhmaRepository,
                 this.henkiloDataRepository,
@@ -134,7 +128,6 @@ public class KayttooikeusAnomusServiceTest {
                 this.anomusRepository,
                 this.organisaatioHenkiloDataRepository,
                 this.organisaatioHenkiloRepository,
-                this.organisaatioCacheRepository,
                 this.orikaBeanMapper,
                 this.localizationService,
                 this.emailService,

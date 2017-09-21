@@ -6,6 +6,7 @@ import com.querydsl.core.types.Predicate;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.util.CollectionUtils;
@@ -15,8 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Getter
 @Setter
@@ -37,15 +36,16 @@ public class AnomusCriteria {
     private Boolean adminView;
     private Set<Long> kayttooikeusRyhmaIds;
 
-    public Predicate condition(QAnomus qAnomus) {
+    public Predicate condition(QAnomus qAnomus, OrganisaatioClient organisaatioClient) {
         BooleanBuilder builder = new BooleanBuilder();
-        return this.condition(qAnomus, builder);
+        return this.condition(qAnomus, builder, organisaatioClient);
     }
 
-    public Predicate condition(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma) {
+    public Predicate condition(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma,
+                               OrganisaatioClient organisaatioClient) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        builder = this.condition(qAnomus, builder);
+        builder = this.condition(qAnomus, builder, organisaatioClient);
 
         if (BooleanUtils.isTrue(this.adminView)) {
             builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
@@ -63,7 +63,7 @@ public class AnomusCriteria {
         return builder;
     }
 
-    private BooleanBuilder condition(QAnomus qAnomus, BooleanBuilder builder) {
+    private BooleanBuilder condition(QAnomus qAnomus, BooleanBuilder builder, OrganisaatioClient organisaatioClient) {
         if (q != null) {
             builder.andAnyOf(
                     qAnomus.henkilo.oidHenkilo.eq(q),
@@ -80,7 +80,7 @@ public class AnomusCriteria {
         }
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
             List<Predicate> predicates = this.organisaatioOids.stream()
-                    .map(oid -> qAnomus.organisaatioCache.organisaatioOidPath.contains(oid))
+                    .map(oid -> qAnomus.organisaatioOid.in(organisaatioClient.getActiveParentOids(oid)))
                     .collect(Collectors.toList());
             builder.and(ExpressionUtils.anyOf(predicates));
         }

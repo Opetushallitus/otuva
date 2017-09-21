@@ -7,6 +7,8 @@ import fi.vm.sade.kayttooikeus.repositories.HaettuKayttooikeusRyhmaRepositoryCus
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import java.util.List;
 import javax.persistence.EntityManager;
+
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
@@ -15,8 +17,11 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
 
     private final EntityManager entityManager;
 
-    public HaettuKayttooikeusRyhmaRepositoryImpl(JpaContext jpaContext) {
+    private final OrganisaatioClient organisaatioClient;
+
+    public HaettuKayttooikeusRyhmaRepositoryImpl(JpaContext jpaContext, OrganisaatioClient organisaatioClient) {
         this.entityManager = jpaContext.getEntityManagerByManagedType(HaettuKayttoOikeusRyhma.class);
+        this.organisaatioClient = organisaatioClient;
     }
 
     @Override
@@ -34,7 +39,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
         if (criteria.getAdminView() != null && criteria.getAdminView()) {
             query.leftJoin(qKayttoOikeusRyhma.kayttoOikeus, qKayttoOikeus);
         }
-        query.where(criteria.condition(qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma));
+        query.where(criteria.condition(qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma, this.organisaatioClient));
         query.where(qKayttoOikeusRyhma.hidden.isFalse());
 
         if (limit != null) {

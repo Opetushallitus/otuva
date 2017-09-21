@@ -53,7 +53,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioCacheRepository organisaatioCacheRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
@@ -250,6 +249,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
         Henkilo savedAnoja = this.henkiloDataRepository.save(anoja);
+        this.organisaatioClient.throwIfActiveNotFound(organisaatioOid);
 
         OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = savedAnoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
@@ -259,8 +259,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
                                 .henkilo(savedAnoja)
-                                .organisaatioCache(this.organisaatioCacheRepository.findByOrganisaatioOid(organisaatioOid)
-                                        .orElseThrow(() -> new NotFoundException("Organisaatio not found from cache by oid " + organisaatioOid)))
                                 .build())));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
         return foundOrCreatedOrganisaatioHenkilo;

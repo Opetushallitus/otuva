@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioCacheRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.*;
@@ -72,9 +71,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private HenkiloHelper henkiloHelper;
-
-    @MockBean
-    private OrganisaatioCacheRepository organisaatioCacheRepository;
 
     @MockBean
     private LdapSynchronizationService ldapSynchronizationService;
@@ -233,8 +229,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
 
@@ -275,8 +269,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 HenkiloPopulator.henkilo("1.2.0.0.2").withUsername("old_username"),
                 "2.1.0.1"))
                 .getHenkilo();
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doThrow(new ExternalServiceException("",
                 new CachingRestClient.HttpException(null,
@@ -322,8 +314,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 
@@ -372,8 +362,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 

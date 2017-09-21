@@ -10,6 +10,7 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -43,7 +44,8 @@ public class HenkiloCriteria {
 
     public Predicate condition(QHenkilo henkilo,
                                QOrganisaatioHenkilo organisaatioHenkilo,
-                               QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
+                               QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma,
+                               OrganisaatioClient organisaatioClient) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
         if (this.passivoitu != null && !this.passivoitu) {
@@ -71,7 +73,8 @@ public class HenkiloCriteria {
         if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
             if(this.subOrganisation != null && this.subOrganisation) {
                 List<Predicate> predicates = this.organisaatioOids.stream()
-                        .map(oid -> organisaatioHenkilo.organisaatioCache.organisaatioOidPath.contains(oid))
+                        .map(organisaatioOid ->
+                                organisaatioHenkilo.organisaatioOid.in(organisaatioClient.getActiveParentOids(organisaatioOid)))
                         .collect(Collectors.toList());
                 builder.and(ExpressionUtils.anyOf(predicates));
             }

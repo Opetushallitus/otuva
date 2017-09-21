@@ -181,12 +181,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
         Set<String> candidateRoles = new HashSet<>();
         for (OrganisaatioHenkilo orgHenkilo : henkilo.get().getOrganisaatioHenkilos()) {
-            OrganisaatioCache organisaatioCache = orgHenkilo.getOrganisaatioCache();
-            if (organisaatioCache != null) {
-                String orgWithParents[] = organisaatioCache.getOrganisaatioOidPath().split("/");
-                for (String allowedRole : allowedRoles) {
-                    candidateRoles.addAll(getPrefixedRoles(allowedRole + "_", Lists.newArrayList(orgWithParents)));
-                }
+            List<String> orgWithParents = this.organisaatioClient.getActiveParentOids(orgHenkilo.getOrganisaatioOid());
+            for (String allowedRole : allowedRoles) {
+                candidateRoles.addAll(getPrefixedRoles(allowedRole + "_", Lists.newArrayList(orgWithParents)));
             }
         }
 

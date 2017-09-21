@@ -114,6 +114,14 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
+    public List<String> getActiveParentOids(String organisaatioOid) {
+        return this.cache.flatWithParentsByOid(organisaatioOid)
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
+                .map(OrganisaatioPerustieto::getOid)
+                .collect(toList());
+    }
+
+    @Override
     public List<String> getChildOids(String organisaatioOid) {
         return this.cache.flatWithChildrenByOid(organisaatioOid)
                         .map(OrganisaatioPerustieto::getOid)

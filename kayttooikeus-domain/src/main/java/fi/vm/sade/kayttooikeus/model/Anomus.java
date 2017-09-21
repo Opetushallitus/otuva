@@ -35,11 +35,6 @@ public class Anomus extends IdentifiableAndVersionedEntity {
     @Column(name = "organisaatiooid")
     private String organisaatioOid;
 
-    @OneToOne(optional = true, fetch = FetchType.LAZY)
-    @NotFound(action = NotFoundAction.IGNORE)
-    @JoinColumn(name = "organisaatiooid", insertable = false, updatable = false)
-    private OrganisaatioCache organisaatioCache;
-
     @Column(name = "tehtavanimike")
     private String tehtavanimike;
 

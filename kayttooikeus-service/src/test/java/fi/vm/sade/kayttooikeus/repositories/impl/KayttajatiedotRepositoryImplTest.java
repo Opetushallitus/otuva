@@ -5,6 +5,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class KayttajatiedotRepositoryImplTest {
 
     @MockBean
     PermissionCheckerService permissionCheckerService;
+
+    @MockBean
+    OrganisaatioClient organisaatioClient;
 
     @Test
     public void testQueryExecutes() {

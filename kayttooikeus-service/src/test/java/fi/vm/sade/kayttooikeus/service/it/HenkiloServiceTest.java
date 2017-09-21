@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
@@ -126,7 +127,8 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
-
+        given(this.organisaatioClient.getActiveParentOids("3.4.5.6.7"))
+                .willReturn(Lists.newArrayList("3.4.5.6.7"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, singletonList(
                         "3.4.5.6.7"), null);

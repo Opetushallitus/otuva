@@ -9,7 +9,6 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -143,13 +142,10 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsAllowedWhenUserBelongsToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
-                setOrganisaatioCache(
-                        new OrganisaatioCache(){{
-                            setOrganisaatioOidPath("org1/org2/org3");
-                        }}
-                );
+                setOrganisaatioOid("org1");
             }}));
         }});
+        given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList("org1", "org2", "org3"));
         Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD", "READ"),
                 null, this.myRoles)).isTrue();
@@ -159,13 +155,11 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsDeniedWhenUserDoesNotBelongToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
-                setOrganisaatioCache(
-                        new OrganisaatioCache(){{
-                            setOrganisaatioOidPath("notCommonOrg1/notCommonOrg2/notCommonOrg3");
-                        }}
-                );
+                setOrganisaatioOid("notCommonOrg1");
             }}));
         }});
+        given(this.organisaatioClient.getActiveParentOids(any()))
+                .willReturn(Lists.newArrayList("notCommonOrg1", "notCommonOrg2", "notCommonOrg3"));
         Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson",
                 Lists.newArrayList("CRUD", "READ"), null, this.myRoles)).isFalse();
