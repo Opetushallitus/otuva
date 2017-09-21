@@ -14,6 +14,7 @@ import java.io.Serializable;
 @Builder
 @Getter @Setter
 @Table(name = "organisaatio_cache")
+@Deprecated
 public class OrganisaatioCache implements Serializable {
     @Id
     @Column(name = "organisaatio_oid")

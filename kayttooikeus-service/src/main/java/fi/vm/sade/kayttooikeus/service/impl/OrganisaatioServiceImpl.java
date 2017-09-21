@@ -10,8 +10,11 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
+
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +36,12 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     @Override
     public void updateOrganisaatioCache() {
         LOGGER.info("Organisaatiocachen päivitys aloitetaan");
-        List<OrganisaatioPerustieto> organisaatiotWithoutRootOrg = organisaatioClient.refreshCache();
+        List<OrganisaatioPerustieto> activeOrganisaatiotWithoutRootOrg = organisaatioClient.refreshCache().stream()
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
+                .collect(Collectors.toList());
         // The only reason keeping this is if old authentication-service still uses this.
         List<OrganisaatioCache> entities = toEntities(
-                commonProperties.getRootOrganizationOid(), organisaatiotWithoutRootOrg, new ArrayDeque<>());
+                commonProperties.getRootOrganizationOid(), activeOrganisaatiotWithoutRootOrg, new ArrayDeque<>());
 
         organisaatioCacheRepository.deleteAllInBatch();
         organisaatioCacheRepository.persistInBatch(entities, BATCH_SIZE);

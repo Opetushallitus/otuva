@@ -519,6 +519,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .map(OrganisaatioHenkilo::getOrganisaatioOid)
                 .collect(Collectors.toList());
 
+        // Skip checking organisation hierarchy is user has ANOMUSTENHALLINTA_CRUD to root organisation.
         if (!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
             allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream()
                     .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())
@@ -527,7 +528,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
                     !allowedOrganisaatioOids.contains(organisaatioOid));
 
-            regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
+            this.regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
         }
 
         // Filter off empty keys
