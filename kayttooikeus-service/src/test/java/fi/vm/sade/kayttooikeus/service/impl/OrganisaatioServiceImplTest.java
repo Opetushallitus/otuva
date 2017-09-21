@@ -11,6 +11,8 @@ import static java.util.Collections.emptyList;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +55,7 @@ public class OrganisaatioServiceImplTest {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setOid(oid);
         organisaatioPerustieto.setChildren(children);
+        organisaatioPerustieto.setStatus(OrganisaatioStatus.AKTIIVINEN);
         return organisaatioPerustieto;
     }
 
