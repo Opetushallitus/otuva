@@ -24,6 +24,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,7 +47,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class})
+        classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class})
 public class KayttooikeusAnomusServiceTest {
     @Autowired
     private OrikaBeanMapper orikaBeanMapper;
@@ -99,44 +100,28 @@ public class KayttooikeusAnomusServiceTest {
     @MockBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
+    @MockBean
+    private OrganisaatioService organisaatioService;
+
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    @SpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
+    @SpyBean
     private CommonProperties commonProperties;
 
     @Before
     public void setup() {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
-        this.commonProperties = new CommonProperties();
-        commonProperties.setRootOrganizationOid("rootOid");
+        this.commonProperties.setRootOrganizationOid("rootOid");
         doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
         doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
         doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
-        this.kayttooikeusAnomusService = spy(new KayttooikeusAnomusServiceImpl(
-                this.haettuKayttooikeusRyhmaRepository,
-                this.henkiloDataRepository,
-                this.henkiloHibernateRepository,
-                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
-                this.kayttoOikeusRyhmaMyontoViiteRepository,
-                this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository,
-                this.kayttooikeusryhmaDataRepository,
-                this.anomusRepository,
-                this.organisaatioHenkiloDataRepository,
-                this.organisaatioHenkiloRepository,
-                this.orikaBeanMapper,
-                this.localizationService,
-                this.emailService,
-                this.ldapSynchronizationService,
-                this.haettuKayttooikeusryhmaValidator,
-                this.permissionCheckerService,
-                commonProperties,
-                this.organisaatioClient)
-        );
     }
 
 

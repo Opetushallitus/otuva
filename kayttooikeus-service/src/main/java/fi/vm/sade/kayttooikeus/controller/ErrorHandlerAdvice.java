@@ -61,7 +61,8 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND) // 404 Entity not found by primary key.
-    @ExceptionHandler(NotFoundException.class) @ResponseBody
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseBody
     public Map<String,Object> notFound(HttpServletRequest req, NotFoundException exception) {
         return handleException(req, exception, "error_NotFoundException",
                 !Objects.equals(exception.getMessage(), "") ?
@@ -70,14 +71,16 @@ public class ErrorHandlerAdvice {
     }
     
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(AuthenticationException.class) @ResponseBody
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseBody
     public Map<String,Object> unauthorized(HttpServletRequest req, AuthenticationException exception) {
         return handleException(req, exception, "error_NotAuthorizedException",
                 messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
     }
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
-    @ExceptionHandler(AccessDeniedException.class) @ResponseBody
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
     public Map<String,Object> notAuthorized(HttpServletRequest req, AccessDeniedException exception) {
         return handleException(req, exception, "error_NotAuthorizedException",
                 messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
@@ -89,7 +92,8 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.GATEWAY_TIMEOUT) // 504: Gateway Timeout
-    @ExceptionHandler(ExternalServiceException.class) @ResponseBody
+    @ExceptionHandler(ExternalServiceException.class)
+    @ResponseBody
     public Map<String,Object> errorCallingExternalService(HttpServletRequest req, ExternalServiceException exception) {
         return handleException(req, exception, "error_calling_external_service",
                 messageSource.getMessage("error_calling_external_service", new Object[]{exception.getResource()}, getLocale(req)));
@@ -108,25 +112,29 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler(org.hibernate.exception.ConstraintViolationException.class) @ResponseBody
+    @ExceptionHandler(org.hibernate.exception.ConstraintViolationException.class)
+    @ResponseBody
     public Map<String,Object> constraintViolatingRequest(HttpServletRequest req, ConstraintViolationException exception) {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class}) @ResponseBody
+    @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+    @ResponseBody
     public Map<String,Object> methodArgumentNotValidException(HttpServletRequest req, MethodArgumentNotValidException exception) {
         return handleConstraintViolations(req, exception, exception.getBindingResult());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler(ConstraintViolationException.class) @ResponseBody
+    @ExceptionHandler({ConstraintViolationException.class, javax.validation.ValidationException.class})
+    @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, ConstraintViolationException exception) {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());
     }
     
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler(ValidationException.class) @ResponseBody
+    @ExceptionHandler(ValidationException.class)
+    @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, ValidationException exception) {
         Collection<ViolationDto> violations = exception.getViolations() != null ? Collections2.transform(exception.getViolations(), VIOLATIONS_TRANSFORMER::apply) : new ArrayList<>();
         Collection<String> violationsMsgs = exception.getValidationMessages();
@@ -139,13 +147,15 @@ public class ErrorHandlerAdvice {
     }
     
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad Request
-    @ExceptionHandler({IllegalArgumentException.class, PasswordException.class}) @ResponseBody
+    @ExceptionHandler({IllegalArgumentException.class, PasswordException.class})
+    @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, RuntimeException exception) {
         return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN) // 403 Forbidden
-    @ExceptionHandler(ForbiddenException.class) @ResponseBody
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseBody
     public Map<String,Object> forbidden(HttpServletRequest req, ForbiddenException exception) {
         return handleException(req, exception, "forbidden", exception.getMessage());
     }
@@ -157,7 +167,8 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal
-    @ExceptionHandler(Exception.class) @ResponseBody // any other type
+    @ExceptionHandler(Exception.class)
+    @ResponseBody // any other type
     public Map<String,Object> internalError(HttpServletRequest req, Exception exception) {
         return handleException(req, exception, "internal_server_error", exception.getMessage());
     }
@@ -232,8 +243,8 @@ public class ErrorHandlerAdvice {
         return result;
     }
 
-    protected Map<String,Object> handleException(HttpServletRequest req, Throwable exception, String messageKey, String message,
-                                                 Object... params) {
+    private Map<String,Object> handleException(HttpServletRequest req, Throwable exception, String messageKey, String message,
+                                               Object... params) {
         logger.error("Request: " + req.getRequestURL() + " raised " + exception, exception);
         Map<String,Object> result = new HashMap<String,Object>();
         result.put("message", message);

@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ValidationException;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -49,6 +51,11 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         LOGGER.info("Organisaatiocachen päivitys päättyy: tallennettiin {} organisaatiota", entities.size());
     }
 
+    @Override
+    public Long getClientCacheState() {
+        return this.organisaatioClient.getCacheOrganisationCount();
+    }
+
     private static List<OrganisaatioCache> toEntities(String oid, List<OrganisaatioPerustieto> children, Deque<String> parentOidPath) {
         parentOidPath.addFirst(oid);
         String oidPath = parentOidPath.stream().collect(joining("/"));
@@ -62,6 +69,13 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         children.forEach(child -> entities.addAll(toEntities(
                 child.getOid(), child.getChildren(), new ArrayDeque<>(parentOidPath))));
         return entities;
+    }
+
+    @Override
+    public void throwIfActiveNotFound(String organisaatioOid) {
+        if(!this.organisaatioClient.activeExists(organisaatioOid)) {
+            throw new ValidationException("Active organisation not found with oid " + organisaatioOid);
+        }
     }
 
 }

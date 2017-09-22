@@ -5,7 +5,6 @@ import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
@@ -14,6 +13,7 @@ import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.ValidationException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,17 +81,19 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
+    public Long getCacheOrganisationCount() {
+        return this.cache.getCacheCount();
+    }
+    @Override
     public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid) {
         return this.cache.getByOid(oid);
     }
 
     @Override
-    public void throwIfActiveNotFound(String organisaatioOid) {
-        if(!this.getOrganisaatioPerustiedotCached(organisaatioOid)
+    public boolean activeExists(String organisaatioOid) {
+        return this.getOrganisaatioPerustiedotCached(organisaatioOid)
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
-                .isPresent()) {
-            throw new NotFoundException("Active organisation not found with oid " + organisaatioOid);
-        }
+                .isPresent();
     }
 
     @Override

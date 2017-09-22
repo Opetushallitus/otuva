@@ -5,8 +5,10 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import java.time.Period;
  * @see SchedulingConfiguration ajastuksen aktivointi
  */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class ScheduledTasks {
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledTasks.class);
@@ -50,7 +53,11 @@ public class ScheduledTasks {
     @PostConstruct
     public void onStartup() {
         if(BooleanUtils.isTrue(this.schedulingEnabledOnStartup)) {
-            this.organisaatioClient.refreshCache();
+            try {
+                this.organisaatioClient.refreshCache();
+            } catch (ExternalServiceException e) {
+                log.error("Could not refresh organisation cache. Organisation service not responding.", e);
+            }
         }
     }
 

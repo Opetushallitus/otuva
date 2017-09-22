@@ -49,4 +49,8 @@ public class OrganisaatioCache {
     public Stream<OrganisaatioPerustieto> flatWithParentsAndChildren(String oid) {
         return getByOid(oid).map(org -> Stream.concat(org.parents(), org.andChildren())).orElse(Stream.empty());
     }
+
+    public Long getCacheCount() {
+        return (long) this.byOid.size();
+    }
 }

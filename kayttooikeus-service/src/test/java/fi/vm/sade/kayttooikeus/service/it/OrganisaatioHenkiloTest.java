@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -32,6 +33,9 @@ public class OrganisaatioHenkiloTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private PermissionCheckerService permissionCheckerService;
+
+    @MockBean
+    private OrganisaatioService organisaatioService;
 
     @Autowired
     private OrganisaatioHenkiloService organisaatioHenkiloService;

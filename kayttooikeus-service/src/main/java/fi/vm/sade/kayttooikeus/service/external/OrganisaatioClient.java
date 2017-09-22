@@ -7,11 +7,13 @@ import java.util.Optional;
 public interface OrganisaatioClient {
     List<String> getChildOids(String organisaatioOid);
 
-    void throwIfActiveNotFound(String organisaatioOid);
+    boolean activeExists(String organisaatioOid);
 
     List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid);
 
     List<OrganisaatioPerustieto> refreshCache();
+
+    Long getCacheOrganisationCount();
 
     Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String organisaatioOid);
 

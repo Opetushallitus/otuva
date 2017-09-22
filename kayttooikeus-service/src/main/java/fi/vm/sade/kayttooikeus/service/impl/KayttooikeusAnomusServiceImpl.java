@@ -21,7 +21,6 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import java.util.EnumSet;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -58,6 +57,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final LocalizationService localizationService;
     private final EmailService emailService;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final OrganisaatioService organisaatioService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -249,7 +249,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
         Henkilo savedAnoja = this.henkiloDataRepository.save(anoja);
-        this.organisaatioClient.throwIfActiveNotFound(organisaatioOid);
+        this.organisaatioService.throwIfActiveNotFound(organisaatioOid);
 
         OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = savedAnoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
