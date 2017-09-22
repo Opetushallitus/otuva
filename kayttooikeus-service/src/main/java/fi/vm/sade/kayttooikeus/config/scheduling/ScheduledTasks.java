@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ public class ScheduledTasks {
     private final HenkiloDataRepository henkiloDataRepository;
     private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
+    private final OrganisaatioClient organisaatioClient;
+
     private final CommonProperties commonProperties;
     @Value("${kayttooikeus.scheduling.run-on-startup}")
     private Boolean schedulingEnabledOnStartup;
@@ -47,7 +50,7 @@ public class ScheduledTasks {
     @PostConstruct
     public void onStartup() {
         if(BooleanUtils.isTrue(this.schedulingEnabledOnStartup)) {
-            organisaatioService.updateOrganisaatioCache();
+            this.organisaatioClient.refreshCache();
         }
     }
 

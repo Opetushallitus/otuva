@@ -39,6 +39,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         List<OrganisaatioPerustieto> activeOrganisaatiotWithoutRootOrg = organisaatioClient.refreshCache().stream()
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
                 .collect(Collectors.toList());
+
         // The only reason keeping this is if old authentication-service still uses this.
         List<OrganisaatioCache> entities = toEntities(
                 commonProperties.getRootOrganizationOid(), activeOrganisaatiotWithoutRootOrg, new ArrayDeque<>());

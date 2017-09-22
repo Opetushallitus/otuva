@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.6.RELEASE</version>
+        <version>1.5.7.RELEASE</version>
     </parent>
 
     <modules>
@@ -165,11 +165,15 @@
                 <artifactId>validation-api</artifactId>
                 <version>${javax.validation.api.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.carrotsearch</groupId>
+                <artifactId>java-sizeof</artifactId>
+                <version>0.0.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

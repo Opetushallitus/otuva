@@ -12,15 +12,19 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.carrotsearch.sizeof.RamUsageEstimator.humanReadableUnits;
+import static com.carrotsearch.sizeof.RamUsageEstimator.sizeOf;
 import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.mapper;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final CachingRestClient restClient = new CachingRestClient()
             .setClientSubSystemCode("kayttooikeus.kayttooikeuspalvelu-service");
@@ -66,6 +70,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     return ryhma;
                 }).collect(Collectors.toSet()));
         this.cache = new OrganisaatioCache(this.fetchPerustiedot(this.rootOrganizationOid), organisaatiosWithoutRootOrg);
+        log.info("Organisation client cache refreshed. Cache size " + humanReadableUnits(sizeOf(this.cache)));
         return organisaatiosWithoutRootOrg;
     }
 
