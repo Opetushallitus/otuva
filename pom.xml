@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.6.RELEASE</version>
+        <version>1.5.7.RELEASE</version>
     </parent>
 
     <modules>
@@ -39,7 +39,7 @@
         <assertj.version>3.7.0</assertj.version> <!-- java8 assertions -->
 
         <oppijanumerorekisteri.version>0.1.1-SNAPSHOT</oppijanumerorekisteri.version>
-        <organisaatio.version>2015-09</organisaatio.version>
+        <organisaatio.version>2016-9-SNAPSHOT</organisaatio.version>
         <ryhmasahkoposti.version>14.7</ryhmasahkoposti.version>
 
         <!-- Sade utils -->
@@ -165,11 +165,15 @@
                 <artifactId>validation-api</artifactId>
                 <version>${javax.validation.api.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.carrotsearch</groupId>
+                <artifactId>java-sizeof</artifactId>
+                <version>0.0.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

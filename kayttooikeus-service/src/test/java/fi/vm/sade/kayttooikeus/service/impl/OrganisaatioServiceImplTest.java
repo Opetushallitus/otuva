@@ -11,6 +11,8 @@ import static java.util.Collections.emptyList;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,19 +55,20 @@ public class OrganisaatioServiceImplTest {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setOid(oid);
         organisaatioPerustieto.setChildren(children);
+        organisaatioPerustieto.setStatus(OrganisaatioStatus.AKTIIVINEN);
         return organisaatioPerustieto;
     }
 
     @Test
     public void updateOrganisaatioCache() {
-        when(organisaatioClientMock.listWithoutRoot()).thenReturn(
+        when(organisaatioClientMock.refreshCache()).thenReturn(
                 Arrays.asList(organisaatio("1.2.246.562.10.48349941889",
                         Arrays.asList(organisaatio("1.2.246.562.10.23893528846"), organisaatio("1.2.246.562.10.11762519889")))
                 ));
 
         organisaatioServiceImpl.updateOrganisaatioCache();
 
-        verify(organisaatioClientMock).listWithoutRoot();
+        verify(organisaatioClientMock).refreshCache();
         verify(organisaatioCacheRepositoryMock).deleteAllInBatch();
         verify(organisaatioCacheRepositoryMock).persistInBatch(organisaatioCachesCaptor.capture(), anyInt());
         Collection<OrganisaatioCache> organisaatiot = organisaatioCachesCaptor.getValue();

@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -10,6 +9,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 import static com.querydsl.core.types.ExpressionUtils.eq;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 
-import static com.querydsl.core.types.ExpressionUtils.or;
 import static java.util.stream.Collectors.toSet;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -28,7 +28,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
+@RequiredArgsConstructor
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
+
+    private final OrganisaatioClient organisaatioClient;
 
     @Override
     public Set<String> findOidsBy(OrganisaatioHenkiloCriteria criteria) {
@@ -90,7 +93,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria.HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> criteria,
                                                      Long offset,
                                                      List<String> organisaatioOidRestrictionList,
                                                      List<OrderSpecifier> orderBy) {
@@ -125,7 +128,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             orderBy.forEach(query::orderBy);
         }
 
-        query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+        query.where(criteria.apply(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
         return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),

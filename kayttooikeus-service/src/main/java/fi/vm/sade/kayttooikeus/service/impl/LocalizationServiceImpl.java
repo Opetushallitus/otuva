@@ -57,7 +57,7 @@ public class LocalizationServiceImpl implements LocalizationService {
     public <T extends LocalizableOrganisaatio, C extends Collection<T>> C localizeOrgs(C list) {
         list.forEach(localizableOrganisaatio -> localizableOrganisaatio.setNimi(
                 new TextGroupMapDto(null, this.organisaatioClient
-                        .getOrganisaatioPerustiedotCached(localizableOrganisaatio.getOrganisaatioOid(), OrganisaatioClient.Mode.requireCache())
+                        .getOrganisaatioPerustiedotCached(localizableOrganisaatio.getOrganisaatioOid())
                         .orElseThrow(() -> new NotFoundException("Organisaatio not found by oid " + localizableOrganisaatio.getOrganisaatioOid()))
                         .getNimi())));
         return list;

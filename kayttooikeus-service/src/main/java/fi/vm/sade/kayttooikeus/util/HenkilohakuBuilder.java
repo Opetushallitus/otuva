@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.util;
 
-import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
@@ -18,7 +17,9 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,7 @@ public class HenkilohakuBuilder {
     // Find nimi, kayttajatunnus and oidHenkilo
     public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
         this.henkilohakuResultDtoList = this.henkiloHibernateRepository
-                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
+                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class).createCondition(this.organisaatioClient),
                         offset,
                         this.organisationRestrictionList,
                         orderBy != null ? orderBy.getValue() : null);
@@ -81,14 +82,17 @@ public class HenkilohakuBuilder {
     // Remove henkilos the user has no access (and who have organisation)
     public HenkilohakuBuilder exclusion() {
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+            List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
+                    .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
 
             if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
                 if (henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
                     henkilohakuCriteriaDto.setOrganisaatioOids(currentUserOrganisaatioOids);
-                } else {
+                }
+                else {
                     List<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
-                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .flatMap(currentUserOrganisaatioOid ->
+                                    this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
                             .collect(Collectors.toList());
                     allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
                     allCurrentUserOrganisaatioOids.retainAll(henkilohakuCriteriaDto.getOrganisaatioOids());
@@ -111,17 +115,8 @@ public class HenkilohakuBuilder {
                     .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
                     .map(OrganisaatioHenkilo::getOrganisaatioOid)
                     .map(organisaatioOid -> {
-                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid,
-                                OrganisaatioClient.Mode.requireCache())
-                                .orElseGet(() -> OrganisaatioPerustieto.builder()
-                                        .oid(organisaatioOid)
-                                        .nimi(new HashMap<String, String>() {{
-                                            put("fi", "Tuntematon organisaatio");
-                                            put("sv", "Okänd organisation");
-                                            put("en", "Unknown organisation");
-                                        }})
-                                        .tyypit(Lists.newArrayList())
-                                        .build());
+                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
+                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(organisaatioOid));
                         return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getTyypit(), organisaatio.getNimi());
                     })
                     .collect(Collectors.toList()));

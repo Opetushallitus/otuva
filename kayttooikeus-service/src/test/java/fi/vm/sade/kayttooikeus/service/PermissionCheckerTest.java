@@ -9,7 +9,6 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -143,13 +142,10 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsAllowedWhenUserBelongsToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
-                setOrganisaatioCache(
-                        new OrganisaatioCache(){{
-                            setOrganisaatioOidPath("org1/org2/org3");
-                        }}
-                );
+                setOrganisaatioOid("org1");
             }}));
         }});
+        given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList("org1", "org2", "org3"));
         Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson", Lists.newArrayList("CRUD", "READ"),
                 null, this.myRoles)).isTrue();
@@ -159,13 +155,11 @@ public class PermissionCheckerTest {
     public void testThatPermissionIsDeniedWhenUserDoesNotBelongToOrganizationThatLoggedInUserHasAccessTo() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
-                setOrganisaatioCache(
-                        new OrganisaatioCache(){{
-                            setOrganisaatioOidPath("notCommonOrg1/notCommonOrg2/notCommonOrg3");
-                        }}
-                );
+                setOrganisaatioOid("notCommonOrg1");
             }}));
         }});
+        given(this.organisaatioClient.getActiveParentOids(any()))
+                .willReturn(Lists.newArrayList("notCommonOrg1", "notCommonOrg2", "notCommonOrg3"));
         Mockito.when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("callingPerson", "testPerson",
                 Lists.newArrayList("CRUD", "READ"), null, this.myRoles)).isFalse();
@@ -247,7 +241,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void organisaatioLimitationCheckOrganisaatioNoChildrenWrongOid() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5")));
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.1").build();
         boolean hasPermission = this.permissionChecker
@@ -257,7 +251,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void organisaatioLimitationCheckOrganisaatioNoChildrenCorrectOid() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5")));
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
         boolean hasPermission = this.permissionChecker
@@ -267,7 +261,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteMatchesChildTyyppi() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
                         "oppilaitostyyppi_11#1")));
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("11").build();
@@ -278,7 +272,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteMatchesParentOid() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
                         "oppilaitostyyppi_11#1")));
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
@@ -289,7 +283,7 @@ public class PermissionCheckerTest {
 
     @Test
     public void organisaatioLimitationCheckOrganisaatioWithChildrenViiteNoMatch() {
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6",
                         "oppilaitostyyppi_11#1")));
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.1").build();

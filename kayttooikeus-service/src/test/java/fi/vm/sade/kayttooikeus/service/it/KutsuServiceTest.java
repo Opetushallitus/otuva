@@ -6,12 +6,12 @@ import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioCacheRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.*;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
@@ -26,8 +26,6 @@ import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
-import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -52,8 +50,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -74,10 +74,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     private HenkiloHelper henkiloHelper;
 
     @MockBean
-    private OrganisaatioCacheRepository organisaatioCacheRepository;
+    private LdapSynchronizationService ldapSynchronizationService;
 
     @MockBean
-    private LdapSynchronizationService ldapSynchronizationService;
+    private OrganisaatioService organisaatioService;
 
     @Before
     public void setup() {
@@ -111,9 +111,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
         org2.setOid("1.2.3.4.6");
         org2.setNimi(new TextGroupMapDto().put("fi", "Nimi1").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5"), Matchers.any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(org1));
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6"), Matchers.any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6")))
                 .willReturn(Optional.of(org2));
         
         List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, new KutsuCriteria().withQuery("matti meikäläinen"), null, null);
@@ -147,7 +147,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
         org1.setOid("1.2.246.562.10.00000000001");
         org1.setNimi(new TextGroupMapDto().put("FI", "Opetushallitus").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.00000000001"), Matchers.any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.00000000001")))
                 .willReturn(Optional.of(org1));
         
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
@@ -233,8 +233,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
 
@@ -275,8 +273,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 HenkiloPopulator.henkilo("1.2.0.0.2").withUsername("old_username"),
                 "2.1.0.1"))
                 .getHenkilo();
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doThrow(new ExternalServiceException("",
                 new CachingRestClient.HttpException(null,
@@ -322,8 +318,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 
@@ -372,8 +366,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        given(this.organisaatioCacheRepository.findByOrganisaatioOid("1.2.0.0.1"))
-                .willReturn(Optional.of(new OrganisaatioCache("1.2.0.0.1", "/")));
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 

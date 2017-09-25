@@ -1,48 +1,27 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface OrganisaatioClient {
-    List<String> getChildOids(String oid);
+    List<String> getChildOids(String organisaatioOid);
 
-    @Getter
-    class Mode {
-        private final boolean expectMultiple;
-        private boolean changeChecked;
+    boolean activeExists(String organisaatioOid);
 
-        Mode(boolean expectMultiple) {
-            this.expectMultiple = expectMultiple;
-        }
+    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid);
 
-        public static Mode single() {
-            return new Mode(false);
-        }
-        
-        public static Mode multiple() {
-            return new Mode(true);
-        }
+    List<OrganisaatioPerustieto> refreshCache();
 
-        public static Mode requireCache() {
-            return new Mode(true);
-        }
+    Long getCacheOrganisationCount();
 
-        public Mode checked() {
-            this.changeChecked = true;
-            return this;
-        }
-    }
-
-    List<OrganisaatioPerustieto> listWithoutRoot();
-
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid, Mode mode);
-
-    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid, Mode mode);
+    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String organisaatioOid);
 
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 
-    List<String> getParentOids(String oid);
+    List<String> getParentOids(String organisaatioOid);
+
+    List<String> getActiveParentOids(String organisaatioOid);
+
+    List<String> getActiveChildOids(String organisaatioOid);
 }

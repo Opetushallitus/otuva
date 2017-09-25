@@ -13,20 +13,20 @@ public class OrganisaatioCache {
     private final OrganisaatioPerustieto root;
     private final Map<String,OrganisaatioPerustieto> byOid;
 
-    public OrganisaatioCache(OrganisaatioPerustieto root, List<OrganisaatioPerustieto> children) {
+    public OrganisaatioCache(OrganisaatioPerustieto root, List<OrganisaatioPerustieto> rootChildren) {
         this.root = root;
         this.byOid = new HashMap<>();
-        root.setChildren(children);
-        setParents(root, children);
+        root.setChildren(rootChildren);
+        this.setParents(root, rootChildren);
         this.byOid.put(root.getOid(), root);
-        this.byOid.putAll(children.stream().flatMap(OrganisaatioPerustieto::andChildren)
+        this.byOid.putAll(rootChildren.stream().flatMap(OrganisaatioPerustieto::andChildren)
             .collect(toMap(OrganisaatioPerustieto::getOid, identity())));
     }
     
     private void setParents(OrganisaatioPerustieto root, Collection<OrganisaatioPerustieto> children) {
         children.forEach(c -> {
             c.setParent(root);
-            setParents(c, c.getChildren());
+            this.setParents(c, c.getChildren());
         });
     }
     
@@ -48,5 +48,9 @@ public class OrganisaatioCache {
 
     public Stream<OrganisaatioPerustieto> flatWithParentsAndChildren(String oid) {
         return getByOid(oid).map(org -> Stream.concat(org.parents(), org.andChildren())).orElse(Stream.empty());
+    }
+
+    public Long getCacheCount() {
+        return (long) this.byOid.size();
     }
 }

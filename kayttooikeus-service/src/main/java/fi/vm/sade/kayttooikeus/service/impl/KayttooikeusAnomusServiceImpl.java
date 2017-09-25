@@ -21,7 +21,6 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import java.util.EnumSet;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -53,12 +52,12 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final AnomusRepository anomusRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioCacheRepository organisaatioCacheRepository;
 
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
     private final EmailService emailService;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final OrganisaatioService organisaatioService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -93,31 +92,30 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             // käyttöoikeusryhma filtering
             List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
-            criteria.setKayttooikeusRyhmaIds(new HashSet<Long>(slaveIds));
+            criteria.setKayttooikeusRyhmaIds(new HashSet<>(slaveIds));
 
             // organisaatio filtering
             if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
                 if(criteria.getOrganisaatioOids() == null) {
-                    criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                    criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                 } else {
                     Set<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
-                            .flatMap(currentUserOrganisaatioOid -> this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
+                            .flatMap(currentUserOrganisaatioOid ->
+                                    this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
                             .collect(Collectors.toSet());
                     allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
                     allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
 
                     criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
                     if(allCurrentUserOrganisaatioOids.isEmpty()) {
-                        criteria.setOrganisaatioOids(new HashSet<String>(currentUserOrganisaatioOids));
+                        criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                     }
                 }
-
             }
         }
 
-
         List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria, limit, offset, orderBy);
+                .findBy(criteria.createExtendedCondition(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
         return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
@@ -249,6 +247,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     // Sets organisaatiohenkilo active since it might be passive
     private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
         Henkilo savedAnoja = this.henkiloDataRepository.save(anoja);
+        this.organisaatioService.throwIfActiveNotFound(organisaatioOid);
 
         OrganisaatioHenkilo foundOrCreatedOrganisaatioHenkilo = savedAnoja.getOrganisaatioHenkilos().stream()
                 .filter(organisaatioHenkilo ->
@@ -258,8 +257,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
                                 .henkilo(savedAnoja)
-                                .organisaatioCache(this.organisaatioCacheRepository.findByOrganisaatioOid(organisaatioOid)
-                                        .orElseThrow(() -> new NotFoundException("Organisaatio not found from cache by oid " + organisaatioOid)))
                                 .build())));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
         return foundOrCreatedOrganisaatioHenkilo;
@@ -349,7 +346,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
                 .anomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
-        List<Anomus> anomukset = anomusRepository.findBy(criteria);
+        List<Anomus> anomukset = anomusRepository.findBy(criteria.createBasicCondition(this.organisaatioClient));
 
         Set<String> hyvaksyjat = anomukset.stream()
                 .map(this::getAnomuksenHyvaksyjat)
@@ -520,14 +517,16 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .map(OrganisaatioHenkilo::getOrganisaatioOid)
                 .collect(Collectors.toList());
 
+        // Skip checking organisation hierarchy is user has ANOMUSTENHALLINTA_CRUD to root organisation.
         if (!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
-            allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream().flatMap(organisaatioOid ->
-                    this.organisaatioClient.getChildOids(organisaatioOid).stream()).collect(Collectors.toList()));
+            allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream()
+                    .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())
+                    .collect(Collectors.toList()));
 
             kayttooikeusByOrganisation.keySet().removeIf(organisaatioOid ->
                     !allowedOrganisaatioOids.contains(organisaatioOid));
 
-            regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
+            this.regularUserChecks(kayttooikeusByOrganisation, allowedOrganisaatioOids);
         }
 
         // Filter off empty keys

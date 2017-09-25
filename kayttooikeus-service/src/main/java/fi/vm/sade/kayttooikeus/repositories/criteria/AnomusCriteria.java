@@ -6,17 +6,18 @@ import com.querydsl.core.types.Predicate;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Getter
 @Setter
@@ -37,33 +38,53 @@ public class AnomusCriteria {
     private Boolean adminView;
     private Set<Long> kayttooikeusRyhmaIds;
 
-    public Predicate condition(QAnomus qAnomus) {
-        BooleanBuilder builder = new BooleanBuilder();
-        return this.condition(qAnomus, builder);
+    @FunctionalInterface
+    public interface AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> {
+        Predicate apply(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma);
     }
 
-    public Predicate condition(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma) {
-        BooleanBuilder builder = new BooleanBuilder();
-
-        builder = this.condition(qAnomus, builder);
-
-        if (BooleanUtils.isTrue(this.adminView)) {
-            builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
-        }
-
-        if (BooleanUtils.isTrue(this.onlyActive)) {
-            builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
-                    .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
-        }
-
-        if(this.kayttooikeusRyhmaIds != null) {
-            builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
-        }
-
-        return builder;
+    public Function<QAnomus, Predicate> createBasicCondition(OrganisaatioClient organisaatioClient) {
+        return (QAnomus qAnomus) -> {
+            BooleanBuilder builder = new BooleanBuilder();
+            return this.condition(qAnomus, builder, this.getPredicates(organisaatioClient, qAnomus));
+        };
     }
 
-    private BooleanBuilder condition(QAnomus qAnomus, BooleanBuilder builder) {
+    public AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> createExtendedCondition(OrganisaatioClient organisaatioClient) {
+        return (qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma) -> {
+            BooleanBuilder builder = new BooleanBuilder();
+
+            builder = this.condition(qAnomus, builder, this.getPredicates(organisaatioClient, qAnomus));
+
+            if (BooleanUtils.isTrue(this.adminView)) {
+                builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
+            }
+
+            if (BooleanUtils.isTrue(this.onlyActive)) {
+                builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
+                        .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
+            }
+
+            if(this.kayttooikeusRyhmaIds != null) {
+                builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
+            }
+
+            return builder;
+        };
+    }
+
+    @Nullable
+    private List<Predicate> getPredicates(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
+        List<Predicate> predicates = null;
+        if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
+            predicates = this.organisaatioOids.stream()
+                    .map(oid -> qAnomus.organisaatioOid.in(organisaatioClient.getActiveParentOids(oid)))
+                    .collect(Collectors.toList());
+        }
+        return predicates;
+    }
+
+    private BooleanBuilder condition(QAnomus qAnomus, BooleanBuilder builder, List<Predicate> organisaatioConditions) {
         if (q != null) {
             builder.andAnyOf(
                     qAnomus.henkilo.oidHenkilo.eq(q),
@@ -79,10 +100,7 @@ public class AnomusCriteria {
             builder.and(qAnomus.anomuksenTila.in(anomuksenTilat));
         }
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
-            List<Predicate> predicates = this.organisaatioOids.stream()
-                    .map(oid -> qAnomus.organisaatioCache.organisaatioOidPath.contains(oid))
-                    .collect(Collectors.toList());
-            builder.and(ExpressionUtils.anyOf(predicates));
+            builder.and(ExpressionUtils.anyOf(organisaatioConditions));
         }
         if (anojaOid != null) {
             builder.and(qAnomus.henkilo.oidHenkilo.eq(anojaOid));

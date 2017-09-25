@@ -23,6 +23,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
@@ -180,12 +181,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
         Set<String> candidateRoles = new HashSet<>();
         for (OrganisaatioHenkilo orgHenkilo : henkilo.get().getOrganisaatioHenkilos()) {
-            OrganisaatioCache organisaatioCache = orgHenkilo.getOrganisaatioCache();
-            if (organisaatioCache != null) {
-                String orgWithParents[] = organisaatioCache.getOrganisaatioOidPath().split("/");
-                for (String allowedRole : allowedRoles) {
-                    candidateRoles.addAll(getPrefixedRoles(allowedRole + "_", Lists.newArrayList(orgWithParents)));
-                }
+            List<String> orgWithParents = this.organisaatioClient.getActiveParentOids(orgHenkilo.getOrganisaatioOid());
+            for (String allowedRole : allowedRoles) {
+                candidateRoles.addAll(getPrefixedRoles(allowedRole + "_", Lists.newArrayList(orgWithParents)));
             }
         }
 
@@ -274,12 +272,11 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid) {
         List<OrganisaatioPerustieto> organisaatios = new ArrayList<>();
-        Optional<Henkilo> tempHenkilo = henkiloDataRepository.findByOidHenkilo(oid);
-        if (tempHenkilo.isPresent()) {
-            Set<OrganisaatioHenkilo> orgHenkilos = tempHenkilo.get().getOrganisaatioHenkilos();
+        this.henkiloDataRepository.findByOidHenkilo(oid).ifPresent(henkilo -> {
+            Set<OrganisaatioHenkilo> orgHenkilos = henkilo.getOrganisaatioHenkilos();
             List<String> organisaatioOids = orgHenkilos.stream().map(OrganisaatioHenkilo::getOrganisaatioOid).collect(Collectors.toList());
-            organisaatios = organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids);
-        }
+            organisaatios.addAll(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(organisaatioOids));
+        });
         return organisaatios;
     }
 
@@ -292,7 +289,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
         final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
 
-        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
+        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient
+                .listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
                 .stream().findFirst();
         if (!oh.isPresent()) {
             LOG.warn("Organization " + orgOid + " not found!");
@@ -356,17 +354,20 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
-        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid, OrganisaatioClient.Mode.requireCache())
+        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioOid));
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
-            return organisaatioPerustieto.getChildren().stream().anyMatch(childOrganisation ->
-                    viiteSet.stream().anyMatch(organisaatioViite ->
-                            organisaatioViite.getOrganisaatioTyyppi()
-                                    .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
-                                            ? childOrganisation.getOppilaitostyyppi().substring(17, 19) // getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
-                                            : null)
-                                    || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
+            return organisaatioPerustieto.getChildren().stream()
+                    .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.equals(childOrganisation.getStatus()))
+                    .anyMatch(childOrganisation ->
+                            viiteSet.stream().anyMatch(organisaatioViite ->
+                                    organisaatioViite.getOrganisaatioTyyppi()
+                                            .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
+                                                    // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+                                                    ? childOrganisation.getOppilaitostyyppi().substring(17, 19)
+                                                    : null)
+                                            || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
         }
         // if the organization doesn't have child items, then it must be a top level organization or some other type
         // organization in which case the target organization OID must match the allowed-to-organization OID

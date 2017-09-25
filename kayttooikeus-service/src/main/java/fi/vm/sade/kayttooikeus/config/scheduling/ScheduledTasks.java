@@ -5,14 +5,20 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -23,6 +29,7 @@ import java.time.Period;
  * @see SchedulingConfiguration ajastuksen aktivointi
  */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class ScheduledTasks {
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledTasks.class);
@@ -37,7 +44,22 @@ public class ScheduledTasks {
     private final HenkiloDataRepository henkiloDataRepository;
     private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
 
+    private final OrganisaatioClient organisaatioClient;
+
     private final CommonProperties commonProperties;
+    @Value("${kayttooikeus.scheduling.run-on-startup}")
+    private Boolean schedulingEnabledOnStartup;
+
+    @PostConstruct
+    public void onStartup() {
+        if(BooleanUtils.isTrue(this.schedulingEnabledOnStartup)) {
+            try {
+                this.organisaatioClient.refreshCache();
+            } catch (ExternalServiceException e) {
+                log.error("Could not refresh organisation cache. Organisation service not responding.", e);
+            }
+        }
+    }
 
     @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {

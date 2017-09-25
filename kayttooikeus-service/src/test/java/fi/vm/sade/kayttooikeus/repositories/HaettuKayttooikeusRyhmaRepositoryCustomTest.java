@@ -6,10 +6,12 @@ import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -24,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractRepositoryTest {
     @Autowired
     private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
+
+    @MockBean
+    private OrganisaatioClient organisaatioClient;
 
     @Before
     public void setup() {
@@ -58,7 +63,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .anomuksenTilat(Sets.newHashSet(AnomuksenTila.ANOTTU))
                 .build();
         List<HaettuKayttoOikeusRyhma> haetutResult = this.haettuKayttooikeusRyhmaRepository
-                .findBy(anomusCriteria, null, null, null);
+                .findBy(anomusCriteria.createExtendedCondition(this.organisaatioClient), null, null, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
@@ -72,7 +77,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .onlyActive(true)
                 .build();
         List<HaettuKayttoOikeusRyhma> haetutResult = this.haettuKayttooikeusRyhmaRepository
-                .findBy(anomusCriteria, 2L, 1L, null);
+                .findBy(anomusCriteria.createExtendedCondition(this.organisaatioClient), 2L, 1L, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")
@@ -86,7 +91,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .adminView(true)
                 .build();
         List<HaettuKayttoOikeusRyhma> haetutResult = this.haettuKayttooikeusRyhmaRepository
-                .findBy(anomusCriteria, null, null, null);
+                .findBy(anomusCriteria.createExtendedCondition(this.organisaatioClient), null, null, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
                 .extracting("name")

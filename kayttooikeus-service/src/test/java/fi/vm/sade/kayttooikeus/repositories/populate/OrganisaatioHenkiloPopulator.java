@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioCache;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
 import javax.persistence.EntityManager;
@@ -10,7 +9,6 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
-import static java.util.Optional.ofNullable;
 
 public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenkilo> {
     private final Populator<Henkilo> henkilo;
@@ -76,11 +74,6 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         }
         OrganisaatioHenkilo organisaatioHenkilo = new OrganisaatioHenkilo();
         organisaatioHenkilo.setHenkilo(henkilo);
-        organisaatioHenkilo.setOrganisaatioCache(ofNullable(entityManager.find(OrganisaatioCache.class, organisaatioOid))
-                .orElseGet(() ->OrganisaatioCache.builder()
-                    .organisaatioOid(organisaatioOid)
-                    .organisaatioOidPath(organisaatioOid)
-                .build()));
         organisaatioHenkilo.setOrganisaatioOid(organisaatioOid);
         organisaatioHenkilo.setTehtavanimike(tehtavanimike);
         organisaatioHenkilo.setPassivoitu(passivoitu);
