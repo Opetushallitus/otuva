@@ -42,10 +42,30 @@ public class HenkiloCriteria {
     private List<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
-    public Predicate condition(QHenkilo henkilo,
-                               QOrganisaatioHenkilo organisaatioHenkilo,
-                               QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma,
-                               OrganisaatioClient organisaatioClient) {
+    @FunctionalInterface
+    public interface HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> {
+        Predicate apply(QHenkilo qHenkilo, QOrganisaatioHenkilo qOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma);
+    }
+
+    public HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> createCondition(OrganisaatioClient organisaatioClient) {
+        return (qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma) -> {
+            List<Predicate> predicates = null;
+            if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
+                if (this.subOrganisation != null && this.subOrganisation) {
+                    predicates = this.organisaatioOids.stream()
+                            .map(organisaatioOid ->
+                                    qOrganisaatioHenkilo.organisaatioOid.in(organisaatioClient.getActiveParentOids(organisaatioOid)))
+                            .collect(Collectors.toList());
+                }
+            }
+            return this.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma, predicates);
+        };
+    }
+
+    private Predicate condition(QHenkilo henkilo,
+                                QOrganisaatioHenkilo organisaatioHenkilo,
+                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma,
+                                List<Predicate> predicates) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
         if (this.passivoitu != null && !this.passivoitu) {
@@ -72,10 +92,6 @@ public class HenkiloCriteria {
         }
         if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
             if(this.subOrganisation != null && this.subOrganisation) {
-                List<Predicate> predicates = this.organisaatioOids.stream()
-                        .map(organisaatioOid ->
-                                organisaatioHenkilo.organisaatioOid.in(organisaatioClient.getActiveParentOids(organisaatioOid)))
-                        .collect(Collectors.toList());
                 builder.and(ExpressionUtils.anyOf(predicates));
             }
             else {

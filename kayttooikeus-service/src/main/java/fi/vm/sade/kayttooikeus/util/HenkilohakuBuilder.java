@@ -72,7 +72,7 @@ public class HenkilohakuBuilder {
     // Find nimi, kayttajatunnus and oidHenkilo
     public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
         this.henkilohakuResultDtoList = this.henkiloHibernateRepository
-                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
+                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class).createCondition(this.organisaatioClient),
                         offset,
                         this.organisationRestrictionList,
                         orderBy != null ? orderBy.getValue() : null);

@@ -111,13 +111,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                     }
                 }
-
             }
         }
 
-
         List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria.createConditionx(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
+                .findBy(criteria.createExtendedCondition(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
         return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
@@ -348,7 +346,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
                 .anomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
-        List<Anomus> anomukset = anomusRepository.findBy(criteria.createCondition(this.organisaatioClient));
+        List<Anomus> anomukset = anomusRepository.findBy(criteria.createBasicCondition(this.organisaatioClient));
 
         Set<String> hyvaksyjat = anomukset.stream()
                 .map(this::getAnomuksenHyvaksyjat)

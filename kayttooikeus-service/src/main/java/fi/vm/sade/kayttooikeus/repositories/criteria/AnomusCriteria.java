@@ -43,14 +43,14 @@ public class AnomusCriteria {
         Predicate apply(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma);
     }
 
-    public Function<QAnomus, Predicate> createCondition(OrganisaatioClient organisaatioClient) {
+    public Function<QAnomus, Predicate> createBasicCondition(OrganisaatioClient organisaatioClient) {
         return (QAnomus qAnomus) -> {
             BooleanBuilder builder = new BooleanBuilder();
             return this.condition(qAnomus, builder, this.getPredicates(organisaatioClient, qAnomus));
         };
     }
 
-    public AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> createConditionx(OrganisaatioClient organisaatioClient) {
+    public AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> createExtendedCondition(OrganisaatioClient organisaatioClient) {
         return (qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma) -> {
             BooleanBuilder builder = new BooleanBuilder();
 
