@@ -127,7 +127,7 @@ public class KayttooikeusAnomusServiceTest {
 
     @Test
     public void listHaetutKayttoOikeusRyhmat() {
-        given(this.haettuKayttooikeusRyhmaRepository.findBy(any(AnomusCriteria.class), anyLong(), anyLong(), anyObject()))
+        given(this.haettuKayttooikeusRyhmaRepository.findBy(any(), anyLong(), anyLong(), anyObject(), anyBoolean()))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
         AnomusCriteria criteria = AnomusCriteria.builder().anojaOid("1.2.3.4.5").build();
@@ -140,7 +140,7 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getOrganisaatioOid()).isEqualTo("1.2.12.0.1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getAnomus().getAnomusTyyppi()).isEqualByComparingTo(AnomusTyyppi.UUSI);
 
-        verify(this.haettuKayttooikeusRyhmaRepository).findBy(eq(criteria), eq(null), eq(null), eq(null));
+        verify(this.haettuKayttooikeusRyhmaRepository).findBy(any(), eq(null), eq(null), eq(null), eq(null));
         verify(this.localizationService, atLeastOnce()).localize(any(LocalizableDto.class));
     }
 
@@ -152,11 +152,8 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(organisaatioOids).build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
-        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
-        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
-        AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
+        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
     }
 
     @Test
@@ -170,12 +167,9 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
-        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
-        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
-        AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getOrganisaatioOids()).isNull();
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getOrganisaatioOids()).isNull();
+        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
     }
 
     @Test
@@ -189,12 +183,9 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
-        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
-        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
-        AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(captorValue.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
     }
 
     @Test
@@ -211,12 +202,9 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
-        ArgumentCaptor<AnomusCriteria> captor = ArgumentCaptor.forClass(AnomusCriteria.class);
-        verify(this.haettuKayttooikeusRyhmaRepository).findBy(captor.capture(), any(), any(), any());
-        AnomusCriteria captorValue = captor.getValue();
 
-        assertThat(captorValue.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(captorValue.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");
+        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");
     }
 
 
@@ -493,7 +481,7 @@ public class KayttooikeusAnomusServiceTest {
                         HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build()
                 ).collect(toSet()))
                 .build();
-        when(anomusRepository.findBy(any(AnomusCriteria.class)))
+        when(anomusRepository.findBy(any()))
                 .thenReturn(Collections.singletonList(anomus));
         when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
                 .thenReturn(Stream.of(1L, 2L).collect(toSet()));
@@ -525,7 +513,7 @@ public class KayttooikeusAnomusServiceTest {
                         HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(KayttoOikeusRyhma.builder().build()).build()
                 ).collect(toSet()))
                 .build();
-        when(anomusRepository.findBy(any(AnomusCriteria.class)))
+        when(anomusRepository.findBy(any()))
                 .thenReturn(Collections.singletonList(anomus));
         when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
                 .thenReturn(Stream.of(1L, 2L).collect(toSet()));
