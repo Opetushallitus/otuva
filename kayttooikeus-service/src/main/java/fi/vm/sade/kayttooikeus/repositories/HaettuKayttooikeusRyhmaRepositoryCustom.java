@@ -12,5 +12,6 @@ import java.util.List;
 public interface HaettuKayttooikeusRyhmaRepositoryCustom {
 
     List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria.AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> criteriaFunction, Long limit, Long offset, OrderByAnomus orderBy, Boolean adminView);
+    List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria.AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> criteriaFunction, Boolean adminView);
 
 }

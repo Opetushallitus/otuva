@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
-import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import io.swagger.annotations.Api;
@@ -15,7 +15,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,29 +39,25 @@ public class AnomusController {
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
             @RequestParam(required = false, defaultValue = "20") Long limit,
             @RequestParam(required = false) Long offset,
-            @RequestParam(required = false) OrderByAnomus orderBy,
-            @RequestParam(defaultValue = "true") boolean showOwnAnomus) {
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset, orderBy, showOwnAnomus);
+            @RequestParam(required = false) OrderByAnomus orderBy) {
+        return this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, limit, offset, orderBy);
     }
 
     @ApiOperation("Palauttaa henkilön kaikki haetut käyttöoikeusryhmät")
-    @PostAuthorize("@permissionCheckerServiceImpl.hasRoleForOrganisations(returnObject, {'READ', 'READ_UPDATE', 'CRUD'})")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oidHenkilo, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @RequestMapping(value = "/{oidHenkilo}", method = RequestMethod.GET)
-    public List<HaettuKayttooikeusryhmaDto> getActiveAnomuksetByHenkilo(@ApiParam("Henkilön OID") @PathVariable String oidHenkilo,
-                                                                        @RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
-        AnomusCriteria criteria = new AnomusCriteria();
-        criteria.setAnojaOid(oidHenkilo);
-        if (activeOnly) {
-            criteria.setAnomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU));
-        }
-        return kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria);
+    public List<HaettuKayttooikeusryhmaDto> getActiveAnomuksetByHenkilo(
+            @ApiParam("Henkilön OID") @PathVariable String oidHenkilo,
+            @RequestParam(required = false, defaultValue = "false") boolean activeOnly,
+            @RequestHeader(value = "External-Permission-Service", required = false) ExternalPermissionService permissionService) {
+        return this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(oidHenkilo, activeOnly);
     }
 
     @ApiOperation("Tekee uuden käyttöoikeusanomuksen")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/{anojaOid}", method = RequestMethod.POST)
     public Long createKayttooikeusAnomus(@ApiParam("Anojan OID") @PathVariable String anojaOid,
-                                           @RequestBody @Validated KayttooikeusAnomusDto kayttooikeusAnomusDto) {
+                                         @RequestBody @Validated KayttooikeusAnomusDto kayttooikeusAnomusDto) {
         return this.kayttooikeusAnomusService.createKayttooikeusAnomus(anojaOid, kayttooikeusAnomusDto);
     }
 

@@ -55,4 +55,9 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
         return query.fetch();
     }
 
+    @Override
+    public List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria.AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> criteriaFunction, Boolean adminView) {
+        return this.findBy(criteriaFunction, null, null, null, adminView);
+    }
+
 }

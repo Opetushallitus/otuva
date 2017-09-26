@@ -11,6 +11,7 @@ import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ public class AnomusCriteria {
     private LocalDateTime anottuAlku;
     private LocalDateTime anottuLoppu;
     private Set<AnomuksenTila> anomuksenTilat;
+    private Set<KayttoOikeudenTila> kayttoOikeudenTilas;
     private Boolean onlyActive;
     private Set<String> organisaatioOids;
     private String anojaOid;
@@ -64,7 +66,15 @@ public class AnomusCriteria {
                 builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                         .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
             }
-
+            if(this.kayttoOikeudenTilas != null) {
+                // Behaviour from old authentication-service
+                if(this.kayttoOikeudenTilas.size() == 1 && this.kayttoOikeudenTilas.iterator().next().equals(KayttoOikeudenTila.ANOTTU)) {
+                    builder.and(qHaettuKayttoOikeusRyhma.tyyppi.isNull());
+                }
+                else {
+                    builder.and(qHaettuKayttoOikeusRyhma.tyyppi.in(this.kayttoOikeudenTilas));
+                }
+            }
             if(this.kayttooikeusRyhmaIds != null) {
                 builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
             }
@@ -102,7 +112,7 @@ public class AnomusCriteria {
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
             builder.and(ExpressionUtils.anyOf(organisaatioConditions));
         }
-        if (anojaOid != null) {
+        if (StringUtils.hasLength(anojaOid)) {
             builder.and(qAnomus.henkilo.oidHenkilo.eq(anojaOid));
         }
         if (this.henkiloOidRestrictionList != null) {
