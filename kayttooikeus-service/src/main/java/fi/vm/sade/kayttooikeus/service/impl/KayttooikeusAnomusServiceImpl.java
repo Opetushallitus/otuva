@@ -68,8 +68,16 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     @Override
     @Transactional(readOnly = true)
-    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria) {
-        return this.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
+    public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(String oidHenkilo, boolean activeOnly) {
+        AnomusCriteria criteria = new AnomusCriteria();
+        criteria.setAnojaOid(oidHenkilo);
+        if(activeOnly) {
+            criteria.setAnomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU));
+            criteria.setKayttoOikeudenTilas(EnumSet.of(KayttoOikeudenTila.ANOTTU));
+        }
+        List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
+                .findBy(criteria.createExtendedCondition(this.organisaatioClient), criteria.getAdminView());
+        return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
     @Override
@@ -77,17 +85,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria,
                                                                          Long limit,
                                                                          Long offset,
-                                                                         OrderByAnomus orderBy,
-                                                                         boolean showOwnAnomus) {
-        if (!showOwnAnomus) {
-            if (criteria.getHenkiloOidRestrictionList() != null) {
-                criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
-            } else {
-                criteria.setHenkiloOidRestrictionList(Sets.newHashSet(this.permissionCheckerService.getCurrentUserOid()));
-            }
-        }
-
+                                                                         OrderByAnomus orderBy) {
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+        // Do not show own anomus
+        criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
 
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             // käyttöoikeusryhma filtering
