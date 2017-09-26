@@ -132,7 +132,7 @@ public class KayttooikeusAnomusServiceTest {
 
         AnomusCriteria criteria = AnomusCriteria.builder().anojaOid("1.2.3.4.5").build();
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
-                .listHaetutKayttoOikeusRyhmat(criteria, null, null, null, true);
+                .listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(LocalDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
@@ -151,7 +151,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(organisaatioOids).build();
-        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
         assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
     }
@@ -166,7 +166,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
-        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
         assertThat(criteria.getOrganisaatioOids()).isNull();
         assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
@@ -182,7 +182,23 @@ public class KayttooikeusAnomusServiceTest {
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
-        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
+
+        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+    }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForVirkailijaWithShowOwnAnomus() {
+        List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
         assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
         assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
@@ -201,7 +217,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
-        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null, false);
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
         assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
         assertThat(criteria.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");

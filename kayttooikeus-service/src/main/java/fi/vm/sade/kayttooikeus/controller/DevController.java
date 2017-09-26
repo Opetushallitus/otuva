@@ -36,9 +36,9 @@ public class DevController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE', " +
             "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @ApiOperation("Päivittää organisaatiovälimuistin.")
+    @ApiOperation("Palauttaa organisaatioiden ja ryhmien lukumäärän välimuistisssa.")
     public synchronized void getCacheStatus() {
-        organisaatioService.updateOrganisaatioCache();
+        organisaatioService.getClientCacheState();
     }
 
 }
