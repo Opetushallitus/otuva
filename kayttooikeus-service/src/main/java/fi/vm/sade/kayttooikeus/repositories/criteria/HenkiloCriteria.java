@@ -54,7 +54,7 @@ public class HenkiloCriteria {
                 if (this.subOrganisation != null && this.subOrganisation) {
                     predicates = this.organisaatioOids.stream()
                             .map(organisaatioOid ->
-                                    qOrganisaatioHenkilo.organisaatioOid.in(organisaatioClient.getActiveParentOids(organisaatioOid)))
+                                    qOrganisaatioHenkilo.organisaatioOid.in(organisaatioClient.getChildOids(organisaatioOid)))
                             .collect(Collectors.toList());
                 }
             }

@@ -127,7 +127,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
-        given(this.organisaatioClient.getActiveParentOids("3.4.5.6.7"))
+        given(this.organisaatioClient.getChildOids("3.4.5.6.7"))
                 .willReturn(Lists.newArrayList("3.4.5.6.7"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, singletonList(
