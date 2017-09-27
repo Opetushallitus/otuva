@@ -75,11 +75,14 @@ public class HenkiloCriteria {
             builder.and(henkilo.duplicateCached.eq(false));
         }
         if (StringUtils.hasLength(this.nameQuery)) {
+            BooleanBuilder predicate = new BooleanBuilder();
             Arrays.stream(this.nameQuery.split(" ")).forEach(queryPart ->
-                    builder.and(Expressions.anyOf(
+                    predicate.or(Expressions.anyOf(
                             henkilo.etunimetCached.containsIgnoreCase(queryPart),
                             henkilo.sukunimiCached.containsIgnoreCase(queryPart)
                     )));
+            predicate.or(Expressions.anyOf(henkilo.oidHenkilo.eq(this.nameQuery), henkilo.kayttajatiedot.username.eq(this.nameQuery)));
+            builder.and(predicate);
         }
         // Organisaatiohenkilo
         if (this.noOrganisation != null && !this.noOrganisation) {
