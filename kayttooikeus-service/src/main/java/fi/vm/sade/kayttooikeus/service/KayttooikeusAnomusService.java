@@ -4,7 +4,6 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -14,9 +13,9 @@ import java.util.Set;
 
 public interface KayttooikeusAnomusService {
 
-    List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria);
+    List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(String oidHenkilo, boolean activeOnly);
 
-    List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset, OrderByAnomus orderBy, boolean showOwnAnomus);
+    List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(AnomusCriteria criteria, Long limit, Long offset, OrderByAnomus orderBy);
 
     void updateHaettuKayttooikeusryhma(UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto);
 
