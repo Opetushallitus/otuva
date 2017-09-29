@@ -66,7 +66,9 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
 
         List<OrganisaatioCache> entities = new ArrayList<>();
         entities.add(entity);
-        children.forEach(child -> entities.addAll(toEntities(
+        children.stream()
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
+                .forEach(child -> entities.addAll(toEntities(
                 child.getOid(), child.getChildren(), new ArrayDeque<>(parentOidPath))));
         return entities;
     }
