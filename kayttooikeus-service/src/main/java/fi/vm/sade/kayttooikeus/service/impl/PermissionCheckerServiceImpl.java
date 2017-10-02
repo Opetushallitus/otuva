@@ -15,7 +15,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -50,7 +50,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
     private HenkiloDataRepository henkiloDataRepository;
-    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
@@ -65,7 +65,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                                         HenkiloDataRepository henkiloDataRepository,
                                         OrganisaatioClient organisaatioClient,
                                         OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                                        MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository,
+                                        MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
                                         CommonProperties commonProperties) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
@@ -74,7 +74,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         this.henkiloDataRepository = henkiloDataRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.commonProperties = commonProperties;
     }
@@ -338,7 +338,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // Check that current user MKRT can grant wanted KOR
     @Override
     public boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
-        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findValidMyonnettyKayttooikeus(this.getCurrentUserOid()).stream()
                 .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
                 .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());

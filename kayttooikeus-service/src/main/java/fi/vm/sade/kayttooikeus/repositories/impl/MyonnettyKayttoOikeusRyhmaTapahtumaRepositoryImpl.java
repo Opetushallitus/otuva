@@ -1,31 +1,46 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.google.common.collect.Sets;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeusPerustiedotDto;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.QHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom;
+import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+
+import javax.persistence.EntityManager;
+
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.model.QPalvelu.palvelu;
 
 @Repository
-public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractRepository
-        implements MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
+public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom {
+
+    private final EntityManager entityManager;
+
+    public MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl(JpaContext jpaContext) {
+        this.entityManager = jpaContext.getEntityManagerByManagedType(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
+    }
+
+    private JPAQueryFactory jpa() {
+        return new JPAQueryFactory(this.entityManager);
+    }
 
     private BooleanBuilder getValidKayttoOikeusRyhmaCriteria(String oid) {
         LocalDate now = LocalDate.now();
@@ -125,6 +140,39 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
                 .join(qOrganisaatioHenkilo.henkilo, qHenkilo).fetchJoin()
                 .where(qMyonnettyKayttoOikeusRyhma.voimassaLoppuPvm.lt(voimassaLoppuPvm))
                 .distinct().select(qMyonnettyKayttoOikeusRyhma).fetch();
+    }
+
+    @Override
+    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listCurrentKayttooikeusForHenkilo(String oidHenkilo) {
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QHenkilo henkilo = QHenkilo.henkilo;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
+
+        return jpa()
+                .select(henkilo.oidHenkilo, organisaatioHenkilo.organisaatioOid, kayttoOikeusRyhma)
+                .distinct()
+                .from(myonnettyKayttoOikeusRyhmaTapahtuma)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
+                .leftJoin(organisaatioHenkilo.henkilo, henkilo)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
+                .leftJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .where(henkilo.oidHenkilo.eq(oidHenkilo))
+                .fetch()
+                .stream()
+                .map(tuple -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.builder()
+                        .organisaatioOid(tuple.get(organisaatioHenkilo.organisaatioOid))
+                        .kayttooikeusOikeudetDtoSet(
+                                Sets.newHashSet(Optional.ofNullable(tuple.get(kayttoOikeusRyhma)).orElse(new KayttoOikeusRyhma()).getKayttoOikeus()
+                                        .stream()
+                                        .map(kayttoOikeus1 -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto.builder()
+                                                .oikeus(kayttoOikeus1.getRooli())
+                                                .palvelu(kayttoOikeus1.getPalvelu().getName())
+                                                .build())
+                                        .collect(Collectors.toSet())))
+                        .build())
+                .collect(Collectors.toList());
     }
 
 }

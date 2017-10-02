@@ -45,7 +45,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
@@ -442,10 +442,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,
                                                                                                 OrganisaatioHenkilo organisaatioHenkilo,
                                                                                                 KayttoOikeusRyhma kayttoOikeusRyhma) {
-        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =  this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =  this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
                         organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
-                .orElseGet(() -> this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.save(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
+                .orElseGet(() -> this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.save(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(kayttoOikeusRyhma)
                         .organisaatioHenkilo(organisaatioHenkilo)
                         .anomus(Sets.newHashSet())
@@ -482,12 +482,12 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .orElseThrow(() -> new NotFoundException("Current user not found with oid " + UserDetailsUtil.getCurrentUserOid()));
 
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =
-                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(kayttooikeusryhmaId, organisaatioOid, oidHenkilo)
+                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(kayttooikeusryhmaId, organisaatioOid, oidHenkilo)
                         .orElseThrow(() -> new NotFoundException("Myonnettykayttooikeusryhma not found with KayttooikeusryhmaId "
                                 + kayttooikeusryhmaId + " organisaatioOid " + organisaatioOid + " oidHenkilo " + oidHenkilo));
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma
                 .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), "Käyttöoikeuden sulkeminen"));
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
     }
 
     // Käsittelee admin, OPH-virkailija ja virkailija tyyppisiä käyttäjiä. Kaksi ensimmäistä käyttäytyvät tässä samoin.
@@ -504,7 +504,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                 .map(HaettuKayttoOikeusRyhma::getKayttoOikeusRyhma)
                                 .map(KayttoOikeusRyhma::getId)
                                 .collect(toSet())));
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(accessedHenkiloOid)
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(accessedHenkiloOid)
                 .forEach(mkrt -> kayttooikeusByOrganisation.compute(mkrt.getOrganisaatioHenkilo().getOrganisaatioOid(),
                         this.addIfNotExists(mkrt.getKayttoOikeusRyhma().getId())));
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository
@@ -512,7 +512,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .forEach(krth -> kayttooikeusByOrganisation.compute(krth.getOrganisaatioHenkilo().getOrganisaatioOid(),
                         this.addIfNotExists(krth.getKayttoOikeusRyhma().getId())));
 
-        List<String> allowedOrganisaatioOids = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        List<String> allowedOrganisaatioOids = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findCrudAnomustenhallinta(this.permissionCheckerService.getCurrentUserOid()).stream()
                 .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getOrganisaatioHenkilo)
                 .map(OrganisaatioHenkilo::getOrganisaatioOid)
@@ -538,7 +538,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
     private void regularUserChecks(Map<String, Set<Long>> kayttooikeusByOrganisation, List<String> allowedOrganisaatioOids) {
         // MyönnettyKäyttöoikeusryhmäTapahtumat joista löytyvät nämä validit organisaatiot
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findValidMyonnettyKayttooikeus(UserDetailsUtil.getCurrentUserOid()).stream()
                 .filter(myonnettyKayttoOikeusRyhmaTapahtuma -> allowedOrganisaatioOids.stream()
                         .anyMatch(allowedRole -> allowedRole.contains(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())))

@@ -8,7 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
@@ -35,7 +35,6 @@ import static fi.vm.sade.kayttooikeus.util.CreateUtil.creaetOrganisaatioPerustie
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
@@ -48,7 +47,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @Autowired
-    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     @MockBean
     private OrganisaatioClient organisaatioClient;
@@ -83,7 +82,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(oidHenkilo);
         assertThat(henkilo.size()).isEqualTo(1);
         assertThat(henkilo.get(0).getMyonnettyKayttoOikeusRyhmas()).isEmpty();
-        MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
+        MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
         assertThat(mkrt).isNull();
     }
 

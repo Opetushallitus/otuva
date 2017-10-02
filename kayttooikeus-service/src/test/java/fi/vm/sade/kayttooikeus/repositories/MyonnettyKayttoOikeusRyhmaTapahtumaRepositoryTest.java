@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
-import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +15,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -184,11 +182,34 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 kayttoOikeusRyhma("PASSIVOITU").withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
-        List<GroupTypeDto> list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidGroupsByHenkilo("1.2.3.4.5");
+        List<GroupTypeDto> list = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidGroupsByHenkilo("1.2.3.4.5");
         assertEquals(2, list.size());
         assertEquals("RYHMA", list.get(0).getNimi());
         assertEquals("3.4.5.6.7", list.get(0).getOrganisaatioOid());
         assertEquals("RYHMA2", list.get(1).getNimi());
         assertEquals("4.5.6.7.8", list.get(1).getOrganisaatioOid());
+    }
+
+    @Test
+    public void listCurrentKayttooikeusForHenkilo() {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ")))
+                .voimassaPaattyen(LocalDate.now().plusMonths(2)));
+        List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> kayttooikeusOrganisaatiotDtoList
+                = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo("1.2.3.4.5");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
+                .containsExactly("3.4.5.6.7");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
+                .containsExactlyInAnyOrder("READ", "CRUD");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
+                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
 }

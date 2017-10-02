@@ -13,7 +13,7 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -56,7 +56,7 @@ public class PermissionCheckerTest {
 
     private HenkiloDataRepository henkiloDataRepositoryMock;
 
-    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
@@ -79,7 +79,7 @@ public class PermissionCheckerTest {
         this.myRoles = createMockedRoles(new HashSet<>());
 
         this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository.class);
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
 
         CommonProperties commonProperties = new CommonProperties();
@@ -90,7 +90,7 @@ public class PermissionCheckerTest {
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
                 this.henkiloDataRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
-                this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
+                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
                 commonProperties));
         ReflectionTestUtils.setField(permissionChecker, "restClient", this.fakeRestClient);
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
@@ -221,7 +221,7 @@ public class PermissionCheckerTest {
     public void kayttooikeusMyontoviiteLimitationCheckCanNotGrantToSameKayttooikeusryhma() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-        when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+        when(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
                 .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class))).willReturn(Lists.newArrayList(2002L));
 
@@ -232,7 +232,7 @@ public class PermissionCheckerTest {
     public void kayttooikeusMyontoviiteLimitationCheck() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-        when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
+        when(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
                 .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyListOf(Long.class))).willReturn(Lists.newArrayList(2002L));
 
