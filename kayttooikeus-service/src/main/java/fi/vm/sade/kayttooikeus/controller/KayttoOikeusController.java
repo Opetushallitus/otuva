@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeusPerustiedotDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
@@ -54,6 +55,18 @@ public class KayttoOikeusController {
     @RequestMapping(value = "/kayttaja/current", method = RequestMethod.GET)
     public List<KayttoOikeusHistoriaDto> listKayttoOikeusCurrentUser() {
         return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
+            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee kirjautuneen käyttäjän käyttöoikeudet.",
+            notes = "Listaa kaikki nykyisen sisäänkirjautuneen käyttäjän käyttöoikeudet, "
+                    + "jossa on mukana myös vanhentuneet käyttöoikeudet.")
+    @RequestMapping(value = "/kayttaja/{oidHenkilo}", method = RequestMethod.GET)
+    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listKayttoOikeusByOid(@PathVariable String oidHenkilo) {
+        return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForUser(oidHenkilo);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"

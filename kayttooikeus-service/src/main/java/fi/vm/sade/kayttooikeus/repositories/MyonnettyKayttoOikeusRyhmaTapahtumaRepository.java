@@ -1,21 +1,42 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
-import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
-import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository {
-    List<Long> findMasterIdsByHenkilo(String henkiloOid);
+@Repository
+@Transactional(propagation = Propagation.MANDATORY)
+public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository extends CrudRepository<MyonnettyKayttoOikeusRyhmaTapahtuma, Long>,
+        MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom {
 
-    List<MyonnettyKayttoOikeusDto> findByHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid);
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma>
+    findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmLessThanEqualAndVoimassaLoppuPvmGreaterThanEqualAndOrganisaatioHenkiloPassivoitu(
+            String oidHenkilo, LocalDate voimassaAlkuPvm, LocalDate voimassaLoppuPvm, boolean organisaatiohenkiloPassivoitu);
+    default List<MyonnettyKayttoOikeusRyhmaTapahtuma> findValidMyonnettyKayttooikeus(String oidHenkilo) {
+        return findByOrganisaatioHenkiloHenkiloOidHenkiloAndVoimassaAlkuPvmLessThanEqualAndVoimassaLoppuPvmGreaterThanEqualAndOrganisaatioHenkiloPassivoitu(
+                oidHenkilo, LocalDate.now(), LocalDate.now(), false);
+    }
 
-    List<AccessRightTypeDto> findValidAccessRightsByOid(String oid);
+    Optional<MyonnettyKayttoOikeusRyhmaTapahtuma> findFirstByKayttoOikeusRyhmaIdAndOrganisaatioHenkiloOrganisaatioOidAndOrganisaatioHenkiloHenkiloOidHenkilo(
+            Long kayttooikeusryhmaId, String organisaatioOid, String oidHenkilo
+    );
+    default Optional<MyonnettyKayttoOikeusRyhmaTapahtuma> findMyonnettyTapahtuma(Long kayttooikeusryhmaId, String organisaatioOid, String oidHenkilo) {
+        return findFirstByKayttoOikeusRyhmaIdAndOrganisaatioHenkiloOrganisaatioOidAndOrganisaatioHenkiloHenkiloOidHenkilo(
+                kayttooikeusryhmaId, organisaatioOid, oidHenkilo);
+    }
 
-    List<GroupTypeDto> findValidGroupsByHenkilo(String oid);
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkiloHenkiloOidHenkilo(String oidHenkilo);
 
-    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByVoimassaLoppuPvmBefore(LocalDate voimassaLoppuPvm);
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkiloHenkiloOidHenkiloAndKayttoOikeusRyhmaKayttoOikeusRooliAndKayttoOikeusRyhmaKayttoOikeusPalveluName(
+            String oidHenkilo, String role, String name);
+    default List<MyonnettyKayttoOikeusRyhmaTapahtuma> findCrudAnomustenhallinta(String henkiloOid) {
+        return this.findByOrganisaatioHenkiloHenkiloOidHenkiloAndKayttoOikeusRyhmaKayttoOikeusRooliAndKayttoOikeusRyhmaKayttoOikeusPalveluName(
+                henkiloOid, "CRUD", "ANOMUSTENHALLINTA");
+    }
 }

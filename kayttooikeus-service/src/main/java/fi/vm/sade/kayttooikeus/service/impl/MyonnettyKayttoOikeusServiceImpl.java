@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
 import java.time.LocalDate;
@@ -32,7 +31,6 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
     private final PermissionCheckerService permissionCheckerService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
 
@@ -56,7 +54,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                     LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
-            myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(kayttoOikeus);
+            myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
             ldapSynchronizationService.updateHenkilo(henkiloOid);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());

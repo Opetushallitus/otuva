@@ -9,7 +9,7 @@ import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataCriteria;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -41,7 +41,7 @@ public class LdapSynchronizer {
     private final LdapUpdateDataRepository ldapUpdateDataRepository;
     private final HenkiloDataRepository henkiloRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     /**
@@ -83,7 +83,7 @@ public class LdapSynchronizer {
     }
 
     private List<MyonnettyKayttoOikeusRyhmaTapahtuma> getMyonnetyt(String henkiloOid) {
-        return myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findValidMyonnettyKayttooikeus(henkiloOid);
+        return myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidMyonnettyKayttooikeus(henkiloOid);
     }
 
     @RequiredArgsConstructor

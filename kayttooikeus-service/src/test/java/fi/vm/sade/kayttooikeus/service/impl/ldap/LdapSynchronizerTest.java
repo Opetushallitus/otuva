@@ -7,7 +7,7 @@ import fi.vm.sade.kayttooikeus.model.LdapUpdateData;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataCriteria;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.service.TimeService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class LdapSynchronizerTest {
     @Mock
     private HenkiloHibernateRepository henkiloHibernateRepository;
     @Mock
-    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepositoryMock;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock;
     @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
 
@@ -61,7 +61,7 @@ public class LdapSynchronizerTest {
         ldapSynchronizer = new LdapSynchronizer(timeService, ldapServiceMock,
                 ldapUpdateDataRepositoryMock, henkiloRepositoryMock,
                 henkiloHibernateRepository,
-                myonnettyKayttoOikeusRyhmaTapahtumaDataRepositoryMock,
+                myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock,
                 oppijanumerorekisteriClientMock);
     }
 

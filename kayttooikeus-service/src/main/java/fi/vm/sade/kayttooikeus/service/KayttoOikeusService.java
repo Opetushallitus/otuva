@@ -17,6 +17,8 @@ public interface KayttoOikeusService {
 
     List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForCurrentUser();
 
+    List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUser(String oidHenkilo);
+
     List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods);
 
     Map<String, List<Integer>> findKayttooikeusryhmatAndOrganisaatioByHenkiloOid(String henkiloOid);
