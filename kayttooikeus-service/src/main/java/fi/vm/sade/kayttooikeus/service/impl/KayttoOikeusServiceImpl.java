@@ -82,7 +82,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUser(String oidHenkilo) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(getCurrentUserOid());
+        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(oidHenkilo);
     }
 
     @Override
