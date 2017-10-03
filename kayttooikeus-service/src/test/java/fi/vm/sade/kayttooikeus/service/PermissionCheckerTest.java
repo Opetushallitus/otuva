@@ -34,7 +34,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -44,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 
 @RunWith(SpringRunner.class)
@@ -92,7 +92,7 @@ public class PermissionCheckerTest {
                 this.henkiloDataRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
                 commonProperties));
-        Whitebox.setInternalState(permissionChecker, "restClient", this.fakeRestClient);
+        ReflectionTestUtils.setField(permissionChecker, "restClient", this.fakeRestClient);
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")
         );

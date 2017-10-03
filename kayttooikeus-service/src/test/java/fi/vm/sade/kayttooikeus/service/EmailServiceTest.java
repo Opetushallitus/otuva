@@ -35,10 +35,9 @@ import static org.apache.http.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import org.springframework.security.test.context.support.WithMockUser;
 
 @RunWith(SpringRunner.class)
@@ -151,9 +150,9 @@ public class EmailServiceTest extends AbstractServiceTest {
     public void sendInvitationEmail() {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(anyString()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
-        given(this.oppijanumerorekisteriClient.getHenkiloByOid(anyString()))
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))
                 .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());
         Kutsu kutsu = Kutsu.builder()
                 .kieliKoodi("fi")

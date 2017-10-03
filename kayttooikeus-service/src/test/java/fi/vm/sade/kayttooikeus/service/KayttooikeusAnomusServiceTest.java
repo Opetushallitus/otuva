@@ -127,7 +127,7 @@ public class KayttooikeusAnomusServiceTest {
 
     @Test
     public void listHaetutKayttoOikeusRyhmat() {
-        given(this.haettuKayttooikeusRyhmaRepository.findBy(any(), anyLong(), anyLong(), anyObject(), anyBoolean()))
+        given(this.haettuKayttooikeusRyhmaRepository.findBy(any(), any(), any(), any(), any()))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
         AnomusCriteria criteria = AnomusCriteria.builder().anojaOid("1.2.3.4.5").build();

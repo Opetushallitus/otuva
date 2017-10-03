@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import org.mockito.Mock;
 import static org.mockito.Mockito.times;
@@ -33,6 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapSynchronizerTest {

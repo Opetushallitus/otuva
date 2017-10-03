@@ -86,7 +86,6 @@ public class LdapSynchronizationServiceImplTest {
         when(timeService.getDateTimeNow()).thenReturn(now);
         when(ldapSynchronizationDataRepositoryMock.findFirstByOrderByIdDesc())
                 .thenReturn(Optional.of(LdapSynchronizationData.builder().lastRun(lastRun).build()));
-        when(ldapSynchronizerMock.run(any(), anyBoolean(), anyLong(), anyLong())).thenReturn(Optional.empty());
 
         ldapSynchronizationServiceImpl.runSynchronizer();
 
