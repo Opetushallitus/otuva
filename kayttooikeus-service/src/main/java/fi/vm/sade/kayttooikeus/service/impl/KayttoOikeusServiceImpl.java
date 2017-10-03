@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
@@ -82,7 +83,18 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUser(String oidHenkilo) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(oidHenkilo);
+        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
+                .oidHenkilo(oidHenkilo)
+                .build());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUserByUsername(
+            String username) {
+        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
+                .username(username)
+                .build());
     }
 
     @Override

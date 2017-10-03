@@ -69,6 +69,18 @@ public class KayttoOikeusController {
         return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForUser(oidHenkilo);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
+            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee kirjautuneen käyttäjän käyttöoikeudet.",
+            notes = "Listaa kaikki nykyisen sisäänkirjautuneen käyttäjän käyttöoikeudet, "
+                    + "jossa on mukana myös vanhentuneet käyttöoikeudet.")
+    @RequestMapping(value = "/kayttaja/username={username}", method = RequestMethod.GET)
+    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listKayttoOikeusByUsername(@PathVariable String username) {
+        return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForUserByUsername(username);
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
