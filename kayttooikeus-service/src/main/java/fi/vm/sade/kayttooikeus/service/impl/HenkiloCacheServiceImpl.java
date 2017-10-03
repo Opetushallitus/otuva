@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.service.HenkiloCacheService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class HenkiloCacheServiceImpl implements HenkiloCacheService {
-    private static final Logger LOG = LoggerFactory.getLogger(HenkiloCacheServiceImpl.class);
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final HenkiloDataRepository henkiloDataRepository;
@@ -35,40 +36,6 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.henkiloDataRepository = henkiloDataRepository;
         this.scheduleTimestampsDataRepository = scheduleTimestampsDataRepository;
-    }
-
-    @Override
-    @Transactional
-    public void updateHenkiloCache() {
-        ScheduleTimestamps scheduleTimestamps = this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
-                .orElseThrow(DataInconsistencyException::new);
-        List<String> modifiedOidHenkiloList = new ArrayList<>();
-        long amount = 1000L;
-        for(long offset = 0; offset == 0 || !modifiedOidHenkiloList.isEmpty() || !(modifiedOidHenkiloList.size() < amount); offset++) {
-            modifiedOidHenkiloList = this.oppijanumerorekisteriClient.getModifiedSince(scheduleTimestamps.getModified(),
-                    offset*amount, amount);
-            if (!modifiedOidHenkiloList.isEmpty()) {
-                this.saveAll(0, amount, modifiedOidHenkiloList);
-            }
-        }
-        scheduleTimestamps.setModified(LocalDateTime.now());
-    }
-
-    // Do in single transaction so if something fails results are not partially saved (and missing ones are never fetched again)
-    @Override
-    @Transactional
-    public void forceCleanUpdateHenkiloCacheInSingleTransaction() {
-        Long count = 1000L;
-        for(long page = 0; !this.saveAll(page*count, count, null); page++) {
-            // Escape condition in case of inifine loop (10M+ henkilos)
-            if (page > 10000) {
-                LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
-                break;
-            }
-        }
-        this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
-                .orElseThrow(DataInconsistencyException::new)
-                .setModified(LocalDateTime.now());
     }
 
     @Override
@@ -93,6 +60,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
             saveList.add(matchingHenkilo);
         });
         this.henkiloDataRepository.save(saveList);
+        log.info(saveList.size() + " henkilöä tallennettiin cacheen");
         return onrHenkilohakuResultDto.isEmpty() || onrHenkilohakuResultDto.size() < count;
     }
 }
