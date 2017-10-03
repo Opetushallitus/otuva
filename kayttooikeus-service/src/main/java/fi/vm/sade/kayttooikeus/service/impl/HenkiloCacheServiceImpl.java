@@ -1,42 +1,27 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
-import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloCacheService;
-import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class HenkiloCacheServiceImpl implements HenkiloCacheService {
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
-
-    @Autowired
-    public HenkiloCacheServiceImpl(OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                                   HenkiloDataRepository henkiloDataRepository,
-                                   ScheduleTimestampsDataRepository scheduleTimestampsDataRepository) {
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-        this.henkiloDataRepository = henkiloDataRepository;
-        this.scheduleTimestampsDataRepository = scheduleTimestampsDataRepository;
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
