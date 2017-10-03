@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.kayttooikeus.config.scheduling.ScheduledTasks;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
@@ -40,6 +41,9 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     @Autowired
     private HenkiloCacheService henkiloCacheService;
 
+    @Autowired
+    private ScheduledTasks scheduledTasks;
+
     @Test
     public void updateHenkiloCache() throws Exception {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("1.2.3.4.5").build();
@@ -54,57 +58,9 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
                         "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
         given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
                 .willReturn(Lists.newArrayList(henkilo));
+        given(this.henkiloDataRepository.countByEtunimetCachedNotNull()).willReturn(1L);
 
-        this.henkiloCacheService.updateHenkiloCache();
-
-        assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
-        assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
-        assertThat(henkilo.getPassivoituCached()).isFalse();
-        assertThat(henkilo.getDuplicateCached()).isFalse();
-
-        assertThat(henkiloCacheModified.get().getModified()).isNotEqualByComparingTo(timestamp);
-    }
-
-    @Test
-    public void forceCleanUpdateHenkiloCache() throws Exception {
-        Henkilo henkilo = Henkilo.builder().oidHenkilo("1.2.3.4.5").build();
-        LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
-        Optional<ScheduleTimestamps> scheduleTimestamps = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
-        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyListOf(String.class)))
-        .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
-                "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
-        given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
-                .willReturn(Lists.newArrayList(henkilo));
-        given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
-                .willReturn(scheduleTimestamps);
-
-        this.henkiloCacheService.forceCleanUpdateHenkiloCacheInSingleTransaction();
-
-        assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
-        assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
-        assertThat(henkilo.getPassivoituCached()).isFalse();
-        assertThat(henkilo.getDuplicateCached()).isFalse();
-
-        assertThat(scheduleTimestamps.get().getModified()).isNotEqualByComparingTo(timestamp);
-    }
-
-    @Test
-    public void forceCleanUpdateHenkiloCacheHenkiloNotExist() throws Exception {
-        LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
-        Optional<ScheduleTimestamps> henkiloCacheModified = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
-        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyListOf(String.class)))
-        .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
-                "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
-        given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
-                .willReturn(Lists.newArrayList());
-        given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
-                .willReturn(henkiloCacheModified);
-        doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
-        this.henkiloCacheService.forceCleanUpdateHenkiloCacheInSingleTransaction();
-
-        ArgumentCaptor<Henkilo> henkiloArgumentCaptor = ArgumentCaptor.forClass(Henkilo.class);
-        verify(this.henkiloDataRepository, times(1)).save(henkiloArgumentCaptor.capture());
-        Henkilo henkilo = henkiloArgumentCaptor.getValue();
+        this.scheduledTasks.updateHenkiloNimiCache();
 
         assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
         assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
