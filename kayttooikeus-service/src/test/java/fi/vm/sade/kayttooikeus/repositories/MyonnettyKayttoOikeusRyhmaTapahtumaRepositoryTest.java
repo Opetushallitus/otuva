@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,7 +200,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> kayttooikeusOrganisaatiotDtoList
-                = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo("1.2.3.4.5");
+                = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
+                .oidHenkilo("1.2.3.4.5").build());
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
                 .containsExactly("3.4.5.6.7");
@@ -212,4 +214,30 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
+
+    @Test
+    public void listCurrentKayttooikeusForHenkiloByUsername() {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5").withUsername("username"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ")))
+                .voimassaPaattyen(LocalDate.now().plusMonths(2)));
+        List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> kayttooikeusOrganisaatiotDtoList
+                = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
+                .username("username").build());
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
+                .containsExactly("3.4.5.6.7");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
+                .containsExactlyInAnyOrder("READ", "CRUD");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
+                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+    }
+
+
 }

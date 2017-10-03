@@ -10,12 +10,12 @@ import fi.vm.sade.kayttooikeus.dto.KayttooikeusPerustiedotDto;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -143,12 +143,13 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
     }
 
     @Override
-    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listCurrentKayttooikeusForHenkilo(String oidHenkilo) {
+    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria criteria) {
         QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QHenkilo henkilo = QHenkilo.henkilo;
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QKayttajatiedot kayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
         return jpa()
                 .select(henkilo.oidHenkilo, organisaatioHenkilo.organisaatioOid, kayttoOikeusRyhma)
@@ -158,7 +159,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .leftJoin(organisaatioHenkilo.henkilo, henkilo)
                 .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
                 .leftJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
-                .where(henkilo.oidHenkilo.eq(oidHenkilo))
+                .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
+                .where(criteria.condition(kayttajatiedot, henkilo))
                 .fetch()
                 .stream()
                 .map(tuple -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.builder()
@@ -166,9 +168,9 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                         .kayttooikeusOikeudetDtoSet(
                                 Sets.newHashSet(Optional.ofNullable(tuple.get(kayttoOikeusRyhma)).orElse(new KayttoOikeusRyhma()).getKayttoOikeus()
                                         .stream()
-                                        .map(kayttoOikeus1 -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto.builder()
-                                                .oikeus(kayttoOikeus1.getRooli())
-                                                .palvelu(kayttoOikeus1.getPalvelu().getName())
+                                        .map(singleKayttooikeus -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto.builder()
+                                                .oikeus(singleKayttooikeus.getRooli())
+                                                .palvelu(singleKayttooikeus.getPalvelu().getName())
                                                 .build())
                                         .collect(Collectors.toSet())))
                         .build())
