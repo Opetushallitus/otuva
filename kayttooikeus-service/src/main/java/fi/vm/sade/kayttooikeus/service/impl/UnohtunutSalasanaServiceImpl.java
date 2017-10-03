@@ -20,6 +20,7 @@ import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.ifPresentOrElse;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
+import java.time.Duration;
 import java.util.Set;
 
 @Service
@@ -28,6 +29,7 @@ import java.util.Set;
 public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UnohtunutSalasanaServiceImpl.class);
+    private static final Duration POLETTI_VOIMASSA = Duration.ofMinutes(60L);
 
     private final TimeService timeService;
     private final EmailService emailService;
@@ -46,20 +48,20 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
         VarmennusPoletti varmennusPoletti = varmennusPolettiRepository.save(VarmennusPoletti.builder()
                 .poletti(UUID.randomUUID().toString())
                 .tyyppi(VarmennusPoletti.VarmennusPolettiTyyppi.HAVINNYT_SALASANA)
-                .voimassa(timeService.getDateTimeNow().plusMinutes(60))
+                .voimassa(timeService.getDateTimeNow().plus(POLETTI_VOIMASSA))
                 .henkilo(henkilo)
                 .build());
         LOGGER.info("Luotiin henkilölle {} uusi {}-poletti, voimassa {} asti. Poistettin vanhat poletit ({}kpl)",
                 henkilo.getOidHenkilo(), varmennusPoletti.getTyyppi(), varmennusPoletti.getVoimassa(), poistetut);
 
         try {
-            lahetaPoletti(henkilo.getOidHenkilo(), varmennusPoletti.getPoletti());
+            lahetaPoletti(henkilo.getOidHenkilo(), varmennusPoletti.getPoletti(), POLETTI_VOIMASSA);
         } catch (Exception e) {
             LOGGER.error("Unohtunut salasana -sähköpostin lähetys epäonnistui henkilölle {}", henkilo.getOidHenkilo(), e);
         }
     }
 
-    private void lahetaPoletti(String oid, String poletti) {
+    private void lahetaPoletti(String oid, String poletti, Duration voimassa) {
         HenkiloDto henkilo = oppijanumerorekisteriClient.getHenkiloByOid(oid);
         String sahkoposti = YhteystietoUtil.getYhteystietoArvo(henkilo.getYhteystiedotRyhma(),
                 YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
@@ -72,7 +74,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
             throw new DataInconsistencyException("Sähköpostiosoite " + sahkoposti + " on käytössä useammalla henkilöllä: " + oids);
         }
 
-        emailService.sendEmailReset(henkilo, sahkoposti, poletti);
+        emailService.sendEmailReset(henkilo, sahkoposti, poletti, voimassa);
     }
 
 }
