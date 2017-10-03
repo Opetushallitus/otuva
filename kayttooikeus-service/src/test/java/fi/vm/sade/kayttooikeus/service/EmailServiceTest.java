@@ -134,7 +134,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
         assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(3)
-                .extracting("name").containsExactlyInAnyOrder("anomuksenTila", "hylkaamisperuste", "roolit");
+                .extracting("name").containsExactlyInAnyOrder("vastaanottaja", "roolit", "linkki");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("1.2.3.4.5");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
@@ -172,9 +172,9 @@ public class EmailServiceTest extends AbstractServiceTest {
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
-        assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(6)
+        assertThat(emailData.getRecipient().get(0).getRecipientReplacements())
                 .extracting("name")
-                .containsExactlyInAnyOrder("url", "etunimi", "sukunimi", "organisaatiot", "kutsuja", "voimassa");
+                .containsExactlyInAnyOrder("vastaanottaja", "organisaatiot", "linkki", "kutsuja", "voimassa");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
