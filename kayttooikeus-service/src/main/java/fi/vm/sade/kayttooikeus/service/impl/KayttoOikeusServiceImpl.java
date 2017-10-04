@@ -82,19 +82,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
-    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUser(String oidHenkilo) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
-                .oidHenkilo(oidHenkilo)
-                .build());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto> listMyonnettyKayttoOikeusHistoriaForUserByUsername(
-            String username) {
-        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
-                .username(username)
-                .build());
+    public List<KayttooikeusPerustiedotDto> listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria criteria) {
+        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(criteria);
     }
 
     @Override
