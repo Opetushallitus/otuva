@@ -68,7 +68,7 @@ public class AnomusCriteria {
                 builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                         .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
             }
-            if(this.kayttoOikeudenTilas != null) {
+            if (this.kayttoOikeudenTilas != null) {
                 // Behaviour from old authentication-service
                 if(this.kayttoOikeudenTilas.size() == 1 && this.kayttoOikeudenTilas.iterator().next().equals(KayttoOikeudenTila.ANOTTU)) {
                     builder.and(qHaettuKayttoOikeusRyhma.tyyppi.isNull());
@@ -77,7 +77,7 @@ public class AnomusCriteria {
                     builder.and(qHaettuKayttoOikeusRyhma.tyyppi.in(this.kayttoOikeudenTilas));
                 }
             }
-            if(this.kayttooikeusRyhmaIds != null) {
+            if (this.kayttooikeusRyhmaIds != null) {
                 builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
             }
 
