@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
@@ -14,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,10 +98,15 @@ public class AnomusCriteria {
 
     private BooleanBuilder condition(QAnomus qAnomus, BooleanBuilder builder, List<Predicate> organisaatioConditions) {
         if (q != null) {
+            BooleanBuilder predicate = new BooleanBuilder();
+            Arrays.stream(this.q.split(" ")).forEach(queryPart ->
+                    predicate.or(Expressions.anyOf(
+                            qAnomus.henkilo.etunimetCached.containsIgnoreCase(queryPart),
+                            qAnomus.henkilo.sukunimiCached.containsIgnoreCase(queryPart)
+                    )));
             builder.andAnyOf(
                     qAnomus.henkilo.oidHenkilo.eq(q),
-                    qAnomus.henkilo.etunimetCached.containsIgnoreCase(q),
-                    qAnomus.henkilo.sukunimiCached.containsIgnoreCase(q),
+                    predicate,
                     qAnomus.henkilo.kayttajatiedot.username.containsIgnoreCase(q)
             );
         }
