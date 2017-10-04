@@ -69,15 +69,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     @Override
-    public HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot", henkiloOid);
-        return retrying(FunctionalUtils.<HenkilonYhteystiedotViewDto>io(
-                    () -> objectMapper.readerFor(HenkilonYhteystiedotViewDto.class)
-                .readValue(serviceAccountClient.getAsString(url))), 2).get()
-                .orFail(mapper(url));
-    }
-
-    @Override
     public Set<String> getAllOidsForSamePerson(String personOid) {
         String url = urlProperties.url("oppijanumerorekisteri-service.s2s.duplicateHenkilos");
         Map<String,Object> criteria = new HashMap<>();
