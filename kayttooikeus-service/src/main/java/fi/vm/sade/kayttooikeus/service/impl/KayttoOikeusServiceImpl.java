@@ -77,7 +77,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForCurrentUser() {
-        return kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo(getCurrentUserOid());
+        return localizationService.localize(kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo(getCurrentUserOid()));
     }
 
     @Override
