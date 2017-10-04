@@ -47,18 +47,18 @@ public class AnomusCriteria {
         Predicate apply(QAnomus qAnomus, QKayttoOikeus qKayttoOikeus, QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma);
     }
 
-    public Function<QAnomus, Predicate> createBasicCondition(OrganisaatioClient organisaatioClient) {
+    public Function<QAnomus, Predicate> createEmailSendCondition(OrganisaatioClient organisaatioClient) {
         return (QAnomus qAnomus) -> {
             BooleanBuilder builder = new BooleanBuilder();
-            return this.condition(qAnomus, builder, this.getPredicates(organisaatioClient, qAnomus));
+            return this.condition(qAnomus, builder, this.getInChildOrganisationPredicate(organisaatioClient, qAnomus));
         };
     }
 
-    public AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> createExtendedCondition(OrganisaatioClient organisaatioClient) {
+    public AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> createAnomusSearchCondition(OrganisaatioClient organisaatioClient) {
         return (qAnomus, qKayttoOikeus, qHaettuKayttoOikeusRyhma) -> {
             BooleanBuilder builder = new BooleanBuilder();
 
-            builder = this.condition(qAnomus, builder, this.getPredicates(organisaatioClient, qAnomus));
+            builder = this.condition(qAnomus, builder, this.getInSameOrganisationPredicate(organisaatioClient, qAnomus));
 
             if (BooleanUtils.isTrue(this.adminView)) {
                 builder.and(qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
@@ -86,11 +86,22 @@ public class AnomusCriteria {
     }
 
     @Nullable
-    private List<Predicate> getPredicates(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
+    private List<Predicate> getInChildOrganisationPredicate(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
         List<Predicate> predicates = null;
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
             predicates = this.organisaatioOids.stream()
-                    .map(oid -> qAnomus.organisaatioOid.in(organisaatioClient.getActiveParentOids(oid)))
+                    .map(oid -> qAnomus.organisaatioOid.in(organisaatioClient.getActiveChildOids(oid)))
+                    .collect(Collectors.toList());
+        }
+        return predicates;
+    }
+
+    @Nullable
+    private List<Predicate> getInSameOrganisationPredicate(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
+        List<Predicate> predicates = null;
+        if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
+            predicates = this.organisaatioOids.stream()
+                    .map(qAnomus.organisaatioOid::eq)
                     .collect(Collectors.toList());
         }
         return predicates;
