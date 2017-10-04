@@ -23,7 +23,6 @@ import fi.vm.sade.kayttooikeus.util.AnomusKasiteltySahkopostiBuilder;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
@@ -182,19 +181,23 @@ public class EmailServiceImpl implements EmailService {
         
         EmailData email = new EmailData();
         email.setEmail(this.generateEmailMessage(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME, languageCode));
-        email.setRecipient(singletonList(getEmailRecipient(henkiloOid, languageCode, tapahtumas)));
-        ryhmasahkopostiClient.sendRyhmasahkoposti(email);
+        getEmailRecipient(henkiloOid, languageCode, tapahtumas).ifPresent(recipient -> {
+            email.setRecipient(singletonList(recipient));
+            ryhmasahkopostiClient.sendRyhmasahkoposti(email);
+        });
     }
 
-    private EmailRecipient getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet) {
-        HenkilonYhteystiedotViewDto yhteystiedot = oppijanumerorekisteriClient.getHenkilonYhteystiedot(henkiloOid);
-        String email = yhteystiedot.get(YhteystietojenTyypit.PRIORITY_ORDER).getSahkoposti();
-        if (email == null) {
-            logger.warn("Henkilöllä (oid={}) ei ole sähköpostia yhteystietona. Käyttöoikeuksien vanhentumisesta ei lähetetty muistutusta", henkiloOid);
-            return null;
-        }
+    private Optional<EmailRecipient> getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet) {
+        HenkiloDto henkilo = oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
+        Optional<String> yhteystietoArvo = YhteystietoUtil.getYhteystietoArvo(henkilo.getYhteystiedotRyhma(),
+                YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
+                YhteystietojenTyypit.PRIORITY_ORDER);
+        return yhteystietoArvo.map(sahkoposti -> getEmailRecipient(henkiloOid, langugeCode, kayttoOikeudet, sahkoposti, henkilo));
+    }
 
+    private EmailRecipient getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet, String email, HenkiloDto henkilo) {
         List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
+        replacements.add(new ReportedRecipientReplacementDTO("vastaanottaja", mapper.map(henkilo, SahkopostiHenkiloDto.class)));
         replacements.add(new ReportedRecipientReplacementDTO("kayttooikeusryhmat", getExpirationsText(kayttoOikeudet, langugeCode)));
         replacements.add(new ReportedRecipientReplacementDTO("linkki", expirationReminderPersonUrl));
 

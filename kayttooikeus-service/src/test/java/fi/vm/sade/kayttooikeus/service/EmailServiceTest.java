@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Optional.of;
 import static org.apache.http.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +66,16 @@ public class EmailServiceTest extends AbstractServiceTest {
         kielisyys.setKieliKoodi("FI");
         perustiedot.setAsiointiKieli(kielisyys);
         given(oppijanumerorekisteriClient.getHenkilonPerustiedot("1.2.3.4.5")).willReturn(of(perustiedot));
-        given(oppijanumerorekisteriClient.getHenkilonYhteystiedot("1.2.3.4.5")).willReturn(new HenkilonYhteystiedotViewDto()
-            .put(YhteystietojenTyypit.TYOOSOITE, YhteystiedotDto.builder().sahkoposti("testi@example.com").build()));
+        HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto
+                .builder()
+                .ryhmaKuvaus(YhteystietojenTyypit.TYOOSOITE)
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                        .yhteystietoArvo("testi@example.com")
+                        .build())
+                .build()));
+        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any(EmailData.class)))
                 .willReturn(new BasicHttpResponse(new BasicStatusLine(HTTP_1_1, 200, "")));
         emailService.sendExpirationReminder("1.2.3.4.5", asList(

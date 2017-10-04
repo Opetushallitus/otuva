@@ -1,13 +1,9 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 
-import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.KOTIOSOITE;
-import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.PRIORITY_ORDER;
-import static fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit.TYOOSOITE;
 
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkilonYhteystiedotViewDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,22 +44,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         Optional<HenkiloPerustietoDto> result = this.client.getHenkilonPerustiedot("1.2.3.4.5");
         assertTrue(result.isPresent());
         assertEquals("1.2.3.4.5", result.get().getOidHenkilo());
-    }
-
-    @Test
-    public void getHenkilonYhteystiedotTest() {
-        casAuthenticated("1.2.3.4.5");
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5/yhteystiedot"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
-                .withBody(jsonResource("classpath:henkilo/yhteystiedot.json"));
-        HenkilonYhteystiedotViewDto yhteystiedot = this.client.getHenkilonYhteystiedot("1.2.3.4.5");
-        assertNotNull(yhteystiedot);
-        assertNotNull(yhteystiedot.get(TYOOSOITE));
-        assertNotNull(yhteystiedot.get(KOTIOSOITE));
-        assertEquals("tyo@osoite.fi", yhteystiedot.get(TYOOSOITE).getSahkoposti());
-        assertEquals("+358451234567", yhteystiedot.get(KOTIOSOITE).getMatkapuhelinnumero());
-        assertEquals("tyo@osoite.fi", yhteystiedot.getExclusively(PRIORITY_ORDER).getSahkoposti());
     }
 
     @Test
