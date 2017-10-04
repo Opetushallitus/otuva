@@ -22,8 +22,6 @@ public interface OppijanumerorekisteriClient {
                 .filter(h -> henkiloOid.equals(h.getOidHenkilo())).findFirst();
     }
 
-    HenkilonYhteystiedotViewDto getHenkilonYhteystiedot(String henkiloOid);
-
     Set<String> getAllOidsForSamePerson(String personOid);
 
     String getOidByHetu(String hetu);
