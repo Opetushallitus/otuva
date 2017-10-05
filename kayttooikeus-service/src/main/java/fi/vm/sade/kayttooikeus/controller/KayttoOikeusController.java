@@ -62,10 +62,12 @@ public class KayttoOikeusController {
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    @ApiOperation(value = "Hakee käyttäjän käyttöoikeudet henkilöoidilla.")
+    @ApiOperation(value = "Hakee käyttäjien käyttöoikeudet annetuilla hakukriteereillä. Haku rajoitettu 1000 kerralla.")
     @RequestMapping(value = "/kayttaja", method = RequestMethod.GET)
-    public List<KayttooikeusPerustiedotDto> listKayttoOikeusByOid(KayttooikeusCriteria criteria) {
-        return this.kayttoOikeusService.listMyonnettyKayttoOikeusForUser(criteria);
+    public List<KayttooikeusPerustiedotDto> listKayttoOikeusByOid(KayttooikeusCriteria criteria,
+                                                                  @RequestParam(required = false) Long offset) {
+        long limit = 1000L;
+        return this.kayttoOikeusService.listMyonnettyKayttoOikeusForUser(criteria, limit, offset);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
