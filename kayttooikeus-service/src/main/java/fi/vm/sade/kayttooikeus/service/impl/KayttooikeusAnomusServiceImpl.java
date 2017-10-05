@@ -76,7 +76,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             criteria.setKayttoOikeudenTilas(EnumSet.of(KayttoOikeudenTila.ANOTTU));
         }
         List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria.createExtendedCondition(this.organisaatioClient), criteria.getAdminView());
+                .findBy(criteria.createAnomusSearchCondition(this.organisaatioClient), criteria.getAdminView());
         return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
@@ -116,7 +116,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
 
         List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
-                .findBy(criteria.createExtendedCondition(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
+                .findBy(criteria.createAnomusSearchCondition(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
         return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
     }
 
@@ -347,7 +347,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .anottuLoppu(anottuPvm.atTime(LocalTime.MIDNIGHT.minusSeconds(1)))
                 .anomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU))
                 .build();
-        List<Anomus> anomukset = anomusRepository.findBy(criteria.createBasicCondition(this.organisaatioClient));
+        List<Anomus> anomukset = anomusRepository.findBy(criteria.createEmailSendCondition(this.organisaatioClient));
 
         Set<String> hyvaksyjat = anomukset.stream()
                 .map(this::getAnomuksenHyvaksyjat)
