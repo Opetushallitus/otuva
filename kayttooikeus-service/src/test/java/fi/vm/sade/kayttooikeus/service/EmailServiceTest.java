@@ -115,6 +115,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     @Test
     public void sendEmailAnomusAccepted() {
         HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setOidHenkilo("1.2.3.4.5");
         henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(CreateUtil.createYhteystietoSahkoposti("arpa@kuutio.fi", YhteystietojenTyypit.MUU_OSOITE),
                 CreateUtil.createYhteystietoSahkoposti("arpa2@kuutio.fi", YhteystietojenTyypit.TYOOSOITE),
                 CreateUtil.createYhteystietoSahkoposti("arpa3@kuutio.fi", YhteystietojenTyypit.VAPAA_AJAN_OSOITE)));
