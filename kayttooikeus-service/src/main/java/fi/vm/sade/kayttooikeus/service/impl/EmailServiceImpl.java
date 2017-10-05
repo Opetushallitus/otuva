@@ -7,7 +7,6 @@ import fi.vm.sade.kayttooikeus.config.properties.EmailInvitationProperties;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Anomus;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
@@ -121,12 +120,20 @@ public class EmailServiceImpl implements EmailService {
          * but it's not a reason to cancel the whole transaction
          */
         try {
-            EmailRecipient recipient = this.newEmailRecipient(anomus.getHenkilo());
+            HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(anomus.getHenkilo().getOidHenkilo());
+            String email = UserDetailsUtil.getEmailByPriority(henkiloDto)
+                    .orElseThrow(() -> new NotFoundException("User has no valid email"));
+            EmailRecipient recipient = new EmailRecipient();
+            recipient.setEmail(email);
+            recipient.setOid(henkiloDto.getOidHenkilo());
+            recipient.setOidType("henkilo");
+            recipient.setName(UserDetailsUtil.getName(henkiloDto));
+            recipient.setLanguageCode(UserDetailsUtil.getLanguageCode(henkiloDto, "fi", "sv"));
             recipient.setEmail(anomus.getSahkopostiosoite());
             String languageCode = recipient.getLanguageCode();
 
             List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
-            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(anomus.getHenkilo(), SahkopostiHenkiloDto.class)));
+            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkiloDto, SahkopostiHenkiloDto.class)));
             AnomusKasiteltySahkopostiBuilder builder = new AnomusKasiteltySahkopostiBuilder(this.kayttoOikeusRyhmaRepository, languageCode);
             consumer.accept(builder);
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLIT, builder.build()));
@@ -155,19 +162,6 @@ public class EmailServiceImpl implements EmailService {
         message.setHtml(true);
         message.setLanguageCode(languageCode);
         return message;
-    }
-
-    private EmailRecipient newEmailRecipient(Henkilo henkilo) {
-        HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkilo.getOidHenkilo());
-        String email = UserDetailsUtil.getEmailByPriority(henkiloDto)
-                .orElseThrow(() -> new NotFoundException("User has no valid email"));
-        EmailRecipient recipient = new EmailRecipient();
-        recipient.setEmail(email);
-        recipient.setOid(henkilo.getOidHenkilo());
-        recipient.setOidType("henkilo");
-        recipient.setName(UserDetailsUtil.getName(henkiloDto));
-        recipient.setLanguageCode(UserDetailsUtil.getLanguageCode(henkiloDto, "fi", "sv"));
-        return recipient;
     }
 
     @Override
