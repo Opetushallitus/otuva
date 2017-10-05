@@ -1,10 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -205,7 +202,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
-                .oidHenkilo("1.2.3.4.5").build());
+                .oidHenkilo("1.2.3.4.5").build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
@@ -232,7 +229,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
-                .username("username").build());
+                .username("username").build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
@@ -267,7 +264,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
 
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
-                .palvelu(Sets.newHashSet("KOODISTO")).build());
+                .palvelu(Sets.newHashSet("KOODISTO")).build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .extracting(KayttooikeusPerustiedotDto::getOidHenkilo)
                 .containsExactly("1.2.3.4.5");

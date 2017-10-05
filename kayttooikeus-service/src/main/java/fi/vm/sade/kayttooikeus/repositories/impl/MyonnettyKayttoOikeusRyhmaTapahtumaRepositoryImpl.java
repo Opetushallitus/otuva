@@ -2,7 +2,9 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.google.common.collect.Sets;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
@@ -143,7 +145,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
     }
 
     @Override
-    public List<KayttooikeusPerustiedotDto> listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria criteria) {
+    public List<KayttooikeusPerustiedotDto> listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria criteria, Long limit, Long offset) {
         QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QHenkilo henkilo = QHenkilo.henkilo;
@@ -152,7 +154,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
         QKayttajatiedot kayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QPalvelu palvelu = QPalvelu.palvelu;
 
-        return jpa()
+        JPAQuery<Tuple> query = jpa()
                 .select(henkilo.oidHenkilo, organisaatioHenkilo.organisaatioOid, kayttoOikeusRyhma)
                 .distinct()
                 .from(myonnettyKayttoOikeusRyhmaTapahtuma)
@@ -162,8 +164,15 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .leftJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
                 .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
                 .leftJoin(kayttoOikeus.palvelu, palvelu)
-                .where(criteria.condition(kayttajatiedot, henkilo, palvelu))
-                .fetch()
+                .where(criteria.condition(kayttajatiedot, henkilo, palvelu));
+        if(limit != null) {
+            query.limit(limit);
+        }
+        if(offset != null) {
+            query.offset(offset);
+        }
+
+        return query.fetch()
                 .stream()
                 // Map to KayttooikeusPerustiedotDtos
                 .map(tuple -> KayttooikeusPerustiedotDto
