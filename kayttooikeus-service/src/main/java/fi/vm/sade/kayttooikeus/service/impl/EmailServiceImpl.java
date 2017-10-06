@@ -121,10 +121,7 @@ public class EmailServiceImpl implements EmailService {
          */
         try {
             HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(anomus.getHenkilo().getOidHenkilo());
-            String email = UserDetailsUtil.getEmailByPriority(henkiloDto)
-                    .orElseThrow(() -> new NotFoundException("User has no valid email"));
             EmailRecipient recipient = new EmailRecipient();
-            recipient.setEmail(email);
             recipient.setOid(henkiloDto.getOidHenkilo());
             recipient.setOidType("henkilo");
             recipient.setName(UserDetailsUtil.getName(henkiloDto));
