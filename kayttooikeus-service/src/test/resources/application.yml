@@ -67,4 +67,15 @@ kayttooikeus:
   scheduling:
     enabled: false
     run-on-startup: false
+    pool_size: 1
+    organisaatio-retry-time: 100000
+    configuration:
+      organisaatiocache: "0 0 0 * * ?"
+      vanhentuneetkayttooikeudet: 0 0 3 * * ?
+      kayttooikeusmuistutus: "0 30 4 * * ?"
+      kayttooikeusanomusilmoitukset: 0 0 2 * * ?
+      henkiloNimiCache: 100000
+    ldapsynkronointi:
+      fixeddelayinmillis: 60000
+      initialdelayinmillis: 30000
 

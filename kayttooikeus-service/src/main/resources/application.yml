@@ -29,6 +29,7 @@ kayttooikeus:
     enabled: false
     run-on-startup: true
     pool_size: 2
+    organisaatio-retry-time: 300000
     configuration:
       organisaatiocache: "0 0 0 * * ?"
       vanhentuneetkayttooikeudet: 0 0 3 * * ?
