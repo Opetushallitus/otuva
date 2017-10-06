@@ -47,6 +47,7 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
 
     private void onStartup(TaskScheduler taskScheduler) {
         this.organisaatioRetryTask = taskScheduler.scheduleWithFixedDelay(() -> {
+            log.info("Aloitetaan organisaatiocachen päivitystä");
             this.organisaatioClient.refreshCache();
             this.organisaatioRetryTask.cancel(false);
         }, this.environment.getProperty("kayttooikeus.scheduling.organisaatio-retry-time", Long.class));
