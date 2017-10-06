@@ -158,12 +158,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .select(henkilo.oidHenkilo, organisaatioHenkilo.organisaatioOid, kayttoOikeusRyhma)
                 .distinct()
                 .from(myonnettyKayttoOikeusRyhmaTapahtuma)
-                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
-                .leftJoin(organisaatioHenkilo.henkilo, henkilo)
-                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
-                .leftJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
+                .innerJoin(organisaatioHenkilo.henkilo, henkilo)
+                .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
+                .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
                 .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
-                .leftJoin(kayttoOikeus.palvelu, palvelu)
+                .innerJoin(kayttoOikeus.palvelu, palvelu)
                 .where(criteria.condition(kayttajatiedot, henkilo, palvelu));
         if(limit != null) {
             query.limit(limit);
@@ -174,25 +174,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
 
         return query.fetch()
                 .stream()
-                // Map to KayttooikeusPerustiedotDtos
-                .map(tuple -> KayttooikeusPerustiedotDto
-                        .builder()
-                        .oidHenkilo(tuple.get(henkilo.oidHenkilo))
-                        .kayttooikeusOrganisaatiotDtoSet(Sets.newHashSet(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto
-                                .builder()
-                                .organisaatioOid(tuple.get(organisaatioHenkilo.organisaatioOid))
-                                .kayttooikeusOikeudetDtoSet(
-                                        Sets.newHashSet(Optional.ofNullable(tuple.get(kayttoOikeusRyhma))
-                                                .orElse(new KayttoOikeusRyhma()).getKayttoOikeus()
-                                                .stream()
-                                                .map(singleKayttooikeus -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto
-                                                        .builder()
-                                                        .oikeus(singleKayttooikeus.getRooli())
-                                                        .palvelu(singleKayttooikeus.getPalvelu().getName())
-                                                        .build())
-                                                .collect(Collectors.toSet())))
-                                .build()))
-                        .build())
+                .map(this::mapTupleToKayttooikeusPerustiedotDtos)
                 // grouping
                 .collect(Collectors.groupingBy(KayttooikeusPerustiedotDto::getOidHenkilo))
                 .values()
@@ -201,6 +183,30 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                         .stream()
                         .reduce(KayttooikeusPerustiedotDto::mergeIfSameOid).get())
                 .collect(Collectors.toList());
+    }
+
+    private KayttooikeusPerustiedotDto mapTupleToKayttooikeusPerustiedotDtos(Tuple tuple) {
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QHenkilo henkilo = QHenkilo.henkilo;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        return KayttooikeusPerustiedotDto
+                .builder()
+                .oidHenkilo(tuple.get(henkilo.oidHenkilo))
+                .kayttooikeusOrganisaatiotDtoSet(Sets.newHashSet(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto
+                        .builder()
+                        .organisaatioOid(tuple.get(organisaatioHenkilo.organisaatioOid))
+                        .kayttooikeusOikeudetDtoSet(
+                                Sets.newHashSet(Optional.ofNullable(tuple.get(kayttoOikeusRyhma))
+                                        .orElse(new KayttoOikeusRyhma()).getKayttoOikeus()
+                                        .stream()
+                                        .map(singleKayttooikeus -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto
+                                                .builder()
+                                                .oikeus(singleKayttooikeus.getRooli())
+                                                .palvelu(singleKayttooikeus.getPalvelu().getName())
+                                                .build())
+                                        .collect(Collectors.toSet())))
+                        .build()))
+                .build();
     }
 
 }

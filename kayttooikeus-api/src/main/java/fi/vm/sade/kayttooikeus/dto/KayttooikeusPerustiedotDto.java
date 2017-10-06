@@ -15,6 +15,17 @@ public class KayttooikeusPerustiedotDto {
     String oidHenkilo;
     Set<KayttooikeusOrganisaatiotDto> kayttooikeusOrganisaatiotDtoSet = new HashSet<>();
 
+    public KayttooikeusPerustiedotDto(String oidHenkilo, String organisaatioOid, String palvelu, String oikeus) {
+        this.oidHenkilo = oidHenkilo;
+        KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto kayttooikeusOikeudetDto
+                = new KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto(palvelu, oikeus);
+        KayttooikeusOrganisaatiotDto kayttooikeusOrganisaatiotDto = new KayttooikeusOrganisaatiotDto(
+                organisaatioOid,
+                new HashSet<KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto>() {{add(kayttooikeusOikeudetDto);}}
+        );
+        this.kayttooikeusOrganisaatiotDtoSet.add(kayttooikeusOrganisaatiotDto);
+    }
+
     public KayttooikeusPerustiedotDto mergeIfSameOid(KayttooikeusPerustiedotDto kayttooikeusPerustiedotDto) {
         if(kayttooikeusPerustiedotDto.getOidHenkilo().equals(this.getOidHenkilo())) {
             this.kayttooikeusOrganisaatiotDtoSet.addAll(kayttooikeusPerustiedotDto.getKayttooikeusOrganisaatiotDtoSet());
