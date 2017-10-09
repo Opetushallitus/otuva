@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -37,6 +36,7 @@ import static java.util.stream.Collectors.toSet;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.stream.Stream;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTest {
@@ -127,9 +127,9 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
 
     @Test
     public void updateHenkiloKayttajatunnus() {
-        Kayttajatiedot kayttajatiedot = populate(kayttajatiedot(henkilo("oid1"), "user1"));
-        HenkiloDto henkiloDto = createValidHenkiloDto("oid1");
-        when(oppijanumerorekisteriClientMock.getHenkiloByOid(any())).thenReturn(henkiloDto);
+        Kayttajatiedot kayttajatiedot1 = populate(kayttajatiedot(henkilo("oid1"), "user1"));
+        HenkiloDto henkilo1Dto = createValidHenkiloDto("oid1");
+        when(oppijanumerorekisteriClientMock.getHenkiloByOid(eq("oid1"))).thenReturn(henkilo1Dto);
 
         ldapSynchronizationService.updateHenkilo("oid1");
         ldapSynchronizationService.runSynchronizer();
@@ -138,14 +138,25 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
                 .extracting("kayttajatunnus", "oid")
                 .containsExactly(tuple("user1", "oid1"));
 
-        kayttajatiedot.setUsername("user1-updated");
+        kayttajatiedot1.setUsername("user1-updated");
 
         ldapSynchronizationService.updateHenkilo("oid1");
         ldapSynchronizationService.runSynchronizer();
 
         assertThat(kayttajaRepository.findAll())
                 .extracting("kayttajatunnus", "oid")
-                .containsExactly(tuple("user1-updated", "oid1"));
+                .containsExactly(tuple("user1", "oid1"), tuple("user1-updated", "oid1"));
+
+        Kayttajatiedot kayttajatiedot2 = populate(kayttajatiedot(henkilo("oid2"), "user1"));
+        HenkiloDto henkilo2Dto = createValidHenkiloDto("oid2");
+        when(oppijanumerorekisteriClientMock.getHenkiloByOid(eq("oid2"))).thenReturn(henkilo2Dto);
+
+        ldapSynchronizationService.updateHenkilo("oid2");
+        ldapSynchronizationService.runSynchronizer();
+
+        assertThat(kayttajaRepository.findAll())
+                .extracting("kayttajatunnus", "oid")
+                .containsExactly(tuple("user1", "oid2"), tuple("user1-updated", "oid1"));
     }
 
     @Test
@@ -186,10 +197,10 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
 
         assertThat(kayttajaRepository.findAll())
                 .extracting("kayttajatunnus", "oid")
-                .containsExactly(tuple("user1-updated", "oid1"));
+                .containsExactlyInAnyOrder(tuple("user1", "oid1"), tuple("user1-updated", "oid1"));
         assertThat(ryhmaRepository.findAll())
                 .extracting("nimi", "kayttajat")
-                .containsExactly(tuple("LANG_fi", Stream.of("uid=user1-updated,ou=People,dc=opintopolku,dc=fi").collect(toSet())));
+                .containsExactly(tuple("LANG_fi", Stream.of("uid=user1,ou=People,dc=opintopolku,dc=fi", "uid=user1-updated,ou=People,dc=opintopolku,dc=fi").collect(toSet())));
     }
 
     @Test
