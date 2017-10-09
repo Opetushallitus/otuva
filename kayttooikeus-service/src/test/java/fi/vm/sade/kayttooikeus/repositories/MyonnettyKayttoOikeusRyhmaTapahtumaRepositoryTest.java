@@ -246,6 +246,33 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
 
+    @Test
+    public void listCurrentKayttooikeusForHenkiloByHetu() {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.5").withHetu("hetu"), "3.4.5.6.7"),
+                kayttoOikeusRyhma("RYHMA")
+                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus("KOODISTO", "READ")))
+                .voimassaPaattyen(LocalDate.now().plusMonths(2)));
+        List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
+                = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
+                .hetu("hetu").build(), 1000L, 0L);
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
+                .containsExactly("3.4.5.6.7");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
+                .containsExactlyInAnyOrder("READ", "CRUD");
+        assertThat(kayttooikeusOrganisaatiotDtoList)
+                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
+                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+    }
+
     // User has two MyonnettyKayttooikeusRyhmas for same organisation with separate Kayttooikeusryhmas which have same Kayttooikeus
     @Test
     public void listCurrentKayttooikeusForHenkiloByPalveluNameAndGroup() {

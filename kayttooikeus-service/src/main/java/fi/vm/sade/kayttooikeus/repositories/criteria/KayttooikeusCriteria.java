@@ -21,6 +21,7 @@ public class KayttooikeusCriteria {
     String username;
     String oidHenkilo;
     Set<String> palvelu = new HashSet<>();
+    String hetu;
 
     public Predicate condition(QKayttajatiedot kayttajatiedot, QHenkilo henkilo, QPalvelu palvelu) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -32,6 +33,9 @@ public class KayttooikeusCriteria {
         }
         if(!CollectionUtils.isEmpty(this.palvelu)) {
             builder.and(palvelu.name.in(this.palvelu));
+        }
+        if(StringUtils.hasLength(this.hetu)) {
+            builder.and(henkilo.hetuCached.eq(this.hetu));
         }
         return builder;
     }

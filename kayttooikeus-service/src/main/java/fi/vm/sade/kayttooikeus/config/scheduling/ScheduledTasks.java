@@ -80,35 +80,45 @@ public class ScheduledTasks {
     public void updateHenkiloNimiCache() {
         // Update existing cache
         if (this.henkiloDataRepository.countByEtunimetCachedNotNull() > 0L) {
-            log.info("Henkilötietojen olemassa olevan cachen päivitys alkaa");
-            ScheduleTimestamps scheduleTimestamps = this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
-                    .orElseThrow(DataInconsistencyException::new);
-            List<String> modifiedOidHenkiloList = new ArrayList<>();
-            long amount = 1000L;
-            for(long offset = 0; offset == 0 || !modifiedOidHenkiloList.isEmpty() || !(modifiedOidHenkiloList.size() < amount); offset++) {
-                modifiedOidHenkiloList = this.oppijanumerorekisteriClient
-                        .getModifiedSince(scheduleTimestamps.getModified(),offset*amount, amount);
-                if (!modifiedOidHenkiloList.isEmpty()) {
-                    this.henkiloCacheService.saveAll(0, amount, modifiedOidHenkiloList);
-                }
-            }
-            scheduleTimestamps.setModified(LocalDateTime.now());
+            updateExistingHenkiloCache();
         }
         // Fetch whole henkilo nimi cache
         else {
-            log.info("Henkilötietojen uuden cachen luominen alkaa");
-            Long count = 1000L;
-            for(long page = 0; !this.henkiloCacheService.saveAll(page*count, count, null); page++) {
-                // Escape condition in case of inifine loop (10M+ henkilos)
-                if (page > 10000) {
-                    LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
-                    break;
-                }
-            }
-            this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
-                    .orElseThrow(DataInconsistencyException::new)
-                    .setModified(LocalDateTime.now());
+            populateNewHenkiloCache();
         }
         log.info("Henkilötietojen cachen päivitys päättyy");
+    }
+
+    private void populateNewHenkiloCache() {
+        log.info("Henkilötietojen uuden cachen luominen alkaa");
+        Long count = 1000L;
+        for(long page = 0; !this.henkiloCacheService.saveAll(page*count, count, null); page++) {
+            // Escape condition in case of inifine loop (100M+ henkilos)
+            if (page > 100000) {
+                LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
+                break;
+            }
+        }
+        this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
+                .orElseThrow(DataInconsistencyException::new)
+                .setModified(LocalDateTime.now());
+    }
+
+    private void updateExistingHenkiloCache() {
+        log.info("Henkilötietojen olemassa olevan cachen päivitys alkaa");
+        ScheduleTimestamps scheduleTimestamps = this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache")
+                .orElseThrow(DataInconsistencyException::new);
+        LocalDateTime now = LocalDateTime.now();
+        List<String> modifiedOidHenkiloList = new ArrayList<>();
+        long amount = 1000L;
+        for(long offset = 0; offset == 0 || !modifiedOidHenkiloList.isEmpty() || !(modifiedOidHenkiloList.size() < amount); offset++) {
+            modifiedOidHenkiloList = this.oppijanumerorekisteriClient
+                    .getModifiedSince(scheduleTimestamps.getModified(),offset*amount, amount);
+            if (!modifiedOidHenkiloList.isEmpty()) {
+                // Offset 0 because modifiedOidHenkiloList.size <= amount
+                this.henkiloCacheService.saveAll(0, amount, modifiedOidHenkiloList);
+            }
+        }
+        scheduleTimestamps.setModified(now);
     }
 }

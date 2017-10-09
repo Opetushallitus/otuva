@@ -25,7 +25,7 @@ public class DevController {
         ldapSynchronizationService.runSynchronizer();
     }
 
-    @PostMapping
+    @PostMapping("/organisaatioCache")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE', " +
             "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Päivittää organisaatiovälimuistin. (db + memory)")
@@ -33,7 +33,7 @@ public class DevController {
         organisaatioService.updateOrganisaatioCache();
     }
 
-    @GetMapping
+    @GetMapping("/organisaatioCache")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE', " +
             "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Palauttaa organisaatioiden ja ryhmien lukumäärän välimuistisssa.")

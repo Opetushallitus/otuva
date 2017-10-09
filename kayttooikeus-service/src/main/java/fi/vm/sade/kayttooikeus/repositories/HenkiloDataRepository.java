@@ -17,7 +17,6 @@ public interface HenkiloDataRepository extends JpaRepository<Henkilo, Long> {
 
     Optional<Henkilo> findByKayttajatiedotUsername(String kayttajatunnus);
 
-    @Transactional(propagation = Propagation.SUPPORTS)
     Long countByEtunimetCachedNotNull();
 
     List<Henkilo> findByOidHenkiloIn(List<String> oidHenkilo);
