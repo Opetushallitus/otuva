@@ -164,7 +164,9 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
                 .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
                 .innerJoin(kayttoOikeus.palvelu, palvelu)
-                .where(criteria.condition(kayttajatiedot, henkilo, palvelu));
+                .where(criteria.condition(kayttajatiedot, henkilo, palvelu))
+                .where(organisaatioHenkilo.passivoitu.isFalse())
+                .where(kayttoOikeusRyhma.hidden.isFalse());
         if(limit != null) {
             query.limit(limit);
         }
