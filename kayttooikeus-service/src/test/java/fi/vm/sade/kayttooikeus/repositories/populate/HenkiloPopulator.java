@@ -14,6 +14,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
     private Boolean passivoituCached;
     private Boolean duplikaattiCached;
     private Kayttajatiedot kayttajatiedot;
+    private String hetu;
 
     public HenkiloPopulator(String oid) {
         this.oid = oid;
@@ -45,6 +46,11 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         return this;
     }
 
+    public HenkiloPopulator withHetu(String hetu) {
+        this.hetu = hetu;
+        return this;
+    }
+
     @Override
     public Henkilo apply(EntityManager entityManager) {
         Henkilo existing = first(entityManager.createQuery("select h from Henkilo h where h.oidHenkilo = :oid")
@@ -58,6 +64,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         henkilo.setSukunimiCached(this.sukunimiCached);
         henkilo.setPassivoituCached(this.passivoituCached);
         henkilo.setDuplicateCached(this.duplikaattiCached);
+        henkilo.setHetuCached(this.hetu);
         if (this.kayttajatiedot != null) {
             this.kayttajatiedot.setHenkilo(henkilo);
             henkilo.setKayttajatiedot(this.kayttajatiedot);

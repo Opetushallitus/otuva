@@ -46,6 +46,8 @@ public class Henkilo extends IdentifiableAndVersionedEntity {
 
     private Boolean vahvastiTunnistettu;
 
+    private String hetuCached;
+
     public Henkilo(String oidHenkilo) {
         this.oidHenkilo = oidHenkilo;
     }
