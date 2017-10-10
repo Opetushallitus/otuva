@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,4 +36,7 @@ public interface HenkiloService {
     boolean isVahvastiTunnistettu(String oidHenkilo);
 
     boolean isVahvastiTunnistettuByUsername(String username);
+
+    void updateHenkiloToLdap(String oid, LdapSynchronizationService.LdapSynchronizationType ldapSynchronization);
+
 }

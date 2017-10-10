@@ -31,7 +31,6 @@ public class HenkiloController {
     private final HenkiloService henkiloService;
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
-    private final LdapSynchronizationService ldapSynchronizationService;
 
     @GetMapping("/kayttajatunnus={kayttajatunnus}")
     @PostAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(returnObject.oid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
@@ -174,8 +173,9 @@ public class HenkiloController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Lisää henkilön LDAP-synkronointijonoon")
-    public void updateHenkiloToLdap(@PathVariable String oid) {
-        ldapSynchronizationService.updateHenkilo(oid);
+    public void updateHenkiloToLdap(@PathVariable String oid,
+            @RequestParam(required = false, defaultValue = "NORMAL") LdapSynchronizationType ldapSynchronization) {
+        henkiloService.updateHenkiloToLdap(oid, ldapSynchronization);
     }
 
     @PostMapping("/henkilohaku")
