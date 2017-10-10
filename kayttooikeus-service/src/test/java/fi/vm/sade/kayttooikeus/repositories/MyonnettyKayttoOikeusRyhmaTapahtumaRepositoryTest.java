@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.repositories;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -205,17 +204,17 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
                 .oidHenkilo("1.2.3.4.5").build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
                 .containsExactly("3.4.5.6.7");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
                 .containsExactlyInAnyOrder("READ", "CRUD");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
@@ -232,17 +231,17 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
                 .username("username").build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
                 .containsExactly("3.4.5.6.7");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
                 .containsExactlyInAnyOrder("READ", "CRUD");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
@@ -259,17 +258,17 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(KayttooikeusCriteria.builder()
                 .hetu("hetu").build(), 1000L, 0L);
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
                 .containsExactly("3.4.5.6.7");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
                 .containsExactlyInAnyOrder("READ", "CRUD");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
@@ -297,17 +296,17 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .extracting(KayttooikeusPerustiedotDto::getOidHenkilo)
                 .containsExactly("1.2.3.4.5");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
                 .containsExactly("3.4.5.6.7");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
                 .containsExactlyInAnyOrder("READ", "CRUD");
         assertThat(kayttooikeusOrganisaatiotDtoList)
-                .flatExtracting(KayttooikeusPerustiedotDto::getKayttooikeusOrganisaatiotDtoSet)
-                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeusOikeudetDtoSet)
+                .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
+                .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
                 .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
     }
