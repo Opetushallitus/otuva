@@ -277,13 +277,13 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
     // User has two MyonnettyKayttooikeusRyhmas for same organisation with separate Kayttooikeusryhmas which have same Kayttooikeus
     @Test
     public void listCurrentKayttooikeusForHenkiloByPalveluNameAndGroup() {
-        MyonnettyKayttoOikeusRyhmaTapahtuma m1 = populate(myonnettyKayttoOikeus(
+        populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
-        MyonnettyKayttoOikeusRyhmaTapahtuma m2 = populate(myonnettyKayttoOikeus(
+        populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
