@@ -46,6 +46,7 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
             KayttoOikeus oikeus = new KayttoOikeus(rooli, palvelu);
             oikeus.setRooli(rooli);
             oikeus.setPalvelu(palvelu);
+            palvelu.addKayttooikeus(oikeus);
             oikeus.setTextGroup(kuvaus.apply(entityManager));
             entityManager.persist(oikeus);
             return oikeus;

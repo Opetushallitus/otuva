@@ -51,7 +51,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 
     private final LdapSynchronizationService ldapSynchronizationService;
@@ -197,7 +197,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                 .collect(toSet());
         organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(historia);
         this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-        this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
         organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
         ldapSynchronizationService.updateHenkiloAsap(oidHenkilo);
     }

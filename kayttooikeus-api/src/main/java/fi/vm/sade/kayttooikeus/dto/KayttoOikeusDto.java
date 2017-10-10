@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
-import fi.vm.sade.kayttooikeus.dto.PalveluDto;
-import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import lombok.*;
 
 import java.util.HashSet;

@@ -41,7 +41,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final CommonProperties commonProperties;
@@ -103,7 +103,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
                     // Remove kayttooikeus
                     mkortIterator.remove();
-                    this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.delete(mkort.getId());
+                    this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(mkort.getId());
                 }
             }
         }

@@ -65,7 +65,7 @@ public class KayttooikeusAnomusServiceTest {
     private HenkiloHibernateRepository henkiloHibernateRepository;
 
     @MockBean
-    private MyonnettyKayttoOikeusRyhmaTapahtumaDataRepository myonnettyKayttoOikeusRyhmaTapahtumaDataRepository;
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     @MockBean
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
@@ -120,7 +120,7 @@ public class KayttooikeusAnomusServiceTest {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
         this.commonProperties.setRootOrganizationOid("rootOid");
         doAnswer(returnsFirstArg()).when(this.organisaatioHenkiloDataRepository).save(any(OrganisaatioHenkilo.class));
-        doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
+        doAnswer(returnsFirstArg()).when(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository).save(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
         doAnswer(returnsFirstArg()).when(this.henkiloDataRepository).save(any(Henkilo.class));
     }
 
@@ -239,7 +239,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.empty());
 
@@ -251,7 +251,7 @@ public class KayttooikeusAnomusServiceTest {
 
         ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
                 ArgumentCaptor.forClass(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
-        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(1))
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, times(1))
                 .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.getValue();
         ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor =
@@ -296,7 +296,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").passivoitu(true).build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.empty());
         // Passivoitu organisation
@@ -324,7 +324,7 @@ public class KayttooikeusAnomusServiceTest {
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L);
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
 
@@ -335,7 +335,7 @@ public class KayttooikeusAnomusServiceTest {
 
         ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
                 ArgumentCaptor.forClass(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
-        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(0))
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, times(0))
                 .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
         ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor =
                 ArgumentCaptor.forClass(KayttoOikeusRyhmaTapahtumaHistoria.class);
@@ -364,7 +364,7 @@ public class KayttooikeusAnomusServiceTest {
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L);
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
 
@@ -374,7 +374,7 @@ public class KayttooikeusAnomusServiceTest {
 
         ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
                 ArgumentCaptor.forClass(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
-        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(0))
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, times(0))
                 .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
         ArgumentCaptor<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaTapahtumaHistoriaArgumentCaptor =
                 ArgumentCaptor.forClass(KayttoOikeusRyhmaTapahtumaHistoria.class);
@@ -410,7 +410,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
         given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
         given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(createHenkilo("1.2.3.4.1")));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L)));
 
@@ -565,7 +565,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.permissionCheckerService.notOwnData("1.2.3.4.5")).willReturn(true);
         // Actual mocks
         given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1")).willReturn(Optional.of(new Henkilo()));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findMyonnettyTapahtuma(2001L,
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L)));
         // Service call
@@ -576,7 +576,7 @@ public class KayttooikeusAnomusServiceTest {
         verify(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1))
                 .save(myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.capture());
         KayttoOikeusRyhmaTapahtumaHistoria kayttoOikeusRyhmaTapahtumaHistoria = myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor.getValue();
-        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository, times(1))
+        verify(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, times(1))
                 .delete(any(MyonnettyKayttoOikeusRyhmaTapahtuma.class));
 
         assertThat(kayttoOikeusRyhmaTapahtumaHistoria.getTila()).isEqualTo(SULJETTU);
@@ -596,7 +596,7 @@ public class KayttooikeusAnomusServiceTest {
     public void findCurrentHenkiloCanGrantAsAdmin() {
         this.commonProperties.setRootOrganizationOid("1.2.0.0.1");
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findCrudAnomustenhallinta("1.2.3.4.5"))
                 .willReturn(Lists.newArrayList(
                         createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1")));
@@ -604,7 +604,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
                         "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
                 .willReturn(Lists.newArrayList(createKayttooikeusryhmaTapahtumaHistoria(2003L, "1.2.0.0.3", KayttoOikeudenTila.SULJETTU)));
@@ -622,7 +622,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
                         "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
                 .willReturn(Lists.newArrayList(createKayttooikeusryhmaTapahtumaHistoria(2003L, "1.2.0.0.3", KayttoOikeudenTila.SULJETTU)));
@@ -638,7 +638,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.5")
     public void findCurrentHenkiloCanGrantNormalUser() {
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findCrudAnomustenhallinta("1.2.3.4.5"))
                 .willReturn(Lists.newArrayList(
                         createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1")));
@@ -646,7 +646,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
                         "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
                 .willReturn(Lists.newArrayList(createKayttooikeusryhmaTapahtumaHistoria(2003L, "1.2.0.0.3", KayttoOikeudenTila.SULJETTU)));
@@ -669,7 +669,7 @@ public class KayttooikeusAnomusServiceTest {
     public void findCurrentHenkiloCanGrantRootOrganisationUser() {
         this.commonProperties.setRootOrganizationOid("1.2.0.0.1");
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findCrudAnomustenhallinta("1.2.3.4.5"))
                 .willReturn(Lists.newArrayList(
                         createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2001L, "1.2.0.0.1")));
@@ -677,7 +677,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
                         "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
                 .willReturn(Lists.newArrayList(createKayttooikeusryhmaTapahtumaHistoria(2003L, "1.2.0.0.3", KayttoOikeudenTila.SULJETTU)));

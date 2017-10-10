@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeusPerustiedotDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
 import io.swagger.annotations.Api;
@@ -19,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/kayttooikeus")
-@Api(value = "/kayttooikeus", description = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
+@Api(tags = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusController {
     private KayttoOikeusService kayttoOikeusService;
     private TaskExecutorService taskExecutorService;
@@ -53,7 +55,20 @@ public class KayttoOikeusController {
                     + "jossa on mukana myös vanhentuneet käyttöoikeudet.")
     @RequestMapping(value = "/kayttaja/current", method = RequestMethod.GET)
     public List<KayttoOikeusHistoriaDto> listKayttoOikeusCurrentUser() {
-        return kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
+        return this.kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
+            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
+            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Hakee käyttäjien käyttöoikeudet annetuilla hakukriteereillä. Haku rajoitettu 1000 kerralla.",
+            notes = "Vastauksessa ei tule välttämättä 1000 henkilöä koska tulosjoukkoon tehdään yhdistämisiä.")
+    @RequestMapping(value = "/kayttaja", method = RequestMethod.GET)
+    public List<KayttooikeusPerustiedotDto> listKayttoOikeusByOid(KayttooikeusCriteria criteria,
+                                                                  @RequestParam(required = false) Long offset) {
+        long limit = 1000L;
+        return this.kayttoOikeusService.listMyonnettyKayttoOikeusForUser(criteria, limit, offset);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"

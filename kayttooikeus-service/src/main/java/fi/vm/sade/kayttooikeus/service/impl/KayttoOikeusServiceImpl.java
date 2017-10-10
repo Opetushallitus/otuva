@@ -6,19 +6,19 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,59 +34,27 @@ import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
+@RequiredArgsConstructor
 public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOikeusService {
     public static final String FI = "FI";
     public static final String SV = "SV";
     public static final String EN = "EN";
 
-    private final String rootOrganizationOid;
-    private final String groupOrganizationId;
-    private OrganisaatioClient organisaatioClient;
-    private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
-    private KayttoOikeusRepository kayttoOikeusRepository;
-    private LocalizationService localizationService;
-    private OrikaBeanMapper mapper;
-    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
-    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    private KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
-    private PalveluRepository palveluRepository;
-    private OrganisaatioViiteRepository organisaatioViiteRepository;
-    private LdapSynchronizationService ldapSynchronizationService;
-    private PermissionCheckerService permissionCheckerService;
+    private final OrganisaatioClient organisaatioClient;
+    private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+    private final KayttoOikeusRepository kayttoOikeusRepository;
+    private final LocalizationService localizationService;
+    private final OrikaBeanMapper mapper;
+    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
+    private final KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
+    private final PalveluRepository palveluRepository;
+    private final OrganisaatioViiteRepository organisaatioViiteRepository;
+    private final LdapSynchronizationService ldapSynchronizationService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @Autowired
-    public KayttoOikeusServiceImpl(KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository,
-                                   KayttoOikeusRepository kayttoOikeusRepository,
-                                   LocalizationService localizationService,
-                                   OrikaBeanMapper mapper,
-                                   KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
-                                   MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
-                                   KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository,
-                                   PalveluRepository palveluRepository,
-                                   OrganisaatioViiteRepository organisaatioViiteRepository,
-                                   LdapSynchronizationService ldapSynchronizationService,
-                                   OrganisaatioClient organisaatioClient,
-                                   CommonProperties commonProperties,
-                                   OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                                   PermissionCheckerService permissionCheckerService) {
-        this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
-        this.kayttoOikeusRepository = kayttoOikeusRepository;
-        this.localizationService = localizationService;
-        this.mapper = mapper;
-        this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-        this.kayttoOikeusRyhmaTapahtumaHistoriaRepository = kayttoOikeusRyhmaTapahtumaHistoriaRepository;
-        this.palveluRepository = palveluRepository;
-        this.organisaatioViiteRepository = organisaatioViiteRepository;
-        this.ldapSynchronizationService = ldapSynchronizationService;
-        this.organisaatioClient = organisaatioClient;
-        this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
-        this.groupOrganizationId = commonProperties.getGroupOrganizationId();
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-        this.permissionCheckerService = permissionCheckerService;
-    }
+    private final CommonProperties commonProperties;
 
     @Override
     public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
@@ -114,6 +82,12 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     @Override
     @Transactional(readOnly = true)
+    public List<KayttooikeusPerustiedotDto> listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria criteria, Long limit, Long offset) {
+        return this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(criteria, limit, offset);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods) {
         return localizationService.localize(kayttoOikeusRepository.findSoonToBeExpiredTapahtumas(at, expirationPeriods));
     }
@@ -132,11 +106,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             Integer ryhmaId = Optional.ofNullable(result.get(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id))
                     .orElseThrow(() -> new NullPointerException("null_ryhma_id")).intValue();
 
-            List<Integer> ryhmasInOrganisaatio = kayttooikeusRyhmasByOrganisation.get(organisaatioOid);
-            if (ryhmasInOrganisaatio == null) {
-                ryhmasInOrganisaatio = new ArrayList<>();
-                kayttooikeusRyhmasByOrganisation.put(organisaatioOid, ryhmasInOrganisaatio);
-            }
+            List<Integer> ryhmasInOrganisaatio = kayttooikeusRyhmasByOrganisation
+                    .computeIfAbsent(organisaatioOid, absentOrganisaatioOid -> new ArrayList<>());
             ryhmasInOrganisaatio.add(ryhmaId);
         }
         return kayttooikeusRyhmasByOrganisation;
@@ -442,7 +413,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
-        boolean isOphOrganisation = organisaatioOid.equals(rootOrganizationOid);
+        boolean isOphOrganisation = organisaatioOid.equals(this.commonProperties.getRootOrganizationOid());
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {
@@ -458,13 +429,11 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioPerustieto> hakuTulos, List<OrganisaatioViiteDto> viites) {
         Set<String> tyyppis = viites.stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
 
-        if (organisaatioOid.startsWith(groupOrganizationId)) {
-            return oidIsFoundInViites(groupOrganizationId, tyyppis);
+        if (organisaatioOid.startsWith(this.commonProperties.getGroupOrganizationId())) {
+            return oidIsFoundInViites(this.commonProperties.getGroupOrganizationId(), tyyppis);
         }
-        if (oidIsFoundInViites(organisaatioOid, tyyppis)) {
-            return true;
-        }
-        return hakuTulos.stream().filter(pt -> !isEmpty(pt.getChildren()))
+        return oidIsFoundInViites(organisaatioOid, tyyppis) || hakuTulos.stream()
+                .filter(perustieto -> !isEmpty(perustieto.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
     }
 

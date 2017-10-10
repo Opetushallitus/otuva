@@ -53,4 +53,11 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
         this.organisaatioViite.clear();
     }
 
+    public void addKayttooikeus(KayttoOikeus kayttoOikeus) {
+        if(this.kayttoOikeus == null) {
+            this.kayttoOikeus = new HashSet<>();
+        }
+        this.kayttoOikeus.add(kayttoOikeus);
+    }
+
 }
