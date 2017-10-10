@@ -68,7 +68,11 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
             return r;
         });
         
-        oikeus.forEach(o -> ryhma.getKayttoOikeus().add(o.apply(entityManager)));
+        oikeus.forEach(o -> {
+            KayttoOikeus kayttoOikeus = o.apply(entityManager);
+            ryhma.addKayttooikeus(kayttoOikeus);
+            kayttoOikeus.addKayttooikeusRyhma(ryhma);
+        });
         viitteet.forEach(v -> ryhma.getOrganisaatioViite().add(v.apply(entityManager)));
         entityManager.merge(ryhma);
         

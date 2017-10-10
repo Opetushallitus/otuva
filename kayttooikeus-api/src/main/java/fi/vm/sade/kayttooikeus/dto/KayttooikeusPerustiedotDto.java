@@ -15,7 +15,7 @@ public class KayttooikeusPerustiedotDto {
     String oidHenkilo;
     Set<KayttooikeusOrganisaatiotDto> kayttooikeusOrganisaatiotDtoSet = new HashSet<>();
 
-    public KayttooikeusPerustiedotDto(String oidHenkilo, String organisaatioOid, String palvelu, String oikeus) {
+    public KayttooikeusPerustiedotDto(String oidHenkilo, String organisaatioOid, String oikeus, String palvelu) {
         this.oidHenkilo = oidHenkilo;
         KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto kayttooikeusOikeudetDto
                 = new KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto(palvelu, oikeus);

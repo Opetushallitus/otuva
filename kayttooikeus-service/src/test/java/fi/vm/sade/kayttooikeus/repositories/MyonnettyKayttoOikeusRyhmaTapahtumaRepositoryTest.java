@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -276,13 +277,13 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
     // User has two MyonnettyKayttooikeusRyhmas for same organisation with separate Kayttooikeusryhmas which have same Kayttooikeus
     @Test
     public void listCurrentKayttooikeusForHenkiloByPalveluNameAndGroup() {
-        populate(myonnettyKayttoOikeus(
+        MyonnettyKayttoOikeusRyhmaTapahtuma m1 = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
-        populate(myonnettyKayttoOikeus(
+        MyonnettyKayttoOikeusRyhmaTapahtuma m2 = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))

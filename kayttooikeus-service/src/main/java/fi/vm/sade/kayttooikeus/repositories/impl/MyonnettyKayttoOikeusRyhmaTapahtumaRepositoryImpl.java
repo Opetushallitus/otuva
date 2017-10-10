@@ -154,8 +154,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
         QKayttajatiedot kayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QPalvelu palvelu = QPalvelu.palvelu;
 
-        JPAQuery<Tuple> query = jpa()
-                .select(henkilo.oidHenkilo, organisaatioHenkilo.organisaatioOid, kayttoOikeusRyhma)
+        JPAQuery<KayttooikeusPerustiedotDto> query = jpa()
+                .select(Projections.constructor(KayttooikeusPerustiedotDto.class,
+                        henkilo.oidHenkilo,
+                        organisaatioHenkilo.organisaatioOid,
+                        kayttoOikeus.rooli,
+                        palvelu.name))
                 .distinct()
                 .from(myonnettyKayttoOikeusRyhmaTapahtuma)
                 .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo, organisaatioHenkilo)
@@ -164,9 +168,11 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
                 .leftJoin(henkilo.kayttajatiedot, kayttajatiedot)
                 .innerJoin(kayttoOikeus.palvelu, palvelu)
-                .where(criteria.condition(kayttajatiedot, henkilo, palvelu))
+                .where(criteria.condition(kayttajatiedot, henkilo, kayttoOikeusRyhma))
                 .where(organisaatioHenkilo.passivoitu.isFalse())
-                .where(kayttoOikeusRyhma.hidden.isFalse());
+                .where(kayttoOikeusRyhma.hidden.isFalse())
+                .orderBy(henkilo.oidHenkilo.desc())
+                ;
         if(limit != null) {
             query.limit(limit);
         }
@@ -176,7 +182,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
 
         return query.fetch()
                 .stream()
-                .map(this::mapTupleToKayttooikeusPerustiedotDtos)
                 // grouping
                 .collect(Collectors.groupingBy(KayttooikeusPerustiedotDto::getOidHenkilo))
                 .values()
@@ -185,30 +190,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                         .stream()
                         .reduce(KayttooikeusPerustiedotDto::mergeIfSameOid).get())
                 .collect(Collectors.toList());
-    }
-
-    private KayttooikeusPerustiedotDto mapTupleToKayttooikeusPerustiedotDtos(Tuple tuple) {
-        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
-        QHenkilo henkilo = QHenkilo.henkilo;
-        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        return KayttooikeusPerustiedotDto
-                .builder()
-                .oidHenkilo(tuple.get(henkilo.oidHenkilo))
-                .kayttooikeusOrganisaatiotDtoSet(Sets.newHashSet(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto
-                        .builder()
-                        .organisaatioOid(tuple.get(organisaatioHenkilo.organisaatioOid))
-                        .kayttooikeusOikeudetDtoSet(
-                                Sets.newHashSet(Optional.ofNullable(tuple.get(kayttoOikeusRyhma))
-                                        .orElse(new KayttoOikeusRyhma()).getKayttoOikeus()
-                                        .stream()
-                                        .map(singleKayttooikeus -> KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto
-                                                .builder()
-                                                .oikeus(singleKayttooikeus.getRooli())
-                                                .palvelu(singleKayttooikeus.getPalvelu().getName())
-                                                .build())
-                                        .collect(Collectors.toSet())))
-                        .build()))
-                .build();
     }
 
 }

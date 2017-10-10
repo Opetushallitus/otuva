@@ -35,4 +35,11 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
         this.rooli = rooli;
         this.palvelu = palvelu;
     }
+
+    public void addKayttooikeusRyhma(KayttoOikeusRyhma kayttoOikeusRyhma) {
+        if(this.kayttooikeusRyhmas == null) {
+            this.kayttooikeusRyhmas = new HashSet<>();
+        }
+        this.kayttooikeusRyhmas.add(kayttoOikeusRyhma);
+    }
 }
