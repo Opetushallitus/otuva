@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.model.Ryhma;
 import fi.vm.sade.kayttooikeus.repositories.KayttajaRepository;
 import fi.vm.sade.kayttooikeus.repositories.RyhmaRepository;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
+import static fi.vm.sade.kayttooikeus.service.impl.ldap.LdapUtils.generateRandomPassword;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import java.util.List;
 import java.util.Map;
@@ -74,18 +75,18 @@ public class LdapService {
                 .filter(dbRooli -> !ldapRoolit.contains(dbRooli))
                 .forEach(dbRooli -> addToRyhma(dbRooli, kayttajaDn));
 
-        // käyttäjätunnuksen muuttuessa poistetaan myös vanhat käyttäjät
-        kayttajat.get(false).forEach(this::delete);
+        // käyttäjätunnuksen muuttuessa poistetaan vanhan käyttäjätunnuksen salasana
+        kayttajat.get(false).forEach(this::obsolete);
     }
 
     private Kayttaja getOrCreateKayttaja(List<Kayttaja> kayttajat, String kayttajatunnus) {
-        if (kayttajat.isEmpty()) {
-            return new Kayttaja();
+        if (kayttajat.size() > 1) {
+            throw new DataInconsistencyException("Käyttäjätunnuksella " + kayttajatunnus + " löytyi useampi käyttäjä");
         }
         if (kayttajat.size() == 1) {
             return kayttajat.get(0);
         }
-        throw new DataInconsistencyException("Käyttäjätunnuksella " + kayttajatunnus + " löytyi useampi käyttäjä");
+        return kayttajaRepository.findByKayttajatunnus(kayttajatunnus).orElseGet(Kayttaja::new);
     }
 
     /**
@@ -103,6 +104,12 @@ public class LdapService {
         String kayttajaDn = kayttaja.getDnAsString();
         ryhmaRepository.findByKayttajat(kayttajaDn)
                 .forEach(t -> deleteFromRyhma(t, kayttajaDn));
+    }
+
+    private void obsolete(Kayttaja kayttaja) {
+        LOGGER.info("Poistetaan salasana {}", kayttaja);
+        kayttaja.setSalasana(generateRandomPassword());
+        kayttajaRepository.save(kayttaja);
     }
 
     private void addToRyhma(String ryhmaNimi, String kayttajaDn) {

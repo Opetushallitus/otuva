@@ -3,12 +3,11 @@ package fi.vm.sade.kayttooikeus.config.mapper;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttaja;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import java.security.SecureRandom;
+import static fi.vm.sade.kayttooikeus.service.impl.ldap.LdapUtils.generateRandomPassword;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.authentication.encoding.LdapShaPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,18 +28,8 @@ public class KayttajaHenkiloEntityMapper extends CustomMapper<Kayttaja, Henkilo>
             builder.append(kayttajatiedot.getPassword());
             a.setSalasana(builder.toString().getBytes());
         } else {
-            byte[] salasana = new byte[4];
-            new SecureRandom().nextBytes(salasana);
-            a.setSalasana(encrypt(salasana.toString()));
+            a.setSalasana(generateRandomPassword());
         }
-    }
-
-    private static byte[] encrypt(final String plaintext) {
-        byte[] salt = new byte[4];
-        new SecureRandom().nextBytes(salt);
-        LdapShaPasswordEncoder encoder = new LdapShaPasswordEncoder();
-        String digest = encoder.encodePassword(plaintext, salt);
-        return digest.getBytes();
     }
 
     @Override

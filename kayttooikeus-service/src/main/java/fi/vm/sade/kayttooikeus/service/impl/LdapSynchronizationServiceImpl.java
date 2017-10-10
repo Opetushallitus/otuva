@@ -72,10 +72,6 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     }
 
     private void updateHenkilo(String henkiloOid, LdapPriorityType priority) {
-        if (LdapSynchronizer.RUN_ALL_BATCH.equals(henkiloOid)) {
-            updateAllAtNight();
-            return;
-        }
         ldapUpdateDataRepository.findByHenkiloOid(henkiloOid).map(existingData -> {
             if (existingData.getPriority() != LdapPriorityType.ASAP) {
                 existingData.setPriority(priority);

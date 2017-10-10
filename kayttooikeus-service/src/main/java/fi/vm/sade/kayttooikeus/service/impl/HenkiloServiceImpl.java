@@ -140,4 +140,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 .getVahvastiTunnistettu());
     }
 
+    @Override
+    @Transactional
+    public void updateHenkiloToLdap(String oid, LdapSynchronizationService.LdapSynchronizationType ldapSynchronization) {
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
+                .orElseThrow(() -> new NotFoundException(String.format("Henkilöä ei löytynyt OID:lla %s", oid)));
+        ldapSynchronization.getAction().accept(ldapSynchronizationService, henkilo.getOidHenkilo());
+    }
+
 }
