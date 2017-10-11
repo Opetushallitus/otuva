@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
@@ -32,7 +33,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.creaetOrganisaatioPerustietoWithNimi;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
@@ -48,6 +49,9 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
+
+    @Autowired
+    private CommonProperties commonProperties;
 
     @MockBean
     private OrganisaatioClient organisaatioClient;
@@ -115,6 +119,11 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void henkilohakuAsAdminByOrganisation() {
         populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.1"), commonProperties.getRootOrganizationOid()),
+                kayttoOikeusRyhma("RYHMA")
+        ));
+
+        populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
         ));
@@ -129,7 +138,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getChildOids("3.4.5.6.7"))
                 .willReturn(Lists.newArrayList("3.4.5.6.7"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
-                null, null, null, singletonList(
+                null, null, null, singleton(
                         "3.4.5.6.7"), null);
         List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, OrderByHenkilohaku.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");

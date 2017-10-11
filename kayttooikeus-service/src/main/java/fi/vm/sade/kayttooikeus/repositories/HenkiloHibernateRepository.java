@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import com.querydsl.core.types.OrderSpecifier;
-import fi.vm.sade.kayttooikeus.model.QHenkilo;
-import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -34,7 +31,7 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
      */
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
-    List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria.HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> criteria, Long offset, List<String> organisaatioOidRestrictionList, List<OrderSpecifier> orderBy);
+    List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, List<OrderSpecifier> orderBy);
 
     /**
      * Palauttaa henkilöt jotka kuuluvat johonkin annettuun käyttöoikeusryhmään

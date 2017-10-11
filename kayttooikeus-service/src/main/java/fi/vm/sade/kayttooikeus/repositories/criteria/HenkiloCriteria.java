@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -10,14 +9,12 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
  * Henkilöiden hakemiseen oppijanumerorekisteristä henkilön perustietojen
@@ -26,6 +23,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Builder
+@ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,34 +36,12 @@ public class HenkiloCriteria {
 
     // Organisaatiohenkilo
     private Boolean noOrganisation;
-    private Boolean subOrganisation;
-    private List<String> organisaatioOids;
+    private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
-    @FunctionalInterface
-    public interface HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> {
-        Predicate apply(QHenkilo qHenkilo, QOrganisaatioHenkilo qOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma);
-    }
-
-    public HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> createCondition(OrganisaatioClient organisaatioClient) {
-        return (qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma) -> {
-            List<Predicate> predicates = null;
-            if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
-                if (this.subOrganisation != null && this.subOrganisation) {
-                    predicates = this.organisaatioOids.stream()
-                            .map(organisaatioOid ->
-                                    qOrganisaatioHenkilo.organisaatioOid.in(organisaatioClient.getChildOids(organisaatioOid)))
-                            .collect(Collectors.toList());
-                }
-            }
-            return this.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma, predicates);
-        };
-    }
-
-    private Predicate condition(QHenkilo henkilo,
+    public Predicate condition(QHenkilo henkilo,
                                 QOrganisaatioHenkilo organisaatioHenkilo,
-                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma,
-                                List<Predicate> predicates) {
+                                QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
         // Henkilo
         if (this.passivoitu != null && !this.passivoitu) {
@@ -94,12 +70,7 @@ public class HenkiloCriteria {
             builder.and(subquery.exists());
         }
         if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
-            if(this.subOrganisation != null && this.subOrganisation) {
-                builder.and(ExpressionUtils.anyOf(predicates));
-            }
-            else {
-                builder.and(organisaatioHenkilo.organisaatioOid.in(this.organisaatioOids));
-            }
+            builder.and(organisaatioHenkilo.organisaatioOid.in(this.organisaatioOids));
         }
         // Kayttooikeus
         if (this.kayttooikeusryhmaId != null) {

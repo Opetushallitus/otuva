@@ -9,7 +9,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -30,8 +29,6 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implements HenkiloHibernateRepository {
-
-    private final OrganisaatioClient organisaatioClient;
 
     @Override
     public Set<String> findOidsBy(OrganisaatioHenkiloCriteria criteria) {
@@ -93,9 +90,8 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria.HenkiloCriteriaFunction<QHenkilo, QOrganisaatioHenkilo, QMyonnettyKayttoOikeusRyhmaTapahtuma> criteria,
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
                                                      Long offset,
-                                                     List<String> organisaatioOidRestrictionList,
                                                      List<OrderSpecifier> orderBy) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
@@ -120,15 +116,11 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
         query.limit(100L);
 
-        if (organisaatioOidRestrictionList != null && !organisaatioOidRestrictionList.isEmpty()) {
-            query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOidRestrictionList));
-        }
-
         if (orderBy != null) {
             orderBy.forEach(query::orderBy);
         }
 
-        query.where(criteria.apply(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+        query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
         return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),

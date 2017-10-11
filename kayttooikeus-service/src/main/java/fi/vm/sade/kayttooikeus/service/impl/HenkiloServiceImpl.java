@@ -13,7 +13,6 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +44,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final CommonProperties commonProperties;
-
-    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OrikaBeanMapper mapper;
 
@@ -116,7 +113,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                                                   Long offset,
                                                   OrderByHenkilohaku orderBy) {
         return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
-                this.organisaatioHenkiloDataRepository, this.organisaatioHenkiloRepository, this.henkiloDataRepository, this.organisaatioClient, this.commonProperties)
+                this.henkiloDataRepository, this.organisaatioClient, this.organisaatioHenkiloRepository, this.commonProperties)
                 .builder(henkilohakuCriteriaDto)
                 .exclusion()
                 .search(offset, orderBy)
