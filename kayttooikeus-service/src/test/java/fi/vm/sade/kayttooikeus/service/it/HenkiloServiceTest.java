@@ -133,6 +133,11 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("RYHMA")
         ));
 
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.7"), "3.4.5.6.7").passivoitu(),
+                kayttoOikeusRyhma("RYHMA")
+        ));
+
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
         given(this.organisaatioClient.getChildOids("3.4.5.6.7"))

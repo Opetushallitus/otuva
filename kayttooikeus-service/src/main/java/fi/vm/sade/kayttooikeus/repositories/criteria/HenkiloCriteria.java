@@ -71,6 +71,7 @@ public class HenkiloCriteria {
         }
         if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
             builder.and(organisaatioHenkilo.organisaatioOid.in(this.organisaatioOids));
+            builder.and(organisaatioHenkilo.passivoitu.isFalse());
         }
         // Kayttooikeus
         if (this.kayttooikeusryhmaId != null) {
