@@ -32,7 +32,19 @@ public interface PermissionCheckerService {
 
     Set<String> getCasRoles();
 
+    /**
+     * Rekisterinpitäjä
+     * @return isRekisterinpitäjä
+     */
     boolean isCurrentUserAdmin();
+
+    /**
+     * OPH-virkailija
+     * @return isOph-virkailij
+     */
+    boolean isCurrentUserMiniAdmin();
+
+    boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid);
 
     boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
 

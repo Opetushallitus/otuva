@@ -16,6 +16,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -49,9 +50,10 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
 
-    private HenkiloDataRepository henkiloDataRepository;
-    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+    private final HenkiloDataRepository henkiloDataRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
+    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private OrganisaatioClient organisaatioClient;
@@ -67,7 +69,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                                         OppijanumerorekisteriClient oppijanumerorekisteriClient,
                                         MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
-                                        CommonProperties commonProperties) {
+                                        CommonProperties commonProperties,
+                                        OrganisaatioHenkiloRepository organisaatioHenkiloRepository) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.ATARU, ophProperties.url("ataru-editori.external-permission-check"));
@@ -77,6 +80,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.commonProperties = commonProperties;
+        this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
     }
 
     @Override
@@ -330,9 +334,23 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         return Sets.newHashSet(Iterables.transform(authorities, (Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
     }
 
+    // Rekisterinpitäjä
     @Override
     public boolean isCurrentUserAdmin() {
         return isSuperUser(this.getCasRoles());
+    }
+
+    // OPH virkailija
+    @Override
+    public boolean isCurrentUserMiniAdmin() {
+        return this.getCasRoles().stream().anyMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()));
+    }
+
+    @Override
+    public boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid) {
+        return this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid()).stream()
+                .anyMatch(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream()
+                        .anyMatch(requiredOrganiaatioOid::equals));
     }
 
     // Check that current user MKRT can grant wanted KOR

@@ -61,8 +61,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Transactional(readOnly = true)
     public KayttooikeudetDto getKayttooikeudet(String henkiloOid, OrganisaatioHenkiloCriteria criteria) {
         // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
-        String rootOrganizationOid = commonProperties.getRootOrganizationOid();
-        if (organisaatioHenkiloRepository.isHenkiloInOrganisaatio(henkiloOid, rootOrganizationOid, false)) {
+        if (this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             if (criteria.getOrganisaatioOids() != null || criteria.getKayttoOikeusRyhmaNimet() != null) {
                 // haetaan organisaatioon kuuluvat henkilöt
                 return KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsBy(criteria));

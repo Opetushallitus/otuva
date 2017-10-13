@@ -12,8 +12,10 @@ import fi.vm.sade.kayttooikeus.repositories.populate.*;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
@@ -79,6 +81,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     private OrganisaatioService organisaatioService;
 
+    @MockBean
+    private PermissionCheckerService permissionCheckerService;
+
     @Before
     public void setup() {
         doNothing().when(this.oppijanumerorekisteriClient).updateHenkilo(any(HenkiloUpdateDto.class));
@@ -137,6 +142,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void createKutsuTest() {
+        given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(true);
         HttpEntity emailResponseEntity = new StringEntity("12345", Charset.forName("UTF-8"));
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);
@@ -316,7 +322,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);

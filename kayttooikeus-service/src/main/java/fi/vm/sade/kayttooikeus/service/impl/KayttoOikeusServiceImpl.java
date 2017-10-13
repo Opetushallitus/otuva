@@ -11,6 +11,7 @@ import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -51,6 +52,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final PalveluRepository palveluRepository;
     private final OrganisaatioViiteRepository organisaatioViiteRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final PermissionCheckerService permissionCheckerService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -432,7 +434,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
-        boolean isOphOrganisation = organisaatioOid.equals(this.commonProperties.getRootOrganizationOid());
+        boolean isOphOrganisation = this.permissionCheckerService.isCurrentUserMiniAdmin();
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {
