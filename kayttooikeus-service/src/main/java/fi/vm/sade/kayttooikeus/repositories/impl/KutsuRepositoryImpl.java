@@ -3,10 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QKutsu;
-import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -38,13 +35,18 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QHenkilo henkilo = QHenkilo.henkilo;
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         JPAQuery<Kutsu> query = new JPAQueryFactory(this.em)
-                .from(kutsuOrganisaatio)
+                .from(kutsuOrganisaatio, henkilo)
                 .rightJoin(kutsuOrganisaatio.kutsu, kutsu)
                 .leftJoin(kutsuOrganisaatio.ryhmat, kayttoOikeusRyhma)
+                .innerJoin(henkilo.organisaatioHenkilos, organisaatioHenkilo)
                 .select(kutsu)
-                .where(criteria.onCondition(this.permissionCheckerService.getCurrentUserOid()));
-        query.orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
+                .where(henkilo.oidHenkilo.eq(kutsu.kutsuja))
+                .where(criteria.onCondition(this.permissionCheckerService.getCurrentUserOid()))
+                .where(organisaatioHenkilo.passivoitu.isFalse())
+                .orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
         if(offset != null) {
             query.offset(offset);
         }

@@ -65,6 +65,9 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         if(BooleanUtils.isTrue(kutsuListCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
             kutsuListCriteria.setAdminView(null);
         }
+        if(BooleanUtils.isTrue(kutsuListCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
+            kutsuListCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
+        }
         List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
