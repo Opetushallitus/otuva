@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.repositories.populate.*;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
@@ -80,9 +79,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     private OrganisaatioService organisaatioService;
 
-    @MockBean
-    private PermissionCheckerService permissionCheckerService;
-
     @Before
     public void setup() {
         doNothing().when(this.oppijanumerorekisteriClient).updateHenkilo(any(HenkiloUpdateDto.class));
@@ -91,6 +87,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
     public void listAvoinKutsus() {
+        populate(organisaatioHenkilo("1.2.3", "1.2.3.4.5"));
+        populate(organisaatioHenkilo("1.2.4", "1.2.3.4.5"));
+        populate(organisaatioHenkilo("1.2.4", "1.2.3.4.6"));
         Kutsu kutsu1 = populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
@@ -120,7 +119,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6")))
                 .willReturn(Optional.of(org2));
         
-        List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, new KutsuCriteria().withQuery("matti meikäläinen"), null, null);
+        List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, KutsuCriteria.builder().searchTerm("matti meikäläinen").build(), null, null);
         assertEquals(1, kutsus.size());
         assertEquals(LocalDateTime.of(2016,2,1,0,0,0,0), kutsus.get(0).getAikaleima());
         assertEquals(kutsu2.getId(), kutsus.get(0).getId());
@@ -139,9 +138,35 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.246.562.10.00000000001"})
+    public void listAvoinKutsusWithMiniAdminAndOrganisationIsForcedWithOphView() {
+        OrganisaatioHenkilo oh = populate(organisaatioHenkilo("1.2.3", "1.2.246.562.10.00000000001"));
+        Kutsu k = populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
+                .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.00000000001")
+                        .ryhma(kayttoOikeusRyhma("RYHMA1"))
+                ));
+        OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
+        org1.setOid("1.2.246.562.10.00000000001");
+        org1.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.00000000001")))
+                .willReturn(Optional.of(org1));
+
+        // Does not allow changing organisaatio with ophView
+        List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
+                Sort.Direction.ASC,
+                KutsuCriteria.builder().kutsujaOrganisaatioOid("1.2.3.4.5").ophView(true).build(),
+                null,
+                null);
+        assertThat(kutsuList)
+                .flatExtracting(KutsuReadDto::getOrganisaatiot)
+                .flatExtracting(KutsuReadDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                .containsExactly("1.2.246.562.10.00000000001");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.246.562.10.00000000001"})
     public void createKutsuTest() {
-        given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(true);
         HttpEntity emailResponseEntity = new StringEntity("12345", Charset.forName("UTF-8"));
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);

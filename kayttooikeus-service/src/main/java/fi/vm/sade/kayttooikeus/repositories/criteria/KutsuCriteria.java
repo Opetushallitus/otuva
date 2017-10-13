@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QKutsu;
 import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
+import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import lombok.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.StringUtils;
@@ -23,14 +24,17 @@ public class KutsuCriteria extends BaseCriteria {
     private String kutsujaOid;
     private String sahkoposti;
     private String organisaatioOid;
+    private String kutsujaOrganisaatioOid;
     private String searchTerm;
     private Boolean onlyOwnKutsus;
     private Boolean adminView;
+    private Boolean ophView;
 
     public BooleanBuilder onCondition(String currentUserOid) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         BooleanBuilder builder = new BooleanBuilder();
         if (used(tilas)) {
             builder.and(kutsu.tila.in(tilas));
@@ -43,6 +47,9 @@ public class KutsuCriteria extends BaseCriteria {
         }
         if(StringUtils.hasLength(this.organisaatioOid)) {
             builder.and(kutsuOrganisaatio.organisaatioOid.eq(this.organisaatioOid));
+        }
+        if(StringUtils.hasLength(this.kutsujaOrganisaatioOid)) {
+            builder.and(organisaatioHenkilo.organisaatioOid.eq(this.kutsujaOrganisaatioOid));
         }
         if(StringUtils.hasLength(this.searchTerm)) {
             Arrays.stream(this.searchTerm.split(" "))
@@ -57,25 +64,5 @@ public class KutsuCriteria extends BaseCriteria {
         }
 
         return builder;
-    }
-    
-    public KutsuCriteria withTila(KutsunTila...tila) {
-        this.tilas = params(tila);
-        return this;
-    }
-
-    public KutsuCriteria withKutsuja(String kutsujaOid) {
-        this.kutsujaOid = kutsujaOid;
-        return this;
-    }
-
-    public KutsuCriteria withSahkoposti(String sahkoposti) {
-        this.sahkoposti = sahkoposti;
-        return this;
-    }
-
-    public KutsuCriteria withQuery(String query) {
-        this.searchTerm = query;
-        return this;
     }
 }

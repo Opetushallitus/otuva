@@ -337,7 +337,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // Rekisterinpitäjä
     @Override
     public boolean isCurrentUserAdmin() {
-        return isSuperUser(this.getCasRoles());
+        return isSuperUser(this.getCasRoles()) && this.isCurrentUserMiniAdmin();
     }
 
     // OPH virkailija
