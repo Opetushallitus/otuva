@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -237,7 +236,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                         .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
@@ -283,7 +282,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doThrow(new ExternalServiceException("",
                 new CachingRestClient.HttpException(null,
                         new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 400, "reason"),
-                        "message"))).when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+                        "message"))).when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.0.0.2").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
@@ -370,7 +369,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 HenkiloPopulator.henkilo("1.2.3.4.5")))
                 .getHenkilo();
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(anyObject());
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
