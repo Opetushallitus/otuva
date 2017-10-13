@@ -8,16 +8,17 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -52,6 +55,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final PermissionCheckerService permissionCheckerService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     private final CommonProperties commonProperties;
 
@@ -59,16 +64,38 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Transactional(readOnly = true)
     public List<KutsuReadDto> listKutsus(KutsuOrganisaatioOrder sortBy,
                                          Sort.Direction direction,
-                                         KutsuCriteria kutsuListCriteria,
+                                         KutsuCriteria kutsuCriteria,
                                          Long offset,
                                          Long amount) {
-        if(BooleanUtils.isTrue(kutsuListCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
-            kutsuListCriteria.setAdminView(null);
+        if (BooleanUtils.isTrue(kutsuCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
+            kutsuCriteria.setAdminView(null);
         }
-        if(BooleanUtils.isTrue(kutsuListCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            kutsuListCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
+        if (BooleanUtils.isTrue(kutsuCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
+            kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
         }
-        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
+        // Limit organsiaatio search for non admin users
+        if (!this.permissionCheckerService.isCurrentUserAdmin() && !this.permissionCheckerService.isCurrentUserMiniAdmin()) {
+            Set<String> organisaatioOidLimit;
+            if (!CollectionUtils.isEmpty(kutsuCriteria.getOrganisaatioOids())) {
+                organisaatioOidLimit = this.permissionCheckerService.hasOrganisaatioInHierarcy(kutsuCriteria.getOrganisaatioOids());
+            }
+            else {
+                organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
+                        .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid()));
+            }
+            kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
+            kutsuCriteria.setSubOrganisations(true);
+        }
+        // Limit käyttöoikeusryhmä search for non admin users
+        if (!CollectionUtils.isEmpty(kutsuCriteria.getKayttooikeusryhmaIds())
+                && !this.permissionCheckerService.isCurrentUserAdmin()) {
+            Set<Long> currentUserActiveKayttooikeusryhmaIds = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
+                    .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
+                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                    .map(KayttoOikeusRyhma::getId).collect(Collectors.toSet());
+            kutsuCriteria.setKayttooikeusryhmaIds(currentUserActiveKayttooikeusryhmaIds);
+        }
+        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
 

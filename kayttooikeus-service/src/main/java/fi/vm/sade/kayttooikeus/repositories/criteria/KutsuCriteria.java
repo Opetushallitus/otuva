@@ -9,10 +9,12 @@ import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import lombok.*;
 import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -23,9 +25,12 @@ public class KutsuCriteria extends BaseCriteria {
     private List<KutsunTila> tilas;
     private String kutsujaOid;
     private String sahkoposti;
-    private String organisaatioOid;
+    private Set<String> organisaatioOids;
+    private Set<Long> kayttooikeusryhmaIds;
     private String kutsujaOrganisaatioOid;
     private String searchTerm;
+    private Boolean subOrganisations;
+    // Views
     private Boolean onlyOwnKutsus;
     private Boolean adminView;
     private Boolean ophView;
@@ -45,22 +50,25 @@ public class KutsuCriteria extends BaseCriteria {
         if (used(sahkoposti)) {
             builder.and(kutsu.sahkoposti.eq(sahkoposti));
         }
-        if(StringUtils.hasLength(this.organisaatioOid)) {
-            builder.and(kutsuOrganisaatio.organisaatioOid.eq(this.organisaatioOid));
+        if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
+            builder.and(kutsuOrganisaatio.organisaatioOid.in(this.organisaatioOids));
         }
-        if(StringUtils.hasLength(this.kutsujaOrganisaatioOid)) {
+        if (StringUtils.hasLength(this.kutsujaOrganisaatioOid)) {
             builder.and(organisaatioHenkilo.organisaatioOid.eq(this.kutsujaOrganisaatioOid));
         }
-        if(StringUtils.hasLength(this.searchTerm)) {
+        if (StringUtils.hasLength(this.searchTerm)) {
             Arrays.stream(this.searchTerm.split(" "))
                     .forEach(searchTerm -> builder.and(kutsu.etunimi.containsIgnoreCase(searchTerm)
                             .or(kutsu.sukunimi.containsIgnoreCase(searchTerm))));
         }
-        if(BooleanUtils.isTrue(this.onlyOwnKutsus)) {
+        if (BooleanUtils.isTrue(this.onlyOwnKutsus)) {
             builder.and(kutsu.kutsuja.eq(currentUserOid));
         }
-        if(BooleanUtils.isTrue(this.adminView)) {
+        if (BooleanUtils.isTrue(this.adminView)) {
             builder.and(kayttoOikeusRyhma.kayttoOikeus.any().rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
+        }
+        if (!CollectionUtils.isEmpty(this.kayttooikeusryhmaIds)) {
+            builder.and(kayttoOikeusRyhma.id.in(this.kayttooikeusryhmaIds));
         }
 
         return builder;
