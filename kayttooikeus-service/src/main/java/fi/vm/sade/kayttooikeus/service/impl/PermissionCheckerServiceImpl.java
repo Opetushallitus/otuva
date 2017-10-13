@@ -348,9 +348,17 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid) {
-        return this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid()).stream()
+        return this.hasOrganisaatioInHierarcy(Sets.newHashSet(requiredOrganiaatioOid)).isEmpty();
+    }
+
+    @Override
+    public Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids) {
+        List<String> currentUserOrgnisaatios = this.organisaatioHenkiloRepository
+                .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid());
+        return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> currentUserOrgnisaatios.stream()
                 .anyMatch(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream()
-                        .anyMatch(requiredOrganiaatioOid::equals));
+                        .anyMatch(requiredOrganiaatioOid::equals)))
+                .collect(Collectors.toSet());
     }
 
     // Check that current user MKRT can grant wanted KOR

@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -45,6 +46,8 @@ public interface PermissionCheckerService {
     boolean isCurrentUserMiniAdmin();
 
     boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid);
+
+    Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOid);
 
     boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
 
