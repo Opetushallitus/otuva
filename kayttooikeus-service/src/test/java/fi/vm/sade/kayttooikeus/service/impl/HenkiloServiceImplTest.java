@@ -163,6 +163,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAliorganisaatioilla() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setOrganisaatioOids(null);
@@ -179,6 +180,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAntamallaOrganisaatiolla1() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setOrganisaatioOids(Stream.of("oid1").collect(toSet()));
@@ -195,6 +197,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAntamallaOrganisaatiolla2() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         when(organisaatioClientMock.getChildOids(any())).thenReturn(asList("childOid1", "childOid2"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
@@ -212,6 +215,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeHenkilotJoillaOnOrganisaatioKunRootVirkailija() {
         when(permissionCheckerServiceMock.isCurrentUserAdmin()).thenReturn(false);
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setNoOrganisation(true);
 

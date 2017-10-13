@@ -57,6 +57,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final PalveluRepository palveluRepository;
     private final OrganisaatioViiteRepository organisaatioViiteRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final PermissionCheckerService permissionCheckerService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final CommonProperties commonProperties;
     private final PermissionCheckerService permissionCheckerService;
@@ -467,7 +468,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
-        boolean isOphOrganisation = organisaatioOid.equals(this.commonProperties.getRootOrganizationOid());
+        boolean isOphOrganisation = this.permissionCheckerService.isCurrentUserMiniAdmin();
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {

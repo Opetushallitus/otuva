@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -60,6 +61,8 @@ public class PermissionCheckerTest {
 
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private FakeRestClient fakeRestClient = new FakeRestClient();
@@ -81,6 +84,8 @@ public class PermissionCheckerTest {
         this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
+        this.organisaatioHenkiloRepository = mock(OrganisaatioHenkiloRepository.class);
+
 
         CommonProperties commonProperties = new CommonProperties();
 
@@ -91,7 +96,7 @@ public class PermissionCheckerTest {
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
                 this.henkiloDataRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
-                commonProperties));
+                commonProperties, this.organisaatioHenkiloRepository));
         ReflectionTestUtils.setField(permissionChecker, "restClient", this.fakeRestClient);
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")

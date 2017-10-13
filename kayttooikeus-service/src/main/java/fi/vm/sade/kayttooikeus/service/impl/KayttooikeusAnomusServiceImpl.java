@@ -96,7 +96,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             criteria.setKayttooikeusRyhmaIds(new HashSet<>(slaveIds));
 
             // organisaatio filtering
-            if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
                 if(criteria.getOrganisaatioOids() == null) {
                     criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
                 } else {
@@ -216,7 +216,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // When granting to root organisation it has no organisaatioviite
         return !(!CollectionUtils.isEmpty(organisaatioViite)
                 // Root organisation users do not need to pass organisaatioviite
-                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> commonProperties.getRootOrganizationOid().equals(orgOid))
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin()
                 // Organisaatiohenkilo limitations are valid
                 && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> this.permissionCheckerService.organisaatioLimitationCheck(orgOid, organisaatioViite)));
     }
@@ -392,7 +392,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         }
         return organisaatioClient.getParentOids(anomus.getOrganisaatioOid()).stream()
                 // Ei lähetetä root-organisaation henkilöille jokaisesta anomuksesta ilmoitusta
-                .filter(t -> !commonProperties.getRootOrganizationOid().equals(t))
+                .filter(parentOid -> !commonProperties.getRootOrganizationOid().equals(parentOid))
                 .collect(toSet());
     }
 
@@ -518,7 +518,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .map(OrganisaatioHenkilo::getOrganisaatioOid)
                 .collect(Collectors.toList());
 
-        // Skip checking organisation hierarchy is user has ANOMUSTENHALLINTA_CRUD to root organisation.
+        // Skip checking organisation hierarchy if user has ANOMUSTENHALLINTA_CRUD to root organisation.
         if (!allowedOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
             allowedOrganisaatioOids.addAll(allowedOrganisaatioOids.stream()
                     .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())

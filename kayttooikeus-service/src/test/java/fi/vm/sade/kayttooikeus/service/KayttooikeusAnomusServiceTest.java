@@ -163,6 +163,7 @@ public class KayttooikeusAnomusServiceTest {
         List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(true);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
 
