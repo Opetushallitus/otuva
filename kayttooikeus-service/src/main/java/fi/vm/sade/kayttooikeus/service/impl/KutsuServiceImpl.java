@@ -21,6 +21,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,9 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                                          KutsuCriteria kutsuListCriteria,
                                          Long offset,
                                          Long amount) {
+        if(BooleanUtils.isTrue(kutsuListCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
+            kutsuListCriteria.setAdminView(null);
+        }
         List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
@@ -71,8 +75,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Override
     @Transactional
     public long createKutsu(KutsuCreateDto dto) {
-         if (!kutsuRepository.listKutsuListDtos(new KutsuCriteria().withTila(AVOIN).withSahkoposti(dto.getSahkoposti()),
-                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection()).isEmpty()) {
+         if (!kutsuRepository.findBySahkopostiAndTila(dto.getSahkoposti(), AVOIN).isEmpty()) {
              throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
          }
 

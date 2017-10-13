@@ -2,17 +2,22 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
+import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QKutsu;
 import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class KutsuCriteria extends BaseCriteria {
     private List<KutsunTila> tilas;
     private String kutsujaOid;
@@ -20,8 +25,12 @@ public class KutsuCriteria extends BaseCriteria {
     private String organisaatioOid;
     private String searchTerm;
     private Boolean onlyOwnKutsus;
+    private Boolean adminView;
 
-    public BooleanBuilder onCondition(QKutsu kutsu, QKutsuOrganisaatio kutsuOrganisaatio, String currentUserOid) {
+    public BooleanBuilder onCondition(String currentUserOid) {
+        QKutsu kutsu = QKutsu.kutsu;
+        QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         BooleanBuilder builder = new BooleanBuilder();
         if (used(tilas)) {
             builder.and(kutsu.tila.in(tilas));
@@ -42,6 +51,9 @@ public class KutsuCriteria extends BaseCriteria {
         }
         if(BooleanUtils.isTrue(this.onlyOwnKutsus)) {
             builder.and(kutsu.kutsuja.eq(currentUserOid));
+        }
+        if(BooleanUtils.isTrue(this.adminView)) {
+            builder.and(kayttoOikeusRyhma.kayttoOikeus.any().rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
         }
 
         return builder;

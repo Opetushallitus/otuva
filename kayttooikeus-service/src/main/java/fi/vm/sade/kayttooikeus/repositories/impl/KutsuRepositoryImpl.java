@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QKutsu;
 import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
@@ -33,18 +34,16 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
     }
 
     @Override
-    public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier) {
-        return this.listKutsuListDtos(criteria, orderSpecifier, null, null);
-    }
-
-    @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
-        JPAQuery<Kutsu> query = new JPAQueryFactory(this.em).from(kutsuOrganisaatio)
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        JPAQuery<Kutsu> query = new JPAQueryFactory(this.em)
+                .from(kutsuOrganisaatio)
                 .rightJoin(kutsuOrganisaatio.kutsu, kutsu)
+                .leftJoin(kutsuOrganisaatio.ryhmat, kayttoOikeusRyhma)
                 .select(kutsu)
-                .where(criteria.onCondition(kutsu, kutsuOrganisaatio, this.permissionCheckerService.getCurrentUserOid()));
+                .where(criteria.onCondition(this.permissionCheckerService.getCurrentUserOid()));
         query.orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
         if(offset != null) {
             query.offset(offset);
