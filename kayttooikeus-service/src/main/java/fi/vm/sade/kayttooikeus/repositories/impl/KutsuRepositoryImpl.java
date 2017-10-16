@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
@@ -20,31 +19,32 @@ import java.util.List;
 @Transactional(propagation = Propagation.MANDATORY)
 public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
 
-    private final PermissionCheckerService permissionCheckerService;
-
     private final EntityManager em;
 
     @Autowired
-    public KutsuRepositoryImpl(JpaContext context, PermissionCheckerService permissionCheckerService) {
+    public KutsuRepositoryImpl(JpaContext context) {
         this.em = context.getEntityManagerByManagedType(Kutsu.class);
-        this.permissionCheckerService = permissionCheckerService;
     }
 
     @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
-        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QKayttoOikeusRyhma kutsuKayttoOikeusryhma = new QKayttoOikeusRyhma("kutsuKayttoOikeusryhma");
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttoOikeusRyhma kutsujaKayttooikeusryhma = new QKayttoOikeusRyhma("kutsujaKayttooikeusryhma");
         QHenkilo henkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         JPAQuery<Kutsu> query = new JPAQueryFactory(this.em)
                 .from(kutsuOrganisaatio, henkilo)
                 .rightJoin(kutsuOrganisaatio.kutsu, kutsu)
-                .leftJoin(kutsuOrganisaatio.ryhmat, kayttoOikeusRyhma)
+                .leftJoin(kutsuOrganisaatio.ryhmat, kutsuKayttoOikeusryhma)
                 .innerJoin(henkilo.organisaatioHenkilos, organisaatioHenkilo)
+                .leftJoin(organisaatioHenkilo.myonnettyKayttoOikeusRyhmas, myonnettyKayttoOikeusRyhmaTapahtuma)
+                .leftJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kutsujaKayttooikeusryhma)
                 .select(kutsu)
                 .where(henkilo.oidHenkilo.eq(kutsu.kutsuja))
-                .where(criteria.onCondition(this.permissionCheckerService.getCurrentUserOid()))
+                .where(criteria.onCondition(kutsuKayttoOikeusryhma, kutsujaKayttooikeusryhma))
                 .where(organisaatioHenkilo.passivoitu.isFalse())
                 .orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
         if(offset != null) {

@@ -3,10 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 import com.querydsl.core.BooleanBuilder;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
-import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.QKutsu;
-import fi.vm.sade.kayttooikeus.model.QKutsuOrganisaatio;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.CollectionUtils;
@@ -28,17 +25,18 @@ public class KutsuCriteria extends BaseCriteria {
     private Set<String> organisaatioOids;
     private Set<Long> kayttooikeusryhmaIds;
     private String kutsujaOrganisaatioOid;
+    private Set<Long> kutsujaKayttooikeusryhmaIds;
     private String searchTerm;
     private Boolean subOrganisations;
     // Views
     private Boolean onlyOwnKutsus;
     private Boolean adminView;
     private Boolean ophView;
+    private Boolean kayttooikeusryhmaView;
 
-    public BooleanBuilder onCondition(String currentUserOid) {
+    public BooleanBuilder onCondition(QKayttoOikeusRyhma kutsuKayttooikeusryhma, QKayttoOikeusRyhma kutsuttuKayttooikeusryhma) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
-        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         BooleanBuilder builder = new BooleanBuilder();
         if (used(tilas)) {
@@ -56,19 +54,19 @@ public class KutsuCriteria extends BaseCriteria {
         if (StringUtils.hasLength(this.kutsujaOrganisaatioOid)) {
             builder.and(organisaatioHenkilo.organisaatioOid.eq(this.kutsujaOrganisaatioOid));
         }
+        if (!CollectionUtils.isEmpty(this.kutsujaKayttooikeusryhmaIds)) {
+            builder.and(kutsuttuKayttooikeusryhma.id.in(this.kutsujaKayttooikeusryhmaIds));
+        }
         if (StringUtils.hasLength(this.searchTerm)) {
             Arrays.stream(this.searchTerm.split(" "))
                     .forEach(searchTerm -> builder.and(kutsu.etunimi.containsIgnoreCase(searchTerm)
                             .or(kutsu.sukunimi.containsIgnoreCase(searchTerm))));
         }
-        if (BooleanUtils.isTrue(this.onlyOwnKutsus)) {
-            builder.and(kutsu.kutsuja.eq(currentUserOid));
-        }
         if (BooleanUtils.isTrue(this.adminView)) {
-            builder.and(kayttoOikeusRyhma.kayttoOikeus.any().rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
+            builder.and(kutsuKayttooikeusryhma.kayttoOikeus.any().rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
         }
         if (!CollectionUtils.isEmpty(this.kayttooikeusryhmaIds)) {
-            builder.and(kayttoOikeusRyhma.id.in(this.kayttooikeusryhmaIds));
+            builder.and(kutsuKayttooikeusryhma.id.in(this.kayttooikeusryhmaIds));
         }
 
         return builder;
