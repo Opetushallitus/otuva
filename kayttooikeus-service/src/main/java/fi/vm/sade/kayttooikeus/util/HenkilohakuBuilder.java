@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import static java.util.stream.Collectors.toSet;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class HenkilohakuBuilder {
         // vain rekisterinpitäjä saa hakea henkilöitä, joilla ei ole organisaatiota
         if (!permissionCheckerService.isCurrentUserAdmin()
                 && Boolean.TRUE.equals(henkilohakuCriteriaDto.getNoOrganisation())) {
-            LOGGER.warn(String.format("Henkilöllä %s ei ole oikeuksia hakea henkilöitä, joilla ei ole organisaatiota", permissionCheckerService.getCurrentUserOid()));
+            LOGGER.warn(String.format("Käyttäjällä %s ei ole oikeuksia hakea henkilöitä, joilla ei ole organisaatiota", permissionCheckerService.getCurrentUserOid()));
             henkilohakuCriteriaDto.setNoOrganisation(null);
         }
 
@@ -83,7 +82,7 @@ public class HenkilohakuBuilder {
                 currentUserOrganisaatioOids.stream()
                         .flatMap(currentUserOrganisaatioOid ->
                                 this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
-                        .collect(toSet()).forEach(allCurrentUserOrganisaatioOids::add);
+                        .forEach(allCurrentUserOrganisaatioOids::add);
             }
 
             // suodatetaan annetuilla organisaatioilla
