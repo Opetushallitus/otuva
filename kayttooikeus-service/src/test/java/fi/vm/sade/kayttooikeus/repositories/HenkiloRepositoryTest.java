@@ -4,11 +4,9 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -20,9 +18,6 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private HenkiloHibernateRepository henkiloHibernateRepository;
 
-    @MockBean
-    private OrganisaatioClient organisaatioClient;
-
     @Test
     public void findByCriteriaNameQuery() {
         populate(HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etunimi1", "sukunimi1").withUsername("arpa1"));
@@ -32,9 +27,8 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.9").withNimet("etunimi5", "sukunimi5"));
 
         List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloHibernateRepository.findByCriteria(
-                HenkiloCriteria.builder().nameQuery("etunimi").build().createCondition(this.organisaatioClient),
+                HenkiloCriteria.builder().nameQuery("etunimi").build(),
                 1L,
-                null,
                 OrderByHenkilohaku.HENKILO_NIMI_DESC.getValue());
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getNimi)
                 .containsExactly("sukunimi4, etunimi4",
