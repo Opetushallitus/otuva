@@ -8,7 +8,9 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
-import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -19,25 +21,23 @@ import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
+import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
 @Service
 @RequiredArgsConstructor
-public class KutsuServiceImpl extends AbstractService implements KutsuService {
+public class KutsuServiceImpl implements KutsuService {
     private final KutsuRepository kutsuRepository;
     private final HenkiloDataRepository henkiloDataRepository;
 
@@ -66,51 +66,18 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
                                          KutsuCriteria kutsuCriteria,
                                          Long offset,
                                          Long amount) {
-        if (BooleanUtils.isTrue(kutsuCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
-            kutsuCriteria.setAdminView(null);
-        }
-        if (BooleanUtils.isTrue(kutsuCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
-            kutsuCriteria.setSubOrganisations(false);
-        }
-        if (BooleanUtils.isTrue(kutsuCriteria.getOnlyOwnKutsus())) {
-            kutsuCriteria.setKutsujaOid(this.permissionCheckerService.getCurrentUserOid());
-        }
-        if (BooleanUtils.isTrue(kutsuCriteria.getKayttooikeusryhmaView())) {
-            kutsuCriteria.setKutsujaKayttooikeusryhmaIds(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
-                    .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
-                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                    .map(KayttoOikeusRyhma::getId)
-                    .collect(Collectors.toSet()));
-        }
-        // Limit organsiaatio search for non admin users
-        if (!this.permissionCheckerService.isCurrentUserAdmin() && !this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            Set<String> organisaatioOidLimit;
-            if (!CollectionUtils.isEmpty(kutsuCriteria.getOrganisaatioOids())) {
-                organisaatioOidLimit = this.permissionCheckerService.hasOrganisaatioInHierarcy(kutsuCriteria.getOrganisaatioOids());
-            }
-            else {
-                organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
-                        .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid()));
-            }
-            kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
-            kutsuCriteria.setSubOrganisations(true);
-        }
-        // Limit käyttöoikeusryhmä search for non admin users
-        if (!CollectionUtils.isEmpty(kutsuCriteria.getKayttooikeusryhmaIds())
-                && !this.permissionCheckerService.isCurrentUserAdmin()) {
-            Set<Long> currentUserActiveKayttooikeusryhmaIds = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
-                    .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
-                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                    .map(KayttoOikeusRyhma::getId)
-                    .collect(Collectors.toSet());
-            kutsuCriteria.setKayttooikeusryhmaIds(currentUserActiveKayttooikeusryhmaIds);
-        }
-        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuCriteria,
-                sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
-        kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
-
-        return kutsuReadDtoList;
+        return new KutsuHakuBuilder(this.permissionCheckerService,
+                this.localizationService,
+                this.commonProperties,
+                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository,
+                this.kutsuRepository,
+                this.organisaatioHenkiloRepository,
+                this.mapper,
+                kutsuCriteria)
+                .prepareCommon()
+                .doSearch(sortBy, direction, offset, amount)
+                .localise()
+                .build();
     }
 
     @Override
@@ -124,7 +91,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
         newKutsu.setId(null);
         newKutsu.setAikaleima(LocalDateTime.now());
-        newKutsu.setKutsuja(getCurrentUserOid());
+        newKutsu.setKutsuja(this.permissionCheckerService.getCurrentUserOid());
         newKutsu.setSalaisuus(UUID.randomUUID().toString());
         newKutsu.setTila(AVOIN);
         newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
@@ -154,9 +121,9 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     public Kutsu deleteKutsu(long id) {
         Kutsu deletedKutsu = kutsuRepository.findById(id)
                 .filter(kutsu -> this.permissionCheckerService.isCurrentUserAdmin()
-                        || kutsu.getKutsuja().equals(getCurrentUserOid()))
+                        || kutsu.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid()))
                 .orElseThrow(() -> new NotFoundException("Kutsu not found"));
-        deletedKutsu.poista(getCurrentUserOid());
+        deletedKutsu.poista(this.permissionCheckerService.getCurrentUserOid());
         return deletedKutsu;
     }
 
