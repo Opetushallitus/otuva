@@ -21,7 +21,6 @@ public class KutsuReadDto {
     private Asiointikieli asiointikieli;
     private Set<KutsuOrganisaatioDto> organisaatiot = new HashSet<>();
     private String hakaIdentifier;
-    private Boolean canEdit;
 
     @Getter
     @Setter

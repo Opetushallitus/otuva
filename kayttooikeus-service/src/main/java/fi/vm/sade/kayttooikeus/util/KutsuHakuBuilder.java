@@ -58,6 +58,7 @@ public class KutsuHakuBuilder {
         // Force OPH-view
         this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
         this.kutsuCriteria.setSubOrganisations(false);
+        // TODO add condition for fetching only kutsus user is authorized to (see granting käyttöoikeus)
 
         return this;
     }
@@ -74,6 +75,7 @@ public class KutsuHakuBuilder {
         }
         this.kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
         this.kutsuCriteria.setSubOrganisations(true);
+        // TODO add condition for fetching only kutsus user is authorized to (see granting käyttöoikeus)
 
         return this;
     }
@@ -99,11 +101,6 @@ public class KutsuHakuBuilder {
     public KutsuHakuBuilder doSearch(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, Long offset, Long amount) {
         this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
-        return this;
-    }
-
-    public KutsuHakuBuilder fillCanEdit() {
-//        this.result.forEach(kutsuReadDto -> );
         return this;
     }
 
