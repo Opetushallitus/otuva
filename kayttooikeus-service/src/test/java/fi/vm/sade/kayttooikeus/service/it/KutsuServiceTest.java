@@ -186,7 +186,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(org1));
 
-        // Does not allow changing organisaatio with ophView
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
                 Sort.Direction.ASC,
                 KutsuCriteria.builder().kutsujaKayttooikeusryhmaIds(Sets.newHashSet(999L)).kayttooikeusryhmaView(true).build(),
