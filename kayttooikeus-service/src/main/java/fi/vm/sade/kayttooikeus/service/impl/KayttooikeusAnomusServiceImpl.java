@@ -23,7 +23,6 @@ import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
 
 import java.time.LocalDate;
@@ -31,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
@@ -50,7 +48,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
     private final AnomusRepository anomusRepository;
-    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     private final OrikaBeanMapper mapper;
@@ -198,27 +195,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     }
 
     private void organisaatioViiteLimitationsAreValidThrows(Long kayttooikeusryhmaId) {
-        if (!this.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
+        if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kayttooikeusryhmaId)) {
             throw new ForbiddenException("Target organization has invalid organization type");
         }
-    }
-
-    private boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
-        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
-                .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
-                .getOrganisaatioViite();
-        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloDataRepository
-                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid()).stream()
-                .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
-                .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                .collect(Collectors.toList());
-
-        // When granting to root organisation it has no organisaatioviite
-        return !(!CollectionUtils.isEmpty(organisaatioViite)
-                // Root organisation users do not need to pass organisaatioviite
-                && !this.permissionCheckerService.isCurrentUserMiniAdmin()
-                // Organisaatiohenkilo limitations are valid
-                && currentUserOrganisaatioOids.stream().noneMatch((orgOid) -> this.permissionCheckerService.organisaatioLimitationCheck(orgOid, organisaatioViite)));
     }
 
     private void kayttooikeusryhmaLimitationsAreValid(Long kayttooikeusryhmaId) {
@@ -254,7 +233,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .filter(organisaatioHenkilo ->
                         Objects.equals(organisaatioHenkilo.getOrganisaatioOid(), organisaatioOid))
                 .findFirst().orElseGet(() ->
-                        this.organisaatioHenkiloDataRepository.save(savedAnoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
+                        this.organisaatioHenkiloRepository.save(savedAnoja.addOrganisaatioHenkilo(OrganisaatioHenkilo.builder()
                                 .organisaatioOid(organisaatioOid)
                                 .tehtavanimike(tehtavanimike)
                                 .henkilo(savedAnoja)
@@ -555,7 +534,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         // Organisaatioviite (pystyykö tästä KOR myöntämään tähän organisaatioon)
         kayttooikeusByOrganisation.replaceAll((organisaatioOid, kayttooikeusryhmaIdList) ->
                 kayttooikeusryhmaIdList.stream()
-                        .filter(this::organisaatioViiteLimitationsAreValid)
+                        .filter(this.permissionCheckerService::organisaatioViiteLimitationsAreValid)
                         .collect(Collectors.toSet()));
     }
 

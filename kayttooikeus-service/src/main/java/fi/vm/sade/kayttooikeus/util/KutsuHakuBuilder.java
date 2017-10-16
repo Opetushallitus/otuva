@@ -38,53 +38,72 @@ public class KutsuHakuBuilder {
     private final KutsuCriteria kutsuCriteria;
     private List<KutsuReadDto> result;
 
-    public KutsuHakuBuilder prepareCommon() {
-        if (BooleanUtils.isTrue(kutsuCriteria.getAdminView()) && !this.permissionCheckerService.isCurrentUserAdmin()) {
-            kutsuCriteria.setAdminView(null);
+    public KutsuHakuBuilder prepareByAuthority() {
+        this.prepareCommon();
+        if (this.permissionCheckerService.isCurrentUserAdmin()) {
+            return this.prepareForAdmin();
         }
-        if (BooleanUtils.isTrue(kutsuCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
-            kutsuCriteria.setSubOrganisations(false);
+        else if (this.permissionCheckerService.isCurrentUserMiniAdmin()) {
+            return prepareForMiniAdmin();
         }
-        if (BooleanUtils.isTrue(kutsuCriteria.getOnlyOwnKutsus())) {
-            kutsuCriteria.setKutsujaOid(this.permissionCheckerService.getCurrentUserOid());
+        return prepareForNormalUser();
+    }
+
+    private KutsuHakuBuilder prepareForAdmin() {
+
+        return this;
+    }
+
+    private KutsuHakuBuilder prepareForMiniAdmin() {
+        // Force OPH-view
+        this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
+        this.kutsuCriteria.setSubOrganisations(false);
+
+        return this;
+    }
+
+    private KutsuHakuBuilder prepareForNormalUser() {
+        // Limit organsiaatio search for non admin users
+        Set<String> organisaatioOidLimit;
+        if (!CollectionUtils.isEmpty(this.kutsuCriteria.getOrganisaatioOids())) {
+            organisaatioOidLimit = this.permissionCheckerService.hasOrganisaatioInHierarcy(this.kutsuCriteria.getOrganisaatioOids());
         }
-        if (BooleanUtils.isTrue(kutsuCriteria.getKayttooikeusryhmaView())) {
-            kutsuCriteria.setKutsujaKayttooikeusryhmaIds(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
+        else {
+            organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
+                    .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()));
+        }
+        this.kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
+        this.kutsuCriteria.setSubOrganisations(true);
+
+        return this;
+    }
+
+    private void prepareCommon() {
+        if (BooleanUtils.isTrue(this.kutsuCriteria.getOphView())) {
+            this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
+            this.kutsuCriteria.setSubOrganisations(false);
+        }
+        if (BooleanUtils.isTrue(this.kutsuCriteria.getOnlyOwnKutsusView())) {
+            this.kutsuCriteria.setKutsujaOid(this.permissionCheckerService.getCurrentUserOid());
+        }
+        if (BooleanUtils.isTrue(this.kutsuCriteria.getKayttooikeusryhmaView())) {
+            this.kutsuCriteria.setKutsujaKayttooikeusryhmaIds(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                     .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
                     .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
                     .map(KayttoOikeusRyhma::getId)
                     .collect(Collectors.toSet()));
         }
-        // Limit organsiaatio search for non admin users
-        if (!this.permissionCheckerService.isCurrentUserAdmin() && !this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            Set<String> organisaatioOidLimit;
-            if (!CollectionUtils.isEmpty(kutsuCriteria.getOrganisaatioOids())) {
-                organisaatioOidLimit = this.permissionCheckerService.hasOrganisaatioInHierarcy(kutsuCriteria.getOrganisaatioOids());
-            }
-            else {
-                organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
-                        .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()));
-            }
-            kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
-            kutsuCriteria.setSubOrganisations(true);
-        }
-        // Limit käyttöoikeusryhmä search for non admin users
-        if (!CollectionUtils.isEmpty(kutsuCriteria.getKayttooikeusryhmaIds())
-                && !this.permissionCheckerService.isCurrentUserAdmin()) {
-            Set<Long> currentUserActiveKayttooikeusryhmaIds = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
-                    .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
-                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                    .map(KayttoOikeusRyhma::getId)
-                    .collect(Collectors.toSet());
-            kutsuCriteria.setKayttooikeusryhmaIds(currentUserActiveKayttooikeusryhmaIds);
-        }
-        return this;
     }
+
 
     public KutsuHakuBuilder doSearch(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, Long offset, Long amount) {
         this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
+        return this;
+    }
+
+    public KutsuHakuBuilder fillCanEdit() {
+//        this.result.forEach(kutsuReadDto -> );
         return this;
     }
 

@@ -29,7 +29,7 @@ public class KutsuCriteria extends BaseCriteria {
     private String searchTerm;
     private Boolean subOrganisations;
     // Views
-    private Boolean onlyOwnKutsus;
+    private Boolean onlyOwnKutsusView;
     private Boolean adminView;
     private Boolean ophView;
     private Boolean kayttooikeusryhmaView;

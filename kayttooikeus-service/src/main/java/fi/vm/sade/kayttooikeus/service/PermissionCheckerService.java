@@ -49,6 +49,8 @@ public interface PermissionCheckerService {
 
     Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOid);
 
+    boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId);
+
     boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
 
     boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet);

@@ -235,7 +235,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
-    public void listAvoinKutsusWithNormalUserAndKayttooikeusryhmaIsForced() {
+    public void listAvoinKutsusWithNormalUserByKayttooikeusryhmaId() {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
                 = populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
                 kayttoOikeusRyhma("RYHMA1")));
@@ -260,7 +260,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         // Ryhmä user has not rights to will be set to all his ryhmas
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
                 Sort.Direction.ASC,
-                KutsuCriteria.builder().kayttooikeusryhmaIds(Sets.newHashSet(999L)).build(),
+                KutsuCriteria.builder().kayttooikeusryhmaIds(Sets.newHashSet(myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId())).build(),
                 null,
                 null);
         assertThat(kutsuList)

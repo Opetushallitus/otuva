@@ -11,10 +11,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -63,6 +60,8 @@ public class PermissionCheckerTest {
 
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
+    private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private FakeRestClient fakeRestClient = new FakeRestClient();
@@ -85,6 +84,7 @@ public class PermissionCheckerTest {
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
         this.organisaatioHenkiloRepository = mock(OrganisaatioHenkiloRepository.class);
+        this.kayttooikeusryhmaDataRepository = mock(KayttooikeusryhmaDataRepository.class);
 
 
         CommonProperties commonProperties = new CommonProperties();
@@ -96,7 +96,7 @@ public class PermissionCheckerTest {
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(ophPropertiesMock,
                 this.henkiloDataRepositoryMock, organisaatioClient, this.oppijanumerorekisteriClient,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
-                commonProperties, this.organisaatioHenkiloRepository));
+                commonProperties, this.organisaatioHenkiloRepository, this.kayttooikeusryhmaDataRepository));
         ReflectionTestUtils.setField(permissionChecker, "restClient", this.fakeRestClient);
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(Matchers.anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")

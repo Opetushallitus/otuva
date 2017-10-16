@@ -1,6 +1,9 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.dto.KayttooikeusAnomusDto;
+import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
@@ -9,7 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +21,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Api(tags = "Käyttöoikeusanomukset ja käyttöoikeuksien hallinta")
 @RestController

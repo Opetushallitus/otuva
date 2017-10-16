@@ -7,7 +7,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
@@ -45,8 +44,6 @@ public class HenkiloServiceImplTest {
     @Mock
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepositoryMock;
     @Mock
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepositoryMock;
-    @Mock
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock;
     @Mock
     private LdapSynchronizationService ldapSynchronizationServiceMock;
@@ -66,7 +63,6 @@ public class HenkiloServiceImplTest {
                 permissionCheckerServiceMock,
                 kayttoOikeusRyhmaTapahtumaHistoriaDataRepositoryMock,
                 organisaatioHenkiloRepositoryMock,
-                organisaatioHenkiloDataRepositoryMock,
                 myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock,
                 ldapSynchronizationServiceMock,
                 henkiloDataRepositoryMock,
