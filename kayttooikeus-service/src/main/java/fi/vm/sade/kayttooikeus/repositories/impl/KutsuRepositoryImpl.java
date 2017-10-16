@@ -21,7 +21,6 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
 
     private final EntityManager em;
 
-    @Autowired
     public KutsuRepositoryImpl(JpaContext context) {
         this.em = context.getEntityManagerByManagedType(Kutsu.class);
     }

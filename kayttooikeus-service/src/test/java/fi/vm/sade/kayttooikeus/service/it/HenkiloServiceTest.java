@@ -10,7 +10,7 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -45,7 +45,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     private HenkiloService henkiloService;
 
     @Autowired
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Autowired
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -83,7 +83,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         this.em.persist(myonnettyKayttoOikeusRyhmaTapahtuma);
         this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus("1.2.3.4.5", "1.2.3.4.1");
 
-        List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(oidHenkilo);
+        List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo(oidHenkilo);
         assertThat(henkilo.size()).isEqualTo(1);
         assertThat(henkilo.get(0).getMyonnettyKayttoOikeusRyhmas()).isEmpty();
         MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());

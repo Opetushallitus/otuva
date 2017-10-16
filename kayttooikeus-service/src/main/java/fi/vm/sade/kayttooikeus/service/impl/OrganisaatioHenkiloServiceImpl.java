@@ -48,7 +48,6 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final String FALLBACK_LANGUAGE = "fi";
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -144,7 +143,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                     this.organisaatioService.throwIfActiveNotFound(createDto.getOrganisaatioOid());
                     OrganisaatioHenkilo organisaatioHenkilo = mapper.map(createDto, OrganisaatioHenkilo.class);
                     organisaatioHenkilo.setHenkilo(henkilo);
-                    henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.persist(organisaatioHenkilo));
+                    henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.save(organisaatioHenkilo));
                 });
 
         return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
@@ -187,7 +186,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     public void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid) {
         Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Could not find current henkilo with oid " + UserDetailsUtil.getCurrentUserOid()));
-        OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloDataRepository
+        OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloRepository
                 .findByHenkiloOidHenkiloAndOrganisaatioOid(oidHenkilo, henkiloOrganisationOid)
                 .orElseThrow(() -> new NotFoundException("Unknown organisation" + henkiloOrganisationOid + "for henkilo" + oidHenkilo));
         organisaatioHenkilo.setPassivoitu(true);

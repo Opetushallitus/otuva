@@ -13,15 +13,13 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
@@ -40,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +53,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
 
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private OrganisaatioClient organisaatioClient;
@@ -70,7 +70,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                                         MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
                                         CommonProperties commonProperties,
-                                        OrganisaatioHenkiloRepository organisaatioHenkiloRepository) {
+                                        OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
+                                        KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository) {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.ATARU, ophProperties.url("ataru-editori.external-permission-check"));
@@ -81,6 +82,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.commonProperties = commonProperties;
         this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
+        this.kayttooikeusryhmaDataRepository = kayttooikeusryhmaDataRepository;
     }
 
     @Override
@@ -360,6 +362,27 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                         .anyMatch(requiredOrganiaatioOid::equals)))
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
+        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
+                .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
+                .getOrganisaatioViite();
+        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
+                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid()).stream()
+                .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
+                .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                .collect(Collectors.toList());
+
+        // When granting to root organisation it has no organisaatioviite
+        return !(!org.springframework.util.CollectionUtils.isEmpty(organisaatioViite)
+                // Root organisation users do not need to pass organisaatioviite
+                && !this.isCurrentUserMiniAdmin()
+                // Organisaatiohenkilo limitations are valid
+                && currentUserOrganisaatioOids.stream()
+                .noneMatch((orgOid) -> this.organisaatioLimitationCheck(orgOid, organisaatioViite)));
+    }
+
 
     // Check that current user MKRT can grant wanted KOR
     @Override

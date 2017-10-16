@@ -39,7 +39,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
@@ -82,7 +81,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
             kasittelijaOid = getCurrentUserOid();
         }
         final String kasittelijaOidFinal = kasittelijaOid;
-        List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(henkiloOid);
+        List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo(henkiloOid);
         for (OrganisaatioHenkilo oh : orgHenkilos) {
             oh.setPassivoitu(true);
             Set<MyonnettyKayttoOikeusRyhmaTapahtuma> mkorts = oh.getMyonnettyKayttoOikeusRyhmas();

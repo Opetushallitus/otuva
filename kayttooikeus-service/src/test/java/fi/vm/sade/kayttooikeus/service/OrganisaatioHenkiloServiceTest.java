@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -47,9 +46,6 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
 
     @MockBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
-    @MockBean
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @MockBean
     private KayttoOikeusRepository kayttoOikeusRepository;
@@ -155,7 +151,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     public void passivoiHenkiloOrganisation() {
         OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("henkilo1"), "1.1.1.1.1"));
         populate(henkilo("1.2.3.4.5"));
-        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.of(organisaatioHenkilo));
         KayttoOikeusRyhma kayttoOikeusRyhma = populate(kayttoOikeusRyhma("käyttöoikeusryhmä"));
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(kayttooikeusTapahtuma(organisaatioHenkilo, kayttoOikeusRyhma));
@@ -169,7 +165,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test(expected = NotFoundException.class)
     @WithMockUser(username = "1.2.3.4.5")
     public void passivoiHenkiloOrganisationNotFound() {
-        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.empty());
         organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1");
     }

@@ -74,7 +74,7 @@ public class KutsuServiceImpl implements KutsuService {
                 this.organisaatioHenkiloRepository,
                 this.mapper,
                 kutsuCriteria)
-                .prepareCommon()
+                .prepareByAuthority()
                 .doSearch(sortBy, direction, offset, amount)
                 .localise()
                 .build();
