@@ -23,6 +23,7 @@ import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
+import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,8 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void listKutsuListDtosTest() {
-        populate(organisaatioHenkilo("1.2.3", "1.2.3.4.5"));
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
+                kayttoOikeusRyhma("RYHMA1")));
         Kutsu kutsu = populate(kutsu("Aapo", "Esimerkki", "a@example.com")
             .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
             .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
@@ -66,7 +68,8 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void listKutsuWithAdminView() {
-        populate(organisaatioHenkilo("1.2.3", "1.2.3.4.5"));
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
+                kayttoOikeusRyhma("RYHMA1")));
         populate(kutsu("Aapo", "Esimerkki", "a@example.com")
                 .kutsuja("1.2.3")
                 .aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))

@@ -18,7 +18,6 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +71,17 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         }
         if (BooleanUtils.isTrue(kutsuCriteria.getOphView()) && this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
+            kutsuCriteria.setSubOrganisations(false);
+        }
+        if (BooleanUtils.isTrue(kutsuCriteria.getOnlyOwnKutsus())) {
+            kutsuCriteria.setKutsujaOid(this.permissionCheckerService.getCurrentUserOid());
+        }
+        if (BooleanUtils.isTrue(kutsuCriteria.getKayttooikeusryhmaView())) {
+            kutsuCriteria.setKutsujaKayttooikeusryhmaIds(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
+                    .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
+                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                    .map(KayttoOikeusRyhma::getId)
+                    .collect(Collectors.toSet()));
         }
         // Limit organsiaatio search for non admin users
         if (!this.permissionCheckerService.isCurrentUserAdmin() && !this.permissionCheckerService.isCurrentUserMiniAdmin()) {
@@ -92,7 +102,8 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
             Set<Long> currentUserActiveKayttooikeusryhmaIds = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                     .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
                     .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                    .map(KayttoOikeusRyhma::getId).collect(Collectors.toSet());
+                    .map(KayttoOikeusRyhma::getId)
+                    .collect(Collectors.toSet());
             kutsuCriteria.setKayttooikeusryhmaIds(currentUserActiveKayttooikeusryhmaIds);
         }
         List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuCriteria,
