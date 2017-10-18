@@ -66,7 +66,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .findBy(anomusCriteria.createAnomusSearchCondition(this.organisaatioClient), null, null, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
-                .extracting("name")
+                .extracting("tunniste")
                 .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)",
                         "Some random ryhmä");
     }
@@ -80,7 +80,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .findBy(anomusCriteria.createAnomusSearchCondition(this.organisaatioClient), 2L, 1L, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
-                .extracting("name")
+                .extracting("tunniste")
                 .containsExactlyInAnyOrder("Pääkäyttäjä (kk)", "Some random ryhmä");
     }
 
@@ -94,7 +94,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .findBy(anomusCriteria.createAnomusSearchCondition(this.organisaatioClient), null, null, null, true);
         assertThat(haetutResult)
                 .extracting("kayttoOikeusRyhma")
-                .extracting("name")
+                .extracting("tunniste")
                 .containsExactlyInAnyOrder("Rekisterinpitäjä (vain OPHn käytössä)", "Pääkäyttäjä (kk)");
     }
 

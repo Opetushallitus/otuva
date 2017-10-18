@@ -243,7 +243,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
                 .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .extracting(KayttoOikeusRyhma::getName)
+                .extracting(KayttoOikeusRyhma::getTunniste)
                 .containsExactly("ryhma");
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
@@ -289,7 +289,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
                 .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .extracting(KayttoOikeusRyhma::getName)
+                .extracting(KayttoOikeusRyhma::getTunniste)
                 .containsExactly("ryhma");
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
@@ -328,7 +328,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
                 .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .extracting(KayttoOikeusRyhma::getName)
+                .extracting(KayttoOikeusRyhma::getTunniste)
                 .containsExactly("ryhma");
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
@@ -376,7 +376,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)
                 .extracting(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .extracting(KayttoOikeusRyhma::getName)
+                .extracting(KayttoOikeusRyhma::getTunniste)
                 .containsExactly("ryhma");
         assertThat(henkilo.getOrganisaatioHenkilos())
                 .flatExtracting(OrganisaatioHenkilo::getMyonnettyKayttoOikeusRyhmas)

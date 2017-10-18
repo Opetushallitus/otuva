@@ -50,7 +50,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
 
             query.join(qOrganisaatio.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhma);
             query.join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
-            query.where(qKayttoOikeusRyhma.name.in(kayttoOikeusRyhmaNimet));
+            query.where(qKayttoOikeusRyhma.tunniste.in(kayttoOikeusRyhmaNimet));
         });
 
         return new LinkedHashSet<>(query.fetch());
@@ -83,7 +83,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
 
             query.join(qOrganisaatio.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhma);
             query.join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
-            query.where(qKayttoOikeusRyhma.name.in(kayttoOikeusRyhmaNimet));
+            query.where(qKayttoOikeusRyhma.tunniste.in(kayttoOikeusRyhmaNimet));
         });
 
         return new LinkedHashSet<>(query.fetch());

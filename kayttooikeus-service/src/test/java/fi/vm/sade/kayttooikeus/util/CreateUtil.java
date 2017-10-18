@@ -19,14 +19,14 @@ import java.util.HashMap;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class CreateUtil {
-    public static HaettuKayttoOikeusRyhma createHaettuKayttooikeusryhma(String email, String korName, String organisaatioOid) {
+    public static HaettuKayttoOikeusRyhma createHaettuKayttooikeusryhma(String email, String tunniste, String organisaatioOid) {
         Anomus anomus = Anomus.builder()
                 .sahkopostiosoite(email)
                 .organisaatioOid(organisaatioOid)
                 .anomusTyyppi(AnomusTyyppi.UUSI)
                 .build();
         KayttoOikeusRyhma kayttoOikeusRyhma = KayttoOikeusRyhma.builder()
-                .name(korName)
+                .tunniste(tunniste)
                 .hidden(false)
                 .build();
         return new HaettuKayttoOikeusRyhma(anomus, kayttoOikeusRyhma, LocalDateTime.now(), KayttoOikeudenTila.ANOTTU);

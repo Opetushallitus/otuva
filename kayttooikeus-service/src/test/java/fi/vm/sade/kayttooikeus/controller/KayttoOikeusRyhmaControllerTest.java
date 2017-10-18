@@ -12,7 +12,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.LocalDateTime;
 
 import static java.util.Collections.singleton;
@@ -44,8 +43,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                             .id(44L).build()))
                     .rooliRajoite("roolirajoite")
                     .id(14L)
-                    .name("Nimi")
-                    .description(new TextGroupListDto(1L).put("FI", "Test"))
+                    .tunniste("Nimi")
+                    .nimi(new TextGroupListDto(1L).put("FI", "Test"))
                     .build()));
 
         this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON_UTF8))
@@ -65,8 +64,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.listPossibleRyhmasByOrganization("123"))
                 .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()
                         .id(33L)
-                        .name("Käyttöoikeusryhmä")
-                        .description(new TextGroupListDto(1L).put("FI", "Kuvaus"))
+                        .tunniste("Käyttöoikeusryhmä")
+                        .nimi(new TextGroupListDto(1L).put("FI", "Kuvaus"))
                         .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
                                 .organisaatioTyyppi("organisaatiotyyppi")
                                 .id(44L).build()))
@@ -185,8 +184,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         return KayttoOikeusRyhmaDto.builder()
                 .id(44L)
                 .rooliRajoite("roolirajoite")
-                .description(new TextGroupListDto(1L).put("FI", "Kuvaus").put("EN", "kuvaus en"))
-                .name("ryhmänimi")
+                .nimi(new TextGroupListDto(1L).put("FI", "Kuvaus").put("EN", "kuvaus en"))
+                .tunniste("ryhmänimi")
                 .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
                         .organisaatioTyyppi("organisaatiotyyppi")
                         .id(3423L).build()))
@@ -262,9 +261,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                                 .put("SV", "kuvaus sv"))
                         .kayttoOikeusRyhmas(singleton(KayttoOikeusRyhmaDto.builder()
                                 .id(22L)
-                                .name("kayttooikeusryhmä")
+                                .tunniste("kayttooikeusryhmä")
                                 .rooliRajoite("roolirajoite")
-                                .description(new TextGroupDto(3L).put("FI", "ryhmän kuvaus")
+                                .nimi(new TextGroupDto(3L).put("FI", "ryhmän kuvaus")
                                         .put("SV", "ryhmän kuvaus sv")
                                         .put("EN", "ryhmän kuvaus en"))
                                 .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
@@ -310,9 +309,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(kayttoOikeusService.findKayttoOikeusRyhma(Matchers.eq(345L)))
                 .willReturn(KayttoOikeusRyhmaDto.builder()
                         .id(345L)
-                        .name("kayttooikeusryhmä")
+                        .tunniste("kayttooikeusryhmä")
                         .rooliRajoite("roolirajoite")
-                        .description(new TextGroupDto(3L).put("FI", "ryhmän kuvaus"))
+                        .nimi(new TextGroupDto(3L).put("FI", "ryhmän kuvaus"))
                         .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
                                 .id(44L)
                                 .organisaatioTyyppi("viitteen tyyppi")
@@ -356,8 +355,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                                 .id(44L).build()))
                         .rooliRajoite("roolirajoite")
                         .id(14L)
-                        .name("Nimi")
-                        .description(new TextGroupListDto(1L).put("FI", "Test"))
+                        .tunniste("Nimi")
+                        .nimi(new TextGroupListDto(1L).put("FI", "Test"))
                         .build()));
 
         this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")

@@ -211,14 +211,14 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional
     public long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getRyhmaName().get(FI))) {
+        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getNimi().get(FI))) {
             throw new IllegalArgumentException("Group name already in use");
         }
 
         KayttoOikeusRyhma kayttoOikeusRyhma = new KayttoOikeusRyhma();
-        kayttoOikeusRyhma.setName(uusiRyhma.getRyhmaName().get(FI) + "_" + System.currentTimeMillis());
-        TextGroup tg = createRyhmaDescription(uusiRyhma.getRyhmaName());
-        kayttoOikeusRyhma.setDescription(tg);
+        kayttoOikeusRyhma.setTunniste(uusiRyhma.getNimi().get(FI) + "_" + System.currentTimeMillis());
+        TextGroup tg = createRyhmaDescription(uusiRyhma.getNimi());
+        kayttoOikeusRyhma.setNimi(tg);
         if (uusiRyhma.getKuvaus() != null) {
             kayttoOikeusRyhma.setKuvaus(createRyhmaDescription(uusiRyhma.getKuvaus()));
         }
@@ -348,15 +348,15 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private void setRyhmaDescription(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
-        if (kayttoOikeusRyhma.getDescription() == null) {
-            kayttoOikeusRyhma.setDescription(createRyhmaDescription(ryhmaData.getRyhmaName()));
+        if (kayttoOikeusRyhma.getNimi() == null) {
+            kayttoOikeusRyhma.setNimi(createRyhmaDescription(ryhmaData.getNimi()));
         } else {
-            TextGroup description = kayttoOikeusRyhma.getDescription();
+            TextGroup description = kayttoOikeusRyhma.getNimi();
             Set<Text> ryhmaNames = description.getTexts();
 
-            updateOrAddTextForLang(ryhmaNames, FI, ryhmaData.getRyhmaName().get(FI));
-            updateOrAddTextForLang(ryhmaNames, SV, ryhmaData.getRyhmaName().get(SV));
-            updateOrAddTextForLang(ryhmaNames, EN, ryhmaData.getRyhmaName().get(EN));
+            updateOrAddTextForLang(ryhmaNames, FI, ryhmaData.getNimi().get(FI));
+            updateOrAddTextForLang(ryhmaNames, SV, ryhmaData.getNimi().get(SV));
+            updateOrAddTextForLang(ryhmaNames, EN, ryhmaData.getNimi().get(EN));
         }
     }
 

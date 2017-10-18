@@ -5,7 +5,6 @@ import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
@@ -59,10 +58,6 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
         factory.classMap(KutsuOrganisaatio.class, KutsuReadDto.KutsuOrganisaatioDto.class)
                 .fieldAToB("ryhmat", "kayttoOikeusRyhmat")
-                .byDefault()
-                .register();
-        factory.classMap(KayttoOikeusRyhma.class, KutsuReadDto.KayttoOikeusRyhmaDto.class)
-                .fieldAToB("description", "nimi")
                 .byDefault()
                 .register();
         factory.classMap(OrganisaatioRDTO.class, OrganisaatioPerustieto.class)

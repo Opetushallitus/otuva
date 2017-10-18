@@ -284,7 +284,7 @@ public class EmailServiceImpl implements EmailService {
                                         )
                                                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + org.getOrganisaatioOid()))
                                                 .getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
-                                        org.getRyhmat().stream().map(KayttoOikeusRyhma::getDescription)
+                                        org.getRyhmat().stream().map(KayttoOikeusRyhma::getNimi)
                                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
                                                 .filter(Objects::nonNull).sorted().collect(toList())
                                 )

@@ -127,10 +127,10 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         Optional<KayttoOikeusRyhma> ryhma = kayttoOikeusRyhmaRepository.findByRyhmaId(id);
         assertTrue(ryhma.isPresent());
         KayttoOikeusRyhma koRyhma = ryhma.get();
-        assertEquals("RYHMÄ", koRyhma.getName());
+        assertEquals("RYHMÄ", koRyhma.getTunniste());
         assertEquals(1, koRyhma.getOrganisaatioViite().size());
-        assertEquals("RYHMA1", koRyhma.getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getName());
-        assertEquals("Kuvaus", koRyhma.getDescription().getTexts().stream().filter(text -> text.getLang().equals("FI")).findFirst().get().getText());
+        assertEquals("RYHMA1", koRyhma.getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getTunniste());
+        assertEquals("Kuvaus", koRyhma.getNimi().getTexts().stream().filter(text -> text.getLang().equals("FI")).findFirst().get().getText());
         assertEquals(2, koRyhma.getKayttoOikeus().size());
 
         Optional<KayttoOikeusRyhma> hiddenRyhma  = kayttoOikeusRyhmaRepository.findById(hiddenRyhmaId);
@@ -170,11 +170,11 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         assertEquals(0, ryhmas.size());
 
         KayttoOikeusRyhma kor = new KayttoOikeusRyhma();
-        kor.setName("TEST");
+        kor.setTunniste("TEST");
         kor.setHidden(false);
         TextGroup textGroup = new TextGroup();
         textGroup.addText(new Text(textGroup, "FI", "kuvaus"));
-        kor.setDescription(textGroup);
+        kor.setNimi(textGroup);
         kor.getKayttoOikeus().add(oikeus);
         kor.setRooliRajoite("roolirajoite");
         kor = kayttoOikeusRyhmaRepository.persist(kor);
@@ -183,9 +183,9 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         assertEquals(1, ryhmas.size());
 
         KayttoOikeusRyhma ryhma = kayttoOikeusRyhmaRepository.findByRyhmaId(kor.getId()).get();
-        assertEquals("TEST", ryhma.getName());
+        assertEquals("TEST", ryhma.getTunniste());
         assertEquals("roolirajoite", ryhma.getRooliRajoite());
-        assertEquals("kuvaus", ryhma.getDescription().getTexts().stream().findFirst().get().getText());
+        assertEquals("kuvaus", ryhma.getNimi().getTexts().stream().findFirst().get().getText());
         assertEquals("APP1", ryhma.getKayttoOikeus().iterator().next().getPalvelu().getName());
         assertEquals("READ", ryhma.getKayttoOikeus().iterator().next().getRooli());
     }

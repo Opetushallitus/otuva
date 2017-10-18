@@ -18,9 +18,9 @@ public class KayttoOikeusRyhmaConverter extends CustomConverter<KayttoOikeusRyhm
     public KayttoOikeusRyhmaDto convert(KayttoOikeusRyhma source, Type<? extends KayttoOikeusRyhmaDto> destinationType, MappingContext mappingContext) {
         KayttoOikeusRyhmaDto.KayttoOikeusRyhmaDtoBuilder destinationBuilder = KayttoOikeusRyhmaDto.builder()
                 .id(source.getId())
-                .name(source.getName())
+                .tunniste(source.getTunniste())
                 .rooliRajoite(source.getRooliRajoite())
-                .description(new TextGroupDto(source.getDescription().getId()))
+                .nimi(new TextGroupDto(source.getNimi().getId()))
                 .organisaatioViite(source.getOrganisaatioViite().stream().map(organisaatioViite -> OrganisaatioViiteDto.builder()
                         .id(organisaatioViite.getId())
                         .organisaatioTyyppi(organisaatioViite.getOrganisaatioTyyppi())

@@ -260,7 +260,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         palvelu.getKayttoOikeus().add(oikeus);
 
         KayttoOikeusRyhmaModifyDto ryhma = KayttoOikeusRyhmaModifyDto.builder()
-                .ryhmaName(new TextGroupDto()
+                .nimi(new TextGroupDto()
                         .put("FI", "ryhmäname")
                         .put("SV", "ryhmäname sv")
                         .put("EN", "ryhmäname en"))
@@ -288,7 +288,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals(1, createdRyhma.getOrganisaatioViite().size());
         assertEquals("org tyyppi", createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
 
-        ryhma.setRyhmaName(new TextGroupDto().put("FI", "uusi nimi"));
+        ryhma.setNimi(new TextGroupDto().put("FI", "uusi nimi"));
         ryhma.setKuvaus(new TextGroupDto().put("FI", "uusi kuvaus"));
         ryhma.setRooliRajoite("uusi rajoite");
         ryhma.setOrganisaatioTyypit(singletonList("uusi org tyyppi"));

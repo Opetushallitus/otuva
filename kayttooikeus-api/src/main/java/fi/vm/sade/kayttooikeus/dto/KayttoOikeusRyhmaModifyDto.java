@@ -4,18 +4,20 @@ import fi.vm.sade.kayttooikeus.dto.validate.ContainsLanguages;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 public class KayttoOikeusRyhmaModifyDto {
-    @NotNull @ContainsLanguages
-    private TextGroupDto ryhmaName; // TODO: "nimi" (Huom! API-muutos)
+
+    @NotNull
+    @ContainsLanguages
+    private TextGroupDto nimi;
     @ContainsLanguages
     private TextGroupDto kuvaus;
     @NotNull
@@ -23,4 +25,17 @@ public class KayttoOikeusRyhmaModifyDto {
     private List<String> organisaatioTyypit;
     private String rooliRajoite;
     private List<Long> slaveIds;
+
+    /**
+     * Asettaa käyttöoikeusryhmän nimen. Metodi on lisätty vain tukemaan vanhaa
+     * formaattia.
+     *
+     * @param ryhmaName käyttöoikeusryhmän nimi
+     * @deprecated käytä setNimi()
+     */
+    @Deprecated
+    public void setRyhmaName(TextGroupDto ryhmaName) {
+        this.nimi = ryhmaName;
+    }
+
 }

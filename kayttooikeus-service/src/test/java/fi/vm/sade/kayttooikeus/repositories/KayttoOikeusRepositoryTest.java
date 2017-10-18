@@ -86,7 +86,7 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals(tapahtuma.getId(), expiring.get(0).getMyonnettyTapahtumaId());
         assertEquals("1.2.3.4.5", expiring.get(0).getHenkiloOid());
         assertEquals("RYHMA", expiring.get(0).getRyhmaName());
-        assertEquals(tapahtuma.getKayttoOikeusRyhma().getDescription().getId(), expiring.get(0).getRyhmaDescription().getId());
+        assertEquals(tapahtuma.getKayttoOikeusRyhma().getNimi().getId(), expiring.get(0).getRyhmaDescription().getId());
     }
 
     @Test
@@ -132,7 +132,7 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals(LocalDate.now().plusMonths(3), historia.get(0).getVoimassaLoppuPvm());
         assertEquals(LocalDate.now(), historia.get(0).getVoimassaAlkuPvm());
         assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), historia.get(0).getKasittelija());
-        assertEquals(tapahtuma2.getKayttoOikeusRyhma().getDescription().getId(), historia.get(0).getKuvaus().getId());
+        assertEquals(tapahtuma2.getKayttoOikeusRyhma().getNimi().getId(), historia.get(0).getKuvaus().getId());
         assertEquals("KOODISTO", historia.get(0).getPalvelu());
         assertEquals("WRITE", historia.get(0).getRooli());
         assertNotNull(historia.get(0).getKuvaus());
