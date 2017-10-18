@@ -2,10 +2,10 @@ package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrganisaatioHenkiloCustomRepository {
 
@@ -26,4 +26,6 @@ public interface OrganisaatioHenkiloCustomRepository {
      * @return henkilö kuuluu organisaatioon
      */
     boolean isHenkiloInOrganisaatio(String henkiloOid, String organisaatioOid, boolean passivoitu);
+
+    Set<String> findValidByKayttooikeus(String oidHenkilo, String palveluName, String rooli);
 }

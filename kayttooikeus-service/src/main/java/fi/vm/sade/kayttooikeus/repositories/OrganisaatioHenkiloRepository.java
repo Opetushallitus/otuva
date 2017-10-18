@@ -15,4 +15,5 @@ public interface OrganisaatioHenkiloRepository extends CrudRepository<Organisaat
     List<OrganisaatioHenkilo> findByHenkiloOidHenkilo(String oidHenkilo);
 
     Optional<OrganisaatioHenkilo> findByHenkiloOidHenkiloAndOrganisaatioOid(String oidHenkilo, String organisaatioOid);
+
 }
