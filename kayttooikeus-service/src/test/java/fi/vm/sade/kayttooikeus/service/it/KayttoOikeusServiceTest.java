@@ -264,6 +264,10 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .put("FI", "ryhmäname")
                         .put("SV", "ryhmäname sv")
                         .put("EN", "ryhmäname en"))
+                .kuvaus(new TextGroupDto()
+                        .put("FI", "ryhmäkuvaus")
+                        .put("SV", "ryhmäkuvaus sv")
+                        .put("EN", "ryhmäkuvaus en"))
                 .rooliRajoite("roolirajoite")
                 .palvelutRoolit(singletonList(PalveluRooliDto.builder()
                         .rooli("CRUD")
@@ -280,16 +284,19 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertNotNull(createdRyhma);
         assertTrue(createdRyhma.getName().startsWith("ryhmäname_"));
         assertTrue(createdRyhma.getDescription().get("FI").contentEquals("ryhmäname"));
+        assertTrue(createdRyhma.getKuvaus().get("FI").contentEquals("ryhmäkuvaus"));
         assertEquals(1, createdRyhma.getOrganisaatioViite().size());
         assertEquals("org tyyppi", createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
 
         ryhma.setRyhmaName(new TextGroupDto().put("FI", "uusi nimi"));
+        ryhma.setKuvaus(new TextGroupDto().put("FI", "uusi kuvaus"));
         ryhma.setRooliRajoite("uusi rajoite");
         ryhma.setOrganisaatioTyypit(singletonList("uusi org tyyppi"));
         kayttoOikeusService.updateKayttoOikeusForKayttoOikeusRyhma(createdRyhmaId, ryhma);
 
         createdRyhma = kayttoOikeusService.findKayttoOikeusRyhma(createdRyhmaId);
         assertTrue(createdRyhma.getDescription().get("FI").contentEquals("uusi nimi"));
+        assertTrue(createdRyhma.getKuvaus().get("FI").contentEquals("uusi kuvaus"));
         assertTrue(createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi().contentEquals("uusi org tyyppi"));
     }
 

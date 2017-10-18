@@ -15,7 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class KayttoOikeusRyhmaModifyDto {
     @NotNull @ContainsLanguages
-    private TextGroupDto ryhmaName;
+    private TextGroupDto ryhmaName; // TODO: "nimi" (Huom! API-muutos)
+    @ContainsLanguages
+    private TextGroupDto kuvaus;
     @NotNull
     private List<PalveluRooliDto> palvelutRoolit;
     private List<String> organisaatioTyypit;

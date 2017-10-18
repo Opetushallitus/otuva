@@ -28,7 +28,8 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
                 kayttoOikeusRyhma.id.as("id"),
                 kayttoOikeusRyhma.name.as("name"),
                 kayttoOikeusRyhma.rooliRajoite.as("rooliRajoite"),
-                kayttoOikeusRyhma.description.id.as("descriptionId"));
+                kayttoOikeusRyhma.description.id.as("descriptionId"),
+                kayttoOikeusRyhma.kuvaus.id.as("kuvausId"));
     }
 
     @Override
