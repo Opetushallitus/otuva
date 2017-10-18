@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories.criteria;
 
-import org.springframework.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

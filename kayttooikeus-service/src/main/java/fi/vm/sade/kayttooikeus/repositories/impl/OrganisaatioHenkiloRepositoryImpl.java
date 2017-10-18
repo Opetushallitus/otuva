@@ -7,18 +7,18 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
-import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCustomRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
@@ -100,5 +100,27 @@ public class OrganisaatioHenkiloRepositoryImpl implements OrganisaatioHenkiloCus
                 .where(qOrganisaatioHenkilo.organisaatioOid.eq(organisaatioOid))
                 .where(qOrganisaatioHenkilo.passivoitu.eq(passivoitu))
                 .select(Expressions.ONE).fetchFirst() != null;
+    }
+
+    @Override
+    public Set<String> findValidByKayttooikeus(String oidHenkilo, String palveluName, String rooli) {
+        QHenkilo henkilo = QHenkilo.henkilo;
+        QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QPalvelu palvelu = QPalvelu.palvelu;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        return new HashSet<>(jpa().from(organisaatioHenkilo)
+                .innerJoin(organisaatioHenkilo.henkilo, henkilo)
+                .innerJoin(organisaatioHenkilo.myonnettyKayttoOikeusRyhmas, myonnettyKayttoOikeusRyhmaTapahtuma)
+                .innerJoin(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma, kayttoOikeusRyhma)
+                .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .innerJoin(kayttoOikeus.palvelu, palvelu)
+                .where(organisaatioHenkilo.passivoitu.isFalse())
+                .where(palvelu.name.eq(palveluName))
+                .where(kayttoOikeus.rooli.eq(rooli))
+                .select(organisaatioHenkilo.organisaatioOid)
+                .distinct()
+                .fetch());
     }
 }

@@ -50,7 +50,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
         );
 
         List<Kutsu> results = kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().kutsujaOid("1.2.3")
-                .tilas(Lists.newArrayList(KutsunTila.AVOIN)).build(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+                .tilas(Lists.newArrayList(KutsunTila.AVOIN)).build(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(1, results.size());
         Kutsu dto = results.get(0);
         assertEquals(LocalDateTime.of(2016,1,1,0,0,0, 0), dto.getAikaleima());
@@ -59,10 +59,10 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
         assertEquals(kutsu.getId(), dto.getId());
 
         results = kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().kutsujaOid("1.2.3")
-                .tilas(Lists.newArrayList(KutsunTila.POISTETTU, KutsunTila.KAYTETTY)).build(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+                .tilas(Lists.newArrayList(KutsunTila.POISTETTU, KutsunTila.KAYTETTY)).build(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(0, results.size());
 
-        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(1, results.size());
     }
 
@@ -88,10 +88,9 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                                 .withOikeus(oikeus("HENKILONHALLINTA", "READ")))
                 )
         );
-        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().adminView(true).build(),
+        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().adminView(true).build(), null,
                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(),
-                null,
-                null);
+                null, null);
         assertThat(kutsuList).flatExtracting(Kutsu::getSahkoposti).containsExactly("a@example.com");
         assertThat(kutsuList)
                 .flatExtracting(Kutsu::getOrganisaatiot)

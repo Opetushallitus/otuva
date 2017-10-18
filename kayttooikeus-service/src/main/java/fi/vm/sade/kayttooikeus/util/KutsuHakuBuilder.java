@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AuthorizationCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -36,6 +37,8 @@ public class KutsuHakuBuilder {
     private final OrikaBeanMapper mapper;
 
     private final KutsuCriteria kutsuCriteria;
+    private final AuthorizationCriteria authorizationCriteria;
+
     private List<KutsuReadDto> result;
 
     public KutsuHakuBuilder prepareByAuthority() {
@@ -99,7 +102,7 @@ public class KutsuHakuBuilder {
 
 
     public KutsuHakuBuilder doSearch(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, Long offset, Long amount) {
-        this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria,
+        this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria, this.authorizationCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         return this;
     }

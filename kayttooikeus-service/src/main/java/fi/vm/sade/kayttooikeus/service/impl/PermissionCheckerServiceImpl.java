@@ -376,7 +376,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
         // When granting to root organisation it has no organisaatioviite
         return !(!org.springframework.util.CollectionUtils.isEmpty(organisaatioViite)
-                // Root organisation users do not need to pass organisaatioviite
+                // Root organisation users do not need to pass organisaatioviite (admin & mini-admin)
                 && !this.isCurrentUserMiniAdmin()
                 // Organisaatiohenkilo limitations are valid
                 && currentUserOrganisaatioOids.stream()
@@ -390,7 +390,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findValidMyonnettyKayttooikeus(this.getCurrentUserOid()).stream()
                 .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .map(KayttoOikeusRyhma::getId).collect(Collectors.toList());
+                .map(KayttoOikeusRyhma::getId)
+                .collect(Collectors.toList());
         List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
         return this.isCurrentUserAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
     }

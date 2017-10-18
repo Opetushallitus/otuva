@@ -5,8 +5,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AuthorizationCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +26,8 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
     }
 
     @Override
-    public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
+    public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria, AuthorizationCriteria authorizationCriteria,
+                                         List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
         QKayttoOikeusRyhma kutsuKayttoOikeusryhma = new QKayttoOikeusRyhma("kutsuKayttoOikeusryhma");
@@ -46,10 +47,13 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
                 .where(criteria.onCondition(kutsuKayttoOikeusryhma, kutsujaKayttooikeusryhma))
                 .where(organisaatioHenkilo.passivoitu.isFalse())
                 .orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
-        if(offset != null) {
+        if (authorizationCriteria != null) {
+            query.where(authorizationCriteria.onConditionByAuthorization());
+        }
+        if (offset != null) {
             query.offset(offset);
         }
-        if(amount != null) {
+        if (amount != null) {
             query.limit(amount);
         }
         return query.distinct().fetch();
