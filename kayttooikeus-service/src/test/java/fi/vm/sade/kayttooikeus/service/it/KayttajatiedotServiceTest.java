@@ -73,6 +73,30 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    public void updateShouldNotThrowIfUsernameNotChanged() {
+        String oid = "1.2.3.4.5";
+        populate(kayttajatiedot(henkilo(oid), "user1"));
+        KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
+        updateDto.setUsername("user1");
+
+        KayttajatiedotReadDto readDto = kayttajatiedotService.updateKayttajatiedot(oid, updateDto);
+
+        assertThat(readDto.getUsername()).isEqualTo("user1");
+    }
+
+    @Test
+    public void updateShouldCreateKayttajatiedotIfMissing() {
+        String oid = "1.2.3.4.5";
+        populate(henkilo(oid));
+        KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
+        updateDto.setUsername("user1");
+
+        KayttajatiedotReadDto readDto = kayttajatiedotService.updateKayttajatiedot(oid, updateDto);
+
+        assertThat(readDto.getUsername()).isEqualTo("user1");
+    }
+
+    @Test
     @WithMockUser(username = "user1")
     public void testValidateUsernamePassword() throws Exception {
         final String henkiloOid = "1.2.246.562.24.27470134096";

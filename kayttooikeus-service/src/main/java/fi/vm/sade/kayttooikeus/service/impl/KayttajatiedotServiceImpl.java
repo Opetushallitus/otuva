@@ -12,18 +12,13 @@ import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import fi.vm.sade.kayttooikeus.service.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
-import org.springframework.util.StringUtils;
-
-import java.security.InvalidParameterException;
 import java.util.Optional;
-import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -37,24 +32,21 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     @Override
     @Transactional
-    public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto dto, LdapSynchronizationType ldapSynchronization) {
-        Kayttajatiedot entity = mapper.map(dto, Kayttajatiedot.class);
-
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
+    public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto createDto, LdapSynchronizationType ldapSynchronization) {
+        KayttajatiedotReadDto readDto = henkiloDataRepository.findByOidHenkilo(henkiloOid)
+                .map(henkilo -> create(henkilo, createDto))
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
+        ldapSynchronization.getAction().accept(ldapSynchronizationService, henkiloOid);
+        return readDto;
+    }
+
+    public KayttajatiedotReadDto create(Henkilo henkilo, KayttajatiedotCreateDto createDto) {
         if (henkilo.getKayttajatiedot() != null) {
             throw new IllegalArgumentException("Käyttäjätiedot on jo luotu henkilölle");
         }
-        kayttajatiedotRepository.findByUsername(entity.getUsername()).ifPresent((Kayttajatiedot t) -> {
-            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-        });
 
-        entity.setHenkilo(henkilo);
-        entity = kayttajatiedotRepository.save(entity);
-        henkilo.setKayttajatiedot(entity);
-
-        ldapSynchronization.getAction().accept(ldapSynchronizationService, henkiloOid);
-        return mapper.map(entity, KayttajatiedotReadDto.class);
+        Kayttajatiedot kayttajatiedot = mapper.map(createDto, Kayttajatiedot.class);
+        return saveKayttajatiedot(henkilo, kayttajatiedot);
     }
 
     @Override
@@ -90,19 +82,37 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
-
-        kayttajatiedotRepository.findByUsername(kayttajatiedotUpdateDto.getUsername()).ifPresent((Kayttajatiedot t) -> {
-            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-        });
-
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
+        KayttajatiedotReadDto kayttajatiedotReadDto = henkiloDataRepository.findByOidHenkilo(henkiloOid)
+                .map(henkilo -> updateKayttajatiedot(henkilo, kayttajatiedotUpdateDto))
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
+        this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
+        return kayttajatiedotReadDto;
+    }
 
-        henkilo.getKayttajatiedot().setUsername(kayttajatiedotUpdateDto.getUsername());
+    private KayttajatiedotReadDto updateKayttajatiedot(Henkilo henkilo, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
+        Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot())
+                .orElseGet(Kayttajatiedot::new);
+        mapper.map(kayttajatiedotUpdateDto, kayttajatiedot);
+        return saveKayttajatiedot(henkilo, kayttajatiedot);
+    }
+
+    private KayttajatiedotReadDto saveKayttajatiedot(Henkilo henkilo, Kayttajatiedot kayttajatiedot) {
+        validateUsernameUnique(kayttajatiedot.getUsername(), henkilo.getOidHenkilo());
+
+        kayttajatiedot.setHenkilo(henkilo);
+        henkilo.setKayttajatiedot(kayttajatiedot);
         henkilo = henkiloDataRepository.save(henkilo);
 
-        this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
+    }
+
+    private void validateUsernameUnique(String username, String henkiloOid) {
+        henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .ifPresent(henkiloByUsername -> {
+                    if (henkiloOid == null || !henkiloOid.equals(henkiloByUsername.getOidHenkilo())) {
+                        throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+                    }
+                });
     }
 
     @Override
