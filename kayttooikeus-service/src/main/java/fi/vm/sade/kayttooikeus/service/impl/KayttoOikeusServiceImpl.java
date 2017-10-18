@@ -315,7 +315,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     private void setKayttoOikeusRyhmas(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
         Set<KayttoOikeus> givenKOs = new HashSet<>();
-        for (PalveluRooliDto prDto : ryhmaData.getPalvelutRoolit()) {
+        for (PalveluRooliModifyDto prDto : ryhmaData.getPalvelutRoolit()) {
             Palvelu palvelu = palveluRepository.findByName(prDto.getPalveluName()).orElseThrow(()
                     -> new NotFoundException("palvelu not found"));
             KayttoOikeus tempKo = kayttoOikeusRepository.findByRooliAndPalvelu(prDto.getRooli(), palvelu.getName());

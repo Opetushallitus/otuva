@@ -269,11 +269,9 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .put("SV", "ryhmäkuvaus sv")
                         .put("EN", "ryhmäkuvaus en"))
                 .rooliRajoite("roolirajoite")
-                .palvelutRoolit(singletonList(PalveluRooliDto.builder()
+                .palvelutRoolit(singletonList(PalveluRooliModifyDto.builder()
                         .rooli("CRUD")
                         .palveluName("HENKILOHALLINTA")
-                        .palveluTexts(new TextGroupListDto().put("FI", "palvelun kuvaus"))
-                        .rooliTexts(new TextGroupListDto().put("FI", "roolin kuvaus"))
                         .build()))
                 .organisaatioTyypit(singletonList("org tyyppi"))
                 .build();

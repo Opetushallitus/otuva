@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.Setter;
 
 @Getter
@@ -21,7 +22,8 @@ public class KayttoOikeusRyhmaModifyDto {
     @ContainsLanguages
     private TextGroupDto kuvaus;
     @NotNull
-    private List<PalveluRooliDto> palvelutRoolit;
+    @Valid
+    private List<PalveluRooliModifyDto> palvelutRoolit;
     private List<String> organisaatioTyypit;
     private String rooliRajoite;
     private List<Long> slaveIds;
