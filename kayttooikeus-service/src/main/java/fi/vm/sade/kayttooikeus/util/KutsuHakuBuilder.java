@@ -9,10 +9,10 @@ import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
-import fi.vm.sade.kayttooikeus.repositories.criteria.AuthorizationCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.data.domain.Sort;
@@ -22,6 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 
 @RequiredArgsConstructor
 public class KutsuHakuBuilder {
@@ -36,8 +39,9 @@ public class KutsuHakuBuilder {
 
     private final OrikaBeanMapper mapper;
 
+    private final OrganisaatioClient organisaatioClient;
+
     private final KutsuCriteria kutsuCriteria;
-    private final AuthorizationCriteria authorizationCriteria;
 
     private List<KutsuReadDto> result;
 
@@ -46,7 +50,7 @@ public class KutsuHakuBuilder {
         if (this.permissionCheckerService.isCurrentUserAdmin()) {
             return this.prepareForAdmin();
         }
-        else if (this.permissionCheckerService.isCurrentUserMiniAdmin()) {
+        else if (this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
             return prepareForMiniAdmin();
         }
         return prepareForNormalUser();
@@ -61,24 +65,29 @@ public class KutsuHakuBuilder {
         // Force OPH-view
         this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
         this.kutsuCriteria.setSubOrganisations(false);
-        // TODO add condition for fetching only kutsus user is authorized to (see granting käyttöoikeus)
 
         return this;
     }
 
     private KutsuHakuBuilder prepareForNormalUser() {
-        // Limit organsiaatio search for non admin users
+
+        // Limit organisaatio search for non-admin users
         Set<String> organisaatioOidLimit;
+
         if (!CollectionUtils.isEmpty(this.kutsuCriteria.getOrganisaatioOids())) {
-            organisaatioOidLimit = this.permissionCheckerService.hasOrganisaatioInHierarcy(this.kutsuCriteria.getOrganisaatioOids());
+            organisaatioOidLimit = this.permissionCheckerService
+                    .hasOrganisaatioInHierarcy(this.kutsuCriteria.getOrganisaatioOids(), PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         }
         else {
             organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
                     .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()));
         }
+        if (BooleanUtils.isTrue(this.kutsuCriteria.getSubOrganisations())) {
+            organisaatioOidLimit = organisaatioOidLimit.stream()
+                    .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())
+                    .collect(Collectors.toSet());
+        }
         this.kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
-        this.kutsuCriteria.setSubOrganisations(true);
-        // TODO add condition for fetching only kutsus user is authorized to (see granting käyttöoikeus)
 
         return this;
     }
@@ -102,7 +111,7 @@ public class KutsuHakuBuilder {
 
 
     public KutsuHakuBuilder doSearch(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, Long offset, Long amount) {
-        this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria, this.authorizationCriteria,
+        this.result = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(this.kutsuCriteria,
                 sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
         return this;
     }

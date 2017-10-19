@@ -41,13 +41,22 @@ public interface PermissionCheckerService {
 
     /**
      * OPH-virkailija
-     * @return isOph-virkailij
+     * @return isOph-virkailija
      */
     boolean isCurrentUserMiniAdmin();
+
+    /**
+     * @param palvelu name
+     * @param rooli name
+     * @return isOph-virkailija with käyttöoikeus
+     */
+    boolean isCurrentUserMiniAdmin(String palvelu, String rooli);
 
     boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid);
 
     Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOid);
+
+    Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
 
     boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId);
 

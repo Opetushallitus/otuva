@@ -19,6 +19,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_ANOMUSTENHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -93,10 +96,11 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void findValidByKayttooikeus() {
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.5", "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus("HENKILONHALLINTA", "CRUD"))));
+                kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))));
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.5", "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus("ANOMUSTENHALLINTA", "CRUD"))));
-        Set<String> allowedOrganisaatioOids = this.organisaatioHenkiloRepository.findValidByKayttooikeus("1.2.3.4.5", "HENKILONHALLINTA", "CRUD");
+                kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_ANOMUSTENHALLINTA, ROLE_CRUD))));
+        Set<String> allowedOrganisaatioOids = this.organisaatioHenkiloRepository
+                .findValidByKayttooikeus("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         assertThat(allowedOrganisaatioOids).containsExactly("3.4.5.6.7");
     }
 }

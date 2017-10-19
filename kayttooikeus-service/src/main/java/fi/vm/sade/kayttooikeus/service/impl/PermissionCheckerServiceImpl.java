@@ -48,6 +48,10 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static ObjectMapper objectMapper = new ObjectMapper();
     private static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
+    public static final String PALVELU_HENKILONHALLINTA = "HENKILONHALLINTA";
+    public static final String PALVELU_ANOMUSTENHALLINTA = "ANOMUSTENHALLINTA";
+    public static final String ROLE_ADMIN = "OPHREKISTERI";
+    public static final String ROLE_CRUD = "CRUD";
 
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -234,7 +238,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     private static boolean isSuperUser(Set<String> roles) {
-        return roles.contains(ROLE_HENKILONHALLINTA_PREFIX + "OPHREKISTERI");
+        return roles.contains(ROLE_HENKILONHALLINTA_PREFIX + ROLE_ADMIN);
     }
 
     private static PermissionCheckResponseDto checkPermissionFromExternalService(String serviceUrl,
@@ -339,13 +343,21 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // Rekisterinpitäjä
     @Override
     public boolean isCurrentUserAdmin() {
-        return isSuperUser(this.getCasRoles()) && this.isCurrentUserMiniAdmin();
+        return this.isCurrentUserMiniAdmin("HENKILONHALLINTA", ROLE_ADMIN);
     }
 
     // OPH virkailija
     @Override
     public boolean isCurrentUserMiniAdmin() {
         return this.getCasRoles().stream().anyMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()));
+    }
+
+    // OPH virkailija
+    @Override
+    public boolean isCurrentUserMiniAdmin(String palvelu, String rooli) {
+        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu)
+                && role.contains(rooli)
+                && role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
     @Override
@@ -360,6 +372,17 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> currentUserOrgnisaatios.stream()
                 .anyMatch(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream()
                         .anyMatch(requiredOrganiaatioOid::equals)))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
+        Set<String> casRoles = this.getCasRoles();
+        return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> casRoles.stream()
+                .anyMatch(casRole -> casRole.contains(palvelu)
+                        && casRole.contains(rooli)
+                        && this.organisaatioClient.getActiveParentOids(requiredOrganiaatioOid).stream()
+                        .anyMatch(casRole::contains)))
                 .collect(Collectors.toSet());
     }
 

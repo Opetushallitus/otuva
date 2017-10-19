@@ -28,6 +28,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.hen
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import static java.util.Arrays.asList;
@@ -110,7 +113,9 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserRekisterinpitajaTest() {
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(true);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_ADMIN))
+                .willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA, HenkiloTyyppi.PALVELU)), new HashSet<>(list));
@@ -119,8 +124,12 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserCrudTest() {
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(false);
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "CRUD")).willReturn(true);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_ADMIN))
+                .willReturn(false);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_CRUD))
+                .willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA)), new HashSet<>(list));
