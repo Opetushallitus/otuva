@@ -15,7 +15,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
-import fi.vm.sade.kayttooikeus.repositories.criteria.AuthorizationCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
@@ -34,7 +33,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 
@@ -71,16 +69,6 @@ public class KutsuServiceImpl implements KutsuService {
                                          KutsuCriteria kutsuCriteria,
                                          Long offset,
                                          Long amount) {
-        Set<String> allowedOrganisaatioOids = this.organisaatioHenkiloRepository
-                .findValidByKayttooikeus(this.permissionCheckerService.getCurrentUserOid(), "HENKILONHALLINTA", "CRUD").stream()
-                .flatMap(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream())
-                .collect(Collectors.toSet());
-        AuthorizationCriteria authorizationCriteria = new AuthorizationCriteria(
-                this.permissionCheckerService.isCurrentUserAdmin(),
-                this.permissionCheckerService.isCurrentUserMiniAdmin(),
-                this.commonProperties.getRootOrganizationOid(),
-                allowedOrganisaatioOids
-        );
         return new KutsuHakuBuilder(this.permissionCheckerService,
                 this.localizationService,
                 this.commonProperties,
@@ -88,8 +76,8 @@ public class KutsuServiceImpl implements KutsuService {
                 this.kutsuRepository,
                 this.organisaatioHenkiloRepository,
                 this.mapper,
-                kutsuCriteria,
-                authorizationCriteria)
+                this.organisaatioClient,
+                kutsuCriteria)
                 .prepareByAuthority()
                 .doSearch(sortBy, direction, offset, amount)
                 .localise()

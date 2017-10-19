@@ -41,7 +41,8 @@ public class KutsuController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ApiOperation(value = "Hakee kutsut annettujen hakuehtojen perusteella",
             notes = "Haun tulos riippuu käyttäjän oikeuksista (rekisterinpitäjä, Oph-virkailija, normaali käyttäjä)")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public List<KutsuReadDto> listAvoinKutsus(
             KutsuCriteria kutsuCriteria,
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,

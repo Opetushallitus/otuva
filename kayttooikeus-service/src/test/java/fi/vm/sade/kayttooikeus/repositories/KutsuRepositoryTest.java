@@ -26,6 +26,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -50,7 +51,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
         );
 
         List<Kutsu> results = kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().kutsujaOid("1.2.3")
-                .tilas(Lists.newArrayList(KutsunTila.AVOIN)).build(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+                .tilas(Lists.newArrayList(KutsunTila.AVOIN)).build(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(1, results.size());
         Kutsu dto = results.get(0);
         assertEquals(LocalDateTime.of(2016,1,1,0,0,0, 0), dto.getAikaleima());
@@ -59,10 +60,10 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
         assertEquals(kutsu.getId(), dto.getId());
 
         results = kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().kutsujaOid("1.2.3")
-                .tilas(Lists.newArrayList(KutsunTila.POISTETTU, KutsunTila.KAYTETTY)).build(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+                .tilas(Lists.newArrayList(KutsunTila.POISTETTU, KutsunTila.KAYTETTY)).build(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(0, results.size());
 
-        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria(), null, KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
+        results = kutsuRepository.listKutsuListDtos(new KutsuCriteria(), KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(), null, null);
         assertEquals(1, results.size());
     }
 
@@ -76,7 +77,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA")
                                 .withKuvaus(text("FI", "Kuvaus"))
-                                .withOikeus(oikeus("HENKILONHALLINTA", "VASTUUKAYTTAJAT")))
+                                .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, "VASTUUKAYTTAJAT")))
                 )
         );
         populate(kutsu("Beepo", "Bsimerkki", "b@example.com")
@@ -85,10 +86,10 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")
                                 .withKuvaus(text("FI", "Kuvaus2"))
-                                .withOikeus(oikeus("HENKILONHALLINTA", "READ")))
+                                .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, "READ")))
                 )
         );
-        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().adminView(true).build(), null,
+        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().adminView(true).build(),
                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(),
                 null, null);
         assertThat(kutsuList).flatExtracting(Kutsu::getSahkoposti).containsExactly("a@example.com");
