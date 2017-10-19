@@ -123,8 +123,8 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .hylkaamisperuste("Hyvä oli")
                 .myonnettyKayttooikeusRyhmas(Sets.newHashSet(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(KayttoOikeusRyhma.builder()
-                                .description(new TextGroup())
-                                .name("Käyttöoikeusryhmä").build())
+                                .nimi(new TextGroup())
+                                .tunniste("Käyttöoikeusryhmä").build())
                         .build()))
                 .build();
         this.emailService.sendEmailAnomusAccepted(anomus);
@@ -162,7 +162,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .sukunimi("kuutio")
                 .organisaatiot(Sets.newHashSet(KutsuOrganisaatio.builder()
                         .organisaatioOid("1.2.3.4.1")
-                        .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().description(new TextGroup()).build()))
+                        .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().nimi(new TextGroup()).build()))
                         .build()))
                 .aikaleima(LocalDateTime.now())
                 .build();

@@ -90,8 +90,8 @@ public class AnomusKasiteltySahkopostiBuilder {
     }
 
     private RooliDto newRooli(final KayttoOikeusRyhma kayttoOikeusRyhma, KayttoOikeudenTila tila) {
-        String kayttoOikeusRyhmaNimi = LocalisationUtils.getText(this.languageCode, kayttoOikeusRyhma.getDescription(),
-                kayttoOikeusRyhma::getName);
+        String kayttoOikeusRyhmaNimi = LocalisationUtils.getText(this.languageCode, kayttoOikeusRyhma.getNimi(),
+                kayttoOikeusRyhma::getTunniste);
         return new RooliDto(kayttoOikeusRyhmaNimi, tila);
     }
 

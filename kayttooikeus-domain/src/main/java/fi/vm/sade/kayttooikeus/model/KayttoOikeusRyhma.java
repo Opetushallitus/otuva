@@ -18,7 +18,7 @@ import java.util.Set;
 public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
 
     @Column(name = "name", nullable = false)
-    private String name;
+    private String tunniste;
 
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "kayttooikeusryhma_kayttooikeus", inverseJoinColumns = @JoinColumn(name = "kayttooikeus_id",
@@ -28,8 +28,12 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "textgroup_id")
-    private TextGroup description;
+    private TextGroup nimi;
     
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "kuvaus_id", foreignKey = @ForeignKey(name = "fk_kayttooikeusryhma_textgroup_kuvaus"))
+    private TextGroup kuvaus;
+
     @OneToMany(mappedBy = "kayttoOikeusRyhma", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH }, fetch = FetchType.LAZY)
     private Set<OrganisaatioViite> organisaatioViite = new HashSet<>();

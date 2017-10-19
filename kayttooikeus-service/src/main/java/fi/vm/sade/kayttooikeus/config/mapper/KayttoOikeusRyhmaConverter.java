@@ -16,16 +16,21 @@ public class KayttoOikeusRyhmaConverter extends CustomConverter<KayttoOikeusRyhm
 
     @Override
     public KayttoOikeusRyhmaDto convert(KayttoOikeusRyhma source, Type<? extends KayttoOikeusRyhmaDto> destinationType, MappingContext mappingContext) {
-        return KayttoOikeusRyhmaDto.builder()
+        KayttoOikeusRyhmaDto.KayttoOikeusRyhmaDtoBuilder destinationBuilder = KayttoOikeusRyhmaDto.builder()
                 .id(source.getId())
-                .name(source.getName())
+                .tunniste(source.getTunniste())
                 .rooliRajoite(source.getRooliRajoite())
-                .description(new TextGroupDto(source.getDescription().getId()))
+                .nimi(new TextGroupDto(source.getNimi().getId()))
                 .organisaatioViite(source.getOrganisaatioViite().stream().map(organisaatioViite -> OrganisaatioViiteDto.builder()
                         .id(organisaatioViite.getId())
                         .organisaatioTyyppi(organisaatioViite.getOrganisaatioTyyppi())
-                        .build()).collect(Collectors.toList()))
-                .build();
+                        .build()).collect(Collectors.toList()));
+
+        if (source.getKuvaus() != null) {
+            destinationBuilder.kuvaus(new TextGroupDto(source.getKuvaus().getId()));
+        }
+
+        return destinationBuilder.build();
     }
 
 }

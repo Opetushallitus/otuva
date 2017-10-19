@@ -73,7 +73,7 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
                         ko.id.as("kayttoOikeusId"),
                         oh.tehtavanimike.as("tehtavanimike"),
                         kor.id.as("kayttoOikeusRyhmaId"),
-                        kor.description.id.as("kuvausId"),
+                        kor.nimi.id.as("kuvausId"),
                         ko.rooli.as("rooli"),
                         ko.textGroup.id.as("kayttoOikeusKuvausId"),
                         ko.palvelu.name.as("palvelu"),
@@ -99,8 +99,8 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
                         henkilo.oidHenkilo.as("henkiloOid"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.id.as("myonnettyTapahtumaId"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.as("voimassaLoppuPvm"),
-                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.name.as("ryhmaName"),
-                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.description.id.as("ryhmaDescriptionId")
+                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.tunniste.as("ryhmaName"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.nimi.id.as("ryhmaDescriptionId")
                 ))
                 .where(myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.goe(now)
                         .and(expireConditions))

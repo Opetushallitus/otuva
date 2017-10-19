@@ -211,14 +211,17 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional
     public long createKayttoOikeusRyhma(KayttoOikeusRyhmaModifyDto uusiRyhma) {
-        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getRyhmaName().get(FI))) {
+        if (kayttoOikeusRyhmaRepository.ryhmaNameFiExists(uusiRyhma.getNimi().get(FI))) {
             throw new IllegalArgumentException("Group name already in use");
         }
 
         KayttoOikeusRyhma kayttoOikeusRyhma = new KayttoOikeusRyhma();
-        kayttoOikeusRyhma.setName(uusiRyhma.getRyhmaName().get(FI) + "_" + System.currentTimeMillis());
-        TextGroup tg = createRyhmaDescription(uusiRyhma.getRyhmaName());
-        kayttoOikeusRyhma.setDescription(tg);
+        kayttoOikeusRyhma.setTunniste(uusiRyhma.getNimi().get(FI) + "_" + System.currentTimeMillis());
+        TextGroup tg = createRyhmaDescription(uusiRyhma.getNimi());
+        kayttoOikeusRyhma.setNimi(tg);
+        if (uusiRyhma.getKuvaus() != null) {
+            kayttoOikeusRyhma.setKuvaus(createRyhmaDescription(uusiRyhma.getKuvaus()));
+        }
         kayttoOikeusRyhma.setRooliRajoite(uusiRyhma.getRooliRajoite());
 
         kayttoOikeusRyhma.getKayttoOikeus().addAll(uusiRyhma.getPalvelutRoolit().stream()
@@ -267,6 +270,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
         // UI must always send the list of group names even if they don't change!!
         setRyhmaDescription(ryhmaData, kayttoOikeusRyhma);
+        if (ryhmaData.getKuvaus() != null) {
+            setRyhmaKuvaus(ryhmaData, kayttoOikeusRyhma);
+        }
 
         for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(kayttoOikeusRyhma.getId())) {
             kayttoOikeusRyhmaMyontoViiteRepository.remove(viite);
@@ -309,7 +315,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     private void setKayttoOikeusRyhmas(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
         Set<KayttoOikeus> givenKOs = new HashSet<>();
-        for (PalveluRooliDto prDto : ryhmaData.getPalvelutRoolit()) {
+        for (PalveluRooliModifyDto prDto : ryhmaData.getPalvelutRoolit()) {
             Palvelu palvelu = palveluRepository.findByName(prDto.getPalveluName()).orElseThrow(()
                     -> new NotFoundException("palvelu not found"));
             KayttoOikeus tempKo = kayttoOikeusRepository.findByRooliAndPalvelu(prDto.getRooli(), palvelu.getName());
@@ -342,15 +348,28 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private void setRyhmaDescription(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
-        if (kayttoOikeusRyhma.getDescription() == null) {
-            kayttoOikeusRyhma.setDescription(createRyhmaDescription(ryhmaData.getRyhmaName()));
+        if (kayttoOikeusRyhma.getNimi() == null) {
+            kayttoOikeusRyhma.setNimi(createRyhmaDescription(ryhmaData.getNimi()));
         } else {
-            TextGroup description = kayttoOikeusRyhma.getDescription();
+            TextGroup description = kayttoOikeusRyhma.getNimi();
             Set<Text> ryhmaNames = description.getTexts();
 
-            updateOrAddTextForLang(ryhmaNames, FI, ryhmaData.getRyhmaName().get(FI));
-            updateOrAddTextForLang(ryhmaNames, SV, ryhmaData.getRyhmaName().get(SV));
-            updateOrAddTextForLang(ryhmaNames, EN, ryhmaData.getRyhmaName().get(EN));
+            updateOrAddTextForLang(ryhmaNames, FI, ryhmaData.getNimi().get(FI));
+            updateOrAddTextForLang(ryhmaNames, SV, ryhmaData.getNimi().get(SV));
+            updateOrAddTextForLang(ryhmaNames, EN, ryhmaData.getNimi().get(EN));
+        }
+    }
+
+    private void setRyhmaKuvaus(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma kayttoOikeusRyhma) {
+        if (kayttoOikeusRyhma.getKuvaus()== null) {
+            kayttoOikeusRyhma.setKuvaus(createRyhmaDescription(ryhmaData.getKuvaus()));
+        } else {
+            TextGroup kuvaus = kayttoOikeusRyhma.getKuvaus();
+            Set<Text> ryhmaKuvaukset = kuvaus.getTexts();
+
+            updateOrAddTextForLang(ryhmaKuvaukset, FI, ryhmaData.getKuvaus().get(FI));
+            updateOrAddTextForLang(ryhmaKuvaukset, SV, ryhmaData.getKuvaus().get(SV));
+            updateOrAddTextForLang(ryhmaKuvaukset, EN, ryhmaData.getKuvaus().get(EN));
         }
     }
 

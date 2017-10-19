@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> {
-    private final String name;
+    private final String tunniste;
     private boolean hidden;
     private final List<Populator<OrganisaatioViite>> viitteet = new ArrayList<>();
     private final List<Populator<KayttoOikeus>> oikeus = new ArrayList<>();
     private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
 
-    public KayttoOikeusRyhmaPopulator(String name) {
-        this.name = name;
+    public KayttoOikeusRyhmaPopulator(String tunniste) {
+        this.tunniste = tunniste;
         this.hidden = false;
     }
     
-    public static KayttoOikeusRyhmaPopulator kayttoOikeusRyhma(String name) {
-        return new KayttoOikeusRyhmaPopulator(name);
+    public static KayttoOikeusRyhmaPopulator kayttoOikeusRyhma(String tunniste) {
+        return new KayttoOikeusRyhmaPopulator(tunniste);
     }
     
     public KayttoOikeusRyhmaPopulator withOikeus(Populator<KayttoOikeus> oikeus) {
@@ -59,10 +59,10 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
     public KayttoOikeusRyhma apply(EntityManager entityManager) {
         KayttoOikeusRyhma ryhma = Populator.<KayttoOikeusRyhma>firstOptional(entityManager
                 .createQuery("select kor from KayttoOikeusRyhma kor " +
-                    "where kor.name = :name").setParameter("name", name)).orElseGet(() -> {
+                    "where kor.tunniste = :tunniste").setParameter("tunniste", tunniste)).orElseGet(() -> {
             KayttoOikeusRyhma r = new KayttoOikeusRyhma();
-            r.setDescription(kuvaus.apply(entityManager));
-            r.setName(name);
+            r.setNimi(kuvaus.apply(entityManager));
+            r.setTunniste(tunniste);
             r.setHidden(hidden);
             entityManager.persist(r);
             return r;

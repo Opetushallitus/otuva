@@ -26,9 +26,10 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
     private QBean<KayttoOikeusRyhmaDto> KayttoOikeusRyhmaDtoBean() {
         return Projections.bean(KayttoOikeusRyhmaDto.class,
                 kayttoOikeusRyhma.id.as("id"),
-                kayttoOikeusRyhma.name.as("name"),
+                kayttoOikeusRyhma.tunniste.as("tunniste"),
                 kayttoOikeusRyhma.rooliRajoite.as("rooliRajoite"),
-                kayttoOikeusRyhma.description.id.as("descriptionId"));
+                kayttoOikeusRyhma.nimi.id.as("nimiId"),
+                kayttoOikeusRyhma.kuvaus.id.as("kuvausId"));
     }
 
     @Override
@@ -42,7 +43,7 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
                 .and(kayttoOikeusRyhma.id.in(idList));
 
         return jpa().from(kayttoOikeusRyhma)
-                .leftJoin(kayttoOikeusRyhma.description)
+                .leftJoin(kayttoOikeusRyhma.nimi)
                 .where(booleanBuilder)
                 .orderBy(kayttoOikeusRyhma.id.asc())
                 .select(KayttoOikeusRyhmaDtoBean())
@@ -61,15 +62,15 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
     @Override
     public Boolean ryhmaNameFiExists(String ryhmaNameFi) {
         return exists(jpa().from(kayttoOikeusRyhma)
-                .where(kayttoOikeusRyhma.description.texts.any().lang.eq("FI"),
-                        kayttoOikeusRyhma.description.texts.any().text.eq(ryhmaNameFi))
+                .where(kayttoOikeusRyhma.nimi.texts.any().lang.eq("FI"),
+                        kayttoOikeusRyhma.nimi.texts.any().text.eq(ryhmaNameFi))
                 .select(kayttoOikeusRyhma));
     }
 
     @Override
     public List<KayttoOikeusRyhmaDto> listAll() {
         return jpa().from(kayttoOikeusRyhma)
-                .leftJoin(kayttoOikeusRyhma.description)
+                .leftJoin(kayttoOikeusRyhma.nimi)
                 .where(kayttoOikeusRyhma.hidden.eq(false))
                 .orderBy(kayttoOikeusRyhma.id.asc())
                 .select(KayttoOikeusRyhmaDtoBean())
