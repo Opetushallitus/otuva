@@ -84,6 +84,8 @@ public class KutsuController {
         this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, kutsuUpdateDto);
     }
 
+
+
     /**
      *  /kutsu is open to non-authenticated use.
      */

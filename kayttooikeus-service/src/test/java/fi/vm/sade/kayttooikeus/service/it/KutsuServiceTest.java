@@ -400,15 +400,17 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
     public void deleteKutsuTest() {
         Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
                 .kutsuja("1.2.4")
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
         );
-        kutsuService.deleteKutsu(kutsu.getId());
-        em.flush();
+        populate(organisaatioHenkilo("1.2.4", "1.2.3.4.5"));
+        given(this.organisaatioClient.getActiveChildOids("1.2.3.4.5")).willReturn(Lists.newArrayList("1.2.3.4.5"));
+        this.kutsuService.deleteKutsu(kutsu.getId());
+        this.em.flush();
         assertEquals(KutsunTila.POISTETTU, kutsu.getTila());
         assertEquals("1.2.4", kutsu.getPoistaja());
         assertNotNull(kutsu.getPoistettu());
