@@ -38,13 +38,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
+import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaMyontoViitePopulator.kayttoOikeusRyhmaMyontoViite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
+import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.viite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
@@ -279,8 +283,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.246.562.10.00000000001"})
-    public void createKutsuTest() {
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
+    public void createKutsuAsAdmin() {
         HttpEntity emailResponseEntity = new StringEntity("12345", Charset.forName("UTF-8"));
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);
@@ -296,12 +300,13 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo("1.2.4", "1.2.246.562.10.00000000001"),
-                kayttoOikeusRyhma("kayttoOikeusRyhma").withKuvaus(text("fi", "Käyttöoikeusryhmä"))));
-        
+                kayttoOikeusRyhma("kayttoOikeusRyhma")
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
+                        .withKuvaus(text("fi", "Käyttöoikeusryhmä"))));
         Long kayttoOikeusRyhmaId = tapahtuma.getKayttoOikeusRyhma().getId();
         KutsuCreateDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KayttoOikeusRyhmaDto();
         kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
-        
+
         KutsuCreateDto kutsu = new KutsuCreateDto();
         kutsu.setEtunimi("Etu");
         kutsu.setSukunimi("Suku");
@@ -317,15 +322,80 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         KutsuReadDto tallennettu = kutsuService.getKutsu(id);
 
         assertThat(tallennettu.getAsiointikieli()).isEqualByComparingTo(Asiointikieli.fi);
-        Set<KutsuReadDto.KutsuOrganisaatioDto> organisaatiot = tallennettu.getOrganisaatiot();
-        assertThat(organisaatiot).hasSize(1);
-        KutsuReadDto.KutsuOrganisaatioDto tallennettuKutsuOrganisaatio = organisaatiot.iterator().next();
-        Set<KutsuReadDto.KayttoOikeusRyhmaDto> kayttoOikeusRyhmat = tallennettuKutsuOrganisaatio.getKayttoOikeusRyhmat();
-        assertThat(kayttoOikeusRyhmat).hasSize(1);
-        KutsuReadDto.KayttoOikeusRyhmaDto tallennettuKutsuKayttoOikeusRyhma = kayttoOikeusRyhmat.iterator().next();
-        assertThat(tallennettuKutsuKayttoOikeusRyhma.getNimi().getTexts()).containsExactly(new AbstractMap.SimpleEntry<>("fi", "Käyttöoikeusryhmä"));
+        assertThat(tallennettu.getOrganisaatiot())
+                .hasSize(1)
+                .flatExtracting(KutsuReadDto.KutsuOrganisaatioDto::getKayttoOikeusRyhmat)
+                .hasSize(1)
+                .extracting(KutsuReadDto.KayttoOikeusRyhmaDto::getNimi)
+                .flatExtracting(TextGroupMapDto::getTexts)
+                .extracting("fi")
+                .containsExactly("Käyttöoikeusryhmä");
 
         Kutsu entity = em.find(Kutsu.class, id);
+        assertThat(entity.getSalaisuus()).isNotEmpty();
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
+    public void createKutsuAsNormalUser() {
+        HttpEntity emailResponseEntity = new StringEntity("12345", Charset.forName("UTF-8"));
+        BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
+        response.setEntity(emailResponseEntity);
+        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn(response);
+        doReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build())
+                .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
+
+        OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
+        org1.setOid("1.2.3.4.1");
+        org1.setNimi(new TextGroupMapDto().put("FI", "Kutsuttu organisaatio").asMap());
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.1")))
+                .willReturn(Optional.of(org1));
+        OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
+        org1.setOid("1.2.3.4.5");
+        org1.setNimi(new TextGroupMapDto().put("FI", "Käyttäjän organisaatio").asMap());
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(org2));
+
+        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
+                kayttoOikeusRyhma("kayttoOikeusRyhma")
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))));
+        OrganisaatioViite organisaatioViite = populate(viite(kayttoOikeusRyhma("RYHMA2")
+                        .withKuvaus(text("fi", "Käyttöoikeusryhmä")),
+                "1.2.3.4.5"));
+        populate(kayttoOikeusRyhmaMyontoViite(tapahtuma.getKayttoOikeusRyhma().getId(),
+                organisaatioViite.getKayttoOikeusRyhma().getId()));
+
+        KutsuCreateDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KayttoOikeusRyhmaDto();
+        kutsuKayttoOikeusRyhma.setId(organisaatioViite.getKayttoOikeusRyhma().getId());
+        given(this.organisaatioClient.getActiveChildOids("1.2.3.4.5"))
+                .willReturn(Lists.newArrayList("1.2.3.4.5", "1.2.3.4.1"));
+
+        KutsuCreateDto kutsu = new KutsuCreateDto();
+        kutsu.setEtunimi("Etu");
+        kutsu.setSukunimi("Suku");
+        kutsu.setSahkoposti("example@example.com");
+        kutsu.setAsiointikieli(Asiointikieli.fi);
+        kutsu.setOrganisaatiot(new LinkedHashSet<>());
+        KutsuCreateDto.KutsuOrganisaatioDto kutsuOrganisaatio = new KutsuCreateDto.KutsuOrganisaatioDto();
+        kutsuOrganisaatio.setOrganisaatioOid("1.2.3.4.1");
+        kutsuOrganisaatio.setKayttoOikeusRyhmat(Stream.of(kutsuKayttoOikeusRyhma).collect(toSet()));
+        kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
+
+        long id = kutsuService.createKutsu(kutsu);
+        KutsuReadDto tallennettu = kutsuService.getKutsu(id);
+
+        assertThat(tallennettu.getAsiointikieli()).isEqualByComparingTo(Asiointikieli.fi);
+        assertThat(tallennettu.getOrganisaatiot())
+                .hasSize(1)
+                .flatExtracting(KutsuReadDto.KutsuOrganisaatioDto::getKayttoOikeusRyhmat)
+                .hasSize(1)
+                .extracting(KutsuReadDto.KayttoOikeusRyhmaDto::getNimi)
+                .flatExtracting(TextGroupMapDto::getTexts)
+                .extracting("fi")
+                .containsExactly("Käyttöoikeusryhmä");
+
+        Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
     }
 

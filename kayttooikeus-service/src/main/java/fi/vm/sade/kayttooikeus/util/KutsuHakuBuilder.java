@@ -76,7 +76,7 @@ public class KutsuHakuBuilder {
 
         if (!CollectionUtils.isEmpty(this.kutsuCriteria.getOrganisaatioOids())) {
             organisaatioOidLimit = this.permissionCheckerService
-                    .hasOrganisaatioInHierarcy(this.kutsuCriteria.getOrganisaatioOids(), PALVELU_HENKILONHALLINTA, ROLE_CRUD);
+                    .hasOrganisaatioInHierarchy(this.kutsuCriteria.getOrganisaatioOids(), PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         }
         else {
             organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository

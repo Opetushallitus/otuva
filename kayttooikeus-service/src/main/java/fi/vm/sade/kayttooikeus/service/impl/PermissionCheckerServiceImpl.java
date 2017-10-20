@@ -361,12 +361,12 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     @Override
-    public boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid) {
-        return this.hasOrganisaatioInHierarcy(Sets.newHashSet(requiredOrganiaatioOid)).isEmpty();
+    public boolean hasOrganisaatioInHierarchy(String requiredOrganiaatioOid) {
+        return this.hasOrganisaatioInHierarchy(Sets.newHashSet(requiredOrganiaatioOid)).isEmpty();
     }
 
     @Override
-    public Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids) {
+    public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids) {
         List<String> currentUserOrgnisaatios = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid());
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> currentUserOrgnisaatios.stream()
@@ -376,7 +376,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     @Override
-    public Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
+    public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
         Set<String> casRoles = this.getCasRoles();
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> casRoles.stream()
                 .anyMatch(casRole -> casRole.contains(palvelu)

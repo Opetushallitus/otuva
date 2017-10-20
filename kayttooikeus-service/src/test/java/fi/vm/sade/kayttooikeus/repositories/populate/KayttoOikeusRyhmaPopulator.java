@@ -47,9 +47,11 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
     
     public static Populator<OrganisaatioViite> viite(Populator<KayttoOikeusRyhma> ryhma, String organisaatioTyyppi) {
         return em -> {
+            KayttoOikeusRyhma kayttoOikeusRyhma = ryhma.apply(em);
             OrganisaatioViite viite = new OrganisaatioViite();
-            viite.setKayttoOikeusRyhma(ryhma.apply(em));
+            viite.setKayttoOikeusRyhma(kayttoOikeusRyhma);
             viite.setOrganisaatioTyyppi(organisaatioTyyppi);
+            kayttoOikeusRyhma.addOrganisaatioViite(viite);
             em.persist(viite);
             return viite;
         };

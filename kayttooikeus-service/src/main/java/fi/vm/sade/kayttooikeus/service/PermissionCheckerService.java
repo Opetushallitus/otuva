@@ -52,12 +52,16 @@ public interface PermissionCheckerService {
      */
     boolean isCurrentUserMiniAdmin(String palvelu, String rooli);
 
-    boolean hasOrganisaatioInHierarcy(String requiredOrganiaatioOid);
+    boolean hasOrganisaatioInHierarchy(String requiredOrganiaatioOid);
 
-    Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOid);
+    Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOid);
 
-    Set<String> hasOrganisaatioInHierarcy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
+    Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
 
+    /**
+     * @param kayttooikeusryhmaId käyttöoikeusryhmästä joka halutaan myöntää
+     * @return isValid
+     */
     boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId);
 
     boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
