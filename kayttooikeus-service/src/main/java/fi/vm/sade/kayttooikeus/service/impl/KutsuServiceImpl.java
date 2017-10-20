@@ -18,10 +18,10 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +33,11 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +46,6 @@ public class KutsuServiceImpl implements KutsuService {
     private final HenkiloDataRepository henkiloDataRepository;
 
     private final OrikaBeanMapper mapper;
-    private final KutsuValidator validator;
 
     private final EmailService emailService;
     private final LocalizationService localizationService;
@@ -86,12 +88,19 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public long createKutsu(KutsuCreateDto dto) {
-         if (!kutsuRepository.findBySahkopostiAndTila(dto.getSahkoposti(), AVOIN).isEmpty()) {
-             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
-         }
+    public long createKutsu(KutsuCreateDto kutsuCreateDto) {
+        if (!this.kutsuRepository.findBySahkopostiAndTila(kutsuCreateDto.getSahkoposti(), AVOIN).isEmpty()) {
+            throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
+        }
+        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+                this.throwIfNotInHierarchy(kutsuCreateDto.getOrganisaatiot());
+                this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
+            }
+            this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
+        }
 
-        final Kutsu newKutsu = mapper.map(dto, Kutsu.class);
+        final Kutsu newKutsu = mapper.map(kutsuCreateDto, Kutsu.class);
 
         newKutsu.setId(null);
         newKutsu.setAikaleima(LocalDateTime.now());
@@ -100,8 +109,6 @@ public class KutsuServiceImpl implements KutsuService {
         newKutsu.setTila(AVOIN);
         newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
 
-        validator.validate(newKutsu);
-
         Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
         
         this.emailService.sendInvitationEmail(persistedNewKutsu);
@@ -109,6 +116,39 @@ public class KutsuServiceImpl implements KutsuService {
         return persistedNewKutsu.getId();
     }
 
+    private void throwIfNotInHierarchy(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+        Set<String> organisaatioOids = kutsuOrganisaatioDtos.stream()
+                .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                .collect(Collectors.toSet());
+        Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
+        if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
+            organisaatioOids.removeAll(accessibleOrganisationOids);
+            throw new ForbiddenException("No access to organisation through hierarchy to oids "
+                    + organisaatioOids.stream().collect(Collectors.joining(", ")));
+        }
+    }
+
+    private void organisaatioViiteLimitationsAreValidThrows(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+        kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
+                .forEach(kayttoOikeusRyhmaDto -> {
+                    if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kayttoOikeusRyhmaDto.getId())) {
+                        throw new ForbiddenException("Target organization has invalid organization type for group "
+                                + kayttoOikeusRyhmaDto.getId());
+                    }
+                }));
+    }
+
+    private void kayttooikeusryhmaLimitationsAreValid(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+        // The granting person's limitations must be checked always since there there shouldn't be a situation where the
+        // the granting person doesn't have access rights limitations (except admin users who have full access)
+        kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
+                .forEach(kayttoOikeusRyhmaDto -> {
+                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttoOikeusRyhmaDto.getId())) {
+                        throw new ForbiddenException("User doesn't have access rights to grant this group for group "
+                                + kayttoOikeusRyhmaDto.getId());
+                    }
+                }));
+    }
 
     @Override
     @Transactional(readOnly = true)
