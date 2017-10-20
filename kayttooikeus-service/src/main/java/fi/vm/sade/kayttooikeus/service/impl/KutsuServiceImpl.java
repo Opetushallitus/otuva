@@ -11,6 +11,7 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -94,7 +95,7 @@ public class KutsuServiceImpl implements KutsuService {
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
-                this.throwIfNotInHierarchy(kutsuCreateDto.getOrganisaatiot());
+                this.throwIfNotInHierarchy(kutsuCreateDto);
                 this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             }
             this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
@@ -116,14 +117,17 @@ public class KutsuServiceImpl implements KutsuService {
         return persistedNewKutsu.getId();
     }
 
-    private void throwIfNotInHierarchy(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
-        Set<String> organisaatioOids = kutsuOrganisaatioDtos.stream()
+    private void throwIfNotInHierarchy(KutsuCreateDto kutsuCreateDto) {
+        Set<String> organisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
                 .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
                 .collect(Collectors.toSet());
+        this.throwIfNotInHierarchy(organisaatioOids);
+    }
+    private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
         Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
         if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
             organisaatioOids.removeAll(accessibleOrganisationOids);
-            throw new ForbiddenException("No access to organisation through hierarchy to oids "
+            throw new ForbiddenException("No access through organisation hierarchy to oids "
                     + organisaatioOids.stream().collect(Collectors.joining(", ")));
         }
     }
@@ -167,8 +171,19 @@ public class KutsuServiceImpl implements KutsuService {
                 .filter(kutsu -> this.permissionCheckerService.isCurrentUserAdmin()
                         || kutsu.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid()))
                 .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(deletedKutsu);
+
         deletedKutsu.poista(this.permissionCheckerService.getCurrentUserOid());
         return deletedKutsu;
+    }
+
+    private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {
+        if (!this.permissionCheckerService.isCurrentUserAdmin()
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+            this.throwIfNotInHierarchy(deletedKutsu.getOrganisaatiot().stream()
+                    .map(KutsuOrganisaatio::getOrganisaatioOid)
+                    .collect(Collectors.toSet()));
+        }
     }
 
     @Override
