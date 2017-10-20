@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,13 @@ public interface KutsuService {
     long createKutsu(KutsuCreateDto dto);
 
     KutsuReadDto getKutsu(Long id);
+
+    /**
+     * Kutsun uusiminen muuttamatta kutsun sisältöä. Jos ei ole oma kutsu vaatii tavallisilta käyttäjiltä
+     * authorisoinnin organisaatiohierarkian kautta.
+     * @param id kutsun ID
+     */
+    void renewKutsu(long id);
 
     Kutsu deleteKutsu(long id);
 

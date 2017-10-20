@@ -53,6 +53,7 @@ public class KutsuController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
+    @ApiOperation("Uuden kutsun luominen. Vaatii samat oikeudet kuin uuden käyttöoikeuden myöntäminen.")
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public ResponseEntity<Long> create(@Validated @RequestBody KutsuCreateDto kutsu) {
@@ -68,12 +69,19 @@ public class KutsuController {
         return kutsuService.getKutsu(id);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public void delete(@PathVariable Long id) {
         kutsuService.deleteKutsu(id);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @ApiOperation("Kutsun uusiminen muuttamatta kutsun sisältöä eikä uusimisesta jää tietoa")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    public void renew(@PathVariable Long id) {
+        this.kutsuService.renewKutsu(id);
     }
 
     @RequestMapping(value = "/{temporaryToken}/token/identifier", method = RequestMethod.PUT)

@@ -166,15 +166,25 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public Kutsu deleteKutsu(long id) {
-        Kutsu deletedKutsu = kutsuRepository.findById(id)
-                .filter(kutsu -> this.permissionCheckerService.isCurrentUserAdmin()
-                        || kutsu.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid()))
+    public void renewKutsu(long id) {
+        Kutsu kutsuToRenew = kutsuRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Kutsu not found"));
-        this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(deletedKutsu);
+        if (!kutsuToRenew.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid())) {
+            this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(kutsuToRenew);
+        }
+        kutsuToRenew.setAikaleima(LocalDateTime.now());
+    }
 
-        deletedKutsu.poista(this.permissionCheckerService.getCurrentUserOid());
-        return deletedKutsu;
+    @Override
+    @Transactional
+    public Kutsu deleteKutsu(long id) {
+        Kutsu kutsuToDelete = kutsuRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        if (!kutsuToDelete.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid())) {
+            this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(kutsuToDelete);
+        }
+        kutsuToDelete.poista(this.permissionCheckerService.getCurrentUserOid());
+        return kutsuToDelete;
     }
 
     private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {

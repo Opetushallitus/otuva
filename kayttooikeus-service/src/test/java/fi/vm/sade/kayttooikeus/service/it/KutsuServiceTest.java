@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.repositories.populate.*;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
@@ -416,15 +417,15 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertNotNull(kutsu.getPoistettu());
     }
     
-    @Test(expected = NotFoundException.class)
+    @Test(expected = ForbiddenException.class)
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_HENKILONHALLINTA_CRUD")
-    public void deleteKutsuOtherKutsujaFailsTest() {
+    public void deleteKutsuOtherKutsujaWithoutProperAuthorityFails() {
         Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
                 .kutsuja("1.2.5")
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
         );
-        kutsuService.deleteKutsu(kutsu.getId());
+        this.kutsuService.deleteKutsu(kutsu.getId());
     }
 
     @Test
