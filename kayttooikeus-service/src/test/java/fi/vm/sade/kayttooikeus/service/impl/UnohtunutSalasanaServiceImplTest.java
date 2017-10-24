@@ -86,7 +86,7 @@ public class UnohtunutSalasanaServiceImplTest {
         assertThat(varmennusPoletti.getTyyppi()).isEqualByComparingTo(VarmennusPoletti.VarmennusPolettiTyyppi.HAVINNYT_SALASANA);
         assertThat(varmennusPoletti.getVoimassa()).isAfter(now);
         verify(oppijanumerorekisteriClient).listOidByYhteystieto(eq("example@example.com"));
-        verify(emailService).sendEmailReset(eq(henkiloDto), eq("example@example.com"), eq("poletti1"));
+        verify(emailService).sendEmailReset(eq(henkiloDto), eq("example@example.com"), eq("poletti1"), any());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class UnohtunutSalasanaServiceImplTest {
         impl.lahetaPoletti("kayttajatunnus1");
 
         verify(oppijanumerorekisteriClient).listOidByYhteystieto(eq("example@example.com"));
-        verify(emailService, never()).sendEmailReset(any(), any(), any());
+        verify(emailService, never()).sendEmailReset(any(), any(), any(), any());
     }
 
     @Test
@@ -148,7 +148,7 @@ public class UnohtunutSalasanaServiceImplTest {
         impl.lahetaPoletti("kayttajatunnus1");
 
         verify(oppijanumerorekisteriClient).listOidByYhteystieto(eq("example@example.com"));
-        verify(emailService, never()).sendEmailReset(any(), any(), any());
+        verify(emailService, never()).sendEmailReset(any(), any(), any(), any());
     }
 
     @Test
@@ -158,7 +158,7 @@ public class UnohtunutSalasanaServiceImplTest {
 
         impl.lahetaPoletti("kayttajatunnus1");
 
-        verify(emailService, never()).sendEmailReset(any(), any(), any());
+        verify(emailService, never()).sendEmailReset(any(), any(), any(), any());
     }
 
 }

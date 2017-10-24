@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Optional.of;
 import static org.apache.http.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +66,16 @@ public class EmailServiceTest extends AbstractServiceTest {
         kielisyys.setKieliKoodi("FI");
         perustiedot.setAsiointiKieli(kielisyys);
         given(oppijanumerorekisteriClient.getHenkilonPerustiedot("1.2.3.4.5")).willReturn(of(perustiedot));
-        given(oppijanumerorekisteriClient.getHenkilonYhteystiedot("1.2.3.4.5")).willReturn(new HenkilonYhteystiedotViewDto()
-            .put(YhteystietojenTyypit.TYOOSOITE, YhteystiedotDto.builder().sahkoposti("testi@example.com").build()));
+        HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto
+                .builder()
+                .ryhmaKuvaus(YhteystietojenTyypit.TYOOSOITE)
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                        .yhteystietoArvo("testi@example.com")
+                        .build())
+                .build()));
+        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any(EmailData.class)))
                 .willReturn(new BasicHttpResponse(new BasicStatusLine(HTTP_1_1, 200, "")));
         emailService.sendExpirationReminder("1.2.3.4.5", asList(
@@ -106,6 +115,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     @Test
     public void sendEmailAnomusAccepted() {
         HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setOidHenkilo("1.2.3.4.5");
         henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(CreateUtil.createYhteystietoSahkoposti("arpa@kuutio.fi", YhteystietojenTyypit.MUU_OSOITE),
                 CreateUtil.createYhteystietoSahkoposti("arpa2@kuutio.fi", YhteystietojenTyypit.TYOOSOITE),
                 CreateUtil.createYhteystietoSahkoposti("arpa3@kuutio.fi", YhteystietojenTyypit.VAPAA_AJAN_OSOITE)));
@@ -134,7 +144,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
         assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(3)
-                .extracting("name").containsExactlyInAnyOrder("anomuksenTila", "hylkaamisperuste", "roolit");
+                .extracting("name").containsExactlyInAnyOrder("vastaanottaja", "roolit", "linkki");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("1.2.3.4.5");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
@@ -172,9 +182,9 @@ public class EmailServiceTest extends AbstractServiceTest {
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
-        assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(6)
+        assertThat(emailData.getRecipient().get(0).getRecipientReplacements())
                 .extracting("name")
-                .containsExactlyInAnyOrder("url", "etunimi", "sukunimi", "organisaatiot", "kutsuja", "voimassa");
+                .containsExactlyInAnyOrder("vastaanottaja", "organisaatiot", "linkki", "kutsuja", "voimassa");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
