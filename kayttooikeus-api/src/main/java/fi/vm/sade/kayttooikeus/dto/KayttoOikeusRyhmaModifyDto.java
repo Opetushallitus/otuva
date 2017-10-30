@@ -28,6 +28,7 @@ public class KayttoOikeusRyhmaModifyDto {
     private String rooliRajoite;
     private List<Long> slaveIds;
     private boolean passivoitu;
+    private boolean ryhmaRestriction;
 
 
     /**

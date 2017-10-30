@@ -44,6 +44,9 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     @Column(name = "rooli_rajoite")
     private String rooliRajoite;
 
+    @Column(name = "ryhma_restriction", nullable = false)
+    private boolean ryhmaRestriction;
+
     public void addOrganisaatioViite(OrganisaatioViite organisaatioViite) {
         organisaatioViite.setKayttoOikeusRyhma(this);
         this.organisaatioViite.add(organisaatioViite);
