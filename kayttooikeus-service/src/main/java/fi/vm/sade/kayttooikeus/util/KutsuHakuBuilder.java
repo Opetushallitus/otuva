@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.util;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -93,14 +94,14 @@ public class KutsuHakuBuilder {
     }
 
     private void prepareCommon() {
-        if (BooleanUtils.isTrue(this.kutsuCriteria.getOphView())) {
+        if (KutsuView.OPH.equals(this.kutsuCriteria.getView())) {
             this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
             this.kutsuCriteria.setSubOrganisations(false);
         }
-        if (BooleanUtils.isTrue(this.kutsuCriteria.getOnlyOwnKutsusView())) {
+        if (KutsuView.ONLY_OWN_KUTSUS.equals(this.kutsuCriteria.getView())) {
             this.kutsuCriteria.setKutsujaOid(this.permissionCheckerService.getCurrentUserOid());
         }
-        if (BooleanUtils.isTrue(this.kutsuCriteria.getKayttooikeusryhmaView())) {
+        if (KutsuView.KAYTTOOIKEUSRYHMA.equals(this.kutsuCriteria.getView())) {
             this.kutsuCriteria.setKutsujaKayttooikeusryhmaIds(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                     .findValidMyonnettyKayttooikeus(this.permissionCheckerService.getCurrentUserOid()).stream()
                     .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)

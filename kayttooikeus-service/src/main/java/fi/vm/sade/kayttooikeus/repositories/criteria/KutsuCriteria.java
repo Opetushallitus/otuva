@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
@@ -28,11 +29,8 @@ public class KutsuCriteria extends BaseCriteria {
     private Set<Long> kutsujaKayttooikeusryhmaIds;
     private String searchTerm;
     private Boolean subOrganisations;
-    // Views
-    private Boolean onlyOwnKutsusView;
-    private Boolean adminView;
-    private Boolean ophView;
-    private Boolean kayttooikeusryhmaView;
+
+    private KutsuView view;
 
     public BooleanBuilder onCondition(QKayttoOikeusRyhma kutsuKayttooikeusryhma, QKayttoOikeusRyhma kutsuttuKayttooikeusryhma) {
         QKutsu kutsu = QKutsu.kutsu;
@@ -62,7 +60,7 @@ public class KutsuCriteria extends BaseCriteria {
                     .forEach(searchTerm -> builder.and(kutsu.etunimi.containsIgnoreCase(searchTerm)
                             .or(kutsu.sukunimi.containsIgnoreCase(searchTerm))));
         }
-        if (BooleanUtils.isTrue(this.adminView)) {
+        if (KutsuView.ADMIN.equals(this.view)) {
             builder.and(kutsuKayttooikeusryhma.kayttoOikeus.any().rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName()));
         }
         if (!CollectionUtils.isEmpty(this.kayttooikeusryhmaIds)) {

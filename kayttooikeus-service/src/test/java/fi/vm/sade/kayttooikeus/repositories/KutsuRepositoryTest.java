@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
@@ -89,7 +90,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                                 .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, "READ")))
                 )
         );
-        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().adminView(true).build(),
+        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().view(KutsuView.ADMIN).build(),
                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(),
                 null, null);
         assertThat(kutsuList).flatExtracting(Kutsu::getSahkoposti).containsExactly("a@example.com");

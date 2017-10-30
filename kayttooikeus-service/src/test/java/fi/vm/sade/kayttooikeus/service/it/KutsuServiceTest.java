@@ -6,6 +6,7 @@ import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
 import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
@@ -171,7 +172,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         // Does not allow changing organisaatio with ophView
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
                 Sort.Direction.ASC,
-                KutsuCriteria.builder().kutsujaOrganisaatioOid("1.2.3.4.5").ophView(true).build(),
+                KutsuCriteria.builder().kutsujaOrganisaatioOid("1.2.3.4.5").view(KutsuView.OPH).build(),
                 null,
                 null);
         assertThat(kutsuList)
@@ -199,7 +200,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
                 Sort.Direction.ASC,
-                KutsuCriteria.builder().kutsujaKayttooikeusryhmaIds(Sets.newHashSet(999L)).kayttooikeusryhmaView(true).build(),
+                KutsuCriteria.builder().kutsujaKayttooikeusryhmaIds(Sets.newHashSet(999L)).view(KutsuView.KAYTTOOIKEUSRYHMA).build(),
                 null,
                 null);
         assertThat(kutsuList)
