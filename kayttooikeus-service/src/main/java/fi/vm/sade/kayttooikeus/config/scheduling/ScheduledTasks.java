@@ -9,8 +9,6 @@ import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -32,8 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "kayttooikeus.scheduling.enabled")
 public class ScheduledTasks {
-    private static final Logger LOG = LoggerFactory.getLogger(ScheduledTasks.class);
-
     private final OrganisaatioService organisaatioService;
     private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
     private final TaskExecutorService taskExecutorService;
@@ -95,7 +91,7 @@ public class ScheduledTasks {
         for(long page = 0; !this.henkiloCacheService.saveAll(page*count, count, null); page++) {
             // Escape condition in case of inifine loop (100M+ henkilos)
             if (page > 100000) {
-                LOG.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
+                log.error("Infinite loop detected with page "+ page + " and count " + count + ". Henkilo cache might not be fully updated!");
                 break;
             }
         }
