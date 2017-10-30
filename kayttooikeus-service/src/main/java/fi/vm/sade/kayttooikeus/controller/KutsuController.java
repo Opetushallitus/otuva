@@ -43,7 +43,7 @@ public class KutsuController {
             notes = "Haun tulos riippuu käyttäjän oikeuksista (rekisterinpitäjä, Oph-virkailija, normaali käyttäjä)")
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
-    public List<KutsuReadDto> listAvoinKutsus(
+    public List<KutsuReadDto> listKutsus(
             KutsuCriteria kutsuCriteria,
             @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
             @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
@@ -91,7 +91,6 @@ public class KutsuController {
                                         @RequestBody KutsuUpdateDto kutsuUpdateDto) {
         this.kutsuService.updateHakaIdentifierToKutsu(temporaryToken, kutsuUpdateDto);
     }
-
 
 
     /**
