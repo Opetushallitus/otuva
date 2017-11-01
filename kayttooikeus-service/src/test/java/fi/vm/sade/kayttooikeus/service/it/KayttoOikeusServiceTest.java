@@ -274,6 +274,8 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .palveluName("HENKILOHALLINTA")
                         .build()))
                 .organisaatioTyypit(singletonList("org tyyppi"))
+                .passivoitu(false)
+                .ryhmaRestriction(false)
                 .build();
 
         long createdRyhmaId = kayttoOikeusService.createKayttoOikeusRyhma(ryhma);
@@ -285,6 +287,8 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertTrue(createdRyhma.getKuvaus().get("FI").contentEquals("ryhmäkuvaus"));
         assertEquals(1, createdRyhma.getOrganisaatioViite().size());
         assertEquals("org tyyppi", createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
+        assertFalse(createdRyhma.isPassivoitu());
+        assertFalse(createdRyhma.isRyhmaRestriction());
 
         ryhma.setNimi(new TextGroupDto().put("FI", "uusi nimi"));
         ryhma.setKuvaus(new TextGroupDto().put("FI", "uusi kuvaus"));

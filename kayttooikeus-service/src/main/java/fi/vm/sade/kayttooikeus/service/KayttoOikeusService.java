@@ -44,6 +44,8 @@ public interface KayttoOikeusService {
 
     void updateKayttoOikeusForKayttoOikeusRyhma(long id, KayttoOikeusRyhmaModifyDto ryhmaData);
 
+    void passivoiKayttooikeusryhma(long id);
+
     List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusList(Map<String, String> kayttoOikeusList);
 
     AuthorizationDataDto findAuthorizationDataByOid(String oid);
