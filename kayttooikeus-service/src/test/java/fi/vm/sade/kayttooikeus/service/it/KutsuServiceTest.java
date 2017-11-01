@@ -431,12 +431,15 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     public void getByTemporaryToken() {
-        populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi").temporaryToken("123"));
+        populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .temporaryToken("123")
+                .hakaIdentifier("hakaidentifier"));
         KutsuReadDto kutsu = this.kutsuService.getByTemporaryToken("123");
         assertThat(kutsu.getAsiointikieli()).isEqualTo(Asiointikieli.fi);
         assertThat(kutsu.getEtunimi()).isEqualTo("arpa");
         assertThat(kutsu.getSukunimi()).isEqualTo("kuutio");
         assertThat(kutsu.getSahkoposti()).isEqualTo("arpa@kuutio.fi");
+        assertThat(kutsu.getHakaIdentifier()).isTrue();
     }
 
     @Test
