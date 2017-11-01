@@ -20,7 +20,6 @@ public class KutsuReadDto {
     private LocalDateTime aikaleima;
     private Asiointikieli asiointikieli;
     private Set<KutsuOrganisaatioDto> organisaatiot = new HashSet<>();
-    private String hakaIdentifier;
 
     @Getter
     @Setter

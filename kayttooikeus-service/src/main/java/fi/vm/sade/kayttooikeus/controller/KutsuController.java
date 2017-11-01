@@ -49,7 +49,7 @@ public class KutsuController {
             @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
             @RequestParam(required = false) Long offset,
             @RequestParam(required = false, defaultValue = "20") Long amount) {
-        return kutsuService.listKutsus(sortBy, direction, kutsuCriteria, offset, amount);
+        return this.kutsuService.listKutsus(sortBy, direction, kutsuCriteria, offset, amount);
     }
 
     @RequestMapping(method = RequestMethod.POST)

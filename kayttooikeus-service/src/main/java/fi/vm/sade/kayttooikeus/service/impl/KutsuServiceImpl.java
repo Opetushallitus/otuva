@@ -211,7 +211,7 @@ public class KutsuServiceImpl implements KutsuService {
     public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             // Validation
             this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
             this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
@@ -245,18 +245,18 @@ public class KutsuServiceImpl implements KutsuService {
     private void createOrUpdateCredentialsAndPrivileges(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String henkiloOid) {
         Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(henkiloOid);
         // Create username/password and haka identifier if provided
-        if(StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             // If haka identifier is provided add it to henkilo identifiers
             Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
             this.identificationService.updateHakatunnuksetByHenkiloAndIdp(henkiloOid, hakaIdentifiers);
-            if(!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
+            if (!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
                 this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
             }
         }
         this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi(),
                 LdapSynchronizationService.LdapSynchronizationType.ASAP);
-        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, henkiloCreateByKutsuDto.getPassword());
         }
 
