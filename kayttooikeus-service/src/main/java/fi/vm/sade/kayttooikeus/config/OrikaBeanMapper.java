@@ -15,6 +15,7 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.converter.builtin.PassThroughConverter;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import ma.glasnost.orika.metadata.Property;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -49,11 +50,6 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
         factory.classMap(KutsuCreateDto.KutsuOrganisaatioDto.class, KutsuOrganisaatio.class)
                 .fieldAToB("kayttoOikeusRyhmat", "ryhmat")
-                .byDefault()
-                .register();
-        factory.classMap(Kutsu.class, KutsuReadDto.class)
-                .fieldAToB("kieliKoodi", "asiointikieli")
-                .fieldBToA("asiointikieli", "kieliKoodi")
                 .byDefault()
                 .register();
         factory.classMap(KutsuOrganisaatio.class, KutsuReadDto.KutsuOrganisaatioDto.class)
