@@ -19,9 +19,21 @@ public interface OrganisaatioClient {
 
     List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
 
+    /**
+     * @param organisaatioOid Haettava organisaatio
+     * @return Haetun organisaation ja tämän yläorganisaatioiden oidit
+     */
     List<String> getParentOids(String organisaatioOid);
 
+    /**
+     * @param organisaatioOid Haettava organisaatio
+     * @return Haetun organisaation ja tämän yläorganisaatioiden aktiiviset oidit
+     */
     List<String> getActiveParentOids(String organisaatioOid);
 
+    /**
+     * @param organisaatioOid Haettava organisaatio
+     * @return Haetun organisaation ja tämän aliorganisaatioiden aktiiviset oidit
+     */
     List<String> getActiveChildOids(String organisaatioOid);
 }
