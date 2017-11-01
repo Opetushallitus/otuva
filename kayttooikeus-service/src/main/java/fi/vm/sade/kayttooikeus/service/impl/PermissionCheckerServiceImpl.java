@@ -39,19 +39,25 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final Logger LOG = LoggerFactory.getLogger(PermissionCheckerService.class);
     private static CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode("henkilo.authentication-service");
     private static ObjectMapper objectMapper = new ObjectMapper();
-    private static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
+    public static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
     private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
     public static final String PALVELU_HENKILONHALLINTA = "HENKILONHALLINTA";
     public static final String PALVELU_ANOMUSTENHALLINTA = "ANOMUSTENHALLINTA";
     public static final String ROLE_ADMIN = "OPHREKISTERI";
     public static final String ROLE_CRUD = "CRUD";
+
+
+    public static final Pattern oidRegexp = Pattern.compile("([1-9][0-9]{0,3}|0)(\\.([1-9][0-9]{0,3}|0))+\\.\\d{5,13}");
 
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -99,7 +105,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
-        return personOid.equals(currentUserOid) || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, this.getCasRoles());
+        return personOid.equals(currentUserOid)
+                || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
@@ -167,7 +174,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
-        if (isSuperUser(callingUserRoles)) {
+        if (this.isCurrentUserAdmin()) {
             return true;
         }
 
@@ -230,15 +237,11 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
-            if (!this.hasRoleForOrganization(oid, allowedRolesWithoutPrefix, this.getCasRoles())) {
+            if (!this.hasRoleForOrganisation(oid, allowedRolesWithoutPrefix)) {
                 return false;
             }
         }
         return true;
-    }
-
-    private static boolean isSuperUser(Set<String> roles) {
-        return roles.contains(ROLE_HENKILONHALLINTA_PREFIX + ROLE_ADMIN);
     }
 
     private static PermissionCheckResponseDto checkPermissionFromExternalService(String serviceUrl,
@@ -292,31 +295,43 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean hasRoleForOrganization(String orgOid, final List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
-        if (isSuperUser(callingUserRoles)) {
+    public boolean hasRoleForOrganisation(String orgOid, final List<String> allowedRolesWithoutPrefix) {
+        if (this.isCurrentUserAdmin()) {
             return true;
         }
 
         final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
 
-        Optional<OrganisaatioPerustieto> oh = this.organisaatioClient
-                .listActiveOrganisaatioPerustiedotByOidRestrictionList(Collections.singleton(orgOid))
-                .stream().findFirst();
-        if (!oh.isPresent()) {
+        List<String> orgAndParentOids = this.organisaatioClient.getActiveParentOids(orgOid);
+        if (orgAndParentOids.isEmpty()) {
             LOG.warn("Organization " + orgOid + " not found!");
             return false;
         }
-        final OrganisaatioPerustieto org = oh.get();
-        Set<String> orgAndParentOids = Sets.newHashSet(org.getParentOidPath().split("/"));
-        orgAndParentOids.add(org.getOid());
 
-        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream().map(orgOrParentOid ->
-                allowedRoles.stream().map(role -> role.concat("_" + orgOrParentOid)).collect(Collectors.toCollection(HashSet::new)))
+        Set<Set<String>> candidateRolesByOrg = orgAndParentOids.stream()
+                .map(orgOrParentOid -> allowedRoles.stream()
+                        .map(role -> role.concat("_" + orgOrParentOid))
+                        .collect(Collectors.toCollection(HashSet::new)))
                 .collect(Collectors.toCollection(HashSet::new));
 
         Set<String> flattenedCandidateRolesByOrg = Sets.newHashSet(Iterables.concat(candidateRolesByOrg));
 
-        return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, callingUserRoles);
+        return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, this.getCasRoles());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role) {
+        return this.getCasRoles().stream()
+                .filter(casRole -> casRole.contains(palvelu + "_" + role))
+                .flatMap(casRole -> {
+                    Matcher matchingOid = oidRegexp.matcher(casRole);
+                    if (matchingOid.find()) {
+                        return Stream.of(matchingOid.group());
+                    }
+                    return Stream.empty();
+                })
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -336,14 +351,15 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public Set<String> getCasRoles(){
-        Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        return Sets.newHashSet(Iterables.transform(authorities, (Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
     }
 
     // Rekisterinpitäjä
     @Override
     public boolean isCurrentUserAdmin() {
-        return this.isCurrentUserMiniAdmin("HENKILONHALLINTA", ROLE_ADMIN);
+        return this.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_ADMIN);
     }
 
     // OPH virkailija
@@ -355,8 +371,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // OPH virkailija
     @Override
     public boolean isCurrentUserMiniAdmin(String palvelu, String rooli) {
-        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu)
-                && role.contains(rooli)
+        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_1")
                 && role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
@@ -379,8 +394,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
         Set<String> casRoles = this.getCasRoles();
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> casRoles.stream()
-                .anyMatch(casRole -> casRole.contains(palvelu)
-                        && casRole.contains(rooli)
+                .anyMatch(casRole -> casRole.contains(palvelu + "_" + rooli)
                         && this.organisaatioClient.getActiveParentOids(requiredOrganiaatioOid).stream()
                         .anyMatch(casRole::contains)))
                 .collect(Collectors.toSet());

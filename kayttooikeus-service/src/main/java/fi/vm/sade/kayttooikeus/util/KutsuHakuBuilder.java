@@ -80,8 +80,7 @@ public class KutsuHakuBuilder {
                     .hasOrganisaatioInHierarchy(this.kutsuCriteria.getOrganisaatioOids(), PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         }
         else {
-            organisaatioOidLimit = new HashSet<>(this.organisaatioHenkiloRepository
-                    .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()));
+            organisaatioOidLimit = this.permissionCheckerService.getCurrentUserOrgnisationsWithPalveluRole(PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         }
         if (BooleanUtils.isTrue(this.kutsuCriteria.getSubOrganisations())) {
             organisaatioOidLimit = organisaatioOidLimit.stream()
