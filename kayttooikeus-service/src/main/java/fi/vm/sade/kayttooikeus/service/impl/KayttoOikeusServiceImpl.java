@@ -473,21 +473,28 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {
+
+                    if (organisaatioOid.startsWith(this.commonProperties.getGroupOrganizationId()) && kayttoOikeusRyhma.isRyhmaRestriction())  {
+                        return true;
+                    }
+
                     if (isEmpty(kayttoOikeusRyhma.getOrganisaatioViite()) && !isOphOrganisation) {
                         return false;
                     }
+
                     boolean noOrgLimits = !isEmpty(kayttoOikeusRyhma.getOrganisaatioViite())
-                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, hakuTulos, kayttoOikeusRyhma.getOrganisaatioViite());
+                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, hakuTulos, kayttoOikeusRyhma);
                     return !noOrgLimits;
                 }).collect(toList());
     }
 
-    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioPerustieto> hakuTulos, List<OrganisaatioViiteDto> viites) {
-        Set<String> tyyppis = viites.stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
+    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioPerustieto> hakuTulos, KayttoOikeusRyhmaDto kayttoOikeusRyhma) {
+        Set<String> tyyppis = kayttoOikeusRyhma.getOrganisaatioViite().stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
 
         if (organisaatioOid.startsWith(this.commonProperties.getGroupOrganizationId())) {
             return oidIsFoundInViites(this.commonProperties.getGroupOrganizationId(), tyyppis);
         }
+
         return oidIsFoundInViites(organisaatioOid, tyyppis) || hakuTulos.stream()
                 .filter(perustieto -> !isEmpty(perustieto.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));
