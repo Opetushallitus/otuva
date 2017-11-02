@@ -173,6 +173,15 @@ public class KayttoOikeusRyhmaController {
         return kayttoOikeusService.findKayttoOikeusRyhma(id);
     }
 
+    @RequestMapping(value = "/{id}/passivoi", method = RequestMethod.PUT)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation(value = "Passivoi käyttöoikeusryhmän.",
+            notes = "Passivoi käyttöoikeusryhmän. ")
+    public void passivoiKayttoOikeusRyhma(@PathVariable("id") Long id) {
+        kayttoOikeusService.passivoiKayttooikeusryhma(id);
+    }
+
     @RequestMapping(value = "/ryhmasByKayttooikeus", method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"

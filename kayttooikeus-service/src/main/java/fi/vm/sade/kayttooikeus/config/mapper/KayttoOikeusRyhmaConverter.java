@@ -21,6 +21,8 @@ public class KayttoOikeusRyhmaConverter extends CustomConverter<KayttoOikeusRyhm
                 .tunniste(source.getTunniste())
                 .rooliRajoite(source.getRooliRajoite())
                 .nimi(new TextGroupDto(source.getNimi().getId()))
+                .ryhmaRestriction(source.isRyhmaRestriction())
+                .passivoitu(source.isPassivoitu())
                 .organisaatioViite(source.getOrganisaatioViite().stream().map(organisaatioViite -> OrganisaatioViiteDto.builder()
                         .id(organisaatioViite.getId())
                         .organisaatioTyyppi(organisaatioViite.getOrganisaatioTyyppi())

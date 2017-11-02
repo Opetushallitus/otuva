@@ -11,6 +11,8 @@ import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -19,10 +21,13 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.*;
 import java.util.function.Function;
@@ -40,6 +45,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     public static final String SV = "SV";
     public static final String EN = "EN";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(KayttoOikeusServiceImpl.class);
     private final OrganisaatioClient organisaatioClient;
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
@@ -51,10 +57,11 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final PalveluRepository palveluRepository;
     private final OrganisaatioViiteRepository organisaatioViiteRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
-
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-
     private final CommonProperties commonProperties;
+    private final PermissionCheckerService permissionCheckerService;
+    private final HenkiloDataRepository henkiloDataRepository;
+    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 
     @Override
     public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
@@ -182,8 +189,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public KayttoOikeusRyhmaDto findKayttoOikeusRyhma(long id) {
-        KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhmaRepository.findByRyhmaId(id).orElseThrow(()
-                -> new NotFoundException("kayttooikeusryhma not found")), KayttoOikeusRyhmaDto.class);
+        KayttoOikeusRyhma kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.findByRyhmaId(id).orElseThrow(()
+                -> new NotFoundException("kayttooikeusryhma not found"));
+        KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhma, KayttoOikeusRyhmaDto.class);
         return localizationService.localize(ryhma);
     }
 
@@ -274,6 +282,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
             setRyhmaKuvaus(ryhmaData, kayttoOikeusRyhma);
         }
 
+        kayttoOikeusRyhma.setRyhmaRestriction(ryhmaData.isRyhmaRestriction());
+
         for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(kayttoOikeusRyhma.getId())) {
             kayttoOikeusRyhmaMyontoViiteRepository.remove(viite);
         }
@@ -289,6 +299,31 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         setKayttoOikeusRyhmas(ryhmaData, kayttoOikeusRyhma);
 
         ldapSynchronizationService.updateKayttoOikeusRyhma(id);
+    }
+
+    @Override
+    @Transactional
+    public void passivoiKayttooikeusryhma(long id) {
+        LOGGER.info("Aloitetaan käyttöoikeusryhmän " + id + " passivointi.");
+        KayttoOikeusRyhma kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.findById(id).orElseThrow(()
+                -> new NotFoundException("kayttooikeusryhma not found"));
+        String currentUser = permissionCheckerService.getCurrentUserOid();
+        Henkilo kasittelija = henkiloDataRepository.findByOidHenkilo(currentUser)
+                .orElseThrow(() -> new DataInconsistencyException("Henkilöä ei löydy käyttäjän OID:lla " + currentUser));
+        kayttoOikeusRyhma.setPassivoitu(true);
+        List<MyonnettyKayttoOikeusRyhmaTapahtuma> kayttooikeudet = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByKayttoOikeusRyhmaId(id);
+
+        for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttooikeudet) {
+            String henkiloOid = kayttoOikeus.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo();
+
+            KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
+                    kasittelija, KayttoOikeudenTila.SULJETTU,
+                    LocalDateTime.now(), "Oikeudet poistetaan käyttöoikeusryhmän passivoinnin myötä");
+            kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
+            myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
+            ldapSynchronizationService.updateHenkilo(henkiloOid);
+        }
+        LOGGER.info("Käyttöoikeusryhmän passivoinnin myötä poistettiin {} käyttöoikeutta", kayttooikeudet.size());
     }
 
     @Override
@@ -436,21 +471,28 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {
+
+                    if (organisaatioOid.startsWith(this.commonProperties.getGroupOrganizationId()) && kayttoOikeusRyhma.isRyhmaRestriction())  {
+                        return true;
+                    }
+
                     if (isEmpty(kayttoOikeusRyhma.getOrganisaatioViite()) && !isOphOrganisation) {
                         return false;
                     }
+
                     boolean noOrgLimits = !isEmpty(kayttoOikeusRyhma.getOrganisaatioViite())
-                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, hakuTulos, kayttoOikeusRyhma.getOrganisaatioViite());
+                            && !isOphOrganisation && !checkOrganizationLimitations(organisaatioOid, hakuTulos, kayttoOikeusRyhma);
                     return !noOrgLimits;
                 }).collect(toList());
     }
 
-    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioPerustieto> hakuTulos, List<OrganisaatioViiteDto> viites) {
-        Set<String> tyyppis = viites.stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
+    private boolean checkOrganizationLimitations(String organisaatioOid, List<OrganisaatioPerustieto> hakuTulos, KayttoOikeusRyhmaDto kayttoOikeusRyhma) {
+        Set<String> tyyppis = kayttoOikeusRyhma.getOrganisaatioViite().stream().map(OrganisaatioViiteDto::getOrganisaatioTyyppi).collect(toSet());
 
         if (organisaatioOid.startsWith(this.commonProperties.getGroupOrganizationId())) {
             return oidIsFoundInViites(this.commonProperties.getGroupOrganizationId(), tyyppis);
         }
+
         return oidIsFoundInViites(organisaatioOid, tyyppis) || hakuTulos.stream()
                 .filter(perustieto -> !isEmpty(perustieto.getChildren()))
                 .anyMatch(perustieto -> orgTypeMatchesOrOidIsFoundInViites(organisaatioOid, tyyppis, perustieto));

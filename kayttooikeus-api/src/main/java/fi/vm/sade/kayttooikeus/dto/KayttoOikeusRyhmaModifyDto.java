@@ -27,7 +27,8 @@ public class KayttoOikeusRyhmaModifyDto {
     private List<String> organisaatioTyypit;
     private String rooliRajoite;
     private List<Long> slaveIds;
-    private boolean passivoitu;
+    @NotNull
+    private boolean ryhmaRestriction;
 
 
     /**

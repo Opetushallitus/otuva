@@ -30,7 +30,8 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
                 kayttoOikeusRyhma.rooliRajoite.as("rooliRajoite"),
                 kayttoOikeusRyhma.nimi.id.as("nimiId"),
                 kayttoOikeusRyhma.kuvaus.id.as("kuvausId"),
-                kayttoOikeusRyhma.passivoitu.as("passivoitu"));
+                kayttoOikeusRyhma.passivoitu.as("passivoitu"),
+                kayttoOikeusRyhma.ryhmaRestriction.as("ryhmaRestriction"));
     }
 
     @Override

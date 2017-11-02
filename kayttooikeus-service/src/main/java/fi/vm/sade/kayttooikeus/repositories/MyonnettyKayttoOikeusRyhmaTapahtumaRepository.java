@@ -39,4 +39,6 @@ public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository extends CrudRepos
         return this.findByOrganisaatioHenkiloHenkiloOidHenkiloAndKayttoOikeusRyhmaKayttoOikeusRooliAndKayttoOikeusRyhmaKayttoOikeusPalveluName(
                 henkiloOid, "CRUD", "ANOMUSTENHALLINTA");
     }
+
+    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByKayttoOikeusRyhmaId(long id);
 }

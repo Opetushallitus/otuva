@@ -23,6 +23,7 @@ public class KayttoOikeusRyhmaDto implements Serializable, LocalizableDto {
     private TextGroupDto nimi;
     private TextGroupDto kuvaus;
     private boolean passivoitu;
+    private boolean ryhmaRestriction;
 
     public void setNimiId(Long id) {
         this.nimi = localizeLaterById(id);
