@@ -4,13 +4,12 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.scheduling.ScheduledTasks;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
-import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
@@ -20,12 +19,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {"kayttooikeus.scheduling.enabled=TRUE"})
