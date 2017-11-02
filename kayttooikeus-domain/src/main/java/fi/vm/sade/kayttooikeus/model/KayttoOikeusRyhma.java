@@ -39,7 +39,7 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     private Set<OrganisaatioViite> organisaatioViite = new HashSet<>();
     
     @Column(name = "hidden", nullable = false)
-    private boolean hidden;
+    private boolean passivoitu;
     
     @Column(name = "rooli_rajoite")
     private String rooliRajoite;

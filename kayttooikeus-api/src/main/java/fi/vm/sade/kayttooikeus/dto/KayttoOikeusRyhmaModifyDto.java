@@ -27,6 +27,8 @@ public class KayttoOikeusRyhmaModifyDto {
     private List<String> organisaatioTyypit;
     private String rooliRajoite;
     private List<Long> slaveIds;
+    private boolean passivoitu;
+
 
     /**
      * Asettaa käyttöoikeusryhmän nimen. Metodi on lisätty vain tukemaan vanhaa
