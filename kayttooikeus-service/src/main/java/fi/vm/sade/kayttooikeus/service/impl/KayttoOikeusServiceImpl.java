@@ -283,8 +283,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         }
 
         kayttoOikeusRyhma.setRyhmaRestriction(ryhmaData.isRyhmaRestriction());
-        kayttoOikeusRyhma.setPassivoitu(ryhmaData.isPassivoitu());
-
 
         for (KayttoOikeusRyhmaMyontoViite viite : kayttoOikeusRyhmaMyontoViiteRepository.getMyontoViites(kayttoOikeusRyhma.getId())) {
             kayttoOikeusRyhmaMyontoViiteRepository.remove(viite);
