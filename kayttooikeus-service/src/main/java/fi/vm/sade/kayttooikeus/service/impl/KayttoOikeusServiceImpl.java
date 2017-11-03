@@ -60,7 +60,6 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final PermissionCheckerService permissionCheckerService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final CommonProperties commonProperties;
-    private final PermissionCheckerService permissionCheckerService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 
@@ -141,8 +140,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                 .map(kayttoOikeusRyhmaDto -> {
             MyonnettyKayttoOikeusDto dto = new MyonnettyKayttoOikeusDto();
             dto.setRyhmaId(kayttoOikeusRyhmaDto.getId());
-            if (kayttoOikeusRyhmaDto.getDescription() != null) {
-                dto.setRyhmaNamesId(kayttoOikeusRyhmaDto.getDescription().getId());
+            if (kayttoOikeusRyhmaDto.getNimi() != null) {
+                dto.setRyhmaNamesId(kayttoOikeusRyhmaDto.getNimi().getId());
             }
             dto.setSelected(false);
             kayttoOikeusForHenkilo.stream()
