@@ -65,7 +65,6 @@ public class KutsuHakuBuilder {
     private KutsuHakuBuilder prepareForMiniAdmin() {
         // Force OPH-view
         this.kutsuCriteria.setKutsujaOrganisaatioOid(this.commonProperties.getRootOrganizationOid());
-        this.kutsuCriteria.setSubOrganisations(false);
 
         return this;
     }
