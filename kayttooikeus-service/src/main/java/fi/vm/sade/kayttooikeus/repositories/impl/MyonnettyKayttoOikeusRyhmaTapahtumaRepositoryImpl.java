@@ -17,7 +17,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
 import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
@@ -183,9 +185,11 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .collect(Collectors.groupingBy(KayttooikeusPerustiedotDto::getOidHenkilo))
                 .values()
                 .stream()
-                .map(kayttooikeusPerustiedotDtoGroup -> kayttooikeusPerustiedotDtoGroup
+                .flatMap(kayttooikeusPerustiedotDtoGroup -> kayttooikeusPerustiedotDtoGroup
                         .stream()
-                        .reduce(KayttooikeusPerustiedotDto::mergeIfSameOid).get())
+                        .reduce(KayttooikeusPerustiedotDto::mergeIfSameOid)
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty))
                 .collect(Collectors.toList());
     }
 

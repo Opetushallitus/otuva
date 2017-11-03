@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class KayttooikeusPerustiedotDto {
-    String oidHenkilo;
-    Set<KayttooikeusOrganisaatiotDto> organisaatiot = new HashSet<>();
+    protected String oidHenkilo;
+    protected Set<KayttooikeusOrganisaatiotDto> organisaatiot = new HashSet<>();
 
     public KayttooikeusPerustiedotDto(String oidHenkilo, String organisaatioOid, String oikeus, String palvelu) {
         this.oidHenkilo = oidHenkilo;
@@ -49,8 +49,8 @@ public class KayttooikeusPerustiedotDto {
     @AllArgsConstructor
     @Builder
     public static class KayttooikeusOrganisaatiotDto {
-        String organisaatioOid;
-        Set<KayttooikeusOikeudetDto> kayttooikeudet = new HashSet<>();
+        protected String organisaatioOid;
+        protected Set<KayttooikeusOikeudetDto> kayttooikeudet = new HashSet<>();
 
         public KayttooikeusOrganisaatiotDto mergeIfSameOid(KayttooikeusOrganisaatiotDto kayttooikeusOrganisaatiotDto) {
             if(kayttooikeusOrganisaatiotDto.getOrganisaatioOid().equals(this.getOrganisaatioOid())) {
@@ -70,8 +70,8 @@ public class KayttooikeusPerustiedotDto {
         @Builder
         @EqualsAndHashCode
         public static class KayttooikeusOikeudetDto {
-            String palvelu;
-            String oikeus;
+            protected String palvelu;
+            protected String oikeus;
         }
     }
 }

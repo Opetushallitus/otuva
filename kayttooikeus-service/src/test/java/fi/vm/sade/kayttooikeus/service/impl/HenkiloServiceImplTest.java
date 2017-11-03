@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDa
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -55,12 +56,15 @@ public class HenkiloServiceImplTest {
     private OrikaBeanMapper mapper;
     @Mock
     private OrganisaatioClient organisaatioClientMock;
+    @Mock
+    private KayttoOikeusService kayttoOikeusService;
 
     @Before
     public void setup() {
         henkiloServiceImpl = new HenkiloServiceImpl(
                 henkiloHibernateRepositoryMock,
                 permissionCheckerServiceMock,
+                kayttoOikeusService,
                 kayttoOikeusRyhmaTapahtumaHistoriaDataRepositoryMock,
                 organisaatioHenkiloRepositoryMock,
                 myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock,
