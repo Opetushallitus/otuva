@@ -1,14 +1,16 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.AnomusDto;
+import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -39,8 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,8 +56,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public static final String ROLE_ADMIN = "OPHREKISTERI";
     public static final String ROLE_CRUD = "CRUD";
 
-
-    public static final Pattern oidRegexp = Pattern.compile("([1-9][0-9]{0,3}|0)(\\.([1-9][0-9]{0,3}|0))+\\.\\d{5,13}");
 
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -325,9 +323,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         return this.getCasRoles().stream()
                 .filter(casRole -> casRole.contains(palvelu + "_" + role))
                 .flatMap(casRole -> {
-                    Matcher matchingOid = oidRegexp.matcher(casRole);
-                    if (matchingOid.find()) {
-                        return Stream.of(matchingOid.group());
+                    int index = casRole.indexOf(this.commonProperties.getOrganisaatioPrefix());
+                    if (index != -1) {
+                        return Stream.of(casRole.substring(index));
                     }
                     return Stream.empty();
                 })
