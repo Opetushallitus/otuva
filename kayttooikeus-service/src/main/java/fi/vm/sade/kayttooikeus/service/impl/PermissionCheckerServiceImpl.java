@@ -371,7 +371,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // OPH virkailija
     @Override
     public boolean isCurrentUserMiniAdmin(String palvelu, String rooli) {
-        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_1")
+        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_" + this.commonProperties.getOrganisaatioPrefix())
                 && role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
