@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
@@ -11,6 +12,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
+import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -36,6 +38,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final HenkiloHibernateRepository henkiloHibernateRepository;
 
     private final PermissionCheckerService permissionCheckerService;
+    private final KayttoOikeusService kayttoOikeusService;
 
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
@@ -141,6 +144,22 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException(String.format("Henkilöä ei löytynyt OID:lla %s", oid)));
         ldapSynchronization.getAction().accept(ldapSynchronizationService, henkilo.getOidHenkilo());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OmatTiedotDto getOmatTiedot() {
+        OmatTiedotDto omatTiedotDto = this.mapper.map(this.kayttoOikeusService
+                        .listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria.builder()
+                                        .oidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+                                        .build(),
+                                null,
+                                null).stream().findFirst()
+                        .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + this.permissionCheckerService.getCurrentUserOid())),
+                OmatTiedotDto.class);
+        omatTiedotDto.setIsAdmin(this.permissionCheckerService.isCurrentUserAdmin());
+        omatTiedotDto.setIsMiniAdmin(this.permissionCheckerService.isCurrentUserMiniAdmin());
+        return omatTiedotDto;
     }
 
 }

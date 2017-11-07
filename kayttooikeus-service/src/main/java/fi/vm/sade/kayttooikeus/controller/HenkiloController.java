@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
+import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -23,7 +24,7 @@ import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/henkilo")
-@Api(value = "/henkilo", description = "Henkilön organisaatiohenkilöihin liittyvät operaatiot.")
+@Api(tags = "Henkilöön liittyvät operaatiot")
 @RequiredArgsConstructor
 public class HenkiloController {
 
@@ -188,6 +189,13 @@ public class HenkiloController {
                                                   @RequestParam(defaultValue = "0") Long offset,
                                                   @RequestParam(required = false) OrderByHenkilohaku orderBy) {
         return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current/omattiedot", method = RequestMethod.GET)
+    @ApiOperation("Palauttaa henkilön tiedot käyttöoikeuspalvelun näkökulmasta")
+    public OmatTiedotDto omatTiedot() {
+        return this.henkiloService.getOmatTiedot();
     }
 
 }
