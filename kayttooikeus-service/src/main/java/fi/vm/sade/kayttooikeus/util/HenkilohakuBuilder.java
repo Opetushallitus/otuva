@@ -74,7 +74,7 @@ public class HenkilohakuBuilder {
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
 
-        if (!currentUserOrganisaatioOids.contains(this.commonProperties.getRootOrganizationOid())) {
+        if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             Set<String> allCurrentUserOrganisaatioOids = new HashSet<>(currentUserOrganisaatioOids);
 
             // haetaan myös aliorganisaatioista

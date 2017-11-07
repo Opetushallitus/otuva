@@ -11,14 +11,19 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
+import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.service.validators.KutsuValidator;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -29,17 +34,19 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 
 @Service
 @RequiredArgsConstructor
-public class KutsuServiceImpl extends AbstractService implements KutsuService {
+public class KutsuServiceImpl implements KutsuService {
     private final KutsuRepository kutsuRepository;
     private final HenkiloDataRepository henkiloDataRepository;
 
     private final OrikaBeanMapper mapper;
-    private final KutsuValidator validator;
 
     private final EmailService emailService;
     private final LocalizationService localizationService;
@@ -51,6 +58,10 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private final PermissionCheckerService permissionCheckerService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final OrganisaatioClient organisaatioClient;
+
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     private final CommonProperties commonProperties;
 
@@ -58,34 +69,46 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     @Transactional(readOnly = true)
     public List<KutsuReadDto> listKutsus(KutsuOrganisaatioOrder sortBy,
                                          Sort.Direction direction,
-                                         KutsuCriteria kutsuListCriteria,
+                                         KutsuCriteria kutsuCriteria,
                                          Long offset,
                                          Long amount) {
-        List<KutsuReadDto> kutsuReadDtoList = this.mapper.mapAsList(this.kutsuRepository.listKutsuListDtos(kutsuListCriteria,
-                sortBy.getSortWithDirection(direction), offset, amount), KutsuReadDto.class);
-        kutsuReadDtoList.forEach(kutsuReadDto -> this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
-
-        return kutsuReadDtoList;
+        return new KutsuHakuBuilder(this.permissionCheckerService,
+                this.localizationService,
+                this.commonProperties,
+                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository,
+                this.kutsuRepository,
+                this.organisaatioHenkiloRepository,
+                this.mapper,
+                this.organisaatioClient,
+                kutsuCriteria)
+                .prepareByAuthority()
+                .doSearch(sortBy, direction, offset, amount)
+                .localise()
+                .build();
     }
 
     @Override
     @Transactional
-    public long createKutsu(KutsuCreateDto dto) {
-         if (!kutsuRepository.listKutsuListDtos(new KutsuCriteria().withTila(AVOIN).withSahkoposti(dto.getSahkoposti()),
-                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection()).isEmpty()) {
-             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
-         }
+    public long createKutsu(KutsuCreateDto kutsuCreateDto) {
+        if (!this.kutsuRepository.findBySahkopostiAndTila(kutsuCreateDto.getSahkoposti(), AVOIN).isEmpty()) {
+            throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
+        }
+        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+                this.throwIfNotInHierarchy(kutsuCreateDto);
+                this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
+            }
+            this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
+        }
 
-        final Kutsu newKutsu = mapper.map(dto, Kutsu.class);
+        final Kutsu newKutsu = mapper.map(kutsuCreateDto, Kutsu.class);
 
         newKutsu.setId(null);
         newKutsu.setAikaleima(LocalDateTime.now());
-        newKutsu.setKutsuja(getCurrentUserOid());
+        newKutsu.setKutsuja(this.permissionCheckerService.getCurrentUserOid());
         newKutsu.setSalaisuus(UUID.randomUUID().toString());
         newKutsu.setTila(AVOIN);
         newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
-
-        validator.validate(newKutsu);
 
         Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
         
@@ -94,6 +117,42 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
         return persistedNewKutsu.getId();
     }
 
+    private void throwIfNotInHierarchy(KutsuCreateDto kutsuCreateDto) {
+        Set<String> organisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
+                .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                .collect(Collectors.toSet());
+        this.throwIfNotInHierarchy(organisaatioOids);
+    }
+    private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
+        Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
+        if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
+            organisaatioOids.removeAll(accessibleOrganisationOids);
+            throw new ForbiddenException("No access through organisation hierarchy to oids "
+                    + organisaatioOids.stream().collect(Collectors.joining(", ")));
+        }
+    }
+
+    private void organisaatioViiteLimitationsAreValidThrows(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+        kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
+                .forEach(kayttoOikeusRyhmaDto -> {
+                    if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kayttoOikeusRyhmaDto.getId())) {
+                        throw new ForbiddenException("Target organization has invalid organization type for group "
+                                + kayttoOikeusRyhmaDto.getId());
+                    }
+                }));
+    }
+
+    private void kayttooikeusryhmaLimitationsAreValid(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+        // The granting person's limitations must be checked always since there there shouldn't be a situation where the
+        // the granting person doesn't have access rights limitations (except admin users who have full access)
+        kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
+                .forEach(kayttoOikeusRyhmaDto -> {
+                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttoOikeusRyhmaDto.getId())) {
+                        throw new ForbiddenException("User doesn't have access rights to grant this group for group "
+                                + kayttoOikeusRyhmaDto.getId());
+                    }
+                }));
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -107,13 +166,34 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
 
     @Override
     @Transactional
-    public Kutsu deleteKutsu(long id) {
-        Kutsu deletedKutsu = kutsuRepository.findById(id)
-                .filter(kutsu -> this.permissionCheckerService.isCurrentUserAdmin()
-                        || kutsu.getKutsuja().equals(getCurrentUserOid()))
+    public void renewKutsu(long id) {
+        Kutsu kutsuToRenew = kutsuRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Kutsu not found"));
-        deletedKutsu.poista(getCurrentUserOid());
-        return deletedKutsu;
+        if (!kutsuToRenew.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid())) {
+            this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(kutsuToRenew);
+        }
+        kutsuToRenew.setAikaleima(LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional
+    public Kutsu deleteKutsu(long id) {
+        Kutsu kutsuToDelete = kutsuRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Kutsu not found"));
+        if (!kutsuToDelete.getKutsuja().equals(this.permissionCheckerService.getCurrentUserOid())) {
+            this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(kutsuToDelete);
+        }
+        kutsuToDelete.poista(this.permissionCheckerService.getCurrentUserOid());
+        return kutsuToDelete;
+    }
+
+    private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {
+        if (!this.permissionCheckerService.isCurrentUserAdmin()
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+            this.throwIfNotInHierarchy(deletedKutsu.getOrganisaatiot().stream()
+                    .map(KutsuOrganisaatio::getOrganisaatioOid)
+                    .collect(Collectors.toSet()));
+        }
     }
 
     @Override
@@ -131,7 +211,7 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             // Validation
             this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
             this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi());
@@ -165,18 +245,18 @@ public class KutsuServiceImpl extends AbstractService implements KutsuService {
     private void createOrUpdateCredentialsAndPrivileges(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String henkiloOid) {
         Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(henkiloOid);
         // Create username/password and haka identifier if provided
-        if(StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             // If haka identifier is provided add it to henkilo identifiers
             Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
             this.identificationService.updateHakatunnuksetByHenkiloAndIdp(henkiloOid, hakaIdentifiers);
-            if(!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
+            if (!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
                 this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
             }
         }
         this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi(),
                 LdapSynchronizationService.LdapSynchronizationType.ASAP);
-        if(StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, henkiloCreateByKutsuDto.getPassword());
         }
 

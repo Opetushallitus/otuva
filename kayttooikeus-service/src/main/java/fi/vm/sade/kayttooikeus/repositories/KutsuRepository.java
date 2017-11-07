@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,4 +27,6 @@ public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepos
     default Optional<Kutsu> findBySalaisuusIsValid(String salaisuus) {
         return findBySalaisuusAndAikaleimaGreaterThanAndTila(salaisuus, LocalDateTime.now().minusMonths(1), KutsunTila.AVOIN);
     }
+
+    List<Kutsu> findBySahkopostiAndTila(String sahkoposti, KutsunTila kutsunTila);
 }

@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +44,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     private ScheduledTasks scheduledTasks;
 
     @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void updateHenkiloCache() throws Exception {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("1.2.3.4.5").build();
         LocalDateTime timestamp = LocalDateTime.now().minusDays(1);
@@ -51,10 +53,10 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
                 .willReturn(henkiloCacheModified);
         given(this.oppijanumerorekisteriClient.getModifiedSince(timestamp, 0L, 1000L))
                 .willReturn(Lists.newArrayList("1.2.3.4.5"));
-        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyListOf(String.class)))
+        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyList()))
                 .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
                         "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
-        given(this.henkiloDataRepository.findByOidHenkiloIn(anyListOf(String.class)))
+        given(this.henkiloDataRepository.findByOidHenkiloIn(anyList()))
                 .willReturn(Lists.newArrayList(henkilo));
         given(this.henkiloDataRepository.countByEtunimetCachedNotNull()).willReturn(1L);
 

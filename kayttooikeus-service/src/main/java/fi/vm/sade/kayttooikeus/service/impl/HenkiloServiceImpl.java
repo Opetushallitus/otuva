@@ -39,7 +39,6 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
     private final HenkiloDataRepository henkiloDataRepository;
@@ -61,8 +60,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Transactional(readOnly = true)
     public KayttooikeudetDto getKayttooikeudet(String henkiloOid, OrganisaatioHenkiloCriteria criteria) {
         // juuriorganisaatioon kuuluvalla henkilöllä on oikeus kaikkiin alla oleviin organisaatioihin
-        String rootOrganizationOid = commonProperties.getRootOrganizationOid();
-        if (organisaatioHenkiloRepository.isHenkiloInOrganisaatio(henkiloOid, rootOrganizationOid, false)) {
+        if (this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             if (criteria.getOrganisaatioOids() != null || criteria.getKayttoOikeusRyhmaNimet() != null) {
                 // haetaan organisaatioon kuuluvat henkilöt
                 return KayttooikeudetDto.admin(henkiloHibernateRepository.findOidsBy(criteria));
@@ -83,7 +81,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
             kasittelijaOid = getCurrentUserOid();
         }
         final String kasittelijaOidFinal = kasittelijaOid;
-        List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(henkiloOid);
+        List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo(henkiloOid);
         for (OrganisaatioHenkilo oh : orgHenkilos) {
             oh.setPassivoitu(true);
             Set<MyonnettyKayttoOikeusRyhmaTapahtuma> mkorts = oh.getMyonnettyKayttoOikeusRyhmas();

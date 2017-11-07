@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -29,6 +28,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.hen
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import static java.util.Arrays.asList;
@@ -47,9 +49,6 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
 
     @MockBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
-    @MockBean
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
 
     @MockBean
     private KayttoOikeusRepository kayttoOikeusRepository;
@@ -114,7 +113,9 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserRekisterinpitajaTest() {
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(true);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_ADMIN))
+                .willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA, HenkiloTyyppi.PALVELU)), new HashSet<>(list));
@@ -123,8 +124,12 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listPossibleHenkiloTypesAccessibleForCurrentUserCrudTest() {
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "OPHREKISTERI")).willReturn(false);
-        given(this.kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", "HENKILONHALLINTA", "CRUD")).willReturn(true);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_ADMIN))
+                .willReturn(false);
+        given(this.kayttoOikeusRepository
+                .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_CRUD))
+                .willReturn(true);
 
         List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
         assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA)), new HashSet<>(list));
@@ -155,7 +160,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     public void passivoiHenkiloOrganisation() {
         OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("henkilo1"), "1.1.1.1.1"));
         populate(henkilo("1.2.3.4.5"));
-        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.of(organisaatioHenkilo));
         KayttoOikeusRyhma kayttoOikeusRyhma = populate(kayttoOikeusRyhma("käyttöoikeusryhmä"));
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(kayttooikeusTapahtuma(organisaatioHenkilo, kayttoOikeusRyhma));
@@ -169,7 +174,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     @Test(expected = NotFoundException.class)
     @WithMockUser(username = "1.2.3.4.5")
     public void passivoiHenkiloOrganisationNotFound() {
-        given(this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
+        given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkiloAndOrganisaatioOid("1.2.3.4.5", "1.1.1.1.1"))
                 .willReturn(Optional.empty());
         organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1");
     }

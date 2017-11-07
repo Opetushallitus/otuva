@@ -57,9 +57,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final PalveluRepository palveluRepository;
     private final OrganisaatioViiteRepository organisaatioViiteRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final PermissionCheckerService permissionCheckerService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final CommonProperties commonProperties;
-    private final PermissionCheckerService permissionCheckerService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 
@@ -140,8 +140,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                 .map(kayttoOikeusRyhmaDto -> {
             MyonnettyKayttoOikeusDto dto = new MyonnettyKayttoOikeusDto();
             dto.setRyhmaId(kayttoOikeusRyhmaDto.getId());
-            if (kayttoOikeusRyhmaDto.getDescription() != null) {
-                dto.setRyhmaNamesId(kayttoOikeusRyhmaDto.getDescription().getId());
+            if (kayttoOikeusRyhmaDto.getNimi() != null) {
+                dto.setRyhmaNamesId(kayttoOikeusRyhmaDto.getNimi().getId());
             }
             dto.setSelected(false);
             kayttoOikeusForHenkilo.stream()
@@ -467,7 +467,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getRyhmasWithoutOrganizationLimitations(String organisaatioOid, List<KayttoOikeusRyhmaDto> allRyhmas) {
-        boolean isOphOrganisation = organisaatioOid.equals(this.commonProperties.getRootOrganizationOid());
+        boolean isOphOrganisation = this.permissionCheckerService.isCurrentUserMiniAdmin();
         List<OrganisaatioPerustieto> hakuTulos = organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
         return allRyhmas.stream()
                 .filter(kayttoOikeusRyhma -> {

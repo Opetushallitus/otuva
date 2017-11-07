@@ -7,7 +7,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
@@ -45,8 +44,6 @@ public class HenkiloServiceImplTest {
     @Mock
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepositoryMock;
     @Mock
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepositoryMock;
-    @Mock
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock;
     @Mock
     private LdapSynchronizationService ldapSynchronizationServiceMock;
@@ -66,7 +63,6 @@ public class HenkiloServiceImplTest {
                 permissionCheckerServiceMock,
                 kayttoOikeusRyhmaTapahtumaHistoriaDataRepositoryMock,
                 organisaatioHenkiloRepositoryMock,
-                organisaatioHenkiloDataRepositoryMock,
                 myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock,
                 ldapSynchronizationServiceMock,
                 henkiloDataRepositoryMock,
@@ -163,6 +159,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAliorganisaatioilla() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setOrganisaatioOids(null);
@@ -179,6 +176,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAntamallaOrganisaatiolla1() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setOrganisaatioOids(Stream.of("oid1").collect(toSet()));
@@ -195,6 +193,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeRootVirkailijanAntamallaOrganisaatiolla2() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("rootOid"));
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
         when(organisaatioClientMock.getChildOids(any())).thenReturn(asList("childOid1", "childOid2"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
@@ -212,6 +211,7 @@ public class HenkiloServiceImplTest {
     @Test
     public void henkilohakuHakeeHenkilotJoillaOnOrganisaatioKunRootVirkailija() {
         when(permissionCheckerServiceMock.isCurrentUserAdmin()).thenReturn(false);
+        when(this.permissionCheckerServiceMock.isCurrentUserMiniAdmin()).thenReturn(true);
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
         henkilohakuCriteriaDto.setNoOrganisation(true);
 

@@ -17,6 +17,8 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +34,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         Long id = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now())).getKayttoOikeusRyhma().getId();
 
@@ -77,7 +79,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(voimassaPaattyen));
 
@@ -113,7 +115,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
 
@@ -140,8 +142,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         assertEquals(0, myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.madeup.4").size());
         List<AccessRightTypeDto> list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidAccessRightsByOid("1.2.3.4.5");
         assertEquals(3, list.size());
-        assertEquals("HENKILOHALLINTA", list.get(0).getPalvelu());
-        assertEquals("CRUD", list.get(0).getRooli());
+        assertEquals(PALVELU_HENKILONHALLINTA, list.get(0).getPalvelu());
+        assertEquals(ROLE_CRUD, list.get(0).getRooli());
         assertEquals("3.4.5.6.7", list.get(0).getOrganisaatioOid());
         assertEquals("KOODISTO", list.get(1).getPalvelu());
         assertEquals("READ", list.get(1).getRooli());
@@ -156,7 +158,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
 
@@ -197,7 +199,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
@@ -211,12 +213,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
-                .containsExactlyInAnyOrder("READ", "CRUD");
+                .containsExactlyInAnyOrder("READ", ROLE_CRUD);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
-                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+                .containsExactlyInAnyOrder("KOODISTO", PALVELU_HENKILONHALLINTA);
     }
 
     @Test
@@ -224,7 +226,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5").withUsername("username"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
@@ -238,12 +240,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
-                .containsExactlyInAnyOrder("READ", "CRUD");
+                .containsExactlyInAnyOrder("READ", ROLE_CRUD);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
-                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+                .containsExactlyInAnyOrder("KOODISTO", PALVELU_HENKILONHALLINTA);
     }
 
     @Test
@@ -251,7 +253,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5").withHetu("hetu"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         List<KayttooikeusPerustiedotDto> kayttooikeusOrganisaatiotDtoList
@@ -265,12 +267,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
-                .containsExactlyInAnyOrder("READ", "CRUD");
+                .containsExactlyInAnyOrder("READ", ROLE_CRUD);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
-                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+                .containsExactlyInAnyOrder("KOODISTO", PALVELU_HENKILONHALLINTA);
     }
 
     // User has two MyonnettyKayttooikeusRyhmas for same organisation with separate Kayttooikeusryhmas which have same Kayttooikeus
@@ -279,13 +281,13 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
+                        .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(2)));
 
@@ -303,12 +305,12 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getOikeus)
-                .containsExactlyInAnyOrder("READ", "CRUD");
+                .containsExactlyInAnyOrder("READ", ROLE_CRUD);
         assertThat(kayttooikeusOrganisaatiotDtoList)
                 .flatExtracting(KayttooikeusPerustiedotDto::getOrganisaatiot)
                 .flatExtracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getKayttooikeudet)
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto::getPalvelu)
-                .containsExactlyInAnyOrder("KOODISTO", "HENKILOHALLINTA");
+                .containsExactlyInAnyOrder("KOODISTO", PALVELU_HENKILONHALLINTA);
     }
 
 

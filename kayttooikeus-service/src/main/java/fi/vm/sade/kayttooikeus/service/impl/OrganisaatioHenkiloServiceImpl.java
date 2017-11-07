@@ -30,6 +30,10 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.PALVELU;
 import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA;
 import static java.util.Arrays.asList;
@@ -42,13 +46,9 @@ import static java.util.stream.Collectors.toSet;
 @Service
 @RequiredArgsConstructor
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
-    private final String HENKILOHALLINTA_PALVELUNAME = "HENKILONHALLINTA";
-    private final String ROOLI_OPH_REKISTERINPITAJA = "OPHREKISTERI";
-    private final String ROOLI_CRUD = "CRUD";
     private final String FALLBACK_LANGUAGE = "fi";
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -101,11 +101,11 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     @Transactional(readOnly = true)
     public List<HenkiloTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser() {
         if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
-                HENKILOHALLINTA_PALVELUNAME, ROOLI_OPH_REKISTERINPITAJA)) {
+                PALVELU_HENKILONHALLINTA, ROLE_ADMIN)) {
             return asList(VIRKAILIJA, PALVELU);
         }
         if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
-                HENKILOHALLINTA_PALVELUNAME, ROOLI_CRUD)) {
+                PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
             return singletonList(VIRKAILIJA);
         }
         return emptyList();
@@ -125,7 +125,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid,
                                                                 List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) {
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
@@ -144,7 +144,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                     this.organisaatioService.throwIfActiveNotFound(createDto.getOrganisaatioOid());
                     OrganisaatioHenkilo organisaatioHenkilo = mapper.map(createDto, OrganisaatioHenkilo.class);
                     organisaatioHenkilo.setHenkilo(henkilo);
-                    henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.persist(organisaatioHenkilo));
+                    henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.save(organisaatioHenkilo));
                 });
 
         return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
@@ -187,7 +187,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     public void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid) {
         Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(UserDetailsUtil.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Could not find current henkilo with oid " + UserDetailsUtil.getCurrentUserOid()));
-        OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloDataRepository
+        OrganisaatioHenkilo organisaatioHenkilo = this.organisaatioHenkiloRepository
                 .findByHenkiloOidHenkiloAndOrganisaatioOid(oidHenkilo, henkiloOrganisationOid)
                 .orElseThrow(() -> new NotFoundException("Unknown organisation" + henkiloOrganisationOid + "for henkilo" + oidHenkilo));
         organisaatioHenkilo.setPassivoitu(true);

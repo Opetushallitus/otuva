@@ -10,7 +10,7 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -45,7 +45,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     private HenkiloService henkiloService;
 
     @Autowired
-    private OrganisaatioHenkiloDataRepository organisaatioHenkiloDataRepository;
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Autowired
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -57,7 +57,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     private OrganisaatioClient organisaatioClient;
 
     @Test
-    @WithMockUser(value = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void getByKayttajatunnus() {
         populate(kayttajatiedot(henkilo("oid1"), "user1"));
 
@@ -67,7 +67,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Transactional
-    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void passivoiHenkiloOrganisationsAndKayttooikeus() {
         // Käsittelijä
         populate(henkilo("1.2.3.4.1"));
@@ -83,16 +83,15 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         this.em.persist(myonnettyKayttoOikeusRyhmaTapahtuma);
         this.henkiloService.disableHenkiloOrganisationsAndKayttooikeus("1.2.3.4.5", "1.2.3.4.1");
 
-        List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloDataRepository.findByHenkiloOidHenkilo(oidHenkilo);
+        List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo(oidHenkilo);
         assertThat(henkilo.size()).isEqualTo(1);
         assertThat(henkilo.get(0).getMyonnettyKayttoOikeusRyhmas()).isEmpty();
         MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
         assertThat(mkrt).isNull();
     }
 
-
     @Test
-    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void henkilohakuAsAdminSearchByName() {
         populate(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio").withPassive(false).withDuplikate(true));
         populate(henkilo("1.2.3.4.3").withNimet("arpa", "kuutio").withPassive(true).withDuplikate(false));
@@ -104,7 +103,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void henkilohakuAsAdminSearchOrganisationRequired() {
         populate(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio").withPassive(false).withDuplikate(true));
         populate(henkilo("1.2.3.4.3").withNimet("arpa", "kuutio").withPassive(true).withDuplikate(false));
@@ -116,7 +115,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void henkilohakuAsAdminByOrganisation() {
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.1"), commonProperties.getRootOrganizationOid()),
@@ -142,9 +141,9 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
         given(this.organisaatioClient.getChildOids("3.4.5.6.7"))
                 .willReturn(Lists.newArrayList("3.4.5.6.7"));
+
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
-                null, null, null, singleton(
-                        "3.4.5.6.7"), null);
+                null, null, null, singleton("3.4.5.6.7"), null);
         List<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, OrderByHenkilohaku.HENKILO_NIMI_ASC);
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo).containsExactly("1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).flatExtracting(HenkilohakuResultDto::getOrganisaatioNimiList)
@@ -154,7 +153,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(value = "1.2.3.4.1", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
     public void henkilohakuAsAdminByKayttooikeusryhma() {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
