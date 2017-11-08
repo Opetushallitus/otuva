@@ -33,17 +33,17 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void listAllTest() {
         populate(kayttoOikeusRyhma("RYHMÄ")
-                .withKuvaus(text("FI", "ryhmän kuvaus"))
+                .withNimi(text("FI", "ryhmän kuvaus"))
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE")));
 
         populate(kayttoOikeusRyhma("Piilotettu ryhmä")
-                .asHidden()
+                .asPassivoitu()
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE")));
 
         populate(kayttoOikeusRyhma("RYHMÄ2")
-                .withKuvaus(text("FI", "ryhmän 2 kuvaus"))
+                .withNimi(text("FI", "ryhmän 2 kuvaus"))
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE")));
 
@@ -59,7 +59,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "1.0.0.102.0"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
         ).voimassaAlkaen(LocalDate.now().minusMonths(3))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3)));
@@ -84,7 +84,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
         Long id3 = populate(kayttoOikeusRyhma("RYHMÄ2")
-                .asHidden()
+                .asPassivoitu()
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
@@ -114,13 +114,13 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void findByIdTest(){
         Long id =populate(kayttoOikeusRyhma("RYHMÄ")
-                .withKuvaus(text("FI", "Kuvaus"))
+                .withNimi(text("FI", "Kuvaus"))
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
         Long hiddenRyhmaId = populate(kayttoOikeusRyhma("RYHMÄ2")
-                .asHidden()
+                .asPassivoitu()
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE"))).getId();
 
@@ -147,10 +147,10 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void ryhmaNameExistTest(){
         populate(kayttoOikeusRyhma("RYHMÄ")
-                .withKuvaus(text("FI", "Kuvaus")));
+                .withNimi(text("FI", "Kuvaus")));
 
         populate(kayttoOikeusRyhma("RYHMÄ")
-                .withKuvaus(text("EN", "Kuvaus en")));
+                .withNimi(text("EN", "Kuvaus en")));
 
         Boolean found = kayttoOikeusRyhmaRepository.ryhmaNameFiExists("Kuvaus");
         assertTrue(found);
@@ -196,13 +196,13 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         KayttoOikeus crudOikeus = populate(oikeus("APP", "CRUD"));
 
         KayttoOikeusRyhma ryhma = populate(kayttoOikeusRyhma("RYHMÄ")
-                .withKuvaus(text("FI", "ryhmän kuvaus"))
+                .withNimi(text("FI", "ryhmän kuvaus"))
                 .withOikeus(oikeus("APP2", "WRITE")));
         ryhma.getKayttoOikeus().add(oikeus);
         ryhma.getKayttoOikeus().add(crudOikeus);
 
         KayttoOikeusRyhma piilotettuRyhma = populate(kayttoOikeusRyhma("Piilotettu ryhmä")
-                .asHidden()
+                .asPassivoitu()
                 .withOikeus(oikeus("APP3", "READ"))
                 .withOikeus(oikeus("APP4", "WRITE")));
         piilotettuRyhma.getKayttoOikeus().add(oikeus);

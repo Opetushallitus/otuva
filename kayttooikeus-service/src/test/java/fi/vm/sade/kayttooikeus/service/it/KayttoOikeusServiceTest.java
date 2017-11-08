@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator;
@@ -31,7 +30,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloK
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
-import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
@@ -43,18 +41,15 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     private KayttoOikeusService kayttoOikeusService;
 
     @MockBean
-    private OrganisaatioViiteRepository organisaatioViiteRepository;
-
-    @MockBean
     private OrganisaatioClient organisaatioClient;
 
     @Test
     public void listAllKayttoOikeusRyhmasTest() {
-        populate(kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Käyttäjähallinta")
+        populate(kayttoOikeusRyhma("RYHMA1").withNimi(text("FI", "Käyttäjähallinta")
                                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ")));
-        populate(kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+        populate(kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
                         .put("EN", "Code management"))
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("KOODISTO", "CRUD")));
@@ -90,7 +85,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         ));
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
-                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta"))
+                kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta"))
                         .withOikeus(oikeus("KOODISTO", "CRUD")
                                 .kuvaus(text("FI", "Kirjoitusoikeus")))
         ));
@@ -119,7 +114,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     public void findToBeExpiringMyonnettyKayttoOikeusTest() {
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "kuvaus"))
+                kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ"))
             ).voimassaPaattyen(LocalDate.now().plusMonths(1)));
@@ -139,17 +134,12 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(any()))
                 .willReturn(singletonList(organisaatioPerustieto));
 
-        Long ryhmaId = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
-                .put("EN", "User management"))
+        populate(viite(kayttoOikeusRyhma("RYHMA")
+                .withNimi(text("FI", "Käyttäjähallinta").put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                .withOikeus(oikeus("KOODISTO", "READ"))
-                .withViite(viite(kayttoOikeusRyhma("test"), "organisaatio tyyppi")))
-                .getId();
-
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
-                .willReturn(singletonList(OrganisaatioViiteDto.builder()
-                        .organisaatioTyyppi("123.123.123")
-                        .id(1L).kayttoOikeusRyhmaId(ryhmaId).build()));
+                .withOikeus(oikeus("KOODISTO", "READ")),
+                "123.123.123"));
+        populate(kayttoOikeusRyhma("test"));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listPossibleRyhmasByOrganization("123.123.123");
         assertEquals(1, ryhmas.size());
@@ -162,11 +152,11 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void findKayttoOikeusRyhmaTest(){
-        populate(kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Käyttäjähallinta")
+        populate(kayttoOikeusRyhma("RYHMA1").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ")));
-        Long id = populate(kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
                 .put("EN", "Code management"))
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("KOODISTO", "CRUD"))).getId();
@@ -186,11 +176,11 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .put("SV", "kuvaus på sv")));
         palvelu.getKayttoOikeus().add(populate(oikeus("HENKILOHALLINTA", "CRUD")));
 
-        populate(kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Käyttäjähallinta")
+        populate(kayttoOikeusRyhma("RYHMA1").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ")));
-        Long id = populate(kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
                 .put("EN", "Code management"))
                 .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                 .withOikeus(oikeus("KOODISTO", "CRUD"))).getId();
@@ -209,7 +199,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3.4.5")
     public void findHenkilotByKayttoOikeusRyhma(){
 
-        KayttoOikeusRyhmaPopulator pop = kayttoOikeusRyhma("RYHMA1").withKuvaus(text("FI", "Koodistonhallinta")
+        KayttoOikeusRyhmaPopulator pop = kayttoOikeusRyhma("RYHMA1").withNimi(text("FI", "Koodistonhallinta")
                 .put("EN", "Code management"))
                 .withOikeus(oikeus("KOODISTO", "CRUD"));
 
@@ -219,7 +209,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("5.6.7.8.9"), "3.4.5.6.7"), pop).voimassaPaattyen(LocalDate.now().plusMonths(2)).voimassaAlkaen(LocalDate.now().minusMonths(1)));
 
-        KayttoOikeusRyhmaPopulator pop2 = kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "testiryhma")
+        KayttoOikeusRyhmaPopulator pop2 = kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "testiryhma")
                 .put("EN", "testgroup"))
                 .withOikeus(oikeus("HAKUAPP", "CRUD"));
 
@@ -237,7 +227,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void findSubRyhmasByMasterRyhmaTest(){
-        Long id = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ"))).getId();
@@ -323,26 +313,15 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos(){
-        MyonnettyKayttoOikeusRyhmaTapahtuma mko = populate(myonnettyKayttoOikeus(
+        populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+                kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
                         .put("EN", "Code management"))
-                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                        .withViite(viite(kayttoOikeusRyhma("dummy"), "123.123.123"))
+                        .withViite(viite(kayttoOikeusRyhma("dummy"), "3.4.5.6.7"))
                         .withOikeus(oikeus("KOODISTO", "CRUD"))
         ));
-
-
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
-                .willReturn(asList(OrganisaatioViiteDto.builder()
-                                .organisaatioTyyppi("123.123.123")
-                                .id(1L)
-                                .kayttoOikeusRyhmaId(mko.getKayttoOikeusRyhma().getId())
-                                .build(),
-                        OrganisaatioViiteDto.builder()
-                                .organisaatioTyyppi("3.4.5.6.7")
-                                .id(2L)
-                                .kayttoOikeusRyhmaId(mko.getKayttoOikeusRyhma().getId())
-                                .build()));
+        populate(kayttoOikeusRyhma("RYHMA1"));
 
         List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
         assertEquals(1, list.size());
@@ -356,7 +335,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilosWithMyontoViite(){
         MyonnettyKayttoOikeusRyhmaTapahtuma mko = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Koodistonhallinta")
+                kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
                         .put("EN", "Code management"))
                         .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
                         .withOikeus(oikeus("KOODISTO", "CRUD"))
@@ -364,22 +343,13 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
         MyonnettyKayttoOikeusRyhmaTapahtuma mko2 = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA3").withKuvaus(text("FI", "Koodistonhallinta")
+                kayttoOikeusRyhma("RYHMA3").withNimi(text("FI", "Koodistonhallinta")
                         .put("EN", "Code management"))
-                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                        .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "3.4.5.6.7"))
                         .withOikeus(oikeus("KOODISTO", "CRUD"))
         ));
 
         populate(kayttoOikeusRyhmaMyontoViite(mko.getKayttoOikeusRyhma().getId(), mko2.getId()));
-        Long viiteKoId = mko.getKayttoOikeusRyhma().getOrganisaatioViite().iterator().next().getKayttoOikeusRyhma().getId();
-
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
-                .willReturn(singletonList(OrganisaatioViiteDto.builder()
-                                .organisaatioTyyppi("3.4.5.6.7")
-                                .id(123123L)
-                                .kayttoOikeusRyhmaId(viiteKoId)
-                                .build()));
-
 
         List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
         assertEquals(1, list.size());
@@ -388,22 +358,14 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void findKayttoOikeusRyhmasByKayttoOikeusIdsTest() {
-        KayttoOikeusRyhma ryhma = populate(kayttoOikeusRyhma("RYHMA")
-                .withKuvaus(text("FI", "Käyttäjähallinta")
+        populate(viite(kayttoOikeusRyhma("RYHMA")
+                .withNimi(text("FI", "Käyttäjähallinta")
                         .put("EN", "User management")
                         .put("SV", "på svenska"))
-                .withViite(viite(kayttoOikeusRyhma("RYHMA1"), "TYYPPI"))
+                .withRooliRajoite("roolirajoite")
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                .withOikeus(oikeus("KOODISTO", "READ")));
-        ryhma.setRooliRajoite("roolirajoite");
-        Long oikeusId = ryhma.getKayttoOikeus().iterator().next().getId();
-
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any()))
-                .willReturn(singletonList(OrganisaatioViiteDto.builder()
-                        .organisaatioTyyppi("123.123.123")
-                        .id(1L)
-                        .kayttoOikeusRyhmaId(ryhma.getId())
-                        .build()));
+                .withOikeus(oikeus("KOODISTO", "READ")), "123.123.123"));
+        populate(kayttoOikeusRyhma("RYHMA1"));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(singletonMap("HENKILOHALLINTA", "CRUD"));
         assertEquals(1, ryhmas.size());
@@ -414,7 +376,6 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("på svenska", ryhmas.get(0).getDescription().get("SV"));
         assertEquals("123.123.123", ryhmas.get(0).getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
 
-        given(this.organisaatioViiteRepository.findByKayttoOikeusRyhmaIds(any())).willReturn(emptyList());
         ryhmas = kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(emptyMap());
         assertEquals(0, ryhmas.size());
     }
