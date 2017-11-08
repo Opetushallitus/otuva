@@ -304,7 +304,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 organisaatioHenkilo("1.2.4", "1.2.246.562.10.00000000001"),
                 kayttoOikeusRyhma("kayttoOikeusRyhma")
                         .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
-                        .withKuvaus(text("fi", "Käyttöoikeusryhmä"))));
+                        .withNimi(text("fi", "Käyttöoikeusryhmä"))));
         Long kayttoOikeusRyhmaId = tapahtuma.getKayttoOikeusRyhma().getId();
         KutsuCreateDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KayttoOikeusRyhmaDto();
         kutsuKayttoOikeusRyhma.setId(kayttoOikeusRyhmaId);
@@ -363,7 +363,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 kayttoOikeusRyhma("kayttoOikeusRyhma")
                         .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))));
         OrganisaatioViite organisaatioViite = populate(viite(kayttoOikeusRyhma("RYHMA2")
-                        .withKuvaus(text("fi", "Käyttöoikeusryhmä")),
+                        .withNimi(text("fi", "Käyttöoikeusryhmä")),
                 "1.2.3.4.5"));
         populate(kayttoOikeusRyhmaMyontoViite(tapahtuma.getKayttoOikeusRyhma().getId(),
                 organisaatioViite.getKayttoOikeusRyhma().getId()));
@@ -449,7 +449,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
-                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withNimi(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
@@ -488,7 +488,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
-                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withNimi(text("FI", "Kuvaus")))));
         populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         Henkilo henkilo = populate(OrganisaatioHenkiloPopulator.organisaatioHenkilo(
                 HenkiloPopulator.henkilo("1.2.0.0.2").withUsername("old_username"),
@@ -534,7 +534,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
-                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withNimi(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
@@ -579,7 +579,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
                 .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
-                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withKuvaus(text("FI", "Kuvaus")))));
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withNimi(text("FI", "Kuvaus")))));
         Henkilo henkilo = populate(IdentificationPopulator.identification(HAKA_AUTHENTICATION_IDP,
                 "old_identifier",
                 HenkiloPopulator.henkilo("1.2.3.4.5")))

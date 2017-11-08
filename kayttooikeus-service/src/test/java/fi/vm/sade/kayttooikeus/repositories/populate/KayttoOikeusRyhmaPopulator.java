@@ -11,14 +11,16 @@ import java.util.List;
 
 public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> {
     private final String tunniste;
-    private boolean hidden;
+    private boolean passivoitu;
     private final List<Populator<OrganisaatioViite>> viitteet = new ArrayList<>();
     private final List<Populator<KayttoOikeus>> oikeus = new ArrayList<>();
     private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
+    private String rooliRajoite;
+    private boolean ryhmaRestriction;
 
     public KayttoOikeusRyhmaPopulator(String tunniste) {
         this.tunniste = tunniste;
-        this.hidden = false;
+        this.passivoitu = false;
     }
     
     public static KayttoOikeusRyhmaPopulator kayttoOikeusRyhma(String tunniste) {
@@ -30,8 +32,8 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
         return this;
     }
     
-    public KayttoOikeusRyhmaPopulator withKuvaus(Populator<TextGroup> kuvaus) {
-        this.kuvaus = kuvaus;
+    public KayttoOikeusRyhmaPopulator withNimi(Populator<TextGroup> nimi) {
+        this.kuvaus = nimi;
         return this;
     }
     
@@ -40,11 +42,21 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
         return this;
     }
 
-    public KayttoOikeusRyhmaPopulator asHidden(){
-        this.hidden = true;
+    public KayttoOikeusRyhmaPopulator withRooliRajoite(String rooliRajoite) {
+        this.rooliRajoite = rooliRajoite;
         return this;
     }
-    
+
+    public KayttoOikeusRyhmaPopulator asRyhmaRestriction() {
+        this.ryhmaRestriction = true;
+        return this;
+    }
+
+    public KayttoOikeusRyhmaPopulator asPassivoitu() {
+        this.passivoitu = true;
+        return this;
+    }
+
     public static Populator<OrganisaatioViite> viite(Populator<KayttoOikeusRyhma> ryhma, String organisaatioTyyppi) {
         return em -> {
             KayttoOikeusRyhma kayttoOikeusRyhma = ryhma.apply(em);
@@ -65,7 +77,9 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
             KayttoOikeusRyhma r = new KayttoOikeusRyhma();
             r.setNimi(kuvaus.apply(entityManager));
             r.setTunniste(tunniste);
-            r.setPassivoitu(hidden);
+            r.setPassivoitu(passivoitu);
+            r.setRooliRajoite(rooliRajoite);
+            r.setRyhmaRestriction(ryhmaRestriction);
             entityManager.persist(r);
             return r;
         });

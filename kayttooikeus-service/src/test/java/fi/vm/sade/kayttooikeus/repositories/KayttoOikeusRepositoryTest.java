@@ -65,7 +65,7 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
     public void findSoonToBeExpiredTapahtumasTest() {
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus("KOODISTO", "READ"))
         ).voimassaPaattyen(LocalDate.now().plusMonths(3)));
@@ -91,7 +91,7 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
 
     @Test
     public void listKayttoOikeusByPalveluTest() {
-        populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+        populate(kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Kuvaus")
                                 .put("EN", "Desc")))
                         .withOikeus(oikeus("HENKILOHALLINTA", "READ"))
@@ -110,13 +110,13 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
     public void listMyonnettyKayttoOikeusHistoriaForHenkiloTest() {
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma1 = populate(myonnettyKayttoOikeus(
                     organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                    kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                    kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                             .withOikeus(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Luku-muokkaus")))
                             .withOikeus(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Palvelukuvaus")), "READ")))
                         .voimassaPaattyen(LocalDate.now())),
             tapahtuma2 = populate(myonnettyKayttoOikeus(
                     organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8").tehtavanimike("testaaja"),
-                    kayttoOikeusRyhma("RYHMA2").withKuvaus(text("FI", "Ryhmäkuvaus"))
+                    kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Ryhmäkuvaus"))
                             .withOikeus(oikeus("KOODISTO", "WRITE").kuvaus(text("FI", "Kirjoitusoikeus"))))
                     .voimassaPaattyen(LocalDate.now().plusMonths(3)));
         

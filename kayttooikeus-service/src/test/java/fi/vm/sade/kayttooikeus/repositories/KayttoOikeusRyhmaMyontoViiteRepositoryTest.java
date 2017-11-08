@@ -25,7 +25,7 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractReposito
 
     @Test
     public void getSlaveIdsByMasterIdsTest() throws Exception {
-        Long id = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ"))).getId();
@@ -58,7 +58,7 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractReposito
 
     @Test
     public void isCyclicMyontoViiteTest() throws Exception {
-        Long id = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ"))).getId();
@@ -82,7 +82,7 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractReposito
 
     @Test
     public void getMyontoViitesTest() throws Exception {
-        Long id = populate(kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Käyttäjähallinta")
+        Long id = populate(kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Käyttäjähallinta")
                 .put("EN", "User management"))
                 .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                 .withOikeus(oikeus("KOODISTO", "READ"))).getId();
