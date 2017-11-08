@@ -30,10 +30,15 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloK
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 
 @RunWith(SpringRunner.class)
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
@@ -130,23 +135,45 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.6")
     public void listPossibleRyhmasByOrganizationTest(){
-        OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
-        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(any()))
-                .willReturn(singletonList(organisaatioPerustieto));
+        OrganisaatioPerustieto oppilaitos11 = oppilaitos("1.2.246.562.10.12345678911", "11");
+        OrganisaatioPerustieto oppilaitos12 = oppilaitos("1.2.246.562.10.12345678912", "12");
+        OrganisaatioPerustieto koulutustoimija1 = new OrganisaatioPerustieto();
+        koulutustoimija1.setOid("1.2.246.562.10.12345678910");
+        koulutustoimija1.setChildren(asList(oppilaitos11, oppilaitos12));
+        given(this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(eq("1.2.246.562.10.12345678910")))
+                .willReturn(asList(koulutustoimija1, oppilaitos11, oppilaitos12));
 
-        populate(viite(kayttoOikeusRyhma("RYHMA")
-                .withNimi(text("FI", "Käyttäjähallinta").put("EN", "User management"))
-                .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                .withOikeus(oikeus("KOODISTO", "READ")),
-                "123.123.123"));
-        populate(kayttoOikeusRyhma("test"));
+        populate(viite(kayttoOikeusRyhma("RYHMA-ORGANISAATIOLLE"), "1.2.246.562.10.12345678901"));
+        populate(viite(kayttoOikeusRyhma("RYHMA-OPPILAITOKSEN_PERUSTEELLA"), "12"));
+        populate(viite(kayttoOikeusRyhma("RYHMA-ORGANISAATIORYHMILLE1"), "1.2.246.562.28"));
+        populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIORYHMILLE2").asRyhmaRestriction());
+        populate(kayttoOikeusRyhma("RYHMA-VAIN_OPH"));
 
-        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listPossibleRyhmasByOrganization("123.123.123");
-        assertEquals(1, ryhmas.size());
-        assertEquals("RYHMA", ryhmas.get(0).getName());
-        assertEquals(1, ryhmas.get(0).getOrganisaatioViite().size());
-        assertEquals("123.123.123", ryhmas.get(0).getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
-        assertEquals("Käyttäjähallinta", ryhmas.get(0).getDescription().get("FI"));
+        List<KayttoOikeusRyhmaDto> ryhmat;
+        ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.10.12345678901");
+        assertThat(ryhmat).extracting(KayttoOikeusRyhmaDto::getTunniste)
+                .containsExactlyInAnyOrder("RYHMA-ORGANISAATIOLLE");
+
+        ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.10.12345678902");
+        assertThat(ryhmat).isEmpty();
+
+        ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.10.12345678910");
+        assertThat(ryhmat).extracting(KayttoOikeusRyhmaDto::getTunniste)
+                .containsExactlyInAnyOrder("RYHMA-OPPILAITOKSEN_PERUSTEELLA");
+
+        ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.28.12345678901");
+        assertThat(ryhmat).extracting(KayttoOikeusRyhmaDto::getTunniste)
+                .containsExactlyInAnyOrder("RYHMA-ORGANISAATIORYHMILLE1", "RYHMA-ORGANISAATIORYHMILLE2");
+
+        ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.10.00000000001");
+        assertThat(ryhmat).hasSize(kayttoOikeusService.listAllKayttoOikeusRyhmas().size());
+    }
+
+    private static OrganisaatioPerustieto oppilaitos(String oid, String oppilaitostyyppi) {
+        OrganisaatioPerustieto organisaatio = new OrganisaatioPerustieto();
+        organisaatio.setOid(oid);
+        organisaatio.setOppilaitostyyppi(String.format("oppilaitostyyppi_%s#1", oppilaitostyyppi));
+        return organisaatio;
     }
 
     @Test

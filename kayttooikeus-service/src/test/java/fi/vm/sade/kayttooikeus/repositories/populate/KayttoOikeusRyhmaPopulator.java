@@ -16,6 +16,7 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
     private final List<Populator<KayttoOikeus>> oikeus = new ArrayList<>();
     private Populator<TextGroup> kuvaus = Populator.constant(new TextGroup());
     private String rooliRajoite;
+    private boolean ryhmaRestriction;
 
     public KayttoOikeusRyhmaPopulator(String tunniste) {
         this.tunniste = tunniste;
@@ -46,6 +47,11 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
         return this;
     }
 
+    public KayttoOikeusRyhmaPopulator asRyhmaRestriction() {
+        this.ryhmaRestriction = true;
+        return this;
+    }
+
     public KayttoOikeusRyhmaPopulator asPassivoitu() {
         this.passivoitu = true;
         return this;
@@ -73,6 +79,7 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
             r.setTunniste(tunniste);
             r.setPassivoitu(passivoitu);
             r.setRooliRajoite(rooliRajoite);
+            r.setRyhmaRestriction(ryhmaRestriction);
             entityManager.persist(r);
             return r;
         });
