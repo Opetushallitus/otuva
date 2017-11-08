@@ -335,6 +335,23 @@ public class PermissionCheckerTest {
         assertThat(oids).containsExactly(ROOT_ORG);
     }
 
+    @Test
+    public void hasInsternalAccess() {
+        given(this.henkiloDataRepositoryMock.findByOidHenkilo("1.2.3.4.5"))
+                .willReturn(Optional.of(Henkilo.builder().oidHenkilo("1.2.3.4.5")
+                        .organisaatioHenkilos(Sets.newHashSet(OrganisaatioHenkilo.builder()
+                                .organisaatioOid("1.2.3.4.100")
+                                .build()))
+                        .build()));
+        given(this.organisaatioClient.getActiveParentOids("1.2.3.4.100"))
+                .willReturn(Lists.newArrayList("1.2.3.4.100"));
+        boolean hasInternalAccess = this.permissionChecker.hasInternalAccess("1.2.3.4.5",
+                Lists.newArrayList("READ"),
+                Sets.newHashSet("ROLE_APP_HENKILONHALLINTA_READ", "ROLE_APP_HENKILONHALLINTA_READ_1.2.3.4.100"));
+        assertThat(hasInternalAccess).isTrue();
+        verify(this.organisaatioClient, Mockito.times(1)).getActiveParentOids(anyString());
+    }
+
     private static List<OrganisaatioPerustieto> getDummyOrganisaatioHakutulos() {
         OrganisaatioPerustieto org2 = getOrg(ORG2);
         OrganisaatioPerustieto org2Child1 = getOrg(ORG2 + ".child1");

@@ -172,7 +172,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
-        if (this.isCurrentUserAdmin()) {
+        if (this.isUserAdmin(callingUserRoles)) {
             return true;
         }
 
@@ -357,19 +357,37 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // Rekisterinpitäjä
     @Override
     public boolean isCurrentUserAdmin() {
-        return this.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_ADMIN);
+        return this.isUserAdmin(this.getCasRoles());
+    }
+
+    // Rekisterinpitäjä
+    @Override
+    public boolean isUserAdmin(Set<String> userRoles) {
+        return this.isUserMiniAdmin(userRoles, PALVELU_HENKILONHALLINTA, ROLE_ADMIN);
     }
 
     // OPH virkailija
     @Override
     public boolean isCurrentUserMiniAdmin() {
-        return this.getCasRoles().stream().anyMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()));
+        return this.isUserMiniAdmin(this.getCasRoles());
+    }
+
+    // OPH virkailija
+    @Override
+    public boolean isUserMiniAdmin(Set<String> userRoles) {
+        return userRoles.stream().anyMatch(role -> role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
     // OPH virkailija
     @Override
     public boolean isCurrentUserMiniAdmin(String palvelu, String rooli) {
-        return this.getCasRoles().stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_" + this.commonProperties.getOrganisaatioPrefix())
+        return this.isUserMiniAdmin(this.getCasRoles(), palvelu, rooli);
+    }
+
+    // OPH virkailija
+    @Override
+    public boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli) {
+        return userRoles.stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_" + this.commonProperties.getOrganisaatioPrefix())
                 && role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
