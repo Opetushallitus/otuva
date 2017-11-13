@@ -88,17 +88,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         return new LinkedHashSet<>(query.fetch());
     }
 
-    // Because jpaquery limitations this can't be done with subqueries and union all.
-    // This needs to be done in 2 queries becaus postgres query planner can't optimise it correctly because of
-    // kayttajatiedot outer join and where or.
     @Override
-    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
-                                                     Long offset,
-                                                     List<OrderSpecifier> orderBy) {
+    public List<HenkilohakuResultDto> findByUsername(HenkiloCriteria criteria,
+                                                     Long offset) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
-        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
-        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
-                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
         List<Tuple> fetchByUsernameResult = new ArrayList<>();
@@ -114,6 +107,22 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                     .where(qKayttajatiedot.username.eq(criteria.getNameQuery()))
                     .fetch();
         }
+        return fetchByUsernameResult.stream().map(tuple -> new HenkilohakuResultDto(
+                tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
+                tuple.get(qHenkilo.oidHenkilo),
+                tuple.get(qHenkilo.kayttajatiedot.username)
+        )).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
+                                                     Long offset,
+                                                     List<OrderSpecifier> orderBy) {
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
         JPAQuery<Tuple> query = jpa().from(qHenkilo)
                 // Not excluding henkilos without organisation (different condition on where)
@@ -137,8 +146,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
-        fetchByUsernameResult.addAll(query.fetch());
-        return fetchByUsernameResult.stream().map(tuple -> new HenkilohakuResultDto(
+        return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
                 tuple.get(qHenkilo.oidHenkilo),
                 tuple.get(qHenkilo.kayttajatiedot.username)
