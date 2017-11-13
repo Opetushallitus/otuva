@@ -41,11 +41,17 @@ public interface PermissionCheckerService {
      */
     boolean isCurrentUserAdmin();
 
+    // Rekisterinpitäjä
+    boolean isUserAdmin(Set<String> userRoles);
+
     /**
      * OPH-virkailija
      * @return isOph-virkailija
      */
     boolean isCurrentUserMiniAdmin();
+
+    // OPH virkailija
+    boolean isUserMiniAdmin(Set<String> userRoles);
 
     /**
      * @param palvelu name
@@ -53,6 +59,9 @@ public interface PermissionCheckerService {
      * @return isOph-virkailija with käyttöoikeus
      */
     boolean isCurrentUserMiniAdmin(String palvelu, String rooli);
+
+    // OPH virkailija
+    boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli);
 
     boolean hasOrganisaatioInHierarchy(String requiredOrganiaatioOid);
 

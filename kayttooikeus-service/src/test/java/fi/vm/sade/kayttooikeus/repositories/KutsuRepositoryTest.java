@@ -47,7 +47,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
             .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016,1,1,0,0,0, 0))
             .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                 .ryhma(kayttoOikeusRyhma("RYHMA")
-                    .withKuvaus(text("FI", "Kuvaus")))
+                    .withNimi(text("FI", "Kuvaus")))
             )
         );
 
@@ -77,7 +77,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA")
-                                .withKuvaus(text("FI", "Kuvaus"))
+                                .withNimi(text("FI", "Kuvaus"))
                                 .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, "VASTUUKAYTTAJAT")))
                 )
         );
@@ -86,7 +86,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")
-                                .withKuvaus(text("FI", "Kuvaus2"))
+                                .withNimi(text("FI", "Kuvaus2"))
                                 .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, "READ")))
                 )
         );

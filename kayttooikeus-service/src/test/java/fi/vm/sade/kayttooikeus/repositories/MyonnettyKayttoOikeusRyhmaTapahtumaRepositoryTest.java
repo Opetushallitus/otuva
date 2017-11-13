@@ -33,7 +33,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
     public void findMasterIdsByHenkiloTest(){
         Long id = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                         .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(LocalDate.now())).getKayttoOikeusRyhma().getId();
@@ -78,7 +78,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA").withKuvaus(text("FI", "Kuvaus"))
+                kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
                         .withOikeus(oikeus(PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                         .withOikeus(oikeus("KOODISTO", "READ")))
                 .voimassaPaattyen(voimassaPaattyen));
@@ -100,7 +100,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.9").tehtavanimike("testaaja"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE"))
-                        .asHidden())
+                        .asPassivoitu())
                 .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
         list = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio("1.2.3.4.5", null);

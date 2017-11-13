@@ -45,7 +45,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
                 .withHaettuRyhma(haettuKayttooikeusryhma(null)
                         .withRyhma(kayttoOikeusRyhma("Koodiston ylläpitäjä")
                                 .withOikeus(oikeus("HENKILOHALLINTA", KayttooikeusRooli.VASTUUKAYTTAJAT.getName()))
-                                .asHidden())));
+                                .asPassivoitu())));
         populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
                 .withHaettuRyhma(haettuKayttooikeusryhma(KayttoOikeudenTila.MYONNETTY)
                         .withRyhma(kayttoOikeusRyhma("Granted ryhmä"))));
