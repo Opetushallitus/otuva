@@ -102,7 +102,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
         List<Tuple> fetchByUsernameResult = new ArrayList<>();
-        if (StringUtils.hasLength(criteria.getNameQuery())) {
+        if (StringUtils.hasLength(criteria.getNameQuery()) && (offset == null || offset == 0L)) {
             // Should return 0 or 1 results since username is unique.
             fetchByUsernameResult = jpa().from(qHenkilo)
                     .innerJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
