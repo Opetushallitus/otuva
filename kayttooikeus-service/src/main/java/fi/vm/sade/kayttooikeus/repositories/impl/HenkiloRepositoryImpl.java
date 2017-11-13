@@ -12,7 +12,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.*;
 
 import static com.querydsl.core.types.ExpressionUtils.eq;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
@@ -23,9 +23,6 @@ import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
 import org.springframework.util.StringUtils;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -104,8 +101,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
+        List<Tuple> fetchByUsernameResult = new ArrayList<>();
         if (StringUtils.hasLength(criteria.getNameQuery())) {
-            List<Tuple> fetchByUsernameResult = jpa().from(qHenkilo)
+            // Should return 0 or 1 results since username is unique.
+            fetchByUsernameResult = jpa().from(qHenkilo)
                     .innerJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
                     // Organisaatiohenkilos need to be added later (enrichment)
                     .select(qHenkilo.sukunimiCached,
@@ -114,14 +113,6 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                             qHenkilo.kayttajatiedot.username)
                     .where(qKayttajatiedot.username.eq(criteria.getNameQuery()))
                     .fetch();
-            if (fetchByUsernameResult.size() > 0) {
-                // User is most likely searching by username so just return the (single) result.
-                return fetchByUsernameResult.stream().map(tuple -> new HenkilohakuResultDto(
-                        tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
-                        tuple.get(qHenkilo.oidHenkilo),
-                        tuple.get(qHenkilo.kayttajatiedot.username)
-                )).collect(Collectors.toList());
-            }
         }
 
         JPAQuery<Tuple> query = jpa().from(qHenkilo)
@@ -146,8 +137,8 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
-
-        return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
+        fetchByUsernameResult.addAll(query.fetch());
+        return fetchByUsernameResult.stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
                 tuple.get(qHenkilo.oidHenkilo),
                 tuple.get(qHenkilo.kayttajatiedot.username)
