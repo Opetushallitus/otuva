@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.EmailInvitationProperties;
-import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Anomus;
+import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
@@ -17,8 +17,8 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.service.impl.email.SahkopostiHenkiloDto;
+import fi.vm.sade.kayttooikeus.util.LocalisationUtils;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
-import fi.vm.sade.kayttooikeus.util.AnomusKasiteltySahkopostiBuilder;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
@@ -46,7 +46,6 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -66,7 +65,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME = "kayttooikeushakemusilmoitus_email";
     private static final String ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME = "kayttooikeusanomuskasitelty_email_v2";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
-    private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLIT = "roolit";
+    private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI = "rooli";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI = "linkki";
     private static final String UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME = "salasanareset_email";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
@@ -109,16 +108,17 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendEmailAnomusAccepted(Anomus anomus) {
+    public void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
         // add all handled with accepted status to email
-        this.sendEmailAnomusHandled(anomus, input -> input.myonnetyt(anomus.getMyonnettyKayttooikeusRyhmas()));
+        this.sendEmailAnomusHandled(anomus, updateHaettuKayttooikeusryhmaDto);
     }
 
-    private void sendEmailAnomusHandled(Anomus anomus, Consumer<AnomusKasiteltySahkopostiBuilder> consumer) {
+    private void sendEmailAnomusHandled(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
         /* If this fails, the whole requisition handling process MUST NOT fail!!
          * Having an email sent from handled requisitions is a nice-to-have feature
          * but it's not a reason to cancel the whole transaction
          */
+
         try {
             HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(anomus.getHenkilo().getOidHenkilo());
             EmailRecipient recipient = new EmailRecipient();
@@ -128,15 +128,12 @@ public class EmailServiceImpl implements EmailService {
             recipient.setLanguageCode(UserDetailsUtil.getLanguageCode(henkiloDto, "fi", "sv"));
             recipient.setEmail(anomus.getSahkopostiosoite());
             String languageCode = recipient.getLanguageCode();
-
             List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkiloDto, SahkopostiHenkiloDto.class)));
-            AnomusKasiteltySahkopostiBuilder builder = new AnomusKasiteltySahkopostiBuilder(this.kayttoOikeusRyhmaRepository, languageCode);
-            consumer.accept(builder);
-            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLIT, builder.build()));
+            AnomusKasiteltyRecipientDto kasiteltyAnomus = createAnomusKasiteltyDto(anomus, updateHaettuKayttooikeusryhmaDto, languageCode);
+            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI, kasiteltyAnomus));
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI, urlProperties.url("cas.login")));
             recipient.setRecipientReplacements(replacements);
-
             EmailMessage message = this.generateEmailMessage(ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME, languageCode);
             this.ryhmasahkopostiClient.sendRyhmasahkoposti(new EmailData(Lists.newArrayList(recipient), message));
         }
@@ -144,6 +141,21 @@ public class EmailServiceImpl implements EmailService {
             logger.error("Error sending requisition handled email", e);
         }
     }
+
+    private AnomusKasiteltyRecipientDto createAnomusKasiteltyDto(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusDto, String languageCode) {
+        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = anomus.getHaettuKayttoOikeusRyhmas().stream()
+                                                                        .filter( h -> h.getKayttoOikeusRyhma().getId()
+                                                                                .equals(updateHaettuKayttooikeusDto.getId()))
+                                                                        .findFirst()
+                                                                        .orElseThrow( () -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt") );
+        KayttoOikeusRyhma kayttooikeusryhma = haettuKayttoOikeusRyhma.getKayttoOikeusRyhma();
+        String kayttooikeusryhmaNimi = LocalisationUtils.getText(languageCode, kayttooikeusryhma.getNimi(), kayttooikeusryhma::getTunniste);
+        if(updateHaettuKayttooikeusDto.getKayttoOikeudenTila().equals(KayttoOikeudenTila.MYONNETTY)) {
+            return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.MYONNETTY);
+        }
+        return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.HYLATTY);
+    }
+
 
     private EmailMessage generateEmailMessage(String templateName, String languageCode) {
         return this.generateEmailMessage(languageCode, this.expirationReminderSenderEmail,

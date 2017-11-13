@@ -26,6 +26,8 @@ public class UpdateHaettuKayttooikeusryhmaDto {
     @NotNull
     private LocalDate loppupvm;
 
+    private String hylkaysperuste;
+
     @JsonIgnore
     @AssertTrue(message = "invalid.date.alkupvm-after-loppupvm")
     public boolean isAlkuPvmBeforeLoppuPvm() {

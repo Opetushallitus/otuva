@@ -32,8 +32,12 @@ public class CreateUtil {
         return new HaettuKayttoOikeusRyhma(anomus, kayttoOikeusRyhma, LocalDateTime.now(), KayttoOikeudenTila.ANOTTU);
     }
 
+    public static UpdateHaettuKayttooikeusryhmaDto createUpdateHaettuKayttooikeusryhmaDto(Long id, String tila, LocalDate loppupvm, String hylkaysperuste) {
+        return new UpdateHaettuKayttooikeusryhmaDto(id, tila, LocalDate.now(), loppupvm, hylkaysperuste);
+    }
+
     public static UpdateHaettuKayttooikeusryhmaDto createUpdateHaettuKayttooikeusryhmaDto(Long id, String tila, LocalDate loppupvm) {
-        return new UpdateHaettuKayttooikeusryhmaDto(id, tila, LocalDate.now(), loppupvm);
+        return CreateUtil.createUpdateHaettuKayttooikeusryhmaDto(id, tila, loppupvm, "hylkaysperuste");
     }
 
     public static GrantKayttooikeusryhmaDto createGrantKayttooikeusryhmaDto(Long id, LocalDate loppupvm) {

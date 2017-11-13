@@ -45,6 +45,8 @@ public class AnomusKasiteltySahkopostiBuilder {
      * @return access right group data
      */
     public Iterable<RooliDto> build() {
+
+
         List<RooliDto> lista = new ArrayList<>();
         for (MyonnettyKayttoOikeusDto myonnettyKayttoOikeus : this.kasitellyt) {
             lista.add(newRooli(myonnettyKayttoOikeus));

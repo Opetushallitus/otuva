@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
+import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
@@ -26,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -113,7 +115,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void sendEmailAnomusAccepted() {
+    public void sendEmailKayttooikeusAnomusKasitelty() {
         HenkiloDto henkiloDto = new HenkiloDto();
         henkiloDto.setOidHenkilo("1.2.3.4.5");
         henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(CreateUtil.createYhteystietoSahkoposti("arpa@kuutio.fi", YhteystietojenTyypit.MUU_OSOITE),
@@ -125,26 +127,37 @@ public class EmailServiceTest extends AbstractServiceTest {
         henkiloDto.setSukunimi("kuutio");
         given(this.oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
 
+        LocalDate startDate = LocalDate.of(2017, 10, 10);
+        LocalDate endDate = LocalDate.of(2017, 10, 9);
+        UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(10L, "MYONNETTY", startDate, endDate, null);
+
         Henkilo henkilo = new Henkilo();
         henkilo.setOidHenkilo("1.2.3.4.5");
         Anomus anomus = Anomus.builder().sahkopostiosoite("arpa@kuutio.fi")
                 .henkilo(henkilo)
                 .anomuksenTila(AnomuksenTila.KASITELTY)
                 .hylkaamisperuste("Hyvä oli")
+                .haettuKayttoOikeusRyhmas(Sets.newHashSet(HaettuKayttoOikeusRyhma.builder()
+                        .kayttoOikeusRyhma(KayttoOikeusRyhma.builder()
+                                .nimi(new TextGroup())
+                                .tunniste("Käyttöoikeusryhma haettu").build())
+                        .build()))
                 .myonnettyKayttooikeusRyhmas(Sets.newHashSet(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                         .kayttoOikeusRyhma(KayttoOikeusRyhma.builder()
                                 .nimi(new TextGroup())
                                 .tunniste("Käyttöoikeusryhmä").build())
                         .build()))
                 .build();
-        this.emailService.sendEmailAnomusAccepted(anomus);
+        anomus.getHaettuKayttoOikeusRyhmas().stream().forEach( h -> h.getKayttoOikeusRyhma().setId(10L));
+
+        this.emailService.sendEmailAnomusKasitelty(anomus, updateHaettuKayttooikeusryhmaDto);
 
         ArgumentCaptor<EmailData> emailDataArgumentCaptor = ArgumentCaptor.forClass(EmailData.class);
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
         EmailData emailData = emailDataArgumentCaptor.getValue();
         assertThat(emailData.getRecipient()).hasSize(1);
         assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(3)
-                .extracting("name").containsExactlyInAnyOrder("vastaanottaja", "roolit", "linkki");
+                .extracting("name").containsExactlyInAnyOrder("vastaanottaja", "rooli", "linkki");
         assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("1.2.3.4.5");
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");

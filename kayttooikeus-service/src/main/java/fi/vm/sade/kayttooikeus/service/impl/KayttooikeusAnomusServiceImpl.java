@@ -147,7 +147,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             throw new UnprocessableEntityException(errors);
         }
 
-        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo("1.2.246.562.24.16503920574")
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.permissionCheckerService.getCurrentUserOid()));
         anojanAnomus.setKasittelija(kasittelija);
 
@@ -171,11 +171,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             anojanAnomus.addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
-        // If everything is handled and something is granted on anomus send email notification to anoja.
-        if (anojanAnomus.getHaettuKayttoOikeusRyhmas().isEmpty()
-                && !anojanAnomus.getMyonnettyKayttooikeusRyhmas().isEmpty()) {
-            this.emailService.sendEmailAnomusAccepted(anojanAnomus);
-        }
+        this.emailService.sendEmailAnomusKasitelty(anojanAnomus, updateHaettuKayttooikeusryhmaDto);
     }
 
     private void notEditingOwnData(String oidHenkilo) {
