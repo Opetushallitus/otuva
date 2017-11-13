@@ -52,12 +52,13 @@ public class HenkiloCriteria {
         }
         if (StringUtils.hasLength(this.nameQuery)) {
             BooleanBuilder predicate = new BooleanBuilder();
-            Arrays.stream(this.nameQuery.split(" ")).forEach(queryPart ->
+            Arrays.stream(this.nameQuery.toLowerCase().split(" ")).forEach(queryPart ->
                     predicate.or(Expressions.anyOf(
-                            henkilo.etunimetCached.containsIgnoreCase(queryPart),
-                            henkilo.sukunimiCached.containsIgnoreCase(queryPart)
+                            // By using contains query can't use B-tree index
+                            henkilo.etunimetCached.startsWithIgnoreCase(queryPart),
+                            henkilo.sukunimiCached.startsWithIgnoreCase(queryPart)
                     )));
-            predicate.or(Expressions.anyOf(henkilo.oidHenkilo.eq(this.nameQuery), henkilo.kayttajatiedot.username.eq(this.nameQuery)));
+            predicate.or(henkilo.oidHenkilo.eq(this.nameQuery));
             builder.and(predicate);
         }
         // Organisaatiohenkilo

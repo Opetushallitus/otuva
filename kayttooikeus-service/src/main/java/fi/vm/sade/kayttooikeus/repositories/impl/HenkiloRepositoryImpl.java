@@ -21,6 +21,8 @@ import static java.util.stream.Collectors.toSet;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import org.springframework.util.StringUtils;
+
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -89,6 +91,9 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         return new LinkedHashSet<>(query.fetch());
     }
 
+    // Because jpaquery limitations this can't be done with subqueries and union all.
+    // This needs to be done in 2 queries becaus postgres query planner can't optimise it correctly because of
+    // kayttajatiedot outer join and where or.
     @Override
     public List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria,
                                                      Long offset,
@@ -98,6 +103,26 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
                 = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+
+        if (StringUtils.hasLength(criteria.getNameQuery())) {
+            List<Tuple> fetchByUsernameResult = jpa().from(qHenkilo)
+                    .innerJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
+                    // Organisaatiohenkilos need to be added later (enrichment)
+                    .select(qHenkilo.sukunimiCached,
+                            qHenkilo.etunimetCached,
+                            qHenkilo.oidHenkilo,
+                            qHenkilo.kayttajatiedot.username)
+                    .where(qKayttajatiedot.username.eq(criteria.getNameQuery()))
+                    .fetch();
+            if (fetchByUsernameResult.size() > 0) {
+                // User is most likely searching by username so just return the (single) result.
+                return fetchByUsernameResult.stream().map(tuple -> new HenkilohakuResultDto(
+                        tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
+                        tuple.get(qHenkilo.oidHenkilo),
+                        tuple.get(qHenkilo.kayttajatiedot.username)
+                )).collect(Collectors.toList());
+            }
+        }
 
         JPAQuery<Tuple> query = jpa().from(qHenkilo)
                 // Not excluding henkilos without organisation (different condition on where)
