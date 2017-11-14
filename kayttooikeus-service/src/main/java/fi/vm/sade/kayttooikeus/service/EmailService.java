@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface EmailService {
 
-    void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto);
+    void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, Long kayttooikeusryhmaId);
 
     void sendExpirationReminder(String henkiloOid, List<ExpiringKayttoOikeusDto> tapahtumas);
 

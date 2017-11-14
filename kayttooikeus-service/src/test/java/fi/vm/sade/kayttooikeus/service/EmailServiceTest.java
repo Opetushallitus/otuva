@@ -150,7 +150,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .build();
         anomus.getHaettuKayttoOikeusRyhmas().stream().forEach( h -> h.getKayttoOikeusRyhma().setId(10L));
 
-        this.emailService.sendEmailAnomusKasitelty(anomus, updateHaettuKayttooikeusryhmaDto);
+        this.emailService.sendEmailAnomusKasitelty(anomus, updateHaettuKayttooikeusryhmaDto, 10L);
 
         ArgumentCaptor<EmailData> emailDataArgumentCaptor = ArgumentCaptor.forClass(EmailData.class);
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());

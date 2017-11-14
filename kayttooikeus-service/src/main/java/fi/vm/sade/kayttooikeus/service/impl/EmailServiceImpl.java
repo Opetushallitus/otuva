@@ -108,12 +108,12 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
+    public void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, Long kayttooikeusryhmaId) {
         // add all handled with accepted status to email
-        this.sendEmailAnomusHandled(anomus, updateHaettuKayttooikeusryhmaDto);
+        this.sendEmailAnomusHandled(anomus, updateHaettuKayttooikeusryhmaDto, kayttooikeusryhmaId);
     }
 
-    private void sendEmailAnomusHandled(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto) {
+    private void sendEmailAnomusHandled(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, Long kayttooikeusryhmaId) {
         /* If this fails, the whole requisition handling process MUST NOT fail!!
          * Having an email sent from handled requisitions is a nice-to-have feature
          * but it's not a reason to cancel the whole transaction
@@ -130,7 +130,7 @@ public class EmailServiceImpl implements EmailService {
             String languageCode = recipient.getLanguageCode();
             List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkiloDto, SahkopostiHenkiloDto.class)));
-            AnomusKasiteltyRecipientDto kasiteltyAnomus = createAnomusKasiteltyDto(anomus, updateHaettuKayttooikeusryhmaDto, languageCode);
+            AnomusKasiteltyRecipientDto kasiteltyAnomus = createAnomusKasiteltyDto(anomus, updateHaettuKayttooikeusryhmaDto, languageCode, kayttooikeusryhmaId);
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI, kasiteltyAnomus));
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI, urlProperties.url("cas.login")));
             recipient.setRecipientReplacements(replacements);
@@ -142,18 +142,13 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private AnomusKasiteltyRecipientDto createAnomusKasiteltyDto(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusDto, String languageCode) {
-        HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = anomus.getHaettuKayttoOikeusRyhmas().stream()
-                                                                        .filter( h -> h.getKayttoOikeusRyhma().getId()
-                                                                                .equals(updateHaettuKayttooikeusDto.getId()))
-                                                                        .findFirst()
-                                                                        .orElseThrow( () -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt") );
-        KayttoOikeusRyhma kayttooikeusryhma = haettuKayttoOikeusRyhma.getKayttoOikeusRyhma();
+    private AnomusKasiteltyRecipientDto createAnomusKasiteltyDto(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusDto, String languageCode, Long kayttooikeusryhmaId) {
+        KayttoOikeusRyhma kayttooikeusryhma = this.kayttoOikeusRyhmaRepository.findById(kayttooikeusryhmaId).orElseThrow(() -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt id:llä: " + kayttooikeusryhmaId.toString()));
         String kayttooikeusryhmaNimi = LocalisationUtils.getText(languageCode, kayttooikeusryhma.getNimi(), kayttooikeusryhma::getTunniste);
         if(updateHaettuKayttooikeusDto.getKayttoOikeudenTila().equals(KayttoOikeudenTila.MYONNETTY)) {
             return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.MYONNETTY);
         }
-        return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.HYLATTY);
+        return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.HYLATTY, updateHaettuKayttooikeusDto.getHylkaysperuste());
     }
 
 
