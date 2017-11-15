@@ -148,7 +148,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             throw new UnprocessableEntityException(errors);
         }
 
-        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo("1.2.246.562.24.16503920574")
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(this.permissionCheckerService.getCurrentUserOid())
                 .orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + this.permissionCheckerService.getCurrentUserOid()));
         anojanAnomus.setKasittelija(kasittelija);
 
