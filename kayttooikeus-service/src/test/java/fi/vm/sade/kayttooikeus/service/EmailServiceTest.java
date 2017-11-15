@@ -12,6 +12,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
+import fi.vm.sade.kayttooikeus.util.LocalisationUtils;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import org.apache.http.message.BasicHttpResponse;
@@ -126,7 +127,10 @@ public class EmailServiceTest extends AbstractServiceTest {
         henkiloDto.setKutsumanimi("arpa");
         henkiloDto.setSukunimi("kuutio");
         given(this.oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
-
+        given(this.kayttoOikeusRyhmaRepository.findById(10L)).willReturn(of(KayttoOikeusRyhma.builder()
+                .tunniste("kayttooikeusryhmatunniste")
+                .nimi(new TextGroup())
+                .build()));
         LocalDate startDate = LocalDate.of(2017, 10, 10);
         LocalDate endDate = LocalDate.of(2017, 10, 9);
         UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(10L, "MYONNETTY", startDate, endDate, null);
