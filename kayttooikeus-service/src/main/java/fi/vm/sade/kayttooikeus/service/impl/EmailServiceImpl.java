@@ -145,7 +145,7 @@ public class EmailServiceImpl implements EmailService {
     private AnomusKasiteltyRecipientDto createAnomusKasiteltyDto(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusDto, String languageCode, Long kayttooikeusryhmaId) {
         KayttoOikeusRyhma kayttooikeusryhma = this.kayttoOikeusRyhmaRepository.findById(kayttooikeusryhmaId).orElseThrow(() -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt id:llä: " + kayttooikeusryhmaId.toString()));
         String kayttooikeusryhmaNimi = LocalisationUtils.getText(languageCode, kayttooikeusryhma.getNimi(), kayttooikeusryhma::getTunniste);
-        if(updateHaettuKayttooikeusDto.getKayttoOikeudenTila().equals(KayttoOikeudenTila.MYONNETTY)) {
+        if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
             return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.MYONNETTY);
         }
         return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.HYLATTY, updateHaettuKayttooikeusDto.getHylkaysperuste());
