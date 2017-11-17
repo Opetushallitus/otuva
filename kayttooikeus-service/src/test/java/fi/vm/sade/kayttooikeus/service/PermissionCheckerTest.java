@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
@@ -214,10 +215,28 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    public void getPrefixedRolesByPalveluRooli() {
+        Map<String, List<String>> input1 = Maps.newHashMap();
+        input1.put("OPPIJANUMEROREKISTERI", Lists.newArrayList("CRUD", "READ"));
+        input1.put("HENKILONHALLINTA", Lists.newArrayList("CRUD"));
+
+        Set<String> expectedResult1 = Sets.newHashSet("ROLE_APP_OPPIJANUMEROREKISTERI_CRUD",
+                "ROLE_APP_OPPIJANUMEROREKISTERI_READ", "ROLE_APP_HENKILONHALLINTA_CRUD");
+        assertThat(permissionChecker.getPrefixedRolesByPalveluRooli(input1)).isEqualTo(expectedResult1);
+
+        Map<String, List<String>> input2 = Maps.newHashMap();
+        input2.put("TESTIPALVELU", Lists.newArrayList("ABC", "DEF", "ABCSD"));
+        input2.put("OIKEAPALVELU", Lists.newArrayList("ABC", "FOOBAR"));
+
+        Set<String> expectedResult2 = Sets.newHashSet("ROLE_APP_TESTIPALVELU_ABC", "ROLE_APP_TESTIPALVELU_DEF",
+                "ROLE_APP_TESTIPALVELU_ABCSD", "ROLE_APP_OIKEAPALVELU_ABC", "ROLE_APP_OIKEAPALVELU_FOOBAR");
+        assertThat(permissionChecker.getPrefixedRolesByPalveluRooli(input2)).isEqualTo(expectedResult2);
+    }
+
+    @Test
     public void kayttooikeusMyontoviiteLimitationCheckNoKayttajaryhmas() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-
         assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(1L)).isFalse();
     }
 
