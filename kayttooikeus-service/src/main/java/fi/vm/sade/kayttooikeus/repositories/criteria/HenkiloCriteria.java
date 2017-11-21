@@ -63,16 +63,17 @@ public class HenkiloCriteria {
                 // expect sukunimi to be first or last of queryParts
                 // use startsWithIgnoreCase to get use of index
 
-                BooleanBuilder sukunimiFirstPredicate = new BooleanBuilder();
-                sukunimiFirstPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0)));
-                List<String> sublist = queryParts.subList(1, queryParts.size());
-                sublist.forEach( queryPart -> sukunimiFirstPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(queryPart)));
+                BooleanBuilder SukunimiEtunimiPredicate = new BooleanBuilder();
+                SukunimiEtunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0)));
+                String etunimiLast = String.join(" ", queryParts.subList(1, queryParts.size()));
+                SukunimiEtunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiLast));
 
-                BooleanBuilder sukunimiLastPredicate = new BooleanBuilder();
-                sukunimiLastPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1)));
-                queryParts.subList(0, queryParts.size() - 1).forEach( queryPart -> sukunimiLastPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(queryPart)));
+                BooleanBuilder etunimiSukunimiPredicate = new BooleanBuilder();
+                etunimiSukunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1)));
+                String etunimiFirst = String.join(" ", queryParts.subList(0, queryParts.size() - 1));
+                etunimiSukunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiFirst));
 
-                predicate.or(sukunimiFirstPredicate).or(sukunimiLastPredicate);
+                predicate.or(SukunimiEtunimiPredicate).or(etunimiSukunimiPredicate);
 
             } else {
                 predicate.or(
