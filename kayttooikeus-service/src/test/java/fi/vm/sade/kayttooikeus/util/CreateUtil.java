@@ -48,7 +48,7 @@ public class CreateUtil {
     }
 
     public static AnomusDto createAnomusDto(String organisaatioOid) {
-        return new AnomusDto(organisaatioOid, LocalDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI, HenkiloNimiDto.builder().oid("oid1").build());
+        return new AnomusDto(organisaatioOid, LocalDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI, HenkiloNimiDto.builder().oid("oid1").build(), "Perusteluteksti");
     }
 
     public static KayttoOikeusRyhma createKayttooikeusryhma(Long id) {
