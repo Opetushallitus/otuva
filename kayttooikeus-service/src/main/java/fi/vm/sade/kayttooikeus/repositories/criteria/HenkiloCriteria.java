@@ -2,9 +2,11 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -13,7 +15,9 @@ import lombok.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,13 +56,35 @@ public class HenkiloCriteria {
         }
         if (StringUtils.hasLength(this.nameQuery)) {
             BooleanBuilder predicate = new BooleanBuilder();
-            Arrays.stream(this.nameQuery.toLowerCase().split(" ")).forEach(queryPart ->
-                    predicate.or(Expressions.anyOf(
-                            // By using contains query can't use B-tree index
-                            henkilo.etunimetCached.startsWithIgnoreCase(queryPart),
-                            henkilo.sukunimiCached.startsWithIgnoreCase(queryPart)
-                    )));
-            predicate.or(henkilo.oidHenkilo.eq(this.nameQuery));
+            String trimmedQuery = this.nameQuery.trim();
+            List<String> queryParts = Arrays.asList(trimmedQuery.split(" "));
+
+            if(queryParts.size() > 1) {
+                // expect sukunimi to be first or last of queryParts
+                // use startsWithIgnoreCase to get use of index
+
+                BooleanBuilder SukunimiEtunimiPredicate = new BooleanBuilder();
+                SukunimiEtunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0)));
+                String etunimiLast = String.join(" ", queryParts.subList(1, queryParts.size()));
+                SukunimiEtunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiLast));
+
+                BooleanBuilder etunimiSukunimiPredicate = new BooleanBuilder();
+                etunimiSukunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1)));
+                String etunimiFirst = String.join(" ", queryParts.subList(0, queryParts.size() - 1));
+                etunimiSukunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiFirst));
+
+                predicate.or(SukunimiEtunimiPredicate).or(etunimiSukunimiPredicate);
+
+            } else {
+                predicate.or(
+                        Expressions.anyOf(
+                                henkilo.oidHenkilo.eq(trimmedQuery),
+                                henkilo.kayttajatiedot.username.eq(trimmedQuery),
+                                henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
+                                henkilo.sukunimiCached.startsWithIgnoreCase(trimmedQuery)
+                        )
+                );
+            }
             builder.and(predicate);
         }
         // Organisaatiohenkilo
