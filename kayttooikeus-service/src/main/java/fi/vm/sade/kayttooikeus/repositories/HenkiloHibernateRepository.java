@@ -31,6 +31,9 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
      */
     Set<String> findOidsBySamaOrganisaatio(String henkiloOid, OrganisaatioHenkiloCriteria criteria);
 
+    List<HenkilohakuResultDto> findByUsername(HenkiloCriteria criteria,
+                                              Long offset);
+
     List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, List<OrderSpecifier> orderBy);
 
     /**

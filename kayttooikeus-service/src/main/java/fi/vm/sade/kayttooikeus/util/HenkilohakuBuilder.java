@@ -55,10 +55,15 @@ public class HenkilohakuBuilder {
 
     // Find nimi, kayttajatunnus and oidHenkilo
     public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
-        this.henkilohakuResultDtoList = this.henkiloHibernateRepository
-                .findByCriteria(this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class),
+        // Because jpaquery limitations this can't be done with subqueries and union all.
+        // This needs to be done in 2 queries because postgres query planner can't optimise it correctly because of
+        // kayttajatiedot outer join and where or combination.
+        HenkiloCriteria henkiloCriteria = this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class);
+        this.henkilohakuResultDtoList = this.henkiloHibernateRepository.findByUsername(henkiloCriteria, offset);
+        this.henkilohakuResultDtoList.addAll(this.henkiloHibernateRepository
+                .findByCriteria(henkiloCriteria,
                         offset,
-                        orderBy != null ? orderBy.getValue() : null);
+                        orderBy != null ? orderBy.getValue() : null));
         return this;
     }
 
