@@ -61,23 +61,19 @@ public class HenkiloCriteria {
 
             if(queryParts.size() > 1) {
                 // expect sukunimi to be first or last of queryParts
-                // use .startsWithIgnoreCase to
-                BooleanExpression etunimetTailMatch = henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(1));
-                BooleanExpression etunimetHeadMatch = henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(0));
+                // use startsWithIgnoreCase to get use of index
 
-                if(queryParts.size() > 2) {
-                    etunimetTailMatch.and(henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(2)));
-                    etunimetHeadMatch.and(henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(1)));
-                }
+                BooleanBuilder etunimetTailPredicate = new BooleanBuilder();
+                etunimetTailPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0)));
+                List<String> sublist = queryParts.subList(1, queryParts.size());
+                sublist.forEach( queryPart -> etunimetTailPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(queryPart)));
 
-                predicate.or(
-                    Expressions.anyOf(
-                        henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0))
-                                .and(etunimetTailMatch),
-                        henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1))
-                                .and(etunimetHeadMatch)
-                    )
-                );
+                BooleanBuilder etunimetHeadPredicate = new BooleanBuilder();
+                etunimetHeadPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1)));
+                queryParts.subList(0, queryParts.size() - 1).forEach( queryPart -> etunimetHeadPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(queryPart)));
+
+                predicate.or(etunimetTailPredicate).or(etunimetHeadPredicate);
+
             } else {
                 predicate.or(
                         Expressions.anyOf(
