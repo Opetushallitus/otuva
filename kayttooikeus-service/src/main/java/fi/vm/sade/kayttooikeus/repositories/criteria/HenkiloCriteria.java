@@ -2,9 +2,11 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -13,7 +15,9 @@ import lombok.*;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,12 +56,38 @@ public class HenkiloCriteria {
         }
         if (StringUtils.hasLength(this.nameQuery)) {
             BooleanBuilder predicate = new BooleanBuilder();
-            Arrays.stream(this.nameQuery.split(" ")).forEach(queryPart ->
-                    predicate.or(Expressions.anyOf(
-                            henkilo.etunimetCached.containsIgnoreCase(queryPart),
-                            henkilo.sukunimiCached.containsIgnoreCase(queryPart)
-                    )));
-            predicate.or(Expressions.anyOf(henkilo.oidHenkilo.eq(this.nameQuery), henkilo.kayttajatiedot.username.eq(this.nameQuery)));
+            String trimmedQuery = this.nameQuery.trim();
+            List<String> queryParts = Arrays.asList(trimmedQuery.split(" "));
+
+            if(queryParts.size() > 1) {
+                // expect sukunimi to be first or last of queryParts
+
+                BooleanExpression etunimetTailMatch = henkilo.etunimetCached.containsIgnoreCase(queryParts.get(1));
+                BooleanExpression etunimetHeadMatch = henkilo.etunimetCached.containsIgnoreCase(queryParts.get(0));
+
+                if(queryParts.size() > 2) {
+                    etunimetTailMatch.and(henkilo.etunimetCached.containsIgnoreCase(queryParts.get(2)));
+                    etunimetHeadMatch.and(henkilo.etunimetCached.containsIgnoreCase(queryParts.get(1)));
+                }
+
+                predicate.or(
+                    Expressions.anyOf(
+                        henkilo.sukunimiCached.containsIgnoreCase(queryParts.get(0))
+                                .and(etunimetTailMatch),
+                        henkilo.sukunimiCached.containsIgnoreCase(queryParts.get(queryParts.size() - 1))
+                                .and(etunimetHeadMatch)
+                    )
+                );
+            } else {
+                predicate.or(
+                        Expressions.anyOf(
+                                henkilo.oidHenkilo.eq(trimmedQuery),
+                                henkilo.kayttajatiedot.username.eq(trimmedQuery),
+                                henkilo.etunimetCached.containsIgnoreCase(trimmedQuery),
+                                henkilo.sukunimiCached.containsIgnoreCase(trimmedQuery)
+                        )
+                );
+            }
             builder.and(predicate);
         }
         // Organisaatiohenkilo
