@@ -133,6 +133,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                         + updateHaettuKayttooikeusryhmaDto.getId()));
         Anomus anojanAnomus = haettuKayttoOikeusRyhma.getAnomus();
         KayttoOikeusRyhma anottuKayttoOikeusRyhma = haettuKayttoOikeusRyhma.getKayttoOikeusRyhma();
+        Long kayttooikeusryhmaId = anottuKayttoOikeusRyhma.getId();
 
         // Permission checks for declining requisition (there are separate checks for granting)
         this.notEditingOwnData(anojanAnomus.getHenkilo().getOidHenkilo());
@@ -155,6 +156,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid "
                         + anojanAnomus.getHenkilo().getOidHenkilo()));
 
+
         this.updateAnomusAndRemoveHaettuKayttooikeusRyhma(haettuKayttoOikeusRyhma,
                 KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusryhmaDto.getKayttoOikeudenTila()));
 
@@ -171,11 +173,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             anojanAnomus.addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
-        // If everything is handled and something is granted on anomus send email notification to anoja.
-        if (anojanAnomus.getHaettuKayttoOikeusRyhmas().isEmpty()
-                && !anojanAnomus.getMyonnettyKayttooikeusRyhmas().isEmpty()) {
-            this.emailService.sendEmailAnomusAccepted(anojanAnomus);
-        }
+        this.emailService.sendEmailAnomusKasitelty(anojanAnomus, updateHaettuKayttooikeusryhmaDto, kayttooikeusryhmaId);
+
     }
 
     private void notEditingOwnData(String oidHenkilo) {

@@ -55,7 +55,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void updateHaettuKayttooikeusryhma() throws Exception {
         UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
-                KayttoOikeudenTila.MYONNETTY.toString(), LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate());
+                KayttoOikeudenTila.MYONNETTY.toString(), LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate(), "hylkaysperusteteksti");
         this.mvc.perform(put("/kayttooikeusanomus")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))

@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
@@ -11,7 +12,7 @@ import java.util.Set;
 
 public interface EmailService {
 
-    void sendEmailAnomusAccepted(Anomus anomus);
+    void sendEmailAnomusKasitelty(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto, Long kayttooikeusryhmaId);
 
     void sendExpirationReminder(String henkiloOid, List<ExpiringKayttoOikeusDto> tapahtumas);
 
