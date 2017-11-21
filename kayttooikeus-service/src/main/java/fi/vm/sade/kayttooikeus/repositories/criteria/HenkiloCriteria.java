@@ -61,20 +61,20 @@ public class HenkiloCriteria {
 
             if(queryParts.size() > 1) {
                 // expect sukunimi to be first or last of queryParts
-
-                BooleanExpression etunimetTailMatch = henkilo.etunimetCached.containsIgnoreCase(queryParts.get(1));
-                BooleanExpression etunimetHeadMatch = henkilo.etunimetCached.containsIgnoreCase(queryParts.get(0));
+                // use .startsWithIgnoreCase to
+                BooleanExpression etunimetTailMatch = henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(1));
+                BooleanExpression etunimetHeadMatch = henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(0));
 
                 if(queryParts.size() > 2) {
-                    etunimetTailMatch.and(henkilo.etunimetCached.containsIgnoreCase(queryParts.get(2)));
-                    etunimetHeadMatch.and(henkilo.etunimetCached.containsIgnoreCase(queryParts.get(1)));
+                    etunimetTailMatch.and(henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(2)));
+                    etunimetHeadMatch.and(henkilo.etunimetCached.startsWithIgnoreCase(queryParts.get(1)));
                 }
 
                 predicate.or(
                     Expressions.anyOf(
-                        henkilo.sukunimiCached.containsIgnoreCase(queryParts.get(0))
+                        henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0))
                                 .and(etunimetTailMatch),
-                        henkilo.sukunimiCached.containsIgnoreCase(queryParts.get(queryParts.size() - 1))
+                        henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1))
                                 .and(etunimetHeadMatch)
                     )
                 );
@@ -83,8 +83,8 @@ public class HenkiloCriteria {
                         Expressions.anyOf(
                                 henkilo.oidHenkilo.eq(trimmedQuery),
                                 henkilo.kayttajatiedot.username.eq(trimmedQuery),
-                                henkilo.etunimetCached.containsIgnoreCase(trimmedQuery),
-                                henkilo.sukunimiCached.containsIgnoreCase(trimmedQuery)
+                                henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
+                                henkilo.sukunimiCached.startsWithIgnoreCase(trimmedQuery)
                         )
                 );
             }
