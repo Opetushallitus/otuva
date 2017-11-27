@@ -3,9 +3,9 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.VarmennusPoletti;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.VarmennusPolettiRepository;
-import fi.vm.sade.kayttooikeus.service.EmailService;
-import fi.vm.sade.kayttooikeus.service.TimeService;
+import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
@@ -44,12 +44,19 @@ public class UnohtunutSalasanaServiceImplTest {
     private VarmennusPolettiRepository varmennusPolettiRepository;
     @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    @Mock
+    private CryptoService cryptoService;
+    @Mock
+    private LdapSynchronizationService ldapSynchronizationService;
+    @Mock
+    private KayttajatiedotRepository kayttajatiedotRepository;
 
     @Before
     public void setup() {
         impl = new UnohtunutSalasanaServiceImpl(timeService, emailService,
                 henkiloDataRepository, varmennusPolettiRepository,
-                oppijanumerorekisteriClient);
+                oppijanumerorekisteriClient, cryptoService, ldapSynchronizationService,
+                kayttajatiedotRepository);
     }
 
     @Test

@@ -2,18 +2,24 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.VarmennusPoletti;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.VarmennusPolettiRepository;
-import fi.vm.sade.kayttooikeus.service.EmailService;
-import fi.vm.sade.kayttooikeus.service.TimeService;
+import fi.vm.sade.kayttooikeus.service.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import fi.vm.sade.kayttooikeus.service.UnohtunutSalasanaService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.ifPresentOrElse;
@@ -36,6 +42,9 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final VarmennusPolettiRepository varmennusPolettiRepository;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final CryptoService cryptoService;
+    private final LdapSynchronizationService ldapSynchronizationService;
+    private final KayttajatiedotRepository kayttajatiedotRepository;
 
     @Override
     public void lahetaPoletti(String kayttajatunnus) {
@@ -75,6 +84,34 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
         }
 
         emailService.sendEmailReset(henkilo, sahkoposti, poletti, voimassa);
+    }
+
+    @Override
+    @Transactional
+    public void resetoiSalasana(String base64EncodedPoletti, String password) {
+        this.cryptoService.throwIfNotStrongPassword(password);
+        String poletti = new String(Base64.decodeBase64(base64EncodedPoletti));
+        VarmennusPoletti varmennusPoletti = varmennusPolettiRepository.findByPoletti(poletti).
+                orElseThrow(() -> new NotFoundException("Varmennuspolettia ei löytynyt: " + poletti));
+        if(!LocalDateTime.now().isBefore(varmennusPoletti.getVoimassa())) {
+            throw new ForbiddenException("Varmennuspoletti ei ole voimassa");
+        }
+
+        Henkilo henkilo = varmennusPoletti.getHenkilo();
+        Kayttajatiedot kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(henkilo.getOidHenkilo()).orElseGet(() -> {
+            Kayttajatiedot newKayttajatiedot = new Kayttajatiedot();
+            henkilo.setKayttajatiedot(newKayttajatiedot);
+            newKayttajatiedot.setHenkilo(henkilo);
+            return newKayttajatiedot;
+        });
+        String salt = this.cryptoService.generateSalt();
+        String hash = this.cryptoService.getSaltedHash(password, salt);
+        kayttajatiedot.setSalt(salt);
+        kayttajatiedot.setPassword(hash);
+
+        ldapSynchronizationService.updateHenkiloAsap(henkilo.getOidHenkilo());
+        LOGGER.info("Käytettiin henkilölle {} luotu poletti {}.",
+                henkilo.getOidHenkilo(), varmennusPoletti.getPoletti());
     }
 
 }
