@@ -1,12 +1,9 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import fi.vm.sade.kayttooikeus.service.UnohtunutSalasanaService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/salasana")
@@ -20,5 +17,12 @@ public class SalasanaController {
     public void lahetaPoletti(@PathVariable String kayttajatunnus) {
         unohtunutSalasanaService.lahetaPoletti(kayttajatunnus);
     }
+
+    @PostMapping("/resetointi/{poletti}")
+    @ApiOperation(value = "Vaihtaa polettiin liitetyn henkilön salasanan")
+    public void resetoiSalasana(@PathVariable String base64EncodedPoletti, @RequestBody String password) {
+        unohtunutSalasanaService.resetoiSalasana(base64EncodedPoletti, password);
+    }
+
 
 }

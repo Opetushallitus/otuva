@@ -67,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI = "rooli";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI = "linkki";
-    private static final String UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME = "salasanareset_email";
+    private static final String UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME = "salasanareset_v2_email";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_LINKKI = "linkki";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VOIMASSA_TUNTEINA = "voimassa_tunteina";
@@ -330,7 +330,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmailReset(HenkiloDto henkilo, String sahkoposti, String poletti, Duration voimassa) {
-        String linkki = urlProperties.url("registration-ui.passwordReset", encode(poletti));
+        String linkki = urlProperties.url("henkilo-ui.password.reset", encode(poletti));
 
         EmailRecipient recipient = new EmailRecipient(henkilo.getOidHenkilo(), sahkoposti);
         recipient.setRecipientReplacements(Arrays.asList(new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkilo, SahkopostiHenkiloDto.class)),
