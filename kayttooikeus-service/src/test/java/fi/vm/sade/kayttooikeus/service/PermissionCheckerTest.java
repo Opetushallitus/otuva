@@ -222,7 +222,7 @@ public class PermissionCheckerTest {
 
         Set<String> expectedResult1 = Sets.newHashSet("ROLE_APP_OPPIJANUMEROREKISTERI_CRUD",
                 "ROLE_APP_OPPIJANUMEROREKISTERI_READ", "ROLE_APP_HENKILONHALLINTA_CRUD");
-        assertThat(permissionChecker.getPrefixedRolesByPalveluRooli(input1)).isEqualTo(expectedResult1);
+        assertThat(PermissionCheckerServiceImpl.getPrefixedRolesByPalveluRooli(input1)).isEqualTo(expectedResult1);
 
         Map<String, List<String>> input2 = Maps.newHashMap();
         input2.put("TESTIPALVELU", Lists.newArrayList("ABC", "DEF", "ABCSD"));
@@ -230,7 +230,7 @@ public class PermissionCheckerTest {
 
         Set<String> expectedResult2 = Sets.newHashSet("ROLE_APP_TESTIPALVELU_ABC", "ROLE_APP_TESTIPALVELU_DEF",
                 "ROLE_APP_TESTIPALVELU_ABCSD", "ROLE_APP_OIKEAPALVELU_ABC", "ROLE_APP_OIKEAPALVELU_FOOBAR");
-        assertThat(permissionChecker.getPrefixedRolesByPalveluRooli(input2)).isEqualTo(expectedResult2);
+        assertThat(PermissionCheckerServiceImpl.getPrefixedRolesByPalveluRooli(input2)).isEqualTo(expectedResult2);
     }
 
     @Test
