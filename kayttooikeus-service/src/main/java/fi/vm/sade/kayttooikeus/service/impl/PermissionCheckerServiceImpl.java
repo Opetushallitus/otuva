@@ -104,6 +104,12 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     @Transactional(readOnly = true)
+    public boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService) {
+        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, this.getCasRoles());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
         return personOid.equals(currentUserOid)
