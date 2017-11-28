@@ -2,32 +2,27 @@ package fi.vm.sade.kayttooikeus.service;
 
 
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface PermissionCheckerService {
+
     boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
 
     boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
 
-    boolean isAllowedToAccessPerson(String callingUserOid, String personOid, List<String> allowedRoles,
-                                    ExternalPermissionService permissionCheckService, Set<String> callingUserRoles);
-
-    boolean isAllowedToAccessPersonByPalveluRooli(String callingUserOid, String personOid, Map<String, List<String>> allowedPalveluRooli,
-                                                  ExternalPermissionService permissionCheckService, Set<String> callingUserRoles);
+    boolean isAllowedToAccessPerson(PermissionCheckDto permissionCheckDto);
 
     boolean checkRoleForOrganisation(List<String> orgOidList, List<String> allowedRolesWithoutPrefix);
 
     List<OrganisaatioPerustieto> listOrganisaatiosByHenkiloOid(String oid);
 
     boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles);
-
-    boolean hasInternalAccessByPalveluRooli(String personOid, Map<String, List<String>> allowedPalveluRooli, Set<String> callingUserRoles);
 
     boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
 
@@ -40,8 +35,6 @@ public interface PermissionCheckerService {
     String getCurrentUserOid();
 
     Set<String> getCasRoles();
-
-    Set<String> getPrefixedRolesByPalveluRooli(Map<String, List<String>> palveluRooli);
 
     /**
      * Rekisterinpitäjä
