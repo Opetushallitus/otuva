@@ -8,11 +8,15 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface PermissionCheckerService {
 
+    @Deprecated
     boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
+
+    boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
 
     boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
 
