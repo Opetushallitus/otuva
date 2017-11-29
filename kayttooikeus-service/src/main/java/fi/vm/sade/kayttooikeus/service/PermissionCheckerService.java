@@ -18,7 +18,10 @@ public interface PermissionCheckerService {
 
     boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
 
+    @Deprecated
     boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
+
+    boolean isAllowedToAccessPersonOrSelf(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
 
     boolean isAllowedToAccessPerson(PermissionCheckDto permissionCheckDto);
 
