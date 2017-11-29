@@ -61,9 +61,10 @@ public class EmailServiceImpl implements EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
     private static final Locale DEFAULT_LOCALE = new Locale(DEFAULT_LANGUAGE_CODE);
-    private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email";
-    private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME = "kayttooikeushakemusilmoitus_email";
-    private static final String ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME = "kayttooikeusanomuskasitelty_email_v2";
+    private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email_v2";
+    private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME = "kayttooikeushakemusilmoitus_email_v2";
+    private static final String ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME = "kayttooikeusanomuskasitelty_email_v3";
+    private static final String KUTSUTTU_EMAIL_TEMPLATE_NAME = "kayttooikeus_kutsu_v2";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI = "rooli";
     private static final String ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI = "linkki";
@@ -71,6 +72,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VASTAANOTTAJA = "vastaanottaja";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_LINKKI = "linkki";
     private static final String UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VOIMASSA_TUNTEINA = "voimassa_tunteina";
+    private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_REPLACEMENT_LINKKI = "linkki";
     private static final String CALLING_PROCESS = "kayttooikeus";
 
     private final String expirationReminderSenderEmail;
@@ -99,7 +101,7 @@ public class EmailServiceImpl implements EmailService {
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
         this.ryhmasahkopostiClient = ryhmasahkopostiClient;
         this.expirationReminderSenderEmail = config.getSenderEmail();
-        this.expirationReminderPersonUrl = ophProperties.url("authentication-henkiloui.expirationreminder.personurl");
+        this.expirationReminderPersonUrl = ophProperties.url("henkilo-ui.omattiedot");
         this.kayttoOikeusRyhmaRepository = kayttoOikeusRyhmaRepository;
         this.mapper = mapper;
         this.commonProperties = commonProperties;
@@ -242,7 +244,8 @@ public class EmailServiceImpl implements EmailService {
         recipient.setLanguageCode(kieliKoodi);
         List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
         replacements.add(new ReportedRecipientReplacementDTO("vastaanottaja", mapper.map(henkilo, SahkopostiHenkiloDto.class)));
-        replacements.add(new ReportedRecipientReplacementDTO("linkki", urlProperties.url("authentication-henkiloui.anomukset")));
+        replacements.add(new ReportedRecipientReplacementDTO(KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_REPLACEMENT_LINKKI,
+                urlProperties.url("henkilo-ui.anomukset")));
         recipient.setRecipientReplacements(replacements);
         return recipient;
     }
@@ -260,7 +263,7 @@ public class EmailServiceImpl implements EmailService {
         EmailData emailData = new EmailData();
 
         EmailMessage email = new EmailMessage();
-        email.setTemplateName(this.commonProperties.getInvitationEmail().getTemplate());
+        email.setTemplateName(KUTSUTTU_EMAIL_TEMPLATE_NAME);
         email.setLanguageCode(kutsu.getKieliKoodi());
         email.setCallingProcess(CALLING_PROCESS);
         email.setFrom(this.commonProperties.getInvitationEmail().getFrom());
