@@ -59,7 +59,7 @@ public class HenkiloCriteria {
             String trimmedQuery = this.nameQuery.trim();
             List<String> queryParts = Arrays.asList(trimmedQuery.split(" "));
 
-            if(queryParts.size() > 1) {
+            if (queryParts.size() > 1) {
                 // expect sukunimi to be first or last of queryParts
                 // use startsWithIgnoreCase to get use of index
 
@@ -75,11 +75,11 @@ public class HenkiloCriteria {
 
                 predicate.or(SukunimiEtunimiPredicate).or(etunimiSukunimiPredicate);
 
-            } else {
+            }
+            else {
                 predicate.or(
                         Expressions.anyOf(
                                 henkilo.oidHenkilo.eq(trimmedQuery),
-                                henkilo.kayttajatiedot.username.eq(trimmedQuery),
                                 henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
                                 henkilo.sukunimiCached.startsWithIgnoreCase(trimmedQuery)
                         )

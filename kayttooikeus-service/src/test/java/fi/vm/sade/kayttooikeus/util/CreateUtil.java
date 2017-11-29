@@ -32,8 +32,12 @@ public class CreateUtil {
         return new HaettuKayttoOikeusRyhma(anomus, kayttoOikeusRyhma, LocalDateTime.now(), KayttoOikeudenTila.ANOTTU);
     }
 
+    public static UpdateHaettuKayttooikeusryhmaDto createUpdateHaettuKayttooikeusryhmaDto(Long id, String tila, LocalDate loppupvm, String hylkaysperuste) {
+        return new UpdateHaettuKayttooikeusryhmaDto(id, tila, LocalDate.now(), loppupvm, hylkaysperuste);
+    }
+
     public static UpdateHaettuKayttooikeusryhmaDto createUpdateHaettuKayttooikeusryhmaDto(Long id, String tila, LocalDate loppupvm) {
-        return new UpdateHaettuKayttooikeusryhmaDto(id, tila, LocalDate.now(), loppupvm);
+        return CreateUtil.createUpdateHaettuKayttooikeusryhmaDto(id, tila, loppupvm, "hylkaysperuste");
     }
 
     public static GrantKayttooikeusryhmaDto createGrantKayttooikeusryhmaDto(Long id, LocalDate loppupvm) {
@@ -48,7 +52,7 @@ public class CreateUtil {
     }
 
     public static AnomusDto createAnomusDto(String organisaatioOid) {
-        return new AnomusDto(organisaatioOid, LocalDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI, HenkiloNimiDto.builder().oid("oid1").build());
+        return new AnomusDto(organisaatioOid, LocalDateTime.now().minusDays(1), new Date(), AnomusTyyppi.UUSI, HenkiloNimiDto.builder().oid("oid1").build(), "Perusteluteksti");
     }
 
     public static KayttoOikeusRyhma createKayttooikeusryhma(Long id) {

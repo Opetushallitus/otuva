@@ -23,4 +23,6 @@ public class AnomusDto {
 
     private HenkiloNimiDto henkilo;
 
+    private String perustelut;
+
 }
