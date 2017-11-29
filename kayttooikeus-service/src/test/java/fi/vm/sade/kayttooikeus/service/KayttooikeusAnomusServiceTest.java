@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
@@ -174,11 +175,14 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithNoCriteriaOrganisaatios() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
         List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
@@ -188,25 +192,30 @@ public class KayttooikeusAnomusServiceTest {
     }
 
     @Test
-    public void listHaetutKayttoOikeusRyhmatForVirkailijaWithShowOwnAnomus() {
+    public void listHaetutKayttoOikeusRyhmatForVirkailijaCantSeeOwnAnomus() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
+        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
         List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
-
+        given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3");
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
         assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
         assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+        assertThat(criteria.getHenkiloOidRestrictionList())
+                .containsExactly("1.2.3");
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatios() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
-        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3", "2.3.4");
+        List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3", "2.3.4", "2.3.4.5.6");
         List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
         Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
 
@@ -222,7 +231,24 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(criteria.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");
     }
 
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatiosToChildOrganisation() {
+        List<String> userOrganisaatioOids = Lists.newArrayList("1.2.3.4.5.0");
+        List<String> userOrganisaatioChildOids = Lists.newArrayList("1.2.3.4.5.0", "1.2.3.4.5.1");
+        List<Long> kayttooikeusRyhmas = Lists.newArrayList(12345L, 23456L, 34567L);
+        Set<String> criteriaOrganisaatioOids = Sets.newHashSet("1.2.3.4.5.1");
 
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
+
+        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getOrganisaatioOids()).containsExactly("1.2.3.4.5.1");
+    }
 
     @Test
     @WithMockUser("1.2.3.4.1")
@@ -707,5 +733,6 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(currentHenkiloCanGrant.get("1.2.0.0.2")).containsExactly(2002L);
         assertThat(currentHenkiloCanGrant.get("1.2.0.0.3")).containsExactly(2003L);
     }
+
 
 }
