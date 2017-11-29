@@ -81,10 +81,7 @@ public class KayttoOikeusRyhmaController {
     }
 
     @RequestMapping(value = "/henkilo/current", method = RequestMethod.GET)
-    @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
-            + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
-            + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
-            + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "Hakee kirjautuneen henkilön käyttöoikeusryhmät.",
             notes = "Listaa nykyisen kirjautuneen henkilön kaikki käyttöoikeusryhmät "
                     + "sekä rajaa ne tiettyyn organisaatioon, jos kutsussa on "
