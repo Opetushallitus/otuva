@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
@@ -154,8 +155,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                                         .oidHenkilo(this.permissionCheckerService.getCurrentUserOid())
                                         .build(),
                                 null,
-                                null).stream().findFirst()
-                        .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + this.permissionCheckerService.getCurrentUserOid())),
+                                null).stream()
+                        .findFirst()
+                        .orElseGet(() -> KayttooikeusPerustiedotDto.builder()
+                                .oidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+                                .organisaatiot(Sets.newHashSet())
+                                .build()),
                 OmatTiedotDto.class);
         omatTiedotDto.setIsAdmin(this.permissionCheckerService.isCurrentUserAdmin());
         omatTiedotDto.setIsMiniAdmin(this.permissionCheckerService.isCurrentUserMiniAdmin());
