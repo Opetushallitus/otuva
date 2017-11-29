@@ -104,6 +104,10 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 else {
                     allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
                     criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
+                    // User has no rights to any requested organisations.
+                    if (allCurrentUserOrganisaatioOids.isEmpty()) {
+                        return new ArrayList<>();
+                    }
                 }
             }
         }
