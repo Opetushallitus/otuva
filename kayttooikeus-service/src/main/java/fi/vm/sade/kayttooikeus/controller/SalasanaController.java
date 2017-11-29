@@ -18,7 +18,7 @@ public class SalasanaController {
         unohtunutSalasanaService.lahetaPoletti(kayttajatunnus);
     }
 
-    @PostMapping("/resetointi/{poletti}")
+    @PostMapping("/resetointi/{base64EncodedPoletti}")
     @ApiOperation(value = "Vaihtaa polettiin liitetyn henkilön salasanan")
     public void resetoiSalasana(@PathVariable String base64EncodedPoletti, @RequestBody String password) {
         unohtunutSalasanaService.resetoiSalasana(base64EncodedPoletti, password);
