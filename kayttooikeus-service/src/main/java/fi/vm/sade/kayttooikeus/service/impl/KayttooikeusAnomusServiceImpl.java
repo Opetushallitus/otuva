@@ -83,7 +83,6 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          Long limit,
                                                                          Long offset,
                                                                          OrderByAnomus orderBy) {
-        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
         // Do not show own anomus
         criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
 
@@ -94,20 +93,17 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
             // organisaatio filtering
             if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-                if(criteria.getOrganisaatioOids() == null) {
-                    criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
-                } else {
-                    Set<String> allCurrentUserOrganisaatioOids = currentUserOrganisaatioOids.stream()
-                            .flatMap(currentUserOrganisaatioOid ->
-                                    this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
-                            .collect(Collectors.toSet());
-                    allCurrentUserOrganisaatioOids.addAll(currentUserOrganisaatioOids);
+                Set<String> allCurrentUserOrganisaatioOids = this.organisaatioHenkiloRepository
+                        .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()).stream()
+                        .flatMap(currentUserOrganisaatioOid ->
+                                this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
+                        .collect(Collectors.toSet());
+                if (criteria.getOrganisaatioOids() == null) {
+                    criteria.setOrganisaatioOids(new HashSet<>(allCurrentUserOrganisaatioOids));
+                }
+                else {
                     allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
-
                     criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
-                    if(allCurrentUserOrganisaatioOids.isEmpty()) {
-                        criteria.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
-                    }
                 }
             }
         }
