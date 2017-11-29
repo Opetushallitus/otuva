@@ -133,7 +133,8 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .build()));
         LocalDate startDate = LocalDate.of(2017, 10, 10);
         LocalDate endDate = LocalDate.of(2017, 10, 9);
-        UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(10L, "MYONNETTY", startDate, endDate, null);
+        UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto
+                = new UpdateHaettuKayttooikeusryhmaDto(10L, "MYONNETTY", startDate, endDate, null);
 
         Henkilo henkilo = new Henkilo();
         henkilo.setOidHenkilo("1.2.3.4.5");
@@ -211,6 +212,6 @@ public class EmailServiceTest extends AbstractServiceTest {
         assertThat(emailData.getEmail().getCallingProcess()).isEqualTo("kayttooikeus");
         assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("fi");
         assertThat(emailData.getEmail().getFrom()).isEqualTo(emailData.getEmail().getReplyTo()).isEqualTo("noreply@oph.fi");
-        assertThat(emailData.getEmail().getTemplateName()).isEqualTo("kayttooikeus_kutsu");
+        assertThat(emailData.getEmail().getTemplateName()).isEqualTo("kayttooikeus_kutsu_v2");
     }
 }
