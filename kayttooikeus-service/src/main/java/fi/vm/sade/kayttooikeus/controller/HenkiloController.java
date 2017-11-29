@@ -54,7 +54,7 @@ public class HenkiloController {
         return organisaatioHenkiloService.listOrganisaatioHenkilos(oid, comparisonLangCode);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön organisaatiot.",
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo", method = RequestMethod.GET)
@@ -83,7 +83,7 @@ public class HenkiloController {
         return kayttajatiedotService.create(henkiloOid, kayttajatiedot, ldapSynchronization);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'READ', 'READ_UPDATE', 'CRUD'}, null)")
     @ApiOperation(value = "Hakee henkilön käyttäjätiedot.",
             notes = "Hakee henkilön käyttäjätiedot.")
     @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.GET)
