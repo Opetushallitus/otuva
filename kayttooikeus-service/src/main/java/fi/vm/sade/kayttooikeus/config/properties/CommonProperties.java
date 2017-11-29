@@ -21,7 +21,6 @@ public class CommonProperties {
 
     @Getter @Setter
     public static class InvitationEmail {
-        private String template;
         private String from;
         private String sender;
     }
