@@ -96,14 +96,8 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
         if(!LocalDateTime.now().isBefore(varmennusPoletti.getVoimassa())) {
             throw new ForbiddenException("Varmennuspoletti ei ole voimassa");
         }
-
         Henkilo henkilo = varmennusPoletti.getHenkilo();
-        Kayttajatiedot kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(henkilo.getOidHenkilo()).orElseGet(() -> {
-            Kayttajatiedot newKayttajatiedot = new Kayttajatiedot();
-            henkilo.setKayttajatiedot(newKayttajatiedot);
-            newKayttajatiedot.setHenkilo(henkilo);
-            return newKayttajatiedot;
-        });
+        Kayttajatiedot kayttajatiedot = henkilo.getKayttajatiedot();
         String salt = this.cryptoService.generateSalt();
         String hash = this.cryptoService.getSaltedHash(password, salt);
         kayttajatiedot.setSalt(salt);
