@@ -20,11 +20,11 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -162,11 +162,11 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Transactional(readOnly = true)
     public List<MyonnettyKayttoOikeusDto> listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio(String henkiloOid, String organisaatioOid) {
 
-        List<MyonnettyKayttoOikeusDto> all = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
+        List<MyonnettyKayttoOikeusDto> all = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         /* History data must be fetched also since it's additional information for admin users
          * if they need to solve possible conflicts with users' access rights
          */
-        List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = kayttoOikeusRyhmaTapahtumaHistoriaRepository
+        List<MyonnettyKayttoOikeusDto> ryhmaTapahtumaHistorias = this.kayttoOikeusRyhmaTapahtumaHistoriaRepository
                 .findByHenkiloInOrganisaatio(henkiloOid, organisaatioOid);
         all.addAll(ryhmaTapahtumaHistorias);
         return this.mapKasittelijaNimiToMyonnettyKayttooikeusDto(this.localizationService.localize(all));
@@ -174,16 +174,17 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
 
     private List<MyonnettyKayttoOikeusDto> mapKasittelijaNimiToMyonnettyKayttooikeusDto(
             List<MyonnettyKayttoOikeusDto> myonnettyKayttoOikeusDtoList) {
-        List<HenkiloPerustietoDto> henkiloPerustiedotDtos = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(myonnettyKayttoOikeusDtoList.stream()
-                .map(MyonnettyKayttoOikeusDto::getKasittelijaOid).collect(Collectors.toList()));
-        return myonnettyKayttoOikeusDtoList.stream()
-                .map(myonnettyKayttoOikeusDto -> {
-                    HenkiloPerustietoDto kasittelija = henkiloPerustiedotDtos.stream()
-                            .filter(henkiloPerustietoDto -> Objects.equals(henkiloPerustietoDto.getOidHenkilo(), henkiloPerustietoDto.getOidHenkilo()))
-                            .findFirst().orElseThrow(() -> new NotFoundException("Kasittelija not found with oid " + myonnettyKayttoOikeusDto.getKasittelijaOid()));
-                    myonnettyKayttoOikeusDto.setKasittelijaNimi(kasittelija.getKutsumanimi() + " " + kasittelija.getSukunimi());
-                    return myonnettyKayttoOikeusDto;
-                }).collect(Collectors.toList());
+        Set<String> kasittelijaOids = myonnettyKayttoOikeusDtoList.stream()
+                .map(MyonnettyKayttoOikeusDto::getKasittelijaOid)
+                .collect(Collectors.toSet());
+        Map<String, String> kasittelijasMap = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(kasittelijaOids).stream()
+                .collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo,
+                        henkiloPerustietoDto -> henkiloPerustietoDto.getKutsumanimi() + " "
+                                + henkiloPerustietoDto.getSukunimi()));
+        myonnettyKayttoOikeusDtoList.forEach(myonnettyKayttoOikeusDto ->
+                myonnettyKayttoOikeusDto.setKasittelijaNimi(kasittelijasMap
+                        .getOrDefault(myonnettyKayttoOikeusDto.getKasittelijaOid(), myonnettyKayttoOikeusDto.getKasittelijaOid())));
+        return myonnettyKayttoOikeusDtoList;
     }
 
     @Override
@@ -501,7 +502,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private boolean orgTypeMatchesOrOidIsFoundInViites(String organisaatioOid, Set<String> organisaatioTyyppis, OrganisaatioPerustieto opt) {
         return opt.getChildren().stream()
                 .anyMatch(child -> {
-                    String laitosTyyppi = StringUtils.isNotBlank(child.getOppilaitostyyppi()) ? child.getOppilaitostyyppi().substring(17, 19) : null;
+                    String laitosTyyppi = StringUtils.hasLength(child.getOppilaitostyyppi()) ? child.getOppilaitostyyppi().substring(17, 19) : null;
                     return organisaatioTyyppis.stream()
                             .anyMatch(s -> s.equals(laitosTyyppi) || s.equals(organisaatioOid));
                 });
