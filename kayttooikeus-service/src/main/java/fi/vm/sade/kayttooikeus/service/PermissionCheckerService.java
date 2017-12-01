@@ -2,20 +2,28 @@ package fi.vm.sade.kayttooikeus.service;
 
 
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface PermissionCheckerService {
+
+    @Deprecated
     boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
 
+    boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
+
+    @Deprecated
     boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
 
-    boolean isAllowedToAccessPerson(String callingUserOid, String personOid, List<String> allowedRoles,
-                                    ExternalPermissionService permissionCheckService, Set<String> callingUserRoles);
+    boolean isAllowedToAccessPersonOrSelf(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
+
+    boolean isAllowedToAccessPerson(PermissionCheckDto permissionCheckDto);
 
     boolean checkRoleForOrganisation(List<String> orgOidList, List<String> allowedRolesWithoutPrefix);
 

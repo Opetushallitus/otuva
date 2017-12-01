@@ -12,6 +12,7 @@ import fi.vm.sade.kayttooikeus.dto.HaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloCreateDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
+import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.*;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import static java.util.Collections.singletonMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +57,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public static final String PALVELU_ANOMUSTENHALLINTA = "ANOMUSTENHALLINTA";
     public static final String ROLE_ADMIN = "OPHREKISTERI";
     public static final String ROLE_CRUD = "CRUD";
+    public static final String ROLE_PREFIX = "ROLE_APP_";
 
 
     private final HenkiloDataRepository henkiloDataRepository;
@@ -96,12 +99,23 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
+        return isAllowedToAccessPerson(getCurrentUserOid(), personOid, singletonMap(PALVELU_HENKILONHALLINTA, allowedRoles), permissionService, this.getCasRoles());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService) {
         return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, this.getCasRoles());
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
+        return isAllowedToAccessPersonOrSelf(personOid, singletonMap(PALVELU_HENKILONHALLINTA, allowedRoles), permissionService);
+    }
+
+    @Override
+    public boolean isAllowedToAccessPersonOrSelf(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService) {
         String currentUserOid = getCurrentUserOid();
         return personOid.equals(currentUserOid)
                 || isAllowedToAccessPerson(currentUserOid, personOid, allowedRoles, permissionService, this.getCasRoles());
@@ -109,15 +123,38 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, List<String> allowedRoles,
-                                           ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
+    public boolean isAllowedToAccessPerson(PermissionCheckDto permissionCheckDto) {
+        handleAllowedRoles(permissionCheckDto);
+        return isAllowedToAccessPerson(permissionCheckDto.getCallingUserOid(),
+                permissionCheckDto.getUserOid(), permissionCheckDto.getAllowedPalveluRooli(),
+                permissionCheckDto.getExternalPermissionService(), permissionCheckDto.getCallingUserRoles());
+    }
 
-        if (this.hasInternalAccess(personOidToAccess, allowedRoles, callingUserRoles)) {
+    public static void handleAllowedRoles(PermissionCheckDto permissionCheckDto) {
+        // muutetaan vanha "allowedRoles" uuteen "allowedPalveluRooli"-formaattiin
+        if (permissionCheckDto.getAllowedRoles() != null) {
+            if (permissionCheckDto.getAllowedPalveluRooli() == null) {
+                permissionCheckDto.setAllowedPalveluRooli(new HashMap<>());
+            }
+            permissionCheckDto.getAllowedPalveluRooli().merge(PALVELU_HENKILONHALLINTA, permissionCheckDto.getAllowedRoles(), (vanhaArvo, uusiArvo) -> {
+                vanhaArvo.addAll(uusiArvo);
+                return vanhaArvo;
+            });
+            permissionCheckDto.setAllowedRoles(null);
+        }
+    }
+
+    /*
+     * Check internally and externally whether currentuser has any of the palvelu/rooli pair combination given in allowedPalveluRooli
+     * that grants access to the given user (personOidToAccess)
+     */
+    private boolean isAllowedToAccessPerson(String callingUserOid, String personOidToAccess, Map<String, List<String>> allowedPalveluRooli,
+                                          ExternalPermissionService permissionCheckService, Set<String> callingUserRoles) {
+        if (this.hasInternalAccess(personOidToAccess, allowedPalveluRooli, callingUserRoles)) {
             return true;
         }
 
         // If no internal access -> try to check permission from external service
-
         String serviceUri = SERVICE_URIS.get(permissionCheckService);
 
         if (StringUtils.isBlank(personOidToAccess) || StringUtils.isBlank(serviceUri)) {
@@ -159,7 +196,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         }
 
         if (!response.isAccessAllowed()) {
-            LOG.error("Insufficient roles. permission check done from external service:"+ permissionCheckService + " Logged in user:" + callingUserOid + " accessed personId:" + personOidToAccess + " loginuser orgs:" + flattedOrgs.stream().collect(Collectors.joining(",")) + " roles needed:" + allowedRoles.stream().collect(Collectors.joining(",")), " user cas roles:" + callingUserRoles.stream().collect(Collectors.joining(",")) + " personOidsForSamePerson:" + personOidsForSamePerson.stream().collect(Collectors.joining(",")) + " external service error message:" + response.getErrorMessage());
+            LOG.error("Insufficient roles. permission check done from external service:"+ permissionCheckService + " Logged in user:" + callingUserOid + " accessed personId:" + personOidToAccess + " loginuser orgs:" + flattedOrgs.stream().collect(Collectors.joining(",")) + " palveluroles needed:" + getPrefixedRolesByPalveluRooli(allowedPalveluRooli).stream().collect(Collectors.joining(",")), " user cas roles:" + callingUserRoles.stream().collect(Collectors.joining(",")) + " personOidsForSamePerson:" + personOidsForSamePerson.stream().collect(Collectors.joining(",")) + " external service error message:" + response.getErrorMessage());
         }
 
         return response.isAccessAllowed();
@@ -172,11 +209,19 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean hasInternalAccess(String personOid, List<String> allowedRolesWithoutPrefix, Set<String> callingUserRoles) {
+        return hasInternalAccess(personOid, singletonMap(PALVELU_HENKILONHALLINTA, allowedRolesWithoutPrefix), callingUserRoles);
+    }
+
+    /**
+     * Checks if the logged in user has HENKILONHALLINTA roles that
+     * grants access to the wanted person (personOid)
+     */
+    private boolean hasInternalAccess(String personOid, Map<String, List<String>> allowedPalveluRooli, Set<String> callingUserRoles) {
         if (this.isUserAdmin(callingUserRoles)) {
             return true;
         }
 
-        Set<String> allowedRoles = getPrefixedRoles(ROLE_HENKILONHALLINTA_PREFIX, allowedRolesWithoutPrefix);
+        Set<String> allowedRoles = getPrefixedRolesByPalveluRooli(allowedPalveluRooli);
 
         Optional<Henkilo> henkilo = henkiloDataRepository.findByOidHenkilo(personOid);
         if (!henkilo.isPresent()) {
@@ -203,6 +248,11 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         }
 
         return CollectionUtils.containsAny(callingUserRoles, candidateRoles);
+    }
+
+    public static Set<String> getPrefixedRolesByPalveluRooli(Map<String, List<String>> palveluRoolit) {
+        return palveluRoolit.keySet().stream().flatMap( palvelu ->
+                    palveluRoolit.get(palvelu).stream().map( rooli -> ROLE_PREFIX + palvelu + "_" + rooli)).collect(Collectors.toSet());
     }
 
     @Override
@@ -473,7 +523,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                                             || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
         }
         // if the organization doesn't have child items, then it must be a top level organization or some other type
-        // organization in which case the target organization OID must match the allowed-to-organization OID
+        // organization in which case the target organization OID must match the allowedPalveluRooli-to-organization OID
         return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                 .contains(organisaatioOid);
     }

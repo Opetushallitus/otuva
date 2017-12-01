@@ -32,9 +32,7 @@ public class ServiceToServiceController {
     @PreAuthorize("hasRole('APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/canUserAccessUser", method = RequestMethod.POST)
     public boolean checkUserPermissionToUser(@RequestBody PermissionCheckDto permissionCheckDto) {
-        return permissionCheckerService.isAllowedToAccessPerson(permissionCheckDto.getCallingUserOid(),
-                permissionCheckDto.getUserOid(), permissionCheckDto.getAllowedRoles(),
-                permissionCheckDto.getExternalPermissionService(), permissionCheckDto.getCallingUserRoles());
+        return permissionCheckerService.isAllowedToAccessPerson(permissionCheckDto);
     }
 
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
