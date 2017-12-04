@@ -84,7 +84,10 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_READ")
+    @WithMockUser(username = "1.2.3.4.5", authorities = {
+        "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI",
+        "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001",
+    })
     public void listKayttoOikeusRyhmasIncludingHenkilosTest() throws Exception {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("234", "123", "1.2.3.4.5"))
                 .willReturn(singletonList(MyonnettyKayttoOikeusDto.builder()
