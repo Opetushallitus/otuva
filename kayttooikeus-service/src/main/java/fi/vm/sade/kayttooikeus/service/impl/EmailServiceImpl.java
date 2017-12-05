@@ -330,7 +330,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmailReset(HenkiloDto henkilo, String sahkoposti, String poletti, Duration voimassa) {
-        String linkki = urlProperties.url("henkilo-ui.password.reset", encode(poletti));
+        String kieliKoodi = UserDetailsUtil.getLanguageCode(henkilo, "fi", "sv");
+        String linkki = urlProperties.url("henkilo-ui.password.reset", kieliKoodi, encode(poletti));
 
         EmailRecipient recipient = new EmailRecipient(henkilo.getOidHenkilo(), sahkoposti);
         recipient.setRecipientReplacements(Arrays.asList(new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkilo, SahkopostiHenkiloDto.class)),
@@ -338,7 +339,6 @@ public class EmailServiceImpl implements EmailService {
                 new ReportedRecipientReplacementDTO(UNOHTUNUT_SALASANA_EMAIL_REPLACEMENT_VOIMASSA_TUNTEINA, voimassa.toHours())
         ));
 
-        String kieliKoodi = UserDetailsUtil.getLanguageCode(henkilo, "fi", "sv");
         EmailMessage emailMessage = generateEmailMessage(UNOHTUNUT_SALASANA_EMAIL_TEMPLATE_NAME, kieliKoodi);
 
         EmailData emailData = new EmailData();
