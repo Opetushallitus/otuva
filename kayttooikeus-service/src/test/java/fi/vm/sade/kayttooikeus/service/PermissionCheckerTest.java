@@ -251,6 +251,52 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    @WithMockUser(value = "callingPerson", authorities = {
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD",
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD_" + ORG1,
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD_" + ORG2,
+    })
+    public void isAllowedToAccessPersonShouldReturnTrueWhenPalvelukayttajaCrudAndPalvelu() {
+        Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
+            setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
+                setOrganisaatioOid(ORG1);
+            }}));
+        }});
+        given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList(ORG1, ORG2, "org3"));
+        when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
+                .henkiloTyyppi(HenkiloTyyppi.PALVELU)
+                .build());
+        when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
+        assertThat(this.permissionChecker.isAllowedToAccessPerson(
+                "testPerson",
+                singletonMap("KAYTTOOIKEUS", singletonList("PALVELUKAYTTAJA_CRUD")),
+                ExternalPermissionService.HAKU_APP)).isTrue();
+    }
+
+    @Test
+    @WithMockUser(value = "callingPerson", authorities = {
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD",
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD_" + ORG1,
+        "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD_" + ORG2,
+    })
+    public void isAllowedToAccessPersonShouldReturnFalseWhenPalvelukayttajaCrudAndVirkailija() {
+        Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
+            setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
+                setOrganisaatioOid(ORG1);
+            }}));
+        }});
+        given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList(ORG1, ORG2, "org3"));
+        when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
+                .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
+                .build());
+        when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
+        assertThat(this.permissionChecker.isAllowedToAccessPerson(
+                "testPerson",
+                singletonMap("KAYTTOOIKEUS", singletonList("PALVELUKAYTTAJA_CRUD")),
+                ExternalPermissionService.HAKU_APP)).isFalse();
+    }
+
+    @Test
     @WithMockUser(value = "callingPerson", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD","ROLE_APP_HENKILONHALLINTA_CRUD_" + ORG1,
             "ROLE_APP_HENKILONHALLINTA_CRUD_" + ORG2,"ROLE_APP_ANOMUSTENHALLINTA_CRUD","ROLE_APP_ANOMUSTENHALLINTA_CRUD_" + ORG1,
             "ROLE_APP_ANOMUSTENHALLINTA_CRUD_" + ORG2})
