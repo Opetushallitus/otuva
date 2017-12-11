@@ -173,6 +173,8 @@ public class KutsuServiceImpl implements KutsuService {
             this.throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(kutsuToRenew);
         }
         kutsuToRenew.setAikaleima(LocalDateTime.now());
+        kutsuToRenew = kutsuRepository.save(kutsuToRenew);
+        emailService.sendInvitationEmail(kutsuToRenew);
     }
 
     @Override
