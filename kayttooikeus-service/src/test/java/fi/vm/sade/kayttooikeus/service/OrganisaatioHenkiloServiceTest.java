@@ -39,7 +39,6 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
@@ -80,11 +79,14 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                                 .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.1").build()).build(),
                         OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(2L).voimassaAlkuPvm(LocalDate.now().minusYears(1))
                                 .passivoitu(true).tehtavanimike("Opettaja")
-                                .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build()
+                                .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build(),
+                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(3L).voimassaAlkuPvm(LocalDate.now().minusYears(1))
+                                .passivoitu(true).tehtavanimike("Testaaja")
+                                .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.3").build()).build()
                 ));
 
         List<OrganisaatioHenkiloWithOrganisaatioDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi");
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals("1.2.3.4.2", result.get(0).getOrganisaatio().getOid()); // O < S
         assertEquals(2L, result.get(0).getId());
         assertEquals("Only in English", result.get(0).getOrganisaatio().getNimi().getOrAny("fi").orElse(null));
