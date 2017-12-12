@@ -42,10 +42,15 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class OrganisaatioHenkiloServiceImpl extends AbstractService implements OrganisaatioHenkiloService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrganisaatioHenkiloServiceImpl.class);
+
     private final String FALLBACK_LANGUAGE = "fi";
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
@@ -71,8 +76,11 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                         mapOrganisaatioDtoRecursive(
                                 this.organisaatioClient
                                         .getOrganisaatioPerustiedotCached(organisaatioHenkilo.getOrganisaatio().getOid())
-                                        .orElseThrow(() -> new NotFoundException("Organisation not found with oid "
-                                                + organisaatioHenkilo.getOrganisaatio().getOid())),
+                                        .orElseGet(() -> {
+                                            String organisaatioOid = organisaatioHenkilo.getOrganisaatio().getOid();
+                                            LOGGER.warn("Henkilön {} organisaatiota {} ei löytynyt", henkiloOid, organisaatioOid);
+                                            return UserDetailsUtil.createUnknownOrganisation(organisaatioOid);
+                                        }),
                                 compareByLang))
                 ).sorted(Comparator.comparing(dto -> dto.getOrganisaatio().getNimi(),
                         comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE)))).collect(toList());

@@ -91,7 +91,7 @@ public class UserDetailsUtil {
     }
 
     public static OrganisaatioPerustieto createUnknownOrganisation(String organisaatioOid) {
-        return OrganisaatioPerustieto.builder()
+        return new OrganisaatioPerustieto().toBuilder()
                 .oid(organisaatioOid)
                 .nimi(new HashMap<String, String>() {{
                     put("fi", "Tuntematon organisaatio");
