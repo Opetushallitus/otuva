@@ -425,10 +425,12 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getGrantableRyhmasWithoutOrgLimitations(String organisaatioOid, String myontajaOid) {
+        // Get all master ids for current user and use them to get a list of all slave ids
         List<Long> slaveIds =  kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(
                 myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMasterIdsByHenkilo(myontajaOid));
 
-        List<KayttoOikeusRyhmaDto> allRyhmas = isEmpty(slaveIds) ?
+
+        List<KayttoOikeusRyhmaDto> allRyhmas = (isEmpty(slaveIds) || this.permissionCheckerService.isCurrentUserAdmin()) ?
                 kayttoOikeusRyhmaRepository.listAll() : kayttoOikeusRyhmaRepository.findByIdList(slaveIds);
         return getRyhmasWithoutOrganizationLimitations(organisaatioOid,
                 addOrganisaatioViitteesToRyhmas(allRyhmas));
