@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrganisaatioPerustieto {

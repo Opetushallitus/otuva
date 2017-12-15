@@ -521,8 +521,12 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
-        OrganisaatioPerustieto organisaatioPerustieto = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
-                .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + organisaatioOid));
+        Optional<OrganisaatioPerustieto> organisaatioPerustietoOptional = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid);
+        if (!organisaatioPerustietoOptional.isPresent()) {
+            LOG.warn("Organisaatiota {} ei löytynyt", organisaatioOid);
+            return false;
+        }
+        OrganisaatioPerustieto organisaatioPerustieto = organisaatioPerustietoOptional.get();
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream()

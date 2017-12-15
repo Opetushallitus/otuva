@@ -6,10 +6,9 @@ import fi.vm.sade.kayttooikeus.repositories.TextGroupRepository;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.dto.Localizable;
 import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +18,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class LocalizationServiceImpl implements LocalizationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationServiceImpl.class);
+
     private final TextGroupRepository textGroupRepository;
 
     private final OrganisaatioClient organisaatioClient;
@@ -58,7 +62,11 @@ public class LocalizationServiceImpl implements LocalizationService {
         list.forEach(localizableOrganisaatio -> localizableOrganisaatio.setNimi(
                 new TextGroupMapDto(null, this.organisaatioClient
                         .getOrganisaatioPerustiedotCached(localizableOrganisaatio.getOrganisaatioOid())
-                        .orElseThrow(() -> new NotFoundException("Organisaatio not found by oid " + localizableOrganisaatio.getOrganisaatioOid()))
+                        .orElseGet(() -> {
+                            String organisaatioOid = localizableOrganisaatio.getOrganisaatioOid();
+                            LOGGER.warn("Organisaatiota {} ei löytynyt", organisaatioOid);
+                            return UserDetailsUtil.createUnknownOrganisation(organisaatioOid);
+                        })
                         .getNimi())));
         return list;
     }
