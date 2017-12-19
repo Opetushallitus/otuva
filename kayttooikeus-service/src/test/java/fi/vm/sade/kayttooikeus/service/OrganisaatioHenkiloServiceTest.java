@@ -11,6 +11,8 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
@@ -63,6 +63,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
             orgDto.setOid("1.2.3.4.1");
             orgDto.setNimi(new TextGroupMapDto().put("fi", "Suomeksi").put("en", "In English").asMap());
             orgDto.setOrganisaatiotyypit(asList("Tyyppi1", "Tyyppi2"));
+            orgDto.setStatus(OrganisaatioStatus.AKTIIVINEN);
             return Optional.of(orgDto);
         });
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.2"))).willAnswer(invocation -> {
@@ -70,33 +71,78 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
             orgDto.setOid("1.2.3.4.2");
             orgDto.setNimi(new TextGroupMapDto().put("en", "Only in English").asMap());
             orgDto.setOrganisaatiotyypit(singletonList("Tyyppi1"));
+            orgDto.setStatus(OrganisaatioStatus.AKTIIVINEN);
+            orgDto.setChildren(Lists.newArrayList(
+                    OrganisaatioPerustieto.builder()
+                            .oid("1.2.3.4.2.1")
+                            .status(OrganisaatioStatus.PASSIIVINEN)
+                            .children(Lists.newArrayList())
+                            .build(),
+                    OrganisaatioPerustieto.builder()
+                            .oid("1.2.3.4.2.2")
+                            .status(OrganisaatioStatus.AKTIIVINEN)
+                            .children(Lists.newArrayList())
+                            .build()));
             return Optional.of(orgDto);
         });
         given(this.organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5")).willReturn(
-                asList(OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L).passivoitu(false)
-                                .voimassaAlkuPvm(LocalDate.now()).voimassaLoppuPvm(LocalDate.now().plusYears(1))
+                asList(OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder()
+                                .id(1L)
+                                .passivoitu(false)
+                                .voimassaAlkuPvm(LocalDate.now())
+                                .voimassaLoppuPvm(LocalDate.now().plusYears(1))
                                 .tehtavanimike("Devaaja")
                                 .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.1").build()).build(),
-                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(2L).voimassaAlkuPvm(LocalDate.now().minusYears(1))
-                                .passivoitu(true).tehtavanimike("Opettaja")
-                                .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build()).build(),
-                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(3L).voimassaAlkuPvm(LocalDate.now().minusYears(1))
-                                .passivoitu(true).tehtavanimike("Testaaja")
+                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder()
+                                .id(2L)
+                                .voimassaAlkuPvm(LocalDate.now().minusYears(1))
+                                .passivoitu(false)
+                                .tehtavanimike("Opettaja")
+                                .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.2").build())
+                                .build(),
+                        // Unknown organisation (not found in cache so defaulted)
+                        OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder()
+                                .id(3L)
+                                .voimassaAlkuPvm(LocalDate.now().minusYears(1))
+                                .passivoitu(false)
+                                .tehtavanimike("Testaaja")
                                 .organisaatio(OrganisaatioDto.builder().oid("1.2.3.4.3").build()).build()
                 ));
 
         List<OrganisaatioHenkiloWithOrganisaatioDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi");
-        assertEquals(3, result.size());
-        assertEquals("1.2.3.4.2", result.get(0).getOrganisaatio().getOid()); // O < S
-        assertEquals(2L, result.get(0).getId());
-        assertEquals("Only in English", result.get(0).getOrganisaatio().getNimi().getOrAny("fi").orElse(null));
-        assertEquals(true, result.get(0).isPassivoitu());
-        assertEquals("1.2.3.4.1", result.get(1).getOrganisaatio().getOid());
-        assertEquals("Suomeksi", result.get(1).getOrganisaatio().getNimi().get("fi"));
-        assertEquals(asList("Tyyppi1", "Tyyppi2"), result.get(1).getOrganisaatio().getTyypit());
-        assertEquals(LocalDate.now(), result.get(1).getVoimassaAlkuPvm());
-        assertEquals(LocalDate.now().plusYears(1), result.get(1).getVoimassaLoppuPvm());
-        assertEquals("Devaaja", result.get(1).getTehtavanimike());
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getOrganisaatio)
+                .extracting(OrganisaatioDto::getOid)
+                .containsExactlyInAnyOrder("1.2.3.4.1", "1.2.3.4.2", "1.2.3.4.3");
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getOrganisaatio)
+                .flatExtracting(OrganisaatioDto::getChildren)
+                .extracting(OrganisaatioDto::getOid)
+                .containsExactlyInAnyOrder("1.2.3.4.2.2");
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getId)
+                .containsExactlyInAnyOrder(1L, 2L, 3L);
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getOrganisaatio)
+                .extracting(OrganisaatioDto::getNimi)
+                .extracting(TextGroupMapDto::getTexts)
+                .flatExtracting(Map::values)
+                .containsExactlyInAnyOrder("Only in English", "Suomeksi", "In English", "Okänd organisation", "Tuntematon organisaatio", "Unknown organisation");
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getOrganisaatio)
+                .flatExtracting(OrganisaatioDto::getTyypit)
+                .containsExactlyInAnyOrder("Tyyppi1", "Tyyppi2", "Tyyppi1");
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getTehtavanimike)
+                .containsExactlyInAnyOrder("Devaaja", "Opettaja", "Testaaja");
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaAlkuPvm)
+                .allSatisfy(alkupvm -> assertThat(alkupvm).isLessThanOrEqualTo(LocalDate.now()));
+        assertThat(result)
+                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaLoppuPvm)
+                .filteredOn(Objects::nonNull)
+                .hasSize(1)
+                .allSatisfy(loppupvm -> assertThat(loppupvm).isGreaterThanOrEqualTo(LocalDate.now()));
     }
 
     @Test
