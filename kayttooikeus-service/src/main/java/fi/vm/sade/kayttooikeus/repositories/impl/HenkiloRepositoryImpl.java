@@ -126,9 +126,6 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
         JPAQuery<Tuple> query = jpa().from(qHenkilo)
-                // Not excluding henkilos without organisation (different condition on where)
-                .leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
-                .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma)
                 .leftJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
                 // Organisaatiohenkilos need to be added later (enrichment)
                 .select(qHenkilo.sukunimiCached,
@@ -138,8 +135,16 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 .distinct();
 
         if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids())) {
-            query.on(qOrganisaatioHenkilo.passivoitu.isFalse()
-                    .and(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids())));
+            // Exclude henkilos without organisation
+            query.join(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
+                    .on(qOrganisaatioHenkilo.passivoitu.isFalse()
+                            .and(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids())))
+                    .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
+        }
+        else {
+            // Not excluding henkilos without organisation
+            query.leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
+                    .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
         if (offset != null) {
