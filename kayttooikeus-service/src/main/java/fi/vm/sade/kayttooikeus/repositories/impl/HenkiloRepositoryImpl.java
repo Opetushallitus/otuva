@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toSet;
 import fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.stream.Collectors;
@@ -135,6 +136,11 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.oidHenkilo,
                         qHenkilo.kayttajatiedot.username)
                 .distinct();
+
+        if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids())) {
+            query.on(qOrganisaatioHenkilo.passivoitu.isFalse()
+                    .and(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids())));
+        }
 
         if (offset != null) {
             query.offset(offset);
