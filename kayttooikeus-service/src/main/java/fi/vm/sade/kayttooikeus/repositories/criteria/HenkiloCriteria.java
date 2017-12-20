@@ -99,10 +99,6 @@ public class HenkiloCriteria {
                             .and(subOrganisaatioHenkilo.henkilo.eq(henkilo)));
             builder.and(subquery.exists());
         }
-        if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
-            builder.and(organisaatioHenkilo.organisaatioOid.in(this.organisaatioOids));
-            builder.and(organisaatioHenkilo.passivoitu.isFalse());
-        }
         // Kayttooikeus
         if (this.kayttooikeusryhmaId != null) {
             builder.and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(this.kayttooikeusryhmaId));
