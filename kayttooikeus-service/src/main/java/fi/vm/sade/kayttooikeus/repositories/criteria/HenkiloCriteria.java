@@ -90,15 +90,6 @@ public class HenkiloCriteria {
             }
             builder.and(predicate);
         }
-        // Organisaatiohenkilo
-        if (this.noOrganisation != null && !this.noOrganisation) {
-            QOrganisaatioHenkilo subOrganisaatioHenkilo = new QOrganisaatioHenkilo("subOrganisaatioHenkilo");
-            JPQLQuery<Henkilo> subquery = JPAExpressions.select(subOrganisaatioHenkilo.henkilo)
-                    .from(subOrganisaatioHenkilo)
-                    .where(subOrganisaatioHenkilo.passivoitu.isFalse()
-                            .and(subOrganisaatioHenkilo.henkilo.eq(henkilo)));
-            builder.and(subquery.exists());
-        }
         // Kayttooikeus
         if (this.kayttooikeusryhmaId != null) {
             builder.and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(this.kayttooikeusryhmaId));

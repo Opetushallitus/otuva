@@ -134,12 +134,14 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.kayttajatiedot.username)
                 .distinct();
 
-        if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids())) {
-            // Exclude henkilos without organisation
-            query.join(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
-                    .on(qOrganisaatioHenkilo.passivoitu.isFalse()
-                            .and(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids())))
-                    .leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
+        if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids()) || Boolean.FALSE.equals(criteria.getNoOrganisation())) {
+            // Exclude henkilos without active organisation
+            query.innerJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
+                    .on(qOrganisaatioHenkilo.passivoitu.isFalse());
+            if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids())) {
+                query.on(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids()));
+            }
+            query.leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
         }
         else {
             // Not excluding henkilos without organisation
