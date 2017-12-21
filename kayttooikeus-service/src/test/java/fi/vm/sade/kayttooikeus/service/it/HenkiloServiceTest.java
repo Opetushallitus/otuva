@@ -117,7 +117,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
-    public void henkilohakuAsMiniAdminByOrganisation() {
+    public void henkilohakuAsAdminByOrganisation() {
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.1"), commonProperties.getRootOrganizationOid()),
                 kayttoOikeusRyhma("RYHMA")
