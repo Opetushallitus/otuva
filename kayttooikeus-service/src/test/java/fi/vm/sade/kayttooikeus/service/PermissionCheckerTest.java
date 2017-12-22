@@ -453,6 +453,54 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    public void organisaatioLimitationCheckOrganisaatioWithoutChildrenOppilaitosMatch() {
+        OrganisaatioPerustieto organisaatio = CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5");
+        organisaatio.setOppilaitostyyppi("oppilaitostyyppi_11#1");
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(organisaatio));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("11").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithChildrenOppilaitosMatch() {
+        OrganisaatioPerustieto organisaatio = CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6", "oppilaitostyyppi_12#1");
+        organisaatio.setOppilaitostyyppi("oppilaitostyyppi_11#1");
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(organisaatio));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("11").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isTrue();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithoutChildrenOppilaitosNoMatch() {
+        OrganisaatioPerustieto organisaatio = CreateUtil.createOrganisaatioPerustietoNoChildren("1.2.3.4.5");
+        organisaatio.setOppilaitostyyppi("oppilaitostyyppi_11#1");
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(organisaatio));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("12").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isFalse();
+    }
+
+    @Test
+    public void organisaatioLimitationCheckOrganisaatioWithChildrenOppilaitosNoMatch() {
+        OrganisaatioPerustieto organisaatio = CreateUtil.createOrganisaatioPerustietoWithChild("1.2.3.4.5", "1.2.3.4.6", "oppilaitostyyppi_12#1");
+        organisaatio.setOppilaitostyyppi("oppilaitostyyppi_11#1");
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(organisaatio));
+        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("13").build();
+        boolean hasPermission = this.permissionChecker
+                .organisaatioLimitationCheck("1.2.3.4.5", Sets.newHashSet(organisaatioViite));
+        assertThat(hasPermission).isFalse();
+    }
+
+    @Test
     public void organisaatioLimitationCheckOrganisaatioRyhmaCorrectOid() {
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.246.562.28").build();
         boolean hasPermission = this.permissionChecker

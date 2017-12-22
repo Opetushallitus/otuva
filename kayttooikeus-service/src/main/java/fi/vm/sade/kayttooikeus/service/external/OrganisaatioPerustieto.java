@@ -31,6 +31,17 @@ public class OrganisaatioPerustieto {
         return this.tyypit;
     }
 
+    /**
+     * @return oppilaitostyypin koodi
+     */
+    public Optional<String> getOppilaitostyyppiKoodi() {
+        return Optional.ofNullable(oppilaitostyyppi)
+                // oppilaitostyyppi on muotoa "oppilaitostyyppi_01#1"
+                // eli "<koodisto>_<koodi>#<versio>"
+                .filter(tyyppi -> tyyppi.length() >= 19)
+                .map(tyyppi -> tyyppi.substring(17, 19));
+    }
+
     public Stream<OrganisaatioPerustieto> andChildren() {
         return Stream.concat(Stream.of(this),
                 children.stream().flatMap(OrganisaatioPerustieto::andChildren));

@@ -527,6 +527,13 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return false;
         }
         OrganisaatioPerustieto organisaatioPerustieto = organisaatioPerustietoOptional.get();
+        // sallitaan anomuksen käsittely samaan oppilaitokseen (jos sallittu käyttöoikeusryhmässä)
+        Optional<String> oppilaitostyyppiKoodi = organisaatioPerustieto.getOppilaitostyyppiKoodi();
+        if (viiteSet.stream()
+                .map(OrganisaatioViite::getOrganisaatioTyyppi)
+                .anyMatch(organisaatioTyyppi -> organisaatioTyyppi.equals(oppilaitostyyppiKoodi.orElse(null)))) {
+            return true;
+        }
         // Organization must have child items in it, so that the institution type can be fetched and verified
         if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
             return organisaatioPerustieto.getChildren().stream()
