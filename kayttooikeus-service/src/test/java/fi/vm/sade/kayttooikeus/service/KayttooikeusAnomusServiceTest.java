@@ -262,7 +262,6 @@ public class KayttooikeusAnomusServiceTest {
         Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
@@ -289,7 +288,6 @@ public class KayttooikeusAnomusServiceTest {
         Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
@@ -313,7 +311,6 @@ public class KayttooikeusAnomusServiceTest {
         Set<String> criteriaOrganisaatioOids = singleton("1.2.3.4.5.1");
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
         given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
