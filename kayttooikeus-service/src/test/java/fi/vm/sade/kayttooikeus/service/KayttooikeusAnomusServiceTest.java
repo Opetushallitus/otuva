@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.mapper.CachedDateTimeConverter;
 import fi.vm.sade.kayttooikeus.config.mapper.LocalDateConverter;
@@ -36,15 +35,29 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria.Myontooikeus;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.*;
 import static java.util.Collections.singleton;
+import java.util.Map.Entry;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.util.Maps.newHashMap;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -125,6 +138,8 @@ public class KayttooikeusAnomusServiceTest {
 
     @Test
     public void listHaetutKayttoOikeusRyhmat() {
+        given(kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any()))
+                .willReturn(newHashMap("1.2.12.0.1", singleton(1L)));
         given(this.haettuKayttooikeusRyhmaRepository.findBy(any(), any(), any(), any(), any()))
                 .willReturn(newArrayList(createHaettuKayttooikeusryhma("xmail", "kayttooikeusryhma1", "1.2.12.0.1")));
 
@@ -132,7 +147,7 @@ public class KayttooikeusAnomusServiceTest {
         List<HaettuKayttooikeusryhmaDto> haettuKayttooikeusryhmaDtoList = this.kayttooikeusAnomusService
                 .listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
         assertThat(haettuKayttooikeusryhmaDtoList.size()).isEqualTo(1);
-        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isLessThanOrEqualTo(LocalDateTime.now());
+        assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKasittelyPvm()).isBeforeOrEqualTo(LocalDateTime.now());
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getTyyppi()).isEqualByComparingTo(KayttoOikeudenTila.ANOTTU);
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKayttoOikeusRyhma().getName()).isEqualTo("kayttooikeusryhma1");
         assertThat(haettuKayttooikeusryhmaDtoList.get(0).getKayttoOikeusRyhma().getTunniste()).isEqualTo("kayttooikeusryhma1");
@@ -158,56 +173,80 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     public void listHaetutKayttoOikeusRyhmatForOphVirkailija() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "rootOid");
-        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(true);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::isRootOrganisaatio, Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(
+                        tuple(true, singleton("rootOid"), kayttooikeusRyhmas),
+                        tuple(false, singleton("1.2.3.4.5"), kayttooikeusRyhmas)
+                );
         assertThat(criteria.getOrganisaatioOids()).isNull();
-        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithNoCriteriaOrganisaatios() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
         List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
-        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(false);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
 
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
-        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(
+                        tuple(Stream.of("1.2.3.4.5", "2.3.4.5.6").collect(toSet()), kayttooikeusRyhmas),
+                        tuple(Stream.of("1.2.3.4.5", "2.3.4.5.6").collect(toSet()), kayttooikeusRyhmas)
+                );
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
+        assertThat(criteria.getOrganisaatioOids()).isNull();
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaCantSeeOwnAnomus() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
         List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
-        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.permissionCheckerService.isCurrentUserMiniAdmin()).willReturn(false);
-        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
         given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3");
         AnomusCriteria criteria = AnomusCriteria.builder().build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
-        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(userOrganisaatioOids);
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(
+                        tuple(Stream.of("1.2.3.4.5", "2.3.4.5.6").collect(toSet()), kayttooikeusRyhmas),
+                        tuple(Stream.of("1.2.3.4.5", "2.3.4.5.6").collect(toSet()), kayttooikeusRyhmas)
+                );
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
+        assertThat(criteria.getOrganisaatioOids()).isNull();
         assertThat(criteria.getHenkiloOidRestrictionList())
                 .containsExactly("1.2.3");
     }
@@ -216,38 +255,76 @@ public class KayttooikeusAnomusServiceTest {
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatios() {
         List<String> userOrganisaatioOids = Arrays.asList("1.2.3.4.5", "2.3.4.5.6");
         List<String> userOrganisaatioChildOids = Arrays.asList("1.2.3", "2.3.4", "2.3.4.5.6");
-        List<Long> kayttooikeusRyhmas = Arrays.asList(12345L, 23456L, 34567L);
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
         Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
-        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(criteria.getOrganisaatioOids()).containsExactlyInAnyOrder("2.3.4", "2.3.4.5.6");
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(
+                        tuple(Stream.of("2.3.4.5.6", "2.3.4").collect(toSet()), kayttooikeusRyhmas),
+                        tuple(Stream.of("2.3.4.5.6", "2.3.4").collect(toSet()), kayttooikeusRyhmas)
+                );
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
+        assertThat(criteria.getOrganisaatioOids()).isNull();
+    }
+
+    @Test
+    public void listHaetutKayttoOikeusRyhmatForOphVirkailijaWithCriteriaOrganisaatios() {
+        List<String> userOrganisaatioOids = Arrays.asList("rootOid");
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
+        Set<String> criteriaOrganisaatioOids = Stream.of("2.3.4.5.6", "2.3.4").collect(toSet());
+
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
+        given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
+
+        AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
+        this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
+
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::isRootOrganisaatio, Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(tuple(false, criteriaOrganisaatioOids, kayttooikeusRyhmas));
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
+        assertThat(criteria.getOrganisaatioOids()).isNull();
     }
 
     @Test
     public void listHaetutKayttoOikeusRyhmatForVirkailijaWithCriteriaOrganisaatiosToChildOrganisation() {
         List<String> userOrganisaatioOids = Lists.newArrayList("1.2.3.4.5.0");
         List<String> userOrganisaatioChildOids = Lists.newArrayList("1.2.3.4.5.0", "1.2.3.4.5.1");
-        List<Long> kayttooikeusRyhmas = Lists.newArrayList(12345L, 23456L, 34567L);
-        Set<String> criteriaOrganisaatioOids = Sets.newHashSet("1.2.3.4.5.1");
+        Set<Long> kayttooikeusRyhmas = Stream.of(12345L, 23456L, 34567L).collect(toSet());
+        Map<String, Set<Long>> myontooikeudet = userOrganisaatioOids.stream()
+                .map(oid -> new AbstractMap.SimpleEntry<>(oid, kayttooikeusRyhmas))
+                .collect(toMap(Entry::getKey, Entry::getValue));
+        Set<String> criteriaOrganisaatioOids = singleton("1.2.3.4.5.1");
 
         given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(false);
         given(this.organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid(any())).willReturn(userOrganisaatioOids);
         given(this.organisaatioClient.getActiveChildOids(any())).willReturn(userOrganisaatioChildOids);
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any())).willReturn(kayttooikeusRyhmas);
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).willReturn(myontooikeudet);
 
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(criteriaOrganisaatioOids).build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
-        assertThat(criteria.getKayttooikeusRyhmaIds()).containsOnlyElementsOf(kayttooikeusRyhmas);
-        assertThat(criteria.getOrganisaatioOids()).containsExactly("1.2.3.4.5.1");
+        assertThat(criteria.getMyontooikeudet())
+                .extracting(Myontooikeus::getOrganisaatioOids, Myontooikeus::getKayttooikeusryhmaIds)
+                .containsExactlyInAnyOrder(tuple(singleton("1.2.3.4.5.1"), kayttooikeusRyhmas));
+        assertThat(criteria.getKayttooikeusRyhmaIds()).isNull();
+        assertThat(criteria.getOrganisaatioOids()).isNull();
     }
 
     @Test
