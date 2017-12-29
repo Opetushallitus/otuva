@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import static java.util.Objects.requireNonNull;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -163,12 +164,21 @@ public class AnomusCriteria {
     @Getter
     @Setter
     @ToString
-    @AllArgsConstructor
     public static class Myontooikeus {
 
-        private boolean rootOrganisaatio;
-        private Set<String> organisaatioOids;
-        private Set<Long> kayttooikeusryhmaIds;
+        private final boolean rootOrganisaatio;
+        private final Set<String> organisaatioOids;
+        private final Set<Long> kayttooikeusryhmaIds;
+
+        public Myontooikeus(boolean rootOrganisaatio, Set<String> organisaatioOids, Set<Long> kayttooikeusryhmaIds) {
+            this.rootOrganisaatio = rootOrganisaatio;
+            this.organisaatioOids = requireNonNull(organisaatioOids);
+            this.kayttooikeusryhmaIds = requireNonNull(kayttooikeusryhmaIds);
+        }
+
+        public boolean isNotEmpty() {
+            return !organisaatioOids.isEmpty() && !kayttooikeusryhmaIds.isEmpty();
+        }
 
     }
 

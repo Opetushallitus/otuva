@@ -119,7 +119,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         MyontooikeusMapper myontooikeusMapper = new MyontooikeusMapper(commonProperties, organisaatioClient, criteria);
         return myontooikeusByOrganisaatio.entrySet().stream()
                 .map(myontooikeusMapper)
-                .filter(myontooikeusMapper)
+                .filter(Myontooikeus::isNotEmpty)
                 .collect(toList());
     }
 

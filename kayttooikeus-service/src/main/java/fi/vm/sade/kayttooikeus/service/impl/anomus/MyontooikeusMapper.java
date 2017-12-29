@@ -8,11 +8,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class MyontooikeusMapper implements Function<Map.Entry<String, Set<Long>>, Myontooikeus>, Predicate<Myontooikeus> {
+public class MyontooikeusMapper implements Function<Map.Entry<String, Set<Long>>, Myontooikeus> {
 
     private final CommonProperties commonProperties;
     private final OrganisaatioClient organisaatioClient;
@@ -45,12 +44,6 @@ public class MyontooikeusMapper implements Function<Map.Entry<String, Set<Long>>
             kayttooikeusryhmaIds.retainAll(criteria.getKayttooikeusRyhmaIds());
         }
         return new Myontooikeus(rootOrganisaatio, organisaatioOids, kayttooikeusryhmaIds);
-    }
-
-    @Override
-    public boolean test(Myontooikeus myontooikeus) {
-        return !myontooikeus.getOrganisaatioOids().isEmpty()
-                && !myontooikeus.getKayttooikeusryhmaIds().isEmpty();
     }
 
 }
