@@ -521,35 +521,20 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
                     .contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
         }
-        Optional<OrganisaatioPerustieto> organisaatioPerustietoOptional = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid);
-        if (!organisaatioPerustietoOptional.isPresent()) {
-            LOG.warn("Organisaatiota {} ei löytynyt", organisaatioOid);
-            return false;
-        }
-        OrganisaatioPerustieto organisaatioPerustieto = organisaatioPerustietoOptional.get();
-        // sallitaan anomuksen käsittely samaan oppilaitokseen (jos sallittu käyttöoikeusryhmässä)
-        Optional<String> oppilaitostyyppiKoodi = organisaatioPerustieto.getOppilaitostyyppiKoodi();
-        if (viiteSet.stream()
-                .map(OrganisaatioViite::getOrganisaatioTyyppi)
-                .anyMatch(organisaatioTyyppi -> organisaatioTyyppi.equals(oppilaitostyyppiKoodi.orElse(null)))) {
-            return true;
-        }
-        // Organization must have child items in it, so that the institution type can be fetched and verified
-        if (!org.springframework.util.CollectionUtils.isEmpty(organisaatioPerustieto.getChildren())) {
-            return organisaatioPerustieto.getChildren().stream()
-                    .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.equals(childOrganisation.getStatus()))
-                    .anyMatch(childOrganisation ->
-                            viiteSet.stream().anyMatch(organisaatioViite ->
+        List<OrganisaatioPerustieto> organisaatiot = this.organisaatioClient.listActiveOganisaatioPerustiedotRecursiveCached(organisaatioOid);
+        return organisaatiot.stream().anyMatch(organisaatio -> organisaatioLimitationCheck(organisaatioOid, viiteSet, organisaatio)
+                || organisaatio.getChildren().stream()
+                        .filter(childOrganisation -> OrganisaatioStatus.AKTIIVINEN.equals(childOrganisation.getStatus()))
+                        .anyMatch(childOrganisation -> organisaatioLimitationCheck(organisaatioOid, viiteSet, childOrganisation)));
+    }
+
+    private static boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet, OrganisaatioPerustieto childOrganisation) {
+        return viiteSet.stream().anyMatch(organisaatioViite ->
                                     organisaatioViite.getOrganisaatioTyyppi()
                                             .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
                                                     // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
                                                     ? childOrganisation.getOppilaitostyyppi().substring(17, 19)
                                                     : null)
-                                            || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid)));
-        }
-        // if the organization doesn't have child items, then it must be a top level organization or some other type
-        // organization in which case the target organization OID must match the allowedPalveluRooli-to-organization OID
-        return viiteSet.stream().map(OrganisaatioViite::getOrganisaatioTyyppi).collect(Collectors.toList())
-                .contains(organisaatioOid);
+                                            || organisaatioViite.getOrganisaatioTyyppi().equals(organisaatioOid));
     }
 }
