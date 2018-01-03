@@ -45,7 +45,8 @@ public class ScheduledTasks {
     private final CommonProperties commonProperties;
 
 
-    @Scheduled(cron = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
+    @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache}",
+            initialDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
     public void updateOrganisaatioCache() {
         organisaatioService.updateOrganisaatioCache();
     }
