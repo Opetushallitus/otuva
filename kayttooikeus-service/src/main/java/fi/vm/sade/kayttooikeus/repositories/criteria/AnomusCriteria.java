@@ -3,7 +3,9 @@ package fi.vm.sade.kayttooikeus.repositories.criteria;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import static com.querydsl.core.types.dsl.Expressions.anyOf;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
@@ -18,9 +20,11 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import static java.util.Objects.requireNonNull;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
 
 @Getter
 @Setter
@@ -41,6 +45,7 @@ public class AnomusCriteria {
     private Set<String> henkiloOidRestrictionList;
     private Boolean adminView;
     private Set<Long> kayttooikeusRyhmaIds;
+    private List<Myontooikeus> myontooikeudet;
 
     @FunctionalInterface
     public interface AnomusCriteriaFunction<QAnomus, QKayttoOikeus, QHaettuKayttoOikeusRyhma> {
@@ -79,6 +84,15 @@ public class AnomusCriteria {
             }
             if (this.kayttooikeusRyhmaIds != null) {
                 builder.and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(this.kayttooikeusRyhmaIds));
+            }
+            if (myontooikeudet != null) {
+                List<BooleanExpression> expressions = myontooikeudet.stream().map(myontooikeus -> {
+                    if (myontooikeus.isRootOrganisaatio()) {
+                        return qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(myontooikeus.getKayttooikeusryhmaIds());
+                    }
+                    return qAnomus.organisaatioOid.in(myontooikeus.getOrganisaatioOids()).and(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma.id.in(myontooikeus.getKayttooikeusryhmaIds()));
+                }).collect(toList());
+                builder.and(anyOf(expressions.toArray(new BooleanExpression[]{})));
             }
 
             return builder;
@@ -145,6 +159,27 @@ public class AnomusCriteria {
             this.henkiloOidRestrictionList = new HashSet<>();
         }
         this.henkiloOidRestrictionList.add(henkiloOid);
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class Myontooikeus {
+
+        private final boolean rootOrganisaatio;
+        private final Set<String> organisaatioOids;
+        private final Set<Long> kayttooikeusryhmaIds;
+
+        public Myontooikeus(boolean rootOrganisaatio, Set<String> organisaatioOids, Set<Long> kayttooikeusryhmaIds) {
+            this.rootOrganisaatio = rootOrganisaatio;
+            this.organisaatioOids = requireNonNull(organisaatioOids);
+            this.kayttooikeusryhmaIds = requireNonNull(kayttooikeusryhmaIds);
+        }
+
+        public boolean isNotEmpty() {
+            return !organisaatioOids.isEmpty() && !kayttooikeusryhmaIds.isEmpty();
+        }
+
     }
 
 }

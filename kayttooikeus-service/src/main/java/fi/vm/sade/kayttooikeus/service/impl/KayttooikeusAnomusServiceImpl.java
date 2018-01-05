@@ -10,11 +10,14 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria.Myontooikeus;
+import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.impl.anomus.MyontooikeusMapper;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 
@@ -29,11 +32,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import static java.util.Collections.emptyList;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Service
@@ -83,38 +88,39 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                                                                          Long limit,
                                                                          Long offset,
                                                                          OrderByAnomus orderBy) {
+        String kayttajaOid = permissionCheckerService.getCurrentUserOid();
+
         // Do not show own anomus
-        criteria.addHenkiloOidRestriction(this.permissionCheckerService.getCurrentUserOid());
+        criteria.addHenkiloOidRestriction(kayttajaOid);
 
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            // käyttöoikeusryhma filtering
-            List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
-            criteria.setKayttooikeusRyhmaIds(new HashSet<>(slaveIds));
-
-            // organisaatio filtering
-            if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-                Set<String> allCurrentUserOrganisaatioOids = this.organisaatioHenkiloRepository
-                        .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid()).stream()
-                        .flatMap(currentUserOrganisaatioOid ->
-                                this.organisaatioClient.getActiveChildOids(currentUserOrganisaatioOid).stream())
-                        .collect(Collectors.toSet());
-                if (criteria.getOrganisaatioOids() == null) {
-                    criteria.setOrganisaatioOids(new HashSet<>(allCurrentUserOrganisaatioOids));
-                }
-                else {
-                    allCurrentUserOrganisaatioOids.retainAll(criteria.getOrganisaatioOids());
-                    criteria.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
-                    // User has no rights to any requested organisations.
-                    if (allCurrentUserOrganisaatioOids.isEmpty()) {
-                        return new ArrayList<>();
-                    }
-                }
+            // organisaatio & myöntöviite suodatus
+            MyontooikeusCriteria myontooikeusCriteria = MyontooikeusCriteria.oletus();
+            Map<String, Set<Long>> myontooikeusByOrganisaatio = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(kayttajaOid, myontooikeusCriteria);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Käyttäjän {} käyttöoikeuksien myöntöoikeudet {}", kayttajaOid, myontooikeusByOrganisaatio);
             }
+            List<Myontooikeus> myontooikeudet = getMyontooikeudet(myontooikeusByOrganisaatio, criteria);
+            if (myontooikeudet.isEmpty()) {
+                logger.info("Käyttäjällä {} ei ole yhtään käyttöoikeuden myöntöoikeutta hakukriteereillä {} (kaikki myöntöoikeudet: {})", kayttajaOid, criteria, myontooikeudet);
+                return emptyList();
+            }
+            criteria.setMyontooikeudet(myontooikeudet);
+            criteria.setOrganisaatioOids(null); // myöntöoikeudet suodattaa organisaatioiden mukaan
+            criteria.setKayttooikeusRyhmaIds(null); // myöntöoikeudet suodattaa käyttöoikeusryhmien mukaan
         }
 
         List<HaettuKayttoOikeusRyhma> haettuKayttoOikeusRyhmas = this.haettuKayttooikeusRyhmaRepository
                 .findBy(criteria.createAnomusSearchCondition(this.organisaatioClient), limit, offset, orderBy, criteria.getAdminView());
         return localizeKayttooikeusryhma(mapper.mapAsList(haettuKayttoOikeusRyhmas, HaettuKayttooikeusryhmaDto.class));
+    }
+
+    private List<Myontooikeus> getMyontooikeudet(Map<String, Set<Long>> myontooikeusByOrganisaatio, AnomusCriteria criteria) {
+        MyontooikeusMapper myontooikeusMapper = new MyontooikeusMapper(commonProperties, organisaatioClient, criteria);
+        return myontooikeusByOrganisaatio.entrySet().stream()
+                .map(myontooikeusMapper)
+                .filter(Myontooikeus::isNotEmpty)
+                .collect(toList());
     }
 
     private List<HaettuKayttooikeusryhmaDto> localizeKayttooikeusryhma(List<HaettuKayttooikeusryhmaDto> unlocalizedDtos) {
