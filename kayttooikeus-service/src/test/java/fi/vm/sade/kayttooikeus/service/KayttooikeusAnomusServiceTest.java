@@ -698,11 +698,7 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     @WithMockUser(value = "1.2.3.4.5", roles = "HENKILONHALLINTA_OPHREKISTERI")
     public void findCurrentHenkiloCanGrantAsAdmin() {
-        this.commonProperties.setRootOrganizationOid("1.2.0.0.1");
-        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository
-                .getSlaveIdsByMasterHenkiloOid(eq("1.2.3.4.5"), any()))
-                .willReturn(newHashMap("1.2.0.0.1", singleton(2001L)));
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
@@ -770,11 +766,7 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     @WithMockUser("1.2.3.4.5")
     public void findCurrentHenkiloCanGrantRootOrganisationUser() {
-        this.commonProperties.setRootOrganizationOid("1.2.0.0.1");
-        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository
-                .getSlaveIdsByMasterHenkiloOid(eq("1.2.3.4.5"), any()))
-                .willReturn(newHashMap("1.2.0.0.1", singleton(2001L)));
+        given(this.permissionCheckerService.isCurrentUserAdmin()).willReturn(true);
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",

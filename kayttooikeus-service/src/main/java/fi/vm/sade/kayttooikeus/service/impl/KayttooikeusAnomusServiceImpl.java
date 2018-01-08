@@ -504,8 +504,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         MyontooikeusCriteria myontooikeusCriteria = MyontooikeusCriteria.oletus();
         Map<String, Set<Long>> myontooikeudet = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(kayttajaOid, myontooikeusCriteria);
 
-        // Skip checking organisation hierarchy if user has ANOMUSTENHALLINTA_CRUD to root organisation.
-        if (!myontooikeudet.containsKey(commonProperties.getRootOrganizationOid())) {
+        // vain rekisterinpitäjä saa myöntää kaikkia käyttöoikeuksia
+        if (!permissionCheckerService.isCurrentUserAdmin()) {
             // lisätään myöntöoikeudet aliorganisaatioihin
             myontooikeudet.entrySet().stream()
                     .flatMap(entry -> organisaatioClient.getActiveChildOids(entry.getKey()).stream()
