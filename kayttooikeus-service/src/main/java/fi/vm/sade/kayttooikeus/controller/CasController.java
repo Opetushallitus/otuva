@@ -16,6 +16,7 @@ import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
@@ -107,7 +108,7 @@ public class CasController {
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
-    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET, consumes = "utf-8")
+    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public void requestGet(HttpServletResponse response,
                            @RequestParam(value="loginToken", required = false) String loginToken,
                            @RequestParam(value="kutsuToken", required = false) String kutsuToken,
