@@ -5,6 +5,11 @@ logging.level.org:
 spring:
   mandatory-file-encoding: UTF-8
   profiles.active: default
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 server:
   context-path: /kayttooikeus-service

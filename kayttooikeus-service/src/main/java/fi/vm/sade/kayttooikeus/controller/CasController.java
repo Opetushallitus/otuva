@@ -108,7 +108,7 @@ public class CasController {
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
-    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
     public void requestGet(HttpServletResponse response,
                            @RequestParam(value="loginToken", required = false) String loginToken,
                            @RequestParam(value="kutsuToken", required = false) String kutsuToken,
