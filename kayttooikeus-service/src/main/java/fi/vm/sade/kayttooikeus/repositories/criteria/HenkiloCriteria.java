@@ -67,13 +67,13 @@ public class HenkiloCriteria {
                 SukunimiEtunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(0)));
                 String etunimiLast = String.join(" ", queryParts.subList(1, queryParts.size()));
                 SukunimiEtunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiLast)
-                        .or(henkilo.kutsumanimiCached.startsWith(etunimiLast)));
+                        .or(henkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiLast)));
 
                 BooleanBuilder etunimiSukunimiPredicate = new BooleanBuilder();
                 etunimiSukunimiPredicate.and(henkilo.sukunimiCached.startsWithIgnoreCase(queryParts.get(queryParts.size() - 1)));
                 String etunimiFirst = String.join(" ", queryParts.subList(0, queryParts.size() - 1));
                 etunimiSukunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiFirst)
-                        .or(henkilo.kutsumanimiCached.startsWith(etunimiFirst)));
+                        .or(henkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiFirst)));
 
                 predicate.or(SukunimiEtunimiPredicate).or(etunimiSukunimiPredicate);
 
