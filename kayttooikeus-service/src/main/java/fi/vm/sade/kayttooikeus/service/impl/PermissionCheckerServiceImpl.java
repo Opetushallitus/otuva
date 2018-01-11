@@ -88,6 +88,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.ATARU, ophProperties.url("ataru-editori.external-permission-check"));
+        SERVICE_URIS.put(ExternalPermissionService.KOSKI, ophProperties.url("koski.external-permission-check"));
         this.henkiloDataRepository = henkiloDataRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
