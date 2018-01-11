@@ -55,7 +55,6 @@ public class HenkiloCriteria {
             builder.and(henkilo.duplicateCached.eq(false));
         }
         if (StringUtils.hasLength(this.nameQuery)) {
-            BooleanBuilder predicate = new BooleanBuilder();
             String trimmedQuery = this.nameQuery.trim();
             List<String> queryParts = Arrays.asList(trimmedQuery.split(" "));
 
@@ -75,11 +74,12 @@ public class HenkiloCriteria {
                 etunimiSukunimiPredicate.and(henkilo.etunimetCached.startsWithIgnoreCase(etunimiFirst)
                         .or(henkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiFirst)));
 
-                predicate.or(SukunimiEtunimiPredicate).or(etunimiSukunimiPredicate);
-
+                builder.and(SukunimiEtunimiPredicate
+                        .or(etunimiSukunimiPredicate)
+                        .or(henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery)));
             }
             else {
-                predicate.or(
+                builder.and(
                         Expressions.anyOf(
                                 henkilo.oidHenkilo.eq(trimmedQuery),
                                 henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
@@ -88,7 +88,6 @@ public class HenkiloCriteria {
                         )
                 );
             }
-            builder.and(predicate);
         }
         // Kayttooikeus
         if (this.kayttooikeusryhmaId != null) {
