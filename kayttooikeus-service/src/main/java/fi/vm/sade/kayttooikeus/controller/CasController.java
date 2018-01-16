@@ -30,6 +30,7 @@ import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.exception.HetuKaytossaException;
 import fi.vm.sade.kayttooikeus.service.exception.HetuVaaraException;
+import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
@@ -166,8 +167,8 @@ public class CasController {
                 });
 
                 // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
-                boolean onTyosahkopostiosoite = henkiloByLoginToken
-                        .getYhteystieto(YhteystietojenTyypit.TYOOSOITE, YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                boolean onTyosahkopostiosoite = HenkiloUtils
+                        .getYhteystieto(henkiloByLoginToken, YhteystietojenTyypit.TYOOSOITE, YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .isPresent();
                 response.sendRedirect(ophProperties.url("henkilo-ui.vahvatunnistus.lisatiedot", kielisyys, loginToken, onTyosahkopostiosoite));
             } catch (LoginTokenNotFoundException e) {
