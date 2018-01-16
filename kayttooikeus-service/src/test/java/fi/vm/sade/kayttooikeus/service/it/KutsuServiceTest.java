@@ -18,10 +18,7 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpVersion;
 import org.apache.http.ProtocolVersion;
@@ -469,7 +466,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser("1.2.3.4.5")
     public void createHenkilo() {
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
                 .hetu("hetu")
@@ -506,9 +506,42 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
     }
 
+    @Test
+    @WithMockUser("1.2.3.4.5")
+    public void createHenkiloWhenKutsuCreatorHetuMatches() {
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
+        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
+                .temporaryToken("123")
+                .hetu("valid hetu")
+                .kutsuja("1.2.3.4.1")
+                .organisaatio(KutsuOrganisaatioPopulator.kutsuOrganisaatio("1.2.0.0.1")
+                        .ryhma(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("ryhma").withNimi(text("FI", "Kuvaus")))));
+        Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
+        populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
+        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
+                new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
+
+        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        // Username/password won't change
+        assertThat(henkilo.getKayttajatiedot()).isNull();
+        // No organisation or kayttooikeusryhma are granted
+        assertThat(henkilo.getOrganisaatioHenkilos()).isEmpty();
+
+        assertThat(kutsu.getLuotuHenkiloOid()).isEqualTo(henkilo.getOidHenkilo());
+        assertThat(kutsu.getTemporaryToken()).isNull();
+        assertThat(kutsu.getTila()).isEqualTo(KutsunTila.KAYTETTY);
+    }
+
     // Existing henkilo username changes to the new one
     @Test
+    @WithMockUser("1.2.3.4.5")
     public void createHenkiloHetuExistsKayttajatiedotExists() {
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
                 .hetu("hetu")
@@ -553,7 +586,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser("1.2.3.4.5")
     public void createHenkiloWithHakaIdentifier() {
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
@@ -598,7 +634,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     // Another haka identifier will be added to an existing user credentials
     @Test
+    @WithMockUser("1.2.3.4.5")
     public void createHenkiloWithHakaIdentifierHetuExists() {
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+                .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
