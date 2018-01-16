@@ -100,6 +100,12 @@ public class KutsuServiceImpl implements KutsuService {
             }
             this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
         }
+        // This is redundant after every virkailija has been strongly identified
+        final String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
+        HenkiloDto currentUser = this.oppijanumerorekisteriClient.getHenkiloByOid(currentUserOid);
+        if (StringUtils.isEmpty(currentUser.getHetu()) || !currentUser.isYksiloityVTJ()) {
+            throw new ForbiddenException("To create new invitation user needs to have hetu and be identified from VTJ");
+        }
 
         final Kutsu newKutsu = mapper.map(kutsuCreateDto, Kutsu.class);
 
