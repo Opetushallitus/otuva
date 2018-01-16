@@ -236,8 +236,13 @@ public class KutsuServiceImpl implements KutsuService {
                 .orElseGet(() -> this.henkiloDataRepository.save(Henkilo.builder().oidHenkilo(henkiloOid).build()));
         henkilo.setVahvastiTunnistettu(true);
 
-        // Create or update credentials and add privileges
-        this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
+        // Create or update credentials and add privileges if hetu not same as kutsu creator
+        final String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
+        HenkiloPerustietoDto currentUser = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(currentUserOid)
+                .orElseThrow(() -> new NotFoundException("Current user not found with oid " + currentUserOid));
+        if (StringUtils.isEmpty(currentUser.getHetu()) || !kutsuByToken.getHetu().equals(currentUser.getHetu())) {
+            this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
+        }
 
         // Update kutsu
         kutsuByToken.setKaytetty(LocalDateTime.now());
