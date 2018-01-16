@@ -16,6 +16,7 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
@@ -291,7 +292,12 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn(response);
-        doReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build())
+        doReturn(HenkiloDto.builder()
+                .kutsumanimi("kutsun")
+                .sukunimi("kutsuja")
+                .yksiloityVTJ(true)
+                .hetu("valid hetu")
+                .build())
                 .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
 
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
@@ -344,7 +350,12 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         BasicHttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "Ok"));
         response.setEntity(emailResponseEntity);
         given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn(response);
-        doReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build())
+        doReturn(HenkiloDto.builder()
+                .kutsumanimi("kutsun")
+                .sukunimi("kutsuja")
+                .yksiloityVTJ(true)
+                .hetu("valid hetu")
+                .build())
                 .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
 
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
@@ -403,6 +414,17 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
+    }
+
+    @Test(expected = ForbiddenException.class)
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
+    public void createKutsuAsAdminWithNoHetuOrVtjYksiloity() {
+        doReturn(HenkiloDto.builder()
+                .kutsumanimi("kutsun")
+                .sukunimi("kutsuja")
+                .build())
+                .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
+        this.kutsuService.createKutsu(new KutsuCreateDto());
     }
 
     @Test
