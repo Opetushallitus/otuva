@@ -88,6 +88,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, ophProperties.url("haku-app.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.SURE, ophProperties.url("suoritusrekisteri.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.ATARU, ophProperties.url("ataru-editori.external-permission-check"));
+        SERVICE_URIS.put(ExternalPermissionService.KOSKI, ophProperties.url("koski.external-permission-check"));
         this.henkiloDataRepository = henkiloDataRepository;
         this.organisaatioClient = organisaatioClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
@@ -191,11 +192,17 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
 
 //        SURElla ei kaikissa tapauksissa (esim. jos YO tutkinto ennen 90-lukua) ole tietoa
-//        henkilösta, joten pitää kysyä varmuuden vuoksi myös haku-appilta
+//        henkilösta, joten pitää kysyä varmuuden vuoksi myös haku-appilta ja sen jälkeen atarulta
         if (!response.isAccessAllowed() && ExternalPermissionService.SURE.equals(permissionCheckService)) {
-            return checkPermissionFromExternalService(
-                    SERVICE_URIS.get(ExternalPermissionService.HAKU_APP), personOidsForSamePerson, flattedOrgs, callingUserRoles
-            ).isAccessAllowed();
+            PermissionCheckResponseDto responseHakuApp = checkPermissionFromExternalService(
+                    SERVICE_URIS.get(ExternalPermissionService.HAKU_APP), personOidsForSamePerson, flattedOrgs, callingUserRoles);
+            if (!responseHakuApp.isAccessAllowed()) {
+                return checkPermissionFromExternalService(
+                        SERVICE_URIS.get(ExternalPermissionService.ATARU), personOidsForSamePerson, flattedOrgs, callingUserRoles).isAccessAllowed();
+            } else {
+                return true;
+            }
+            
         }
 
         if (!response.isAccessAllowed()) {
