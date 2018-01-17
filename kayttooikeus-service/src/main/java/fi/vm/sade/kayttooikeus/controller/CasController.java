@@ -196,7 +196,7 @@ public class CasController {
             @RequestParam(value = "loginToken") String loginToken,
             @RequestBody @Valid VahvaTunnistusRequestDto dto) throws IOException {
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 2
-        return vahvaTunnistusService.tunnistaudu(loginToken, dto);
+        return vahvaTunnistusService.tunnistauduIlmanTransaktiota(loginToken, dto);
     }
 
     @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",

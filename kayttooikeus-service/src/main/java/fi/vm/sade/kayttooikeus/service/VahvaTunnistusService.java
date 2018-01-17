@@ -14,4 +14,16 @@ public interface VahvaTunnistusService {
      */
     VahvaTunnistusResponseDto tunnistaudu(String loginToken, VahvaTunnistusRequestDto lisatiedotDto);
 
+    /**
+     * Tunnistaa käyttäjän vahvasti järjestelmään.
+     *
+     * @param loginToken tunnistautumisen kertakäyttöinen avain
+     * @param lisatiedotDto käyttäjän syöttämät lisätiedot jotka tallennetaan
+     * @return uudelleenohjaukseen tarvittavat parametrit
+     * @deprecated käytä transaktionaalista metodia kun palvelut käyttävät eri
+     * kantaa
+     */
+    @Deprecated
+    VahvaTunnistusResponseDto tunnistauduIlmanTransaktiota(String loginToken, VahvaTunnistusRequestDto lisatiedotDto);
+
 }

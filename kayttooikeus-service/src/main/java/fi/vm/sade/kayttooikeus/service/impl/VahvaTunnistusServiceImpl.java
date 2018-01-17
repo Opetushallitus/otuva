@@ -31,10 +31,19 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
     private final OphProperties ophProperties;
 
     @Override
-    // TODO: muuta metodi transaktionaaliseksi kun palvelut käyttävät eri kantaa
-    @Transactional(propagation = Propagation.NEVER)
     public VahvaTunnistusResponseDto tunnistaudu(String loginToken, VahvaTunnistusRequestDto lisatiedotDto) {
         TunnistusToken tunnistusToken = identificationService.consumeLoginToken(loginToken);
+        return tunnistaudu(tunnistusToken, lisatiedotDto);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NEVER)
+    public VahvaTunnistusResponseDto tunnistauduIlmanTransaktiota(String loginToken, VahvaTunnistusRequestDto lisatiedotDto) {
+        TunnistusToken tunnistusToken = identificationService.consumeLoginToken(loginToken);
+        return tunnistaudu(tunnistusToken, lisatiedotDto);
+    }
+
+    public VahvaTunnistusResponseDto tunnistaudu(TunnistusToken tunnistusToken, VahvaTunnistusRequestDto lisatiedotDto) {
         Henkilo henkiloByLoginToken = tunnistusToken.getHenkilo();
         String henkiloOid = henkiloByLoginToken.getOidHenkilo();
 
