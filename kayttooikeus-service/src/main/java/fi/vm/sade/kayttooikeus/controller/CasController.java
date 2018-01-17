@@ -171,7 +171,7 @@ public class CasController {
                 boolean onTyosahkopostiosoite = HenkiloUtils
                         .getYhteystieto(henkiloByLoginToken, YhteystietojenTyypit.TYOOSOITE, YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .isPresent();
-                response.sendRedirect(ophProperties.url("henkilo-ui.vahvatunnistus.lisatiedot", kielisyys, loginToken, onTyosahkopostiosoite));
+                response.sendRedirect(ophProperties.url("henkilo-ui.uudelleenrekisterointi", kielisyys, loginToken, onTyosahkopostiosoite));
             } catch (LoginTokenNotFoundException e) {
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
             } catch (HetuVaaraException e) {
@@ -189,7 +189,7 @@ public class CasController {
         }
     }
 
-    @PostMapping("/tunnistus/lisatiedot")
+    @PostMapping("/uudelleenrekisterointi")
     @ApiOperation(value = "Virkailijan uudelleenrekisteröinti")
     public VahvaTunnistusResponseDto tunnistauduVahvasti(
             @RequestParam(value = "kielisyys") String kielisyys,
