@@ -237,10 +237,10 @@ public class KutsuServiceImpl implements KutsuService {
         henkilo.setVahvastiTunnistettu(true);
 
         // Create or update credentials and add privileges if hetu not same as kutsu creator
-        final String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
-        HenkiloPerustietoDto currentUser = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(currentUserOid)
-                .orElseThrow(() -> new NotFoundException("Current user not found with oid " + currentUserOid));
-        if (StringUtils.isEmpty(currentUser.getHetu()) || !kutsuByToken.getHetu().equals(currentUser.getHetu())) {
+        final String kutsujaOid = kutsuByToken.getKutsuja();
+        HenkiloPerustietoDto kutsuja = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(kutsujaOid)
+                .orElseThrow(() -> new NotFoundException("Current user not found with oid " + kutsujaOid));
+        if (StringUtils.isEmpty(kutsuja.getHetu()) || !kutsuByToken.getHetu().equals(kutsuja.getHetu())) {
             this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
         }
 
