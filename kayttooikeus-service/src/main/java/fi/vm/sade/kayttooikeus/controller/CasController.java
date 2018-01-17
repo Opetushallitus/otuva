@@ -1,7 +1,8 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusLisatiedotDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -190,18 +191,12 @@ public class CasController {
 
     @PostMapping("/tunnistus/lisatiedot")
     @ApiOperation(value = "Virkailijan uudelleenrekisteröinti")
-    public Map<String, String> tunnistauduVahvasti(
+    public VahvaTunnistusResponseDto tunnistauduVahvasti(
             @RequestParam(value = "kielisyys") String kielisyys,
             @RequestParam(value = "loginToken") String loginToken,
-            @RequestBody @Valid VahvaTunnistusLisatiedotDto dto) throws IOException {
+            @RequestBody @Valid VahvaTunnistusRequestDto dto) throws IOException {
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 2
-        String authToken = vahvaTunnistusService.tunnistaudu(loginToken, dto);
-
-        Map<String, String> loginParameters = new HashMap<String, String>() {{
-            put("authToken", authToken);
-            put("service", ophProperties.url("virkailijan-tyopoyta"));
-        }};
-        return loginParameters;
+        return vahvaTunnistusService.tunnistaudu(loginToken, dto);
     }
 
     @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
