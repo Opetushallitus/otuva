@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,11 +51,11 @@ public interface KutsuService {
 
     /**
      * Henkilön luominen väliaikaisella kutsutokenilla
-     * @param temporaryToken token generoitu kutsulle vahvan tunnistuksen jälkeen
+     * @param kutsuByToken token generoitu kutsulle vahvan tunnistuksen jälkeen
      * @param henkiloCreateByKutsuDto haluttu henkilö
      * @return Luodun henkilön oid
      */
-    String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
+    String createHenkilo(Kutsu kutsuByToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 
     /**
      * Päivittää haka tunnisteen kutsuun

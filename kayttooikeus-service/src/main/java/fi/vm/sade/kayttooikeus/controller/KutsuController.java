@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
+import fi.vm.sade.kayttooikeus.model.Kutsu;
+import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
@@ -8,6 +10,7 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
@@ -37,6 +40,7 @@ public class KutsuController {
     private final KutsuService kutsuService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final IdentificationService identificationService;
+    private final KutsuRepository kutsuRepository;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ApiOperation(value = "Hakee kutsut annettujen hakuehtojen perusteella",
@@ -111,11 +115,14 @@ public class KutsuController {
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         // This needs to be done like this since otherwice KO locks the table row for this henkilo and ONR can't update
         // it until the transaction finishes when ONR request timeouts.
-        String oidHenkilo =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
+        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
+        String oidHenkilo =  this.kutsuService.createHenkilo(kutsuByToken, henkiloCreateByKutsuDto);
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(oidHenkilo);
         henkiloUpdateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
+        henkiloUpdateDto.setHetu(kutsuByToken.getHetu());
         // In case henkilo already exists
         henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
         this.oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
