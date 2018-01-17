@@ -466,9 +466,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser("1.2.3.4.5")
     public void createHenkilo() {
-        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
@@ -509,7 +508,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser("1.2.3.4.5")
     public void createHenkiloWhenKutsuCreatorHetuMatches() {
-        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
@@ -538,9 +537,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     // Existing henkilo username changes to the new one
     @Test
-    @WithMockUser("1.2.3.4.5")
     public void createHenkiloHetuExistsKayttajatiedotExists() {
-        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .temporaryToken("123")
@@ -586,9 +584,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser("1.2.3.4.5")
     public void createHenkiloWithHakaIdentifier() {
-        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .hakaIdentifier("!haka%Identifier1/")
@@ -634,9 +631,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     // Another haka identifier will be added to an existing user credentials
     @Test
-    @WithMockUser("1.2.3.4.5")
     public void createHenkiloWithHakaIdentifierHetuExists() {
-        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.5")))
+        given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
                 .hakaIdentifier("!haka%Identifier1/")
