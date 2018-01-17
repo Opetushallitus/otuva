@@ -117,7 +117,7 @@ public class KutsuController {
         // it until the transaction finishes when ONR request timeouts.
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        String oidHenkilo =  this.kutsuService.createHenkilo(kutsuByToken, henkiloCreateByKutsuDto);
+        String oidHenkilo =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(oidHenkilo);

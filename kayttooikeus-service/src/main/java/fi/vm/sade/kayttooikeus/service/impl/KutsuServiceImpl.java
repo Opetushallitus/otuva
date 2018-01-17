@@ -216,7 +216,9 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public String createHenkilo(Kutsu kutsuByToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+    public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
             // Validation
             this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());

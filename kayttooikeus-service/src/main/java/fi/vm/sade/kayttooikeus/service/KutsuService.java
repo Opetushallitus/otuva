@@ -51,11 +51,11 @@ public interface KutsuService {
 
     /**
      * Henkilön luominen väliaikaisella kutsutokenilla
-     * @param kutsuByToken token generoitu kutsulle vahvan tunnistuksen jälkeen
+     * @param temporaryToken token generoitu kutsulle vahvan tunnistuksen jälkeen
      * @param henkiloCreateByKutsuDto haluttu henkilö
      * @return Luodun henkilön oid
      */
-    String createHenkilo(Kutsu kutsuByToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
+    String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 
     /**
      * Päivittää haka tunnisteen kutsuun

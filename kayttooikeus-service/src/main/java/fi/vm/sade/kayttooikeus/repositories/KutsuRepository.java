@@ -17,6 +17,7 @@ public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepos
     Optional<Kutsu> findById(Long id);
     Optional<Kutsu> findByTemporaryTokenAndTilaAndTemporaryTokenCreatedGreaterThan(String temporaryToken, KutsunTila kutsunTila, LocalDateTime created);
 
+    @Transactional
     default Optional<Kutsu> findByTemporaryTokenIsValidIsActive(String temporaryToken) {
         return findByTemporaryTokenAndTilaAndTemporaryTokenCreatedGreaterThan(
                 temporaryToken, KutsunTila.AVOIN, LocalDateTime.now().minusHours(1));
