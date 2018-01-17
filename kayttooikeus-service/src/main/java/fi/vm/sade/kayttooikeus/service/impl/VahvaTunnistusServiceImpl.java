@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusLisatiedotDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
@@ -10,6 +11,7 @@ import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.properties.OphProperties;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,12 +28,22 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
     private final KayttajatiedotService kayttajatiedotService;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final OphProperties ophProperties;
 
     @Override
-    // TODO: muuta metodi transaktionaaliseksi kun palvelut käyttävät eri kantaa
-    @Transactional(propagation = Propagation.NEVER)
-    public String tunnistaudu(String loginToken, VahvaTunnistusLisatiedotDto lisatiedotDto) {
+    public VahvaTunnistusResponseDto tunnistaudu(String loginToken, VahvaTunnistusRequestDto lisatiedotDto) {
         TunnistusToken tunnistusToken = identificationService.consumeLoginToken(loginToken);
+        return tunnistaudu(tunnistusToken, lisatiedotDto);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NEVER)
+    public VahvaTunnistusResponseDto tunnistauduIlmanTransaktiota(String loginToken, VahvaTunnistusRequestDto lisatiedotDto) {
+        TunnistusToken tunnistusToken = identificationService.consumeLoginToken(loginToken);
+        return tunnistaudu(tunnistusToken, lisatiedotDto);
+    }
+
+    public VahvaTunnistusResponseDto tunnistaudu(TunnistusToken tunnistusToken, VahvaTunnistusRequestDto lisatiedotDto) {
         Henkilo henkiloByLoginToken = tunnistusToken.getHenkilo();
         String henkiloOid = henkiloByLoginToken.getOidHenkilo();
 
@@ -45,8 +57,13 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
                 .filter(StringUtils::hasLength)
                 .ifPresent(salasana -> kayttajatiedotService.changePasswordAsAdmin(henkiloOid, salasana, LdapSynchronizationService.LdapSynchronizationType.NOW));
 
-        return identificationService.generateAuthTokenForHenkilo(henkiloOid, STRONG_AUTHENTICATION_IDP,
+        String authToken = identificationService.generateAuthTokenForHenkilo(henkiloOid, STRONG_AUTHENTICATION_IDP,
                 tunnistusToken.getHenkilo().getKayttajatiedot().getUsername());
+
+        return VahvaTunnistusResponseDto.builder()
+                .authToken(authToken)
+                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .build();
     }
 
 }
