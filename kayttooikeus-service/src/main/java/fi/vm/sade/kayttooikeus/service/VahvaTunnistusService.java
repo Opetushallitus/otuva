@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusLisatiedotDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
+import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 
 public interface VahvaTunnistusService {
 
@@ -9,8 +10,8 @@ public interface VahvaTunnistusService {
      *
      * @param loginToken tunnistautumisen kertakäyttöinen avain
      * @param lisatiedotDto käyttäjän syöttämät lisätiedot jotka tallennetaan
-     * @return kertakäyttöinen avain kirjautumiseen ("authToken")
+     * @return uudelleenohjaukseen tarvittavat parametrit
      */
-    String tunnistaudu(String loginToken, VahvaTunnistusLisatiedotDto lisatiedotDto);
+    VahvaTunnistusResponseDto tunnistaudu(String loginToken, VahvaTunnistusRequestDto lisatiedotDto);
 
 }

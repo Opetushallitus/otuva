@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Email;
  */
 @Getter
 @Setter
-public class VahvaTunnistusLisatiedotDto {
+public class VahvaTunnistusRequestDto {
 
     // käyttäjä vaihtaa salasanan uusien salasanakäytäntöjen mukaiseksi
     @NotNull
