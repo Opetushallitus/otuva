@@ -99,10 +99,9 @@ public class HenkilohakuBuilder {
             henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
         }
         else {
-            // root-virkailija hakee ilman aliorganisaatioita (ei koske adminia)
+            // root-virkailija hakee ilman aliorganisaatioita
             if (!Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())
-                    && henkilohakuCriteriaDto.getOrganisaatioOids() == null
-                    && !this.permissionCheckerService.isCurrentUserAdmin()) {
+                    && henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
                 henkilohakuCriteriaDto.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
             }
         }

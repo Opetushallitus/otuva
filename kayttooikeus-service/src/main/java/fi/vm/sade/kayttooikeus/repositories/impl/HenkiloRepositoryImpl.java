@@ -134,7 +134,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.kayttajatiedot.username)
                 .distinct();
 
-        if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids()) || Boolean.FALSE.equals(criteria.getNoOrganisation())) {
+        if (!Boolean.TRUE.equals(criteria.getNoOrganisation())) {
             // Exclude henkilos without active organisation
             query.innerJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
                     .on(qOrganisaatioHenkilo.passivoitu.isFalse());
@@ -159,6 +159,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         }
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+
         return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.sukunimiCached) + ", " + tuple.get(qHenkilo.etunimetCached),
                 tuple.get(qHenkilo.oidHenkilo),
