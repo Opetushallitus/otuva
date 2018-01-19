@@ -35,6 +35,7 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     @Override
     @Transactional
     public void updateAllAtNight() {
+        LOGGER.info("Lisätään kaikkien henkilöiden päivitys LDAP-synkronointijonoon");
         Optional<LdapUpdateData> existingData = ldapUpdateDataRepository.findByHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
         if (!existingData.isPresent()) {
             LdapUpdateData newData = new LdapUpdateData();
@@ -49,6 +50,7 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     @Override
     @Transactional
     public void updateKayttoOikeusRyhma(Long kayttoOikeusRyhmaId) {
+        LOGGER.info("Lisätään käyttöoikeusryhmä {} LDAP-synkronointijonoon", kayttoOikeusRyhmaId);
         if (ldapUpdateDataRepository.countByKayttoOikeusRyhmaId(kayttoOikeusRyhmaId).compareTo(0L) == 0) {
             LdapUpdateData newData = new LdapUpdateData();
             newData.setKayttoOikeusRyhmaId(kayttoOikeusRyhmaId);
@@ -73,6 +75,7 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
 
     private void updateHenkilo(String henkiloOid, LdapPriorityType priority) {
         ldapUpdateDataRepository.findByHenkiloOid(henkiloOid).map(existingData -> {
+            LOGGER.info("Päivitetään henkilö {} LDAP-synkronointijonoon prioriteetilla {}", henkiloOid, priority);
             if (existingData.getPriority() != LdapPriorityType.ASAP) {
                 existingData.setPriority(priority);
                 existingData.setModified(timeService.getDateTimeNow());
@@ -83,6 +86,7 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
             }
             return existingData;
         }).orElseGet(() -> {
+            LOGGER.info("Lisätään henkilö {} LDAP-synkronointijonoon prioriteetilla {}", henkiloOid, priority);
             LdapUpdateData newData = new LdapUpdateData();
             newData.setHenkiloOid(henkiloOid);
             newData.setPriority(priority);
