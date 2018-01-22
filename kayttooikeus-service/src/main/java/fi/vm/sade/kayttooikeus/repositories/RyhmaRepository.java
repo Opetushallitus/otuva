@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories;
 import fi.vm.sade.kayttooikeus.model.Ryhma;
 import java.util.List;
 import java.util.Optional;
+import javax.naming.Name;
 import org.springframework.data.ldap.repository.LdapRepository;
 
 public interface RyhmaRepository extends LdapRepository<Ryhma>, RyhmaRepositoryCustom {
@@ -15,6 +16,6 @@ public interface RyhmaRepository extends LdapRepository<Ryhma>, RyhmaRepositoryC
      * @param kayttajaDn käyttäjä DN
      * @return ryhmät
      */
-    List<Ryhma> findByKayttajat(String kayttajaDn);
+    List<Ryhma> findByKayttajat(Name kayttajaDn);
 
 }
