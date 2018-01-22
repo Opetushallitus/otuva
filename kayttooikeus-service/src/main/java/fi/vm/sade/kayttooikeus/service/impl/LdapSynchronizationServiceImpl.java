@@ -19,6 +19,7 @@ import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     @Transactional
     public void updateAllAtNight() {
         LOGGER.info("Lisätään kaikkien henkilöiden päivitys LDAP-synkronointijonoon");
-        Optional<LdapUpdateData> existingData = ldapUpdateDataRepository.findByHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
-        if (!existingData.isPresent()) {
+        Iterable<LdapUpdateData> existingData = ldapUpdateDataRepository.findByHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
+        if (!existingData.iterator().hasNext()) {
             LdapUpdateData newData = new LdapUpdateData();
             newData.setHenkiloOid(LdapSynchronizer.RUN_ALL_BATCH);
             newData.setPriority(LdapPriorityType.NIGHT);
@@ -74,26 +75,23 @@ public class LdapSynchronizationServiceImpl implements LdapSynchronizationServic
     }
 
     private void updateHenkilo(String henkiloOid, LdapPriorityType priority) {
-        ldapUpdateDataRepository.findByHenkiloOid(henkiloOid).map(existingData -> {
-            LOGGER.info("Päivitetään henkilö {} LDAP-synkronointijonoon prioriteetilla {}", henkiloOid, priority);
-            if (existingData.getPriority() != LdapPriorityType.ASAP) {
-                existingData.setPriority(priority);
-                existingData.setModified(timeService.getDateTimeNow());
-            }
-            if (existingData.getStatus() == LdapStatusType.FAILED) {
-                existingData.setStatus(LdapStatusType.IN_QUEUE);
-                existingData.setModified(timeService.getDateTimeNow());
-            }
-            return existingData;
-        }).orElseGet(() -> {
-            LOGGER.info("Lisätään henkilö {} LDAP-synkronointijonoon prioriteetilla {}", henkiloOid, priority);
-            LdapUpdateData newData = new LdapUpdateData();
-            newData.setHenkiloOid(henkiloOid);
-            newData.setPriority(priority);
-            newData.setStatus(LdapStatusType.IN_QUEUE);
-            newData.setModified(timeService.getDateTimeNow());
-            return ldapUpdateDataRepository.save(newData);
-        });
+        LOGGER.info("Lisätään henkilö {} LDAP-synkronointijonoon prioriteetilla {}", henkiloOid, priority);
+
+        // poistetaan henkilön epäonnistuneet ldap-synkronoinnit
+        StreamSupport.stream(ldapUpdateDataRepository.findByHenkiloOid(henkiloOid).spliterator(), false)
+                .filter(existingData -> LdapStatusType.FAILED.equals(existingData.getStatus()))
+                .peek(existingData -> LOGGER.info("Poistetaan epäonnistunut {}", existingData))
+                .forEach(ldapUpdateDataRepository::delete);
+
+        // lisätään aina uusi rivi ldap-synkronointijonoon, koska tällä hetkellä
+        // mahdollisesti käynnissä oleva synkronointi ei ota huomioon tässä
+        // transaktiossa tulleita henkilön muutoksia
+        LdapUpdateData newData = new LdapUpdateData();
+        newData.setHenkiloOid(henkiloOid);
+        newData.setPriority(priority);
+        newData.setStatus(LdapStatusType.IN_QUEUE);
+        newData.setModified(timeService.getDateTimeNow());
+        ldapUpdateDataRepository.save(newData);
     }
 
     @Override
