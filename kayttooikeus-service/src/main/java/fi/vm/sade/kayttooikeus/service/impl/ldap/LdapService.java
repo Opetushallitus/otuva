@@ -15,9 +15,13 @@ import java.util.Map;
 import java.util.Set;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toSet;
+import javax.naming.Name;
+import javax.naming.ldap.LdapName;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ldap.core.support.BaseLdapNameAware;
+import org.springframework.ldap.support.LdapNameBuilder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,13 +29,19 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class LdapService {
+public class LdapService implements BaseLdapNameAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapService.class);
 
     private final KayttajaRepository kayttajaRepository;
     private final RyhmaRepository ryhmaRepository;
     private final OrikaBeanMapper mapper;
+    private LdapName baseLdapPath;
+
+    @Override
+    public void setBaseLdapPath(LdapName baseLdapPath) {
+        this.baseLdapPath = baseLdapPath;
+    }
 
     /**
      * Lisää tai päivittää henkilön tiedot.
@@ -65,7 +75,7 @@ public class LdapService {
         LOGGER.info("Tallennetaan {}", kayttaja);
 
         // päivitetään käyttäjän ryhmät
-        String kayttajaDn = kayttaja.getDnAsString();
+        Name kayttajaDn = getFullDn(kayttaja);
         List<Ryhma> ldapRyhmat = ryhmaRepository.findByKayttajat(kayttajaDn);
         Set<String> ldapRoolit = ldapRyhmat.stream().map(Ryhma::getNimi).collect(toSet());
         ldapRyhmat.stream()
@@ -101,7 +111,7 @@ public class LdapService {
     private void delete(Kayttaja kayttaja) {
         LOGGER.info("Poistetaan {}", kayttaja);
         kayttajaRepository.delete(kayttaja);
-        String kayttajaDn = kayttaja.getDnAsString();
+        Name kayttajaDn = getFullDn(kayttaja);
         ryhmaRepository.findByKayttajat(kayttajaDn)
                 .forEach(t -> deleteFromRyhma(t, kayttajaDn));
     }
@@ -112,20 +122,20 @@ public class LdapService {
         kayttajaRepository.save(kayttaja);
     }
 
-    private void addToRyhma(String ryhmaNimi, String kayttajaDn) {
+    private void addToRyhma(String ryhmaNimi, Name kayttajaDn) {
         Ryhma ryhma = ryhmaRepository.findByNimi(ryhmaNimi)
                 .orElseGet(() -> Ryhma.builder().nimi(ryhmaNimi).build());
         addToRyhma(ryhma, kayttajaDn);
     }
 
-    private void addToRyhma(Ryhma ryhma, String kayttajaDn) {
+    private void addToRyhma(Ryhma ryhma, Name kayttajaDn) {
         LOGGER.info("Lisätään käyttäjä '{}' ryhmään '{}'", kayttajaDn, ryhma.getNimi());
         if (ryhma.addKayttaja(kayttajaDn)) {
             ryhmaRepository.save(ryhma);
         }
     }
 
-    private void deleteFromRyhma(Ryhma ryhma, String kayttajaDn) {
+    private void deleteFromRyhma(Ryhma ryhma, Name kayttajaDn) {
         LOGGER.info("Poistetaan käyttäjältä '{}' ryhmä '{}'", kayttajaDn, ryhma.getNimi());
         if (ryhma.deleteKayttaja(kayttajaDn)) {
             if (ryhma.isEmpty()) {
@@ -135,6 +145,10 @@ public class LdapService {
                 ryhmaRepository.save(ryhma);
             }
         }
+    }
+
+    private Name getFullDn(Kayttaja kayttaja) {
+        return LdapNameBuilder.newInstance(baseLdapPath).add(kayttaja.getDn()).build();
     }
 
 }
