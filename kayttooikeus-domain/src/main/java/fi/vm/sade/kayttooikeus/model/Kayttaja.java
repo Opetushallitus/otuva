@@ -55,6 +55,10 @@ public final class Kayttaja {
     @Attribute(name = "mail")
     private String sahkoposti;
 
+    public String getDnAsString() {
+        return "uid=" + kayttajatunnus + ",ou=People,dc=opintopolku,dc=fi";
+    }
+
     public String getNimi() {
         return Stream.of(etunimet, sukunimi).filter(Objects::nonNull).collect(joining(" "));
     }
