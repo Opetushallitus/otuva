@@ -36,8 +36,6 @@ import static java.util.stream.Collectors.toSet;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.stream.Stream;
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -178,7 +176,7 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
     }
 
     @Test
-    public void updateHenkiloKayttajatunnusAndAsiointikieli() throws InvalidNameException {
+    public void updateHenkiloKayttajatunnusAndAsiointikieli() {
         Kayttajatiedot kayttajatiedot = populate(kayttajatiedot(henkilo("oid1"), "user1"));
         HenkiloDto henkiloDto = createValidHenkiloDto("oid1");
         henkiloDto.setAsiointiKieli(new KielisyysDto("fi", "suomi"));
@@ -202,7 +200,7 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
                 .containsExactlyInAnyOrder(tuple("user1", "oid1"), tuple("user1-updated", "oid1"));
         assertThat(ryhmaRepository.findAll())
                 .extracting("nimi", "kayttajat")
-                .containsExactly(tuple("LANG_fi", Stream.of(new LdapName("uid=user1,ou=People,dc=opintopolku,dc=fi"), new LdapName("uid=user1-updated,ou=People,dc=opintopolku,dc=fi")).collect(toSet())));
+                .containsExactly(tuple("LANG_fi", Stream.of("uid=user1,ou=People,dc=opintopolku,dc=fi", "uid=user1-updated,ou=People,dc=opintopolku,dc=fi").collect(toSet())));
     }
 
     @Test
