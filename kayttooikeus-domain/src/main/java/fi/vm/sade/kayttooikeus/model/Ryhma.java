@@ -36,7 +36,7 @@ public final class Ryhma {
     private String nimi;
 
     @Attribute(name = "uniqueMember")
-    private Set<Name> kayttajat;
+    private Set<String> kayttajat;
 
     public boolean isEmpty() {
         if (kayttajat == null) {
@@ -45,14 +45,14 @@ public final class Ryhma {
         return kayttajat.isEmpty();
     }
 
-    public boolean addKayttaja(Name kayttajaDn) {
+    public boolean addKayttaja(String kayttajaDn) {
         if (kayttajat == null) {
             kayttajat = new HashSet<>();
         }
         return kayttajat.add(kayttajaDn);
     }
 
-    public boolean deleteKayttaja(Name kayttajaDn) {
+    public boolean deleteKayttaja(String kayttajaDn) {
         if (kayttajat == null) {
             return false;
         }
