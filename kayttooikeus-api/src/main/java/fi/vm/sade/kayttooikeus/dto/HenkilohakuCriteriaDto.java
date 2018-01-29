@@ -16,7 +16,6 @@ public class HenkilohakuCriteriaDto {
     private Boolean duplikaatti;
 
     private String nameQuery;
-    private Boolean isHetu;
 
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
