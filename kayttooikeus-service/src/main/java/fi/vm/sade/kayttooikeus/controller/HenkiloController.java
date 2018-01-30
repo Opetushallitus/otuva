@@ -34,6 +34,13 @@ public class HenkiloController {
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
 
+    @GetMapping("/{oid}")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
+    @ApiOperation("Hakee henkilön OID:n perusteella")
+    public HenkiloReadDto getByOid(@PathVariable String oid) {
+        return henkiloService.getByOid(oid);
+    }
+
     @GetMapping("/kayttajatunnus={kayttajatunnus}")
     @PostAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(returnObject.oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
     @ApiOperation("Hakee henkilön käyttäjätunnuksen perusteella")

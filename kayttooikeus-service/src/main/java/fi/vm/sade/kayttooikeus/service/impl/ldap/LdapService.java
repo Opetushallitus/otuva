@@ -49,10 +49,10 @@ public class LdapService {
         // muodostetaan henkilön ldap-roolit
         LdapRoolitBuilder roolit = new LdapRoolitBuilder()
                 // käyttöoikeuspalvelun roolit
+                .kayttajaTyyppi(entity.getKayttajaTyyppi())
                 .identifications(entity.getIdentifications())
                 .myonnetyt(myonnetyt)
                 // oppijanumerorekisterin roolit
-                .henkiloTyyppi(dto.getHenkiloTyyppi())
                 .asiointikieli(dto.getAsiointiKieli());
         Set<String> dbRoolit = roolit.asSet();
 

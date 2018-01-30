@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 
@@ -9,6 +10,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 
 public class HenkiloPopulator implements Populator<Henkilo> {
     private final String oid;
+    private KayttajaTyyppi tyyppi;
     private String etunimetCached;
     private String sukunimiCached;
     private Boolean passivoituCached;
@@ -22,6 +24,19 @@ public class HenkiloPopulator implements Populator<Henkilo> {
 
     public static HenkiloPopulator henkilo(String oid) {
         return new HenkiloPopulator(oid);
+    }
+
+    public static HenkiloPopulator virkailija(String oid) {
+        return new HenkiloPopulator(oid).withTyyppi(KayttajaTyyppi.VIRKAILIJA);
+    }
+
+    public static HenkiloPopulator palvelukayttaja(String oid) {
+        return new HenkiloPopulator(oid).withTyyppi(KayttajaTyyppi.PALVELU);
+    }
+
+    public HenkiloPopulator withTyyppi(KayttajaTyyppi tyyppi) {
+        this.tyyppi = tyyppi;
+        return this;
     }
 
     public HenkiloPopulator withNimet(String etunimi, String sukunimi) {
@@ -60,6 +75,7 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         }
         Henkilo henkilo = new Henkilo();
         henkilo.setOidHenkilo(oid);
+        henkilo.setKayttajaTyyppi(tyyppi);
         henkilo.setEtunimetCached(this.etunimetCached);
         henkilo.setSukunimiCached(this.sukunimiCached);
         henkilo.setPassivoituCached(this.passivoituCached);

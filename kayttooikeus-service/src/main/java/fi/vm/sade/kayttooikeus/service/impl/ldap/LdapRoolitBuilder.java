@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import static java.util.Collections.unmodifiableSet;
 import java.util.List;
@@ -85,7 +85,7 @@ public final class LdapRoolitBuilder {
         return this;
     }
 
-    public LdapRoolitBuilder henkiloTyyppi(HenkiloTyyppi tyyppi) {
+    public LdapRoolitBuilder kayttajaTyyppi(KayttajaTyyppi tyyppi) {
         if (tyyppi != null) {
             roolit.add(tyyppi.name());
         }

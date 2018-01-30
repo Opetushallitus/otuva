@@ -30,13 +30,13 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
-import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.PALVELU;
-import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA;
+import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.PALVELU;
+import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -110,7 +110,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
     @Override
     @Transactional(readOnly = true)
-    public List<HenkiloTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser() {
+    public List<KayttajaTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser() {
         if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(getCurrentUserOid(),
                 PALVELU_HENKILONHALLINTA, ROLE_ADMIN)) {
             return asList(VIRKAILIJA, PALVELU);

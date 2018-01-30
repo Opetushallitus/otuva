@@ -22,10 +22,8 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.kayttooikeus.util.HenkiloProvider;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.collections4.CollectionUtils;
@@ -238,14 +236,11 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return false;
         }
 
-        HenkiloProvider henkiloProvider = new HenkiloProvider(oppijanumerorekisteriClient);
-
         // If person doesn't have any organisation (and is not of type "OPPIJA") -> access is granted
         // Otherwise creating persons wouldn't work, as first the person is created and only after that
         // the person is attached to an organisation
         if (henkilo.get().getOrganisaatioHenkilos().isEmpty()) {
-            HenkiloDto henkiloDto = henkiloProvider.getByOid(personOid);
-            if (!HenkiloTyyppi.OPPIJA.equals(henkiloDto.getHenkiloTyyppi())
+            if (henkilo.get().getKayttajaTyyppi() != null && !KayttajaTyyppi.OPPIJA.equals(henkilo.get().getKayttajaTyyppi())
                     && CollectionUtils.containsAny(callingUserRoles, allowedRoles)) {
                 return true;
             }
@@ -254,8 +249,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         if (callingUserRoles.contains(ROLE_PALVELUKAYTTAJA_CRUD)
                 && allowedRoles.contains(ROLE_PALVELUKAYTTAJA_CRUD)) {
             // käyttöoikeudella saa muokata vain palvelukäyttäjiä
-            HenkiloDto henkiloDto = henkiloProvider.getByOid(personOid);
-            if (!HenkiloTyyppi.PALVELU.equals(henkiloDto.getHenkiloTyyppi())) {
+            if (!KayttajaTyyppi.PALVELU.equals(henkilo.get().getKayttajaTyyppi())) {
                 allowedRoles.remove(ROLE_PALVELUKAYTTAJA_CRUD);
             }
         }

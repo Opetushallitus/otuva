@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.model;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import lombok.*;
 
 import javax.persistence.*;
@@ -29,6 +30,10 @@ public class Henkilo implements Identifiable {
 
     @Column(nullable = false, name = "oidhenkilo")
     private String oidHenkilo;
+
+    @Column(name = "henkilotyyppi")
+    @Enumerated(EnumType.STRING)
+    private KayttajaTyyppi kayttajaTyyppi;
 
     @OneToOne(mappedBy = "henkilo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Kayttajatiedot kayttajatiedot;

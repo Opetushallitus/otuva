@@ -32,7 +32,7 @@ import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static fi.vm.sade.kayttooikeus.util.JsonUtil.readJson;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -165,8 +165,8 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                 .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_ADMIN))
                 .willReturn(true);
 
-        List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
-        assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA, HenkiloTyyppi.PALVELU)), new HashSet<>(list));
+        List<KayttajaTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
+        assertEquals(new HashSet<>(asList(KayttajaTyyppi.VIRKAILIJA, KayttajaTyyppi.PALVELU)), new HashSet<>(list));
     }
 
     @Test
@@ -179,8 +179,8 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                 .isHenkiloMyonnettyKayttoOikeusToPalveluInRole("1.2.3.4.5", PALVELU_HENKILONHALLINTA, ROLE_CRUD))
                 .willReturn(true);
 
-        List<HenkiloTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
-        assertEquals(new HashSet<>(asList(HenkiloTyyppi.VIRKAILIJA)), new HashSet<>(list));
+        List<KayttajaTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
+        assertEquals(new HashSet<>(asList(KayttajaTyyppi.VIRKAILIJA)), new HashSet<>(list));
     }
 
     @Test

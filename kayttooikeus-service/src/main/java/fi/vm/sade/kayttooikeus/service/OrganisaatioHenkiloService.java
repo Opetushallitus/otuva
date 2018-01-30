@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ public interface OrganisaatioHenkiloService {
     
     List<OrganisaatioPerustieto> listOrganisaatioPerustiedotForCurrentUser();
 
-    List<HenkiloTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser();
+    List<KayttajaTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser();
 
     OrganisaatioHenkiloDto findOrganisaatioHenkiloByHenkiloAndOrganisaatio(String henkiloOid, String organisaatioOid);
 
