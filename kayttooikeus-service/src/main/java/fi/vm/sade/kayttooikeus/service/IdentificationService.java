@@ -29,6 +29,8 @@ public interface IdentificationService {
 
     TunnistusToken updateLoginToken(String loginToken, String hetu);
 
-    TunnistusToken consumeLoginToken(String loginToken);
+    TunnistusToken getByValidLoginToken(String loginToken);
+
+    String consumeLoginToken(String loginToken);
 
 }

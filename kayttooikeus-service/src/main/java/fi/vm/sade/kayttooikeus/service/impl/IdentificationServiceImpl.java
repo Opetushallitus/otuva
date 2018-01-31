@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 
 @Service
 @RequiredArgsConstructor
@@ -211,15 +213,24 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     }
 
     @Override
-    @Transactional
-    public TunnistusToken consumeLoginToken(String loginToken) {
-        TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
+    @Transactional(readOnly = true)
+    public TunnistusToken getByValidLoginToken(String loginToken) {
+        return tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new LoginTokenNotFoundException("Login token not found " + loginToken));
+    }
+
+    @Override
+    @Transactional
+    public String consumeLoginToken(String loginToken) {
+        TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByLoginToken(loginToken)
+                .orElseThrow(() -> new DataInconsistencyException("Login token not found " + loginToken));
         Henkilo henkilo = tunnistusToken.getHenkilo();
         henkilo.setVahvastiTunnistettu(true);
 
         tunnistusToken.setKaytetty(LocalDateTime.now());
-        return tunnistusToken;
+
+        Kayttajatiedot kayttajatiedot = henkilo.getKayttajatiedot();
+        return generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, kayttajatiedot.getUsername());
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
