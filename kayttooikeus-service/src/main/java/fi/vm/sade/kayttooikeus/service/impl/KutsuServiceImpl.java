@@ -3,10 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
@@ -217,7 +214,7 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+    public HenkiloCreatedDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
@@ -228,8 +225,9 @@ public class KutsuServiceImpl implements KutsuService {
         }
 
         // Create henkilo
+        HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
         String henkiloOid = this.oppijanumerorekisteriClient
-                .createHenkiloForKutsu(this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken))
+                .createHenkiloForKutsu(henkiloCreateDto)
                 .orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
 
         // Set henkilo strongly identified
@@ -252,7 +250,7 @@ public class KutsuServiceImpl implements KutsuService {
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
         this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
-        return henkiloOid;
+        return new HenkiloCreatedDto(henkiloOid, kutsuByToken.getSahkoposti(), henkiloCreateDto.getYhteystiedotRyhma());
     }
 
     // In case virkailija already exists
