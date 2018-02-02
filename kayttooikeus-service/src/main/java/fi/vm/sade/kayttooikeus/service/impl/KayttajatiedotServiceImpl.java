@@ -94,7 +94,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     public KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
         kayttajatiedotRepository.findByUsername(kayttajatiedotUpdateDto.getUsername()).ifPresent(kayttajatiedot -> {
             if(!kayttajatiedot.getHenkilo().getOidHenkilo().equals(henkiloOid)) {
-                throw new IllegalArgumentException("Käyttäjänimi on jo olemassa");
+                throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
             }
         });
 
