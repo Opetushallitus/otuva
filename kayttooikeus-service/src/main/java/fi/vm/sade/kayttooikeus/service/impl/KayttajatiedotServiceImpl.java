@@ -82,6 +82,10 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
+        kayttajatiedotRepository.findByUsername(kayttajatiedotUpdateDto.getUsername()).ifPresent(k -> {
+            throw new IllegalArgumentException("Käyttäjänimi on jo olemassa");
+        });
+
         KayttajatiedotReadDto kayttajatiedotReadDto = henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .map(henkilo -> updateKayttajatiedot(henkilo, kayttajatiedotUpdateDto))
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
