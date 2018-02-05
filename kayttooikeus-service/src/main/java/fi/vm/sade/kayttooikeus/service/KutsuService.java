@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloCreatedDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
@@ -8,8 +7,9 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ public interface KutsuService {
      * @param henkiloCreateByKutsuDto haluttu henkilö
      * @return Luodun henkilön oid
      */
-    HenkiloCreatedDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
+    HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 
     /**
      * Päivittää haka tunnisteen kutsuun
@@ -65,4 +65,13 @@ public interface KutsuService {
      * @param kutsuUpdateDto haka tunnisteen sisältävä dto
      */
     void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto);
+
+
+    /**
+     * Luo HenkiloUpdateDto:n HenkiloCreateDtosta, oidista ja sähköpostiosoitteesta.
+     * @param henkiloOid luodun henkilön oid
+     * @param henkiloCreateDto luodun henkilön dto
+     * @param kutsuSahkoposti kutsun tiedoissa ollut sähköpostiosoite
+     */
+    HenkiloUpdateDto createHenkiloUpdateByKutsu(String henkiloOid, HenkiloCreateDto henkiloCreateDto, String kutsuSahkoposti);
 }

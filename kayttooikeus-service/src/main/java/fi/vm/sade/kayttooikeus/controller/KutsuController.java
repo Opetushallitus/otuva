@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloCreatedDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
@@ -15,19 +14,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
@@ -113,26 +107,9 @@ public class KutsuController {
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         // This needs to be done like this since otherwice KO locks the table row for this henkilo and ONR can't update
         // it until the transaction finishes when ONR request timeouts.
-
-        HenkiloCreatedDto henkilo =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
-        // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
-        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
-        henkiloUpdateDto.setOidHenkilo(henkilo.getOidHenkilo());
-        henkiloUpdateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
-
-        // In case henkilo already exists
-        henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
-
-        // Add email given in kutsu to henkilos existing yhteystiedot.
-        Set<YhteystiedotRyhmaDto> yhteystiedotRyhmaDtos = henkilo.getYhteystiedotRyhma();
-        YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, henkilo.getSahkoposti());
-        HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
-        yhteystietoDtos.add(yhteystietoDto);
-        yhteystiedotRyhmaDtos.add(new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, yhteystietoDtos));
-        henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhmaDtos);
-
+        HenkiloUpdateDto henkiloUpdateDto =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
         this.oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
-        return this.identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkilo.getOidHenkilo());
+        return this.identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloUpdateDto.getOidHenkilo());
     }
 
 }

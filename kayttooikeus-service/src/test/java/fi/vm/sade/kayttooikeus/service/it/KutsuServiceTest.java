@@ -34,12 +34,12 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
+import sun.reflect.Reflection;
 
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
@@ -423,6 +423,34 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
         this.kutsuService.createKutsu(new KutsuCreateDto());
     }
+
+    // Assert that existing yhteystiedot won't be overrun
+    @Test
+    public void createHenkiloUpdateByKutsuTest() {
+        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
+        Set<YhteystiedotRyhmaDto> initialYhteystiedotRyhmaDtos = new HashSet<>();
+        Set<YhteystietoDto> initialYhteystietoDtos = new HashSet<>();
+        YhteystietoDto initialYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "initial@emaildomain.com");
+        initialYhteystietoDtos.add(initialYhteystietoDto);
+        YhteystiedotRyhmaDto initialYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, initialYhteystietoDtos);
+        initialYhteystiedotRyhmaDtos.add(initialYhteystiedotRyhmaDto);
+        henkiloCreateDto.setKutsumanimi("Teppo");
+        henkiloCreateDto.setYhteystiedotRyhma(initialYhteystiedotRyhmaDtos);
+
+        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
+    }
+
+    // Assert that kutsusähköposti is added if no initial yhteystiedot exists
+    @Test
+    public void createHenkiloUpdateByKutsuTestEmptyYhteystiedot() {
+        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
+        henkiloCreateDto.setKutsumanimi("Teppo");
+        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "123", henkiloCreateDto, "kutsu@domain.com");
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
+    }
+
+
 
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
