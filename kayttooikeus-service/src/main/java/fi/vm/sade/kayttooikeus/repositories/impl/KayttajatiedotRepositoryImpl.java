@@ -32,4 +32,16 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         return Optional.ofNullable(dto);
     }
 
+    @Override
+    public Optional<Kayttajatiedot> findByUsername(String username) {
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+
+        Kayttajatiedot entity = new JPAQuery<>(em)
+                .from(qKayttajatiedot)
+                .where(qKayttajatiedot.username.equalsIgnoreCase(username))
+                .select(qKayttajatiedot)
+                .fetchOne();
+        return Optional.ofNullable(entity);
+    }
+
 }
