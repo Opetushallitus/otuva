@@ -437,7 +437,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         henkiloCreateDto.setKutsumanimi("Teppo");
         henkiloCreateDto.setYhteystiedotRyhma(initialYhteystiedotRyhmaDtos);
 
-        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
+        HenkiloUpdateDto henkiloUpdateDto = kutsuService.createHenkiloUpdateByKutsu("12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
     }
 
@@ -446,7 +446,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     public void createHenkiloUpdateByKutsuTestEmptyYhteystiedot() {
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
         henkiloCreateDto.setKutsumanimi("Teppo");
-        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "123", henkiloCreateDto, "kutsu@domain.com");
+        HenkiloUpdateDto henkiloUpdateDto = kutsuService.createHenkiloUpdateByKutsu("123", henkiloCreateDto, "kutsu@domain.com");
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
     }
 

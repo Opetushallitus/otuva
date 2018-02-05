@@ -266,8 +266,9 @@ public class KutsuServiceImpl implements KutsuService {
         YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
         HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
         yhteystietoDtos.add(yhteystietoDto);
-        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = henkiloCreateDto.getYhteystiedotRyhma();
+        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
         yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, yhteystietoDtos));
+        yhteystiedotRyhma.addAll(henkiloCreateDto.getYhteystiedotRyhma());
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
         return henkiloUpdateDto;
     }
