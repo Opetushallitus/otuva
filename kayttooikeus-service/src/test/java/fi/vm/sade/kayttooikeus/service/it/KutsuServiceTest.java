@@ -40,6 +40,7 @@ import sun.reflect.Reflection;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
@@ -59,6 +60,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -439,6 +441,14 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         HenkiloUpdateDto henkiloUpdateDto = kutsuService.createHenkiloUpdateByKutsu("12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
+
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("kutsuSahkoposti@domain.com"));
+        assertTrue(yhteystietoArvot.contains("initial@emaildomain.com"));
+
     }
 
     // Assert that kutsusähköposti is added if no initial yhteystiedot exists
