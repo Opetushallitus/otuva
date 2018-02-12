@@ -29,11 +29,9 @@ import java.util.Map;
 
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
-import fi.vm.sade.kayttooikeus.service.exception.HetuKaytossaException;
 import fi.vm.sade.kayttooikeus.service.exception.HetuVaaraException;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -159,13 +157,6 @@ public class CasController {
                         throw new HetuVaaraException(String.format("Vahvan tunnistuksen henkilötunnus %s on eri kuin virkailijan henkilötunnus %s", hetu, tallennettuHetu));
                     }
                 });
-                // tarkistetaan että hetu ei ole toisen virkailijan käytössä
-                oppijanumerorekisteriClient.getHenkiloByHetu(hetu).ifPresent(henkiloByHetu -> {
-                    if (!henkiloByHetu.getOidHenkilo().equals(henkiloByLoginToken.getOidHenkilo())
-                            && HenkiloTyyppi.VIRKAILIJA.equals(henkiloByHetu.getHenkiloTyyppi())) {
-                        throw new HetuKaytossaException(String.format("Vahvan tunnistuksen henkilötunnus %s on käytössä virkailijalla %s", hetu, henkiloByHetu.getOidHenkilo()));
-                    }
-                });
 
                 // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
                 boolean onTyosahkopostiosoite = HenkiloUtils
@@ -176,8 +167,6 @@ public class CasController {
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
             } catch (HetuVaaraException e) {
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vaara"));
-            } catch (HetuKaytossaException e) {
-                response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "kaytossa"));
             } catch (Exception e) {
                 log.warn("User failed strong identification", e);
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken));
