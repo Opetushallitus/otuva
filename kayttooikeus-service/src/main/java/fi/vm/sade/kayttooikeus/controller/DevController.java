@@ -19,6 +19,7 @@ public class DevController {
 
     @PutMapping("/ldapsynkronointi")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Suorittaa LDAP-synkronoinnin")
     public void ldapSynkronointi() {
@@ -27,6 +28,7 @@ public class DevController {
 
     @PostMapping("/organisaatioCache")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE', " +
+            "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', " +
             "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Päivittää organisaatiovälimuistin. (db + memory)")
     public synchronized void updateCache() {
@@ -35,6 +37,7 @@ public class DevController {
 
     @GetMapping("/organisaatioCache")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE', " +
+            "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', " +
             "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Palauttaa organisaatioiden ja ryhmien lukumäärän välimuistisssa.")
     public synchronized void getCacheStatus() {

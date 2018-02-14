@@ -137,8 +137,24 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    @WithMockUser(value = "callingPerson", authorities = ROLE_KAYTTOOIKEUS_PREFIX + ROLE_REKISTERINPITAJA + "_" + ROOT_ORG)
+    public void testThatRekisterinpitajaIsAllowedAccess() {
+        assertThat(this.permissionChecker.isAllowedToAccessPerson("testPerson", Lists.newArrayList("CRUD"),
+                ExternalPermissionService.HAKU_APP)).isTrue();
+    }
+
+    @Test
     @WithMockUser(value = "callingPerson", authorities = ROLE_HENKILONHALLINTA_PREFIX + ROLE_ADMIN + "_" + ROOT_ORG)
     public void isAllowedToAccessPersonShouldReturnTrueWhenSuperUser() {
+        assertThat(this.permissionChecker.isAllowedToAccessPerson(
+                "testPerson",
+                singletonMap("PALVELU1", singletonList("OIKEUS1")),
+                ExternalPermissionService.HAKU_APP)).isTrue();
+    }
+
+    @Test
+    @WithMockUser(value = "callingPerson", authorities = ROLE_KAYTTOOIKEUS_PREFIX + ROLE_REKISTERINPITAJA + "_" + ROOT_ORG)
+    public void isAllowedToAccessPersonShouldReturnTrueWhenRekisterinpitaja() {
         assertThat(this.permissionChecker.isAllowedToAccessPerson(
                 "testPerson",
                 singletonMap("PALVELU1", singletonList("OIKEUS1")),
