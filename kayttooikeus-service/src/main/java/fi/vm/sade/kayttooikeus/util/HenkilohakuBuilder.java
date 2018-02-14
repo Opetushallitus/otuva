@@ -67,6 +67,15 @@ public class HenkilohakuBuilder {
         return this;
     }
 
+    // Find count of result with criteria
+    public HenkilohakuBuilder searchCount() {
+        HenkiloCriteria henkiloCriteria = this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class);
+        this.henkilohakuResultDtoList = this.henkiloHibernateRepository.findByUsername(henkiloCriteria, null);
+        this.henkilohakuResultDtoList.addAll(this.henkiloHibernateRepository
+                .findByCriteria(henkiloCriteria,null,null));
+        return this;
+    }
+
     // Remove henkilos the user has no access (and who have organisation)
     public HenkilohakuBuilder exclusion() {
         // vain rekisterinpitäjä saa hakea henkilöitä, joilla ei ole organisaatiota

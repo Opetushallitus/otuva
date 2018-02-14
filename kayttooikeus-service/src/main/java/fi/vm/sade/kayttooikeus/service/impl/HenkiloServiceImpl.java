@@ -125,6 +125,18 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     @Override
     @Transactional(readOnly = true)
+    public Long henkilohakuCount(HenkilohakuCriteriaDto henkiloHakuCriteriaDto) {
+        List<HenkilohakuResultDto> henkilos = new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
+                this.henkiloDataRepository, this.organisaatioClient, this.organisaatioHenkiloRepository, this.commonProperties)
+                .builder(henkiloHakuCriteriaDto)
+                .exclusion()
+                .searchCount()
+                .build();
+        return new Long(henkilos.size());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean isVahvastiTunnistettu(String oidHenkilo) {
         return BooleanUtils.isTrue(this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo))

@@ -152,7 +152,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         if (offset != null) {
             query.offset(offset);
         }
-        query.limit(100L);
+
+        if(criteria.getIsCountSearch() == null || !criteria.getIsCountSearch()) {
+            query.limit(100L);
+        }
 
         if (orderBy != null) {
             orderBy.forEach(query::orderBy);
