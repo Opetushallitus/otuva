@@ -42,13 +42,13 @@ public class HenkiloController {
     }
 
     @GetMapping("/kayttajatunnus={kayttajatunnus}")
-    @PostAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(returnObject.oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
+    @PostAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(returnObject.oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'PALVELUKAYTTAJA_CRUD'}}, null)")
     @ApiOperation("Hakee henkilön käyttäjätunnuksen perusteella")
     public HenkiloReadDto getByKayttajatunnus(@PathVariable String kayttajatunnus) {
         return henkiloService.getByKayttajatunnus(kayttajatunnus);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai " +
             "ryhmien tiedoilla rekursiivisesti.",
             notes = "Hakee annetun henkilön aktiiviset organisaatiohenkilöt organisaation tai ryhmän tiedoilla siten, " +
@@ -63,7 +63,7 @@ public class HenkiloController {
         return organisaatioHenkiloService.listOrganisaatioHenkilos(oid, comparisonLangCode);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön organisaatiot.",
             notes = "Hakee annetun henkilön kaikki organisaatiohenkilöt.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo", method = RequestMethod.GET)
@@ -73,7 +73,7 @@ public class HenkiloController {
         return organisaatioHenkiloService.findOrganisaatioByHenkilo(henkiloOid);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'PALVELUKAYTTAJA_CRUD'}}, null)")
     @ApiOperation(value = "Hakee henkilön yhden organisaation tiedot.",
             notes = "Hakee henkilön yhden organisaatiohenkilön tiedot.")
     @RequestMapping(value = "/{oid}/organisaatiohenkilo/{organisaatioOid}", method = RequestMethod.GET)
@@ -92,7 +92,7 @@ public class HenkiloController {
         return kayttajatiedotService.create(henkiloOid, kayttajatiedot, ldapSynchronization);
     }
 
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'PALVELUKAYTTAJA_CRUD'}}, null)")
     @ApiOperation(value = "Hakee henkilön käyttäjätiedot.",
             notes = "Hakee henkilön käyttäjätiedot.")
     @RequestMapping(value = "/{oid}/kayttajatiedot", method = RequestMethod.GET)

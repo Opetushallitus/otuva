@@ -38,6 +38,7 @@ public class KutsuController {
     @ApiOperation(value = "Hakee kutsut annettujen hakuehtojen perusteella",
             notes = "Haun tulos riippuu käyttäjän oikeuksista (rekisterinpitäjä, Oph-virkailija, normaali käyttäjä)")
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public List<KutsuReadDto> listKutsus(
