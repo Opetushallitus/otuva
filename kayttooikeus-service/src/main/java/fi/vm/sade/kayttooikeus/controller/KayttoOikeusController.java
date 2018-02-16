@@ -34,6 +34,7 @@ public class KayttoOikeusController {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_READ',"
+            + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
@@ -50,6 +51,7 @@ public class KayttoOikeusController {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_READ',"
+            + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
@@ -64,6 +66,7 @@ public class KayttoOikeusController {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_READ',"
+            + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"

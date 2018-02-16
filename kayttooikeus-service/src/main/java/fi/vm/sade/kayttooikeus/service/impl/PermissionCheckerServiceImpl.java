@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import static java.util.Collections.singletonMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +53,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static ObjectMapper objectMapper = new ObjectMapper();
     public static final String ROLE_KAYTTOOIKEUS_PREFIX = "ROLE_APP_KAYTTOOIKEUS_";
     public static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
-    private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
     public static final String PALVELU_KAYTTOOIKEUS = "KAYTTOOIKEUS";
     public static final String PALVELU_HENKILONHALLINTA = "HENKILONHALLINTA";
     public static final String PALVELU_ANOMUSTENHALLINTA = "ANOMUSTENHALLINTA";
@@ -276,6 +276,19 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     public boolean hasRoleForOrganisations(@NotNull List<Object> organisaatioHenkiloDtoList,
                                            List<String> allowedRolesWithoutPrefix) {
+        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
+                -> checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix));
+    }
+
+    @Override
+    public boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
+            Map<String, List<String>> allowedRoles) {
+        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
+                -> checkRoleForOrganisation(orgOidList, allowedRoles));
+    }
+
+    private boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
+            Function<List<String>, Boolean> checkRoleForOrganisationFunc) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
             LOG.warn(this.getCurrentUserOid() + " called permission checker with empty input");
@@ -296,7 +309,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         else {
             throw new NotImplementedException("Unsupported input type.");
         }
-        return checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix);
+        return checkRoleForOrganisationFunc.apply(orgOidList);
     }
 
     @Override
@@ -304,6 +317,16 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
             if (!this.hasRoleForOrganisation(oid, allowedRolesWithoutPrefix)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkRoleForOrganisation(List<String> orgOidList, Map<String, List<String>> allowedRoles) {
+        for(String oid : orgOidList) {
+            if (!this.hasRoleForOrganisation(oid, allowedRoles)) {
                 return false;
             }
         }
@@ -365,11 +388,16 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean hasRoleForOrganisation(String orgOid, final List<String> allowedRolesWithoutPrefix) {
+        return hasRoleForOrganisation(orgOid, singletonMap(PALVELU_ANOMUSTENHALLINTA, allowedRolesWithoutPrefix));
+    }
+
+    @Override
+    public boolean hasRoleForOrganisation(String orgOid, Map<String, List<String>> allowedRolesAsMap) {
         if (this.isCurrentUserAdmin()) {
             return true;
         }
 
-        final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
+        final Set<String> allowedRoles = getPrefixedRolesByPalveluRooli(allowedRolesAsMap);
 
         List<String> orgAndParentOids = this.organisaatioClient.getActiveParentOids(orgOid);
         if (orgAndParentOids.isEmpty()) {
