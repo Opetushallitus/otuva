@@ -129,6 +129,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .antMatchers("/cas/auth/token/*").permitAll()
                 .antMatchers("/cas/henkilo/*").permitAll()
                 .antMatchers("/salasana/unohtunut/*").permitAll()
+                .antMatchers("/salasana/resetointi/*").permitAll()
                 .antMatchers("/kutsu/token/*").permitAll()
                 .antMatchers("/cas/tunnistus").permitAll()
                 .antMatchers("/cas/uudelleenrekisterointi").permitAll()
