@@ -35,7 +35,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import sun.reflect.Reflection;
 
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -439,7 +438,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         henkiloCreateDto.setKutsumanimi("Teppo");
         henkiloCreateDto.setYhteystiedotRyhma(initialYhteystiedotRyhmaDtos);
 
-        HenkiloUpdateDto henkiloUpdateDto = kutsuService.createHenkiloUpdateByKutsu("12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
+        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
 
 
@@ -456,7 +455,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     public void createHenkiloUpdateByKutsuTestEmptyYhteystiedot() {
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
         henkiloCreateDto.setKutsumanimi("Teppo");
-        HenkiloUpdateDto henkiloUpdateDto = kutsuService.createHenkiloUpdateByKutsu("123", henkiloCreateDto, "kutsu@domain.com");
+        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "123", henkiloCreateDto, "kutsu@domain.com");
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
     }
 

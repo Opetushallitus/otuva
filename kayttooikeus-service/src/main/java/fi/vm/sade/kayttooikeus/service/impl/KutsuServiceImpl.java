@@ -253,7 +253,7 @@ public class KutsuServiceImpl implements KutsuService {
         return createHenkiloUpdateByKutsu(henkiloOid, henkiloCreateDto, kutsuByToken.getSahkoposti());
     }
 
-    public HenkiloUpdateDto createHenkiloUpdateByKutsu(String henkiloOid, HenkiloCreateDto henkiloCreateDto, String kutsuSahkoposti) {
+    private HenkiloUpdateDto createHenkiloUpdateByKutsu(String henkiloOid, HenkiloCreateDto henkiloCreateDto, String kutsuSahkoposti) {
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);

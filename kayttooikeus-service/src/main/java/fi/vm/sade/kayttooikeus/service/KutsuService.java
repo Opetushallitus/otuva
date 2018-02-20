@@ -66,12 +66,4 @@ public interface KutsuService {
      */
     void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto);
 
-
-    /**
-     * Luo HenkiloUpdateDto:n HenkiloCreateDtosta, oidista ja sähköpostiosoitteesta.
-     * @param henkiloOid luodun henkilön oid
-     * @param henkiloCreateDto luodun henkilön dto
-     * @param kutsuSahkoposti kutsun tiedoissa ollut sähköpostiosoite
-     */
-    HenkiloUpdateDto createHenkiloUpdateByKutsu(String henkiloOid, HenkiloCreateDto henkiloCreateDto, String kutsuSahkoposti);
 }
