@@ -15,7 +15,6 @@ import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
-import fi.vm.sade.kayttooikeus.service.dto.StrongIdentificationInternalDto;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -38,6 +37,8 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 
 @Service
 @RequiredArgsConstructor
@@ -197,25 +198,39 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     public String createLoginToken(String oidHenkilo) {
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
-        TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null);
+        TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null, null);
         this.tunnistusTokenDataRepository.save(tunnistusToken);
         return tunnistusToken.getLoginToken();
     }
 
-    // Hae henkilön tiedot jotka liittyvät logintokeniin
-    // Päivitä henkilölle hetu jos ei ole ennestään olemassa ja merkitse se vahvistetuksi. Muuten tarkista, että hetu täsmää.
-    // Luo auth token
-    // Redirectaa CAS:iin auth tokenin kanssa.
     @Override
     @Transactional
-    public Henkilo validateTokenAndSetHenkiloStronglyIdentified(String hetu, String etunimet, String sukunimi, String loginToken) {
-        TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
+    public TunnistusToken updateLoginToken(String loginToken, String hetu) {
+        TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new LoginTokenNotFoundException("Login token not found " + loginToken));
+        tunnistusToken.setHetu(hetu);
+        return tunnistusTokenDataRepository.save(tunnistusToken);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TunnistusToken getByValidLoginToken(String loginToken) {
+        return tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
+                .orElseThrow(() -> new LoginTokenNotFoundException("Login token not found " + loginToken));
+    }
+
+    @Override
+    @Transactional
+    public String consumeLoginToken(String loginToken) {
+        TunnistusToken tunnistusToken = this.tunnistusTokenDataRepository.findByLoginToken(loginToken)
+                .orElseThrow(() -> new DataInconsistencyException("Login token not found " + loginToken));
         Henkilo henkilo = tunnistusToken.getHenkilo();
         henkilo.setVahvastiTunnistettu(true);
 
         tunnistusToken.setKaytetty(LocalDateTime.now());
-        return henkilo;
+
+        Kayttajatiedot kayttajatiedot = henkilo.getKayttajatiedot();
+        return generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, kayttajatiedot.getUsername());
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
