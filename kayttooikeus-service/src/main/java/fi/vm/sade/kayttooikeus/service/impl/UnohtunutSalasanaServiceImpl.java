@@ -103,7 +103,7 @@ public class UnohtunutSalasanaServiceImpl implements UnohtunutSalasanaService {
         kayttajatiedot.setSalt(salt);
         kayttajatiedot.setPassword(hash);
 
-        ldapSynchronizationService.updateHenkiloAsap(henkilo.getOidHenkilo());
+        ldapSynchronizationService.updateHenkiloNow(henkilo.getOidHenkilo());
         LOGGER.info("Käytettiin henkilölle {} luotu poletti {}.",
                 henkilo.getOidHenkilo(), varmennusPoletti.getPoletti());
     }
