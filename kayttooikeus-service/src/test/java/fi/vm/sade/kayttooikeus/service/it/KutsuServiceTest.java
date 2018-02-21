@@ -16,7 +16,6 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.apache.http.HttpEntity;
@@ -31,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -67,6 +67,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private KutsuService kutsuService;
@@ -427,39 +428,68 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     // Assert that existing yhteystiedot won't be overrun
     @Test
-    public void createHenkiloUpdateByKutsuTest() {
-        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
-        Set<YhteystiedotRyhmaDto> initialYhteystiedotRyhmaDtos = new HashSet<>();
-        Set<YhteystietoDto> initialYhteystietoDtos = new HashSet<>();
-        YhteystietoDto initialYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "initial@emaildomain.com");
-        initialYhteystietoDtos.add(initialYhteystietoDto);
-        YhteystiedotRyhmaDto initialYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, initialYhteystietoDtos);
-        initialYhteystiedotRyhmaDtos.add(initialYhteystiedotRyhmaDto);
-        henkiloCreateDto.setKutsumanimi("Teppo");
-        henkiloCreateDto.setYhteystiedotRyhma(initialYhteystiedotRyhmaDtos);
+    public void addEmailToNewHenkiloUpdateDto() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+        String kutsuEmail = "kutsumail@domain.com";
 
-        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "12345", henkiloCreateDto, "kutsuSahkoposti@domain.com");
-        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
-
+        henkiloUpdateDto = ReflectionTestUtils.invokeMethod(this.kutsuService, "addEmailToNewHenkiloUpdateDto", henkiloUpdateDto, kutsuEmail);
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
 
         HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
         henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
         List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
-        assertTrue(yhteystietoArvot.contains("kutsuSahkoposti@domain.com"));
-        assertTrue(yhteystietoArvot.contains("initial@emaildomain.com"));
-
+        assertTrue(yhteystietoArvot.contains("kutsumail@domain.com"));
     }
 
-    // Assert that kutsusähköposti is added if no initial yhteystiedot exists
+    //Assert that duplicate email addresses won't be created
     @Test
-    public void createHenkiloUpdateByKutsuTestEmptyYhteystiedot() {
-        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
-        henkiloCreateDto.setKutsumanimi("Teppo");
-        HenkiloUpdateDto henkiloUpdateDto = ReflectionTestUtils.invokeMethod(kutsuService, "createHenkiloUpdateByKutsu", "123", henkiloCreateDto, "kutsu@domain.com");
+    public void addEmailToExistingHenkiloNoDuplicateEmailTest() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+
+        HenkiloDto existingHenkiloDto = new HenkiloDto();
+        Set<YhteystiedotRyhmaDto> existingYhteystiedotRyhmaDtos = new HashSet<>();
+        Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
+        YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "teppo.testi@domain.com");
+        existingYhteystietoDtos.add(existingYhteystietoDto);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, existingYhteystietoDtos);
+        existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
+        existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq("12345"))).willReturn(existingHenkiloDto);
+
+        henkiloUpdateDto = ReflectionTestUtils.invokeMethod(this.kutsuService, "addEmailToExistingHenkiloUpdateDto", "12345", "teppo.testi@domain.com", henkiloUpdateDto);
         assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("teppo.testi@domain.com"));
     }
+    
+    //Assert that new email addresses are added and existing remains
+    @Test
+    public void addEmailToExistingHenkiloTest() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
 
+        HenkiloDto existingHenkiloDto = new HenkiloDto();
+        Set<YhteystiedotRyhmaDto> existingYhteystiedotRyhmaDtos = new HashSet<>();
+        Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
+        YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "teppo.toinenposti@domain.com");
+        existingYhteystietoDtos.add(existingYhteystietoDto);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, existingYhteystietoDtos);
+        existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
+        existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq("12345"))).willReturn(existingHenkiloDto);
 
+        henkiloUpdateDto = ReflectionTestUtils.invokeMethod(this.kutsuService, "addEmailToExistingHenkiloUpdateDto", "12345", "teppo.testi@domain.com", henkiloUpdateDto);
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("teppo.testi@domain.com"));
+        assertTrue(yhteystietoArvot.contains("teppo.toinenposti@domain.com"));
+
+    }
 
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
