@@ -136,7 +136,6 @@ public class KayttoOikeusRyhmaController {
 
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Luo uuden käyttöoikeusryhmän.",
             notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
@@ -148,7 +147,6 @@ public class KayttoOikeusRyhmaController {
 
     @RequestMapping(value = "/kayttooikeus", method = RequestMethod.POST)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Luo uuden käyttöoikeuden.",
             notes = "Luo uuden käyttöoikeuden annetun käyttöoikeus modelin pohjalta.")
@@ -160,7 +158,6 @@ public class KayttoOikeusRyhmaController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Päivittää käyttöoikeusryhmän.",
             notes = "Päivittää käyttöoikeusryhmän tiedot annetun DTO:n avulla.")
@@ -171,7 +168,6 @@ public class KayttoOikeusRyhmaController {
 
     @RequestMapping(value = "/{id}/passivoi", method = RequestMethod.PUT)
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Passivoi käyttöoikeusryhmän.",
             notes = "Passivoi käyttöoikeusryhmän. ")
