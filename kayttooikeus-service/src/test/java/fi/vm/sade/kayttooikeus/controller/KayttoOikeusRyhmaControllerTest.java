@@ -156,7 +156,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
     public void getKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.findKayttoOikeusRyhma(44L))
                 .willReturn(buildKayttoOikeusRyhma());
@@ -173,7 +173,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
     public void getSubRyhmasByKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.findSubRyhmasByMasterRyhma(44L))
                 .willReturn(singletonList(buildKayttoOikeusRyhma()));
@@ -203,7 +203,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
     public void getKayttoOikeusByKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.findPalveluRoolisByKayttoOikeusRyhma(46L))
                 .willReturn(singletonList(PalveluRooliDto.builder()
@@ -349,7 +349,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_READ")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
     public void getKayttoOikeusRyhmasByKayttoOikeusTest() throws Exception {
         given(kayttoOikeusService.findKayttoOikeusRyhmasByKayttoOikeusList(anyMap()))
                 .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()

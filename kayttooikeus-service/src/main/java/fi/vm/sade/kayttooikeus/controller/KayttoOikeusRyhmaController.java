@@ -89,6 +89,7 @@ public class KayttoOikeusRyhmaController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee käyttöoikeusryhmän tiedot.",
             notes = "Hakee yhden käyttöoikeusryhmän kaikki tiedot "
@@ -111,6 +112,7 @@ public class KayttoOikeusRyhmaController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee käyttöoikeusryhmään kuuluvat palvelut ja roolit.",
             notes = "Listaa kaikki annettuun käyttöoikeusryhmään kuuluvat "
@@ -177,6 +179,7 @@ public class KayttoOikeusRyhmaController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KOOSTEROOLIENHALLINTA_READ',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Listaa käyttöoikeusryhmät käyttooikeuksien mukaan.",
             notes = "Hakee käyttöoikeusryhmät joissa esiintyy jokin annetuista käyttöoikeuksista.")
