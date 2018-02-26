@@ -43,6 +43,9 @@ public class HenkiloCriteria {
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
+    // Haetaan vain henkilöiden lukumäärä
+    private Boolean isCountSearch;
+
     public Predicate condition(QHenkilo henkilo,
                                 QOrganisaatioHenkilo organisaatioHenkilo,
                                 QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {

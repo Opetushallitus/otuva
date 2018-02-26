@@ -195,6 +195,14 @@ public class HenkiloController {
         return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
     }
 
+    @PostMapping("/henkilohakucount")
+    @PreAuthorize("isAuthenticated()")
+    @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta palauttaa henkilohaun tulosten lukumäärän ilman sivutusrajoitusta",
+            notes = "Palauttaa annetuilla rajoitteilla löytyvän henkilöjoukon koon")
+    public Long henkilohakuCount(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto ) {
+        return this.henkiloService.henkilohakuCount(henkilohakuCriteriaDto);
+    }
+
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/current/omattiedot", method = RequestMethod.GET)
     @ApiOperation("Palauttaa henkilön tiedot käyttöoikeuspalvelun näkökulmasta")
