@@ -228,7 +228,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void createKayttoOikeusRyhmaTest() throws Exception {
         given(this.kayttoOikeusService.createKayttoOikeusRyhma(Matchers.any(KayttoOikeusRyhmaModifyDto.class)))
                 .willReturn(234L);
@@ -250,7 +250,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void createNewKayttoOikeusTest() throws Exception {
         given(this.kayttoOikeusService.createKayttoOikeus(Matchers.any(KayttoOikeusCreateDto.class)))
                 .willReturn(1L);
@@ -307,7 +307,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KOOSTEROOLIENHALLINTA_CRUD")
     public void updateKayttoOikeusRyhmaTest() throws Exception {
         given(kayttoOikeusService.findKayttoOikeusRyhma(Matchers.eq(345L)))
                 .willReturn(KayttoOikeusRyhmaDto.builder()
