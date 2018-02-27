@@ -34,6 +34,7 @@ public class HenkilohakuBuilder {
 
     private HenkilohakuCriteriaDto henkilohakuCriteriaDto;
     private List<HenkilohakuResultDto> henkilohakuResultDtoList = new ArrayList<>();
+    private Long henkilohakuResultCount;
 
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final OrikaBeanMapper mapper;
@@ -52,6 +53,7 @@ public class HenkilohakuBuilder {
     public List<HenkilohakuResultDto> build() {
         return this.henkilohakuResultDtoList;
     }
+    public Long buildHakuResultCount() { return this.henkilohakuResultCount; }
 
     // Find nimi, kayttajatunnus and oidHenkilo
     public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
@@ -64,6 +66,15 @@ public class HenkilohakuBuilder {
                 .findByCriteria(henkiloCriteria,
                         offset,
                         orderBy != null ? orderBy.getValue() : null));
+        return this;
+    }
+
+    // Find count of result with criteria
+    public HenkilohakuBuilder searchCount() {
+        HenkiloCriteria henkiloCriteria = this.mapper.map(this.henkilohakuCriteriaDto, HenkiloCriteria.class);
+        Long henkiloCountByUsername = this.henkiloHibernateRepository.findByUsernameCount(henkiloCriteria);
+        Long henkiloCountByCriteria = this.henkiloHibernateRepository.findByCriteriaCount(henkiloCriteria);
+        this.henkilohakuResultCount = henkiloCountByCriteria + henkiloCountByUsername;
         return this;
     }
 

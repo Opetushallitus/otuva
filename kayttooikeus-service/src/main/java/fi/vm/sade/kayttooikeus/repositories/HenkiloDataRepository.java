@@ -12,10 +12,8 @@ import java.util.Optional;
 
 @Transactional(propagation = Propagation.MANDATORY)
 @Repository
-public interface HenkiloDataRepository extends JpaRepository<Henkilo, Long> {
+public interface HenkiloDataRepository extends JpaRepository<Henkilo, Long>, HenkiloDataRepositoryCustom {
     Optional<Henkilo> findByOidHenkilo(String oidHenkilo);
-
-    Optional<Henkilo> findByKayttajatiedotUsername(String kayttajatunnus);
 
     Long countByEtunimetCachedNotNull();
 

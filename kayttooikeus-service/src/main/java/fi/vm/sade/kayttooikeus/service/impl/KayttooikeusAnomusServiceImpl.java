@@ -488,11 +488,12 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         // Haetun henkilön anumukset, voimassa olevat käyttöoikeudet ja joskus voimassa olleet oikeudet
         this.anomusRepository.findByHenkiloOidHenkilo(accessedHenkiloOid)
-                .forEach(anomus -> kayttooikeusByOrganisation.put(anomus.getOrganisaatioOid(),
+                .forEach(anomus -> kayttooikeusByOrganisation.merge(anomus.getOrganisaatioOid(),
                         anomus.getHaettuKayttoOikeusRyhmas().stream()
                                 .map(HaettuKayttoOikeusRyhma::getKayttoOikeusRyhma)
                                 .map(KayttoOikeusRyhma::getId)
-                                .collect(toSet())));
+                                .collect(toSet()),
+                        appending()));
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(accessedHenkiloOid)
                 .forEach(mkrt -> kayttooikeusByOrganisation.compute(mkrt.getOrganisaatioHenkilo().getOrganisaatioOid(),
                         this.addIfNotExists(mkrt.getKayttoOikeusRyhma().getId())));

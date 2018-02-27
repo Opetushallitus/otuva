@@ -48,7 +48,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         populate(henkilo(oid));
         populate(kayttajatiedot(henkilo("toinen"), "user1"));
         KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto();
-        createDto.setUsername("user1");
+        createDto.setUsername("USER1");
 
         Throwable throwable = catchThrowable(() -> kayttajatiedotService.create(oid, createDto, LdapSynchronizationType.ASAP));
 
@@ -63,7 +63,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         populate(henkilo(oid));
         populate(kayttajatiedot(henkilo("toinen"), "user1"));
         KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
-        updateDto.setUsername("user1");
+        updateDto.setUsername("USER1");
 
         Throwable throwable = catchThrowable(() -> kayttajatiedotService.updateKayttajatiedot(oid, updateDto));
 

@@ -20,4 +20,6 @@ public class HenkilohakuCriteriaDto {
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
+    private Boolean isCountSearch;
+
 }

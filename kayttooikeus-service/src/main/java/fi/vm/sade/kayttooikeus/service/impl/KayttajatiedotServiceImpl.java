@@ -46,7 +46,17 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         }
 
         Kayttajatiedot kayttajatiedot = mapper.map(createDto, Kayttajatiedot.class);
+        validateUsernameUnique(kayttajatiedot.getUsername(), henkilo.getOidHenkilo());
         return saveKayttajatiedot(henkilo, kayttajatiedot);
+    }
+
+    private void validateUsernameUnique(String username, String henkiloOid) {
+        henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .ifPresent(henkiloByUsername -> {
+                    if (henkiloOid == null || !henkiloOid.equals(henkiloByUsername.getOidHenkilo())) {
+                        throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+                    }
+                });
     }
 
     @Override
@@ -82,6 +92,12 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
+        kayttajatiedotRepository.findByUsername(kayttajatiedotUpdateDto.getUsername()).ifPresent(kayttajatiedot -> {
+            if(!kayttajatiedot.getHenkilo().getOidHenkilo().equals(henkiloOid)) {
+                throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+            }
+        });
+
         KayttajatiedotReadDto kayttajatiedotReadDto = henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .map(henkilo -> updateKayttajatiedot(henkilo, kayttajatiedotUpdateDto))
                 .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
@@ -97,29 +113,22 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     private KayttajatiedotReadDto saveKayttajatiedot(Henkilo henkilo, Kayttajatiedot kayttajatiedot) {
-        validateUsernameUnique(kayttajatiedot.getUsername(), henkilo.getOidHenkilo());
-
         kayttajatiedot.setHenkilo(henkilo);
         henkilo.setKayttajatiedot(kayttajatiedot);
         henkilo = henkiloDataRepository.save(henkilo);
-
         return mapper.map(henkilo.getKayttajatiedot(), KayttajatiedotReadDto.class);
     }
 
-    private void validateUsernameUnique(String username, String henkiloOid) {
-        henkiloDataRepository.findByKayttajatiedotUsername(username)
-                .ifPresent(henkiloByUsername -> {
-                    if (henkiloOid == null || !henkiloOid.equals(henkiloByUsername.getOidHenkilo())) {
-                        throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-                    }
-                });
+    @Override
+    public void changePasswordAsAdmin(String oid, String newPassword) {
+        changePasswordAsAdmin(oid, newPassword, LdapSynchronizationType.ASAP);
     }
 
     @Override
     @Transactional
-    public void changePasswordAsAdmin(String oid, String newPassword) {
+    public void changePasswordAsAdmin(String oid, String newPassword, LdapSynchronizationType ldapSynchronizationType) {
         this.cryptoService.throwIfNotStrongPassword(newPassword);
-        this.changePassword(oid, newPassword);
+        this.changePassword(oid, newPassword, ldapSynchronizationType);
     }
 
     @Override
@@ -138,10 +147,10 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         }
     }
 
-    private void changePassword(String oid, String newPassword) {
+    private void changePassword(String oid, String newPassword, LdapSynchronizationType ldapSynchronizationType) {
         setPasswordForHenkilo(oid, newPassword);
         // Trigger ASAP priority update to LDAP
-        ldapSynchronizationService.updateHenkiloAsap(oid);
+        ldapSynchronizationType.getAction().accept(ldapSynchronizationService, oid);
     }
 
     private void setPasswordForHenkilo(String oidHenkilo, String password) {

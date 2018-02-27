@@ -43,6 +43,9 @@ public class HenkiloCriteria {
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
+    // Haetaan vain henkilöiden lukumäärä
+    private Boolean isCountSearch;
+
     public Predicate condition(QHenkilo henkilo,
                                 QOrganisaatioHenkilo organisaatioHenkilo,
                                 QMyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
@@ -84,7 +87,8 @@ public class HenkiloCriteria {
                                 henkilo.oidHenkilo.eq(trimmedQuery),
                                 henkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
                                 henkilo.sukunimiCached.startsWithIgnoreCase(trimmedQuery),
-                                henkilo.kutsumanimiCached.startsWithIgnoreCase(trimmedQuery)
+                                henkilo.kutsumanimiCached.startsWithIgnoreCase(trimmedQuery),
+                                henkilo.hetuCached.eq(trimmedQuery)
                         )
                 );
             }

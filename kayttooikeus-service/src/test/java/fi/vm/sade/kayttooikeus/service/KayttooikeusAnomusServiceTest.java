@@ -37,6 +37,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria.Myontooikeus;
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import java.util.Map.Entry;
 import static java.util.stream.Collectors.toMap;
@@ -801,5 +803,27 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(currentHenkiloCanGrant.get("1.2.0.0.3")).containsExactly(2003L);
     }
 
+    @Test
+    @WithMockUser("1.2.3.4.5")
+    public void findCurrentHenkiloCanGrantWhenMultiplAnomuseInSameOrganisation() {
+        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.5");
+        given(this.kayttoOikeusRyhmaMyontoViiteRepository
+                .getSlaveIdsByMasterHenkiloOid(eq("1.2.3.4.5"), any()))
+                .willReturn(newHashMap("1.2.0.0.1", Stream.of(2001L, 2002L).collect(toSet())));
+        given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
+                .willReturn(asList(
+                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L),
+                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2002L))
+                );
+        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(any()))
+                .willReturn(emptyList());
+        given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila(any(), any()))
+                .willReturn(emptyList());
+        given(this.permissionCheckerService.organisaatioViiteLimitationsAreValid(any())).willReturn(true);
+
+        Map<String, Set<Long>> currentHenkiloCanGrant = this.kayttooikeusAnomusService.findCurrentHenkiloCanGrant("1.2.3.4.6");
+        assertThat(currentHenkiloCanGrant).containsOnlyKeys("1.2.0.0.1");
+        assertThat(currentHenkiloCanGrant.get("1.2.0.0.1")).containsExactlyInAnyOrder(2001L, 2002L);
+    }
 
 }
