@@ -228,7 +228,7 @@ public class KutsuServiceImpl implements KutsuService {
         // Create henkilo
         HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
         Optional<String> henkiloOidForKutsu = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto);
-        boolean isNewHenkilo = henkiloOidForKutsu.isPresent() ? true : false;
+        boolean isNewHenkilo = henkiloOidForKutsu.isPresent();
         String henkiloOid = henkiloOidForKutsu.orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
 
         // Set henkilo strongly identified
@@ -250,7 +250,6 @@ public class KutsuServiceImpl implements KutsuService {
         kutsuByToken.setLuotuHenkiloOid(henkiloOid);
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
-
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);
@@ -260,46 +259,44 @@ public class KutsuServiceImpl implements KutsuService {
         henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
 
         if(isNewHenkilo) {
-            henkiloUpdateDto = addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
+            addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
         } else {
-            henkiloUpdateDto = addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuByToken.getSahkoposti(), henkiloUpdateDto);
+            addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuByToken.getSahkoposti(), henkiloUpdateDto);
         }
 
         this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return henkiloUpdateDto;
     }
 
-    private HenkiloUpdateDto addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
+    private void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
         HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
 
         // Initiate new YhteystiedotRyhma with email in kutsu
         YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
-        HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
+        Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
         yhteystietoDtos.add(yhteystietoDto);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
 
-        // collect existing henkilos all yhteystiedot to a list
-        HashSet<YhteystietoDto> existingYhteystiedot = new HashSet<>();
-        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> existingYhteystiedot.addAll(yr.getYhteystieto()));
-        List<String> yhteystietoArvot = existingYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        boolean missingKutsusahkoposti = henkiloUpdateDto.getYhteystiedotRyhma().stream()
+                .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
+                .map(yhteystiedotDto -> yhteystiedotDto.getYhteystietoArvo())
+                .noneMatch(arvo -> arvo.equals(kutsuSahkoposti));
 
         yhteystiedotRyhma.addAll(henkiloDto.getYhteystiedotRyhma());
-        if(!yhteystietoArvot.contains(kutsuSahkoposti)) {
-            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, yhteystietoDtos));
+        if(missingKutsusahkoposti) {
+            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
         }
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
-        return henkiloUpdateDto;
     }
 
-    private HenkiloUpdateDto addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
+    private void addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
         // Initiate new YhteystiedotRyhma with email in kutsu
         YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
         HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
         yhteystietoDtos.add(yhteystietoDto);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
-        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, "yhteystietotyyppi2", "alkupera6", true, yhteystietoDtos));
+        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
-        return henkiloUpdateDto;
     }
 
     // In case virkailija already exists
