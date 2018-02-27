@@ -66,4 +66,6 @@ public interface KutsuService {
      */
     void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto);
 
+    void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuEmail, HenkiloUpdateDto henkiloUpdateDto);
+
 }

@@ -23,7 +23,9 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -268,28 +270,29 @@ public class KutsuServiceImpl implements KutsuService {
         return henkiloUpdateDto;
     }
 
-    private void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
+    public void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
         HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
-
-        // Initiate new YhteystiedotRyhma with email in kutsu
-        YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
-        Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
-        yhteystietoDtos.add(yhteystietoDto);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
 
-        boolean missingKutsusahkoposti = henkiloUpdateDto.getYhteystiedotRyhma().stream()
+        // add existing henkilos yhteystiedot to henkiloupdate
+        yhteystiedotRyhma.addAll(henkiloDto.getYhteystiedotRyhma());
+
+        boolean missingKutsusahkoposti = henkiloDto.getYhteystiedotRyhma().stream()
                 .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
                 .map(yhteystiedotDto -> yhteystiedotDto.getYhteystietoArvo())
                 .noneMatch(arvo -> arvo.equals(kutsuSahkoposti));
 
-        yhteystiedotRyhma.addAll(henkiloDto.getYhteystiedotRyhma());
-        if(missingKutsusahkoposti) {
+        if(missingKutsusahkoposti) { // add kutsuemail if it doesn't exist in henkilos yhteystiedot
+            YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
+            Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
+            yhteystietoDtos.add(yhteystietoDto);
             yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
         }
+
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
     }
 
-    private void addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
+    public void addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
         // Initiate new YhteystiedotRyhma with email in kutsu
         YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
         HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
