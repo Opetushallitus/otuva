@@ -30,4 +30,7 @@ public class TunnistusToken extends IdentifiableAndVersionedEntity {
     @Column(name = "hetu")
     private String hetu; // vahvasta tunnistautumisesta saatu hetu
 
+    @Column(name = "salasanan_vaihto")
+    private Boolean salasananVaihto; // vaaditaanko uudelleenrekisteröinnissä salasanan vaihto
+
 }
