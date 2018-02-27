@@ -69,6 +69,6 @@ public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
     public void passivoiHenkiloOrganisationTest() throws Exception {
         this.mvc.perform(delete("/organisaatiohenkilo/henkiloOid/organisaatioOid").accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is4xxClientError());
     }
 }
