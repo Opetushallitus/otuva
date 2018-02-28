@@ -7,11 +7,18 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface HenkiloService {
+
+    /**
+     * Palauttaa henkilön tiedot OID:n perusteella.
+     *
+     * @param oid henkilön oid
+     * @return henkilö
+     */
+    HenkiloReadDto getByOid(String oid);
 
     /**
      * Palauttaa henkilön tiedot käyttäjätunnuksen perusteella.

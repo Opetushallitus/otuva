@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -19,7 +20,6 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -151,8 +151,8 @@ public class PermissionCheckerTest {
             "ROLE_APP_ANOMUSTENHALLINTA_CRUD_" + ORG2})
     public void testThatPermissionIsAllowedWhenUserIsNotOppijaAndHasNoOrganization() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo());
+        henkilo.get().setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
         when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
-                .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
                 .build());
         when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson("testPerson", Lists.newArrayList("CRUD"),
@@ -167,8 +167,8 @@ public class PermissionCheckerTest {
     })
     public void isAllowedToAccessPersonShouldReturnTrueWhenUserIsNotOppijaAndHasNoOrganization() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo());
+        henkilo.get().setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
         when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
-                .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
                 .build());
         when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson(
@@ -259,13 +259,13 @@ public class PermissionCheckerTest {
     })
     public void isAllowedToAccessPersonShouldReturnTrueWhenPalvelukayttajaCrudAndPalvelu() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
+            setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
                 setOrganisaatioOid(ORG1);
             }}));
         }});
         given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList(ORG1, ORG2, "org3"));
         when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
-                .henkiloTyyppi(HenkiloTyyppi.PALVELU)
                 .build());
         when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson(
@@ -282,13 +282,13 @@ public class PermissionCheckerTest {
     })
     public void isAllowedToAccessPersonShouldReturnFalseWhenPalvelukayttajaCrudAndVirkailija() {
         Optional<Henkilo> henkilo = Optional.of(new Henkilo(){{
+            setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
             setOrganisaatioHenkilos(Collections.singleton(new OrganisaatioHenkilo(){{
                 setOrganisaatioOid(ORG1);
             }}));
         }});
         given(this.organisaatioClient.getActiveParentOids(any())).willReturn(Lists.newArrayList(ORG1, ORG2, "org3"));
         when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
-                .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
                 .build());
         when(henkiloDataRepositoryMock.findByOidHenkilo("testPerson")).thenReturn(henkilo);
         assertThat(this.permissionChecker.isAllowedToAccessPerson(

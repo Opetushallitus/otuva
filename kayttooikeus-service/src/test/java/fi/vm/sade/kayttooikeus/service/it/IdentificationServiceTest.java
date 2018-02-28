@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.AccessRightTypeDto;
 import fi.vm.sade.kayttooikeus.dto.GroupTypeDto;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.virkailija;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
@@ -33,7 +35,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloK
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
@@ -105,7 +106,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void validateAuthTokenTest() throws Exception {
         Identification identification = populate(identification("haka", "identifier",
-                henkilo("1.2.3.4.5")).withAuthToken("12345"));
+                virkailija("1.2.3.4.5")).withAuthToken("12345"));
 
         Kayttajatiedot kayttajatiedot = new Kayttajatiedot();
         kayttajatiedot.setHenkilo(identification.getHenkilo());
@@ -113,13 +114,13 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         identification.getHenkilo().setKayttajatiedot(kayttajatiedot);
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
+                organisaatioHenkilo(virkailija("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
                         .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
                         .withOikeus(oikeus(palvelu("KOODISTO"), "READ"))));
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
+                organisaatioHenkilo(virkailija("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2").withOikeus(oikeus("KOODISTO", "CRUD"))));
 
         YhteystietoDto yhteystieto = YhteystietoDto.builder()
@@ -136,14 +137,13 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                         .sukunimi("Testi")
                         .hetu("11111-1111")
                         .sukupuoli("1")
-                        .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
                         .passivoitu(false)
                         .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
                         .build());
 
         IdentifiedHenkiloTypeDto dto = identificationService.findByTokenAndInvalidateToken("12345");
         assertEquals("1.2.3.4.5", dto.getOidHenkilo());
-        assertEquals("VIRKAILIJA", dto.getHenkiloTyyppi());
+        assertEquals(KayttajaTyyppi.VIRKAILIJA, dto.getHenkiloTyyppi());
         assertEquals("haka", dto.getIdpEntityId());
         assertEquals("identifier", dto.getIdentifier());
         assertEquals("hakakäyttäjä", dto.getKayttajatiedot().getUsername());
@@ -199,7 +199,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                         .sukunimi("Testi")
                         .hetu("11111-1111")
                         .sukupuoli("1")
-                        .henkiloTyyppi(HenkiloTyyppi.VIRKAILIJA)
                         .passivoitu(false)
                         .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
                         .build());

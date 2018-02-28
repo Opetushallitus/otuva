@@ -4,6 +4,11 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
+import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
+import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
@@ -23,9 +28,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -236,6 +239,7 @@ public class KutsuServiceImpl implements KutsuService {
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .orElseGet(() -> this.henkiloDataRepository.save(Henkilo.builder().oidHenkilo(henkiloOid).build()));
+        henkilo.setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
         henkilo.setVahvastiTunnistettu(true);
 
         // Create or update credentials and add privileges if hetu not same as kutsu creator
@@ -255,7 +259,6 @@ public class KutsuServiceImpl implements KutsuService {
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);
-        henkiloUpdateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
 
         // In case henkilo already exists
         henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
@@ -346,7 +349,6 @@ public class KutsuServiceImpl implements KutsuService {
         henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
         henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());
         henkiloCreateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
-        henkiloCreateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
         henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
                 .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
                 .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())

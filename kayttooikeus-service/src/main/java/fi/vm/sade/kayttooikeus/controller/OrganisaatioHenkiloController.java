@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class OrganisaatioHenkiloController {
     @RequestMapping(value = "/current/availablehenkilotype", method = RequestMethod.GET)
     @ApiOperation(value = "Listaa sallitut organisaatiohenkilötyypit henkilöiden luontiin liittyen.",
             notes = "Listaa ne organisaatiohenkilötyypit joita kirjautunt käyttäjä saa luoda henkilöhallintaan.")
-    public List<HenkiloTyyppi> listPossibleHenkiloTypesByCurrentHenkilo() {
+    public List<KayttajaTyyppi> listPossibleHenkiloTypesByCurrentHenkilo() {
         return organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
     }
 

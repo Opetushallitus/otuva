@@ -16,5 +16,6 @@ import lombok.ToString;
 public class HenkiloReadDto {
 
     private String oid;
+    private KayttajaTyyppi kayttajaTyyppi;
 
 }

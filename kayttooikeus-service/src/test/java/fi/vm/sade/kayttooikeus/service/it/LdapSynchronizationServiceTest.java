@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.repositories.LdapUpdateDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.RyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
+import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.virkailija;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
@@ -18,7 +19,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.pal
 import fi.vm.sade.kayttooikeus.service.TimeService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -205,9 +205,8 @@ public class LdapSynchronizationServiceTest extends AbstractServiceIntegrationTe
 
     @Test
     public void updateHenkiloTyyppi() {
-        populate(kayttajatiedot(henkilo("oid1"), "user1"));
+        populate(kayttajatiedot(virkailija("oid1"), "user1"));
         HenkiloDto henkiloDto = createValidHenkiloDto("oid1");
-        henkiloDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
         when(oppijanumerorekisteriClientMock.getHenkiloByOid(any())).thenReturn(henkiloDto);
 
         ldapSynchronizationService.updateHenkilo("oid1");

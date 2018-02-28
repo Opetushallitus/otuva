@@ -104,7 +104,7 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
         HenkiloDto perustiedot = oppijanumerorekisteriClient.getHenkiloByOid(identification.getHenkilo().getOidHenkilo());
         IdentifiedHenkiloTypeDto dto = mapper.map(identification, IdentifiedHenkiloTypeDto.class);
-        dto.setHenkiloTyyppi(perustiedot.getHenkiloTyyppi().name());
+        dto.setHenkiloTyyppi(identification.getHenkilo().getKayttajaTyyppi());
         dto.setPassivoitu(perustiedot.isPassivoitu());
         dto.setAuthorizationData(kayttoOikeusService.findAuthorizationDataByOid(dto.getOidHenkilo()));
 

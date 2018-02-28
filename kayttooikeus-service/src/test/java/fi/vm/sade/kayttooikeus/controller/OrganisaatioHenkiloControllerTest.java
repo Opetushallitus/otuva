@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import static fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi.VIRKAILIJA;
+import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
