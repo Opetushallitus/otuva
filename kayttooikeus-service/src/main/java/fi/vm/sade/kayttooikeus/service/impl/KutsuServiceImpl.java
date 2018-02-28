@@ -259,6 +259,7 @@ public class KutsuServiceImpl implements KutsuService {
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);
+        henkiloUpdateDto.setPassivoitu(false);
 
         // In case henkilo already exists
         henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
