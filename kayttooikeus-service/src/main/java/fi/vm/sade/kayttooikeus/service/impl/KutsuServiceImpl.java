@@ -3,10 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
-import fi.vm.sade.kayttooikeus.dto.KutsuUpdateDto;
-import fi.vm.sade.kayttooikeus.dto.KutsunTila;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
@@ -26,7 +23,9 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -118,7 +117,7 @@ public class KutsuServiceImpl implements KutsuService {
         newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
 
         Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
-        
+
         this.emailService.sendInvitationEmail(persistedNewKutsu);
 
         return persistedNewKutsu.getId();
@@ -130,6 +129,7 @@ public class KutsuServiceImpl implements KutsuService {
                 .collect(Collectors.toSet());
         this.throwIfNotInHierarchy(organisaatioOids);
     }
+
     private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
         Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
         if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
@@ -217,7 +217,7 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+    public HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
@@ -228,9 +228,10 @@ public class KutsuServiceImpl implements KutsuService {
         }
 
         // Create henkilo
-        String henkiloOid = this.oppijanumerorekisteriClient
-                .createHenkiloForKutsu(this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken))
-                .orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
+        HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
+        Optional<String> henkiloOidForKutsu = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto);
+        boolean isNewHenkilo = henkiloOidForKutsu.isPresent();
+        String henkiloOid = henkiloOidForKutsu.orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
 
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
@@ -251,8 +252,54 @@ public class KutsuServiceImpl implements KutsuService {
         kutsuByToken.setLuotuHenkiloOid(henkiloOid);
         kutsuByToken.setTila(KutsunTila.KAYTETTY);
 
+        // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+        henkiloUpdateDto.setOidHenkilo(henkiloOid);
+        henkiloUpdateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
+
+        // In case henkilo already exists
+        henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
+
+        if(isNewHenkilo) {
+            addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
+        } else {
+            addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuByToken.getSahkoposti(), henkiloUpdateDto);
+        }
+
         this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
-        return henkiloOid;
+        return henkiloUpdateDto;
+    }
+
+    public void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
+        HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
+        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
+
+        // add existing henkilos yhteystiedot to henkiloupdate
+        yhteystiedotRyhma.addAll(henkiloDto.getYhteystiedotRyhma());
+
+        boolean missingKutsusahkoposti = henkiloDto.getYhteystiedotRyhma().stream()
+                .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
+                .map(yhteystiedotDto -> yhteystiedotDto.getYhteystietoArvo())
+                .noneMatch(arvo -> arvo.equals(kutsuSahkoposti));
+
+        if(missingKutsusahkoposti) { // add kutsuemail if it doesn't exist in henkilos yhteystiedot
+            YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
+            Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
+            yhteystietoDtos.add(yhteystietoDto);
+            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
+        }
+
+        henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
+    }
+
+    public void addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
+        // Initiate new YhteystiedotRyhma with email in kutsu
+        YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
+        HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
+        yhteystietoDtos.add(yhteystietoDto);
+        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
+        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
+        henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
     }
 
     // In case virkailija already exists
@@ -318,4 +365,6 @@ public class KutsuServiceImpl implements KutsuService {
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         this.mapper.map(kutsuUpdateDto, kutsu);
     }
+
+
 }

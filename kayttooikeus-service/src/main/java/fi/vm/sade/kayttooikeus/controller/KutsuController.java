@@ -9,16 +9,12 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloTyyppi;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -111,15 +107,9 @@ public class KutsuController {
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         // This needs to be done like this since otherwice KO locks the table row for this henkilo and ONR can't update
         // it until the transaction finishes when ONR request timeouts.
-        String oidHenkilo =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
-        // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
-        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
-        henkiloUpdateDto.setOidHenkilo(oidHenkilo);
-        henkiloUpdateDto.setHenkiloTyyppi(HenkiloTyyppi.VIRKAILIJA);
-        // In case henkilo already exists
-        henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
+        HenkiloUpdateDto henkiloUpdateDto =  this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
         this.oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
-        return this.identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(oidHenkilo);
+        return this.identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloUpdateDto.getOidHenkilo());
     }
 
 }

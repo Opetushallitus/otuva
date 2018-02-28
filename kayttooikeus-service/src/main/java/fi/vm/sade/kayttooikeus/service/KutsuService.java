@@ -7,8 +7,9 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public interface KutsuService {
      * @param henkiloCreateByKutsuDto haluttu henkilö
      * @return Luodun henkilön oid
      */
-    String createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
+    HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
 
     /**
      * Päivittää haka tunnisteen kutsuun
@@ -64,4 +65,7 @@ public interface KutsuService {
      * @param kutsuUpdateDto haka tunnisteen sisältävä dto
      */
     void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto);
+
+    void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuEmail, HenkiloUpdateDto henkiloUpdateDto);
+
 }

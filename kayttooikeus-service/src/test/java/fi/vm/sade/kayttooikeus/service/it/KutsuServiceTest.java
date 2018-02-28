@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.*;
@@ -16,7 +17,6 @@ import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.apache.http.HttpEntity;
@@ -28,18 +28,20 @@ import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
@@ -59,6 +61,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -66,6 +69,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private KutsuService kutsuService;
@@ -76,7 +80,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
 
-    @SpyBean
+    @MockBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @MockBean
@@ -424,6 +428,76 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         this.kutsuService.createKutsu(new KutsuCreateDto());
     }
 
+    // Assert that existing yhteystiedot won't be overrun
+    @Test
+    public void addEmailToNewHenkiloUpdateDto() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+        String kutsuEmail = "kutsumail@domain.com";
+
+        ReflectionTestUtils.invokeMethod(this.kutsuService, "addEmailToNewHenkiloUpdateDto", henkiloUpdateDto, kutsuEmail);
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("kutsumail@domain.com"));
+    }
+
+    //Assert that duplicate email addresses won't be created
+    @Test
+    public void addEmailToExistingHenkiloNoDuplicateEmailTest() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+        String henkiloOid = "1.2.3.4.5";
+        String kutsuEmail = "teppo.testi@domain.com";
+
+        HenkiloDto existingHenkiloDto = new HenkiloDto();
+        Set<YhteystiedotRyhmaDto> existingYhteystiedotRyhmaDtos = new HashSet<>();
+        Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
+        YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuEmail);
+        existingYhteystietoDtos.add(existingYhteystietoDto);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
+        existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
+        existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq(henkiloOid))).willReturn(existingHenkiloDto);
+
+        this.kutsuService.addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuEmail, henkiloUpdateDto);
+
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(1);
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("teppo.testi@domain.com"));
+    }
+    
+    //Assert that new email addresses are added and existing remains
+    @Test
+    public void addEmailToExistingHenkiloTest() {
+        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
+        String henkiloOid = "1.2.3.4.5";
+        String kutsuEmail = "teppo.testi@domain.com";
+
+        HenkiloDto existingHenkiloDto = new HenkiloDto();
+        Set<YhteystiedotRyhmaDto> existingYhteystiedotRyhmaDtos = new HashSet<>();
+        Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
+        YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "teppo.toinenposti@domain.com");
+        existingYhteystietoDtos.add(existingYhteystietoDto);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
+        existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
+        existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq(henkiloOid))).willReturn(existingHenkiloDto);
+
+        this.kutsuService.addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuEmail, henkiloUpdateDto);
+        assertThat(henkiloUpdateDto.getYhteystiedotRyhma().size()).isEqualTo(2);
+
+        HashSet<YhteystietoDto> allYhteystiedot = new HashSet<>();
+        henkiloUpdateDto.getYhteystiedotRyhma().forEach(yr -> allYhteystiedot.addAll(yr.getYhteystieto()));
+        List<String> yhteystietoArvot = allYhteystiedot.stream().map(y -> y.getYhteystietoArvo()).collect(Collectors.toList());
+        assertTrue(yhteystietoArvot.contains("teppo.testi@domain.com"));
+        assertTrue(yhteystietoArvot.contains("teppo.toinenposti@domain.com"));
+
+    }
+
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD", "ROLE_APP_HENKILONHALLINTA_CRUD_1.2.3.4.5"})
     public void deleteKutsuTest() {
@@ -482,6 +556,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
 
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).isEqualTo("arpauser");
@@ -519,10 +594,13 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Henkilo henkilo = populate(HenkiloPopulator.henkilo("1.2.3.4.5"));
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
-        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
+        doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("valid hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
+        HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setOidHenkilo("123");
 
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(henkiloDto);
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         // Username/password won't change
@@ -560,6 +638,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", "stronkPassword!");
 
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.0.0.2");
         assertThat(henkilo.getKayttajatiedot().getUsername()).isEqualTo("arpauser");
@@ -601,6 +680,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
@@ -651,6 +731,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), null, null);
 
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
