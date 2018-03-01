@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
@@ -13,6 +10,7 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupListDto.localizeAsListLaterBy
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class PalveluKayttoOikeusDto implements Serializable, LocalizableDto {
     private String rooli;

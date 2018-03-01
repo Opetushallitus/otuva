@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
@@ -13,6 +10,7 @@ import static fi.vm.sade.kayttooikeus.dto.TextGroupDto.localizeLaterById;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class PalveluDto implements Serializable, LocalizableDto {
     private Long id;
@@ -23,9 +21,6 @@ public class PalveluDto implements Serializable, LocalizableDto {
 
     public PalveluDto(Long id) {
         this.id = id;
-    }
-
-    public PalveluDto() {
     }
 
     public void setDescriptionId(Long id) {

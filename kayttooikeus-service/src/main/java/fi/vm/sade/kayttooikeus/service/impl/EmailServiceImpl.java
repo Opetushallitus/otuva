@@ -30,6 +30,7 @@ import fi.vm.sade.ryhmasahkoposti.api.dto.EmailRecipient;
 import fi.vm.sade.ryhmasahkoposti.api.dto.ReportedRecipientReplacementDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.jetbrains.annotations.NotNull;
@@ -325,10 +326,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class OranizationReplacement {
-        private final String name;
-        private final List<String> permissions;
+        private String name;
+        private List<String> permissions;
     }
 
     @Override

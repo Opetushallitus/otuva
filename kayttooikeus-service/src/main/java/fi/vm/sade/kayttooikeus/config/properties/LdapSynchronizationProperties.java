@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.properties;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +14,7 @@ public class LdapSynchronizationProperties {
     @Getter
     @Setter
     @ToString
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Timed {
 

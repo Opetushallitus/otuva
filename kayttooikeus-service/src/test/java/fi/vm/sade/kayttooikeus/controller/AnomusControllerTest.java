@@ -76,7 +76,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
     public void createKayttooikeusAnomus() throws Exception {
-        ArrayList<Long> oids = new ArrayList<Long>();
+        ArrayList<Long> oids = new ArrayList<>();
         oids.add(1L);
         KayttooikeusAnomusDto kayttooikeusAnomusDto = new KayttooikeusAnomusDto("1.2.3.4.5",
                  "email@domain.com", oids, "perustelut");

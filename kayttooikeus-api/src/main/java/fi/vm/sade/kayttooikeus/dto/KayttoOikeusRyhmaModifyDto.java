@@ -1,18 +1,16 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import fi.vm.sade.kayttooikeus.dto.validate.ContainsLanguages;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import javax.validation.Valid;
-import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class KayttoOikeusRyhmaModifyDto {
 
