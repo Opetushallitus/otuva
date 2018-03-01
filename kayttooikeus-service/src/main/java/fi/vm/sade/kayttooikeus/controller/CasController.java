@@ -169,7 +169,7 @@ public class CasController {
                     // jos mitään tietoja ei tarvitse täyttää, suoritetaan tunnistautuminen ilman rekisteröintisivua
                     VahvaTunnistusRequestDto vahvaTunnistusRequestDto = new VahvaTunnistusRequestDto();
                     VahvaTunnistusResponseDto vahvaTunnistusResponseDto = tunnistauduVahvasti(kielisyys, loginToken, vahvaTunnistusRequestDto);
-                    response.sendRedirect(ophProperties.url("cas.login", vahvaTunnistusResponseDto));
+                    response.sendRedirect(ophProperties.url("cas.login", vahvaTunnistusResponseDto.asMap()));
                 }
             } catch (LoginTokenNotFoundException e) {
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
