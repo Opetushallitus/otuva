@@ -195,10 +195,10 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
 
     @Override
     @Transactional
-    public String createLoginToken(String oidHenkilo) {
+    public String createLoginToken(String oidHenkilo, Boolean salasananVaihto) {
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
-        TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null, null);
+        TunnistusToken tunnistusToken = new TunnistusToken(this.generateToken(), henkilo, LocalDateTime.now(), null, null, salasananVaihto);
         this.tunnistusTokenDataRepository.save(tunnistusToken);
         return tunnistusToken.getLoginToken();
     }

@@ -93,8 +93,8 @@ public class CasController {
     @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
-    public String createLoginToken(@PathVariable String oidHenkilo) {
-        return this.identificationService.createLoginToken(oidHenkilo);
+    public String createLoginToken(@PathVariable String oidHenkilo, @RequestParam(required = false) Boolean salasananVaihto) {
+        return this.identificationService.createLoginToken(oidHenkilo, salasananVaihto);
     }
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
@@ -158,11 +158,19 @@ public class CasController {
                     }
                 });
 
-                // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
-                boolean onTyosahkopostiosoite = HenkiloUtils
+                boolean sahkopostinAsetus = !HenkiloUtils
                         .getYhteystieto(henkiloByLoginToken, YhteystietojenTyypit.TYOOSOITE, YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .isPresent();
-                response.sendRedirect(ophProperties.url("henkilo-ui.uudelleenrekisterointi", kielisyys, loginToken, onTyosahkopostiosoite));
+                boolean salasananVaihto = Boolean.TRUE.equals(tunnistusToken.getSalasananVaihto());
+                if (sahkopostinAsetus || salasananVaihto) {
+                    // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
+                    response.sendRedirect(ophProperties.url("henkilo-ui.uudelleenrekisterointi", kielisyys, loginToken, sahkopostinAsetus, salasananVaihto));
+                } else {
+                    // jos mitään tietoja ei tarvitse täyttää, suoritetaan tunnistautuminen ilman rekisteröintisivua
+                    VahvaTunnistusRequestDto vahvaTunnistusRequestDto = new VahvaTunnistusRequestDto();
+                    VahvaTunnistusResponseDto vahvaTunnistusResponseDto = tunnistauduVahvasti(kielisyys, loginToken, vahvaTunnistusRequestDto);
+                    response.sendRedirect(ophProperties.url("cas.login", vahvaTunnistusResponseDto.asMap()));
+                }
             } catch (LoginTokenNotFoundException e) {
                 response.sendRedirect(this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
             } catch (HetuVaaraException e) {

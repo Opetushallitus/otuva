@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Email;
@@ -13,7 +12,6 @@ import org.hibernate.validator.constraints.Email;
 public class VahvaTunnistusRequestDto {
 
     // käyttäjä vaihtaa salasanan uusien salasanakäytäntöjen mukaiseksi
-    @NotNull
     private String salasana;
 
     // käyttäjä täyttää työsähköpostiosoitteen (jos se puuttuu)
