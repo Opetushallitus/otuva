@@ -258,6 +258,11 @@
             <artifactId>logback-access</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.kagkarlsson</groupId>
+            <artifactId>db-scheduler</artifactId>
+        </dependency>
+
     </dependencies>
 
 
