@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 public class ScheduledTasks {
     private final OrganisaatioService organisaatioService;
 
-    @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache}",
-            initialDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache}")
+    @Scheduled(fixedDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache:600000}",
+            initialDelayString = "${kayttooikeus.scheduling.configuration.organisaatiocache:600000}")
     public void updateOrganisaatioCache() {
         this.organisaatioService.updateOrganisaatioCache();
     }

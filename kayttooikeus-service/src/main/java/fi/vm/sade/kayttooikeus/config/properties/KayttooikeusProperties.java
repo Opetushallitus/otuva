@@ -24,7 +24,7 @@ public class KayttooikeusProperties {
 
         @Getter @Setter
         public static class Configuration {
-            private Long organisaatiocache = 600000L;
+            private Long organisaatiocache; // Default in ScheduledTasks.java
             private String vanhentuneetkayttooikeudet = "0 0 3 * * ?";
             private Integer vanhentuneetkayttooikeudetHour = 3;
             private String kayttooikeusmuistutus = "0 30 4 * * ?";
