@@ -3,12 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import fi.vm.sade.generic.common.ValidationException;
-import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
-import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
-import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
-import fi.vm.sade.kayttooikeus.service.exception.UnprocessableEntityException;
+import fi.vm.sade.kayttooikeus.service.exception.*;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
 import lombok.Setter;
@@ -147,7 +142,7 @@ public class ErrorHandlerAdvice {
     }
     
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad Request
-    @ExceptionHandler({IllegalArgumentException.class, PasswordException.class})
+    @ExceptionHandler({IllegalArgumentException.class, PasswordException.class, UsernameAlreadyExistsException.class})
     @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, RuntimeException exception) {
         return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
