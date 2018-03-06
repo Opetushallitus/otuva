@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.scheduling;
 
+import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +26,10 @@ import java.util.concurrent.ScheduledFuture;
 @EnableScheduling
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(name = "kayttooikeus.scheduling.run-on-startup")
+@ConditionalOnProperty(name = "kayttooikeus.scheduling.run-on-startup", matchIfMissing = true)
 public class SchedulingConfiguration implements SchedulingConfigurer {
 
-    private final Environment environment;
+    private final KayttooikeusProperties kayttooikeusProperties;
 
     private final OrganisaatioClient organisaatioClient;
 
@@ -45,12 +46,12 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
             log.info("Aloitetaan organisaatiocachen päivitystä");
             this.organisaatioClient.refreshCache();
             this.organisaatioRetryTask.cancel(false);
-        }, this.environment.getProperty("kayttooikeus.scheduling.organisaatio-retry-time", Long.class));
+        }, this.kayttooikeusProperties.getScheduling().getOrganisaatioRetryTime());
     }
 
     @Bean(destroyMethod = "shutdown")
     public ScheduledExecutorService taskExecutor() {
-        return Executors.newScheduledThreadPool(environment.getProperty("kayttooikeus.scheduling.pool_size", Integer.class));
+        return Executors.newScheduledThreadPool(1);
     }
 
 }

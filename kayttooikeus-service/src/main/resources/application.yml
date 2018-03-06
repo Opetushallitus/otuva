@@ -11,31 +11,3 @@ server:
   session:
     tracking-modes: cookie
     timeout: 30
-
-kayttooikeus:
-  ldap_synchronization:
-    day_time:
-      interval_in_minutes: 1
-      batch_size: 250
-      load_threshold_in_seconds: 15
-    night_time:
-      interval_in_minutes: 9
-      batch_size: 500
-      load_threshold_in_seconds: 15
-    night_starts: 22
-    night_ends: 5
-    statistics_size: 25
-  scheduling:
-    enabled: false
-    run-on-startup: true
-    pool_size: 2
-    organisaatio-retry-time: 300000
-    configuration:
-      organisaatiocache: 600000
-      vanhentuneetkayttooikeudet: 0 0 3 * * ?
-      kayttooikeusmuistutus: "0 30 4 * * ?"
-      kayttooikeusanomusilmoitukset: 0 0 2 * * ?
-      henkiloNimiCache: 100000
-    ldapsynkronointi:
-      fixeddelayinmillis: 60000
-      initialdelayinmillis: 30000

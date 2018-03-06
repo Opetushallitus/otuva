@@ -1,13 +1,15 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.kayttooikeus.config.scheduling.ScheduledTasks;
+import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
+import fi.vm.sade.kayttooikeus.config.scheduling.UpdateHenkiloNimiCacheTask;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(properties = {"kayttooikeus.scheduling.enabled=TRUE"})
+//@TestPropertySource(properties = {"kayttooikeus.scheduling.enabled=TRUE"})
 public class HenkiloCacheServiceTest extends AbstractServiceTest {
 
     @MockBean
@@ -40,8 +42,17 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     @Autowired
     private HenkiloCacheService henkiloCacheService;
 
-    @Autowired
-    private ScheduledTasks scheduledTasks;
+    private UpdateHenkiloNimiCacheTask scheduledTasks;
+
+    @Before
+    public void setup() {
+        this.scheduledTasks = new UpdateHenkiloNimiCacheTask(
+                new KayttooikeusProperties(),
+                this.henkiloDataRepository,
+                this.henkiloCacheService,
+                this.scheduleTimestampsDataRepository,
+                this.oppijanumerorekisteriClient);
+    }
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_HENKILONHALLINTA_OPHREKISTERI", "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI_1.2.246.562.10.00000000001"})
@@ -60,7 +71,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
                 .willReturn(Lists.newArrayList(henkilo));
         given(this.henkiloDataRepository.countByEtunimetCachedNotNull()).willReturn(1L);
 
-        this.scheduledTasks.updateHenkiloNimiCache();
+        this.scheduledTasks.execute(null, null);
 
         assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
         assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
