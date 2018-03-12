@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.HenkilohakuBuilderService;
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -43,7 +44,13 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
                 .exclusion()
                 .search(0L, null, orderBy)
                 .build();
-        return mapper.mapAsList(palvelukayttajat, PalvelukayttajaReadDto.class);
+        return palvelukayttajat.stream().map(henkilohakuResult -> {
+            PalvelukayttajaReadDto palvelukayttaja = new PalvelukayttajaReadDto();
+            palvelukayttaja.setOid(henkilohakuResult.getOidHenkilo());
+            palvelukayttaja.setNimi(henkilohakuResult.getSukunimi());
+            palvelukayttaja.setKayttajatunnus(henkilohakuResult.getKayttajatunnus());
+            return palvelukayttaja;
+        }).collect(toList());
     }
 
     @Override
