@@ -110,7 +110,7 @@ public class HenkilohakuBuilder {
             henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
         }
         else {
-            // root-virkailija hakee ilman aliorganisaatioita
+            // oph-virkailija hakee ilman aliorganisaatioita
             if (!Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())
                     && henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
                 henkilohakuCriteriaDto.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
