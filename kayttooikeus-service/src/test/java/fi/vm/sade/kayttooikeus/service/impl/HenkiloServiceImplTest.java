@@ -113,8 +113,11 @@ public class HenkiloServiceImplTest {
     public void henkilohakuHakeeAnnetuillaOrganisaatioilla() {
         when(organisaatioHenkiloRepositoryMock.findDistinctOrganisaatiosForHenkiloOid(any())).thenReturn(asList("oid1", "oid3", "oid5"));
         when(commonPropertiesMock.getRootOrganizationOid()).thenReturn("rootOid");
+        when(organisaatioClientMock.getChildOids(eq("oid1"))).thenReturn(asList("childOid1"));
+        when(organisaatioClientMock.getChildOids(eq("oid3"))).thenReturn(asList("childOid2"));
+        when(organisaatioClientMock.getChildOids(eq("oid5"))).thenReturn(asList("childOid3"));
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto();
-        henkilohakuCriteriaDto.setOrganisaatioOids(Stream.of("oid1", "oid2", "oid3").collect(toSet()));
+        henkilohakuCriteriaDto.setOrganisaatioOids(Stream.of("oid1", "oid3", "childOid1").collect(toSet()));
         henkilohakuCriteriaDto.setSubOrganisation(false);
 
         henkiloServiceImpl.henkilohaku(henkilohakuCriteriaDto, null, null);
@@ -122,7 +125,7 @@ public class HenkiloServiceImplTest {
         ArgumentCaptor<HenkiloCriteria> henkiloCriteriaCaptor = ArgumentCaptor.forClass(HenkiloCriteria.class);
         verify(henkiloHibernateRepositoryMock).findByCriteria(henkiloCriteriaCaptor.capture(), any(), any(), any());
         HenkiloCriteria henkiloCriteria = henkiloCriteriaCaptor.getValue();
-        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactlyInAnyOrder("oid1", "oid3");
+        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactlyInAnyOrder("oid1", "oid3", "childOid1");
     }
 
     @Test
