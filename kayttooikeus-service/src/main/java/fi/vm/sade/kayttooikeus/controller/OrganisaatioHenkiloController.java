@@ -27,6 +27,7 @@ public class OrganisaatioHenkiloController {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/current/organisaatio", method = RequestMethod.GET)
     @ApiOperation(value = "Hakee kirjautuneen käyttäjän organisaatioiden tiedot.",
@@ -40,6 +41,7 @@ public class OrganisaatioHenkiloController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/current/availablehenkilotype", method = RequestMethod.GET)
     @ApiOperation(value = "Listaa sallitut organisaatiohenkilötyypit henkilöiden luontiin liittyen.",

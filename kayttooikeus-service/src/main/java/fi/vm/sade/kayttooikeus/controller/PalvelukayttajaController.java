@@ -20,6 +20,7 @@ public class PalvelukayttajaController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public PalvelukayttajaReadDto create(@RequestBody @Valid PalvelukayttajaCreateDto dto) {
         return palvelukayttajaService.create(dto);

@@ -35,6 +35,7 @@ public class KayttoOikeusController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee palveluun liittyvät käyttöoikeudet.",
             notes = "Listaa kaikki palveluun liitetyt käyttöoikeudet "
@@ -49,6 +50,7 @@ public class KayttoOikeusController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee kirjautuneen käyttäjän käyttöoikeudet.",
             notes = "Listaa kaikki nykyisen sisäänkirjautuneen käyttäjän käyttöoikeudet, "
@@ -61,6 +63,7 @@ public class KayttoOikeusController {
     @PreAuthorize("hasAnyRole('ROLE_APP_HENKILONHALLINTA_READ',"
             + "'ROLE_APP_HENKILONHALLINTA_READ_UPDATE',"
             + "'ROLE_APP_HENKILONHALLINTA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Hakee käyttäjien käyttöoikeudet annetuilla hakukriteereillä. Haku rajoitettu 1000 kerralla.",
             notes = "Vastauksessa ei tule välttämättä 1000 henkilöä koska tulosjoukkoon tehdään yhdistämisiä.")
@@ -72,6 +75,7 @@ public class KayttoOikeusController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation(value = "Lähettää muistutusviestit henkilöille joilla on käyttöoikeus päättymässä.",
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",

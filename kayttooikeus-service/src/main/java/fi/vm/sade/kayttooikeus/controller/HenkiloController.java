@@ -124,7 +124,7 @@ public class HenkiloController {
 
 
 
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @RequestMapping(value = "/{henkiloOid}/passivoi", method = RequestMethod.DELETE)
     @ApiOperation(value = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet.",
             notes = "Passivoi henkilön kaikki organisaatiot ja käyttöoikeudet. Kutsutaan oppijanumerorekisterin henkilön" +
@@ -167,14 +167,14 @@ public class HenkiloController {
     }
 
     @GetMapping("/{oid}/kayttooikeudet")
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
     public KayttooikeudetDto getKayttooikeudet(@PathVariable String oid, OrganisaatioHenkiloCriteria criteria) {
         return henkiloService.getKayttooikeudet(oid, criteria);
     }
 
     @PostMapping("/{oid}/kayttooikeudet")
-    @PreAuthorize("hasRole('ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
     public KayttooikeudetDto postKayttooikeudet(@PathVariable String oid, @RequestBody OrganisaatioHenkiloCriteria criteria) {
         return henkiloService.getKayttooikeudet(oid, criteria);
@@ -182,6 +182,7 @@ public class HenkiloController {
 
     @PutMapping("/{oid}/ldap")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_SCHEDULE',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     @ApiOperation("Lisää henkilön LDAP-synkronointijonoon")
     public void updateHenkiloToLdap(@PathVariable String oid,
