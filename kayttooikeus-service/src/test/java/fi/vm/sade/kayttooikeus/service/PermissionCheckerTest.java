@@ -352,6 +352,20 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    @WithMockUser(value = "callingPerson", authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG2,
+    })
+    public void hasRoleForOrganisationShouldReturnFalseWhenUserNotAssociatedWithOrg() {
+        Mockito.when(organisaatioClient.listActiveOrganisaatioPerustiedotByOidRestrictionList(anyCollection()))
+                .thenReturn(new ArrayList<>());
+        assertThat(permissionChecker.hasRoleForOrganisation("orgThatLoggedInUserIsNotAssociatedWith",
+                singletonMap("PALVELU1", asList("OIKEUS1"))))
+                .isFalse();
+    }
+
+    @Test
     @WithMockUser(value = "callingPerson", authorities = {"ROLE_APP_HENKILONHALLINTA_CRUD","ROLE_APP_HENKILONHALLINTA_CRUD_" + ORG1,
             "ROLE_APP_HENKILONHALLINTA_CRUD_" + ORG2,"ROLE_APP_ANOMUSTENHALLINTA_CRUD","ROLE_APP_ANOMUSTENHALLINTA_CRUD_" + ORG1,
             "ROLE_APP_ANOMUSTENHALLINTA_CRUD_" + ORG2})
@@ -359,6 +373,18 @@ public class PermissionCheckerTest {
         Mockito.when(organisaatioClient.getActiveParentOids(anyString()))
                 .thenReturn(Lists.newArrayList(ORG2, "parent1", "parent2", "parent3"));
         assertThat(permissionChecker.hasRoleForOrganisation(ORG1, Lists.newArrayList("CRUD", "READ"))).isTrue();
+    }
+
+    @Test
+    @WithMockUser(value = "callingPerson", authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG2,
+    })
+    public void hasRoleForOrganisationShouldReturnTrueWhenUserIsAssociatedWithOrg() {
+        Mockito.when(organisaatioClient.getActiveParentOids(anyString()))
+                .thenReturn(Lists.newArrayList(ORG2, "parent1", "parent2", "parent3"));
+        assertThat(permissionChecker.hasRoleForOrganisation(ORG1, singletonMap("PALVELU1", asList("OIKEUS1")))).isTrue();
     }
 
     @Test
@@ -547,6 +573,32 @@ public class PermissionCheckerTest {
     public void getUserCurrentOrganisationOidsByPalveluAndRole() {
         Set<String> oids = this.permissionChecker.getCurrentUserOrgnisationsWithPalveluRole(PALVELU_HENKILONHALLINTA, ROLE_CRUD);
         assertThat(oids).containsExactly(ROOT_ORG);
+    }
+
+    @Test
+    @WithMockUser(authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ROOT_ORG,
+    })
+    public void getCurrentUserOrgnisationsWithPalveluRole() {
+        Set<String> oids = this.permissionChecker.getCurrentUserOrgnisationsWithPalveluRole(singletonMap("PALVELU1", singletonList("OIKEUS1")));
+        assertThat(oids).containsExactly(ROOT_ORG);
+    }
+
+    @Test
+    @WithMockUser(authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
+        "ROLE_APP_PALVELU1_OIKEUS2_" + ORG2,
+        "ROLE_APP_PALVELU2_OIKEUS1_" + ORG2,
+    })
+    public void hasOrganisaatioInHierarchy() {
+        when(organisaatioClient.getActiveParentOids(eq(ORG1))).thenReturn(asList(ROOT_ORG, ORG1));
+        when(organisaatioClient.getActiveParentOids(eq(ORG2))).thenReturn(asList(ROOT_ORG, ORG2));
+
+        Set<String> oids = this.permissionChecker.hasOrganisaatioInHierarchy(asList(ORG1, ORG2), singletonMap("PALVELU1", singletonList("OIKEUS1")));
+
+        assertThat(oids).containsExactly(ORG1);
     }
 
     @Test

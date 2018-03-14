@@ -19,13 +19,16 @@ import org.apache.commons.lang.BooleanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
+import static java.util.Collections.singletonList;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class KutsuHakuBuilder {
@@ -51,7 +54,8 @@ public class KutsuHakuBuilder {
         if (this.permissionCheckerService.isCurrentUserAdmin()) {
             return this.prepareForAdmin();
         }
-        else if (this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+        else if (this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)
+                || permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
             return prepareForMiniAdmin();
         }
         return prepareForNormalUser();
@@ -74,12 +78,16 @@ public class KutsuHakuBuilder {
         // Limit organisaatio search for non-admin users
         Set<String> organisaatioOidLimit;
 
+        Map<String, List<String>> palveluRoolit = new HashMap<>();
+        palveluRoolit.put(PALVELU_HENKILONHALLINTA, singletonList(ROLE_CRUD));
+        palveluRoolit.put(PALVELU_KAYTTOOIKEUS, singletonList(ROLE_CRUD));
+
         if (!CollectionUtils.isEmpty(this.kutsuCriteria.getOrganisaatioOids())) {
             organisaatioOidLimit = this.permissionCheckerService
-                    .hasOrganisaatioInHierarchy(this.kutsuCriteria.getOrganisaatioOids(), PALVELU_HENKILONHALLINTA, ROLE_CRUD);
+                    .hasOrganisaatioInHierarchy(this.kutsuCriteria.getOrganisaatioOids(), palveluRoolit);
         }
         else {
-            organisaatioOidLimit = this.permissionCheckerService.getCurrentUserOrgnisationsWithPalveluRole(PALVELU_HENKILONHALLINTA, ROLE_CRUD);
+            organisaatioOidLimit = this.permissionCheckerService.getCurrentUserOrgnisationsWithPalveluRole(palveluRoolit);
         }
         if (BooleanUtils.isTrue(this.kutsuCriteria.getSubOrganisations())) {
             organisaatioOidLimit = organisaatioOidLimit.stream()
