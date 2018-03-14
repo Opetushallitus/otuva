@@ -141,7 +141,7 @@ public class HenkiloServiceImplTest {
         ArgumentCaptor<HenkiloCriteria> henkiloCriteriaCaptor = ArgumentCaptor.forClass(HenkiloCriteria.class);
         verify(henkiloHibernateRepositoryMock).findByCriteria(henkiloCriteriaCaptor.capture(), any(), any(), any());
         HenkiloCriteria henkiloCriteria = henkiloCriteriaCaptor.getValue();
-        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactlyInAnyOrder("oid1", "oid3", "childOid1");
+        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactlyInAnyOrder("oid1", "oid3", "childOid1", "childOid2");
     }
 
     @Test
@@ -209,7 +209,7 @@ public class HenkiloServiceImplTest {
         ArgumentCaptor<HenkiloCriteria> henkiloCriteriaCaptor = ArgumentCaptor.forClass(HenkiloCriteria.class);
         verify(henkiloHibernateRepositoryMock).findByCriteria(henkiloCriteriaCaptor.capture(), any(), any(), any());
         HenkiloCriteria henkiloCriteria = henkiloCriteriaCaptor.getValue();
-        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactly("oid1");
+        assertThat(henkiloCriteria.getOrganisaatioOids()).containsExactlyInAnyOrder("oid1", "childOid1", "childOid2");
     }
 
     @Test
