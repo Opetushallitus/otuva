@@ -576,6 +576,32 @@ public class PermissionCheckerTest {
     }
 
     @Test
+    @WithMockUser(authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ROOT_ORG,
+    })
+    public void getCurrentUserOrgnisationsWithPalveluRole() {
+        Set<String> oids = this.permissionChecker.getCurrentUserOrgnisationsWithPalveluRole(singletonMap("PALVELU1", singletonList("OIKEUS1")));
+        assertThat(oids).containsExactly(ROOT_ORG);
+    }
+
+    @Test
+    @WithMockUser(authorities = {
+        "ROLE_APP_PALVELU1_OIKEUS1",
+        "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
+        "ROLE_APP_PALVELU1_OIKEUS2_" + ORG2,
+        "ROLE_APP_PALVELU2_OIKEUS1_" + ORG2,
+    })
+    public void hasOrganisaatioInHierarchy() {
+        when(organisaatioClient.getActiveParentOids(eq(ORG1))).thenReturn(asList(ROOT_ORG, ORG1));
+        when(organisaatioClient.getActiveParentOids(eq(ORG2))).thenReturn(asList(ROOT_ORG, ORG2));
+
+        Set<String> oids = this.permissionChecker.hasOrganisaatioInHierarchy(asList(ORG1, ORG2), singletonMap("PALVELU1", singletonList("OIKEUS1")));
+
+        assertThat(oids).containsExactly(ORG1);
+    }
+
+    @Test
     public void hasInsternalAccess() {
         given(this.henkiloDataRepositoryMock.findByOidHenkilo("1.2.3.4.5"))
                 .willReturn(Optional.of(Henkilo.builder().oidHenkilo("1.2.3.4.5")
