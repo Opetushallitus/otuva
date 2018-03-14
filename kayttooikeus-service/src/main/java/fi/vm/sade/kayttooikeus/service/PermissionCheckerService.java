@@ -44,7 +44,10 @@ public interface PermissionCheckerService {
 
     boolean hasRoleForOrganisation(String orgOid, Map<String, List<String>> allowedRoles);
 
+    @Deprecated
     Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role);
+
+    Set<String> getCurrentUserOrgnisationsWithPalveluRole(Map<String, List<String>> palveluRoolit);
 
     boolean notOwnData(String dataOwnderOid);
 
@@ -84,7 +87,10 @@ public interface PermissionCheckerService {
 
     Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOid);
 
+    @Deprecated
     Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
+
+    Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, Map<String, List<String>> palveluRoolit);
 
     /**
      * @param kayttooikeusryhmaId käyttöoikeusryhmästä joka halutaan myöntää

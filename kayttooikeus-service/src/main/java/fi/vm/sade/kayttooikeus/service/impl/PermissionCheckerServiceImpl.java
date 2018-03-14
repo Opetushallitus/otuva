@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -419,8 +420,13 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role) {
+        return getCurrentUserOrgnisationsWithPalveluRole(singletonMap(palvelu, singletonList(role)));
+    }
+
+    @Override
+    public Set<String> getCurrentUserOrgnisationsWithPalveluRole(Map<String, List<String>> palveluRoolit) {
         return this.getCasRoles().stream()
-                .filter(casRole -> casRole.contains(palvelu + "_" + role))
+                .filter(casRole -> palveluRoolit.entrySet().stream().anyMatch(entry -> entry.getValue().stream().anyMatch(role -> casRole.contains(entry.getKey() + "_" + role))))
                 .flatMap(casRole -> {
                     int index = casRole.indexOf(this.commonProperties.getOrganisaatioPrefix());
                     if (index != -1) {
@@ -508,9 +514,14 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
+        return hasOrganisaatioInHierarchy(requiredOrganiaatioOids, singletonMap(palvelu, singletonList(rooli)));
+    }
+
+    @Override
+    public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, Map<String, List<String>> palveluRoolit) {
         Set<String> casRoles = this.getCasRoles();
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> casRoles.stream()
-                .anyMatch(casRole -> casRole.contains(palvelu + "_" + rooli)
+                .anyMatch(casRole -> palveluRoolit.entrySet().stream().anyMatch(entry -> entry.getValue().stream().anyMatch(rooli -> casRole.contains(entry.getKey() + "_" + rooli)))
                         && this.organisaatioClient.getActiveParentOids(requiredOrganiaatioOid).stream()
                         .anyMatch(casRole::contains)))
                 .collect(Collectors.toSet());
