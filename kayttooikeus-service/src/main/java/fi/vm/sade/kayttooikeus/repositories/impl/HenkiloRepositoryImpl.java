@@ -134,7 +134,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                         qHenkilo.kayttajatiedot.username);
 
 
-                if(!CollectionUtils.isEmpty(criteria.getOrganisaatioOids()) || criteria.getKayttooikeusryhmaId() != null) {
+                if(!CollectionUtils.isEmpty(criteria.getOrganisaatioOids()) && criteria.getKayttooikeusryhmaId() != null) {
                     query.innerJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
                             .on(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids()))
                             .innerJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma)
