@@ -58,6 +58,7 @@ public interface KutsuService {
      * @return Luodun henkilön oid
      */
     HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto);
+    void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuEmail, HenkiloUpdateDto henkiloUpdateDto);
 
     /**
      * Päivittää haka tunnisteen kutsuun
@@ -66,6 +67,5 @@ public interface KutsuService {
      */
     void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto);
 
-    void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuEmail, HenkiloUpdateDto henkiloUpdateDto);
 
 }

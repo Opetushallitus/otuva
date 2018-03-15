@@ -24,6 +24,7 @@ import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
@@ -233,11 +234,16 @@ public class KutsuServiceImpl implements KutsuService {
             this.kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
         }
 
-        // Create henkilo
-        HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
-        Optional<String> henkiloOidForKutsu = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto);
-        boolean isNewHenkilo = henkiloOidForKutsu.isPresent();
-        String henkiloOid = henkiloOidForKutsu.orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
+        // Search for existing henkilo by hetu and create new if not found
+        Optional<HenkiloDto> henkiloByHetu = this.oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
+        boolean isNewHenkilo = !henkiloByHetu.isPresent();
+        String henkiloOid;
+        if(isNewHenkilo) {
+            HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
+            henkiloOid = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto).get();
+        } else {
+            henkiloOid = henkiloByHetu.get().getOidHenkilo();
+        }
 
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
@@ -262,9 +268,10 @@ public class KutsuServiceImpl implements KutsuService {
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);
+        henkiloUpdateDto.setPassivoitu(false);
 
         // In case henkilo already exists
-        henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
+        henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
 
         if(isNewHenkilo) {
             addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
@@ -275,6 +282,7 @@ public class KutsuServiceImpl implements KutsuService {
         this.ldapSynchronizationService.updateHenkiloAsap(henkiloOid);
         return henkiloUpdateDto;
     }
+
 
     public void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
         HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
