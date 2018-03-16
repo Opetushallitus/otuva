@@ -293,8 +293,8 @@ public class KutsuServiceImpl implements KutsuService {
 
         boolean missingKutsusahkoposti = henkiloDto.getYhteystiedotRyhma().stream()
                 .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
-                .map(yhteystiedotDto -> yhteystiedotDto.getYhteystietoArvo())
-                .noneMatch(arvo -> arvo.equals(kutsuSahkoposti));
+                .map(YhteystietoDto::getYhteystietoArvo)
+                .noneMatch(kutsuSahkoposti::equals);
 
         if(missingKutsusahkoposti) { // add kutsuemail if it doesn't exist in henkilos yhteystiedot
             YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
