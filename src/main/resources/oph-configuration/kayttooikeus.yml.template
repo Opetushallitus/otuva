@@ -12,12 +12,16 @@ spring:
     banner-mode: "off"
   jpa:
     hibernate:
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+      dialect: org.hibernate.dialect.PostgreSQL94Dialect
+      implicit-naming-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
       ddl-auto: validate
       use-new-id-generator-mappings: true
-    show-sql: false
-    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    connection:
+      charset: utf-8
+    archive:
+      autodetection: class,hbm
+    current-session-context-class: org.springframework.orm.hibernate5.SpringSessionContext
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver

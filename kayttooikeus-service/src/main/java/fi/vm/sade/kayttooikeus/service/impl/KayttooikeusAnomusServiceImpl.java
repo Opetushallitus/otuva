@@ -109,7 +109,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
             }
             List<Myontooikeus> myontooikeudet = getMyontooikeudet(myontooikeusByOrganisaatio, criteria);
             if (myontooikeudet.isEmpty()) {
-                logger.info("Käyttäjällä {} ei ole yhtään käyttöoikeuden myöntöoikeutta hakukriteereillä {} (kaikki myöntöoikeudet: {})", kayttajaOid, criteria, myontooikeudet);
+                logger.info("Käyttäjällä {} ei ole yhtään käyttöoikeuden myöntöoikeutta hakukriteereillä {} (kaikki myöntöoikeudet: {})", kayttajaOid, criteria, myontooikeudet);
                 return emptyList();
             }
             criteria.setMyontooikeudet(myontooikeudet);
@@ -323,7 +323,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
 
         Iterable<KayttoOikeusRyhma> kayttoOikeusRyhmas = this.kayttooikeusryhmaDataRepository
-                .findAllById(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
+                .findAll(kayttooikeusAnomusDto.getKayttooikeusRyhmaIds());
 
         kayttoOikeusRyhmas.forEach(k -> {
             HaettuKayttoOikeusRyhma h = new HaettuKayttoOikeusRyhma();
@@ -460,7 +460,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
         if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }
-        this.haettuKayttooikeusRyhmaRepository.deleteById(kayttooikeusRyhmaId);
+        this.haettuKayttooikeusRyhmaRepository.delete(kayttooikeusRyhmaId);
     }
 
     @Override

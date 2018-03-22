@@ -171,11 +171,11 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found"));
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
-        identificationRepository.deleteAll(identifications);
+        identificationRepository.delete(identifications);
         Set<Identification> updatedIdentifications = hakatunnukset.stream()
                 .map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus)).collect(Collectors.toSet());
         henkilo.setIdentifications(updatedIdentifications);
-        identificationRepository.saveAll(updatedIdentifications);
+        identificationRepository.save(updatedIdentifications);
         ldapSynchronizationService.updateHenkiloAsap(oid);
         return hakatunnukset;
     }

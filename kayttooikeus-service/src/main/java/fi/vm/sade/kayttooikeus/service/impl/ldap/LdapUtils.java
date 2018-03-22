@@ -1,10 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl.ldap;
 
 import java.security.SecureRandom;
-
-import org.springframework.security.crypto.keygen.BytesKeyGenerator;
-import org.springframework.security.crypto.keygen.KeyGenerators;
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
+import org.springframework.security.authentication.encoding.LdapShaPasswordEncoder;
 
 public final class LdapUtils {
 
@@ -18,9 +15,10 @@ public final class LdapUtils {
     }
 
     private static byte[] encrypt(final String plaintext) {
-        BytesKeyGenerator bytesKeyGenerator = KeyGenerators.secureRandom(4);
-        LdapShaPasswordEncoder encoder = new LdapShaPasswordEncoder(bytesKeyGenerator);
-        String digest = encoder.encode(plaintext);
+        byte[] salt = new byte[4];
+        new SecureRandom().nextBytes(salt);
+        LdapShaPasswordEncoder encoder = new LdapShaPasswordEncoder();
+        String digest = encoder.encodePassword(plaintext, salt);
         return digest.getBytes();
     }
 

@@ -7,9 +7,7 @@ spring:
   profiles.active: default
 
 server:
-  servlet:
-    context-path: /kayttooikeus-service
-    session:
-      timeout: 30s
-    tracking-modes:
-      - cookie
+  context-path: /kayttooikeus-service
+  session:
+    tracking-modes: cookie
+    timeout: 30
