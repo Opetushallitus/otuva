@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.config;
 
 import com.unboundid.ldap.listener.InMemoryDirectoryServer;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -44,7 +45,7 @@ public class EmbeddedLdapConfiguration {
             source.setPassword(this.embeddedProperties.getCredential().getPassword());
         }
         source.setUrls(this.properties.determineUrls(this.environment));
-        source.setBase(embeddedProperties.getBaseDn());
+        source.setBase(embeddedProperties.getBaseDn().stream().findFirst().orElseThrow(DataInconsistencyException::new));
         return source;
     }
 

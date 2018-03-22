@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @ToString
 @Configuration
-@ConfigurationProperties(prefix = "kayttooikeus.ldap_synchronization")
+@ConfigurationProperties(prefix = "kayttooikeus.ldap-synchronization")
 public class LdapSynchronizationProperties {
 
     @Getter

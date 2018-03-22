@@ -14,7 +14,7 @@ spring:
     database-platform: org.hibernate.dialect.HSQLDialect
   ldap:
     embedded:
-      base-dn: dc=opintopolku,dc=fi
+      base-dn: - dc=opintopolku,dc=fi
 
 hikari:
   datasource:
