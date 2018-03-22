@@ -12,6 +12,12 @@ public interface KayttajatiedotService {
 
     KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto kayttajatiedot, LdapSynchronizationType ldapSynchronization);
 
+    /**
+     * Luo tai pävittää ei-tyhjän käyttäjänimen
+     * @param oidHenkilo päivitettävän henkilön oid
+     * @param username Ei-tyhjä luotava tai pävivitettävä käyttäjänimi
+     * @param ldapSynchronization ldap synkronoinnin prioriteetti
+     */
     void createOrUpdateUsername(String oidHenkilo, String username, LdapSynchronizationType ldapSynchronization);
 
     Optional<Kayttajatiedot> getKayttajatiedotByOidHenkilo(String oidHenkilo);
