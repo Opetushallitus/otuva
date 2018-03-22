@@ -36,7 +36,7 @@ public class HenkiloDataRepositoryTest {
     public void findByOidHenkilo() {
         Henkilo henkilo = new Henkilo();
         henkilo.setOidHenkilo("1.2.3.4.5");
-        this.testEntityManager.persist(henkilo);
+        this.testEntityManager.persistAndFlush(henkilo);
 
         Optional<Henkilo> returnHenkilo = this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5");
         assertThat(returnHenkilo).hasValueSatisfying(h -> assertThat(h.getOidHenkilo()).isEqualTo("1.2.3.4.5"));

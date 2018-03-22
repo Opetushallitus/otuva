@@ -46,7 +46,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
             matchingHenkilo.setHetuCached(henkiloHakuDto.getHetu());
             saveList.add(matchingHenkilo);
         });
-        this.henkiloDataRepository.save(saveList);
+        this.henkiloDataRepository.saveAll(saveList);
         log.info(saveList.size() + " henkilöä tallennettiin cacheen");
         return onrHenkilohakuResultDto.isEmpty() || onrHenkilohakuResultDto.size() < count;
     }

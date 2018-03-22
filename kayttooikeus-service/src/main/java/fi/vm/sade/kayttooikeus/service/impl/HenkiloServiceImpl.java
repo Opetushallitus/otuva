@@ -110,7 +110,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
                     // Remove kayttooikeus
                     mkortIterator.remove();
-                    this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(mkort.getId());
+                    this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.deleteById(mkort.getId());
                 }
             }
         }
