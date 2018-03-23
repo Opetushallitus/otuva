@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,33 +97,34 @@ public class HenkilohakuBuilder {
 
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+        Set<String> criteriaOrganisaatioOids = henkilohakuCriteriaDto.getOrganisaatioOids() != null
+                ? henkilohakuCriteriaDto.getOrganisaatioOids()
+                : new HashSet<>(currentUserOrganisaatioOids);
+        boolean juuriorganisaatioHaku = criteriaOrganisaatioOids.contains(commonProperties.getRootOrganizationOid());
 
-        // Normal user
-        if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            Set<String> allCurrentUserOrganisaatioOids = new HashSet<>(currentUserOrganisaatioOids);
-
+        if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && !juuriorganisaatioHaku) {
             // haetaan myös aliorganisaatioista
-            if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())) {
-                currentUserOrganisaatioOids.stream()
-                        .flatMap(currentUserOrganisaatioOid ->
-                                this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
-                        .forEach(allCurrentUserOrganisaatioOids::add);
-            }
-
-            // suodatetaan annetuilla organisaatioilla
+            criteriaOrganisaatioOids = criteriaOrganisaatioOids.stream()
+                    .flatMap(organisaatioOid -> Stream.concat(Stream.of(organisaatioOid),
+                            organisaatioClient.getChildOids(organisaatioOid).stream()))
+                    .collect(toSet());
+        }
+        if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             if (henkilohakuCriteriaDto.getOrganisaatioOids() != null) {
-                allCurrentUserOrganisaatioOids.retainAll(henkilohakuCriteriaDto.getOrganisaatioOids());
+                // suodatetaan käyttäjän organisaatioilla
+                Set<String> kayttajaOrganisaatioOids = currentUserOrganisaatioOids.stream()
+                        .flatMap(organisaatioOid -> Stream.concat(Stream.of(organisaatioOid),
+                                organisaatioClient.getChildOids(organisaatioOid).stream()))
+                        .collect(toSet());
+                criteriaOrganisaatioOids.retainAll(kayttajaOrganisaatioOids);
             }
-
-            henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
-        }
-        else {
-            // root-virkailija hakee ilman aliorganisaatioita
-            if (!Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())
-                    && henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
-                henkilohakuCriteriaDto.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
+        } else {
+            if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && juuriorganisaatioHaku) {
+                // oph-virkailija hakee kaikista organisaatioista
+                criteriaOrganisaatioOids = null;
             }
         }
+        henkilohakuCriteriaDto.setOrganisaatioOids(criteriaOrganisaatioOids);
         return this;
     }
 
