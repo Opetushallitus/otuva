@@ -211,6 +211,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
 
         query.where(criteria.condition(qHenkilo, qOrganisaatioHenkilo, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
+        // Exclude henkilos with given oids.
         if(henkiloOids != null && henkiloOids.size() > 0) {
             query.where(qHenkilo.oidHenkilo.notIn(henkiloOids));
         }
