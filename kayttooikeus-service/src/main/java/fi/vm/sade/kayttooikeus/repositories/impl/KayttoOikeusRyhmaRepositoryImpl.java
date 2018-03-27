@@ -17,13 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static fi.vm.sade.kayttooikeus.model.QKayttoOikeus.kayttoOikeus;
-import static fi.vm.sade.kayttooikeus.model.QKayttoOikeusRyhma.kayttoOikeusRyhma;
 
 @Repository
 public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOikeusRyhma> implements KayttoOikeusRyhmaRepository {
 
     private QBean<KayttoOikeusRyhmaDto> KayttoOikeusRyhmaDtoBean() {
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         return Projections.bean(KayttoOikeusRyhmaDto.class,
                 kayttoOikeusRyhma.id.as("id"),
                 kayttoOikeusRyhma.tunniste.as("tunniste"),
@@ -36,17 +35,15 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
 
     @Override
     public List<KayttoOikeusRyhmaDto> findByIdList(List<Long> idList) {
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         if (CollectionUtils.isEmpty(idList)){
             return new ArrayList<>();
         }
 
-        BooleanBuilder booleanBuilder = new BooleanBuilder()
-                .and(kayttoOikeusRyhma.passivoitu.eq(false))
-                .and(kayttoOikeusRyhma.id.in(idList));
-
         return jpa().from(kayttoOikeusRyhma)
                 .leftJoin(kayttoOikeusRyhma.nimi)
-                .where(booleanBuilder)
+                .where(kayttoOikeusRyhma.passivoitu.isFalse())
+                .where(kayttoOikeusRyhma.id.in(idList))
                 .orderBy(kayttoOikeusRyhma.id.asc())
                 .select(KayttoOikeusRyhmaDtoBean())
                 .fetch();
@@ -54,15 +51,19 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
 
     @Override
     public Optional<KayttoOikeusRyhma> findByRyhmaId(Long id) {
-        return Optional.ofNullable(from(kayttoOikeusRyhma)
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        return Optional.ofNullable(jpa()
+                .select(kayttoOikeusRyhma)
+                .from(kayttoOikeusRyhma)
                 .where(kayttoOikeusRyhma.passivoitu.eq(false)
                         .and(kayttoOikeusRyhma.id.eq(id)))
                 .distinct()
-                .select(kayttoOikeusRyhma).fetchFirst());
+                .fetchFirst());
     }
 
     @Override
     public Boolean ryhmaNameFiExists(String ryhmaNameFi) {
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         return exists(jpa().from(kayttoOikeusRyhma)
                 .where(kayttoOikeusRyhma.nimi.texts.any().lang.eq("FI"),
                         kayttoOikeusRyhma.nimi.texts.any().text.eq(ryhmaNameFi))
@@ -71,6 +72,7 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
 
     @Override
     public List<KayttoOikeusRyhmaDto> listAll() {
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         return jpa().from(kayttoOikeusRyhma)
                 .leftJoin(kayttoOikeusRyhma.nimi)
                 .where(kayttoOikeusRyhma.passivoitu.eq(false))
@@ -102,6 +104,9 @@ public class KayttoOikeusRyhmaRepositoryImpl extends BaseRepositoryImpl<KayttoOi
 
     @Override
     public List<KayttoOikeusRyhmaDto> findKayttoOikeusRyhmasByKayttoOikeusIds(List<Long> kayttoOikeusIds) {
+        QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+
         BooleanBuilder booleanBuilder = new BooleanBuilder()
                 .and(kayttoOikeus.id.in(kayttoOikeusIds))
                 .and(kayttoOikeusRyhma.passivoitu.eq(false));

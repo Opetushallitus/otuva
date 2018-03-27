@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -33,6 +35,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.t
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -47,6 +50,9 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private OrganisaatioClient organisaatioClient;
+
+    @SpyBean
+    private CommonProperties commonProperties;
 
     @Test
     public void listAllKayttoOikeusRyhmasTest() {
@@ -359,7 +365,8 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     @WithMockUser(username = "1.2.3.4.5")
-    public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilosWithMyontoViite(){
+    public void listMyonnettyKayttoOikeusRyhmasMergedWithHenkilosWithMyontoViiteToRootOrganisation(){
+        given(this.commonProperties.getRootOrganizationOid()).willReturn("3.4.5.6.7");
         MyonnettyKayttoOikeusRyhmaTapahtuma mko = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta")
@@ -376,10 +383,18 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .withOikeus(oikeus("KOODISTO", "CRUD"))
         ));
 
-        populate(kayttoOikeusRyhmaMyontoViite(mko.getKayttoOikeusRyhma().getId(), mko2.getId()));
+        populate(kayttoOikeusRyhmaMyontoViite(mko.getKayttoOikeusRyhma().getId(), mko2.getKayttoOikeusRyhma().getId()));
 
         List<MyonnettyKayttoOikeusDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasMergedWithHenkilos("1.2.3.4.5", "3.4.5.6.7", "1.2.3.4.5");
-        assertEquals(1, list.size());
+        assertThat(list)
+                .hasSize(1)
+                .extracting(MyonnettyKayttoOikeusDto::getRyhmaTunniste, MyonnettyKayttoOikeusDto::getTyyppi)
+                .containsExactly(tuple("RYHMA3", "KORyhma"));
+        assertThat(list)
+                .extracting(MyonnettyKayttoOikeusDto::getRyhmaNames)
+                .flatExtracting(TextGroupDto::getTexts)
+                .extracting(TextDto::getText)
+                .containsExactlyInAnyOrder("Code management", "Koodistonhallinta");
     }
 
     @Test

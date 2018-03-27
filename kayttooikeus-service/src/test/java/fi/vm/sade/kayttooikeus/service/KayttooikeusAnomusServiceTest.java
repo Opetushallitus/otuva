@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class})
+        classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class, CommonProperties.class})
 public class KayttooikeusAnomusServiceTest {
     @Autowired
     private OrikaBeanMapper orikaBeanMapper;
@@ -126,7 +126,7 @@ public class KayttooikeusAnomusServiceTest {
     @SpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
-    @SpyBean
+    @Autowired
     private CommonProperties commonProperties;
 
     @Before

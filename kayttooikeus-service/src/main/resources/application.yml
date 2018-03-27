@@ -5,9 +5,15 @@ logging.level.org:
 spring:
   mandatory-file-encoding: UTF-8
   profiles.active: default
+  session:
+    store-type: jdbc
+    jdbc:
+      schema: classpath:org/springframework/session/jdbc/schema-postgresql.sql
+      initialize-schema: always
 
 server:
-  context-path: /kayttooikeus-service
-  session:
-    tracking-modes: cookie
-    timeout: 30
+  servlet:
+    context-path: /kayttooikeus-service
+    session:
+      cookie:
+        name: JSESSIONID
