@@ -213,8 +213,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                         .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), "Henkilön passivointi"))
                 .collect(toSet());
         organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(historia);
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
+        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.saveAll(historia);
+        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.deleteAll(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
         organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
         ldapSynchronizationService.updateHenkiloAsap(oidHenkilo);
     }

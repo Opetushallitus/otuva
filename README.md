@@ -36,7 +36,7 @@ Lisää kayttoikeus.yml:ään host-osioon
 
 Backend-palvelun käynnistäminen dev-profiililla:
 
-    java -jar -Dspring.profiles.active=dev -Dspring.config.location=/<path>/<to>/oph-configuration/kayttooikeus.yml kayttooikeus-service/target/kayttooikeus-service-1.0.0-SNAPSHOT.jar
+    java -jar -Dspring.profiles.active=dev -Dspring.config.additional-location=/<path>/<to>/oph-configuration/kayttooikeus.yml kayttooikeus-service/target/kayttooikeus-service-1.0.0-SNAPSHOT.jar
 
 ## Webpack-dev-server
 

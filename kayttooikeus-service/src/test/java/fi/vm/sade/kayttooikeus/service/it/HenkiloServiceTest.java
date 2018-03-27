@@ -88,8 +88,8 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         List<OrganisaatioHenkilo> henkilo = this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo(oidHenkilo);
         assertThat(henkilo.size()).isEqualTo(1);
         assertThat(henkilo.get(0).getMyonnettyKayttoOikeusRyhmas()).isEmpty();
-        MyonnettyKayttoOikeusRyhmaTapahtuma mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOne(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
-        assertThat(mkrt).isNull();
+        Optional<MyonnettyKayttoOikeusRyhmaTapahtuma> mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findById(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
+        assertThat(mkrt).isEmpty();
     }
 
     @Test
