@@ -19,6 +19,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class HenkilohakuBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HenkilohakuBuilder.class);
+    private static final Long DEFAULT_LIMIT = 100L;
 
     private HenkilohakuCriteriaDto henkilohakuCriteriaDto;
     private LinkedHashSet<HenkilohakuResultDto> henkilohakuResultDtoList = new LinkedHashSet<>();
@@ -53,6 +56,10 @@ public class HenkilohakuBuilder {
 
     // Find nimi, kayttajatunnus and oidHenkilo
     public HenkilohakuBuilder search(Long offset, OrderByHenkilohaku orderBy) {
+        return search(offset, DEFAULT_LIMIT, orderBy);
+    }
+
+    public HenkilohakuBuilder search(Long offset, Long limit, OrderByHenkilohaku orderBy) {
         // Because jpaquery limitations this can't be done with subqueries and union all.
         // This needs to be done in 2 queries because postgres query planner can't optimise it correctly because of
         // kayttajatiedot outer join and where or combination.
@@ -62,6 +69,7 @@ public class HenkilohakuBuilder {
         this.henkilohakuResultDtoList.addAll(this.henkiloHibernateRepository
                 .findByCriteria(henkiloCriteria,
                         offset,
+                        limit,
                         orderBy != null ? orderBy.getValue() : null));
 
         return this;
@@ -88,33 +96,34 @@ public class HenkilohakuBuilder {
 
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+        Set<String> criteriaOrganisaatioOids = henkilohakuCriteriaDto.getOrganisaatioOids() != null
+                ? henkilohakuCriteriaDto.getOrganisaatioOids()
+                : new HashSet<>(currentUserOrganisaatioOids);
+        boolean juuriorganisaatioHaku = criteriaOrganisaatioOids.contains(commonProperties.getRootOrganizationOid());
 
-        // Normal user
-        if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
-            Set<String> allCurrentUserOrganisaatioOids = new HashSet<>(currentUserOrganisaatioOids);
-
+        if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && !juuriorganisaatioHaku) {
             // haetaan myös aliorganisaatioista
-            if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())) {
-                currentUserOrganisaatioOids.stream()
-                        .flatMap(currentUserOrganisaatioOid ->
-                                this.organisaatioClient.getChildOids(currentUserOrganisaatioOid).stream())
-                        .forEach(allCurrentUserOrganisaatioOids::add);
-            }
-
-            // suodatetaan annetuilla organisaatioilla
+            criteriaOrganisaatioOids = criteriaOrganisaatioOids.stream()
+                    .flatMap(organisaatioOid -> Stream.concat(Stream.of(organisaatioOid),
+                            organisaatioClient.getChildOids(organisaatioOid).stream()))
+                    .collect(toSet());
+        }
+        if (!this.permissionCheckerService.isCurrentUserMiniAdmin()) {
             if (henkilohakuCriteriaDto.getOrganisaatioOids() != null) {
-                allCurrentUserOrganisaatioOids.retainAll(henkilohakuCriteriaDto.getOrganisaatioOids());
+                // suodatetaan käyttäjän organisaatioilla
+                Set<String> kayttajaOrganisaatioOids = currentUserOrganisaatioOids.stream()
+                        .flatMap(organisaatioOid -> Stream.concat(Stream.of(organisaatioOid),
+                                organisaatioClient.getChildOids(organisaatioOid).stream()))
+                        .collect(toSet());
+                criteriaOrganisaatioOids.retainAll(kayttajaOrganisaatioOids);
             }
-
-            henkilohakuCriteriaDto.setOrganisaatioOids(allCurrentUserOrganisaatioOids);
-        }
-        else {
-            // oph-virkailija hakee ilman aliorganisaatioita
-            if (!Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation())
-                    && henkilohakuCriteriaDto.getOrganisaatioOids() == null) {
-                henkilohakuCriteriaDto.setOrganisaatioOids(new HashSet<>(currentUserOrganisaatioOids));
+        } else {
+            if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && juuriorganisaatioHaku) {
+                // oph-virkailija hakee kaikista organisaatioista
+                criteriaOrganisaatioOids = null;
             }
         }
+        henkilohakuCriteriaDto.setOrganisaatioOids(criteriaOrganisaatioOids);
         return this;
     }
 

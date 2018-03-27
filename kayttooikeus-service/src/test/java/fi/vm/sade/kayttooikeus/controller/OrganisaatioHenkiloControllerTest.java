@@ -2,6 +2,8 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,7 +15,9 @@ import java.util.ArrayList;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,6 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     @MockBean
     private OrganisaatioHenkiloService service;
+    @MockBean
+    private OrganisaatioClient organisaatioClient;
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_HENKILONHALLINTA_OPHREKISTERI")
@@ -48,5 +54,21 @@ public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     public void listPossibleHenkiloTypesByCurrentHenkiloIsSecuredTest() throws Exception {
         this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().is3xxRedirection()); // redirect to CAS login
+    }
+
+    @Test
+    @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
+    public void findOrCreateOrganisaatioHenkilosTest() throws Exception {
+        this.mvc.perform(post("/organisaatiohenkilo/henkiloOid/findOrCreate")
+                .content("[]").contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
+    public void passivoiHenkiloOrganisationTest() throws Exception {
+        this.mvc.perform(delete("/organisaatiohenkilo/henkiloOid/organisaatioOid").accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is4xxClientError());
     }
 }

@@ -40,7 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,10 +52,12 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final Logger LOG = LoggerFactory.getLogger(PermissionCheckerService.class);
     private static CachingRestClient restClient = new CachingRestClient().setClientSubSystemCode("henkilo.authentication-service");
     private static ObjectMapper objectMapper = new ObjectMapper();
+    public static final String ROLE_KAYTTOOIKEUS_PREFIX = "ROLE_APP_KAYTTOOIKEUS_";
     public static final String ROLE_HENKILONHALLINTA_PREFIX = "ROLE_APP_HENKILONHALLINTA_";
-    private static final String ROLE_ANOMUSTENHALLINTA_PREFIX = "ROLE_APP_ANOMUSTENHALLINTA_";
+    public static final String PALVELU_KAYTTOOIKEUS = "KAYTTOOIKEUS";
     public static final String PALVELU_HENKILONHALLINTA = "HENKILONHALLINTA";
     public static final String PALVELU_ANOMUSTENHALLINTA = "ANOMUSTENHALLINTA";
+    public static final String ROLE_REKISTERINPITAJA = "REKISTERINPITAJA";
     public static final String ROLE_ADMIN = "OPHREKISTERI";
     public static final String ROLE_CRUD = "CRUD";
     public static final String ROLE_PREFIX = "ROLE_APP_";
@@ -273,6 +277,19 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     public boolean hasRoleForOrganisations(@NotNull List<Object> organisaatioHenkiloDtoList,
                                            List<String> allowedRolesWithoutPrefix) {
+        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
+                -> checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix));
+    }
+
+    @Override
+    public boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
+            Map<String, List<String>> allowedRoles) {
+        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
+                -> checkRoleForOrganisation(orgOidList, allowedRoles));
+    }
+
+    private boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
+            Function<List<String>, Boolean> checkRoleForOrganisationFunc) {
         List<String> orgOidList;
         if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
             LOG.warn(this.getCurrentUserOid() + " called permission checker with empty input");
@@ -293,7 +310,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         else {
             throw new NotImplementedException("Unsupported input type.");
         }
-        return checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix);
+        return checkRoleForOrganisationFunc.apply(orgOidList);
     }
 
     @Override
@@ -301,6 +318,16 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
         for(String oid : orgOidList) {
             if (!this.hasRoleForOrganisation(oid, allowedRolesWithoutPrefix)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkRoleForOrganisation(List<String> orgOidList, Map<String, List<String>> allowedRoles) {
+        for(String oid : orgOidList) {
+            if (!this.hasRoleForOrganisation(oid, allowedRoles)) {
                 return false;
             }
         }
@@ -362,11 +389,16 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public boolean hasRoleForOrganisation(String orgOid, final List<String> allowedRolesWithoutPrefix) {
+        return hasRoleForOrganisation(orgOid, singletonMap(PALVELU_ANOMUSTENHALLINTA, allowedRolesWithoutPrefix));
+    }
+
+    @Override
+    public boolean hasRoleForOrganisation(String orgOid, Map<String, List<String>> allowedRolesAsMap) {
         if (this.isCurrentUserAdmin()) {
             return true;
         }
 
-        final Set<String> allowedRoles = getPrefixedRoles(ROLE_ANOMUSTENHALLINTA_PREFIX, allowedRolesWithoutPrefix);
+        final Set<String> allowedRoles = getPrefixedRolesByPalveluRooli(allowedRolesAsMap);
 
         List<String> orgAndParentOids = this.organisaatioClient.getActiveParentOids(orgOid);
         if (orgAndParentOids.isEmpty()) {
@@ -388,8 +420,13 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Override
     @Transactional(readOnly = true)
     public Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role) {
+        return getCurrentUserOrgnisationsWithPalveluRole(singletonMap(palvelu, singletonList(role)));
+    }
+
+    @Override
+    public Set<String> getCurrentUserOrgnisationsWithPalveluRole(Map<String, List<String>> palveluRoolit) {
         return this.getCasRoles().stream()
-                .filter(casRole -> casRole.contains(palvelu + "_" + role))
+                .filter(casRole -> palveluRoolit.entrySet().stream().anyMatch(entry -> entry.getValue().stream().anyMatch(role -> casRole.contains(entry.getKey() + "_" + role))))
                 .flatMap(casRole -> {
                     int index = casRole.indexOf(this.commonProperties.getOrganisaatioPrefix());
                     if (index != -1) {
@@ -431,7 +468,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     // Rekisterinpitäjä
     @Override
     public boolean isUserAdmin(Set<String> userRoles) {
-        return this.isUserMiniAdmin(userRoles, PALVELU_HENKILONHALLINTA, ROLE_ADMIN);
+        return this.isUserMiniAdmin(userRoles, PALVELU_HENKILONHALLINTA, ROLE_ADMIN)
+                || isUserMiniAdmin(userRoles, PALVELU_KAYTTOOIKEUS, ROLE_REKISTERINPITAJA);
     }
 
     // OPH virkailija
@@ -476,9 +514,14 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
+        return hasOrganisaatioInHierarchy(requiredOrganiaatioOids, singletonMap(palvelu, singletonList(rooli)));
+    }
+
+    @Override
+    public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, Map<String, List<String>> palveluRoolit) {
         Set<String> casRoles = this.getCasRoles();
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> casRoles.stream()
-                .anyMatch(casRole -> casRole.contains(palvelu + "_" + rooli)
+                .anyMatch(casRole -> palveluRoolit.entrySet().stream().anyMatch(entry -> entry.getValue().stream().anyMatch(rooli -> casRole.contains(entry.getKey() + "_" + rooli)))
                         && this.organisaatioClient.getActiveParentOids(requiredOrganiaatioOid).stream()
                         .anyMatch(casRole::contains)))
                 .collect(Collectors.toSet());

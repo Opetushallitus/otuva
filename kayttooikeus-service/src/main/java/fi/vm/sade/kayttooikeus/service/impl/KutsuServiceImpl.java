@@ -24,6 +24,7 @@ import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 
 @Service
@@ -97,7 +99,8 @@ public class KutsuServiceImpl implements KutsuService {
             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)
+                    && !permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
                 this.throwIfNotInHierarchy(kutsuCreateDto);
                 this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             }
@@ -201,7 +204,8 @@ public class KutsuServiceImpl implements KutsuService {
 
     private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {
         if (!this.permissionCheckerService.isCurrentUserAdmin()
-                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)) {
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)
+                && !permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
             this.throwIfNotInHierarchy(deletedKutsu.getOrganisaatiot().stream()
                     .map(KutsuOrganisaatio::getOrganisaatioOid)
                     .collect(Collectors.toSet()));
@@ -230,11 +234,16 @@ public class KutsuServiceImpl implements KutsuService {
             this.kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
         }
 
-        // Create henkilo
-        HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
-        Optional<String> henkiloOidForKutsu = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto);
-        boolean isNewHenkilo = henkiloOidForKutsu.isPresent();
-        String henkiloOid = henkiloOidForKutsu.orElseGet(() -> this.oppijanumerorekisteriClient.getOidByHetu(kutsuByToken.getHetu()));
+        // Search for existing henkilo by hetu and create new if not found
+        Optional<HenkiloDto> henkiloByHetu = this.oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
+        boolean isNewHenkilo = !henkiloByHetu.isPresent();
+        String henkiloOid;
+        if(isNewHenkilo) {
+            HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
+            henkiloOid = this.oppijanumerorekisteriClient.createHenkiloForKutsu(henkiloCreateDto).get();
+        } else {
+            henkiloOid = henkiloByHetu.get().getOidHenkilo();
+        }
 
         // Set henkilo strongly identified
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
@@ -259,9 +268,10 @@ public class KutsuServiceImpl implements KutsuService {
         // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
         HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
         henkiloUpdateDto.setOidHenkilo(henkiloOid);
+        henkiloUpdateDto.setPassivoitu(false);
 
         // In case henkilo already exists
-        henkiloUpdateDto.setKutsumanimi(henkiloCreateDto.getKutsumanimi());
+        henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
 
         if(isNewHenkilo) {
             addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
@@ -273,6 +283,7 @@ public class KutsuServiceImpl implements KutsuService {
         return henkiloUpdateDto;
     }
 
+
     public void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
         HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
@@ -282,8 +293,8 @@ public class KutsuServiceImpl implements KutsuService {
 
         boolean missingKutsusahkoposti = henkiloDto.getYhteystiedotRyhma().stream()
                 .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
-                .map(yhteystiedotDto -> yhteystiedotDto.getYhteystietoArvo())
-                .noneMatch(arvo -> arvo.equals(kutsuSahkoposti));
+                .map(YhteystietoDto::getYhteystietoArvo)
+                .noneMatch(kutsuSahkoposti::equals);
 
         if(missingKutsusahkoposti) { // add kutsuemail if it doesn't exist in henkilos yhteystiedot
             YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);

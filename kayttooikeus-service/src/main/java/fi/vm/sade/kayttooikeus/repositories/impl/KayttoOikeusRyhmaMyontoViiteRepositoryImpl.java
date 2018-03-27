@@ -61,14 +61,14 @@ public class KayttoOikeusRyhmaMyontoViiteRepositoryImpl
                 .where(henkilo.oidHenkilo.eq(henkiloOid))
                 .distinct();
 
-        if (criteria.getPalvelu() != null || criteria.getRooli() != null) {
+        if (criteria.getPalvelut() != null || criteria.getRooli() != null) {
             QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
             query.join(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus);
 
-            if (criteria.getPalvelu() != null) {
+            if (criteria.getPalvelut() != null) {
                 QPalvelu palvelu = QPalvelu.palvelu;
                 query.join(kayttoOikeus.palvelu, palvelu);
-                query.where(palvelu.name.eq(criteria.getPalvelu()));
+                query.where(palvelu.name.in(criteria.getPalvelut()));
             }
             if (criteria.getRooli() != null) {
                 query.where(kayttoOikeus.rooli.eq(criteria.getRooli()));

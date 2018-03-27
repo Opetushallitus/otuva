@@ -14,14 +14,18 @@ import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
+import org.springframework.util.StringUtils;
+
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     private final KayttajatiedotRepository kayttajatiedotRepository;
@@ -62,17 +66,22 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional
     public void createOrUpdateUsername(String oidHenkilo, String username, LdapSynchronizationType ldapSynchronization) {
-        Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo);
-        if(kayttajatiedot.isPresent()) {
-            this.kayttajatiedotRepository.findByUsername(username)
-                    .ifPresent((Kayttajatiedot t) -> {
-                        throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-                    });
-            kayttajatiedot.get().setUsername(username);
-            ldapSynchronization.getAction().accept(this.ldapSynchronizationService, oidHenkilo);
+        if (StringUtils.hasLength(username)) {
+            Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo);
+            if (kayttajatiedot.isPresent()) {
+                this.kayttajatiedotRepository.findByUsername(username)
+                        .ifPresent((Kayttajatiedot t) -> {
+                            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
+                        });
+                kayttajatiedot.get().setUsername(username);
+                ldapSynchronization.getAction().accept(this.ldapSynchronizationService, oidHenkilo);
+            }
+            else {
+                this.create(oidHenkilo, new KayttajatiedotCreateDto(username), ldapSynchronization);
+            }
         }
         else {
-            this.create(oidHenkilo, new KayttajatiedotCreateDto(username), ldapSynchronization);
+            log.warn("Tried to create or update empty username.");
         }
     }
 

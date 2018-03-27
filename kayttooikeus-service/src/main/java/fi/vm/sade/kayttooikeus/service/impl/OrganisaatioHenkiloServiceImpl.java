@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -31,8 +30,10 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_ANOMUSTENHALLINTA;
 
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_HENKILONHALLINTA;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_ADMIN;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
 import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.PALVELU;
@@ -40,6 +41,8 @@ import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -177,8 +180,11 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                 )
                 .forEach(organisaatioHenkiloUpdateDto -> {
                     if (!this.getCurrentUserOid().equals(henkiloOid)) {
+                        Map<String, List<String>> allowedRoles = new LinkedHashMap<>();
+                        allowedRoles.put(PALVELU_ANOMUSTENHALLINTA, asList("CRUD", "READ_UPDATE"));
+                        allowedRoles.put(PALVELU_KAYTTOOIKEUS, asList("CRUD"));
                         this.permissionCheckerService.hasRoleForOrganisations(Collections.singletonList(organisaatioHenkiloUpdateDto),
-                                Lists.newArrayList("CRUD", "READ_UPDATE"));
+                                allowedRoles);
                     }
                     // Make sure organisation exists.
                     this.organisaatioService.throwIfActiveNotFound(organisaatioHenkiloUpdateDto.getOrganisaatioOid());
