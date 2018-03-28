@@ -22,6 +22,7 @@ public class PalvelukayttajaController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD',"
+            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA',"
             + "'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
     public Iterable<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria) {
         return palvelukayttajaService.list(criteria);

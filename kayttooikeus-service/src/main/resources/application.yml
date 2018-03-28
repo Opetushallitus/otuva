@@ -10,6 +10,9 @@ spring:
     jdbc:
       schema: classpath:org/springframework/session/jdbc/schema-postgresql.sql
       initialize-schema: always
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
 
 server:
   servlet:
