@@ -21,6 +21,7 @@ import java.util.Set;
         }
     )
 })
+// Kun tähän lisätään versiointi lisää myös V20180419151224384__init.sql-tiedostoon public.henkilo.version
 public class Henkilo implements Identifiable {
 
     @Id
