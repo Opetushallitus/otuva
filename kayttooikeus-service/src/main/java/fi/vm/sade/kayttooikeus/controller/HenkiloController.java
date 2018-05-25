@@ -219,4 +219,11 @@ public class HenkiloController {
         return this.henkiloService.getOmatTiedot();
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/testing", method = RequestMethod.GET)
+    @ApiOperation("testi")
+    public void testi() {
+        this.organisaatioHenkiloService.passivoiOrganisaationHenkilot();
+    }
+
 }
