@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
 import lombok.*;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -57,5 +59,6 @@ public class OrganisaatioHenkiloWithOrganisaatioDto extends OrganisaatioHenkiloD
         private TextGroupMapDto nimi;
         private List<String> tyypit;
         private List<OrganisaatioDto> children;
+        private OrganisaatioStatus status;
     }
 }
