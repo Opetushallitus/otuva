@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
+import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import lombok.*;
 
 import java.time.LocalDate;
