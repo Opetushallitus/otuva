@@ -96,8 +96,9 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         dto.setNimi(new TextGroupMapDto(null, perustiedot.getNimi()));
         dto.setParentOidPath(perustiedot.getParentOidPath());
         dto.setTyypit(perustiedot.getTyypit());
+        dto.setStatus(perustiedot.getStatus());
         dto.setChildren(perustiedot.getChildren().stream()
-                .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
+               .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()) || OrganisaatioStatus.SUUNNITELTU.equals(organisaatioPerustieto.getStatus()))
                 .map(child -> mapOrganisaatioDtoRecursive(child, compareByLang))
                 .sorted(Comparator.comparing(OrganisaatioDto::getNimi, comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE))))
                 .collect(toList()));
