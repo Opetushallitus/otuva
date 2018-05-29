@@ -167,7 +167,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
         organisaatiosWithoutRootOrg.addAll(ryhmas);
 
-        return organisaatiosWithoutRootOrg.stream().map(OrganisaatioPerustieto::getOid).collect(toList());
+        return organisaatiosWithoutRootOrg.stream()
+                .map(OrganisaatioPerustieto::getOid)
+                .collect(toList());
     }
 
 }

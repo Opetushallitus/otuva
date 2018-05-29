@@ -50,10 +50,6 @@ public class OrganisaatioClientTest extends AbstractClientTest {
                 .havingPath(is("/organisaatio-service/rest/organisaatio/1.2.246.562.10.00000000001"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
-//        onRequest().havingMethod(is("GET"))
-//                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/hae"))
-//                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
-//                .withBody(jsonResource("classpath:organisaatio/lakkautetutOrganisaatioHakutulos.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
