@@ -43,18 +43,27 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void getLakkautetutOidsTest() {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/hae"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/hierarkia/hae"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
-                .withBody(jsonResource("classpath:organisaatio/lakkautetutOrganisaatioHakutulos.json"));
+                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
+        onRequest().havingMethod(is("GET"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/1.2.246.562.10.00000000001"))
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
+//        onRequest().havingMethod(is("GET"))
+//                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/hae"))
+//                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+//                .withBody(jsonResource("classpath:organisaatio/lakkautetutOrganisaatioHakutulos.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
+        this.client.refreshCache();
         List<String> lakkautetutOids = this.client.getLakkautetutOids();
         assertTrue(lakkautetutOids.contains("1.2.246.562.28.32497911273"));
         assertFalse(lakkautetutOids.contains("1.2.246.562.10.234567890"));
         assertTrue(lakkautetutOids.contains("1.2.246.562.10.123456789"));
         assertFalse(lakkautetutOids.contains("1.2.246.562.28.36046890756"));
-        assertTrue(lakkautetutOids.size() == 2);
+        assertTrue(lakkautetutOids.size() == 3);
     }
 }

@@ -50,6 +50,10 @@ public class OrganisaatioCache {
         return getByOid(oid).map(org -> Stream.concat(org.parents(), org.andChildren())).orElse(Stream.empty());
     }
 
+    public Stream<OrganisaatioPerustieto> flatAllOrganisaatios() {
+        return this.byOid.values().stream().flatMap(org -> Stream.concat(org.parents(), org.andChildren()));
+    }
+
     public Long getCacheCount() {
         return (long) this.byOid.size();
     }

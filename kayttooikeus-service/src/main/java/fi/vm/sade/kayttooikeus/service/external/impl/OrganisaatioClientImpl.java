@@ -145,24 +145,19 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public List<String> getLakkautetutOids() {
-        Map<String, String> queryParamsLakkautetutOrganisaatiot = new HashMap<String, String>() {{ put("aktiiviset", "false");
-                                                                                        put("suunnitellut", "false");
-                                                                                        put("lakkautetut", "true");
-        }};
+        Set<OrganisaatioPerustieto> organisaatiosWithoutRootOrg = this.cache.flatAllOrganisaatios()
+                .filter(organisaatioPerustieto -> OrganisaatioStatus.PASSIIVINEN.equals(organisaatioPerustieto.getStatus()))
+                .collect(Collectors.toSet());
 
-        String url = this.urlConfiguration.url("organisaatio-service.organisaatio.h2.hae.flat", queryParamsLakkautetutOrganisaatiot);
-
-        List<OrganisaatioPerustieto> organisaatiosWithoutRootOrg = retrying(io(() -> this.restClient.get(url, OrganisaatioHakutulos.class)), 2)
-                .get().orFail(mapper(url)).getOrganisaatiot();
-        organisaatiosWithoutRootOrg.removeIf(o -> !OrganisaatioStatus.PASSIIVINEN.equals(o.getStatus()));
-
-        Map<String, String> queryParamsLakkautetutRyhmat = new HashMap<String, String>() {{ put("aktiiviset", "false");
+        Map<String, String> queryParamsLakkautetutRyhmat = new HashMap<String, String>() {{
+            put("aktiiviset", "false");
             put("lakkautetut", "true");
         }};
         String haeRyhmasUrl = this.urlConfiguration.url("organisaatio-service.organisaatio.ryhmat", queryParamsLakkautetutRyhmat);
         Set<OrganisaatioPerustieto> ryhmas = Arrays.stream(retrying(io(() ->
                 this.restClient.get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
                 .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl)))
+                .filter(ryhma -> OrganisaatioStatus.PASSIIVINEN.equals(ryhma.getStatus()))
                 // Make ryhma parentoidpath format same as on normal organisations.
                 .map(ryhma -> {
                     ryhma.setParentOidPath(ryhma.getOid() + "/"
@@ -170,10 +165,9 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                     return ryhma;
                 }).collect(Collectors.toSet());
 
-        ryhmas.removeIf(r -> !OrganisaatioStatus.PASSIIVINEN.equals(r.getStatus()));
         organisaatiosWithoutRootOrg.addAll(ryhmas);
 
-        return organisaatiosWithoutRootOrg.stream().map(o -> o.getOid()).collect(toList());
+        return organisaatiosWithoutRootOrg.stream().map(OrganisaatioPerustieto::getOid).collect(toList());
     }
 
 }
