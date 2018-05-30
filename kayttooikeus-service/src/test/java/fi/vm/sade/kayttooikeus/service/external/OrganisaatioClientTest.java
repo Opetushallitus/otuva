@@ -56,10 +56,14 @@ public class OrganisaatioClientTest extends AbstractClientTest {
                 .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
         this.client.refreshCache();
         List<String> lakkautetutOids = this.client.getLakkautetutOids();
+
+        // lakkautetut organisaatiot sisältää sekä ryhmien että organisaatioiden passivoidut
         assertTrue(lakkautetutOids.contains("1.2.246.562.28.32497911273"));
-        assertFalse(lakkautetutOids.contains("1.2.246.562.10.234567890"));
         assertTrue(lakkautetutOids.contains("1.2.246.562.10.123456789"));
+
+        assertFalse(lakkautetutOids.contains("1.2.246.562.10.234567890"));
         assertFalse(lakkautetutOids.contains("1.2.246.562.28.36046890756"));
-        assertTrue(lakkautetutOids.size() == 3);
+        assertFalse(lakkautetutOids.contains(("1.2.246.562.10.14175756379")));
+        assertTrue(lakkautetutOids.size() == 2);
     }
 }
