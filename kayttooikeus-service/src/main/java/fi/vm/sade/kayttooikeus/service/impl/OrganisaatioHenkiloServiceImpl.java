@@ -237,7 +237,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         List<String> passiivisetOids = organisaatioClient.getLakkautetutOids();
         List<OrganisaatioHenkilo> aktiivisetOrganisaatioHenkilosInLakkautetutOrganisaatios = this.organisaatioHenkiloRepository.findByOrganisaatioOidIn(passiivisetOids)
                 .stream().filter(oh -> oh.isAktiivinen()).collect(toList());
-        LOGGER.info("Löytyi {} aktiivista organisaatiohenkilöä");
+        LOGGER.info("Löytyi {} aktiivista organisaatiohenkilöä.", aktiivisetOrganisaatioHenkilosInLakkautetutOrganisaatios.size());
         aktiivisetOrganisaatioHenkilosInLakkautetutOrganisaatios.forEach(organisaatioHenkilo -> this.passivoiOrganisaatioHenkiloJaKayttooikeudet(organisaatioHenkilo));
         LOGGER.info("Lopetetaan passivoitujen organisaatioiden organisaatiohenkilöiden passivointi ja käyttöoikeuksien poisto");
     }
