@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
@@ -53,8 +54,14 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                     kasittelija, KayttoOikeudenTila.SULJETTU,
                     LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-
             myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
+
+            // Passivoidaan organisaatiohenkilö, jos siihen ei enää ole liitetty ainuttakaan käyttöoikeutta
+            int kayttooikeusCount = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(henkiloOid).size();
+            if(kayttooikeusCount == 0) {
+                kayttoOikeus.getOrganisaatioHenkilo().setPassivoitu(true);
+            }
+
             ldapSynchronizationService.updateHenkilo(henkiloOid);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());
