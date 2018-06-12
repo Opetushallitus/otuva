@@ -21,7 +21,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://{{postgresql_kayttooikeus_host}}:{{port_postgresql}}/authentication?ApplicationName=kayttooikeus-service
+    url: jdbc:postgresql://{{postgresql_kayttooikeus_host}}:{{port_postgresql}}/{{postgresql_kayttooikeus_db | default('authentication')}}?ApplicationName=kayttooikeus-service
     username: {{postgresql_kayttooikeus_user}}
     password: {{postgresql_kayttooikeus_password}}
     hikari:
