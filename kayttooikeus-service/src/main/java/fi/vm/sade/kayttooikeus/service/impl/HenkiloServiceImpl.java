@@ -15,6 +15,7 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
@@ -28,10 +29,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -147,17 +145,22 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Override
     @Transactional(readOnly = true)
     public boolean isVahvastiTunnistettu(String oidHenkilo) {
-        return BooleanUtils.isTrue(this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
-                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo))
-                .getVahvastiTunnistettu());
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
+        return this.isVahvastiTunnistettu(henkilo);
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isVahvastiTunnistettuByUsername(String username) {
-        return BooleanUtils.isTrue(this.henkiloDataRepository.findByKayttajatiedotUsername(username)
-                .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username))
-                .getVahvastiTunnistettu());
+        Henkilo henkilo = this.henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username));
+        return this.isVahvastiTunnistettu(henkilo);
+    }
+
+    private boolean isVahvastiTunnistettu(Henkilo henkilo) {
+        return Boolean.TRUE.equals(henkilo.getVahvastiTunnistettu())
+                || henkilo.getHenkiloVarmentajas().stream().anyMatch(HenkiloVarmentaja::isTila);
     }
 
     @Override
@@ -171,21 +174,40 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     @Override
     @Transactional(readOnly = true)
     public OmatTiedotDto getOmatTiedot() {
+        String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
         OmatTiedotDto omatTiedotDto = this.mapper.map(this.kayttoOikeusService
                         .listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria.builder()
-                                        .oidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+                                        .oidHenkilo(currentUserOid)
                                         .build(),
                                 null,
                                 null).stream()
                         .findFirst()
                         .orElseGet(() -> KayttooikeusPerustiedotDto.builder()
-                                .oidHenkilo(this.permissionCheckerService.getCurrentUserOid())
+                                .oidHenkilo(currentUserOid)
                                 .organisaatiot(Sets.newHashSet())
                                 .build()),
                 OmatTiedotDto.class);
         omatTiedotDto.setIsAdmin(this.permissionCheckerService.isCurrentUserAdmin());
         omatTiedotDto.setIsMiniAdmin(this.permissionCheckerService.isCurrentUserMiniAdmin());
+        omatTiedotDto.setAnomusilmoitus(false);
+
+        Optional<Henkilo> currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid);
+        currentUser.ifPresent(h -> {
+            omatTiedotDto.setAnomusilmoitus(h.getAnomusilmoitus());
+        });
+
         return omatTiedotDto;
+    }
+
+    @Override
+    @Transactional
+    public void updateAnomusilmoitus(String oid, boolean anomusilmoitus) {
+        if(!this.permissionCheckerService.getCurrentUserOid().equals(oid)) {
+            throw new ForbiddenException("Henkilo can only update his own anomusilmoitus -setting");
+        }
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(
+                () -> new NotFoundException(String.format("Henkilöä ei löytynyt OID:lla %s", oid)));
+        henkilo.setAnomusilmoitus(anomusilmoitus);
     }
 
 }
