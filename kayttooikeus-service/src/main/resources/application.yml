@@ -33,3 +33,7 @@ server:
     session:
       cookie:
         name: JSESSIONID
+
+cas:
+  proxy:
+    enabled: false
