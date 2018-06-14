@@ -25,9 +25,9 @@ spring:
     username: {{postgresql_kayttooikeus_user}}
     password: {{postgresql_kayttooikeus_password}}
     hikari:
-      maximum-pool-size: 20
-      connection-timeout: 10000
-      max-lifetime: 900000
+      maximum-pool-size: {{postgresql_kayttooikeus_maximum_pool_size | default('20')}}
+      connection-timeout: {{postgresql_kayttooikeus_connection_timeout | default('10000')}}
+      max-lifetime: {{postgresql_kayttooikeus_max_lifetime | default('900000')}}
   ldap:
     urls: ldap://{{host_ldap}}
     base: dc=opintopolku,dc=fi
