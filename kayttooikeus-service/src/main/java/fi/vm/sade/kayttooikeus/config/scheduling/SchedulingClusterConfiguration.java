@@ -27,12 +27,14 @@ public class SchedulingClusterConfiguration {
                         LahetaUusienAnomuksienIlmoituksetTask lahetaUusienAnomuksienIlmoituksetTask,
                         LdapSynkronointiTask ldapSynkronointiTask,
                         PoistaVanhentuneetKayttooikeudetTask poistaVanhentuneetKayttooikeudetTask,
+                        KasitteleOrganisaatioLakkautusTask kasitteleOrganisaatioLakkautusTask,
                         SendExpirationRemindersTask sendExpirationRemindersTask,
                         UpdateHenkiloNimiCacheTask updateHenkiloNimiCacheTask) {
         Scheduler scheduler = Scheduler.create(dataSource)
                 .startTasks(lahetaUusienAnomuksienIlmoituksetTask,
                         ldapSynkronointiTask,
                         poistaVanhentuneetKayttooikeudetTask,
+                        kasitteleOrganisaatioLakkautusTask,
                         sendExpirationRemindersTask,
                         updateHenkiloNimiCacheTask)
                 .threads(this.kayttooikeusProperties.getScheduling().getPool_size())
