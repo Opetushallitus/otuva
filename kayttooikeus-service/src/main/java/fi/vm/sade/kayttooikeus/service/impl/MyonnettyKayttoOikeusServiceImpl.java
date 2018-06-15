@@ -48,18 +48,18 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> kayttoOikeudet = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByVoimassaLoppuPvmBefore(LocalDate.now());
 
         for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttoOikeudet) {
-            String henkiloOid = kayttoOikeus.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo();
+            OrganisaatioHenkilo organisaatioHenkilo = kayttoOikeus.getOrganisaatioHenkilo();
+            String henkiloOid = organisaatioHenkilo.getHenkilo().getOidHenkilo();
 
             KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
                     kasittelija, KayttoOikeudenTila.SULJETTU,
                     LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
             myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
-
+            organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().remove(kayttoOikeus);
             // Passivoidaan organisaatiohenkilö, jos siihen ei enää ole liitetty ainuttakaan käyttöoikeutta
-            int kayttooikeusCount = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(henkiloOid).size();
-            if(kayttooikeusCount == 0) {
-                kayttoOikeus.getOrganisaatioHenkilo().setPassivoitu(true);
+            if(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().size() == 0) {
+                organisaatioHenkilo.setPassivoitu(true);
             }
 
             ldapSynchronizationService.updateHenkilo(henkiloOid);
