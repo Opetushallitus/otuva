@@ -12,6 +12,8 @@ import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaR
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Override
     public void poistaVanhentuneet() {
@@ -61,6 +64,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
             if(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().size() == 0) {
                 organisaatioHenkilo.setPassivoitu(true);
             }
+            organisaatioHenkiloRepository.save(organisaatioHenkilo);
 
             ldapSynchronizationService.updateHenkilo(henkiloOid);
         }
