@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_ANOMUSTENHALLINTA;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
+import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
@@ -507,7 +508,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
 
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> byOrganisaatioHenkilo = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkilo(myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo());
         if(byOrganisaatioHenkilo.isEmpty()) {
-            myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo().setPassivoitu(true);
+            OrganisaatioHenkilo organisaatioHenkilo = myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo();
+            organisaatioHenkilo.setPassivoitu(true);
+            this.organisaatioHenkiloRepository.save(organisaatioHenkilo);
         }
 
         ldapSynchronizationService.updateHenkiloAsap(oidHenkilo);
