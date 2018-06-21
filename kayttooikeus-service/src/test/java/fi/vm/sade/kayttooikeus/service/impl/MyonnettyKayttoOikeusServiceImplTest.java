@@ -7,19 +7,22 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static fi.vm.sade.kayttooikeus.util.CreateUtil.createHenkilo;
+import static fi.vm.sade.kayttooikeus.util.CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation;
+import static fi.vm.sade.kayttooikeus.util.CreateUtil.createOrganisaatioHenkilo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +46,9 @@ public class MyonnettyKayttoOikeusServiceImplTest {
 
     @Mock
     private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
+
+    @Mock
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Mock
     private LdapSynchronizationService ldapSynchronizationService;
@@ -138,4 +144,5 @@ public class MyonnettyKayttoOikeusServiceImplTest {
         verify(myonnettyKayttoOikeusRyhmaTapahtumaRepository, times(1)).delete(any());
         verify(ldapSynchronizationService, times(1)).updateHenkilo(any());
     }
+
 }
