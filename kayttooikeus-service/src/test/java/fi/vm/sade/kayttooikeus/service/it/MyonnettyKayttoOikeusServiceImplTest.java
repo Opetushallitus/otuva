@@ -93,7 +93,7 @@ public class MyonnettyKayttoOikeusServiceImplTest extends AbstractServiceIntegra
         OrganisaatioHenkilo result2 = organisaatioHenkiloList.get(1);
 
         assertThat(result1.isPassivoitu()).isFalse();
-        assertThat(result2.isPassivoitu()).isTrue();
+        assertThat(result2.isPassivoitu()).isFalse();
         assertThat(result1.getMyonnettyKayttoOikeusRyhmas().size()).isEqualTo(1);
         assertThat(result2.getMyonnettyKayttoOikeusRyhmas().size()).isEqualTo(0);
 

@@ -45,6 +45,4 @@ public interface MyonnettyKayttoOikeusRyhmaTapahtumaRepository extends CrudRepos
     }
 
     List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByKayttoOikeusRyhmaId(long id);
-
-    List<MyonnettyKayttoOikeusRyhmaTapahtuma> findByOrganisaatioHenkilo(OrganisaatioHenkilo organisaatioHenkilo);
 }
