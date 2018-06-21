@@ -1,15 +1,11 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
-import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.OmatTiedotDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
-import fi.vm.sade.kayttooikeus.dto.KayttooikeudetDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface HenkiloService {
 
@@ -58,4 +54,12 @@ public interface HenkiloService {
     OmatTiedotDto getOmatTiedot();
 
     void updateAnomusilmoitus(String oid, boolean anomusilmoitus);
+
+    /**
+     * Hakee henkilön linkitykset muihin henkilöihin käyttöoikeuspalvelussa
+     * @param oid henkilön oid
+     * @param showPassive
+     * @return Henkilön kaikki linkitykset sisältävä dto
+     */
+    HenkiloLinkitysDto getLinkitykset(String oid, boolean showPassive);
 }

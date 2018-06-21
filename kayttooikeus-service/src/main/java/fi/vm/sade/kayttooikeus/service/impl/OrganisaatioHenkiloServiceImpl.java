@@ -229,6 +229,23 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.deleteAll(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
         organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
         ldapSynchronizationService.updateHenkiloAsap(organisaatioHenkilo.getHenkilo().getOidHenkilo());
+
+        this.henkiloDataRepository.findByOidHenkilo(organisaatioHenkilo.getHenkilo().getOidHenkilo())
+                .ifPresent(this::disableNonValidVarmennettavas);
+    }
+
+    // HenkiloVarmentaja suhde on validi jos löytyy yhä yhteinen aktiivinen organisaatio
+    private void disableNonValidVarmennettavas(Henkilo henkilo) {
+        henkilo.getHenkiloVarmennettavas().forEach(henkiloVarmentaja -> {
+            boolean isValid = henkiloVarmentaja.getVarmennettavaHenkilo().getOrganisaatioHenkilos().stream()
+                    .filter(OrganisaatioHenkilo::isAktiivinen)
+                    .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                    .anyMatch(organisaatioHenkilo -> henkilo.getOrganisaatioHenkilos().stream()
+                            .filter(OrganisaatioHenkilo::isAktiivinen)
+                            .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                            .anyMatch(organisaatioOid -> organisaatioOid.equals(organisaatioHenkilo)));
+            henkiloVarmentaja.setTila(isValid);
+        });
     }
 
     @Transactional
