@@ -49,6 +49,13 @@ public class HenkiloController {
         return henkiloService.getByKayttajatunnus(kayttajatunnus);
     }
 
+    @GetMapping("/{oid}/linkitykset")
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
+    @ApiOperation("Henkilön linkitystiedot")
+    public HenkiloLinkitysDto getLinkitykset(@PathVariable String oid, @RequestParam(defaultValue = "false") boolean showPassive) {
+        return this.henkiloService.getLinkitykset(oid, showPassive);
+    }
+
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'HENKILONHALLINTA': {'READ', 'READ_UPDATE', 'CRUD'}, 'KAYTTOOIKEUS': {'READ', 'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
     @ApiOperation(value = "Listaa henkilön aktiiviset organisaatiot (organisaatiohenkilöt) organisaatioiden tai " +
             "ryhmien tiedoilla rekursiivisesti.",
