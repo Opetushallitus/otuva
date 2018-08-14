@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
+import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.*;
@@ -66,6 +67,9 @@ import static org.mockito.Mockito.*;
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private KutsuService kutsuService;
+
+    @Autowired
+    private IdentificationRepository identificationRepository;
     
     @MockBean
     private OrganisaatioClient organisaatioClient;
@@ -691,7 +695,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");
 
-        assertThat(henkilo.getIdentifications())
+        assertThat(identificationRepository.findByHenkilo(henkilo))
                 .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
                 .extracting(Identification::getIdentifier)
                 .containsExactlyInAnyOrder("!haka%Identifier1/");
@@ -741,11 +745,11 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");
 
-        assertThat(henkilo.getIdentifications())
+        assertThat(identificationRepository.findByHenkilo(henkilo))
                 .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
                 .extracting(Identification::getIdentifier)
                 .containsExactlyInAnyOrder("!haka%Identifier1/");
-        assertThat(henkilo2.getIdentifications())
+        assertThat(identificationRepository.findByHenkilo(henkilo2))
                 .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
                 .isEmpty();
 
@@ -795,7 +799,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .flatExtracting(OrganisaatioHenkilo::getOrganisaatioOid)
                 .containsExactly("1.2.0.0.1");
 
-        assertThat(henkilo.getIdentifications())
+        assertThat(identificationRepository.findByHenkilo(henkilo))
                 .filteredOn(identification -> identification.getIdpEntityId().equals(HAKA_AUTHENTICATION_IDP))
                 .extracting(Identification::getIdentifier)
                 .containsExactlyInAnyOrder("!haka%Identifier1/", "old_identifier");
