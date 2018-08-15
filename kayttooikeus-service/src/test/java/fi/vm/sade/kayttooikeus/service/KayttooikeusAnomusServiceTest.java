@@ -346,6 +346,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.empty());
+        given(this.organisaatioClient.existsByOidAndStatus(any(), any())).willReturn(true);
 
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
                 LocalDate.now().plusYears(1));
@@ -434,6 +435,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
+        given(this.organisaatioClient.existsByOidAndStatus(any(), any())).willReturn(true);
 
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
                 LocalDate.now().plusYears(1));
@@ -471,6 +473,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
                 .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").build()));
         given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(2001L)).willReturn(true);
+        given(this.organisaatioClient.existsByOidAndStatus(any(), any())).willReturn(true);
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L);
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
@@ -522,6 +525,7 @@ public class KayttooikeusAnomusServiceTest {
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
                 "1.2.0.0.1", "1.2.3.4.5"))
                 .willReturn(Optional.of(createMyonnettyKayttoOikeusRyhmaTapahtuma(3001L, 2001L)));
+        given(this.organisaatioClient.existsByOidAndStatus(any(), any())).willReturn(true);
 
         UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusryhmaDto = createUpdateHaettuKayttooikeusryhmaDto(1L,
                 "MYONNETTY", LocalDate.now().plusYears(1));

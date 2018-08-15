@@ -9,7 +9,7 @@ import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.organisaatio.api.model.types.OrganisaatioStatus;
+import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -102,6 +102,13 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     public boolean activeExists(String organisaatioOid) {
         return this.getOrganisaatioPerustiedotCached(organisaatioOid)
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
+                .isPresent();
+    }
+
+    @Override
+    public boolean existsByOidAndStatus(String organisaatioOid, Set<OrganisaatioStatus> statuses) {
+        return this.getOrganisaatioPerustiedotCached(organisaatioOid)
+                .filter(organisaatioPerustieto -> statuses.contains(organisaatioPerustieto.getStatus()))
                 .isPresent();
     }
 
