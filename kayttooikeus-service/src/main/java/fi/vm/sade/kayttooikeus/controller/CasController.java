@@ -3,6 +3,8 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
@@ -20,6 +22,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
+
+import fi.vm.sade.kayttooikeus.model.TunnistusToken;
+import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
+import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
+
 import javax.validation.Valid;
 import java.io.IOException;
 
@@ -161,4 +173,26 @@ public class CasController {
     public ResponseEntity<String> requestPost() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",
+            notes = "Deprekoitu. Käytä /henkilo/current/omattiedot ja oppijanumerorekisterin /henkilo/current/omattiedot" +
+                    "rajapintoja.",
+            authorizations = @Authorization("login"),
+            response = ResponseEntity.class)
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/me", method = RequestMethod.GET)
+    public MeDto getMe() throws JsonProcessingException {
+        return this.henkiloService.getMe();
+    }
+
+    @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",
+            notes = "Deprekoitu. Käytä /henkilo/current/omattiedot rajapintaa.",
+            authorizations = @Authorization("login"),
+            response = ResponseEntity.class)
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/myroles", method = RequestMethod.GET)
+    public List<String> getMyroles() {
+        return this.henkiloService.getMyRoles();
+    }
+
 }
