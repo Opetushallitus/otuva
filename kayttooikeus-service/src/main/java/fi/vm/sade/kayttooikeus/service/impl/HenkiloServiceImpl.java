@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
+
 @Service
 @RequiredArgsConstructor
 public class HenkiloServiceImpl extends AbstractService implements HenkiloService {
@@ -241,7 +243,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         return this.getAppRolesSorted(
                 String.format("LANG_%s", omattiedotDto.getAsiointikieli()),
                 String.format("USER_%s", henkilo.getKayttajatiedot().getUsername()),
-                henkilo.getKayttajaTyyppi().name())
+                Optional.ofNullable(henkilo.getKayttajaTyyppi()).map(KayttajaTyyppi::name).orElse(VIRKAILIJA.name()))
                 .collect(Collectors.toList());
     }
 
@@ -270,7 +272,8 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
         String langRole = String.format("LANG_%s", omattiedotDto.getAsiointikieli());
         String usernameRole = String.format("USER_%s", henkilo.getKayttajatiedot().getUsername());
-        String kayttajatyyppiRole = Optional.ofNullable(henkilo.getKayttajaTyyppi()).orElse(KayttajaTyyppi.VIRKAILIJA).name();
+        String kayttajatyyppiRole = Optional.ofNullable(henkilo.getKayttajaTyyppi()).map(KayttajaTyyppi::name).orElse(VIRKAILIJA.name());
+
         meDto.setOid(oid);
         meDto.setUid(henkilo.getKayttajatiedot().getUsername());
         Stream<String> roles = this.getAppRolesSorted(langRole, usernameRole, kayttajatyyppiRole);
