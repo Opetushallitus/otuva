@@ -58,7 +58,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                     });
 
             KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
-                    kasittelija, KayttoOikeudenTila.SULJETTU,
+                    kasittelija, KayttoOikeudenTila.VANHENTUNUT,
                     LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
 
