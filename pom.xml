@@ -31,7 +31,7 @@
         <module>kayttooikeus-domain</module>
         <module>kayttooikeus-service</module>
     </modules>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.fileEncoding>UTF-8</project.build.fileEncoding>
@@ -55,7 +55,7 @@
 
         <!-- QA -->
         <jadler.version>1.3.0</jadler.version>
-        
+
         <orika.version>1.5.1</orika.version>
     </properties>
 
@@ -166,11 +166,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <repositories>
         <repository>
             <id>oph-sade-artifactory-snapshots</id>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local</url>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -180,7 +180,7 @@
         </repository>
         <repository>
             <id>oph-sade-artifactory-releases</id>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -189,17 +189,17 @@
             </snapshots>
         </repository>
     </repositories>
-    
+
     <distributionManagement>
         <repository>
             <id>oph-sade-artifactory</id>
             <name>oph-sade-artifactory-releases</name>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-release-local</url>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
         </repository>
         <snapshotRepository>
             <id>oph-sade-artifactory</id>
             <name>oph-sade-artifactory-snapshots</name>
-            <url>https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local</url>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -210,7 +210,7 @@
             <version>12.0</version>
         </dependency>
     </dependencies>
-    
+
     <build>
         <pluginManagement>
             <plugins>
