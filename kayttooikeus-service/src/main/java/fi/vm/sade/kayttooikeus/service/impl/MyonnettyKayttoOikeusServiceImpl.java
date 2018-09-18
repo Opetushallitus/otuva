@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
@@ -9,6 +10,8 @@ import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaR
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final LdapSynchronizationService ldapSynchronizationService;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Override
     public void poistaVanhentuneet() {
@@ -47,8 +51,10 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> kayttoOikeudet = myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findByVoimassaLoppuPvmBefore(LocalDate.now());
 
-        for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttoOikeudet) {
-            Henkilo henkilo = kayttoOikeus.getOrganisaatioHenkilo().getHenkilo();
+        for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttoOikeudet) {;
+            OrganisaatioHenkilo organisaatioHenkilo = kayttoOikeus.getOrganisaatioHenkilo();
+            Henkilo henkilo = organisaatioHenkilo.getHenkilo();
+            String henkiloOid = henkilo.getOidHenkilo();
             henkilo.getHenkiloVarmennettavas().stream()
                     .filter(HenkiloVarmentaja::isTila)
                     .forEach(henkiloVarmentajaSuhde -> {
@@ -61,9 +67,8 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                     kasittelija, KayttoOikeudenTila.SULJETTU,
                     LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
             kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-
             myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
-            ldapSynchronizationService.updateHenkilo(henkilo.getOidHenkilo());
+            ldapSynchronizationService.updateHenkilo(henkiloOid);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());
     }

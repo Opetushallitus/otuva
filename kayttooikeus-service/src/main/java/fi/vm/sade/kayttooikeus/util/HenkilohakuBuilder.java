@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioMinimalDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluRooliGroup;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
@@ -112,7 +113,8 @@ public class HenkilohakuBuilder {
         }
 
         List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
-                .findDistinctOrganisaatiosForHenkiloOid(this.permissionCheckerService.getCurrentUserOid());
+                .findUsersOrganisaatioHenkilosByPalveluRoolis(this.permissionCheckerService.getCurrentUserOid(), PalveluRooliGroup.HENKILOHAKU);
+
         Set<String> criteriaOrganisaatioOids = henkilohakuCriteriaDto.getOrganisaatioOids() != null
                 ? henkilohakuCriteriaDto.getOrganisaatioOids()
                 : new HashSet<>(currentUserOrganisaatioOids);
