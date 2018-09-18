@@ -9,10 +9,7 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
-import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
@@ -36,7 +33,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
+import static java.util.Arrays.asList;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +59,7 @@ public class KutsuServiceImpl implements KutsuService {
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
+    private final IdentificationRepository identificationRepository;
 
     private final CommonProperties commonProperties;
 
@@ -314,6 +314,19 @@ public class KutsuServiceImpl implements KutsuService {
         Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(henkiloOid);
         // Create username/password and haka identifier if provided
         if (StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
+            // haka-tunniste tulee olla uniikki
+            identificationRepository.findByidpEntityIdAndIdentifier(HAKA_AUTHENTICATION_IDP, kutsuByToken.getHakaIdentifier()).ifPresent(identification -> {
+                String oidByIdentification = identification.getHenkilo().getOidHenkilo();
+                if (!henkiloOid.equals(oidByIdentification)) {
+                    // yhdistetään henkilöt
+                    oppijanumerorekisteriClient.yhdistaHenkilot(henkiloOid, asList(oidByIdentification));
+
+                    // poistetaan duplikaatilta haka-tunniste
+                    Set<String> identifications = identificationService.getHakatunnuksetByHenkiloAndIdp(oidByIdentification);
+                    identifications.remove(kutsuByToken.getHakaIdentifier());
+                    identificationService.updateHakatunnuksetByHenkiloAndIdp(oidByIdentification, identifications);
+                }
+            });
             // If haka identifier is provided add it to henkilo identifiers
             Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
