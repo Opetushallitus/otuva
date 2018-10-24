@@ -7,20 +7,25 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluRooliGroup;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCustomRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.model.QHenkilo.henkilo;
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toSet;
 
 @Repository
 public class OrganisaatioHenkiloRepositoryImpl implements OrganisaatioHenkiloCustomRepository {
@@ -42,19 +47,29 @@ public class OrganisaatioHenkiloRepositoryImpl implements OrganisaatioHenkiloCus
     }
 
     public static BooleanBuilder hasAnyPalveluRooli(QPalvelu palvelu, QKayttoOikeus kayttoOikeus, PalveluRooliGroup palveluRooliList) {
-        HashMap<String, Set<String>> requiredRoles = new HashMap<>();
-        if(palveluRooliList == PalveluRooliGroup.HENKILOHAKU) {
-            HashSet<String> henkilohakuKayttooikeusRoolit = new HashSet<>(Arrays.asList("REKISTERINPITAJA", "READ", "CRUD"));
-            HashSet<String> henkilohakuOppijanumerorekisteriRoolit = new HashSet<>(Arrays.asList("REKISTERINPITAJA_READ","REKISTERINPITAJA","READ","HENKILON_RU"));
-            requiredRoles.put("KAYTTOOIKEUS", henkilohakuKayttooikeusRoolit);
-            requiredRoles.put("OPPIJANUMEROREKISTERI", henkilohakuOppijanumerorekisteriRoolit);
-        }
+        Map<String, Set<String>> requiredRoles = getRequiredRoles(palveluRooliList);
 
         BooleanBuilder hasPalveluRooliBooleanBuilder = new BooleanBuilder();
         requiredRoles.forEach((p,r) -> {
             hasPalveluRooliBooleanBuilder.or(palvelu.name.eq(p).and(kayttoOikeus.rooli.in(r)));
         });
         return hasPalveluRooliBooleanBuilder;
+    }
+
+    private static Map<String, Set<String>> getRequiredRoles(PalveluRooliGroup palveluRooliList) {
+        switch (palveluRooliList) {
+            case KAYTTAJAHAKU:
+                return singletonMap("KAYTTOOIKEUS", Stream.of("REKISTERINPITAJA", "CRUD", "READ").collect(toSet()));
+            case HENKILOHAKU:
+                Map<String, Set<String>> requiredRoles = new HashMap<>();
+                HashSet<String> henkilohakuKayttooikeusRoolit = new HashSet<>(Arrays.asList("REKISTERINPITAJA", "READ", "CRUD"));
+                HashSet<String> henkilohakuOppijanumerorekisteriRoolit = new HashSet<>(Arrays.asList("REKISTERINPITAJA_READ","REKISTERINPITAJA","READ","HENKILON_RU"));
+                requiredRoles.put("KAYTTOOIKEUS", henkilohakuKayttooikeusRoolit);
+                requiredRoles.put("OPPIJANUMEROREKISTERI", henkilohakuOppijanumerorekisteriRoolit);
+                return requiredRoles;
+            default:
+                throw new DataInconsistencyException("Tuntematon palveluRooliList: " + palveluRooliList);
+        }
     }
 
     @Override
@@ -155,6 +170,48 @@ public class OrganisaatioHenkiloRepositoryImpl implements OrganisaatioHenkiloCus
                 organisaatioHenkilo.voimassaAlkuPvm.as("voimassaAlkuPvm"),
                 organisaatioHenkilo.voimassaLoppuPvm.as("voimassaLoppuPvm")
         );
+    }
+
+    @Override
+    public Collection<String> findOrganisaatioOidBy(OrganisaatioHenkiloCriteria criteria) {
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+
+        JPAQuery<String> query = jpa().from(qOrganisaatioHenkilo)
+                .select(qOrganisaatioHenkilo.organisaatioOid)
+                .distinct();
+
+        Optional.ofNullable(criteria.getKayttajaTyyppi()).ifPresent(kayttajaTyyppi -> {
+            QHenkilo qHenkilo = QHenkilo.henkilo;
+
+            query.join(qOrganisaatioHenkilo.henkilo, qHenkilo);
+            query.where(qHenkilo.kayttajaTyyppi.eq(kayttajaTyyppi));
+        });
+        Optional.ofNullable(criteria.getPassivoitu()).ifPresent(passivoitu
+                -> query.where(qOrganisaatioHenkilo.passivoitu.eq(passivoitu)));
+        Optional.ofNullable(criteria.getOrganisaatioOids()).ifPresent(organisaatioOids
+                -> query.where(qOrganisaatioHenkilo.organisaatioOid.in(organisaatioOids)));
+
+        if (criteria.getKayttoOikeusRyhmaNimet() != null || criteria.getKayttooikeudet() != null) {
+            QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhma = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+            QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+
+            query.join(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhma);
+            query.join(qMyonnettyKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma);
+
+            if (criteria.getKayttoOikeusRyhmaNimet() != null) {
+                query.where(qKayttoOikeusRyhma.tunniste.in(criteria.getKayttoOikeusRyhmaNimet()));
+            }
+            if (criteria.getKayttooikeudet() != null) {
+                QKayttoOikeus qKayttoOikeus = QKayttoOikeus.kayttoOikeus;
+                QPalvelu qPalvelu = QPalvelu.palvelu;
+
+                query.join(qKayttoOikeusRyhma.kayttoOikeus, qKayttoOikeus);
+                query.join(qKayttoOikeus.palvelu, qPalvelu);
+                query.where(qPalvelu.name.concat("_").concat(qKayttoOikeus.rooli).in(criteria.getKayttooikeudet()));
+            }
+        }
+
+        return query.fetch();
     }
 
     @Override
