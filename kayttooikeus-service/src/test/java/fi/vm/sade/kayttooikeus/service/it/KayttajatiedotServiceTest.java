@@ -5,8 +5,10 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService.LdapSynchronizationType;
+import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 @RunWith(SpringRunner.class)
@@ -25,6 +28,9 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private KayttajatiedotService kayttajatiedotService;
+
+    @Autowired
+    private HenkiloService henkiloService;
 
     @Autowired
     private KayttajatiedotRepository kayttajatiedotRepository;
@@ -106,5 +112,31 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kayttajatiedot)
                 .isNotEmpty()
                 .hasValueSatisfying(kayttajatiedot1 -> assertThat(kayttajatiedot1.getPassword()).isNotEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = "oid1")
+    public void getByUsernameAndPassword() {
+        // käyttäjää ei löydy
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
+                .isInstanceOf(UnauthorizedException.class);
+
+        // käyttäjällä ei ole salasanaa
+        KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto("user2");
+        kayttajatiedotService.create("oid2", createDto, LdapSynchronizationType.ASAP);
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
+                .isInstanceOf(UnauthorizedException.class);
+
+        // käyttäjällä on salasana
+        kayttajatiedotService.changePasswordAsAdmin("oid2", "IFuRzDC5+aYLSSqE");
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
+                .isInstanceOf(UnauthorizedException.class);
+        KayttajatiedotReadDto readDto = kayttajatiedotService.getByUsernameAndPassword("USER2", "IFuRzDC5+aYLSSqE");
+        assertThat(readDto).extracting(KayttajatiedotReadDto::getUsername).containsExactly("user2");
+
+        // käyttäjä on passivoitu
+        henkiloService.passivoi("oid2", "oid1");
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("USER2", "IFuRzDC5+aYLSSqE"))
+                .isInstanceOf(UnauthorizedException.class);
     }
 }
