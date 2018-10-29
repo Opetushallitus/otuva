@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
@@ -168,6 +169,24 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private boolean isVahvastiTunnistettu(Henkilo henkilo) {
         return Boolean.TRUE.equals(henkilo.getVahvastiTunnistettu())
                 || henkilo.getHenkiloVarmentajas().stream().anyMatch(HenkiloVarmentaja::isTila);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LogInRedirectType logInRedirect(String username) {
+        Henkilo henkilo = this.henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username));
+        boolean isVahvastiTunnistettu = this.isVahvastiTunnistettu(henkilo);
+        if(Boolean.FALSE.equals(isVahvastiTunnistettu)) {
+            return LogInRedirectType.STRONG_IDENTIFICATION;
+        }
+
+        LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
+        if(henkilo.getSahkopostivarmennusAikaleima() == null || henkilo.getSahkopostivarmennusAikaleima().isBefore(sixMonthsAgo)) {
+            return LogInRedirectType.EMAIL_VERIFICATION;
+        }
+
+        return null;
     }
 
     @Override

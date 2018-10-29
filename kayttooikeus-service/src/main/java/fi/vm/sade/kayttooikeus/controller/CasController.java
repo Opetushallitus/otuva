@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
@@ -77,6 +78,13 @@ public class CasController {
     @RequestMapping(value = "/auth/henkilo/username/{username}/vahvastiTunnistettu", method = RequestMethod.GET)
     public boolean isVahvastiTunnistettuByUsername(@PathVariable String username) {
         return this.henkiloService.isVahvastiTunnistettuByUsername(username);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
+    @RequestMapping(value = "/auth/henkilo/username/{username}/logInRedirect")
+    public LogInRedirectType logInRedirect(@PathVariable String username) {
+        return this.henkiloService.logInRedirect(username);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")

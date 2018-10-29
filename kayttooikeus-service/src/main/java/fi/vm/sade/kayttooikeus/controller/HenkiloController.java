@@ -169,7 +169,6 @@ public class HenkiloController {
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
         return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, hakatunnisteet);
-
     }
 
     @GetMapping("/{oid}/kayttooikeudet")
@@ -231,5 +230,7 @@ public class HenkiloController {
     public void updateAnomusilmoitus(@PathVariable String oid, @RequestBody boolean anomusilmoitus) {
         this.henkiloService.updateAnomusilmoitus(oid, anomusilmoitus);
     }
+
+    
 
 }

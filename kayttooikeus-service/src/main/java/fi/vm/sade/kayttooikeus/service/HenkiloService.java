@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
@@ -50,6 +51,8 @@ public interface HenkiloService {
 
     boolean isVahvastiTunnistettuByUsername(String username);
 
+    LogInRedirectType logInRedirect(String username);
+
     void updateHenkiloToLdap(String oid, LdapSynchronizationService.LdapSynchronizationType ldapSynchronization);
 
     /**
@@ -67,4 +70,5 @@ public interface HenkiloService {
      * @return Henkilön kaikki linkitykset sisältävä dto
      */
     HenkiloLinkitysDto getLinkitykset(String oid, boolean showPassive);
+
 }
