@@ -5,6 +5,8 @@ import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 
 import java.util.Collection;
 
@@ -71,4 +73,13 @@ public interface HenkiloService {
      */
     HenkiloLinkitysDto getLinkitykset(String oid, boolean showPassive);
 
+    /*
+     * Päivittää henkilon tiedot. Tarkoitettu sähköpostin varmennukseen
+     */
+    String emailVerification(HenkiloUpdateDto henkiloUpdate, String loginToken);
+
+    /*
+     * Hakee henkilön tiedot loginTokenin perusteella. Tarkoitettu sähköpostinvarmennus-näkymän populointiin
+     */
+    HenkiloDto getHenkiloByLoginToken(String loginToken);
 }

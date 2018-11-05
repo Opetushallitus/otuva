@@ -5,10 +5,13 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.properties.OphProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +61,14 @@ public class HenkiloServiceImplTest {
     private OrganisaatioClient organisaatioClientMock;
     @Mock
     private KayttoOikeusService kayttoOikeusService;
+    @Mock
+    private TunnistusTokenDataRepository tunnistusTokenDataRepositoryMock;
+    @Mock
+    private OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
+    @Mock
+    private IdentificationService identificationServiceMock;
+    @Mock
+    private OphProperties ophPropertiesMock;
 
     @Before
     public void setup() {
@@ -72,6 +83,10 @@ public class HenkiloServiceImplTest {
                 henkiloDataRepositoryMock,
                 kayttajatiedotRepositoryMock,
                 commonPropertiesMock,
+                tunnistusTokenDataRepositoryMock,
+                oppijanumerorekisteriClientMock,
+                identificationServiceMock,
+                ophPropertiesMock,
                 mapper,
                 organisaatioClientMock);
     }

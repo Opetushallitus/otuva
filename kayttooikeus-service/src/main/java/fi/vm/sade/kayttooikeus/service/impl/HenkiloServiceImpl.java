@@ -11,14 +11,17 @@ import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
-import fi.vm.sade.kayttooikeus.service.HenkiloService;
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
+import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static fi.vm.sade.kayttooikeus.model.Identification.CAS_AUTHENTICATION_IDP;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +50,10 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final CommonProperties commonProperties;
+    private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final IdentificationService identificationService;
+    private final OphProperties ophProperties;
 
     private final OrikaBeanMapper mapper;
 
@@ -239,6 +248,42 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     public HenkiloLinkitysDto getLinkitykset(String oid, boolean showPassive) {
         return this.henkiloDataRepository.findLinkityksetByOid(oid, showPassive)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oid));
+    }
+
+    @Override
+    @Transactional
+    public String emailVerification(HenkiloUpdateDto henkiloUpdateDto, String loginToken) {
+        TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByLoginToken(loginToken)
+                .orElseThrow(() -> new NotFoundException(String.format("Login tokenia %s ei löytynyt", loginToken)));
+        Henkilo henkilo = tunnistusToken.getHenkilo();
+
+        if(!henkilo.getOidHenkilo().equals(henkiloUpdateDto.getOidHenkilo())) {
+            throw new ValidationException(String.format("Login token %s doesn't match henkilo oid %s", loginToken, henkiloUpdateDto.getOidHenkilo()));
+        }
+
+        oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
+        henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now());
+
+        String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
+        Map<String, Object> redirectMapping = this.redirectMapping(authToken, ophProperties.url("virkailijan-tyopoyta"));
+        return ophProperties.url("cas.login", redirectMapping);
+
+    }
+
+    private Map<String, Object> redirectMapping(String authToken, String service) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("authToken", authToken);
+        map.put("service", service);
+        return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public HenkiloDto getHenkiloByLoginToken(String loginToken) {
+        TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByLoginToken(loginToken)
+                .orElseThrow(() -> new NotFoundException(String.format("Login tokenia %s ei löytynyt", loginToken)));
+        String oid = tunnistusToken.getHenkilo().getOidHenkilo();
+        return this.oppijanumerorekisteriClient.getHenkiloByOid(oid);
     }
 
 }

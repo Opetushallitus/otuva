@@ -1,2 +1,2 @@
 alter table henkilo
-    add column timestamp with time zone sahkopostivarmennus_aikaleima;
+    add column sahkopostivarmennus_aikaleima timestamp without time zone;
