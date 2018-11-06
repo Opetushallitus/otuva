@@ -179,7 +179,7 @@ public class CasController {
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public void emailVerification(HttpServletResponse response,
                                   @RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
-                                  String loginToken) throws IOException {
+                                  @PathVariable("loginToken") String loginToken) throws IOException {
         String redirectUrl = this.henkiloService.emailVerification(henkiloUpdate, loginToken);
         response.sendRedirect(redirectUrl);
     }
