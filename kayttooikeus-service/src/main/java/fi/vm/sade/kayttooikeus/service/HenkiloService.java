@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
@@ -9,6 +10,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface HenkiloService {
 
@@ -84,4 +86,18 @@ public interface HenkiloService {
      * Hakee henkilön tiedot loginTokenin perusteella. Tarkoitettu sähköpostinvarmennus-näkymän populointiin
      */
     HenkiloDto getHenkiloByLoginToken(String loginToken);
+
+    /**
+     *  Korvike vanhalle /cas/myroles rajapinnalle.
+     * @return Käyttäjän roolit plus lisätietoa
+     */
+    @Deprecated
+    List<String> getMyRoles();
+
+    /**
+     * Korvike vanhalle /cas/me rajapinnalle.
+     * @return Käyttäjän tietoja.
+     */
+    @Deprecated
+    MeDto getMe() throws JsonProcessingException;
 }

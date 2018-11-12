@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
@@ -74,6 +75,8 @@ public class HenkiloServiceImplTest {
     private IdentificationService identificationServiceMock;
     @Mock
     private OphProperties ophPropertiesMock;
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Before
     public void setup() {
@@ -93,7 +96,9 @@ public class HenkiloServiceImplTest {
                 identificationServiceMock,
                 ophPropertiesMock,
                 mapper,
-                organisaatioClientMock);
+                organisaatioClientMock,
+                objectMapper
+        );
     }
 
     @Test

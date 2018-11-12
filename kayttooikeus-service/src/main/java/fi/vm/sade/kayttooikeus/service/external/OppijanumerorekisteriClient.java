@@ -40,8 +40,6 @@ public interface OppijanumerorekisteriClient {
 
     Optional<HenkiloDto> getHenkiloByHetu(String hetu);
 
-    Set<String> listOidByYhteystieto(String arvo);
-
     Collection<HenkiloYhteystiedotDto> listYhteystiedot(HenkiloHakuCriteria criteria);
 
     Optional<String> createHenkiloForKutsu(HenkiloCreateDto henkiloCreateDto);
@@ -53,4 +51,10 @@ public interface OppijanumerorekisteriClient {
     void updateHenkilo(HenkiloUpdateDto henkiloUpdateDto);
 
     void yhdistaHenkilot(String oid, Collection<String> duplicateOids);
+    /**
+     * Palauttaa haetun käyttäjän omat tiedot
+     * @param oidHenkilo käyttäjän henkilöoid
+     * @return haetun käyttäjän omat tiedot
+     */
+    HenkiloOmattiedotDto getOmatTiedot(String oidHenkilo);
 }
