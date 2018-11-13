@@ -98,7 +98,7 @@ public class UserDetailsUtil {
                     put("sv", "Okänd organisation");
                     put("en", "Unknown organisation");
                 }})
-                .organisaatiotyypit(Lists.newArrayList())
+                .tyypit(Lists.newArrayList())
                 .build();
     }
 }
