@@ -52,7 +52,7 @@ public interface OrganisaatioClient {
     /**
      * @param organisaatioOid Haettava organisaatio
      * @param filter Suodatin jonka mukaiset organisaatiot palautetaan
-     * @return Haetun organisaation ja tämän yläorganisaatioiden oidit
+     * @return Haetun organisaation ja tämän aliorganisaatioiden oidit
      */
     Set<String> listWithChildOids(String organisaatioOid, Predicate<OrganisaatioPerustieto> filter);
 
