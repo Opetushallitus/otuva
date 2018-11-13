@@ -23,6 +23,7 @@ import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 public class OrganisaatioClientImpl implements OrganisaatioClient {
@@ -152,6 +153,14 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()))
                 .map(OrganisaatioPerustieto::getOid)
                 .collect(toList());
+    }
+
+    @Override
+    public Set<String> listWithChildOids(String organisaatioOid, Predicate<OrganisaatioPerustieto> filter) {
+        return this.cache.flatWithChildrenByOid(organisaatioOid)
+                .filter(filter)
+                .map(OrganisaatioPerustieto::getOid)
+                .collect(toSet());
     }
 
     @Override
