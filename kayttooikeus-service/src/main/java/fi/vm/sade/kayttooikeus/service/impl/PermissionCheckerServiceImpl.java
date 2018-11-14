@@ -8,7 +8,6 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.generic.rest.CachingRestClient;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
@@ -504,11 +503,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids) {
         List<String> currentUserOrgnisaatios = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid());
-        Set<OrganisaatioStatus> sallitutTilat = EnumSet.of(OrganisaatioStatus.AKTIIVINEN, OrganisaatioStatus.SUUNNITELTU);
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> currentUserOrgnisaatios.stream()
                 .anyMatch(organisaatioOid -> this.organisaatioClient.listWithChildOids(organisaatioOid,
-                        organisaatio -> sallitutTilat.contains(organisaatio.getStatus())).stream()
-                        .anyMatch(requiredOrganiaatioOid::equals)))
+                        new OrganisaatioMyontoPredicate()).stream().anyMatch(requiredOrganiaatioOid::equals)))
                 .collect(Collectors.toSet());
     }
 
