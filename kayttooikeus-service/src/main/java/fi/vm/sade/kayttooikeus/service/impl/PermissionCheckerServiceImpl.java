@@ -504,8 +504,8 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         List<String> currentUserOrgnisaatios = this.organisaatioHenkiloRepository
                 .findDistinctOrganisaatiosForHenkiloOid(this.getCurrentUserOid());
         return requiredOrganiaatioOids.stream().filter(requiredOrganiaatioOid -> currentUserOrgnisaatios.stream()
-                .anyMatch(organisaatioOid -> this.organisaatioClient.getActiveChildOids(organisaatioOid).stream()
-                        .anyMatch(requiredOrganiaatioOid::equals)))
+                .anyMatch(organisaatioOid -> this.organisaatioClient.listWithChildOids(organisaatioOid,
+                        new OrganisaatioMyontoPredicate()).stream().anyMatch(requiredOrganiaatioOid::equals)))
                 .collect(Collectors.toSet());
     }
 
