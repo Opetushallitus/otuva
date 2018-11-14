@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public interface OrganisaatioClient {
     List<String> getChildOids(String organisaatioOid);
@@ -14,7 +15,13 @@ public interface OrganisaatioClient {
 
     boolean existsByOidAndStatus(String organisaatioOid, Set<OrganisaatioStatus> statuses);
 
-    List<OrganisaatioPerustieto> listActiveOganisaatioPerustiedotRecursiveCached(String organisaatioOid);
+    /**
+     * @param organisaatioOid Haettava organisaatio
+     * @param filter  Suodatin jonka mukaiset organisaatiot palautetaan
+     * @return Haetun organisaation ja tämän ylä- ja alaorganisaatioiden oidit
+     */
+    List<OrganisaatioPerustieto> listWithParentsAndChildren(String organisaatioOid,
+                                                            Predicate<OrganisaatioPerustieto> filter);
 
     long refreshCache();
 
