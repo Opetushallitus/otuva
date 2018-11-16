@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.MeDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
+import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
@@ -40,7 +41,7 @@ public class CasController {
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
     private final VahvaTunnistusService vahvaTunnistusService;
-
+    private final EmailVerificationService emailVerificationService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OphProperties ophProperties;
@@ -183,19 +184,29 @@ public class CasController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PutMapping(value = "/emailverification/{loginToken}")
+    @PostMapping(value = "/emailverification")
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public void emailVerification(HttpServletResponse response,
                                   @RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
-                                  @PathVariable("loginToken") String loginToken) throws IOException {
-        String redirectUrl = this.henkiloService.emailVerification(henkiloUpdate, loginToken);
+                                  @RequestParam(value = "kielisyys") String kielisyys,
+                                  @RequestParam(value = "loginToken") String loginToken) throws IOException {
+        String redirectUrl = this.emailVerificationService.emailVerification(henkiloUpdate, kielisyys, loginToken);
         response.sendRedirect(redirectUrl);
     }
 
-    @GetMapping(value = "/henkilo/loginToken/{loginToken}")
+    @GetMapping(value = "redirectToFrontpageloginToken/{loginToken}/{kielisyys}")
+    @ApiOperation("Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
+    public void getFrontPageRedirectByLoginToken(HttpServletResponse response,
+                                                    @RequestParam(value = "kielisyys") String kielisyys,
+                                                   @RequestParam(value = "loginToken") String loginToken) throws IOException {
+        String redirectUrl = this.emailVerificationService.redirectUrlByLoginToken(loginToken, kielisyys);
+        response.sendRedirect(redirectUrl);
+    }
+
+    @GetMapping(value = "/henkilo/loginToken/{loginToken}/{kielisyys}")
     @ApiOperation("Hakee käyttäjän tiedot loginTokenin perusteella")
     public HenkiloDto getUserByLoginToken(@PathVariable("loginToken") String loginToken) {
-        return this.henkiloService.getHenkiloByLoginToken(loginToken);
+        return this.emailVerificationService.getHenkiloByLoginToken(loginToken);
     }
 
     @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",

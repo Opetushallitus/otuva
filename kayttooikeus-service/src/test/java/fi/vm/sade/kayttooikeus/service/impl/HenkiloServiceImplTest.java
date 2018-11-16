@@ -68,13 +68,7 @@ public class HenkiloServiceImplTest {
     @Mock
     private KayttoOikeusService kayttoOikeusService;
     @Mock
-    private TunnistusTokenDataRepository tunnistusTokenDataRepositoryMock;
-    @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
-    @Mock
-    private IdentificationService identificationServiceMock;
-    @Mock
-    private OphProperties ophPropertiesMock;
     @Mock
     private ObjectMapper objectMapper;
 
@@ -91,10 +85,7 @@ public class HenkiloServiceImplTest {
                 henkiloDataRepositoryMock,
                 kayttajatiedotRepositoryMock,
                 commonPropertiesMock,
-                tunnistusTokenDataRepositoryMock,
                 oppijanumerorekisteriClientMock,
-                identificationServiceMock,
-                ophPropertiesMock,
                 mapper,
                 organisaatioClientMock,
                 objectMapper

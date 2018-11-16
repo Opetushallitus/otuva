@@ -77,16 +77,6 @@ public interface HenkiloService {
      */
     HenkiloLinkitysDto getLinkitykset(String oid, boolean showPassive);
 
-    /*
-     * Päivittää henkilon tiedot. Tarkoitettu sähköpostin varmennukseen
-     */
-    String emailVerification(HenkiloUpdateDto henkiloUpdate, String loginToken);
-
-    /*
-     * Hakee henkilön tiedot loginTokenin perusteella. Tarkoitettu sähköpostinvarmennus-näkymän populointiin
-     */
-    HenkiloDto getHenkiloByLoginToken(String loginToken);
-
     /**
      *  Korvike vanhalle /cas/myroles rajapinnalle.
      * @return Käyttäjän roolit plus lisätietoa
