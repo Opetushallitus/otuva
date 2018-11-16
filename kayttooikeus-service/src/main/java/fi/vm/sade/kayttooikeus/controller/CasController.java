@@ -1,11 +1,9 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
-import fi.vm.sade.kayttooikeus.dto.MeDto;
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
+import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
 import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -184,26 +182,27 @@ public class CasController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PostMapping(value = "/emailverification")
+    @PostMapping(value = "/emailverification/{loginToken}")
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
-    public void emailVerification(HttpServletResponse response,
-                                  @RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
-                                  @RequestParam(value = "kielisyys") String kielisyys,
-                                  @RequestParam(value = "loginToken") String loginToken) throws IOException {
-        String redirectUrl = this.emailVerificationService.emailVerification(henkiloUpdate, kielisyys, loginToken);
-        response.sendRedirect(redirectUrl);
+    public EmailVerificationResponseDto emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
+                                                          @PathVariable String loginToken) {
+        return this.emailVerificationService.emailVerification(henkiloUpdate, loginToken);
     }
 
-    @GetMapping(value = "redirectToFrontpageloginToken/{loginToken}/{kielisyys}")
+    @GetMapping(value = "/emailverification/loginTokenValidation/{loginToken}")
+    @ApiOperation(value = "Palauttaa validatointikoodin loginTokenille",
+            notes = "Validointikoodista käyttöliittymässä tiedetään täytyykö käyttäjälle näyttää virhesivu")
+    public LoginTokenValidationCode getLoginTokenValidationCode(@PathVariable String loginToken) {
+        return this.emailVerificationService.getLoginTokenValidationCode(loginToken);
+    }
+
+    @GetMapping(value = "emailverification/redirectByLoginToken/{loginToken}")
     @ApiOperation("Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
-    public void getFrontPageRedirectByLoginToken(HttpServletResponse response,
-                                                    @RequestParam(value = "kielisyys") String kielisyys,
-                                                   @RequestParam(value = "loginToken") String loginToken) throws IOException {
-        String redirectUrl = this.emailVerificationService.redirectUrlByLoginToken(loginToken, kielisyys);
-        response.sendRedirect(redirectUrl);
+    public EmailVerificationResponseDto getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
+        return this.emailVerificationService.redirectUrlByLoginToken(loginToken);
     }
 
-    @GetMapping(value = "/henkilo/loginToken/{loginToken}/{kielisyys}")
+    @GetMapping(value = "/henkilo/loginToken/{loginToken}")
     @ApiOperation("Hakee käyttäjän tiedot loginTokenin perusteella")
     public HenkiloDto getUserByLoginToken(@PathVariable("loginToken") String loginToken) {
         return this.emailVerificationService.getHenkiloByLoginToken(loginToken);

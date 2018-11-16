@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.dto.EmailVerificationResponseDto;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
@@ -34,18 +36,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
-    public String emailVerification(HenkiloUpdateDto henkiloUpdateDto, String kielisyys, String loginToken) {
+    public EmailVerificationResponseDto emailVerification(HenkiloUpdateDto henkiloUpdateDto, String loginToken) {
         TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
-                .orElse(null);
+                .orElseThrow(() -> new NotFoundException(String.format("Logintoken %s on vanhentunut tai sitä ei löydy", loginToken)));
 
-        if(tunnistusToken == null) {
-            log.error(String.format("Logintoken %s on vanhentunut tai sitä ei löydy", loginToken));
-            return this.ophProperties.url("henkilo-ui.sahkopostivarmistus.virhe", kielisyys, "TOKEN_VANHENTUNUT_EI_LOYDY");
-        }
-
-        if(tunnistusToken.getKaytetty() != null) {
-            log.error(String.format("Logintoken %s on jo käytetty", loginToken));
-            return this.ophProperties.url("henkilo-ui.sahkopostivarmistus.virhe", kielisyys, "TOKEN_KAYTETTY");
+        if(tunnistusToken.getKaytetty() != null){
+            throw new LoginTokenException(String.format("Login token %s on jo käytetty", loginToken));
         }
 
         Henkilo henkilo = tunnistusToken.getHenkilo();
@@ -54,28 +50,25 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now());
 
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        Map<String, Object> redirectMapping = this.redirectMapping(authToken, ophProperties.url("virkailijan-tyopoyta"));
-        return ophProperties.url("cas.login", redirectMapping);
-    }
-
-    private Map<String, Object> redirectMapping(String authToken, String service) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("authToken", authToken);
-        map.put("service", service);
-        return map;
+        return EmailVerificationResponseDto.builder()
+                .authToken(authToken)
+                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .build();
     }
 
     @Override
     @Transactional
-    public String redirectUrlByLoginToken(String loginToken, String kielisyys) {
+    public EmailVerificationResponseDto redirectUrlByLoginToken(String loginToken) {
         TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new NotFoundException(String.format("Login tokenia %s ei löydy tai se on vanhentunut", loginToken)));
         if(tunnistusToken.getKaytetty() != null){
             throw new LoginTokenException(String.format("Login token %s on jo käytetty", loginToken));
         }
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        Map<String, Object> redirectMapping = this.redirectMapping(authToken, ophProperties.url("virkailijan-tyopoyta"));
-        return ophProperties.url("cas.login", redirectMapping);
+        return EmailVerificationResponseDto.builder()
+                .authToken(authToken)
+                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .build();
     }
 
     @Override
@@ -87,5 +80,23 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         return this.oppijanumerorekisteriClient.getHenkiloByOid(oid);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public LoginTokenValidationCode getLoginTokenValidationCode(String loginToken) {
+        TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
+                .orElse(null);
+
+        if(tunnistusToken == null) {
+            log.error(String.format("Logintoken %s on vanhentunut tai sitä ei löydy", loginToken));
+            return LoginTokenValidationCode.TOKEN_VANHENTUNUT_TAI_EI_LOYDY;
+        }
+
+        if(tunnistusToken.getKaytetty() != null) {
+            log.error(String.format("Logintoken %s on jo käytetty", loginToken));
+            return LoginTokenValidationCode.TOKEN_KAYTETTY;
+        }
+
+        return LoginTokenValidationCode.TOKEN_OK;
+    }
 
 }
