@@ -17,6 +17,7 @@ import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloOmattiedotDto;
 import lombok.RequiredArgsConstructor;
@@ -184,7 +185,8 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     public LogInRedirectType logInRedirectByOidhenkilo(String oidHenkilo) {
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
-        return this.getLoginRedirectType(henkilo);
+        boolean isVahvastiTunnistettu = this.isVahvastiTunnistettu(henkilo);
+        return HenkiloUtils.getLoginRedirectType(henkilo, isVahvastiTunnistettu, LocalDateTime.now());
     }
 
     @Override
@@ -192,21 +194,8 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     public LogInRedirectType logInRedirectByUsername(String username) {
         Henkilo henkilo = this.henkiloDataRepository.findByKayttajatiedotUsername(username)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username));
-        return this.getLoginRedirectType(henkilo);
-    }
-
-    protected LogInRedirectType getLoginRedirectType(Henkilo henkilo) {
         boolean isVahvastiTunnistettu = this.isVahvastiTunnistettu(henkilo);
-        if(Boolean.FALSE.equals(isVahvastiTunnistettu)) {
-            return LogInRedirectType.STRONG_IDENTIFICATION;
-        }
-
-        LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
-        if(henkilo.getSahkopostivarmennusAikaleima() == null || henkilo.getSahkopostivarmennusAikaleima().isBefore(sixMonthsAgo)) {
-            return LogInRedirectType.EMAIL_VERIFICATION;
-        }
-
-        return null;
+        return HenkiloUtils.getLoginRedirectType(henkilo, isVahvastiTunnistettu, LocalDateTime.now());
     }
 
     @Override
@@ -286,7 +275,8 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     }
 
 
-
+    @Override
+    @Transactional(readOnly = true)
     public MeDto getMe() throws JsonProcessingException {
         String oid = this.permissionCheckerService.getCurrentUserOid();
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oid)
