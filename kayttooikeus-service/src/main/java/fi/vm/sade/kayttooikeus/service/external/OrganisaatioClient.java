@@ -1,8 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -10,10 +7,6 @@ import java.util.function.Predicate;
 
 public interface OrganisaatioClient {
     List<String> getChildOids(String organisaatioOid);
-
-    boolean activeExists(String organisaatioOid);
-
-    boolean existsByOidAndStatus(String organisaatioOid, Set<OrganisaatioStatus> statuses);
 
     /**
      * @param organisaatioOid Haettava organisaatio
@@ -29,8 +22,6 @@ public interface OrganisaatioClient {
 
     Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String organisaatioOid);
 
-    List<OrganisaatioPerustieto> listActiveOrganisaatioPerustiedotByOidRestrictionList(Collection<String> organisaatioOids);
-
     /**
      * @param organisaatioOid Haettava organisaatio
      * @return Haetun organisaation ja tämän yläorganisaatioiden oidit
@@ -42,12 +33,6 @@ public interface OrganisaatioClient {
      * @return Haetun organisaation ja tämän yläorganisaatioiden aktiiviset oidit
      */
     List<String> getActiveParentOids(String organisaatioOid);
-
-    /**
-     * @param organisaatioOid Haettava organisaatio
-     * @return Haetun organisaation ja tämän aliorganisaatioiden aktiiviset oidit
-     */
-    List<String> getActiveChildOids(String organisaatioOid);
 
     /**
      * @param organisaatioOid Haettava organisaatio

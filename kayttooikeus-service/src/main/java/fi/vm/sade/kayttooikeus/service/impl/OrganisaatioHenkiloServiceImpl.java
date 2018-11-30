@@ -5,15 +5,17 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
-import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
+import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -48,11 +51,9 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    private final KayttooikeusAnomusService kayttooikeusAnomusService;
     private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
 
     private final LdapSynchronizationService ldapSynchronizationService;
-    private final OrganisaatioService organisaatioService;
     private final PermissionCheckerService permissionCheckerService;
 
     private final OrikaBeanMapper mapper;
@@ -94,7 +95,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
         dto.setTyypit(perustiedot.getTyypit());
         dto.setStatus(perustiedot.getStatus());
         dto.setChildren(perustiedot.getChildren().stream()
-               .filter(organisaatioPerustieto -> OrganisaatioStatus.AKTIIVINEN.equals(organisaatioPerustieto.getStatus()) || OrganisaatioStatus.SUUNNITELTU.equals(organisaatioPerustieto.getStatus()))
+               .filter(new OrganisaatioMyontoPredicate())
                 .map(child -> mapOrganisaatioDtoRecursive(child, compareByLang))
                 .sorted(Comparator.comparing(OrganisaatioDto::getNimi, comparingPrimarlyBy(ofNullable(compareByLang).orElse(FALLBACK_LANGUAGE))))
                 .collect(toList()));
@@ -156,7 +157,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                             .noneMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(createDto.getOrganisaatioOid()))
                 )
                 .forEach((OrganisaatioHenkiloCreateDto createDto) -> {
-                    this.organisaatioService.throwIfActiveNotFound(createDto.getOrganisaatioOid());
+                    validateOrganisaatioOid(createDto.getOrganisaatioOid());
                     OrganisaatioHenkilo organisaatioHenkilo = mapper.map(createDto, OrganisaatioHenkilo.class);
                     organisaatioHenkilo.setHenkilo(henkilo);
                     henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.save(organisaatioHenkilo));
@@ -188,7 +189,7 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
                                 allowedRoles);
                     }
                     // Make sure organisation exists.
-                    this.organisaatioService.throwIfActiveNotFound(organisaatioHenkiloUpdateDto.getOrganisaatioOid());
+                    validateOrganisaatioOid(organisaatioHenkiloUpdateDto.getOrganisaatioOid());
                     OrganisaatioHenkilo savedOrgHenkilo = this.findFirstMatching(organisaatioHenkiloUpdateDto,
                             henkilo.getOrganisaatioHenkilos());
                     // Do not allow updating organisation oid (should never happen since organisaatiohenkilo is found by this value)
@@ -283,6 +284,12 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
             anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
             this.haettuKayttooikeusRyhmaRepository.delete(h);
         });
+    }
+
+    private void validateOrganisaatioOid(String organisaatioOid) {
+        organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
+                .filter(new OrganisaatioMyontoPredicate())
+                .orElseThrow(() -> new ValidationException("Active organisation not found with oid " + organisaatioOid));
     }
 
 }
