@@ -2,9 +2,12 @@ package fi.vm.sade.kayttooikeus.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +54,10 @@ public interface HenkiloService {
     boolean isVahvastiTunnistettu(String oidHenkilo);
 
     boolean isVahvastiTunnistettuByUsername(String username);
+
+    LogInRedirectType logInRedirectByOidhenkilo(String oidHenkilo);
+
+    LogInRedirectType logInRedirectByUsername(String username);
 
     void updateHenkiloToLdap(String oid, LdapSynchronizationService.LdapSynchronizationType ldapSynchronization);
 

@@ -6,20 +6,18 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
-import fi.vm.sade.kayttooikeus.service.HenkiloService;
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.LdapSynchronizationService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.exception.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloOmattiedotDto;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
+
 
 @Service
 @RequiredArgsConstructor
@@ -52,11 +51,11 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final CommonProperties commonProperties;
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OrikaBeanMapper mapper;
 
     private final OrganisaatioClient organisaatioClient;
-    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final ObjectMapper objectMapper;
 
@@ -182,6 +181,24 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public LogInRedirectType logInRedirectByOidhenkilo(String oidHenkilo) {
+        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
+        boolean isVahvastiTunnistettu = this.isVahvastiTunnistettu(henkilo);
+        return HenkiloUtils.getLoginRedirectType(henkilo, isVahvastiTunnistettu, LocalDateTime.now());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LogInRedirectType logInRedirectByUsername(String username) {
+        Henkilo henkilo = this.henkiloDataRepository.findByKayttajatiedotUsername(username)
+                .orElseThrow(() -> new NotFoundException("Henkilo not found with username " + username));
+        boolean isVahvastiTunnistettu = this.isVahvastiTunnistettu(henkilo);
+        return HenkiloUtils.getLoginRedirectType(henkilo, isVahvastiTunnistettu, LocalDateTime.now());
+    }
+
+    @Override
     @Transactional
     public void updateHenkiloToLdap(String oid, LdapSynchronizationService.LdapSynchronizationType ldapSynchronization) {
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
@@ -256,6 +273,7 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
         return Stream.concat(roles, additionalInfo)
                 .distinct();
     }
+
 
     @Override
     @Transactional(readOnly = true)

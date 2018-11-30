@@ -1,14 +1,16 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
-import fi.vm.sade.kayttooikeus.dto.MeDto;
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
-import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
+import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
+import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
+import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.properties.OphProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +39,7 @@ public class CasController {
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
     private final VahvaTunnistusService vahvaTunnistusService;
-
+    private final EmailVerificationService emailVerificationService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OphProperties ophProperties;
@@ -80,6 +83,20 @@ public class CasController {
     @RequestMapping(value = "/auth/henkilo/username/{username}/vahvastiTunnistettu", method = RequestMethod.GET)
     public boolean isVahvastiTunnistettuByUsername(@PathVariable String username) {
         return this.henkiloService.isVahvastiTunnistettuByUsername(username);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
+    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/logInRedirect")
+    public LogInRedirectType logInRedirectByOidHenkilo(@PathVariable("oidHenkilo") String oidHenkilo) {
+        return this.henkiloService.logInRedirectByOidhenkilo(oidHenkilo);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
+    @ApiOperation("Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
+    @RequestMapping(value = "/auth/henkilo/username/{username}/logInRedirect")
+    public LogInRedirectType logInRedirectByUsername(@PathVariable("username") String username) {
+        return this.henkiloService.logInRedirectByUsername(username);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA', 'ROLE_APP_HENKILONHALLINTA_OPHREKISTERI')")
@@ -163,6 +180,32 @@ public class CasController {
     @RequestMapping(value = "/prequel", method = RequestMethod.POST)
     public ResponseEntity<String> requestPost() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/emailverification/{loginToken}")
+    @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
+    public EmailVerificationResponseDto emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
+                                                          @PathVariable String loginToken) {
+        return this.emailVerificationService.emailVerification(henkiloUpdate, loginToken);
+    }
+
+    @GetMapping(value = "/emailverification/loginTokenValidation/{loginToken}")
+    @ApiOperation(value = "Palauttaa validatointikoodin loginTokenille",
+            notes = "Validointikoodista käyttöliittymässä tiedetään täytyykö käyttäjälle näyttää virhesivu")
+    public LoginTokenValidationCode getLoginTokenValidationCode(@PathVariable String loginToken) {
+        return this.emailVerificationService.getLoginTokenValidationCode(loginToken);
+    }
+
+    @GetMapping(value = "/emailverification/redirectByLoginToken/{loginToken}")
+    @ApiOperation("Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
+    public EmailVerificationResponseDto getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
+        return this.emailVerificationService.redirectUrlByLoginToken(loginToken);
+    }
+
+    @GetMapping(value = "/henkilo/loginToken/{loginToken}")
+    @ApiOperation("Hakee käyttäjän tiedot loginTokenin perusteella")
+    public HenkiloDto getUserByLoginToken(@PathVariable("loginToken") String loginToken) {
+        return this.emailVerificationService.getHenkiloByLoginToken(loginToken);
     }
 
     @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",
