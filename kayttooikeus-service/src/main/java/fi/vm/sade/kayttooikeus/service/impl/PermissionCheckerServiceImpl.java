@@ -169,12 +169,15 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return false;
         }
 
+        OrganisaatioMyontoPredicate organisaatioMyontoPredicate = new OrganisaatioMyontoPredicate(
+                // myönnetään vain koski-palvelulle käyttöoikeudet passiivisiin organisaatioihin
+                ExternalPermissionService.KOSKI.equals(permissionCheckService));
         Set<String> flattedOrgs = this.henkiloDataRepository.findByOidHenkilo(callingUserOid).map(henkilo ->
                 henkilo.getOrganisaatioHenkilos().stream()
                         .filter(OrganisaatioHenkilo::isAktiivinen)
                         .map(OrganisaatioHenkilo::getOrganisaatioOid)
                         .flatMap(organisaatioOid -> organisaatioClient
-                                .listWithChildOids(organisaatioOid, new OrganisaatioMyontoPredicate(false)).stream())
+                                .listWithChildOids(organisaatioOid, organisaatioMyontoPredicate).stream())
                         .collect(Collectors.toSet()))
                 .orElse(emptySet());
         if (flattedOrgs.isEmpty()) {
