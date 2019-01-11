@@ -92,8 +92,7 @@ public class KutsuServiceImpl implements KutsuService {
             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)
-                    && !permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
                 this.throwIfNotInHierarchy(kutsuCreateDto);
                 this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             }
@@ -197,8 +196,7 @@ public class KutsuServiceImpl implements KutsuService {
 
     private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {
         if (!this.permissionCheckerService.isCurrentUserAdmin()
-                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_HENKILONHALLINTA, ROLE_CRUD)
-                && !permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
             this.throwIfNotInHierarchy(deletedKutsu.getOrganisaatiot().stream()
                     .map(KutsuOrganisaatio::getOrganisaatioOid)
                     .collect(Collectors.toSet()));
