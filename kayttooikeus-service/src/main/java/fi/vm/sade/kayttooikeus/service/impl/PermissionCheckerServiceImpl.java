@@ -153,6 +153,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         permissionCheckRequestDto.setPersonOidsForSamePerson(Lists.newArrayList(personOidsForSamePerson));
         permissionCheckRequestDto.setOrganisationOids(Lists.newArrayList(flattedOrgs));
         permissionCheckRequestDto.setLoggedInUserRoles(callingUserRoles);
+        permissionCheckRequestDto.setLoggedInUserOid(callingUserOid);
 
         PermissionCheckResponseDto response = externalPermissionClient.getPermission(permissionCheckService,  permissionCheckRequestDto);
 
