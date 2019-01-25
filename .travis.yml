@@ -38,7 +38,7 @@ deploy:
     script: mvn deploy -pl kayttooikeus-api -DskipTests --settings ci-tools/common/maven-settings.xml
     skip_cleanup: true
     on:
-      branch: master
+      all_branches: true
   - provider: script
     script: ./ci-tools/build/upload-image.sh $ARTIFACT_NAME
     on:
