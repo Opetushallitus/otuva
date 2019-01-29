@@ -27,6 +27,7 @@ public @interface ApplicationTest {
             System.setProperty("host-shibboleth", "localhost:"+port);
             System.setProperty("host-varda", "localhost:"+port);
             System.setProperty("url-virkailija", "http://localhost:"+port);
+            System.setProperty("url-varda", "http://localhost:"+port);
             System.setProperty("organisaatio-service.baseUrl", "http://localhost:"+port);
             System.setProperty("cas.url", "http://localhost:"+port+"/cas");
         }
