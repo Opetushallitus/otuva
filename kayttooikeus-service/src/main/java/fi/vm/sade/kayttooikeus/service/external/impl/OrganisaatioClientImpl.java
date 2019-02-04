@@ -15,6 +15,7 @@ import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -142,6 +143,14 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                 .filter(filter)
                 .map(OrganisaatioPerustieto::getOid)
                 .collect(toSet());
+    }
+
+    @Override
+    public Set<String> listWithChildOids(Collection<String> organisaatioOids) {
+        return organisaatioOids.stream()
+                .flatMap(organisaatioOid -> this.cache.flatWithChildrenByOid(organisaatioOid)
+                        .map(OrganisaatioPerustieto::getOid))
+                .collect(Collectors.toSet());
     }
 
     @Override

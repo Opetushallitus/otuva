@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +41,13 @@ public interface OrganisaatioClient {
      * @return Haetun organisaation ja tämän aliorganisaatioiden oidit
      */
     Set<String> listWithChildOids(String organisaatioOid, Predicate<OrganisaatioPerustieto> filter);
+
+    /**
+     * Listaa annetut organisaatiot ja näiden aliorganisaatiot.
+     * @param organisaatioOids
+     * @return
+     */
+    Set<String> listWithChildOids(Collection<String> organisaatioOids);
 
     /**
      * @return kaikkien passiviisten organisaatioiden oidit
