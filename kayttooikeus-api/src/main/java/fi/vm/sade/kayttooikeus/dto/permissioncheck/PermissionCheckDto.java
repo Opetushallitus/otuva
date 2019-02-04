@@ -18,10 +18,4 @@ public class PermissionCheckDto {
     ExternalPermissionService externalPermissionService;
 
     Set<String> callingUserRoles;
-
-    /**
-     * Organisaatiot joihin kutsuja on löytänyt hyväksymiään käyttöoikeuksia. Vain näitä organisaatioita kysytään
-     * ulkopuolisilta palveluilta. Voi olla null.
-     */
-    Set<String> permittedOrganisations;
 }

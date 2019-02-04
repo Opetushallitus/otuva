@@ -43,13 +43,6 @@ public interface OrganisaatioClient {
     Set<String> listWithChildOids(String organisaatioOid, Predicate<OrganisaatioPerustieto> filter);
 
     /**
-     * Listaa annetut organisaatiot ja näiden aliorganisaatiot.
-     * @param organisaatioOids
-     * @return
-     */
-    Set<String> listWithChildOids(Collection<String> organisaatioOids);
-
-    /**
      * @return kaikkien passiviisten organisaatioiden oidit
      */
     Set<String> getLakkautetutOids();

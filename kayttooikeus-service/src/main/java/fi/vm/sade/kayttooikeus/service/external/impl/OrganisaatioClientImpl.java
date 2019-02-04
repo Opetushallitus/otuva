@@ -146,14 +146,6 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     @Override
-    public Set<String> listWithChildOids(Collection<String> organisaatioOids) {
-        return organisaatioOids.stream()
-                .flatMap(organisaatioOid -> this.cache.flatWithChildrenByOid(organisaatioOid)
-                        .map(OrganisaatioPerustieto::getOid))
-                .collect(Collectors.toSet());
-    }
-
-    @Override
     public Set<String> getLakkautetutOids() {
         return this.cache.getAllOrganisaatios()
                 .filter(organisaatioPerustieto -> OrganisaatioStatus.PASSIIVINEN.equals(organisaatioPerustieto.getStatus()))
