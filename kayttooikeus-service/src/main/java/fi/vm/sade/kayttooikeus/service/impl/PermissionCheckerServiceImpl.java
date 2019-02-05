@@ -171,7 +171,22 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         }
 
         if (!response.isAccessAllowed()) {
-            LOG.error("Insufficient roles. permission check done from external service:"+ permissionCheckService + " Logged in user:" + callingUserOid + " accessed personId:" + personOidToAccess + " loginuser orgs:" + flattedOrgs.stream().collect(Collectors.joining(",")) + " palveluroles needed:" + getPrefixedRolesByPalveluRooli(allowedPalveluRooli).stream().collect(Collectors.joining(",")), " user cas roles:" + callingUserRoles.stream().collect(Collectors.joining(",")) + " personOidsForSamePerson:" + personOidsForSamePerson.stream().collect(Collectors.joining(",")) + " external service error message:" + response.getErrorMessage());
+            LOG.error("Insufficient roles. permission check done from external service: {} " +
+                    "Logged in user: {} " +
+                    "accessed personId: {} " +
+                    "loginuser orgs: {} " +
+                    "palveluroles needed: {} " +
+                    "user cas roles: {} " +
+                    "personOidsForSamePerson: {} " +
+                    "external service error message: {}",
+                    permissionCheckService,
+                    callingUserOid,
+                    personOidToAccess,
+                    String.join(",", flattedOrgs),
+                    String.join(",", getPrefixedRolesByPalveluRooli(allowedPalveluRooli)),
+                    String.join(",", callingUserRoles),
+                    String.join(",", personOidsForSamePerson),
+                    response.getErrorMessage());
         }
 
         return response.isAccessAllowed();
