@@ -173,12 +173,12 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         if (!response.isAccessAllowed()) {
             LOG.error("Insufficient roles. permission check done from external service: {} " +
                     "Logged in user: {} " +
-                    "accessed personId: {} " +
-                    "loginuser orgs: {} " +
-                    "palveluroles needed: {} " +
-                    "user cas roles: {} " +
-                    "personOidsForSamePerson: {} " +
-                    "external service error message: {}",
+                    "Accessed personId: {} " +
+                    "Loginuser orgs: {} " +
+                    "Palveluroles needed: {} " +
+                    "User cas roles: {} " +
+                    "PersonOidsForSamePerson: {} " +
+                    "External service error message: {}",
                     permissionCheckService,
                     callingUserOid,
                     personOidToAccess,
