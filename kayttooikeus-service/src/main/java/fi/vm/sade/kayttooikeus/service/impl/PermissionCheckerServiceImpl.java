@@ -182,10 +182,10 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                     permissionCheckService,
                     callingUserOid,
                     personOidToAccess,
-                    String.join(",", flattedOrgs),
-                    String.join(",", getPrefixedRolesByPalveluRooli(allowedPalveluRooli)),
-                    String.join(",", callingUserRoles),
-                    String.join(",", personOidsForSamePerson),
+                    String.join(", ", flattedOrgs),
+                    String.join(", ", getPrefixedRolesByPalveluRooli(allowedPalveluRooli)),
+                    String.join(", ", callingUserRoles),
+                    String.join(", ", personOidsForSamePerson),
                     response.getErrorMessage());
         }
 
