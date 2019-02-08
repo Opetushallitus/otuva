@@ -7,14 +7,18 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
+import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
-import fi.vm.sade.kayttooikeus.service.*;
-import fi.vm.sade.kayttooikeus.service.exception.*;
+import fi.vm.sade.kayttooikeus.service.HenkiloService;
+import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
@@ -49,6 +53,8 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
+    private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+
     private final CommonProperties commonProperties;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -213,23 +219,32 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
                 OmatTiedotDto.class);
         omatTiedotDto.setIsAdmin(this.permissionCheckerService.isCurrentUserAdmin());
         omatTiedotDto.setIsMiniAdmin(this.permissionCheckerService.isCurrentUserMiniAdmin());
-        omatTiedotDto.setAnomusilmoitus(false);
 
-        Optional<Henkilo> currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid);
-        currentUser.ifPresent(h -> omatTiedotDto.setAnomusilmoitus(h.getAnomusilmoitus()));
+        Henkilo currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid)
+                .orElseThrow(() -> new IllegalStateException(String.format("Kirjautunutta käyttäjää %s ei löydy käyttöoikeuspalvelusta", currentUserOid)));
+        Collection<Long> tilatutAnomusilmoitukset = currentUser.getAnomusilmoitus().stream()
+                .map(KayttoOikeusRyhma::getId)
+                .collect(Collectors.toSet());
+        omatTiedotDto.setAnomusilmoitus(tilatutAnomusilmoitukset);
 
         return omatTiedotDto;
     }
 
     @Override
     @Transactional
-    public void updateAnomusilmoitus(String oid, boolean anomusilmoitus) {
+    public void updateAnomusilmoitus(String oid, Set<Long> anomusilmoitusKayttooikeusRyhmat) {
         if (!this.permissionCheckerService.getCurrentUserOid().equals(oid)) {
             throw new ForbiddenException("Henkilo can only update his own anomusilmoitus -setting");
         }
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseThrow(
                 () -> new NotFoundException(String.format("Henkilöä ei löytynyt OID:lla %s", oid)));
-        henkilo.setAnomusilmoitus(anomusilmoitus);
+        Set<KayttoOikeusRyhma> tilattavatKayttooikeusryhmat = this.kayttoOikeusRyhmaRepository.findByIdIn(anomusilmoitusKayttooikeusRyhmat).stream()
+                // Sallitaan vain vastuukäyttäjät roolin sisältävät ryhmät
+                .filter(kayttoOikeusRyhma -> kayttoOikeusRyhma.getKayttoOikeus().stream()
+                        .map(KayttoOikeus::getRooli)
+                        .anyMatch(rooli -> KayttooikeusRooli.VASTUUKAYTTAJAT.getName().equals(rooli)))
+                .collect(Collectors.toSet());
+        henkilo.setAnomusilmoitus(tilattavatKayttooikeusryhmat);
     }
 
     @Override
