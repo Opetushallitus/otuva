@@ -59,6 +59,7 @@ public class Henkilo implements Identifiable {
 
     private String hetuCached;
 
+    @BatchSize(size = 30)
     @ManyToMany(fetch = FetchType.LAZY, cascade = {})
     @JoinTable(name = "henkilo_anomusilmoitus_kayttooikeusryhma",
             joinColumns = @JoinColumn(name = "henkilo_id", nullable = false, updatable = true),

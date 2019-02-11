@@ -737,6 +737,43 @@ public class KayttooikeusAnomusServiceTest {
     }
 
     @Test
+    public void adminTilaamaKayttooikeusLahetetaanNormaalienLisaksi() {
+        KayttoOikeusRyhma tilattuRyhma = KayttoOikeusRyhma.builder().tunniste("tilatturyhmä").build();
+        tilattuRyhma.setId(99L);
+        Anomus anomus = Anomus.builder()
+                .henkilo(Henkilo.builder().oidHenkilo("user1").build())
+                .organisaatioOid("rootOid")
+                .haettuKayttoOikeusRyhmas(Stream.of(
+                        HaettuKayttoOikeusRyhma.builder().kayttoOikeusRyhma(tilattuRyhma).build()
+                ).collect(toSet()))
+                .build();
+        Henkilo adminUser = Henkilo.builder()
+                .oidHenkilo("adminTilatullaRyhmällä")
+                .anomusilmoitus(singleton(tilattuRyhma))
+                .build();
+        when(this.henkiloDataRepository.findByAnomusilmoitusIsNotNull()).thenReturn(Stream.of(adminUser));
+        when(anomusRepository.findBy(any()))
+                .thenReturn(Collections.singletonList(anomus));
+        when(kayttoOikeusRyhmaMyontoViiteRepository.getMasterIdsBySlaveIds(any()))
+                .thenReturn(Stream.of(1L, 2L).collect(toSet()));
+        when(henkiloHibernateRepository.findByKayttoOikeusRyhmatAndOrganisaatiot(Stream.of(1L, 2L).collect(toSet()), Collections.singleton("rootOid")))
+                .thenReturn(Arrays.asList(
+                        Henkilo.builder().oidHenkilo("user2").build(),
+                        Henkilo.builder().oidHenkilo("user3").build()
+                ));
+
+        kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
+
+        verifyZeroInteractions(organisaatioClient);
+        verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
+                eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
+        );
+        verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
+        Set<String> henkilot = henkiloOidsCaptor.getValue();
+        assertThat(henkilot).containsExactlyInAnyOrder("adminTilatullaRyhmällä", "user2", "user3");
+    }
+
+    @Test
     public void adminTilaamaKayttooikeusLahetetaan() {
         KayttoOikeusRyhma tilattuRyhma = KayttoOikeusRyhma.builder().tunniste("tilatturyhmä").build();
         tilattuRyhma.setId(99L);

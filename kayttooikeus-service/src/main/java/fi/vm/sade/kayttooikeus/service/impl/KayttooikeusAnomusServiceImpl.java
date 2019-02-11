@@ -343,6 +343,8 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .map(HaettuKayttoOikeusRyhma::getKayttoOikeusRyhma)
                 .collect(toSet());
         Set<String> adminTilaatajaOidit = adminHyvaksyjat.stream()
+                // Ei ilmoiteta omista anomuksista
+                .filter(adminTilaaja -> !adminTilaaja.getOidHenkilo().equals(anomus.getHenkilo().getOidHenkilo()))
                 .filter(admin -> admin.getAnomusilmoitus().stream()
                         .anyMatch(anomuksenKayttooikeusryhmat::contains))
                 .map(Henkilo::getOidHenkilo)
