@@ -1,0 +1,25 @@
+# CAS configuration
+# https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
+
+logging.config=file:/root/oph-configuration/log4j2.xml
+
+cas.server.tomcat.httpProxy.enabled=true
+cas.server.tomcat.httpProxy.secure=true
+cas.server.tomcat.httpProxy.scheme=https
+cas.server.tomcat.httpProxy.protocol=HTTP/1.1
+
+cas.tgc.secure=true
+
+cas.warningCookie.secure=true
+
+# Spring Boot configuration
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+server.tomcat.accesslog.enabled=true
+server.tomcat.accesslog.directory=/root/logs
+server.tomcat.accesslog.prefix=accesslog_cas_oppija
+server.tomcat.accesslog.suffix=.txt
+server.tomcat.accesslog.pattern={\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas-oppija\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}
+server.tomcat.accesslog.request-attributes-enabled=true
+server.tomcat.accesslog.rotate=true
+server.tomcat.accesslog.rename-on-rotate=true

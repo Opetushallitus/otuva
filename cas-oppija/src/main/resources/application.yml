@@ -1,0 +1,24 @@
+# CAS configuration
+# https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
+
+server.servlet.context-path: /cas-oppija
+server.port: 8080
+server.ssl.enabled: false
+server.useForwardHeaders: false
+
+server.tomcat.portHeader:
+server.tomcat.protocolHeader:
+server.tomcat.remoteIpHeader:
+
+cas.httpWebRequest.header.xframe: false
+cas.httpWebRequest.header.xss: false
+cas.httpWebRequest.header.xcontent: false
+cas.httpWebRequest.header.hsts: false
+
+cas.authn.accept.users:
+
+cas.tgc.secure: false
+cas.tgc.path: /cas-oppija
+
+cas.warningCookie.secure: false
+cas.warningCookie.path: /cas-oppija
