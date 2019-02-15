@@ -1,0 +1,36 @@
+sudo: required
+language: java
+jdk:
+  - openjdk11
+services:
+  - docker
+cache:
+  directories:
+    - $HOME/.m2
+env:
+  global:
+    # AWS_ACCESS_KEY_ID
+    - secure: "nkGlhS2hLbb2lQi3jUlG0CogXYO9LHl86eWt93tpy2DfnImmzCwVPdSBAlHYt7eUsNJ+zGCWQwTEFlWZJYrHFAq5HNAZ76lZ2cwR/58hysnUSPb6D24vXI3xlNobBkyFxbMvNRuaGgv8ulJSwqZmb/ZGs9vxkPS3+uqaClepHyn5VXGg/J7zYKK1thSy/6nhnjZzaD0Yb/HjViWY0wEgD8UwcG+HQD4TeslEoD1Xqc3EZ4ljMimTR5OtIoLIEs31rMtJxPaQnV+iHrBvtAIx5MGA/4navbopCDCBP95Ci3K5mo59mz9Ycl3WMsH6jhHYjkTDKAVtqQlqL6p1/Q9uC7Vu8Oii+SJ1s8KVmjxox1i8f/udyVEPd1osBSnRdRMWFdIM8yYMG5WYSrUuZ7wdDWj1S1xSOVt3uEWC3QVSUEEL/L5vC8aT5ZS0rGfS9tyi01pf5tHT2OV0yMwd/TXl7nTzabzYLEfLtr9Ua/E8+O1c/ehLdUpZb5AKfm0JPvXjOmwsc5xM45Z1WevhCfos0A97IonK3MqwjULIAVLk94zobF2BBOAH4coSAALkSADhPY2HrPR5eCab2TElN8pc5CgPm0bxnTlTjik8HqjHy6hQ6Pn0f6HP/FVla8890Q8z0cqweaT9xam71jbvWsQzDspN/Q0ax+j8GlgnotI61M8="
+    # AWS_SECRET_ACCESS_KEY
+    - secure: "g9sRmXBO1fhX+Ykzklt3ybmTJozVE6lcKsos9tY2FAlKK/+kC1sECX74uJ1HJWqmTnPsBvRUqkwnl1pJRyCX/YCwgvbAPcYH63uyxsXzras6sGUUteFyXPT6GygUYK+obgq2Y+hJLS4e+b9746z0Z8+g7zaSpseMkhm0BwZ5yBjqA5iubLPPmz2xA8aG/uX8sNJ9qmb1Pg/0Cbe7rV8l4bhFs6aXeL8Vbjc4gyAhrcZ3qXtGTSmnL0zNn1FPQiTKtni+L9SDdTr66Hd1b3W4TeMwildfA6Easr0gVIMCHfY0Jjs68TuJEhIvtog7kjVDhDvWK3afwXOtFOy+p4ru7gHK4sFwoAIjJ51zAUH0VUfuRcND57MCTKtUf4/Go7Fde5/oH/FIbuMgp/njO9B+ssNXr63b0jj61KTajPnC0BCDO3P3Bi+YLLuBkfTGxU8FNPEzUVpvCnuH4G3H3kIvM1DeIMcRwue1f066ySRKpa1oKr5DYCQrU7OOCD2ZcSVw9lNwYsRX3rmUrwIPOLy5nkaJZYpvs/qsyBb5QxXSFAZuXdxA2MdZdnLW3bVmamOfE/Q7odR+zpk0rEwR1CP/yQJdB0GHa+p72gWVprAi990AuOHedG7TFtmNTCxAKUbykSxG8YkVxG67qmxqtOcpgIM2qquA5ONzQ8oiBEqBlVg="
+
+install:
+  - git clone --branch jdk11 https://github.com/Opetushallitus/ci-tools.git
+  - source ci-tools/common/setup-tools.sh
+  - export ARTIFACT_NAME="cas-oppija"
+
+script:
+  - ./gradlew clean build -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
+
+  - mv build/libs/cas.war $DOCKER_BUILD_DIR/artifact/$ARTIFACT_NAME.jar
+  - cp -vr oph-configuration $DOCKER_BUILD_DIR/config/
+
+  - export BASE_IMAGE="baseimage-fatjar:jdk11"
+  - ./ci-tools/common/pull-image.sh
+  - ./ci-tools/build/build-fatjar.sh $ARTIFACT_NAME
+
+deploy:
+  - provider: script
+    script: ./ci-tools/build/upload-image.sh $ARTIFACT_NAME
+    on:
+      all_branches: true
