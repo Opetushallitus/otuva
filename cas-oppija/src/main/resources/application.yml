@@ -22,3 +22,5 @@ cas.tgc.path: /cas-oppija
 
 cas.warningCookie.secure: false
 cas.warningCookie.path: /cas-oppija
+
+cas.monitor.endpoints.endpoint.health.access: PERMIT
