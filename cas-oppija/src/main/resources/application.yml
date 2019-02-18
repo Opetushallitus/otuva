@@ -10,6 +10,9 @@ server.tomcat.portHeader:
 server.tomcat.protocolHeader:
 server.tomcat.remoteIpHeader:
 
+cas.server.name: http://localhost:8080
+cas.server.prefix: http://localhost:8080/cas-oppija
+
 cas.httpWebRequest.header.xframe: false
 cas.httpWebRequest.header.xss: false
 cas.httpWebRequest.header.xcontent: false

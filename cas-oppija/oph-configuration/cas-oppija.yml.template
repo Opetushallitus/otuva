@@ -3,6 +3,9 @@
 
 logging.config: file:/root/oph-configuration/log4j2.xml
 
+cas.server.name: https://{{ host_oppija }}
+cas.server.prefix: https://{{ host_oppija }}/cas-oppija
+
 cas.server.tomcat.httpProxy:
     enabled: true
     secure: true
@@ -12,6 +15,22 @@ cas.server.tomcat.httpProxy:
 cas.tgc.secure: true
 
 cas.warningCookie.secure: true
+
+cas.authn.pac4j.saml:
+  - clientName: suomi.fi
+    keystorePath: {{ cas_oppija_suomifi_keystore_path }}
+    keystorePassword: {{ cas_oppija_suomifi_keystore_password }}
+    keystoreAlias: {{ cas_oppija_suomifi_keystore_alias }}
+    privateKeyPassword: {{ cas_oppija_suomifi_private_key_password }}
+    serviceProviderEntityId: {{ cas_oppija_suomifi_service_provider_entity_id }}
+    serviceProviderMetadataPath: {{ cas_oppija_suomifi_service_provider_metadata_path }}
+    identityProviderMetadataPath: {{ cas_oppija_suomifi_identity_provider_metadata_path }}
+    principalIdAttribute: nationalIdentificationNumber
+    requestedAttributes:
+      - name: urn:oid:1.2.246.21
+        friendlyName: nationalIdentificationNumber
+        nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
