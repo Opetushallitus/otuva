@@ -48,3 +48,6 @@ server.tomcat.accesslog:
 # Custom configuration
 
 whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
+host.virkailija: https://{{ host_virkailija }}
+service-user.username: {{ cas_oppija_service_user_username }}
+service-user.password: {{ cas_oppija_service_user_password }}

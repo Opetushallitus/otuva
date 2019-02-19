@@ -32,3 +32,6 @@ cas.monitor.endpoints.endpoint.health.access: PERMIT
 # Custom configuration
 
 whitelist.regexp: ^https?://.*
+host.virkailija: http://localhost:8080
+service-user.username: user
+service-user.password: pass

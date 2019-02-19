@@ -22,6 +22,8 @@ repositories {
     maven { url "https://build.shibboleth.net/nexus/content/repositories/releases/" }
     maven { url "https://repo.spring.io/milestone/" }
     maven { url "https://oss.jfrog.org/artifactory/oss-snapshot-local" }
+    maven { url "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local" }
+    maven { url "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local" }
 }
 
 def casServerVersion = project.'cas.version'
@@ -45,12 +47,14 @@ dependencies {
     compile "org.apereo.cas:cas-server-core-api-services:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-api-configuration-model:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-services-api:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-core-authentication-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-attributes:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-generic:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-surrogate-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-webapp-config:${casServerVersion}"
     compile "org.springframework.security:spring-security-config:5.1.2.RELEASE"
+    compile "fi.vm.sade.java-utils:java-http:0.1.4-SNAPSHOT"
 }
 
 tasks.findByName("jibDockerBuild")
