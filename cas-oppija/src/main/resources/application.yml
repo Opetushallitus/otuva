@@ -25,3 +25,7 @@ cas.warningCookie.path: /cas-oppija
 
 cas.monitor.endpoints.endpoint.info.access: PERMIT
 cas.monitor.endpoints.endpoint.health.access: PERMIT
+
+# Custom configuration
+
+whitelist.regexp: ^https?://.*

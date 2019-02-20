@@ -25,3 +25,7 @@ server.tomcat.accesslog:
     request-attributes-enabled: true
     rotate: true
     rename-on-rotate: true
+
+# Custom configuration
+
+whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
