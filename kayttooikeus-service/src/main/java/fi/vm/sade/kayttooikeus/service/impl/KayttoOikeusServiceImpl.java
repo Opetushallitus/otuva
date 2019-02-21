@@ -197,8 +197,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     @Override
     @Transactional(readOnly = true)
     public KayttoOikeusRyhmaDto findKayttoOikeusRyhma(long id) {
-        KayttoOikeusRyhma kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.findByRyhmaId(id).orElseThrow(()
-                -> new NotFoundException("kayttooikeusryhma not found"));
+        KayttoOikeusRyhma kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.findByRyhmaId(id, this.permissionCheckerService.isCurrentUserAdmin())
+                .orElseThrow(() -> new NotFoundException("kayttooikeusryhma not found"));
         KayttoOikeusRyhmaDto ryhma = mapper.map(kayttoOikeusRyhma, KayttoOikeusRyhmaDto.class);
         return localizationService.localize(ryhma);
     }
