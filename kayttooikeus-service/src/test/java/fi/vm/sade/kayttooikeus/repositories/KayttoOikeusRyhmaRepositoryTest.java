@@ -47,7 +47,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 .withOikeus(oikeus("APP1", "READ"))
                 .withOikeus(oikeus("APP2", "WRITE")));
 
-        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll();
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll(false);
         assertEquals(2, ryhmas.size());
         assertEquals("RYHMÄ", ryhmas.get(0).getName());
     }
@@ -166,7 +166,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
     public void insertTest(){
 
         KayttoOikeus oikeus = populate(oikeus("APP1", "READ"));
-        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll();
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll(false);
         assertEquals(0, ryhmas.size());
 
         KayttoOikeusRyhma kor = new KayttoOikeusRyhma();
@@ -179,7 +179,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         kor.setRooliRajoite("roolirajoite");
         kor = kayttoOikeusRyhmaRepository.save(kor);
 
-        ryhmas = kayttoOikeusRyhmaRepository.listAll();
+        ryhmas = kayttoOikeusRyhmaRepository.listAll(false);
         assertEquals(1, ryhmas.size());
 
         KayttoOikeusRyhma ryhma = kayttoOikeusRyhmaRepository.findByRyhmaId(kor.getId(), false).get();

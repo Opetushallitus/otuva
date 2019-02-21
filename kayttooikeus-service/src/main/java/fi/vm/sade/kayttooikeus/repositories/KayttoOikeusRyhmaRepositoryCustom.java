@@ -14,7 +14,7 @@ public interface KayttoOikeusRyhmaRepositoryCustom {
 
     Boolean ryhmaNameFiExists(String ryhmaNameFi);
 
-    List<KayttoOikeusRyhmaDto> listAll();
+    List<KayttoOikeusRyhmaDto> listAll(boolean naytaPassivoidut);
 
     List<Tuple> findOrganisaatioOidAndRyhmaIdByHenkiloOid(String oid);
 

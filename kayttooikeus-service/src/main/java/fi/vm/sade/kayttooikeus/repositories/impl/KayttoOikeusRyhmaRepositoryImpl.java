@@ -92,14 +92,16 @@ public class KayttoOikeusRyhmaRepositoryImpl implements KayttoOikeusRyhmaReposit
     }
 
     @Override
-    public List<KayttoOikeusRyhmaDto> listAll() {
+    public List<KayttoOikeusRyhmaDto> listAll(boolean naytaPassivoidut) {
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        return jpa().from(kayttoOikeusRyhma)
+        JPAQuery<KayttoOikeusRyhmaDto> query = jpa().from(kayttoOikeusRyhma)
                 .leftJoin(kayttoOikeusRyhma.nimi)
-                .where(kayttoOikeusRyhma.passivoitu.eq(false))
                 .orderBy(kayttoOikeusRyhma.id.asc())
-                .select(KayttoOikeusRyhmaDtoBean())
-                .fetch();
+                .select(KayttoOikeusRyhmaDtoBean());
+        if (!naytaPassivoidut) {
+            query.where(kayttoOikeusRyhma.passivoitu.eq(false));
+        }
+        return query.fetch();
     }
 
     @Override
