@@ -46,6 +46,8 @@ dependencies {
     compile "org.apereo.cas:cas-server-core-api-configuration-model:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-services-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-attributes:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-support-generic:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-support-surrogate-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-webapp-config:${casServerVersion}"
     compile "org.springframework.security:spring-security-config:5.1.2.RELEASE"
 }
