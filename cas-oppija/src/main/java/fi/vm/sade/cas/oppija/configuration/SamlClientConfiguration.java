@@ -18,7 +18,7 @@ import static java.util.function.Function.identity;
 public class SamlClientConfiguration {
 
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientPrincipalFactory
-    @Bean
+    //@Bean disabled for now, we might use hetu as principal after all
     public PrincipalFactory clientPrincipalFactory(@Qualifier("oppijanumerorekisteriHttpClient") OphHttpClient httpClient, OphProperties properties) {
         return new HetuToOidPrincipalFactory(httpClient, properties);
     }
