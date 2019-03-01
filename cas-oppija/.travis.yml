@@ -15,7 +15,7 @@ env:
     - secure: "g9sRmXBO1fhX+Ykzklt3ybmTJozVE6lcKsos9tY2FAlKK/+kC1sECX74uJ1HJWqmTnPsBvRUqkwnl1pJRyCX/YCwgvbAPcYH63uyxsXzras6sGUUteFyXPT6GygUYK+obgq2Y+hJLS4e+b9746z0Z8+g7zaSpseMkhm0BwZ5yBjqA5iubLPPmz2xA8aG/uX8sNJ9qmb1Pg/0Cbe7rV8l4bhFs6aXeL8Vbjc4gyAhrcZ3qXtGTSmnL0zNn1FPQiTKtni+L9SDdTr66Hd1b3W4TeMwildfA6Easr0gVIMCHfY0Jjs68TuJEhIvtog7kjVDhDvWK3afwXOtFOy+p4ru7gHK4sFwoAIjJ51zAUH0VUfuRcND57MCTKtUf4/Go7Fde5/oH/FIbuMgp/njO9B+ssNXr63b0jj61KTajPnC0BCDO3P3Bi+YLLuBkfTGxU8FNPEzUVpvCnuH4G3H3kIvM1DeIMcRwue1f066ySRKpa1oKr5DYCQrU7OOCD2ZcSVw9lNwYsRX3rmUrwIPOLy5nkaJZYpvs/qsyBb5QxXSFAZuXdxA2MdZdnLW3bVmamOfE/Q7odR+zpk0rEwR1CP/yQJdB0GHa+p72gWVprAi990AuOHedG7TFtmNTCxAKUbykSxG8YkVxG67qmxqtOcpgIM2qquA5ONzQ8oiBEqBlVg="
 
 install:
-  - git clone --branch jdk11 https://github.com/Opetushallitus/ci-tools.git
+  - git clone https://github.com/Opetushallitus/ci-tools.git
   - source ci-tools/common/setup-tools.sh
   - export ARTIFACT_NAME="cas-oppija"
 
