@@ -2,6 +2,7 @@ package fi.vm.sade.cas.oppija.configuration;
 
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,11 @@ import org.springframework.core.env.Environment;
 public class HttpClientConfiguration {
 
     private static final String CLIENT_SUBSYSTEM_CODE = "cas-oppija";
+
+    @Bean
+    public fi.vm.sade.javautils.httpclient.OphHttpClient httpClient() {
+        return ApacheOphHttpClient.createDefaultOphClient(CLIENT_SUBSYSTEM_CODE, null);
+    }
 
     @Bean
     public OphHttpClient oppijanumerorekisteriHttpClient(OphProperties properties, Environment environment) {
