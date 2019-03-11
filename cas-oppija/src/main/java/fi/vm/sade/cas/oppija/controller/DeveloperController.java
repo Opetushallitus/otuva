@@ -45,8 +45,12 @@ public class DeveloperController {
         this.environment = environment;
     }
 
-    @GetMapping(value = "/serviceValidate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getServiceValidate(HttpServletRequest request) {
+    @GetMapping(value = "/serviceValidate", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getServiceValidate(HttpServletRequest request, @RequestParam(required = false, defaultValue = "XML") String format) {
+        return getServiceValidate(request, Format.valueOf(format, Format.XML));
+    }
+
+    private ResponseEntity<String> getServiceValidate(HttpServletRequest request, @RequestParam(required = false, defaultValue = "XML") Format format) {
         String ticketGrantingTicket = cookieRetrievingCookieGenerator.retrieveCookieValue(request);
         if (ticketGrantingTicket == null) {
             throw new UnauthorizedException();
@@ -61,7 +65,7 @@ public class DeveloperController {
         }
         try {
             String serviceTicket = getServiceTicket(ticketGrantingTicket, serviceUrl);
-            return getServiceValidate(serviceTicket, serviceUrl);
+            return getServiceValidate(serviceTicket, serviceUrl, format);
         } catch (ApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -82,22 +86,24 @@ public class DeveloperController {
                 .execute(OphHttpResponse::asText);
     }
 
-    private ResponseEntity<String> getServiceValidate(String serviceTicket, String serviceUrl) {
+    private ResponseEntity<String> getServiceValidate(String serviceTicket, String serviceUrl, Format format) {
         String serviceValidateUrl = UriComponentsBuilder
                 .fromHttpUrl(environment.getRequiredProperty("cas.server.prefix"))
                 .path("/p3/serviceValidate")
                 .queryParam("service", serviceUrl)
                 .queryParam("ticket", serviceTicket)
-                .queryParam("format", "JSON")
+                .queryParam("format", format.name())
                 .build()
                 .toUriString();
         return httpClient.get(serviceValidateUrl)
                 .expectStatus(200)
-                .execute(DeveloperController::ophResponseToSpringResponse);
+                .execute(response -> ophResponseToSpringResponse(response, format));
     }
 
-    private static ResponseEntity<String> ophResponseToSpringResponse(OphHttpResponse response) {
-        return ResponseEntity.status(response.getStatusCode()).body(response.asText());
+    private static ResponseEntity<String> ophResponseToSpringResponse(OphHttpResponse response, Format format) {
+        return ResponseEntity.status(response.getStatusCode())
+                .contentType(format.contentType)
+                .body(response.asText());
     }
 
     @ExceptionHandler(SystemException.class)
@@ -166,6 +172,27 @@ public class DeveloperController {
         public ApplicationException(Throwable cause) {
             super(cause);
         }
+    }
+
+    private enum Format {
+
+        XML(MediaType.APPLICATION_XML),
+        JSON(MediaType.APPLICATION_JSON);
+
+        private final MediaType contentType;
+
+        Format(MediaType contentType) {
+            this.contentType = contentType;
+        }
+
+        public static Format valueOf(String name, Format defaultValue) {
+            try {
+                return Format.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                return defaultValue;
+            }
+        }
+
     }
 
 }
