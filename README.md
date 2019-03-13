@@ -26,6 +26,10 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 
     mvn clean install
 
+## Tietokanta
+
+    docker run --name kayttooikeus-db -p 5432:5432 -e POSTGRES_USER=oph -e POSTGRES_PASSWORD=oph -e POSTGRES_DB=kayttooikeus -d postgres:10.6
+
 ## Käynnistäminen
 
     java -jar kayttooikeus-service/target/kayttooikeus-service-1.0.1-SNAPSHOT.jar
