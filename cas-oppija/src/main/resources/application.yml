@@ -33,6 +33,8 @@ cas.monitor.endpoints.endpoint.health.access: PERMIT
 
 # Custom configuration
 
+cas.custom.properties:
+  suomiFiClientName: suomi.fi
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
 service-user.username: user

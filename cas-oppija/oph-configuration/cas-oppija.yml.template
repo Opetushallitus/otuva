@@ -17,7 +17,7 @@ cas.tgc.secure: true
 cas.warningCookie.secure: true
 
 cas.authn.pac4j.saml:
-  - clientName: suomi.fi
+  - clientName: ${cas.custom.properties.suomiFiClientName}
     keystorePath: {{ cas_oppija_suomifi_keystore_path }}
     keystorePassword: {{ cas_oppija_suomifi_keystore_password }}
     keystoreAlias: {{ cas_oppija_suomifi_keystore_alias }}
