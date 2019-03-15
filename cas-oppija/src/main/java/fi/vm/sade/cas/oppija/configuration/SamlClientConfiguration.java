@@ -3,17 +3,25 @@ package fi.vm.sade.cas.oppija.configuration;
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.properties.OphProperties;
+import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jBaseClientProperties;
+import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.pac4j.authentication.DelegatedClientFactory;
+import org.apereo.cas.support.pac4j.authentication.handler.support.ClientAuthenticationHandler;
 import org.opensaml.core.xml.schema.XSAny;
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
 import org.pac4j.core.client.BaseClient;
+import org.pac4j.core.client.Clients;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.config.SAML2Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -24,13 +32,14 @@ import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static fi.vm.sade.cas.oppija.CasOppijaConstants.DEFAULT_LANGUAGE;
-import static fi.vm.sade.cas.oppija.CasOppijaConstants.SUPPORTED_LANGUAGES;
+import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
 import static java.util.function.Function.identity;
 
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class SamlClientConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SamlClientConfiguration.class);
 
     private final CasConfigurationProperties casProperties;
 
@@ -39,34 +48,85 @@ public class SamlClientConfiguration {
     }
 
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientPrincipalFactory
-    //@Bean disabled for now, we might use hetu as principal after all
+    @Bean
     public PrincipalFactory clientPrincipalFactory(@Qualifier("oppijanumerorekisteriHttpClient") OphHttpClient httpClient, OphProperties properties) {
-        return new HetuToOidPrincipalFactory(httpClient, properties);
+        return new OidAttributePrincipalFactory(httpClient, properties);
     }
 
-    private static class HetuToOidPrincipalFactory implements PrincipalFactory {
+    private static class OidAttributePrincipalFactory implements PrincipalFactory {
 
         private final OphHttpClient httpClient;
         private final OphProperties properties;
         private final PrincipalFactory principalFactory;
 
-        public HetuToOidPrincipalFactory(OphHttpClient httpClient, OphProperties properties) {
+        public OidAttributePrincipalFactory(OphHttpClient httpClient, OphProperties properties) {
             this.httpClient = httpClient;
             this.properties = properties;
             this.principalFactory = PrincipalFactoryUtils.newPrincipalFactory();
         }
 
         @Override
-        public Principal createPrincipal(String hetu, Map<String, Object> attributes) {
-            String url = properties.url("oppijanumerorekisteri-service.henkilo.byHetu.oid", hetu);
-            OphHttpRequest request = OphHttpRequest.Builder.get(url).build();
-            String oid = httpClient.<String>execute(request)
-                    .expectedStatus(200)
-                    .mapWith(identity())
-                    .orElseThrow(() -> new RuntimeException(String.format("Url %s returned 204 or 404", url)));
-            return principalFactory.createPrincipal(oid, attributes);
+        public Principal createPrincipal(String id, Map<String, Object> attributes) {
+            try {
+                resolveNationalIdentificationNumber(attributes)
+                        .flatMap(this::findOidByNationalIdentificationNumber)
+                        .ifPresent((String oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
+            } catch (Exception e) {
+                LOGGER.error("Unable to get oid by national identification number", e);
+            }
+
+            return principalFactory.createPrincipal(id, attributes);
         }
 
+        private Optional<String> resolveNationalIdentificationNumber(Map<String, Object> attributes) {
+            Object nationalIdentificationNumber = attributes.get(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER);
+            if (nationalIdentificationNumber == null) {
+                return Optional.empty();
+            }
+            if (nationalIdentificationNumber instanceof String) {
+                return Optional.of((String) nationalIdentificationNumber);
+            }
+            if (nationalIdentificationNumber instanceof Iterable) {
+                Iterable iterable = (Iterable) nationalIdentificationNumber;
+                Iterator iterator = iterable.iterator();
+                while (iterator.hasNext()) {
+                    Object value = iterator.next();
+                    if (value instanceof String) {
+                        return Optional.of((String) value);
+                    }
+                }
+            }
+            LOGGER.warn("Cannot parse national identification number to string (type={}, value={})", nationalIdentificationNumber.getClass(), nationalIdentificationNumber);
+            return Optional.empty();
+        }
+
+        private Optional<String> findOidByNationalIdentificationNumber(String nationalIdentificationNumber) {
+            String url = properties.url("oppijanumerorekisteri-service.henkilo.byHetu.oid", nationalIdentificationNumber);
+            OphHttpRequest request = OphHttpRequest.Builder.get(url).build();
+            return httpClient.<String>execute(request)
+                    .expectedStatus(200)
+                    .mapWith(identity());
+        }
+
+    }
+
+    // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientAuthenticationHandler
+    @Bean
+    public AuthenticationHandler clientAuthenticationHandler(ObjectProvider<ServicesManager> servicesManager,
+                                                             @Qualifier("oppijanumerorekisteriHttpClient") OphHttpClient httpClient,
+                                                             OphProperties properties,
+                                                             Clients builtClients) {
+        var pac4j = casProperties.getAuthn().getPac4j();
+        var h = new ClientAuthenticationHandler(pac4j.getName(), servicesManager.getIfAvailable(),
+                clientPrincipalFactory(httpClient, properties), builtClients) {
+            @Override
+            protected String determinePrincipalIdFrom(UserProfile profile, BaseClient client) {
+                return profile.getClientName() + UserProfile.SEPARATOR + profile.getId();
+            }
+        };
+        h.setTypedIdUsed(pac4j.isTypedIdUsed());
+        h.setPrincipalAttributeId(pac4j.getPrincipalAttributeId());
+        return h;
     }
 
     @Bean
