@@ -32,6 +32,7 @@ import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
 import static java.util.function.Function.identity;
 
@@ -79,25 +80,7 @@ public class SamlClientConfiguration {
         }
 
         private Optional<String> resolveNationalIdentificationNumber(Map<String, Object> attributes) {
-            Object nationalIdentificationNumber = attributes.get(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER);
-            if (nationalIdentificationNumber == null) {
-                return Optional.empty();
-            }
-            if (nationalIdentificationNumber instanceof String) {
-                return Optional.of((String) nationalIdentificationNumber);
-            }
-            if (nationalIdentificationNumber instanceof Iterable) {
-                Iterable iterable = (Iterable) nationalIdentificationNumber;
-                Iterator iterator = iterable.iterator();
-                while (iterator.hasNext()) {
-                    Object value = iterator.next();
-                    if (value instanceof String) {
-                        return Optional.of((String) value);
-                    }
-                }
-            }
-            LOGGER.warn("Cannot parse national identification number to string (type={}, value={})", nationalIdentificationNumber.getClass(), nationalIdentificationNumber);
-            return Optional.empty();
+            return resolveAttribute(attributes, ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class);
         }
 
         private Optional<String> findOidByNationalIdentificationNumber(String nationalIdentificationNumber) {
