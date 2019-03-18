@@ -1,8 +1,6 @@
 package fi.vm.sade.cas.oppija.configuration;
 
-import fi.vm.sade.javautils.http.OphHttpClient;
-import fi.vm.sade.javautils.http.OphHttpRequest;
-import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.cas.oppija.service.PersonService;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
@@ -22,7 +20,6 @@ import org.pac4j.saml.config.SAML2Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,9 +29,8 @@ import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
-import static java.util.function.Function.identity;
+import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
 
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
@@ -50,19 +46,17 @@ public class SamlClientConfiguration {
 
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientPrincipalFactory
     @Bean
-    public PrincipalFactory clientPrincipalFactory(@Qualifier("oppijanumerorekisteriHttpClient") OphHttpClient httpClient, OphProperties properties) {
-        return new OidAttributePrincipalFactory(httpClient, properties);
+    public PrincipalFactory clientPrincipalFactory(PersonService personService) {
+        return new OidAttributePrincipalFactory(personService);
     }
 
     private static class OidAttributePrincipalFactory implements PrincipalFactory {
 
-        private final OphHttpClient httpClient;
-        private final OphProperties properties;
+        private final PersonService personService;
         private final PrincipalFactory principalFactory;
 
-        public OidAttributePrincipalFactory(OphHttpClient httpClient, OphProperties properties) {
-            this.httpClient = httpClient;
-            this.properties = properties;
+        public OidAttributePrincipalFactory(PersonService personService) {
+            this.personService = personService;
             this.principalFactory = PrincipalFactoryUtils.newPrincipalFactory();
         }
 
@@ -84,11 +78,7 @@ public class SamlClientConfiguration {
         }
 
         private Optional<String> findOidByNationalIdentificationNumber(String nationalIdentificationNumber) {
-            String url = properties.url("oppijanumerorekisteri-service.henkilo.byHetu.oid", nationalIdentificationNumber);
-            OphHttpRequest request = OphHttpRequest.Builder.get(url).build();
-            return httpClient.<String>execute(request)
-                    .expectedStatus(200)
-                    .mapWith(identity());
+            return personService.findOidByNationalIdentificationNumber(nationalIdentificationNumber);
         }
 
     }
@@ -96,12 +86,11 @@ public class SamlClientConfiguration {
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientAuthenticationHandler
     @Bean
     public AuthenticationHandler clientAuthenticationHandler(ObjectProvider<ServicesManager> servicesManager,
-                                                             @Qualifier("oppijanumerorekisteriHttpClient") OphHttpClient httpClient,
-                                                             OphProperties properties,
+                                                             PersonService personService,
                                                              Clients builtClients) {
         var pac4j = casProperties.getAuthn().getPac4j();
         var h = new ClientAuthenticationHandler(pac4j.getName(), servicesManager.getIfAvailable(),
-                clientPrincipalFactory(httpClient, properties), builtClients) {
+                clientPrincipalFactory(personService), builtClients) {
             @Override
             protected String determinePrincipalIdFrom(UserProfile profile, BaseClient client) {
                 return profile.getClientName() + UserProfile.SEPARATOR + profile.getId();
