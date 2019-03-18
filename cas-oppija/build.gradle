@@ -55,7 +55,6 @@ dependencies {
     compile "org.apereo.cas:cas-server-support-pac4j-core-clients:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-rest:${casServerVersion}"
-    compile "org.apereo.cas:cas-server-support-surrogate-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-webapp-config:${casServerVersion}"
     compile "org.opensaml:opensaml-core:3.4.0"
     compile "org.pac4j:pac4j-core:3.6.1"
