@@ -31,6 +31,13 @@ cas.authn.pac4j.saml:
         friendlyName: nationalIdentificationNumber
         nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
         required: true
+      - name: urn:oid:2.5.4.3
+        friendlyName: cn
+        nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
+    mappedAttributes:
+      - name: urn:oid:2.5.4.3
+        mappedTo: personName
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
@@ -49,5 +56,10 @@ server.tomcat.accesslog:
 
 whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
 host.virkailija: https://{{ host_virkailija }}
+valtuudet.host: {{ cas_oppija_suomifi_host_valtuudet }}
+valtuudet.client-id: {{ cas_oppija_suomifi_valtuudet_client_id }}
+valtuudet.api-key: {{ cas_oppija_suomifi_valtuudet_api_key }}
+valtuudet.oauth-password: {{ cas_oppija_suomifi_valtuudet_oauth_password }}
+valtuudet.session-timeout: {{ cas_oppija_suomifi_valtuudet_session_timeout | default('PT5M') }}
 service-user.username: {{ cas_oppija_service_user_username }}
 service-user.password: {{ cas_oppija_service_user_password }}

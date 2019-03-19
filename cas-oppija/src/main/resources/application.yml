@@ -19,6 +19,8 @@ cas.httpWebRequest.header.xcontent: false
 cas.httpWebRequest.header.hsts: false
 
 cas.authn.accept.users:
+cas.authn.exceptions.exceptions:
+  - fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException
 
 cas.tgc.secure: false
 cas.tgc.path: /cas-oppija
@@ -37,5 +39,10 @@ cas.custom.properties:
   suomiFiClientName: suomi.fi
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
+valtuudet.host: http://localhost:8080
+valtuudet.client-id: client
+valtuudet.api-key: key
+valtuudet.oauth-password: password
+valtuudet.session-timeout: PT5M
 service-user.username: user
 service-user.password: pass
