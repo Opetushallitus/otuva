@@ -56,8 +56,8 @@ server.tomcat.accesslog:
 
 whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
 host.virkailija: https://{{ host_virkailija }}
-valtuudet.enabled {{ cas_oppija_suomifi_valtuudet_enabled | default('true') }}
-valtuudet.required {{ cas_oppija_suomifi_valtuudet_required | default('true') }}
+valtuudet.enabled: {{ cas_oppija_suomifi_valtuudet_enabled | default('true') }}
+valtuudet.required: {{ cas_oppija_suomifi_valtuudet_required | default('true') }}
 valtuudet.host: {{ cas_oppija_suomifi_host_valtuudet }}
 valtuudet.client-id: {{ cas_oppija_suomifi_valtuudet_client_id }}
 valtuudet.api-key: {{ cas_oppija_suomifi_valtuudet_api_key }}
