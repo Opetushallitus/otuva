@@ -12,6 +12,7 @@ import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.services.RegisteredService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,6 +27,7 @@ import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
 import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.TOKEN_PARAMETER_NAME;
 
 @Component
+@ConditionalOnProperty("valtuudet.enabled")
 public class SurrogateInterruptInquirer implements InterruptInquirer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SurrogateInterruptInquirer.class);

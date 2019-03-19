@@ -39,6 +39,7 @@ cas.custom.properties:
   suomiFiClientName: suomi.fi
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
+valtuudet.enabled: false
 valtuudet.host: http://localhost:8080
 valtuudet.client-id: client
 valtuudet.api-key: key
