@@ -68,8 +68,9 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
 
         InterruptResponse interruptResponse = new InterruptResponse();
         interruptResponse.setLinks(Map.of("Suomi.fi-valtuudet", authorizeUrl));
-        interruptResponse.setBlock(true);
-        interruptResponse.setAutoRedirect(true);
+        boolean required = environment.getRequiredProperty("valtuudet.required", Boolean.class);
+        interruptResponse.setBlock(required);
+        interruptResponse.setAutoRedirect(required);
         return interruptResponse;
     }
 
