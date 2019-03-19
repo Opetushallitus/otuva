@@ -16,6 +16,16 @@ cas.tgc.secure: true
 
 cas.warningCookie.secure: true
 
+cas.tgc.crypto:
+    encryption.key: {{ cas_oppija_tgc_encryption_key }}
+    signing.key: {{ cas_oppija_tgc_signing_key }}
+cas.webflow.crypto:
+    encryption.key: {{ cas_oppija_webflow_encryption_key }}
+    signing.key: {{ cas_oppija_webflow_signing_key }}
+
+cas.authn.pac4j.cookie.crypto:
+    encryption.key: {{ cas_oppija_pac4j_cookie_encryption_key }}
+    signing.key: {{ cas_oppija_pac4j_cookie_signing_key }}
 cas.authn.pac4j.saml:
   - clientName: ${cas.custom.properties.suomiFiClientName}
     keystorePath: {{ cas_oppija_suomifi_keystore_path }}
