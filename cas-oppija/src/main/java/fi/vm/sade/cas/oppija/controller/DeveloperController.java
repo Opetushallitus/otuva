@@ -1,5 +1,9 @@
 package fi.vm.sade.cas.oppija.controller;
 
+import fi.vm.sade.cas.oppija.exception.ApplicationException;
+import fi.vm.sade.cas.oppija.exception.BadRequestException;
+import fi.vm.sade.cas.oppija.exception.SystemException;
+import fi.vm.sade.cas.oppija.exception.UnauthorizedException;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import fi.vm.sade.javautils.httpclient.OphHttpResponse;
 import org.apereo.cas.authentication.principal.WebApplicationService;
@@ -10,10 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,74 +110,6 @@ public class DeveloperController {
         return ResponseEntity.status(response.getStatusCode())
                 .contentType(format.contentType)
                 .body(response.asText());
-    }
-
-    @ExceptionHandler(SystemException.class)
-    public ResponseEntity<Void> handle(SystemException exception) {
-        LOGGER.error("Catched exception", exception);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private static class UnauthorizedException extends UserException {
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private static class BadRequestException extends UserException {
-        public BadRequestException(String message) {
-            super(message);
-        }
-    }
-
-    private static abstract class UserException extends ApplicationException {
-        public UserException() {
-        }
-
-        public UserException(String message) {
-            super(message);
-        }
-
-        public UserException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public UserException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    private static class SystemException extends ApplicationException {
-        public SystemException() {
-        }
-
-        public SystemException(String message) {
-            super(message);
-        }
-
-        public SystemException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public SystemException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    private static abstract class ApplicationException extends RuntimeException {
-        public ApplicationException() {
-        }
-
-        public ApplicationException(String message) {
-            super(message);
-        }
-
-        public ApplicationException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ApplicationException(Throwable cause) {
-            super(cause);
-        }
     }
 
     private enum Format {
