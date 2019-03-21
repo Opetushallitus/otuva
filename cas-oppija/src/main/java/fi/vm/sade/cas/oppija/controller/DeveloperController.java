@@ -59,7 +59,7 @@ public class DeveloperController {
     private ResponseEntity<String> getServiceValidate(HttpServletRequest request, @RequestParam(required = false, defaultValue = "XML") Format format) {
         String ticketGrantingTicket = cookieRetrievingCookieGenerator.retrieveCookieValue(request);
         if (ticketGrantingTicket == null) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Ticket granting ticket was not provided");
         }
         WebApplicationService service = argumentExtractor.extractService(request);
         String serviceUrl = service != null ? service.getId() : null;
