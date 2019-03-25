@@ -56,7 +56,6 @@ dependencies {
     compile "org.apereo.cas:cas-server-support-pac4j-authentication:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-core-clients:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-webflow:${casServerVersion}"
-    compile "org.apereo.cas:cas-server-support-rest:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-interrupt-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-interrupt-core:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-interrupt-webflow:${casServerVersion}"
