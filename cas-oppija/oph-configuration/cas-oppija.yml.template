@@ -50,6 +50,8 @@ cas.authn.pac4j.saml:
       - name: urn:oid:2.5.4.3
         mappedTo: personName
 
+cas.logout.redirectUrl: {{ cas_oppija_logout_redirect_url }}
+
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
