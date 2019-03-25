@@ -18,4 +18,5 @@ bin/
 *.log
 tmp/
 ./apache-tomcat
+buildversion.txt
 apache-tomcat.zip

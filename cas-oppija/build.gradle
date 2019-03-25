@@ -34,6 +34,7 @@ project.ext."casWebApplicationBinaryName" = casWebApplicationBinaryName
 
 apply from: rootProject.file("gradle/waroverlay.gradle")
 apply from: rootProject.file("gradle/tasks.gradle")
+apply from: rootProject.file("gradle/buildversion.gradle")
 
 apply plugin: "war"
 apply plugin: "org.springframework.boot"
@@ -174,3 +175,4 @@ jib {
         ]
     }
 }
+
