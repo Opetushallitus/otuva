@@ -58,6 +58,10 @@ cas.logout.redirectUrl: {{ cas_oppija_logout_redirect_url }}
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
+spring.datasource.url: jdbc:postgresql://{{ cas_oppija_datasource_host }}:{{ cas_oppija_datasource_port | default('5432') }}/{{ cas_oppija_datasource_dbname | default('cas-oppija') }}
+spring.datasource.username: {{ cas_oppija_datasource_username }}
+spring.datasource.password: {{ cas_oppija_datasource_password }}
+
 server.tomcat.accesslog:
     enabled: true
     directory: /root/logs

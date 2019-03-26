@@ -33,6 +33,16 @@ management.endpoint.health.enabled: true
 cas.monitor.endpoints.endpoint.info.access: PERMIT
 cas.monitor.endpoints.endpoint.health.access: PERMIT
 
+# Spring Boot configuration
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+spring.datasource.url: jdbc:postgresql://localhost:5432/cas-oppija
+spring.datasource.username: cas-oppija
+spring.datasource.password: cas-oppija
+spring.datasource.driver-class-name: org.postgresql.Driver
+
+spring.flyway.out-of-order: true
+
 # Custom configuration
 
 cas.custom.properties:
