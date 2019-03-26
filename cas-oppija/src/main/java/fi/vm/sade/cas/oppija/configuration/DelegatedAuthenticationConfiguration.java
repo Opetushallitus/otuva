@@ -67,7 +67,8 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     @Override
     public int getOrder() {
         // This CasWebflowExecutionPlanConfigurer must be run before SurrogateConfiguration to able to cancel auth
-        return Ordered.HIGHEST_PRECEDENCE;
+        // but after InterruptConfiguration to enable surrogate authentication after delegated authentication
+        return Ordered.HIGHEST_PRECEDENCE + 1;
     }
 
     // override default delegatedAuthenticationWebflowConfigurer to be able to override its flow definitions (see above)

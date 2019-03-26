@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.ActionList;
 import org.springframework.webflow.engine.ActionState;
@@ -30,7 +31,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer {
+public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
 
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
@@ -74,6 +75,13 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
             }
         });
 
+    }
+
+    @Override
+    public int getOrder() {
+        // This CasWebflowExecutionPlanConfigurer must be run before DelegatedAuthenticationConfiguration to enable
+        // surrogate authentication after delegated authentication
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
