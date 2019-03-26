@@ -11,7 +11,7 @@ public class SurrogateCredential implements Credential {
 
     public SurrogateCredential(String token, String code) {
         this.token = requireNonNull(token);
-        this.code = code;
+        this.code = requireNonNull(code);
     }
 
     @Override

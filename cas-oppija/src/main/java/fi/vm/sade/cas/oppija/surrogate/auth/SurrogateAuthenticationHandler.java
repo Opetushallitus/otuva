@@ -51,15 +51,10 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
 
     public AuthenticationHandlerExecutionResult authenticate(SurrogateCredential credential) throws GeneralSecurityException, PreventedException {
         try {
-            if (credential.getCode() == null) {
-                throw new PreventedException("User cancelled surrogate authentication");
-            }
             SurrogateAuthenticationDto dto = surrogateService.getAuthentication(credential.getToken(), credential.getCode());
             return createHandlerResult(credential, createPrincipal(dto));
         } catch (GeneralSecurityException e) {
             LOGGER.warn(e.getMessage());
-            throw e;
-        } catch (PreventedException e) {
             throw e;
         } catch (Exception e) {
             throw new PreventedException(e);

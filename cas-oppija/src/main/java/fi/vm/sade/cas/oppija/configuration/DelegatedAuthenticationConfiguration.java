@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.webflow.definition.TransitionDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.ActionState;
@@ -20,7 +21,7 @@ import org.springframework.webflow.execution.Action;
  */
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer {
+public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
 
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
@@ -61,6 +62,12 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 createTransitionForState(state, CasWebflowConstants.TRANSITION_ID_SUCCESS, successTargetStateId, true);
             }
         });
+    }
+
+    @Override
+    public int getOrder() {
+        // This CasWebflowExecutionPlanConfigurer must be run before SurrogateConfiguration to able to cancel auth
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 
     // override default delegatedAuthenticationWebflowConfigurer to be able to override its flow definitions (see above)
