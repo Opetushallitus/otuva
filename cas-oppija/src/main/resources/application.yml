@@ -36,12 +36,16 @@ cas.monitor.endpoints.endpoint.health.access: PERMIT
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
-spring.datasource.url: jdbc:postgresql://localhost:5432/cas-oppija
+spring.datasource.url: jdbc:h2:mem:cas-oppija;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE
 spring.datasource.username: cas-oppija
 spring.datasource.password: cas-oppija
-spring.datasource.driver-class-name: org.postgresql.Driver
+spring.datasource.driver-class-name: org.h2.Driver
+spring.datasource.platform: h2
 
+spring.flyway.enabled: false
 spring.flyway.out-of-order: true
+
+spring.session.store-type: jdbc
 
 # Custom configuration
 
