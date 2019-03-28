@@ -54,6 +54,7 @@ dependencies {
     compile "org.apereo.cas:cas-server-core-web-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-webflow-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-generic:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-support-jpa-ticket-registry:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-authentication:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-core:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-pac4j-core-clients:${casServerVersion}"

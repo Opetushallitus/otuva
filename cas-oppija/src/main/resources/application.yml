@@ -33,6 +33,13 @@ management.endpoint.health.enabled: true
 cas.monitor.endpoints.endpoint.info.access: PERMIT
 cas.monitor.endpoints.endpoint.health.access: PERMIT
 
+cas.ticket.registry.jpa.url: jdbc:h2:mem:cas-oppija;DB_CLOSE_ON_EXIT=FALSE
+cas.ticket.registry.jpa.user: cas-oppija
+cas.ticket.registry.jpa.password: cas-oppija
+cas.ticket.registry.jpa.driverClass: org.h2.Driver
+cas.ticket.registry.jpa.dialect: org.hibernate.dialect.H2Dialect
+cas.ticket.registry.jpa.ddlAuto: create
+
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
