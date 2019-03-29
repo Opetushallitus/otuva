@@ -1,7 +1,11 @@
 package fi.vm.sade.cas.oppija.configuration;
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
+import org.apereo.cas.interrupt.InterruptInquirer;
+import org.apereo.cas.interrupt.InterruptResponse;
+import org.apereo.cas.interrupt.webflow.InterruptUtils;
 import org.apereo.cas.interrupt.webflow.InterruptWebflowConfigurer;
+import org.apereo.cas.interrupt.webflow.actions.InquireInterruptAction;
 import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
@@ -18,7 +22,10 @@ import org.springframework.webflow.engine.ActionList;
 import org.springframework.webflow.engine.ActionState;
 import org.springframework.webflow.engine.TransitionSet;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
+import org.springframework.webflow.execution.Event;
+import org.springframework.webflow.execution.RequestContext;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
@@ -62,6 +69,10 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
                 clear(transitions, transitions::remove);
                 transitions.add(createTransition(CasWebflowConstants.TRANSITION_ID_INTERRUPT_SKIPPED, CasWebflowConstants.STATE_ID_CREATE_TICKET_GRANTING_TICKET));
                 transitions.add(createTransition(CasWebflowConstants.TRANSITION_ID_INTERRUPT_REQUIRED, "interruptView"));
+
+                // add redirect transition
+                transitions.add(createTransition("interruptRedirect", "redirectInterrupt"));
+                createEndState(getLoginFlow(), "redirectInterrupt", "flowScope.interruptRedirectUrl", true);
             }
         });
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
@@ -95,6 +106,27 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
             @Override
             protected void doInitialize() {
                 // nop
+            }
+        };
+    }
+
+    // override default inquireInterruptAction to add new interruptRedirect transition
+    @Bean
+    public InquireInterruptAction inquireInterruptAction(List<InterruptInquirer> interruptInquirers) {
+        return new InquireInterruptAction(interruptInquirers) {
+            @Override
+            protected Event doExecute(RequestContext requestContext) {
+                Event event = super.doExecute(requestContext);
+                if (CasWebflowConstants.TRANSITION_ID_INTERRUPT_REQUIRED.equals(event.getId())) {
+                    InterruptResponse interruptResponse = InterruptUtils.getInterruptFrom(requestContext);
+                    if (interruptResponse.isAutoRedirect() && interruptResponse.getAutoRedirectAfterSeconds() < 0
+                            && interruptResponse.getLinks().size() > 0) {
+                        requestContext.getFlowScope().put("interruptRedirectUrl",
+                                interruptResponse.getLinks().values().iterator().next());
+                        return result("interruptRedirect");
+                    }
+                }
+                return event;
             }
         };
     }
