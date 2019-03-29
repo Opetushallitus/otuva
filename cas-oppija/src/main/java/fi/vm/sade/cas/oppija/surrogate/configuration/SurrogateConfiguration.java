@@ -9,7 +9,7 @@ import fi.vm.sade.cas.oppija.surrogate.SurrogateTokenProvider;
 import fi.vm.sade.cas.oppija.surrogate.auth.SurrogateAuthenticationHandler;
 import fi.vm.sade.cas.oppija.surrogate.auth.SurrogateAuthenticationWebflowConfigurer;
 import fi.vm.sade.cas.oppija.surrogate.service.SurrogateServiceImpl;
-import fi.vm.sade.cas.oppija.surrogate.session.InMemorySurrogateSessionStorage;
+import fi.vm.sade.cas.oppija.surrogate.session.HttpSurrogateSessionStorage;
 import fi.vm.sade.cas.oppija.surrogate.session.SurrogateSessionCleaner;
 import fi.vm.sade.cas.oppija.surrogate.token.UuidSurrogateTokenProvider;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
@@ -44,7 +44,7 @@ public class SurrogateConfiguration implements CasWebflowExecutionPlanConfigurer
 
     @Bean
     public SurrogateSessionStorage surrogateSessionStorage() {
-        return new InMemorySurrogateSessionStorage();
+        return new HttpSurrogateSessionStorage();
     }
 
     @Bean

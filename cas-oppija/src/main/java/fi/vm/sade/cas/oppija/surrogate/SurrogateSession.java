@@ -1,8 +1,9 @@
 package fi.vm.sade.cas.oppija.surrogate;
 
+import java.io.Serializable;
 import java.time.Instant;
 
-public class SurrogateSession {
+public class SurrogateSession implements Serializable {
 
     public final Instant created;
     public final String nationalIdentificationNumber;
