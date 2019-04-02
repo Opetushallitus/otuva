@@ -50,7 +50,8 @@ public class SurrogateServiceImpl implements SurrogateService {
         this.transientSessionTicketFactory = transientSessionTicketFactory;
     }
 
-    public String getAuthorizeUrl(SurrogateSession session, Function<String, String> tokenToRedirectUrl) {
+    public String getAuthorizeUrl(String nationalIdentificationNumber, String language, SurrogateSession session,
+                                  Function<String, String> tokenToRedirectUrl) {
         TransientSessionTicket ticket = transientSessionTicketFactory.create(null);
         String token = ticket.getId();
 
@@ -58,7 +59,7 @@ public class SurrogateServiceImpl implements SurrogateService {
         String requestId = UUID.randomUUID().toString();
         String redirectUrl = tokenToRedirectUrl.apply(token);
 
-        RegistrationDto registrationDto = getRegistration(host, session.nationalIdentificationNumber, requestId);
+        RegistrationDto registrationDto = getRegistration(host, nationalIdentificationNumber, requestId);
         session.update(redirectUrl, requestId, registrationDto.sessionId, registrationDto.userId);
         ticket.put(ATTRIBUTE_NAME_SURROGATE, session);
         ticketRegistry.addTicket(ticket);
@@ -68,7 +69,7 @@ public class SurrogateServiceImpl implements SurrogateService {
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUrl)
                 .queryParam("user", registrationDto.userId)
-                .queryParam("lang", session.language)
+                .queryParam("lang", language)
                 .uriComponents(host)
                 .toUriString();
     }
@@ -118,8 +119,8 @@ public class SurrogateServiceImpl implements SurrogateService {
             throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s (result=%s)",
                     person.personId, authorization.result));
         }
-        return new SurrogateAuthenticationDto(session.principalId, session.nationalIdentificationNumber,
-                session.personOid, session.personName, person.personId, person.name);
+        return new SurrogateAuthenticationDto(session.principalId, session.principalAttributes,
+                session.authenticationAttributes, person.personId, person.name);
     }
 
     private AccessTokenDto getAccessToken(UriComponents host, SurrogateSession session, String code) {

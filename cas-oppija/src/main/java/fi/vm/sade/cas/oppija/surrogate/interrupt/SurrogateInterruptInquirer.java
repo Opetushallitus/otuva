@@ -56,15 +56,16 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
 
     private InterruptResponse inquire(Authentication authentication, String serviceUrl, String language) {
         Principal principal = authentication.getPrincipal();
-        String principalId = principal.getId();
-        Map<String, Object> attributes = principal.getAttributes();
-        String nationalIdentificationNumber = resolveAttribute(attributes, ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class)
-                .orElseThrow(() -> new IllegalArgumentException("National identification number not available"));
-        String personOid = resolveAttribute(attributes, ATTRIBUTE_NAME_PERSON_OID, String.class).orElse(null);
-        String personName = resolveAttribute(attributes, ATTRIBUTE_NAME_PERSON_NAME, String.class).orElse("");
+        Map<String, Object> principalAttributes = principal.getAttributes();
+        Map<String, Object> authenticationAttributes = authentication.getAttributes();
 
-        SurrogateSession session = new SurrogateSession(nationalIdentificationNumber, principalId, personOid, personName, language);
-        String authorizeUrl = surrogateService.getAuthorizeUrl(session, token -> createRedirectUrl(serviceUrl, token));
+        String nationalIdentificationNumber = resolveAttribute(principalAttributes,
+                ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class)
+                .orElseThrow(() -> new IllegalArgumentException("National identification number not available"));
+
+        SurrogateSession session = new SurrogateSession(principal.getId(), principalAttributes, authenticationAttributes);
+        String authorizeUrl = surrogateService.getAuthorizeUrl(nationalIdentificationNumber, language, session,
+                token -> createRedirectUrl(serviceUrl, token));
 
         InterruptResponse interruptResponse = new InterruptResponse();
         interruptResponse.setLinks(Map.of("Suomi.fi-valtuudet", authorizeUrl));

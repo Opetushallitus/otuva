@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
+import static org.springframework.util.StringUtils.capitalize;
 
 public class SurrogateAuthenticationHandler implements AuthenticationHandler {
 
@@ -52,6 +53,7 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     public AuthenticationHandlerExecutionResult authenticate(SurrogateCredential credential) throws GeneralSecurityException, PreventedException {
         try {
             SurrogateAuthenticationDto dto = surrogateService.getAuthentication(credential.getToken(), credential.getCode());
+            credential.setAuthenticationAttributes(dto.authenticationAttributes);
             return createHandlerResult(credential, createPrincipal(dto));
         } catch (GeneralSecurityException e) {
             LOGGER.warn(e.getMessage());
@@ -64,16 +66,17 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     private Principal createPrincipal(SurrogateAuthenticationDto dto) {
         String id = dto.principalId + UserProfile.SEPARATOR + dto.personId;
         Map<String, Object> attributes = new LinkedHashMap<>();
-        attributes.put("impersonatorNationalIdentificationNumber", dto.nationalIdentificationNumber);
-        if (dto.personOid != null) {
-            attributes.put("impersonatorPersonOid", dto.personOid);
-        }
-        attributes.put("impersonatorPersonName", dto.personName);
+        dto.principalAttributes.entrySet().stream()
+                .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), entry.getValue()));
         attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.personId);
         personService.findOidByNationalIdentificationNumber(dto.personId)
                 .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
         attributes.put(ATTRIBUTE_NAME_PERSON_NAME, dto.name);
         return principalFactory.createPrincipal(id, attributes);
+    }
+
+    private static String impersonatorAttributeKey(String key) {
+        return String.format("impersonator%s", capitalize(key));
     }
 
     private AuthenticationHandlerExecutionResult createHandlerResult(SurrogateCredential credential, Principal principal) {
