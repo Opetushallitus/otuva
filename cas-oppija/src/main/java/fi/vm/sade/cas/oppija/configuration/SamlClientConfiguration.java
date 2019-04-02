@@ -12,8 +12,10 @@ import org.apereo.cas.support.pac4j.authentication.DelegatedClientFactory;
 import org.apereo.cas.support.pac4j.authentication.handler.support.ClientAuthenticationHandler;
 import org.opensaml.core.xml.schema.XSAny;
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.logout.handler.LogoutHandler;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.config.SAML2Configuration;
@@ -93,7 +95,8 @@ public class SamlClientConfiguration {
                 clientPrincipalFactory(personService), builtClients) {
             @Override
             protected String determinePrincipalIdFrom(UserProfile profile, BaseClient client) {
-                return profile.getClientName() + UserProfile.SEPARATOR + profile.getId();
+                String id = super.determinePrincipalIdFrom(profile, client);
+                return profile.getClientName() + UserProfile.SEPARATOR + id;
             }
         };
         h.setTypedIdUsed(pac4j.isTypedIdUsed());
@@ -111,6 +114,8 @@ public class SamlClientConfiguration {
                 if (client instanceof SAML2Client && Objects.equals(customProperties.get("suomiFiClientName"), client.getName())) {
                     SAML2Client saml2Client = (SAML2Client) client;
                     SAML2Configuration configuration = saml2Client.getConfiguration();
+                    configuration.setSpLogoutRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                    configuration.setLogoutHandler(new LogoutHandler() {});
                     configuration.setAuthnRequestExtensions(createExtensions());
                 }
             }

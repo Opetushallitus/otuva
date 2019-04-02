@@ -39,7 +39,7 @@ cas.authn.pac4j.saml:
     serviceProviderEntityId: {{ cas_oppija_suomifi_service_provider_entity_id }}
     serviceProviderMetadataPath: {{ cas_oppija_suomifi_service_provider_metadata_path }}
     identityProviderMetadataPath: {{ cas_oppija_suomifi_identity_provider_metadata_path }}
-    principalIdAttribute: nationalIdentificationNumber
+    principalAttributeId: nationalIdentificationNumber
     requestedAttributes:
       - name: urn:oid:1.2.246.21
         friendlyName: nationalIdentificationNumber

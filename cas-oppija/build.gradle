@@ -51,6 +51,7 @@ dependencies {
     compile "org.apereo.cas:cas-server-core-services-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-attributes:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-core-util-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-web-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-webflow-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-support-generic:${casServerVersion}"
