@@ -66,6 +66,5 @@ valtuudet.host: http://localhost:8080
 valtuudet.client-id: client
 valtuudet.api-key: key
 valtuudet.oauth-password: password
-valtuudet.session-timeout: PT5M
 service-user.username: user
 service-user.password: pass

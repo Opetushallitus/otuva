@@ -93,6 +93,5 @@ valtuudet.host: {{ cas_oppija_suomifi_host_valtuudet }}
 valtuudet.client-id: {{ cas_oppija_suomifi_valtuudet_client_id }}
 valtuudet.api-key: {{ cas_oppija_suomifi_valtuudet_api_key }}
 valtuudet.oauth-password: {{ cas_oppija_suomifi_valtuudet_oauth_password }}
-valtuudet.session-timeout: {{ cas_oppija_suomifi_valtuudet_session_timeout | default('PT5M') }}
 service-user.username: {{ cas_oppija_service_user_username }}
 service-user.password: {{ cas_oppija_service_user_password }}

@@ -1,11 +1,19 @@
 package fi.vm.sade.cas.oppija.surrogate.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.vm.sade.cas.oppija.surrogate.*;
+import fi.vm.sade.cas.oppija.surrogate.SurrogateAuthenticationDto;
+import fi.vm.sade.cas.oppija.surrogate.SurrogateProperties;
+import fi.vm.sade.cas.oppija.surrogate.SurrogateService;
+import fi.vm.sade.cas.oppija.surrogate.SurrogateSession;
 import fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import org.apereo.cas.ticket.TransientSessionTicket;
+import org.apereo.cas.ticket.TransientSessionTicketFactory;
+import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -17,37 +25,43 @@ import java.util.function.Function;
 
 import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.AUTHORIZATION_HEADER;
 
+@Service
+@Transactional
 public class SurrogateServiceImpl implements SurrogateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SurrogateServiceImpl.class);
+    private final static String ATTRIBUTE_NAME_SURROGATE = "surrogate";
 
     private final OphHttpClient httpClient;
     private final SurrogateProperties properties;
     private final ObjectMapper objectMapper;
-    private final SurrogateSessionStorage surrogateSessionStorage;
-    private final SurrogateTokenProvider surrogateTokenProvider;
+    private final TicketRegistry ticketRegistry;
+    private final TransientSessionTicketFactory transientSessionTicketFactory;
 
     public SurrogateServiceImpl(OphHttpClient httpClient,
                                 SurrogateProperties properties,
                                 ObjectMapper objectMapper,
-                                SurrogateSessionStorage surrogateSessionStorage,
-                                SurrogateTokenProvider surrogateTokenProvider) {
+                                TicketRegistry ticketRegistry,
+                                TransientSessionTicketFactory transientSessionTicketFactory) {
         this.httpClient = httpClient;
         this.properties = properties;
         this.objectMapper = objectMapper;
-        this.surrogateSessionStorage = surrogateSessionStorage;
-        this.surrogateTokenProvider = surrogateTokenProvider;
+        this.ticketRegistry = ticketRegistry;
+        this.transientSessionTicketFactory = transientSessionTicketFactory;
     }
 
     public String getAuthorizeUrl(SurrogateSession session, Function<String, String> tokenToRedirectUrl) {
+        TransientSessionTicket ticket = transientSessionTicketFactory.create(null);
+        String token = ticket.getId();
+
         UriComponents host = UriComponentsBuilder.fromHttpUrl(properties.getHost()).build();
         String requestId = UUID.randomUUID().toString();
-        String token = surrogateTokenProvider.createToken();
         String redirectUrl = tokenToRedirectUrl.apply(token);
 
         RegistrationDto registrationDto = getRegistration(host, session.nationalIdentificationNumber, requestId);
         session.update(redirectUrl, requestId, registrationDto.sessionId, registrationDto.userId);
-        surrogateSessionStorage.add(token, session);
+        ticket.put(ATTRIBUTE_NAME_SURROGATE, session);
+        ticketRegistry.addTicket(ticket);
 
         return UriComponentsBuilder.fromPath("/oauth/authorize")
                 .queryParam("client_id", properties.getClientId())
@@ -72,17 +86,24 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
     public SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException {
-        SurrogateSession session = surrogateSessionStorage.remove(token);
-        if (session == null) {
+        TransientSessionTicket ticket = ticketRegistry.getTicket(token, TransientSessionTicket.class);
+        if (ticket == null) {
             String message = String.format("Session '%s' does not exist", token);
             LOGGER.warn(message);
             throw new LoginException(message);
         }
-        if (session.created.plus(properties.getSessionTimeout()).isBefore(Instant.now())) {
+        if (ticket.isExpired()) {
             String message = String.format("Session '%s' is expired", token);
             LOGGER.warn(message);
             throw new LoginException(message);
         }
+        SurrogateSession session = ticket.get(ATTRIBUTE_NAME_SURROGATE, SurrogateSession.class);
+        if (session == null) {
+            String message = String.format("Session '%s' doesn't contain surrogate data", token);
+            LOGGER.warn(message);
+            throw new LoginException(message);
+        }
+        ticketRegistry.deleteTicket(ticket);
         return getAuthentication(session, code);
     }
 
