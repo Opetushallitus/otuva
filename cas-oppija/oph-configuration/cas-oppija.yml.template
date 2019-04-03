@@ -82,6 +82,7 @@ server.tomcat.accesslog:
     request-attributes-enabled: true
     rotate: true
     rename-on-rotate: true
+    max-days: 7
 
 # Custom configuration
 

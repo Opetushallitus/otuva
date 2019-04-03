@@ -66,6 +66,7 @@ dependencies {
     compile "org.apereo.cas:cas-server-support-interrupt-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-webapp-config:${casServerVersion}"
     runtime "com.h2database:h2:1.4.199"
+    compile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
     compile "org.flywaydb:flyway-core:5.2.4"
     compile "org.opensaml:opensaml-core:3.4.0"
     compile "org.pac4j:pac4j-core:3.6.1"
