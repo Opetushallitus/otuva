@@ -63,14 +63,9 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
-                // fix missing skipped transition from inquireInterruptAction
+                // add redirect transition
                 ActionState inquireInterruptAction = getState(getLoginFlow(), "inquireInterruptAction", ActionState.class);
                 TransitionSet transitions = inquireInterruptAction.getTransitionSet();
-                clear(transitions, transitions::remove);
-                transitions.add(createTransition(CasWebflowConstants.TRANSITION_ID_INTERRUPT_SKIPPED, CasWebflowConstants.STATE_ID_CREATE_TICKET_GRANTING_TICKET));
-                transitions.add(createTransition(CasWebflowConstants.TRANSITION_ID_INTERRUPT_REQUIRED, "interruptView"));
-
-                // add redirect transition
                 transitions.add(createTransition("interruptRedirect", "redirectInterrupt"));
                 createEndState(getLoginFlow(), "redirectInterrupt", "flowScope.interruptRedirectUrl", true);
             }
