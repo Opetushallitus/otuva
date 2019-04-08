@@ -64,12 +64,12 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     }
 
     private Principal createPrincipal(SurrogateAuthenticationDto dto) {
-        String id = dto.principalId + UserProfile.SEPARATOR + dto.personId;
+        String id = dto.principalId + UserProfile.SEPARATOR + dto.nationalIdentificationNumber;
         Map<String, Object> attributes = new LinkedHashMap<>();
         dto.principalAttributes.entrySet().stream()
                 .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), entry.getValue()));
-        attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.personId);
-        personService.findOidByNationalIdentificationNumber(dto.personId)
+        attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.nationalIdentificationNumber);
+        personService.findOidByNationalIdentificationNumber(dto.nationalIdentificationNumber)
                 .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
         attributes.put(ATTRIBUTE_NAME_PERSON_NAME, dto.name);
         return principalFactory.createPrincipal(id, attributes);

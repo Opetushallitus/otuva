@@ -117,10 +117,10 @@ public class SurrogateServiceImpl implements SurrogateService {
 
         if (!"ALLOWED".equals(authorization.result)) {
             throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s (result=%s)",
-                    person.personId, authorization.result));
+                    person.nationalIdentificationNumber, authorization.result));
         }
         return new SurrogateAuthenticationDto(session.principalId, session.principalAttributes,
-                session.authenticationAttributes, person.personId, person.name);
+                session.authenticationAttributes, person.nationalIdentificationNumber, person.name);
     }
 
     private AccessTokenDto getAccessToken(UriComponents host, SurrogateSession session, String code) {
@@ -154,7 +154,7 @@ public class SurrogateServiceImpl implements SurrogateService {
                                               AccessTokenDto accessTokenDto, PersonDto personDto) {
         UriComponents path = UriComponentsBuilder.fromPath("/service/hpa/api/authorization/{sessionId}/{personId}")
                 .queryParam("requestId", session.requestId)
-                .buildAndExpand(session.sessionId, personDto.personId);
+                .buildAndExpand(session.sessionId, personDto.nationalIdentificationNumber);
         String url = UriComponentsBuilder.newInstance().uriComponents(host).uriComponents(path).toUriString();
         return httpClient.get(url)
                 .header("Authorization", "Bearer " + accessTokenDto.accessToken)

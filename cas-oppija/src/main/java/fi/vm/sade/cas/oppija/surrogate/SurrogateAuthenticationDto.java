@@ -9,15 +9,15 @@ public class SurrogateAuthenticationDto {
     public final Map<String, Object> principalAttributes;
     public final Map<String, Object> authenticationAttributes;
     /* surrogate */
-    public final String personId;
+    public final String nationalIdentificationNumber;
     public final String name;
 
     public SurrogateAuthenticationDto(String principalId, Map<String, Object> principalAttributes,
-                                      Map<String, Object> authenticationAttributes, String personId, String name) {
+                                      Map<String, Object> authenticationAttributes, String nationalIdentificationNumber, String name) {
         this.principalId = principalId;
         this.principalAttributes = principalAttributes;
         this.authenticationAttributes = authenticationAttributes;
-        this.personId = personId;
+        this.nationalIdentificationNumber = nationalIdentificationNumber;
         this.name = name;
     }
 
