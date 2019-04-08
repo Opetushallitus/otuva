@@ -11,16 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.security.auth.login.LoginException;
 import java.security.GeneralSecurityException;
-import java.time.Instant;
 import java.util.UUID;
 import java.util.function.Function;
-
-import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.AUTHORIZATION_HEADER;
 
 @Service
 @Transactional
@@ -52,35 +47,17 @@ public class SurrogateServiceImpl implements SurrogateService {
         TransientSessionTicket ticket = transientSessionTicketFactory.create(null);
         String token = ticket.getId();
 
-        UriComponents host = UriComponentsBuilder.fromHttpUrl(properties.getHost()).build();
         String requestId = UUID.randomUUID().toString();
         String redirectUrl = tokenToRedirectUrl.apply(token);
+        SurrogateRequestHelper requestHelper = new SurrogateRequestHelper(httpClient, objectMapper, properties, requestId);
 
-        RegistrationDto registrationDto = getRegistration(host, nationalIdentificationNumber, requestId);
+        RegistrationDto registrationDto = requestHelper.getRegistration(nationalIdentificationNumber);
+
         ticket.put(ATTRIBUTE_NAME_SURROGATE, new SurrogateData(impersonatorData,
                 new SurrogateRequestData(redirectUrl, requestId, registrationDto.sessionId)));
         ticketRegistry.addTicket(ticket);
 
-        return UriComponentsBuilder.fromPath("/oauth/authorize")
-                .queryParam("client_id", properties.getClientId())
-                .queryParam("response_type", "code")
-                .queryParam("redirect_uri", redirectUrl)
-                .queryParam("user", registrationDto.userId)
-                .queryParam("lang", language)
-                .uriComponents(host)
-                .toUriString();
-    }
-
-    private RegistrationDto getRegistration(UriComponents host, String nationalIdentificationNumber, String requestId) {
-        UriComponents path = UriComponentsBuilder.fromPath("/service/hpa/user/register/{client_id}/{hetu}")
-                .queryParam("requestId", requestId)
-                .buildAndExpand(properties.getClientId(), nationalIdentificationNumber);
-        String url = UriComponentsBuilder.newInstance().uriComponents(host).uriComponents(path).toUriString();
-        return httpClient.get(url)
-                .header(AUTHORIZATION_HEADER, properties.getChecksum(path.toUriString(), Instant.now()))
-                .doNotSendOphHeaders()
-                .expectStatus(200)
-                .execute(response -> objectMapper.readValue(response.asInputStream(), RegistrationDto.class));
+        return requestHelper.getAuthorizeUrl(redirectUrl, registrationDto.userId, language);
     }
 
     public SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException {
@@ -106,58 +83,17 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
     private SurrogateAuthenticationDto getAuthentication(SurrogateData data, String code) throws GeneralSecurityException {
-        UriComponents host = UriComponentsBuilder.fromHttpUrl(properties.getHost()).build();
+        SurrogateRequestHelper requestHelper = new SurrogateRequestHelper(httpClient, objectMapper, properties, data.requestData);
 
-        AccessTokenDto accessToken = getAccessToken(host, data.requestData, code);
-        PersonDto person = getSelectedPerson(host, data.requestData, accessToken);
-        AuthorizationDto authorization = getAuthorization(host, data.requestData, accessToken, person);
+        AccessTokenDto accessToken = requestHelper.getAccessToken(code);
+        PersonDto person = requestHelper.getSelectedPerson(accessToken.accessToken);
+        AuthorizationDto authorization = requestHelper.getAuthorization(accessToken.accessToken, person.nationalIdentificationNumber);
 
         if (!"ALLOWED".equals(authorization.result)) {
             throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s (result=%s)",
                     person.nationalIdentificationNumber, authorization.result));
         }
         return new SurrogateAuthenticationDto(data.impersonatorData, person.nationalIdentificationNumber, person.name);
-    }
-
-    private AccessTokenDto getAccessToken(UriComponents host, SurrogateRequestData data, String code) {
-        String url = UriComponentsBuilder.fromPath("/oauth/token")
-                .queryParam("grant_type", "authorization_code")
-                .queryParam("redirect_uri", data.redirectUrl)
-                .queryParam("code", code)
-                .uriComponents(host)
-                .toUriString();
-        return httpClient.post(url)
-                .header("Authorization", "Basic " + properties.getCredentials())
-                .doNotSendOphHeaders()
-                .expectStatus(200)
-                .execute(response -> objectMapper.readValue(response.asInputStream(), AccessTokenDto.class));
-    }
-
-    private PersonDto getSelectedPerson(UriComponents host, SurrogateRequestData data, AccessTokenDto accessTokenDto) {
-        UriComponents path = UriComponentsBuilder.fromPath("/service/hpa/api/delegate/{sessionId}")
-                .queryParam("requestId", data.requestId)
-                .buildAndExpand(data.sessionId);
-        String url = UriComponentsBuilder.newInstance().uriComponents(host).uriComponents(path).toUriString();
-        return httpClient.get(url)
-                .header("Authorization", "Bearer " + accessTokenDto.accessToken)
-                .header(AUTHORIZATION_HEADER, properties.getChecksum(path.toUriString(), Instant.now()))
-                .doNotSendOphHeaders()
-                .expectStatus(200)
-                .execute(response -> objectMapper.readValue(response.asInputStream(), PersonDto[].class))[0];
-    }
-
-    private AuthorizationDto getAuthorization(UriComponents host, SurrogateRequestData data,
-                                              AccessTokenDto accessTokenDto, PersonDto personDto) {
-        UriComponents path = UriComponentsBuilder.fromPath("/service/hpa/api/authorization/{sessionId}/{personId}")
-                .queryParam("requestId", data.requestId)
-                .buildAndExpand(data.sessionId, personDto.nationalIdentificationNumber);
-        String url = UriComponentsBuilder.newInstance().uriComponents(host).uriComponents(path).toUriString();
-        return httpClient.get(url)
-                .header("Authorization", "Bearer " + accessTokenDto.accessToken)
-                .header(AUTHORIZATION_HEADER, properties.getChecksum(path.toUriString(), Instant.now()))
-                .doNotSendOphHeaders()
-                .expectStatus(200)
-                .execute(response -> objectMapper.readValue(response.asInputStream(), AuthorizationDto.class));
     }
 
 }
