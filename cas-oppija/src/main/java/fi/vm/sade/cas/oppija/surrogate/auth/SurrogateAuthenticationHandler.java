@@ -69,8 +69,12 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
         dto.impersonatorData.principalAttributes.entrySet().stream()
                 .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), entry.getValue()));
         attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.nationalIdentificationNumber);
-        personService.findOidByNationalIdentificationNumber(dto.nationalIdentificationNumber)
-                .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
+        try {
+            personService.findOidByNationalIdentificationNumber(dto.nationalIdentificationNumber)
+                    .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
+        } catch (Exception e) {
+            LOGGER.error("Unable to get oid by national identification number", e);
+        }
         attributes.put(ATTRIBUTE_NAME_PERSON_NAME, dto.name);
         return principalFactory.createPrincipal(id, attributes);
     }
