@@ -53,7 +53,7 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     public AuthenticationHandlerExecutionResult authenticate(SurrogateCredential credential) throws GeneralSecurityException, PreventedException {
         try {
             SurrogateAuthenticationDto dto = surrogateService.getAuthentication(credential.getToken(), credential.getCode());
-            credential.setAuthenticationAttributes(dto.authenticationAttributes);
+            credential.setAuthenticationAttributes(dto.impersonatorData.authenticationAttributes);
             return createHandlerResult(credential, createPrincipal(dto));
         } catch (GeneralSecurityException e) {
             LOGGER.warn(e.getMessage());
@@ -64,9 +64,9 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     }
 
     private Principal createPrincipal(SurrogateAuthenticationDto dto) {
-        String id = dto.principalId + UserProfile.SEPARATOR + dto.nationalIdentificationNumber;
+        String id = dto.impersonatorData.principalId + UserProfile.SEPARATOR + dto.nationalIdentificationNumber;
         Map<String, Object> attributes = new LinkedHashMap<>();
-        dto.principalAttributes.entrySet().stream()
+        dto.impersonatorData.principalAttributes.entrySet().stream()
                 .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), entry.getValue()));
         attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.nationalIdentificationNumber);
         personService.findOidByNationalIdentificationNumber(dto.nationalIdentificationNumber)

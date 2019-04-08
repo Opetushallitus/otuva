@@ -1,8 +1,8 @@
 package fi.vm.sade.cas.oppija.surrogate.interrupt;
 
 import fi.vm.sade.cas.oppija.surrogate.SurrogateCredential;
+import fi.vm.sade.cas.oppija.surrogate.SurrogateImpersonatorData;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateService;
-import fi.vm.sade.cas.oppija.surrogate.SurrogateSession;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.principal.Principal;
@@ -63,8 +63,9 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class)
                 .orElseThrow(() -> new IllegalArgumentException("National identification number not available"));
 
-        SurrogateSession session = new SurrogateSession(principal.getId(), principalAttributes, authenticationAttributes);
-        String authorizeUrl = surrogateService.getAuthorizeUrl(nationalIdentificationNumber, language, session,
+        SurrogateImpersonatorData impersonatorData = new SurrogateImpersonatorData(principal.getId(),
+                principalAttributes, authenticationAttributes);
+        String authorizeUrl = surrogateService.getAuthorizeUrl(nationalIdentificationNumber, language, impersonatorData,
                 token -> createRedirectUrl(serviceUrl, token));
 
         InterruptResponse interruptResponse = new InterruptResponse();
