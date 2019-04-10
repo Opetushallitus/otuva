@@ -6,8 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
+import static org.pac4j.saml.credentials.authenticator.SAML2Authenticator.SESSION_INDEX;
 
 @Configuration
 public class RegisteredServiceConfiguration {
@@ -25,7 +28,15 @@ public class RegisteredServiceConfiguration {
 
     @Bean
     public RegisteredServiceAttributeReleasePolicy registeredServiceAttributeReleasePolicy() {
-        return new ReturnAllAttributeReleasePolicy();
+        return new ReturnAllAttributeReleasePolicy() {
+            @Override
+            protected Map<String, Object> returnFinalAttributesCollection(Map<String, Object> attributesToRelease, RegisteredService service) {
+                // pac4j adds session index to principal attributes (should be only in auth attrs), fixed in pac4j 4.0
+                Pattern pattern = Pattern.compile(Pattern.quote(SESSION_INDEX), Pattern.CASE_INSENSITIVE);
+                attributesToRelease.entrySet().removeIf(entry -> pattern.matcher(entry.getKey()).find());
+                return attributesToRelease;
+            }
+        };
     }
 
     @Bean

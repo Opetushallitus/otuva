@@ -21,6 +21,8 @@ cas.httpWebRequest.header.hsts: false
 cas.authn.accept.users:
 cas.authn.exceptions.exceptions:
   - fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException
+cas.authn.authenticationAttributeRelease.onlyRelease:
+  - clientName
 
 cas.tgc.secure: false
 cas.tgc.path: /cas-oppija
