@@ -49,6 +49,7 @@ public class CasControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
     public void getIdentityByAuthTokenTest() throws Exception {
         given(identificationService.findByTokenAndInvalidateToken("mytoken"))
                 .willReturn(IdentifiedHenkiloTypeDto.builder()

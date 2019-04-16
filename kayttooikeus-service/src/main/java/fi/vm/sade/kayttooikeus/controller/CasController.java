@@ -98,7 +98,7 @@ public class CasController {
         return this.identificationService.createLoginToken(oidHenkilo, salasananVaihto, null);
     }
 
-    // Palomuurilla rajoitettu pääsy vain verkon sisältä
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
