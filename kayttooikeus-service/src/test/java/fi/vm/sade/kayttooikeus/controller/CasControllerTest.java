@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -92,20 +91,5 @@ public class CasControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:cas/identification.json")));
     }
-
-    @Test
-    public void updateIdentificationAndGenerateTokenForHenkiloByHetuTest() throws Exception {
-        given(identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("11111-madeup"))
-                .willThrow(new NotFoundException("henkilo not found"));
-        this.mvc.perform(get("/cas/henkilo/11111-madeup"))
-                .andExpect(status().is4xxClientError());
-
-        given(identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("11111-1111"))
-                .willReturn("sometoken");
-        this.mvc.perform(get("/cas/henkilo/11111-1111"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("\"sometoken\""));
-    }
-
 
 }

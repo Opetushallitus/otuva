@@ -107,14 +107,6 @@ public class CasController {
     }
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
-    @ApiOperation(value = "Luo tai päivittää henkilön identiteetitiedot ja palauttaa kertakäyttöisen autentikointitokenin.",
-            notes = "Luo tai päivittää henkilön identiteetitiedot hetun mukaan ja palauttaa kertakäyttöisen autentikointitokenin.")
-    @RequestMapping(value = "/henkilo/{hetu}", method = RequestMethod.GET)
-    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(@PathVariable("hetu") String hetu) throws IOException {
-        return identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu(hetu);
-    }
-
-    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)

@@ -18,8 +18,6 @@ public interface IdentificationService {
 
     String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo);
 
-    String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu);
-
     Set<String> getHakatunnuksetByHenkiloAndIdp(String oid);
 
     Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnisteet);

@@ -234,30 +234,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    public void updateIdentificationAndGenerateTokenForHenkiloByHetuTest() throws Exception {
-        populate(kayttajatiedot(henkilo("1.2.3.4.5"), "user1"));
-
-        given(oppijanumerorekisteriClient.getOidByHetu("090689-1393")).willReturn("1.2.3.4.5");
-        //create new
-        String token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
-        assertTrue(token.length() > 20);
-        Optional<Identification> identification = identificationRepository.findByAuthtokenIsValid(token);
-        assertTrue(identification.isPresent());
-        assertEquals("vetuma", identification.get().getIdpEntityId());
-        assertEquals("user1", identification.get().getIdentifier());
-        Long id = identification.get().getId();
-
-        //update old
-        token = identificationService.updateIdentificationAndGenerateTokenForHenkiloByHetu("090689-1393");
-        assertTrue(token.length() > 20);
-        identification = identificationRepository.findByAuthtokenIsValid(token);
-        assertTrue(identification.isPresent());
-        assertEquals("vetuma", identification.get().getIdpEntityId());
-        assertEquals("user1", identification.get().getIdentifier());
-        assertEquals(id, identification.get().getId());
-    }
-
-    @Test
     public void updateHakatunnuksetByHenkiloAndIdp() {
         String oid = "1.2.3.4.5";
         populate(identification("email", "test@example.com", henkilo(oid)));

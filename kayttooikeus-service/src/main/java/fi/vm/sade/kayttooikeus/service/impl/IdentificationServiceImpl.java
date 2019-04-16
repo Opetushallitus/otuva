@@ -123,12 +123,6 @@ public class IdentificationServiceImpl extends AbstractService implements Identi
     }
 
     @Override
-    @Transactional
-    public String updateIdentificationAndGenerateTokenForHenkiloByHetu(String hetu) {
-        return this.updateIdentificationAndGenerateTokenForHenkiloByOid(this.oppijanumerorekisteriClient.getOidByHetu(hetu));
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public Set<String> getHakatunnuksetByHenkiloAndIdp(String oid) {
         List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
