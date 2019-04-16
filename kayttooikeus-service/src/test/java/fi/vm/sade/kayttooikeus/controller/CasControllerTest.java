@@ -1,7 +1,9 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -53,39 +54,9 @@ public class CasControllerTest extends AbstractControllerTest {
     public void getIdentityByAuthTokenTest() throws Exception {
         given(identificationService.findByTokenAndInvalidateToken("mytoken"))
                 .willReturn(IdentifiedHenkiloTypeDto.builder()
-                        .id(44L)
                         .oidHenkilo("1.2.3.4.5")
-                        .idpEntityId("idpent")
-                        .version(1)
-                        .identifier("identif")
                         .henkiloTyyppi(KayttajaTyyppi.VIRKAILIJA)
-                        .passivoitu(false)
-                        .asiointiKieli(AsiointikieliDto.builder()
-                                .kieliKoodi("fi")
-                                .kieliTyyppi("suomi")
-                                .build())
-                        .email("myemail@mail.com")
-                        .etunimet("Teemu")
-                        .kutsumanimi("Teemu")
-                        .sukunimi("Testi")
-                        .sukupuoli("MIES")
-                        .hetu("11111-1111")
                         .kayttajatiedot(new KayttajatiedotReadDto("teemuuser"))
-                        .authorizationData(AuthorizationDataDto.builder()
-                                .accessrights(AccessRightListTypeDto.builder()
-                                        .accessRight(singletonList(AccessRightTypeDto.builder()
-                                                .organisaatioOid("4.5.6.7.8")
-                                                .palvelu("KOODISTO")
-                                                .rooli("CRUD")
-                                                .build()))
-                                        .build())
-                                .groups(GroupListTypeDto.builder()
-                                        .group(singletonList(GroupTypeDto.builder()
-                                                .organisaatioOid("4.5.6.7.8")
-                                                .nimi("Groupname")
-                                                .build()))
-                                        .build())
-                                .build())
                         .build());
 
         this.mvc.perform(get("/cas/auth/token/mytoken"))
