@@ -121,8 +121,6 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/buildversion.txt").permitAll()
-                .antMatchers("/cas/auth/token/*").permitAll()
-                .antMatchers("/cas/henkilo/*").permitAll()
                 .antMatchers("/kutsu/token/*").permitAll()
                 .antMatchers("/cas/tunnistus").permitAll()
                 .antMatchers("/cas/uudelleenrekisterointi").permitAll()
