@@ -4,18 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.cas.oppija.surrogate.*;
 import fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import fi.vm.sade.suomifi.valtuudet.*;
 import org.apereo.cas.ticket.TransientSessionTicket;
 import org.apereo.cas.ticket.TransientSessionTicketFactory;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.security.auth.login.LoginException;
 import java.security.GeneralSecurityException;
-import java.util.UUID;
-import java.util.function.Function;
+
+import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.TOKEN_PARAMETER_NAME;
 
 @Service
 @Transactional
@@ -24,40 +27,47 @@ public class SurrogateServiceImpl implements SurrogateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SurrogateServiceImpl.class);
     private final static String ATTRIBUTE_NAME_SURROGATE = "surrogate";
 
-    private final OphHttpClient httpClient;
-    private final SurrogateProperties properties;
-    private final ObjectMapper objectMapper;
+    private final Environment environment;
     private final TicketRegistry ticketRegistry;
     private final TransientSessionTicketFactory transientSessionTicketFactory;
+    private final ValtuudetClient valtuudetClient;
 
     public SurrogateServiceImpl(OphHttpClient httpClient,
-                                SurrogateProperties properties,
                                 ObjectMapper objectMapper,
+                                SurrogateProperties properties,
+                                Environment environment,
                                 TicketRegistry ticketRegistry,
                                 TransientSessionTicketFactory transientSessionTicketFactory) {
-        this.httpClient = httpClient;
-        this.properties = properties;
-        this.objectMapper = objectMapper;
+        this.environment = environment;
         this.ticketRegistry = ticketRegistry;
         this.transientSessionTicketFactory = transientSessionTicketFactory;
+        this.valtuudetClient = new ValtuudetClientImpl(httpClient, objectMapper::readValue, properties);
     }
 
-    public String getAuthorizeUrl(String nationalIdentificationNumber, String language,
-                                  SurrogateImpersonatorData impersonatorData, Function<String, String> tokenToRedirectUrl) {
-        TransientSessionTicket ticket = transientSessionTicketFactory.create(null);
-        String token = ticket.getId();
+    public String getRedirectUrl(org.apereo.cas.authentication.principal.Service service, String nationalIdentificationNumber, String language,
+                                 SurrogateImpersonatorData impersonatorData) {
+        TransientSessionTicket ticket = transientSessionTicketFactory.create(service);
 
-        String requestId = UUID.randomUUID().toString();
-        String redirectUrl = tokenToRedirectUrl.apply(token);
-        SurrogateRequestHelper requestHelper = new SurrogateRequestHelper(httpClient, objectMapper, properties, requestId);
-
-        RegistrationDto registrationDto = requestHelper.getRegistration(nationalIdentificationNumber);
+        String callbackUrl = createCallbackUrl(service, ticket.getId());
+        SessionDto session = valtuudetClient.createSession(ValtuudetType.PERSON, nationalIdentificationNumber);
+        String redirectUrl = valtuudetClient.getRedirectUrl(session.userId, callbackUrl, language);
 
         ticket.put(ATTRIBUTE_NAME_SURROGATE, new SurrogateData(impersonatorData,
-                new SurrogateRequestData(redirectUrl, requestId, registrationDto.sessionId)));
+                new SurrogateRequestData(callbackUrl, session.sessionId)));
         ticketRegistry.addTicket(ticket);
 
-        return requestHelper.getAuthorizeUrl(redirectUrl, registrationDto.userId, language);
+        return redirectUrl;
+    }
+
+    private String createCallbackUrl(org.apereo.cas.authentication.principal.Service service, String token) {
+        UriComponentsBuilder redirectUrlBuilder = UriComponentsBuilder
+                .fromHttpUrl(environment.getRequiredProperty("cas.server.prefix") + "/login")
+                .queryParam(TOKEN_PARAMETER_NAME, token);
+        String serviceUrl = service != null ? service.getId() : null;
+        if (serviceUrl != null) {
+            redirectUrlBuilder.queryParam("service", serviceUrl);
+        }
+        return redirectUrlBuilder.toUriString();
     }
 
     public SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException {
@@ -83,17 +93,14 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
     private SurrogateAuthenticationDto getAuthentication(SurrogateData data, String code) throws GeneralSecurityException {
-        SurrogateRequestHelper requestHelper = new SurrogateRequestHelper(httpClient, objectMapper, properties, data.requestData);
+        String accessToken = valtuudetClient.getAccessToken(code, data.requestData.redirectUrl);
+        PersonDto person = valtuudetClient.getSelectedPerson(data.requestData.sessionId, accessToken);
+        boolean authorized = valtuudetClient.isAuthorizedToPerson(data.requestData.sessionId, accessToken, person.personId);
 
-        AccessTokenDto accessToken = requestHelper.getAccessToken(code);
-        PersonDto person = requestHelper.getSelectedPerson(accessToken.accessToken);
-        AuthorizationDto authorization = requestHelper.getAuthorization(accessToken.accessToken, person.nationalIdentificationNumber);
-
-        if (!"ALLOWED".equals(authorization.result)) {
-            throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s (result=%s)",
-                    person.nationalIdentificationNumber, authorization.result));
+        if (!authorized) {
+            throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s", person.personId));
         }
-        return new SurrogateAuthenticationDto(data.impersonatorData, person.nationalIdentificationNumber, person.name);
+        return new SurrogateAuthenticationDto(data.impersonatorData, person.personId, person.name);
     }
 
 }

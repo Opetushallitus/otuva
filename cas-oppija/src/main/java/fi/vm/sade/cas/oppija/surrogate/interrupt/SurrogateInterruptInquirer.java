@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.webflow.execution.RequestContext;
 
 import java.util.Locale;
@@ -24,7 +23,6 @@ import java.util.Optional;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
 import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
-import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.TOKEN_PARAMETER_NAME;
 
 @Component
 @ConditionalOnProperty("valtuudet.enabled")
@@ -46,15 +44,14 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
         if (SurrogateCredential.class.isInstance(credential)) {
             return InterruptResponse.none();
         }
-        String serviceUrl = service != null ? service.getId() : null;
         String language = Optional.ofNullable(requestContext.getExternalContext().getLocale())
                 .map(Locale::getLanguage)
                 .filter(SUPPORTED_LANGUAGES::contains)
                 .orElse(DEFAULT_LANGUAGE);
-        return inquire(authentication, serviceUrl, language);
+        return inquire(authentication, service, language);
     }
 
-    private InterruptResponse inquire(Authentication authentication, String serviceUrl, String language) {
+    private InterruptResponse inquire(Authentication authentication, Service service, String language) {
         Principal principal = authentication.getPrincipal();
         Map<String, Object> principalAttributes = principal.getAttributes();
         Map<String, Object> authenticationAttributes = authentication.getAttributes();
@@ -65,25 +62,14 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
 
         SurrogateImpersonatorData impersonatorData = new SurrogateImpersonatorData(principal.getId(),
                 principalAttributes, authenticationAttributes);
-        String authorizeUrl = surrogateService.getAuthorizeUrl(nationalIdentificationNumber, language, impersonatorData,
-                token -> createRedirectUrl(serviceUrl, token));
+        String redirectUrl = surrogateService.getRedirectUrl(service, nationalIdentificationNumber, language, impersonatorData);
 
         InterruptResponse interruptResponse = new InterruptResponse();
-        interruptResponse.setLinks(Map.of("Suomi.fi-valtuudet", authorizeUrl));
+        interruptResponse.setLinks(Map.of("Suomi.fi-valtuudet", redirectUrl));
         boolean required = environment.getRequiredProperty("valtuudet.required", Boolean.class);
         interruptResponse.setBlock(required);
         interruptResponse.setAutoRedirect(required);
         return interruptResponse;
-    }
-
-    private String createRedirectUrl(String serviceUrl, String token) {
-        UriComponentsBuilder redirectUrlBuilder = UriComponentsBuilder
-                .fromHttpUrl(environment.getRequiredProperty("cas.server.prefix") + "/login")
-                .queryParam(TOKEN_PARAMETER_NAME, token);
-        if (serviceUrl != null) {
-            redirectUrlBuilder.queryParam("service", serviceUrl);
-        }
-        return redirectUrlBuilder.toUriString();
     }
 
 }

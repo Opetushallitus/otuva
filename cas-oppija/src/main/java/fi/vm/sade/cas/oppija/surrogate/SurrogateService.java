@@ -1,12 +1,13 @@
 package fi.vm.sade.cas.oppija.surrogate;
 
+import org.apereo.cas.authentication.principal.Service;
+
 import java.security.GeneralSecurityException;
-import java.util.function.Function;
 
 public interface SurrogateService {
 
-    String getAuthorizeUrl(String nationalIdentificationNumber, String language,
-                           SurrogateImpersonatorData impersonatorData, Function<String, String> tokenToRedirectUrl);
+    String getRedirectUrl(Service service, String nationalIdentificationNumber, String language,
+                          SurrogateImpersonatorData impersonatorData);
 
     SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException;
 
