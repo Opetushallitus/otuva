@@ -678,8 +678,10 @@ public class PermissionCheckerTest {
     public void roleWithUnderscoreIsHandledProperly() {
         boolean hasReadUpdate = this.permissionChecker.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, "READ_UPDATE");
         boolean hasRead = this.permissionChecker.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, "READ");
+        boolean hasReadOrUpdate = this.permissionChecker.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, "READ", "READ_UPDATE");
         assertThat(hasReadUpdate).isTrue();
         assertThat(hasRead).isFalse();
+        assertThat(hasReadOrUpdate).isTrue();
     }
 
     @Test

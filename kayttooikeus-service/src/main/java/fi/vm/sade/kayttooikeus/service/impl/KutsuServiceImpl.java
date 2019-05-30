@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
-import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
-import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_CRUD;
+import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static java.util.Arrays.asList;
 
 @Service
@@ -90,7 +89,7 @@ public class KutsuServiceImpl implements KutsuService {
             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
+            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD, ROLE_KUTSU_CRUD)) {
                 this.throwIfNotInHierarchy(kutsuCreateDto);
                 this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             }
@@ -214,7 +213,7 @@ public class KutsuServiceImpl implements KutsuService {
 
     private void throwIfNormalUserOrganisationLimitedByOrganisationHierarchy(Kutsu deletedKutsu) {
         if (!this.permissionCheckerService.isCurrentUserAdmin()
-                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
+                && !this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD, ROLE_KUTSU_CRUD)) {
             this.throwIfNotInHierarchy(deletedKutsu.getOrganisaatiot().stream()
                     .map(KutsuOrganisaatio::getOrganisaatioOid)
                     .collect(Collectors.toSet()));

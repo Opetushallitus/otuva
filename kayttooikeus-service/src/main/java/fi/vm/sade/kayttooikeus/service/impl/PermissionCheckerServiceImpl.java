@@ -45,6 +45,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public static final String PALVELU_KAYTTOOIKEUS = "KAYTTOOIKEUS";
     public static final String ROLE_REKISTERINPITAJA = "REKISTERINPITAJA";
     public static final String ROLE_CRUD = "CRUD";
+    public static final String ROLE_KUTSU_CRUD = "KUTSU_CRUD";
     public static final String ROLE_PREFIX = "ROLE_APP_";
     private static final String ROLE_PALVELUKAYTTAJA_CRUD = "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD";
 
@@ -388,14 +389,15 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     // OPH virkailija
     @Override
-    public boolean isCurrentUserMiniAdmin(String palvelu, String rooli) {
-        return this.isUserMiniAdmin(this.getCasRoles(), palvelu, rooli);
+    public boolean isCurrentUserMiniAdmin(String palvelu, String rooli, String... muutRoolit) {
+        return this.isUserMiniAdmin(this.getCasRoles(), palvelu, rooli, muutRoolit);
     }
 
     // OPH virkailija
     @Override
-    public boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli) {
-        return userRoles.stream().anyMatch(role -> role.contains(palvelu + "_" + rooli + "_" + this.commonProperties.getOrganisaatioPrefix())
+    public boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli, String... muutRoolit) {
+        List<String> kaikkiRoolit = Stream.concat(Stream.of(rooli), Arrays.stream(muutRoolit)).collect(Collectors.toList());
+        return userRoles.stream().anyMatch(role -> kaikkiRoolit.stream().anyMatch(haluttuRooli -> role.contains(palvelu + "_" + haluttuRooli + "_" + this.commonProperties.getOrganisaatioPrefix()))
                 && role.contains(this.commonProperties.getRootOrganizationOid()));
     }
 
