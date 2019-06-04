@@ -15,25 +15,13 @@ public interface PermissionCheckerService {
 
     boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
 
-    @Deprecated
-    boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService);
-
     boolean isAllowedToAccessPersonOrSelf(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService);
 
     boolean isAllowedToAccessPerson(PermissionCheckDto permissionCheckDto);
 
-    @Deprecated
-    boolean checkRoleForOrganisation(List<String> orgOidList, List<String> allowedRolesWithoutPrefix);
-
     boolean checkRoleForOrganisation(List<String> orgOidList, Map<String, List<String>> allowedRoles);
 
-    @Deprecated
-    boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList, List<String> allowedRolesWithoutPrefix);
-
     boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList, Map<String, List<String>> allowedRoles);
-
-    @Deprecated
-    Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role);
 
     Set<String> getCurrentUserOrgnisationsWithPalveluRole(Map<String, List<String>> palveluRoolit);
 
@@ -70,9 +58,6 @@ public interface PermissionCheckerService {
 
     // OPH virkailija
     boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli, String... muutRoolit);
-
-    @Deprecated
-    Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
 
     Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, Map<String, List<String>> palveluRoolit);
 

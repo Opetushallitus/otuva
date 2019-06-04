@@ -34,14 +34,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
-import static java.util.Collections.*;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -73,12 +72,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     @Transactional(readOnly = true)
     public boolean isAllowedToAccessPerson(String personOid, Map<String, List<String>> allowedRoles, ExternalPermissionService permissionService) {
         return isAllowedToAccessPerson(getCurrentUserOid(), personOid, allowedRoles, permissionService, this.getCasRoles());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isAllowedToAccessPersonOrSelf(String personOid, List<String> allowedRoles, ExternalPermissionService permissionService) {
-        return isAllowedToAccessPersonOrSelf(personOid, singletonMap(PALVELU_KAYTTOOIKEUS, allowedRoles), permissionService);
     }
 
     @Override
@@ -224,13 +217,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     @Override
-    public boolean hasRoleForOrganisations(@NotNull List<Object> organisaatioHenkiloDtoList,
-                                           List<String> allowedRolesWithoutPrefix) {
-        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
-                -> checkRoleForOrganisation(orgOidList, allowedRolesWithoutPrefix));
-    }
-
-    @Override
     public boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
             Map<String, List<String>> allowedRoles) {
         return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
@@ -260,17 +246,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             throw new NotImplementedException("Unsupported input type.");
         }
         return checkRoleForOrganisationFunc.apply(orgOidList);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean checkRoleForOrganisation(@NotNull List<String> orgOidList, List<String> allowedRolesWithoutPrefix) {
-        for(String oid : orgOidList) {
-            if (!this.hasRoleForOrganisation(oid, singletonMap(PALVELU_KAYTTOOIKEUS, allowedRolesWithoutPrefix), this.getCasRoles())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -306,12 +281,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                 .collect(Collectors.toCollection(HashSet::new));
 
         return CollectionUtils.containsAny(flattenedCandidateRolesByOrg, userRoles);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Set<String> getCurrentUserOrgnisationsWithPalveluRole(String palvelu, String role) {
-        return getCurrentUserOrgnisationsWithPalveluRole(singletonMap(palvelu, singletonList(role)));
     }
 
     @Override
@@ -393,11 +362,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         List<String> kaikkiRoolit = Stream.concat(Stream.of(rooli), Arrays.stream(muutRoolit)).collect(Collectors.toList());
         return userRoles.stream().anyMatch(role -> kaikkiRoolit.stream().anyMatch(haluttuRooli -> role.contains(palvelu + "_" + haluttuRooli + "_" + this.commonProperties.getOrganisaatioPrefix()))
                 && role.contains(this.commonProperties.getRootOrganizationOid()));
-    }
-
-    @Override
-    public Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli) {
-        return hasOrganisaatioInHierarchy(requiredOrganiaatioOids, singletonMap(palvelu, singletonList(rooli)));
     }
 
     @Override

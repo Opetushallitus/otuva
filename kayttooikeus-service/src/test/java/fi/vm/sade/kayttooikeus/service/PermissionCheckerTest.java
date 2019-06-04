@@ -681,13 +681,6 @@ public class PermissionCheckerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_" + ROOT_ORG})
-    public void getUserCurrentOrganisationOidsByPalveluAndRole() {
-        Set<String> oids = this.permissionChecker.getCurrentUserOrgnisationsWithPalveluRole(PALVELU_KAYTTOOIKEUS, ROLE_CRUD);
-        assertThat(oids).containsExactly(ROOT_ORG);
-    }
-
-    @Test
     @WithMockUser(authorities = {
         "ROLE_APP_PALVELU1_OIKEUS1",
         "ROLE_APP_PALVELU1_OIKEUS1_" + ROOT_ORG,
