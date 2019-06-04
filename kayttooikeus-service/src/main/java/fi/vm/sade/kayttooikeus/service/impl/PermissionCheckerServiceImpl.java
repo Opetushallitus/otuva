@@ -8,8 +8,14 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
-import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttooikeusryhmaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
@@ -17,7 +23,6 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
-import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -32,11 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
 import static java.util.Collections.*;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class PermissionCheckerServiceImpl implements PermissionCheckerService {
@@ -50,7 +56,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     private static final String ROLE_PALVELUKAYTTAJA_CRUD = "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD";
 
     private final HenkiloDataRepository henkiloDataRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
@@ -66,7 +71,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                                         OrganisaatioClient organisaatioClient,
                                         ExternalPermissionClient externalPermissionClient,
                                         OppijanumerorekisteriClient oppijanumerorekisteriClient,
-                                        MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                                         KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository,
                                         CommonProperties commonProperties,
                                         OrganisaatioHenkiloRepository organisaatioHenkiloRepository,
@@ -75,7 +79,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         this.organisaatioClient = organisaatioClient;
         this.externalPermissionClient = externalPermissionClient;
         this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = myonnettyKayttoOikeusRyhmaTapahtumaRepository;
         this.kayttoOikeusRyhmaMyontoViiteRepository = kayttoOikeusRyhmaMyontoViiteRepository;
         this.commonProperties = commonProperties;
         this.organisaatioHenkiloRepository = organisaatioHenkiloRepository;
@@ -432,36 +435,40 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     @Override
-    public boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId) {
+    public boolean organisaatioViiteLimitationsAreValid(String organisaatioOid, Long kayttooikeusryhmaId) {
         Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
                 .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
                 .getOrganisaatioViite();
-        List<String> currentUserOrganisaatioOids = this.organisaatioHenkiloRepository
-                .findByHenkiloOidHenkilo(UserDetailsUtil.getCurrentUserOid()).stream()
-                .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
-                .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                .collect(Collectors.toList());
 
         // When granting to root organisation it has no organisaatioviite
         return !(!org.springframework.util.CollectionUtils.isEmpty(organisaatioViite)
                 // Root organisation users do not need to pass organisaatioviite (admin & mini-admin)
                 && !this.isCurrentUserMiniAdmin()
                 // Organisaatiohenkilo limitations are valid
-                && currentUserOrganisaatioOids.stream()
-                .noneMatch((orgOid) -> this.organisaatioLimitationCheck(orgOid, organisaatioViite)));
+                && !this.organisaatioLimitationCheck(organisaatioOid, organisaatioViite));
     }
 
 
     // Check that current user MKRT can grant wanted KOR
     @Override
-    public boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId) {
-        List<Long> masterIdList = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
-                .findValidMyonnettyKayttooikeus(this.getCurrentUserOid()).stream()
-                .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
-                .map(KayttoOikeusRyhma::getId)
-                .collect(Collectors.toList());
-        List<Long> slaveIds = this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(masterIdList);
-        return this.isCurrentUserAdmin() || (!slaveIds.isEmpty() && slaveIds.contains(kayttooikeusryhmaId));
+    public boolean kayttooikeusMyontoviiteLimitationCheck(String organisaatioOid, Long kayttooikeusryhmaId) {
+        boolean rekisterinpitaja = this.isCurrentUserAdmin();
+        if (rekisterinpitaja) {
+            return true;
+        }
+        Map<String, Set<Long>> myontooikeudet = this.kayttoOikeusRyhmaMyontoViiteRepository
+                .getSlaveIdsByMasterHenkiloOid(this.getCurrentUserOid(), MyontooikeusCriteria.oletus());
+        lisaaAliorganisaatiot(myontooikeudet, rekisterinpitaja);
+        return myontooikeudet.getOrDefault(organisaatioOid, emptySet()).contains(kayttooikeusryhmaId);
+    }
+
+    private void lisaaAliorganisaatiot(Map<String, Set<Long>> myontooikeudet, boolean passiiviset) {
+        myontooikeudet.entrySet().stream()
+                .flatMap(entry -> organisaatioClient.listWithChildOids(entry.getKey(), new OrganisaatioMyontoPredicate(passiiviset))
+                        .stream()
+                        .map(aliorganisaatioOid -> new AbstractMap.SimpleEntry<>(aliorganisaatioOid, entry.getValue())))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, appending()))
+                .forEach((organisaatioOid, kayttooikeusryhmaIds) -> myontooikeudet.merge(organisaatioOid, kayttooikeusryhmaIds, appending()));
     }
 
     // Check that wanted KOR can be added to the wanted organisation

@@ -46,7 +46,6 @@ import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_I
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaMyontoViitePopulator.kayttoOikeusRyhmaMyontoViite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
-import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.viite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KutsuOrganisaatioPopulator.kutsuOrganisaatio;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
@@ -364,25 +363,25 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.listWithParentsAndChildren(eq("1.2.3.4.1"), any()))
                 .willReturn(asList(org1));
         OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
-        org1.setOid("1.2.3.4.5");
-        org1.setNimi(new TextGroupMapDto().put("FI", "Käyttäjän organisaatio").asMap());
+        org2.setOid("1.2.3.4.5");
+        org2.setNimi(new TextGroupMapDto().put("FI", "Käyttäjän organisaatio").asMap());
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
                 .willReturn(Optional.of(org2));
         given(this.organisaatioClient.listWithParentsAndChildren(eq("1.2.3.4.5"), any()))
                 .willReturn(asList(org2));
 
-        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnetty = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
                 kayttoOikeusRyhma("kayttoOikeusRyhma")
+                        .withOrganisaatiorajoite("1.2.3.4.1")
                         .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        OrganisaatioViite organisaatioViite = populate(viite(kayttoOikeusRyhma("RYHMA2")
-                        .withNimi(text("fi", "Käyttöoikeusryhmä")),
-                "1.2.3.4.5"));
-        populate(kayttoOikeusRyhmaMyontoViite(tapahtuma.getKayttoOikeusRyhma().getId(),
-                organisaatioViite.getKayttoOikeusRyhma().getId()));
+        KayttoOikeusRyhma myonnettava = populate(kayttoOikeusRyhma("RYHMA2")
+                .withNimi(text("fi", "Käyttöoikeusryhmä")));
+        populate(kayttoOikeusRyhmaMyontoViite(myonnetty.getKayttoOikeusRyhma().getId(),
+                myonnettava.getId()));
 
         KutsuCreateDto.KayttoOikeusRyhmaDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KayttoOikeusRyhmaDto();
-        kutsuKayttoOikeusRyhma.setId(organisaatioViite.getKayttoOikeusRyhma().getId());
+        kutsuKayttoOikeusRyhma.setId(myonnettava.getId());
         given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any()))
                 .willReturn(Stream.of("1.2.3.4.5", "1.2.3.4.1").collect(toSet()));
 

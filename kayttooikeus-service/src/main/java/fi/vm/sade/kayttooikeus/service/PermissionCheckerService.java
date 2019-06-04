@@ -81,12 +81,13 @@ public interface PermissionCheckerService {
     Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, Map<String, List<String>> palveluRoolit);
 
     /**
+     * @param organisaatioOid organisaatio johon käyttöoikeusryhmä halutaan myöntää
      * @param kayttooikeusryhmaId käyttöoikeusryhmästä joka halutaan myöntää
      * @return isValid
      */
-    boolean organisaatioViiteLimitationsAreValid(Long kayttooikeusryhmaId);
+    boolean organisaatioViiteLimitationsAreValid(String organisaatioOid, Long kayttooikeusryhmaId);
 
-    boolean kayttooikeusMyontoviiteLimitationCheck(Long kayttooikeusryhmaId);
+    boolean kayttooikeusMyontoviiteLimitationCheck(String organisaatioOid, Long kayttooikeusryhmaId);
 
     boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet);
 

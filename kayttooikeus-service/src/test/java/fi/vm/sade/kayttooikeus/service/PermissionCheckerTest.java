@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -12,7 +11,10 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
-import fi.vm.sade.kayttooikeus.repositories.*;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttooikeusryhmaDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -21,7 +23,6 @@ import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.properties.OphProperties;
-import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,20 +52,13 @@ public class PermissionCheckerTest {
 
     private PermissionCheckerService permissionChecker;
 
-    @Mock
-    private BasicHttpEntity entity;
-
     private HenkiloDataRepository henkiloDataRepositoryMock;
-
-    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private ExternalPermissionClient externalPermissionClient;
@@ -81,7 +75,6 @@ public class PermissionCheckerTest {
     public void setup() {
 
         this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository = mock(MyonnettyKayttoOikeusRyhmaTapahtumaRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
         this.organisaatioHenkiloRepository = mock(OrganisaatioHenkiloRepository.class);
         this.kayttooikeusryhmaDataRepository = mock(KayttooikeusryhmaDataRepository.class);
@@ -95,7 +88,7 @@ public class PermissionCheckerTest {
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(
                 this.henkiloDataRepositoryMock, organisaatioClient, externalPermissionClient, this.oppijanumerorekisteriClient,
-                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository, this.kayttoOikeusRyhmaMyontoViiteRepository,
+                this.kayttoOikeusRyhmaMyontoViiteRepository,
                 commonProperties, this.organisaatioHenkiloRepository, this.kayttooikeusryhmaDataRepository));
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")
@@ -460,7 +453,7 @@ public class PermissionCheckerTest {
     public void kayttooikeusMyontoviiteLimitationCheckNoKayttajaryhmas() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(1L)).isFalse();
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck("organisaatioOid", 1L)).isFalse();
     }
 
     @Test
@@ -468,29 +461,27 @@ public class PermissionCheckerTest {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(true).when(this.permissionChecker).isCurrentUserAdmin();
 
-        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(1L)).isTrue();
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck("organisaatioOid", 1L)).isTrue();
     }
 
     @Test
     public void kayttooikeusMyontoviiteLimitationCheckCanNotGrantToSameKayttooikeusryhma() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-        when(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
-                .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyList())).willReturn(Lists.newArrayList(2002L));
+        Map<String, Set<Long>> myontooikeudet = singletonMap("organisaatioOid", singleton(2002L));
+        when(kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).thenReturn(myontooikeudet);
 
-        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(2001L)).isFalse();
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck("organisaatioOid", 2001L)).isFalse();
     }
 
     @Test
     public void kayttooikeusMyontoviiteLimitationCheck() {
         doReturn("1.2.3.4.5").when(this.permissionChecker).getCurrentUserOid();
         doReturn(false).when(this.permissionChecker).isCurrentUserAdmin();
-        when(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findValidMyonnettyKayttooikeus("1.2.3.4.5"))
-                .thenReturn(Lists.newArrayList(CreateUtil.createMyonnettyKayttoOikeusRyhmaTapahtuma(1001L, 2001L)));
-        given(this.kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterIds(anyList())).willReturn(Lists.newArrayList(2002L));
+        Map<String, Set<Long>> myontooikeudet = singletonMap("organisaatioOid", singleton(2002L));
+        when(kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(any(), any())).thenReturn(myontooikeudet);
 
-        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck(2002L)).isTrue();
+        assertThat(this.permissionChecker.kayttooikeusMyontoviiteLimitationCheck("organisaatioOid", 2002L)).isTrue();
     }
 
     @Test

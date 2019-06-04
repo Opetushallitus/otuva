@@ -89,10 +89,7 @@ public class KutsuServiceImpl implements KutsuService {
             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
-            if (!this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD, ROLE_KUTSU_CRUD)) {
-                this.throwIfNotInHierarchy(kutsuCreateDto);
-                this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
-            }
+            this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
         }
         // This is redundant after every virkailija has been strongly identified
@@ -138,13 +135,6 @@ public class KutsuServiceImpl implements KutsuService {
         }
     }
 
-    private void throwIfNotInHierarchy(KutsuCreateDto kutsuCreateDto) {
-        Set<String> organisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
-                .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
-                .collect(Collectors.toSet());
-        this.throwIfNotInHierarchy(organisaatioOids);
-    }
-
     private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
         Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
         if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
@@ -157,7 +147,7 @@ public class KutsuServiceImpl implements KutsuService {
     private void organisaatioViiteLimitationsAreValidThrows(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
                 .forEach(kayttoOikeusRyhmaDto -> {
-                    if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kayttoOikeusRyhmaDto.getId())) {
+                    if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
                         throw new ForbiddenException("Target organization has invalid organization type for group "
                                 + kayttoOikeusRyhmaDto.getId());
                     }
@@ -169,7 +159,7 @@ public class KutsuServiceImpl implements KutsuService {
         // the granting person doesn't have access rights limitations (except admin users who have full access)
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
                 .forEach(kayttoOikeusRyhmaDto -> {
-                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttoOikeusRyhmaDto.getId())) {
+                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
                         throw new ForbiddenException("User doesn't have access rights to grant this group for group "
                                 + kayttoOikeusRyhmaDto.getId());
                     }
