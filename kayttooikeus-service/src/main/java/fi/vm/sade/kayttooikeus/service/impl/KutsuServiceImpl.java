@@ -96,7 +96,7 @@ public class KutsuServiceImpl implements KutsuService {
         String kutsujaOid = getKutsujaOid(kayttaja, kutsuCreateDto);
         if (!Objects.equals(kayttajaOid, kutsujaOid)) {
             Set<String> kutsuOrganisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
-                    .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                    .map(KutsuCreateDto.KutsuOrganisaatioCreateDto::getOrganisaatioOid)
                     .collect(Collectors.toSet());
             throwIfNotInHierarchy(kutsuOrganisaatioOids);
         }
@@ -174,7 +174,7 @@ public class KutsuServiceImpl implements KutsuService {
         }
     }
 
-    private void organisaatioViiteLimitationsAreValidThrows(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+    private void organisaatioViiteLimitationsAreValidThrows(Collection<KutsuCreateDto.KutsuOrganisaatioCreateDto> kutsuOrganisaatioDtos) {
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
                 .forEach(kayttoOikeusRyhmaDto -> {
                     if (!this.permissionCheckerService.organisaatioViiteLimitationsAreValid(kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
@@ -184,7 +184,7 @@ public class KutsuServiceImpl implements KutsuService {
                 }));
     }
 
-    private void kayttooikeusryhmaLimitationsAreValid(String kayttajaOid, Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+    private void kayttooikeusryhmaLimitationsAreValid(String kayttajaOid, Collection<KutsuCreateDto.KutsuOrganisaatioCreateDto> kutsuOrganisaatioDtos) {
         // The granting person's limitations must be checked always since there there shouldn't be a situation where the
         // the granting person doesn't have access rights limitations (except admin users who have full access)
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
