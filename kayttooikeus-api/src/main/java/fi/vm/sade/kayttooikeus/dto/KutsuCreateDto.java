@@ -16,6 +16,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KutsuCreateDto {
+
+    private String kutsujaOid;
+
     @NotEmpty
     private String etunimi;
     @NotEmpty

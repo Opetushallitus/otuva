@@ -67,6 +67,9 @@ public class PermissionCheckerTest {
 
     private OrganisaatioClient organisaatioClient;
 
+    @Mock
+    private KayttajarooliProvider kayttajarooliProvider;
+
     private static final String ORG1 = "org1";
     private static final String ORG2 = "org2";
     private static final String ROOT_ORG = "1.2.246.562.10.00000000001";
@@ -87,9 +90,11 @@ public class PermissionCheckerTest {
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(
-                this.henkiloDataRepositoryMock, organisaatioClient, externalPermissionClient, this.oppijanumerorekisteriClient,
-                this.kayttoOikeusRyhmaMyontoViiteRepository,
-                commonProperties, this.organisaatioHenkiloRepository, this.kayttooikeusryhmaDataRepository));
+                this.henkiloDataRepositoryMock, this.kayttoOikeusRyhmaMyontoViiteRepository,
+                this.organisaatioHenkiloRepository, this.kayttooikeusryhmaDataRepository,
+                externalPermissionClient, this.oppijanumerorekisteriClient, organisaatioClient,
+                kayttajarooliProvider,
+                commonProperties));
         when(this.oppijanumerorekisteriClient.getAllOidsForSamePerson(anyString())).thenReturn(
                 Sets.newHashSet("masterOid", "slaveOid1", "slaveOid2")
         );

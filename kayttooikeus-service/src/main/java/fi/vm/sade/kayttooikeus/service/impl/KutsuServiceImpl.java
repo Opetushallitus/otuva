@@ -13,6 +13,7 @@ import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
@@ -33,6 +34,7 @@ import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +58,7 @@ public class KutsuServiceImpl implements KutsuService {
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final IdentificationRepository identificationRepository;
-    private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
     private final CommonProperties commonProperties;
 
@@ -88,14 +90,22 @@ public class KutsuServiceImpl implements KutsuService {
         if (!this.kutsuRepository.findBySahkopostiAndTila(kutsuCreateDto.getSahkoposti(), AVOIN).isEmpty()) {
             throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
         }
+        final String kayttajaOid = this.permissionCheckerService.getCurrentUserOid();
+        Henkilo kayttaja = henkiloDataRepository.findByOidHenkilo(kayttajaOid)
+                .orElseThrow(() -> new DataInconsistencyException(String.format("Käyttäjää '%s' ei löytynyt", kayttajaOid)));
+        String kutsujaOid = getKutsujaOid(kayttaja, kutsuCreateDto);
+        if (!Objects.equals(kayttajaOid, kutsujaOid)) {
+            Set<String> kutsuOrganisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
+                    .map(KutsuCreateDto.KutsuOrganisaatioDto::getOrganisaatioOid)
+                    .collect(Collectors.toSet());
+            throwIfNotInHierarchy(kutsuOrganisaatioOids);
+        }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
-            this.kayttooikeusryhmaLimitationsAreValid(kutsuCreateDto.getOrganisaatiot());
+            this.kayttooikeusryhmaLimitationsAreValid(kutsujaOid, kutsuCreateDto.getOrganisaatiot());
         }
-        // This is redundant after every virkailija has been strongly identified
-        final String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
-        HenkiloDto currentUser = this.oppijanumerorekisteriClient.getHenkiloByOid(currentUserOid);
-        if (StringUtils.isEmpty(currentUser.getHetu()) || !currentUser.isYksiloityVTJ()) {
+        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsujaOid);
+        if (StringUtils.isEmpty(kutsuja.getHetu()) || !kutsuja.isYksiloityVTJ()) {
             throw new ForbiddenException("To create new invitation user needs to have hetu and be identified from VTJ");
         }
 
@@ -103,7 +113,7 @@ public class KutsuServiceImpl implements KutsuService {
         this.validateKayttooikeusryhmat(newKutsu);
         newKutsu.setId(null);
         newKutsu.setAikaleima(LocalDateTime.now());
-        newKutsu.setKutsuja(this.permissionCheckerService.getCurrentUserOid());
+        newKutsu.setKutsuja(kutsujaOid);
         newKutsu.setSalaisuus(UUID.randomUUID().toString());
         newKutsu.setTila(AVOIN);
         newKutsu.getOrganisaatiot().forEach(kutsuOrganisaatio -> kutsuOrganisaatio.setKutsu(newKutsu));
@@ -113,6 +123,25 @@ public class KutsuServiceImpl implements KutsuService {
         this.emailService.sendInvitationEmail(persistedNewKutsu);
 
         return persistedNewKutsu.getId();
+    }
+
+    private String getKutsujaOid(Henkilo kayttaja, KutsuCreateDto kutsu) {
+        KayttajaTyyppi kayttajaTyyppi = kayttaja.getKayttajaTyyppi();
+        if (kayttajaTyyppi == null) {
+            throw new DataInconsistencyException(String.format("Käyttäjältä '%s' puuttuu tyyppi", kayttaja.getOidHenkilo()));
+        }
+        switch (kayttajaTyyppi) {
+            case VIRKAILIJA:
+                return kayttaja.getOidHenkilo();
+            case PALVELU:
+                return Optional.ofNullable(kutsu.getKutsujaOid())
+                        .flatMap(henkiloDataRepository::findByOidHenkilo)
+                        .filter(Henkilo::isVirkailija)
+                        .map(Henkilo::getOidHenkilo)
+                        .orElseThrow(() -> new ValidationException("Kutsuja oid on pakollinen palvelukäyttäjänä"));
+            default:
+                throw new ValidationException(String.format("Käyttäjätyyppiä %s ei tueta", kayttajaTyyppi));
+        }
     }
 
     private void validateKayttooikeusryhmat(Kutsu newKutsu) {
@@ -136,7 +165,8 @@ public class KutsuServiceImpl implements KutsuService {
     }
 
     private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
-        Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids);
+        Map<String, List<String>> kayttooikeudet = singletonMap(PALVELU_KAYTTOOIKEUS, asList(ROLE_CRUD, ROLE_KUTSU_CRUD));
+        Set<String> accessibleOrganisationOids = this.permissionCheckerService.hasOrganisaatioInHierarchy(organisaatioOids, kayttooikeudet);
         if (organisaatioOids.size() != accessibleOrganisationOids.size()) {
             organisaatioOids.removeAll(accessibleOrganisationOids);
             throw new ForbiddenException("No access through organisation hierarchy to oids "
@@ -154,12 +184,12 @@ public class KutsuServiceImpl implements KutsuService {
                 }));
     }
 
-    private void kayttooikeusryhmaLimitationsAreValid(Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
+    private void kayttooikeusryhmaLimitationsAreValid(String kayttajaOid, Collection<KutsuCreateDto.KutsuOrganisaatioDto> kutsuOrganisaatioDtos) {
         // The granting person's limitations must be checked always since there there shouldn't be a situation where the
         // the granting person doesn't have access rights limitations (except admin users who have full access)
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
                 .forEach(kayttoOikeusRyhmaDto -> {
-                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
+                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttajaOid, kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
                         throw new ForbiddenException("User doesn't have access rights to grant this group for group "
                                 + kayttoOikeusRyhmaDto.getId());
                     }

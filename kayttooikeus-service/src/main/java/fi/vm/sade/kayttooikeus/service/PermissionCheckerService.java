@@ -71,10 +71,6 @@ public interface PermissionCheckerService {
     // OPH virkailija
     boolean isUserMiniAdmin(Set<String> userRoles, String palvelu, String rooli, String... muutRoolit);
 
-    boolean hasOrganisaatioInHierarchy(String requiredOrganiaatioOid);
-
-    Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOid);
-
     @Deprecated
     Set<String> hasOrganisaatioInHierarchy(Collection<String> requiredOrganiaatioOids, String palvelu, String rooli);
 
@@ -88,6 +84,8 @@ public interface PermissionCheckerService {
     boolean organisaatioViiteLimitationsAreValid(String organisaatioOid, Long kayttooikeusryhmaId);
 
     boolean kayttooikeusMyontoviiteLimitationCheck(String organisaatioOid, Long kayttooikeusryhmaId);
+
+    boolean kayttooikeusMyontoviiteLimitationCheck(String kayttajaOid, String organisaatioOid, Long kayttooikeusryhmaId);
 
     boolean organisaatioLimitationCheck(String organisaatioOid, Set<OrganisaatioViite> viiteSet);
 

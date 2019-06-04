@@ -15,6 +15,7 @@ import java.util.Set;
 public class KutsuReadDto {
     private Long id;
     private KutsunTila tila;
+    private String kutsujaOid;
     private String etunimi;
     private String sukunimi;
     private String sahkoposti;
