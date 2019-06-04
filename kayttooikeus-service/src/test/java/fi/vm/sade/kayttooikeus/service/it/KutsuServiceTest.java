@@ -374,9 +374,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnetty = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(virkailija("1.2.4"), "1.2.3.4.5"),
                 kayttoOikeusRyhma("kayttoOikeusRyhma")
-                        .withOrganisaatiorajoite("1.2.3.4.1")
                         .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         KayttoOikeusRyhma myonnettava = populate(kayttoOikeusRyhma("RYHMA2")
+                .withOrganisaatiorajoite("1.2.3.4.1")
                 .withNimi(text("fi", "Käyttöoikeusryhmä")));
         populate(kayttoOikeusRyhmaMyontoViite(myonnetty.getKayttoOikeusRyhma().getId(),
                 myonnettava.getId()));
@@ -448,9 +448,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnetty = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(virkailija("1.2.4"), "1.2.3.4.5"),
                 kayttoOikeusRyhma("kayttoOikeusRyhma")
-                        .withOrganisaatiorajoite("1.2.3.4.1")
                         .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         KayttoOikeusRyhma myonnettava = populate(kayttoOikeusRyhma("RYHMA2")
+                .withOrganisaatiorajoite("1.2.3.4.1")
                 .withNimi(text("fi", "Käyttöoikeusryhmä")));
         populate(kayttoOikeusRyhmaMyontoViite(myonnetty.getKayttoOikeusRyhma().getId(),
                 myonnettava.getId()));

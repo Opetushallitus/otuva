@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -17,7 +18,6 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
+import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.not;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 
@@ -376,16 +377,14 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public boolean organisaatioViiteLimitationsAreValid(String organisaatioOid, Long kayttooikeusryhmaId) {
-        Set<OrganisaatioViite> organisaatioViite = this.kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
-                .orElseThrow(() -> new NotFoundException("Could not find kayttooikeusryhma with id " + kayttooikeusryhmaId.toString()))
-                .getOrganisaatioViite();
-
-        // When granting to root organisation it has no organisaatioviite
-        return !(!org.springframework.util.CollectionUtils.isEmpty(organisaatioViite)
-                // Root organisation users do not need to pass organisaatioviite (admin & mini-admin)
-                && !this.isCurrentUserMiniAdmin()
-                // Organisaatiohenkilo limitations are valid
-                && !this.organisaatioLimitationCheck(organisaatioOid, organisaatioViite));
+        if (isCurrentUserAdmin()) {
+            return true;
+        }
+        return kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
+                .map(KayttoOikeusRyhma::getOrganisaatioViite)
+                .filter(not(Collection::isEmpty))
+                .map(organisaatioViite -> organisaatioLimitationCheck(organisaatioOid, organisaatioViite))
+                .orElse(false);
     }
 
 
