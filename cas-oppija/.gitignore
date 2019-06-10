@@ -5,6 +5,7 @@
 .history
 .vscode
 target/
+out/
 .idea/
 .DS_Store
 .idea
