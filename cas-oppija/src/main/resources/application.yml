@@ -43,6 +43,8 @@ cas.ticket.registry.jpa.ddlAuto: create
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
+server.error.include-stacktrace: never
+
 spring.datasource.url: jdbc:h2:mem:cas-oppija;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE
 spring.datasource.username: cas-oppija
 spring.datasource.password: cas-oppija
