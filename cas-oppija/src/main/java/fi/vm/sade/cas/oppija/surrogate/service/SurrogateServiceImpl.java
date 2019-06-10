@@ -96,6 +96,7 @@ public class SurrogateServiceImpl implements SurrogateService {
         String accessToken = valtuudetClient.getAccessToken(code, data.requestData.redirectUrl);
         PersonDto person = valtuudetClient.getSelectedPerson(data.requestData.sessionId, accessToken);
         boolean authorized = valtuudetClient.isAuthorizedToPerson(data.requestData.sessionId, accessToken, person.personId);
+        valtuudetClient.destroySession(ValtuudetType.PERSON, data.requestData.sessionId);
 
         if (!authorized) {
             throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s", person.personId));
