@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajaReadDto;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/virkailija")
+@RequestMapping(value = "/virkailija", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @RequiredArgsConstructor
 public class VirkailijaController {
 

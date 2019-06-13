@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ import java.util.Set;
 
 @Api(tags = "Käyttöoikeusanomukset ja käyttöoikeuksien hallinta")
 @RestController
-@RequestMapping("/kayttooikeusanomus")
+@RequestMapping(value = "/kayttooikeusanomus", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AnomusController {
 
     private final KayttooikeusAnomusService kayttooikeusAnomusService;

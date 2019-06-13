@@ -18,6 +18,7 @@ import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/cas")
+@RequestMapping(value = "/cas", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @Api(tags = "CAS:a varten olevat rajapinnat.")
 @RequiredArgsConstructor
 public class CasController {

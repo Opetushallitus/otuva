@@ -9,6 +9,7 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
-@RequestMapping("/organisaatiohenkilo")
+@RequestMapping(value = "/organisaatiohenkilo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @Api(value = "/organisaatiohenkilo", description = "Organisaatiohenkilön käsittelyyn liittyvät operaatiot.")
 public class OrganisaatioHenkiloController {
     private OrganisaatioHenkiloService organisaatioHenkiloService;

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/henkilo")
+@RequestMapping(value = "/henkilo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @Api(tags = "Henkilöön liittyvät operaatiot")
 @RequiredArgsConstructor
 public class HenkiloController {
