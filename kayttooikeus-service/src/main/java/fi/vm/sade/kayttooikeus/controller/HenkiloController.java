@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -106,7 +107,8 @@ public class HenkiloController {
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, null)")
-    @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST)
+    @RequestMapping(value = "/{henkiloOid}/password", method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation(value = "Asettaa henkilön salasanan.",
             notes = "Asettaa henkilölle uuden salasanan virkailijan "
                     + "toimesta, ei tee tarkistusta vanhalle salasanalle "
