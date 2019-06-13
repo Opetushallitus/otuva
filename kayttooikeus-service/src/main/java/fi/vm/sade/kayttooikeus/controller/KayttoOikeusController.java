@@ -72,7 +72,7 @@ public class KayttoOikeusController {
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
             authorizations = @Authorization("ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA"),
             response = Integer.class)
-    @RequestMapping(value = "/expirationReminders", method = RequestMethod.POST,
+    @PostMapping(value = "/expirationReminders", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
             produces = MediaType.TEXT_PLAIN_VALUE)
     public String sendExpirationReminders(@ApiParam(value = "Vuosi", required = true) @RequestParam("year") int year,
                                        @ApiParam(value = "Kuukausi", required = true) @RequestParam("month") int month,

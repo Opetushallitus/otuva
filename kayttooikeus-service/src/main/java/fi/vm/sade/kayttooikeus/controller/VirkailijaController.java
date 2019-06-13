@@ -1,8 +1,8 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajaReadDto;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.KayttajaReadDto;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class VirkailijaController {
 
     private final VirkailijaService virkailijaService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @PreAuthorize("hasRole('ROLE_APP_KAYTTOOIKEUS_VIRKAILIJANLUONTI')")
     @ApiOperation(value = "Virkailijan luonti",
             notes = "Tarkoitettu vain testikäyttöön, tuotannossa virkailijat luodaan kutsun kautta.")
@@ -30,7 +30,7 @@ public class VirkailijaController {
         return virkailijaService.create(dto);
     }
 
-    @PostMapping("/haku")
+    @PostMapping(value = "/haku", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_READ'," +
             "'ROLE_APP_KAYTTOOIKEUS_CRUD'," +
             "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")

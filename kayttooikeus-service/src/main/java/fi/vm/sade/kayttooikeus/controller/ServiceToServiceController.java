@@ -32,7 +32,7 @@ public class ServiceToServiceController {
 
     @ApiOperation("Palauttaa tiedon, onko käyttäjällä oikeus toiseen käyttäjään")
     @PreAuthorize("hasAnyRole('APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @RequestMapping(value = "/canUserAccessUser", method = RequestMethod.POST)
+    @PostMapping(value = "/canUserAccessUser", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public boolean checkUserPermissionToUser(@RequestBody PermissionCheckDto permissionCheckDto) {
         return permissionCheckerService.isAllowedToAccessPerson(permissionCheckDto);
     }
@@ -40,7 +40,7 @@ public class ServiceToServiceController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Lisää henkilölle organisaatiot.",
             notes = "Lisää uudet organisaatiot henkilölle. Ei päivitä tai poista vanhoja organisaatiotietoja. Palauttaa henkilön kaikki nykyiset organisaatiot.")
-    @RequestMapping(value = "/henkilo/{oid}/organisaatio/findOrCreate", method = RequestMethod.POST)
+    @PostMapping(value = "/henkilo/{oid}/organisaatio/findOrCreate", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(@PathVariable("oid") String henkiloOid,
             @RequestBody @Validated List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) {
         return organisaatioHenkiloService.addOrganisaatioHenkilot(henkiloOid, organisaatioHenkilot);

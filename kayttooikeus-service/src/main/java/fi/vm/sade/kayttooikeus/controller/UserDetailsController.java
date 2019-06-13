@@ -32,7 +32,7 @@ public class UserDetailsController {
     }
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public KayttajatiedotReadDto getByUsernameAndPassword(@Valid @RequestBody LoginDto dto) {
         return kayttajatiedotService.getByUsernameAndPassword(dto.getUsername(), dto.getPassword());
     }

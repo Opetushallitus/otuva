@@ -144,7 +144,7 @@ public class CasController {
         }
     }
 
-    @PostMapping("/uudelleenrekisterointi")
+    @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation(value = "Virkailijan uudelleenrekisteröinti")
     public VahvaTunnistusResponseDto tunnistauduVahvasti(
             @RequestParam(value = "kielisyys") String kielisyys,
@@ -171,12 +171,12 @@ public class CasController {
             authorizations = @Authorization("login"),
             response = ResponseEntity.class)
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/prequel", method = RequestMethod.POST)
+    @PostMapping(value = "/prequel", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> requestPost() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PostMapping(value = "/emailverification/{loginToken}")
+    @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public EmailVerificationResponseDto emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
                                                           @PathVariable String loginToken) {

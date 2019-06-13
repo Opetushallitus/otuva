@@ -16,7 +16,7 @@ public class DevController {
 
     private final OrganisaatioService organisaatioService;
 
-    @PostMapping("/organisaatioCache")
+    @PostMapping(value = "/organisaatioCache", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation("Päivittää organisaatiovälimuistin. (db + memory)")
     public synchronized void updateCache() {
