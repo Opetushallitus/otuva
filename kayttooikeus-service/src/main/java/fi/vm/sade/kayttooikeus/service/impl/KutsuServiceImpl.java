@@ -96,10 +96,7 @@ public class KutsuServiceImpl implements KutsuService {
                 .orElseThrow(() -> new DataInconsistencyException(String.format("Käyttäjää '%s' ei löytynyt", kayttajaOid)));
         String kutsujaOid = getKutsujaOid(kayttaja, kutsuCreateDto);
         if (!Objects.equals(kayttajaOid, kutsujaOid)) {
-            Set<String> kutsuOrganisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
-                    .map(KutsuCreateDto.KutsuOrganisaatioCreateDto::getOrganisaatioOid)
-                    .collect(Collectors.toSet());
-            throwIfNotInHierarchy(kutsuOrganisaatioOids);
+            throwIfNotInHierarchy(kutsuCreateDto);
         }
         if (!this.permissionCheckerService.isCurrentUserAdmin()) {
             this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
@@ -163,6 +160,13 @@ public class KutsuServiceImpl implements KutsuService {
         if (eiSallitutKayttooikeusryhmat.length > 0) {
             throw new IllegalArgumentException(String.format("Käyttöoikeusryhmiä %s ei voi myöntää käyttäjätyypille %s", Arrays.toString(eiSallitutKayttooikeusryhmat), KayttajaTyyppi.VIRKAILIJA));
         }
+    }
+
+    private void throwIfNotInHierarchy(KutsuCreateDto kutsuCreateDto) {
+        Set<String> organisaatioOids = kutsuCreateDto.getOrganisaatiot().stream()
+                .map(KutsuCreateDto.KutsuOrganisaatioCreateDto::getOrganisaatioOid)
+                .collect(Collectors.toSet());
+        this.throwIfNotInHierarchy(organisaatioOids);
     }
 
     private void throwIfNotInHierarchy(Collection<String> organisaatioOids) {
