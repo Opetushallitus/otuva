@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
+import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
@@ -189,7 +190,9 @@ public class KutsuServiceImpl implements KutsuService {
         // the granting person doesn't have access rights limitations (except admin users who have full access)
         kutsuOrganisaatioDtos.forEach(kutsuOrganisaatioDto -> kutsuOrganisaatioDto.getKayttoOikeusRyhmat()
                 .forEach(kayttoOikeusRyhmaDto -> {
-                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttajaOid, kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId())) {
+                    if (!this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck(kayttajaOid,
+                            kutsuOrganisaatioDto.getOrganisaatioOid(), kayttoOikeusRyhmaDto.getId(),
+                            MyontooikeusCriteria.kutsu())) {
                         throw new ForbiddenException("User doesn't have access rights to grant this group for group "
                                 + kayttoOikeusRyhmaDto.getId());
                     }
