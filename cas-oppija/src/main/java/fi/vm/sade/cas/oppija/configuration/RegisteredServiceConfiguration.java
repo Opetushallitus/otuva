@@ -29,15 +29,18 @@ public class RegisteredServiceConfiguration {
 
     @Bean
     public RegisteredServiceAttributeReleasePolicy registeredServiceAttributeReleasePolicy() {
-        return new ReturnAllWithoutSessionIndexAttributeReleasePolicy();
+        return new CasOppijaAttributeReleasePolicy();
     }
 
-    private static class ReturnAllWithoutSessionIndexAttributeReleasePolicy extends ReturnAllAttributeReleasePolicy {
+    private static class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePolicy {
 
         @Override
         protected Map<String, Object> returnFinalAttributesCollection(Map<String, Object> attributesToRelease, RegisteredService service) {
             // pac4j adds session index to principal attributes (should be only in auth attrs), fixed in pac4j 4.0
             attributesToRelease.entrySet().removeIf(entry -> SESSION_INDEX_PATTERN.matcher(entry.getKey()).find());
+            // pac4j adds both saml name (e.g. urn:oid:2.5.4.3) and friendly name (e.g. cn) to principal attributes
+            // and cas converts all attributes containing ":" into numbers which is not allowed in xml tags
+            attributesToRelease.entrySet().removeIf(entry -> entry.getKey().contains(":"));
             return attributesToRelease;
         }
 
