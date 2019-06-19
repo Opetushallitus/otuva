@@ -93,10 +93,21 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
     private SurrogateAuthenticationDto getAuthentication(SurrogateData data, String code) throws GeneralSecurityException {
+        try {
+            return handleAuthentication(data, code);
+        } finally {
+            try {
+                valtuudetClient.destroySession(ValtuudetType.PERSON, data.requestData.sessionId);
+            } catch (Exception e) {
+                LOGGER.warn("Unable to destroy valtuudet session", e);
+            }
+        }
+    }
+
+    private SurrogateAuthenticationDto handleAuthentication(SurrogateData data, String code) throws GeneralSecurityException {
         String accessToken = valtuudetClient.getAccessToken(code, data.requestData.redirectUrl);
         PersonDto person = valtuudetClient.getSelectedPerson(data.requestData.sessionId, accessToken);
         boolean authorized = valtuudetClient.isAuthorizedToPerson(data.requestData.sessionId, accessToken, person.personId);
-        valtuudetClient.destroySession(ValtuudetType.PERSON, data.requestData.sessionId);
 
         if (!authorized) {
             throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s", person.personId));
