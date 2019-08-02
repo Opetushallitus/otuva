@@ -22,7 +22,7 @@ import static java.util.Collections.singletonList;
 @Configuration
 public class HttpClientConfiguration {
 
-    private static final String CLIENT_SUBSYSTEM_CODE = "cas-oppija";
+    private static final String CALLER_ID = "1.2.246.562.10.00000000001.cas-oppija";
 
     private final CasConfigurationProperties casProperties;
     private final SSLConnectionSocketFactory trustStoreSslSocketFactory;
@@ -38,7 +38,7 @@ public class HttpClientConfiguration {
 
     @Bean
     public fi.vm.sade.javautils.httpclient.OphHttpClient httpClient() {
-        return ApacheOphHttpClient.createDefaultOphClient(CLIENT_SUBSYSTEM_CODE, null);
+        return ApacheOphHttpClient.createDefaultOphClient(CALLER_ID, null);
     }
 
     @Bean
@@ -49,7 +49,7 @@ public class HttpClientConfiguration {
                 .webCasUrl(properties.url("cas.base"))
                 .casServiceUrl(properties.url("oppijanumerorekisteri-service.security_check"))
                 .build();
-        return new OphHttpClient.Builder(CLIENT_SUBSYSTEM_CODE).authenticator(authenticator).build();
+        return new OphHttpClient.Builder(CALLER_ID).authenticator(authenticator).build();
     }
 
     // override cas httpclient to include caller-id header
@@ -80,7 +80,7 @@ public class HttpClientConfiguration {
         HttpClientProperties httpClient = casProperties.getHttpClient();
         c.setConnectionTimeout(Beans.newDuration(httpClient.getConnectionTimeout()).toMillis());
         c.setReadTimeout((int) Beans.newDuration(httpClient.getReadTimeout()).toMillis());
-        c.setDefaultHeaders(singletonList(new BasicHeader("Caller-Id", CLIENT_SUBSYSTEM_CODE)));
+        c.setDefaultHeaders(singletonList(new BasicHeader("Caller-Id", CALLER_ID)));
         return c;
     }
 
