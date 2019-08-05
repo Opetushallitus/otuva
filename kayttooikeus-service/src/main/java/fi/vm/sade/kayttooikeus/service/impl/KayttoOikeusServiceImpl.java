@@ -33,9 +33,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -443,11 +443,21 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private List<KayttoOikeusRyhmaDto> getKayttooikeusryhmaByMyoontoikeus(String organisaatioOid, String myontajaOid) {
         Map<String, Set<Long>> myontooikeudet = kayttoOikeusRyhmaMyontoViiteRepository
                 .getSlaveIdsByMasterHenkiloOid(myontajaOid, MyontooikeusCriteria.oletus());
+        lisaaAliorganisaatiot(myontooikeudet, false);
         Set<Long> slaveIds = myontooikeudet.getOrDefault(organisaatioOid, Collections.emptySet());
         if (slaveIds.isEmpty()) {
             return Collections.emptyList();
         }
         return kayttoOikeusRyhmaRepository.findByIdList(slaveIds);
+    }
+
+    private void lisaaAliorganisaatiot(Map<String, Set<Long>> myontooikeudet, boolean passiiviset) {
+        myontooikeudet.entrySet().stream()
+                .flatMap(entry -> organisaatioClient.listWithChildOids(entry.getKey(), new OrganisaatioMyontoPredicate(passiiviset))
+                        .stream()
+                        .map(aliorganisaatioOid -> new AbstractMap.SimpleEntry<>(aliorganisaatioOid, entry.getValue())))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, appending()))
+                .forEach((organisaatioOid, kayttooikeusryhmaIds) -> myontooikeudet.merge(organisaatioOid, kayttooikeusryhmaIds, appending()));
     }
 
     private void checkAndInsertSlaveGroups(KayttoOikeusRyhmaModifyDto ryhmaData, KayttoOikeusRyhma koRyhma) {
