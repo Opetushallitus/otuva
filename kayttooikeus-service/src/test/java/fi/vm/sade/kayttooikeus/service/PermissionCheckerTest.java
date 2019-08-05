@@ -14,11 +14,11 @@ import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttooikeusryhmaDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.impl.MyontooikeusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
@@ -56,8 +56,6 @@ public class PermissionCheckerTest {
 
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
 
-    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
 
     @Mock
@@ -79,7 +77,6 @@ public class PermissionCheckerTest {
 
         this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);
         this.kayttoOikeusRyhmaMyontoViiteRepository = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
-        this.organisaatioHenkiloRepository = mock(OrganisaatioHenkiloRepository.class);
         this.kayttooikeusryhmaDataRepository = mock(KayttooikeusryhmaDataRepository.class);
 
 
@@ -90,8 +87,8 @@ public class PermissionCheckerTest {
         when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(
-                this.henkiloDataRepositoryMock, this.kayttoOikeusRyhmaMyontoViiteRepository,
-                this.organisaatioHenkiloRepository, this.kayttooikeusryhmaDataRepository,
+                new MyontooikeusServiceImpl(kayttoOikeusRyhmaMyontoViiteRepository, organisaatioClient),
+                this.henkiloDataRepositoryMock, this.kayttooikeusryhmaDataRepository,
                 externalPermissionClient, this.oppijanumerorekisteriClient, organisaatioClient,
                 kayttajarooliProvider,
                 commonProperties));
