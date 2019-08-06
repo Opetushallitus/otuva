@@ -29,16 +29,15 @@ import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +56,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final OrikaBeanMapper mapper;
     private final LocalizationService localizationService;
     private final EmailService emailService;
-    private final OrganisaatioService organisaatioService;
+    private final MyontooikeusService myontooikeusService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -504,18 +503,11 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 .forEach(krth -> kayttooikeusByOrganisation.compute(krth.getOrganisaatioHenkilo().getOrganisaatioOid(),
                         this.addIfNotExists(krth.getKayttoOikeusRyhma().getId())));
 
-        String kayttajaOid = UserDetailsUtil.getCurrentUserOid();
-        MyontooikeusCriteria myontooikeusCriteria = MyontooikeusCriteria.oletus();
-        Map<String, Set<Long>> myontooikeudet = kayttoOikeusRyhmaMyontoViiteRepository.getSlaveIdsByMasterHenkiloOid(kayttajaOid, myontooikeusCriteria);
-
         // vain rekisterinpitäjä saa myöntää kaikkia käyttöoikeuksia
         if (!permissionCheckerService.isCurrentUserAdmin()) {
-            // lisätään myöntöoikeudet aliorganisaatioihin
-            myontooikeudet.entrySet().stream()
-                    .flatMap(entry -> organisaatioClient.listWithChildOids(entry.getKey(), new OrganisaatioMyontoPredicate(false)).stream()
-                            .map(aliorganisaatioOid -> new SimpleEntry<>(aliorganisaatioOid, entry.getValue())))
-                    .collect(toMap(Entry::getKey, Entry::getValue, appending()))
-                    .forEach((organisaatioOid, kayttooikeusryhmaIds) -> myontooikeudet.merge(organisaatioOid, kayttooikeusryhmaIds, appending()));
+            String kayttajaOid = UserDetailsUtil.getCurrentUserOid();
+            Map<String, Set<Long>> myontooikeudet = myontooikeusService.getMyontooikeudet(kayttajaOid,
+                    MyontooikeusCriteria.oletus(), new OrganisaatioMyontoPredicate(false));
 
             this.regularUserChecks(kayttooikeusByOrganisation, myontooikeudet);
         }

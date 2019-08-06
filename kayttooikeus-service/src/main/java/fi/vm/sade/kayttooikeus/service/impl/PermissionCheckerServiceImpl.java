@@ -12,11 +12,10 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaMyontoViiteRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttooikeusryhmaDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
+import fi.vm.sade.kayttooikeus.service.MyontooikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -39,10 +38,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.appending;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.not;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
@@ -56,9 +53,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     public static final String ROLE_PREFIX = "ROLE_APP_";
     private static final String ROLE_PALVELUKAYTTAJA_CRUD = "ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD";
 
+    private final MyontooikeusService myontooikeusService;
+
     private final HenkiloDataRepository henkiloDataRepository;
-    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
-    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
 
     private final ExternalPermissionClient externalPermissionClient;
@@ -400,19 +397,9 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         if (rekisterinpitaja) {
             return true;
         }
-        Map<String, Set<Long>> myontooikeudet = this.kayttoOikeusRyhmaMyontoViiteRepository
-                .getSlaveIdsByMasterHenkiloOid(kayttajaOid, criteria);
-        lisaaAliorganisaatiot(myontooikeudet, rekisterinpitaja);
+        Map<String, Set<Long>> myontooikeudet = myontooikeusService.getMyontooikeudet(kayttajaOid,
+                criteria, new OrganisaatioMyontoPredicate(false));
         return myontooikeudet.getOrDefault(organisaatioOid, emptySet()).contains(kayttooikeusryhmaId);
-    }
-
-    private void lisaaAliorganisaatiot(Map<String, Set<Long>> myontooikeudet, boolean passiiviset) {
-        myontooikeudet.entrySet().stream()
-                .flatMap(entry -> organisaatioClient.listWithChildOids(entry.getKey(), new OrganisaatioMyontoPredicate(passiiviset))
-                        .stream()
-                        .map(aliorganisaatioOid -> new AbstractMap.SimpleEntry<>(aliorganisaatioOid, entry.getValue())))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, appending()))
-                .forEach((organisaatioOid, kayttooikeusryhmaIds) -> myontooikeudet.merge(organisaatioOid, kayttooikeusryhmaIds, appending()));
     }
 
     // Check that wanted KOR can be added to the wanted organisation

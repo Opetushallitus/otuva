@@ -11,6 +11,7 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
+import fi.vm.sade.kayttooikeus.service.MyontooikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
@@ -61,6 +62,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final CommonProperties commonProperties;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
+    private final MyontooikeusService myontooikeusService;
 
     @Override
     public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
@@ -441,8 +443,8 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     }
 
     private List<KayttoOikeusRyhmaDto> getKayttooikeusryhmaByMyoontoikeus(String organisaatioOid, String myontajaOid) {
-        Map<String, Set<Long>> myontooikeudet = kayttoOikeusRyhmaMyontoViiteRepository
-                .getSlaveIdsByMasterHenkiloOid(myontajaOid, MyontooikeusCriteria.oletus());
+        Map<String, Set<Long>> myontooikeudet = myontooikeusService.getMyontooikeudet(myontajaOid,
+                MyontooikeusCriteria.oletus(), new OrganisaatioMyontoPredicate(false));
         Set<Long> slaveIds = myontooikeudet.getOrDefault(organisaatioOid, Collections.emptySet());
         if (slaveIds.isEmpty()) {
             return Collections.emptyList();
