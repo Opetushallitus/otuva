@@ -5,6 +5,7 @@ import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.authentication.HttpClientProperties;
@@ -81,6 +82,7 @@ public class HttpClientConfiguration {
         c.setConnectionTimeout(Beans.newDuration(httpClient.getConnectionTimeout()).toMillis());
         c.setReadTimeout((int) Beans.newDuration(httpClient.getReadTimeout()).toMillis());
         c.setDefaultHeaders(singletonList(new BasicHeader("Caller-Id", CALLER_ID)));
+        c.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
         return c;
     }
 
