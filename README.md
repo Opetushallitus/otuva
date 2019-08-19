@@ -87,6 +87,22 @@ Kommentti muistutuksena, ettei tätä muutosta commitata.
 
 Rest API on dokumentoitu swaggerin avulla ja löytyy osoitteesta https://virkailija.opintopolku.fi/kayttooikeus-service/swagger-ui.html
 
+## Uuden käyttöoikeuden luonti
+
+Luo uusi migraatio `kayttooikeus-service/src/main/resources/db/migration`
+kansioon jossa kutsutaan `insertkayttooikeus` kantafunktiota.
+
+```
+SELECT insertkayttooikeus('PALVELU', 'KAYTTOOIKEUS', 'Kuvaus');
+```
+
+Palvelun nimen (esimerkissä `PALVELU`) tulee viitata olemassa olevaan
+palveluun taulussa `palvelu`. Käyttöoikeuden nimi (esimerkissä `KAYTTOOIKEUS`)
+tulee osaksi tunnistetta, jolla virkailijalle myönnetty käyttöoikeus esitetään
+rajapintavastauksessa. Kuvaustekstiä (esimerkissä `Kuvaus`) käytetään mm. kun
+listataan ryhmään kuuluvia käyttöoikeuksia käyttöoikeusryhmien hallinnan
+käyttöliittymässä.
+
 ## Virkailijan luonti -käyttöoikeus
 
 ```
