@@ -290,6 +290,39 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.2"})
+    public void listKutsusPassivoituOrganisaatioNormaaliVirkailija() {
+        HenkiloPopulator kutsuja = HenkiloPopulator.henkilo("kutsujaOid");
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo(kutsuja, "1.2.246.562.10.1").passivoitu(), kayttoOikeusRyhma("käyttöoikeusryhmä1")));
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo(kutsuja, "1.2.246.562.10.2"), kayttoOikeusRyhma("käyttöoikeusryhmä2")));
+        Kutsu kutsu = populate(kutsu("Essi", "Esimerkki", "a@example.com").kutsuja("kutsujaOid").organisaatio(kutsuOrganisaatio("1.2.246.562.10.1")));
+
+        KutsuOrganisaatioOrder order = KutsuOrganisaatioOrder.AIKALEIMA;
+        Sort.Direction direction = Sort.Direction.ASC;
+        KutsuCriteria criteria = new KutsuCriteria();
+
+        List<KutsuReadDto> kutsuList = kutsuService.listKutsus(order, direction, criteria, null, null);
+
+        assertThat(kutsuList).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
+    public void listKutsusPassivoituOrganisaatioRekisterinpitaja() {
+        HenkiloPopulator kutsuja = HenkiloPopulator.henkilo("kutsujaOid");
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo(kutsuja, "1.2.246.562.10.1").passivoitu(), kayttoOikeusRyhma("käyttöoikeusryhmä1")));
+        Kutsu kutsu = populate(kutsu("Essi", "Esimerkki", "a@example.com").kutsuja("kutsujaOid").organisaatio(kutsuOrganisaatio("1.2.246.562.10.1")));
+
+        KutsuOrganisaatioOrder order = KutsuOrganisaatioOrder.AIKALEIMA;
+        Sort.Direction direction = Sort.Direction.ASC;
+        KutsuCriteria criteria = new KutsuCriteria();
+
+        List<KutsuReadDto> kutsuList = kutsuService.listKutsus(order, direction, criteria, null, null);
+
+        assertThat(kutsuList).extracting(KutsuReadDto::getId).containsExactly(kutsu.getId());
+    }
+
+    @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void createKutsuAsAdmin() {
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");

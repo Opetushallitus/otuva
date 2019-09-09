@@ -44,7 +44,6 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
                 .select(kutsu)
                 .where(henkilo.oidHenkilo.eq(kutsu.kutsuja))
                 .where(criteria.onCondition(kutsuKayttoOikeusryhma, kutsujaKayttooikeusryhma))
-                .where(organisaatioHenkilo.passivoitu.isFalse())
                 .orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
         if (offset != null) {
             query.offset(offset);
