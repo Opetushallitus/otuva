@@ -88,9 +88,6 @@ public class KutsuServiceImpl implements KutsuService {
     @Override
     @Transactional
     public long createKutsu(KutsuCreateDto kutsuCreateDto) {
-        if (!this.kutsuRepository.findBySahkopostiAndTila(kutsuCreateDto.getSahkoposti(), AVOIN).isEmpty()) {
-            throw new IllegalArgumentException("kutsu_with_sahkoposti_already_sent");
-        }
         final String kayttajaOid = this.permissionCheckerService.getCurrentUserOid();
         Henkilo kayttaja = henkiloDataRepository.findByOidHenkilo(kayttajaOid)
                 .orElseThrow(() -> new DataInconsistencyException(String.format("Käyttäjää '%s' ei löytynyt", kayttajaOid)));
