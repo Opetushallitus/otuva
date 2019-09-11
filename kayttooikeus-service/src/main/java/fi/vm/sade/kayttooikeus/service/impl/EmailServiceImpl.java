@@ -5,7 +5,6 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
-import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
@@ -172,7 +171,6 @@ public class EmailServiceImpl implements EmailService {
 
     private EmailRecipient getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet, String email, HenkiloDto henkilo) {
         List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
-
         replacements.add(new ReportedRecipientReplacementDTO("vastaanottaja", mapper.map(henkilo, SahkopostiHenkiloDto.class)));
         replacements.add(new ReportedRecipientReplacementDTO("kayttooikeusryhmat", getExpirationsText(kayttoOikeudet, langugeCode)));
         replacements.add(new ReportedRecipientReplacementDTO("linkki", expirationReminderPersonUrl));
@@ -187,30 +185,10 @@ public class EmailServiceImpl implements EmailService {
     private String getExpirationsText(List<ExpiringKayttoOikeusDto> kayttoOikeudet, String languageCode) {
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, DEFAULT_LOCALE);
         return kayttoOikeudet.stream().map(kayttoOikeus -> {
-            Optional<KayttoOikeusRyhma> kayttooikeusryhma = this.kayttoOikeusRyhmaRepository.findById(kayttoOikeus.getKayttoOikeusRyhmaId());
+            String kayttoOikeusRyhmaNimi = ofNullable(kayttoOikeus.getRyhmaDescription())
+                    .flatMap(d -> d.getOrAny(languageCode)).orElse(kayttoOikeus.getRyhmaName());
             String voimassaLoppuPvmStr = dateFormat.format(Date.from(kayttoOikeus.getVoimassaLoppuPvm().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
-            String expirationString = kayttooikeusryhma
-                .map(ryhma ->  ryhma.getKayttoOikeus()
-                    .stream()
-                    .map(oikeus ->
-                        String.format("%s, %s, (%s)",
-                            ofNullable(oikeus.getPalvelu().getDescription()).flatMap(d -> d.getOrAny(languageCode)).orElse(""),
-                            ofNullable(oikeus.getTextGroup()).flatMap(d -> d.getOrAny(languageCode)).orElse(""),
-                            voimassaLoppuPvmStr
-                        )
-                    )
-                    .collect(joining(",</br>"))
-                ).orElseGet(() -> {
-                        return String.format("%s (%s)",
-                            ofNullable(kayttoOikeus.getRyhmaDescription()).flatMap(d -> d.getOrAny(languageCode)).orElse(kayttoOikeus.getRyhmaName()),
-                            voimassaLoppuPvmStr
-                        );
-                    }
-                );
-
-            return String.format("%s%s%s", "</br></br>", expirationString, "</br></br>");
-
+            return String.format("%s (%s)", kayttoOikeusRyhmaNimi, voimassaLoppuPvmStr);
         }).collect(joining(", "));
     }
 
