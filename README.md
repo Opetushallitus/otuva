@@ -41,7 +41,7 @@ Konfiguraatioiden muuttaminen komentoriviparametreilla (baseUrl-parametrilla mä
 sovelluksen käyttämät palvelut sijaitsevat):
 
     java -jar kayttooikeus-service/target/kayttooikeus-service-0.1.2-SNAPSHOT.jar \
-        -DbaseUrl=http://localhost:8081 \
+        -DbaseUrl=https://<testiympäristö_host> \
         -Dspring.datasource.username=<tietokannan_tunnus> \
         -Dspring.datasource.password=<tietokannan_salasana> \
         -Dservice-users.default.username=<oma_virkailija_tunnus> \
@@ -59,7 +59,7 @@ service-users.default.password: <oma_virkailija_salasana>
 ...jolloin ajaminen:
 
     java -jar kayttooikeus-service/target/kayttooikeus-service-0.1.2-SNAPSHOT.jar \
-        -DbaseUrl=http://localhost:8081 \
+        -DbaseUrl=https://<testiympäristö_host> \
         -Dspring.config.additional-location=<path/to/configfile>/kayttooikeus.yml
 
 Palvelu löytyy käynnistymisen jälkeen osoitteesta <http://localhost:8080/kayttooikeus-service>.
