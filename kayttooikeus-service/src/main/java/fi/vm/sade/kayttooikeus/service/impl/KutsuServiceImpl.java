@@ -332,7 +332,7 @@ public class KutsuServiceImpl implements KutsuService {
             YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
             Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
             yhteystietoDtos.add(yhteystietoDto);
-            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
+            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
         }
 
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
@@ -344,7 +344,7 @@ public class KutsuServiceImpl implements KutsuService {
         HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
         yhteystietoDtos.add(yhteystietoDto);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
-        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, yhteystietoDtos));
+        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
     }
 
