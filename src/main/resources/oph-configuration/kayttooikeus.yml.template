@@ -10,8 +10,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://{{postgresql_kayttooikeus_host}}:{{port_postgresql}}/{{postgresql_kayttooikeus_db | default('authentication')}}?ApplicationName=kayttooikeus-service
-    username: {{postgresql_kayttooikeus_user}}
-    password: {{postgresql_kayttooikeus_password}}
+    username: {{postgres_app_user}}
+    password: {{postgresql_kayttooikeus_app_password}}
     hikari:
       maximum-pool-size: {{postgresql_kayttooikeus_maximum_pool_size | default('20')}}
       connection-timeout: {{postgresql_kayttooikeus_connection_timeout | default('10000')}}
