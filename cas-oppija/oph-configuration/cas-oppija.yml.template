@@ -58,8 +58,8 @@ cas.logout.redirectUrl: {{ cas_oppija_logout_redirect_url }}
 cas.slo.asynchronous: {{ cas_oppija_slo_asynchronous | default('false') }}
 
 cas.ticket.registry.jpa.url: jdbc:postgresql://{{ cas_oppija_datasource_host }}:{{ cas_oppija_datasource_port | default('5432') }}/{{ cas_oppija_datasource_dbname | default('cas-oppija') }}
-cas.ticket.registry.jpa.user: {{ cas_oppija_datasource_username }}
-cas.ticket.registry.jpa.password: {{ cas_oppija_datasource_password }}
+cas.ticket.registry.jpa.user: {{ postgres_app_user }}
+cas.ticket.registry.jpa.password: {{ postgresql_cas_app_password }}
 cas.ticket.registry.jpa.driverClass: org.postgresql.Driver
 cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQL95Dialect
 cas.ticket.registry.jpa.ddlAuto: validate
@@ -68,8 +68,8 @@ cas.ticket.registry.jpa.ddlAuto: validate
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
 spring.datasource.url: jdbc:postgresql://{{ cas_oppija_datasource_host }}:{{ cas_oppija_datasource_port | default('5432') }}/{{ cas_oppija_datasource_dbname | default('cas-oppija') }}
-spring.datasource.username: {{ cas_oppija_datasource_username }}
-spring.datasource.password: {{ cas_oppija_datasource_password }}
+spring.datasource.username: {{ postgres_app_user }}
+spring.datasource.password: {{ postgresql_cas_app_password }}
 spring.datasource.driver-class-name: org.postgresql.Driver
 spring.datasource.platform: postgresql
 
