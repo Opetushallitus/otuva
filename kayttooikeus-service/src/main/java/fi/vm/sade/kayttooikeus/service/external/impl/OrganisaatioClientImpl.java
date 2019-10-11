@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.carrotsearch.sizeof.RamUsageEstimator.humanReadableUnits;
 import static com.carrotsearch.sizeof.RamUsageEstimator.sizeOf;
@@ -107,6 +108,16 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     @Override
     public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid) {
         return this.cache.getByOid(oid);
+    }
+
+    @Override
+    public OrganisaatioPerustieto getRoot() {
+        return this.cache.getRoot();
+    }
+
+    @Override
+    public Stream<OrganisaatioPerustieto> stream() {
+        return this.cache.getAllOrganisaatios();
     }
 
     @Override
