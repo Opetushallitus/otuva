@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class OrganisaatioController {
     private final OrganisaatioService organisaatioService;
 
     @GetMapping
-    public Collection<OrganisaatioWithChildrenDto> listBy(OrganisaatioCriteriaDto criteria) {
+    public Collection<OrganisaatioDto> listBy(OrganisaatioCriteriaDto criteria) {
         return organisaatioService.listBy(criteria);
     }
 

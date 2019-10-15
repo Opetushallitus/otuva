@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
@@ -46,11 +47,21 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     }
 
     @Override
-    public Collection<OrganisaatioWithChildrenDto> listBy(OrganisaatioCriteriaDto criteria) {
+    public Collection<OrganisaatioDto> listBy(OrganisaatioCriteriaDto criteria) {
         return organisaatioClient.stream()
                 .filter(getPredicate(criteria, Predicate::and))
-                .map(this::mapToWithChildrenDto)
+                .map(this::mapToDto)
                 .collect(toList());
+    }
+
+    private OrganisaatioDto mapToDto(OrganisaatioPerustieto from) {
+        OrganisaatioDto to = new OrganisaatioDto();
+        to.setOid(from.getOid());
+        to.setParentOidPath(from.getParentOidPath());
+        to.setNimi(new TextGroupMapDto(null, from.getNimi()));
+        to.setTyypit(from.getTyypit());
+        to.setStatus(from.getStatus());
+        return to;
     }
 
     @Override

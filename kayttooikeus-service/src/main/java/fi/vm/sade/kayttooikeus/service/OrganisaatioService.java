@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 
 import java.util.Collection;
@@ -11,7 +12,7 @@ public interface OrganisaatioService {
 
     Long getClientCacheState();
 
-    Collection<OrganisaatioWithChildrenDto> listBy(OrganisaatioCriteriaDto criteria);
+    Collection<OrganisaatioDto> listBy(OrganisaatioCriteriaDto criteria);
 
     OrganisaatioWithChildrenDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria);
 
