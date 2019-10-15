@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioTyyppi;
@@ -46,7 +46,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     }
 
     @Override
-    public Collection<OrganisaatioDto> listBy(OrganisaatioCriteriaDto criteria) {
+    public Collection<OrganisaatioWithChildrenDto> listBy(OrganisaatioCriteriaDto criteria) {
         return organisaatioClient.stream()
                 .filter(getPredicate(criteria, Predicate::and))
                 .map(this::mapToWithChildrenDto)
@@ -54,18 +54,18 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     }
 
     @Override
-    public OrganisaatioDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria) {
+    public OrganisaatioWithChildrenDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria) {
         OrganisaatioPerustieto root = organisaatioClient.getRoot();
         Predicate<OrganisaatioPerustieto> predicate = getPredicate(criteria, Predicate::and);
         return mapToWithChildrenDto(root, predicate);
     }
 
-    private OrganisaatioDto mapToWithChildrenDto(OrganisaatioPerustieto from) {
+    private OrganisaatioWithChildrenDto mapToWithChildrenDto(OrganisaatioPerustieto from) {
         return mapToWithChildrenDto(from, organisaatio -> true);
     }
 
-    private OrganisaatioDto mapToWithChildrenDto(OrganisaatioPerustieto from, Predicate<OrganisaatioPerustieto> predicate) {
-        OrganisaatioDto to = new OrganisaatioDto();
+    private OrganisaatioWithChildrenDto mapToWithChildrenDto(OrganisaatioPerustieto from, Predicate<OrganisaatioPerustieto> predicate) {
+        OrganisaatioWithChildrenDto to = new OrganisaatioWithChildrenDto();
         to.setOid(from.getOid());
         to.setParentOidPath(from.getParentOidPath());
         to.setNimi(new TextGroupMapDto(null, from.getNimi()));
@@ -80,7 +80,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     }
 
     @Override
-    public OrganisaatioDto getByOid(String oid) {
+    public OrganisaatioWithChildrenDto getByOid(String oid) {
         return organisaatioClient.getOrganisaatioPerustiedotCached(oid)
                 .map(this::mapToWithChildrenDto)
                 .orElseThrow(() -> new NotFoundException(oid));

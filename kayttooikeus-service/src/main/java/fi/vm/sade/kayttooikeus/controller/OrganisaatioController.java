@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto.OrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -20,17 +20,17 @@ public class OrganisaatioController {
     private final OrganisaatioService organisaatioService;
 
     @GetMapping
-    public Collection<OrganisaatioDto> listBy(OrganisaatioCriteriaDto criteria) {
+    public Collection<OrganisaatioWithChildrenDto> listBy(OrganisaatioCriteriaDto criteria) {
         return organisaatioService.listBy(criteria);
     }
 
     @GetMapping("/root")
-    public OrganisaatioDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria) {
+    public OrganisaatioWithChildrenDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria) {
         return organisaatioService.getRootWithChildrenBy(criteria);
     }
 
     @GetMapping("/{oid}")
-    public OrganisaatioDto getByOid(@PathVariable String oid) {
+    public OrganisaatioWithChildrenDto getByOid(@PathVariable String oid) {
         return organisaatioService.getByOid(oid);
     }
 
