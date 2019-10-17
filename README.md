@@ -111,10 +111,8 @@ käyttöliittymässä.
 
 ## Virkailijan luonti -käyttöoikeus
 
+Testiympäristöihin ajettava virkailijan luonti -käyttöoikeus (Huom! tätä ei saa ajaa tuotantoon):
+
 ```
-INSERT INTO text_group (id, version) VALUES (nextval('hibernate_sequence'), 0);
-INSERT INTO text (id, version, lang, text, textgroup_id) VALUES (nextval('hibernate_sequence'), 0, 'FI', 'Virkailijan luonti', (SELECT max(id) FROM text_group));
-INSERT INTO text (id, version, lang, text, textgroup_id) VALUES (nextval('hibernate_sequence'), 0, 'SV', 'Virkailijan luonti', (SELECT max(id) FROM text_group));
-INSERT INTO text (id, version, lang, text, textgroup_id) VALUES (nextval('hibernate_sequence'), 0, 'EN', 'Virkailijan luonti', (SELECT max(id) FROM text_group));
-INSERT INTO kayttooikeus (id, version, palvelu_id, rooli, textgroup_id) VALUES (nextval('hibernate_sequence'), 0, (SELECT id FROM palvelu WHERE name = 'KAYTTOOIKEUS'), 'VIRKAILIJANLUONTI', (SELECT max(id) FROM text_group));
+SELECT insertkayttooikeus('KAYTTOOIKEUS', 'VIRKAILIJANLUONTI', 'Virkailijan luonti');
 ```
