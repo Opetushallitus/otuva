@@ -33,13 +33,6 @@ cas.warningCookie.path: /cas-oppija
 management.endpoint.health.enabled: true
 cas.monitor.endpoints.endpoint.health.access: PERMIT
 
-cas.ticket.registry.jpa.url: jdbc:postgresql://localhost:5432/cas-oppija
-cas.ticket.registry.jpa.user: cas-oppija
-cas.ticket.registry.jpa.password: cas-oppija
-cas.ticket.registry.jpa.driverClass: org.postgresql.Driver
-cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQL95Dialect
-cas.ticket.registry.jpa.ddlAuto: validate
-
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
