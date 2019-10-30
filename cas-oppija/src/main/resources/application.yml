@@ -33,25 +33,25 @@ cas.warningCookie.path: /cas-oppija
 management.endpoint.health.enabled: true
 cas.monitor.endpoints.endpoint.health.access: PERMIT
 
-cas.ticket.registry.jpa.url: jdbc:h2:mem:cas-oppija;DB_CLOSE_ON_EXIT=FALSE
+cas.ticket.registry.jpa.url: jdbc:postgresql://localhost:5432/cas-oppija
 cas.ticket.registry.jpa.user: cas-oppija
 cas.ticket.registry.jpa.password: cas-oppija
-cas.ticket.registry.jpa.driverClass: org.h2.Driver
-cas.ticket.registry.jpa.dialect: org.hibernate.dialect.H2Dialect
-cas.ticket.registry.jpa.ddlAuto: create
+cas.ticket.registry.jpa.driverClass: org.postgresql.Driver
+cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQL95Dialect
+cas.ticket.registry.jpa.ddlAuto: validate
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
 server.error.include-stacktrace: never
 
-spring.datasource.url: jdbc:h2:mem:cas-oppija;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.url: jdbc:postgresql://localhost:5432/cas-oppija
 spring.datasource.username: cas-oppija
 spring.datasource.password: cas-oppija
-spring.datasource.driver-class-name: org.h2.Driver
-spring.datasource.platform: h2
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.datasource.platform: postgresql
 
-spring.flyway.enabled: false
+spring.flyway.enabled: true
 spring.flyway.out-of-order: true
 
 spring.session.store-type: jdbc

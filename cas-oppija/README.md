@@ -8,6 +8,10 @@ Java 11
 
 Project includes gradle wrapper so it doesn't have to be installed. Just use `./gradlew` (unix) and `gradlew.bat` (win).
 
+## Database
+
+    docker run --name cas-oppija-db -p 5432:5432 -e POSTGRES_USER=cas-oppija -e POSTGRES_PASSWORD=cas-oppija -e POSTGRES_DB=cas-oppija -d postgres:11.5
+
 ## Build
 
     gradle build
