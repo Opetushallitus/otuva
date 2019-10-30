@@ -59,6 +59,7 @@ dependencies {
     compile "org.apereo.cas:cas-server-core-api-configuration-model:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-cookie-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-services-api:${casServerVersion}"
+    compile "org.apereo.cas:cas-server-core-services-authentication:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-tickets-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-api:${casServerVersion}"
     compile "org.apereo.cas:cas-server-core-authentication-attributes:${casServerVersion}"
@@ -88,6 +89,7 @@ dependencies {
     compile "fi.vm.sade.java-utils:suomifi-valtuudet-client:0.1.0-SNAPSHOT"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.4.0"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
+    testImplementation 'org.assertj:assertj-core:3.14.0'
 }
 
 tasks.findByName("jibDockerBuild")

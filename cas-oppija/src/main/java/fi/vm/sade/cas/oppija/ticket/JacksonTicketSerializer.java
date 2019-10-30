@@ -19,6 +19,7 @@ public class JacksonTicketSerializer implements TicketSerializer {
 
     public JacksonTicketSerializer() {
         this(new ObjectMapper()
+                .enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
                 .registerModule(new ParameterNamesModule())
                 .registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule()));
