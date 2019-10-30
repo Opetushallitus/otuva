@@ -12,6 +12,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS_PREFIX;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.ROLE_REKISTERINPITAJA;
@@ -45,6 +47,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                     .rooliRajoite("roolirajoite")
                     .id(14L)
                     .tunniste("Nimi")
+                    .muokattu(OffsetDateTime.of(2019, 10, 29, 14, 07, 58, 0, ZoneOffset.UTC))
+                    .muokkaaja("1.2.3.4.5")
                     .nimi(new TextGroupListDto(1L).put("FI", "Test"))
                     .build()));
 
@@ -360,6 +364,8 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .rooliRajoite("roolirajoite")
                         .id(14L)
                         .tunniste("Nimi")
+                        .muokattu(OffsetDateTime.of(2019, 10, 29, 14, 07, 58, 0, ZoneOffset.UTC))
+                        .muokkaaja("1.2.3.4.5")
                         .nimi(new TextGroupListDto(1L).put("FI", "Test"))
                         .build()));
 

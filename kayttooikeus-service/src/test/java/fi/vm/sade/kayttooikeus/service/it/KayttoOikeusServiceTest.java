@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.TimeService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.assertj.core.groups.Tuple;
@@ -18,7 +19,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +42,7 @@ import static org.hamcrest.Matchers.isOneOf;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 @RunWith(SpringRunner.class)
@@ -48,6 +52,9 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private OrganisaatioClient organisaatioClient;
+
+    @SpyBean
+    private TimeService timeService;
 
     @SpyBean
     private CommonProperties commonProperties;
@@ -340,6 +347,9 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .sallittuKayttajatyyppi(KayttajaTyyppi.PALVELU)
                 .build();
 
+        OffsetDateTime now1 = OffsetDateTime.of(2019, 10, 29, 13, 54, 45, 0, ZoneOffset.UTC);
+        when(timeService.getOffsetDateTimeNow()).thenReturn(now1);
+
         long createdRyhmaId = kayttoOikeusService.createKayttoOikeusRyhma(ryhma);
         KayttoOikeusRyhmaDto createdRyhma = kayttoOikeusService.findKayttoOikeusRyhma(createdRyhmaId, false);
 
@@ -351,6 +361,12 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("org tyyppi", createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi());
         assertFalse(createdRyhma.isRyhmaRestriction());
         assertEquals(KayttajaTyyppi.PALVELU, createdRyhma.getSallittuKayttajatyyppi());
+        assertThat(createdRyhma)
+                .returns(now1, KayttoOikeusRyhmaDto::getMuokattu)
+                .returns("1.2.3.4.5", KayttoOikeusRyhmaDto::getMuokkaaja);
+
+        OffsetDateTime now2 = OffsetDateTime.of(2019, 10, 30, 8, 23, 22, 0, ZoneOffset.UTC);
+        when(timeService.getOffsetDateTimeNow()).thenReturn(now2);
 
         ryhma.setNimi(new TextGroupDto().put("FI", "uusi nimi"));
         ryhma.setKuvaus(new TextGroupDto().put("FI", "uusi kuvaus"));
@@ -364,6 +380,9 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertTrue(createdRyhma.getKuvaus().get("FI").contentEquals("uusi kuvaus"));
         assertTrue(createdRyhma.getOrganisaatioViite().get(0).getOrganisaatioTyyppi().contentEquals("uusi org tyyppi"));
         assertNull(createdRyhma.getSallittuKayttajatyyppi());
+        assertThat(createdRyhma)
+                .returns(now2, KayttoOikeusRyhmaDto::getMuokattu)
+                .returns("1.2.3.4.5", KayttoOikeusRyhmaDto::getMuokkaaja);
     }
 
     @Test

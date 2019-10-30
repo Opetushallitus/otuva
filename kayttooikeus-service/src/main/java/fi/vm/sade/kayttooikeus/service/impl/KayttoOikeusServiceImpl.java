@@ -9,10 +9,7 @@ import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import fi.vm.sade.kayttooikeus.service.MyontooikeusService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -63,6 +60,7 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final MyontooikeusService myontooikeusService;
+    private final TimeService timeService;
 
     @Override
     public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
@@ -256,6 +254,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
                                     .orElseThrow(() -> new NotFoundException("palvelu not found"))
                     )))).collect(toList()));
 
+        kayttoOikeusRyhma.setMuokattu(timeService.getOffsetDateTimeNow());
+        kayttoOikeusRyhma.setMuokkaaja(getCurrentUserOid());
+
         kayttoOikeusRyhma = kayttoOikeusRyhmaRepository.save(kayttoOikeusRyhma);
 
         // Organization limitation must be set only if the Organizatio OIDs are defined
@@ -314,6 +315,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         setKayttoOikeusRyhmas(ryhmaData, kayttoOikeusRyhma);
 
         kayttoOikeusRyhma.setSallittuKayttajatyyppi(ryhmaData.getSallittuKayttajatyyppi());
+
+        kayttoOikeusRyhma.setMuokattu(timeService.getOffsetDateTimeNow());
+        kayttoOikeusRyhma.setMuokkaaja(getCurrentUserOid());
     }
 
     @Override
