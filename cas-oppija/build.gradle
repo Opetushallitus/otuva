@@ -77,6 +77,7 @@ dependencies {
     compile "org.apereo.cas:cas-server-support-interrupt-webflow:${casServerVersion}"
     compile "org.apereo.cas:cas-server-webapp-config:${casServerVersion}"
     compile "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    compile "com.github.kagkarlsson:db-scheduler:6.2"
     compile "org.flywaydb:flyway-core:5.2.4"
     compile "org.opensaml:opensaml-core:3.4.0"
     compile "org.pac4j:pac4j-core:3.6.1"
