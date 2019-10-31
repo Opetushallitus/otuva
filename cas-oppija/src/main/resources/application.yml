@@ -33,6 +33,8 @@ cas.warningCookie.path: /cas-oppija
 management.endpoint.health.enabled: true
 cas.monitor.endpoints.endpoint.health.access: PERMIT
 
+cas.ticket.registry.cleaner.schedule.enabled: false
+
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
