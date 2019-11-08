@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,11 @@ public class JacksonTicketSerializerTest {
     public void transientSessionTicket() {
         TransientSessionTicketFactory transientSessionTicketFactory = new DefaultTransientSessionTicketFactory(new NeverExpiresExpirationPolicy());
         Service service = new WebApplicationServiceFactory().createService("service123");
-        Map<String, Serializable> properties = Map.of("property1", "value1", "property2", 2);
+        Map<String, Serializable> properties = Map.of(
+                "stringProperty", "value1",
+                "integerProperty", 2,
+                "localDateProperty", LocalDate.now(),
+                "jodaLocalDateProperty", org.joda.time.LocalDate.now());
         TransientSessionTicket transientSessionTicket = transientSessionTicketFactory.create(service, properties);
 
         String transientSessionTicketAsJson = ticketSerializer.toJson(transientSessionTicket);
