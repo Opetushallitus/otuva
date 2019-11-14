@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.dto;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,6 +28,8 @@ public class KayttoOikeusRyhmaDto implements Serializable, LocalizableDto {
     private boolean passivoitu;
     private boolean ryhmaRestriction;
     private KayttajaTyyppi sallittuKayttajatyyppi;
+    private OffsetDateTime muokattu;
+    private String muokkaaja;
 
     public void setNimiId(Long id) {
         this.nimi = localizeLaterById(id);

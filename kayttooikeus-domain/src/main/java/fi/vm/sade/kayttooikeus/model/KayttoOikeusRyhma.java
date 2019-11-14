@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,6 +58,12 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     @Column(name = "allowed_usertype")
     @Enumerated(EnumType.STRING)
     private KayttajaTyyppi sallittuKayttajatyyppi;
+
+    @Column(name = "muokattu")
+    private OffsetDateTime muokattu;
+
+    @Column(name = "muokkaaja")
+    private String muokkaaja;
 
     public void addOrganisaatioViite(OrganisaatioViite organisaatioViite) {
         organisaatioViite.setKayttoOikeusRyhma(this);

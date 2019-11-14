@@ -1,12 +1,9 @@
 package fi.vm.sade.kayttooikeus.service;
 
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public interface TimeService {
 
-    long getCurrentTimeMillis();
-
-    LocalDateTime getDateTimeNow();
+    OffsetDateTime getOffsetDateTimeNow();
 
 }
