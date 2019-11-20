@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -9,6 +8,7 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -51,11 +51,10 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
     private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final LakkautettuOrganisaatioRepository lakkautettuOrganisaatioRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
 
     private final PermissionCheckerService permissionCheckerService;
+    private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
 
     private final OrikaBeanMapper mapper;
 
@@ -216,15 +215,8 @@ public class OrganisaatioHenkiloServiceImpl extends AbstractService implements O
 
     // passivoi organisaatiohenkilön ja poistaa käyttöoikeudet
     private void passivoiOrganisaatioHenkiloJaPoistaKayttooikeudet(OrganisaatioHenkilo organisaatioHenkilo, Henkilo kasittelija, String selite) {
-        organisaatioHenkilo.setPassivoitu(true);
-        Set<KayttoOikeusRyhmaTapahtumaHistoria> historia = organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().stream()
-                .map(myonnettyKayttoOikeusRyhmaTapahtuma -> myonnettyKayttoOikeusRyhmaTapahtuma
-                        .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), selite))
-                .collect(toSet());
-        organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(historia);
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.saveAll(historia);
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.deleteAll(organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas());
-        organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet());
+        myonnettyKayttoOikeusService.passivoi(organisaatioHenkilo, new MyonnettyKayttoOikeusService.DeleteDetails(
+                kasittelija, KayttoOikeudenTila.SULJETTU, selite));
 
         this.henkiloDataRepository.findByOidHenkilo(organisaatioHenkilo.getHenkilo().getOidHenkilo())
                 .ifPresent(this::disableNonValidVarmennettavas);

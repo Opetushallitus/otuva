@@ -141,6 +141,8 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "oid1")
     public void getByUsernameAndPassword() {
+        populate(henkilo("oid1"));
+
         // käyttäjää ei löydy
         assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
                 .isInstanceOf(UnauthorizedException.class);

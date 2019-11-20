@@ -57,6 +57,7 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
     private final LocalizationService localizationService;
     private final EmailService emailService;
     private final MyontooikeusService myontooikeusService;
+    private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
 
     private final HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
     private final PermissionCheckerService permissionCheckerService;
@@ -472,10 +473,9 @@ public class KayttooikeusAnomusServiceImpl extends AbstractService implements Ka
                 this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(kayttooikeusryhmaId, organisaatioOid, oidHenkilo)
                         .orElseThrow(() -> new NotFoundException("Myonnettykayttooikeusryhma not found with KayttooikeusryhmaId "
                                 + kayttooikeusryhmaId + " organisaatioOid " + organisaatioOid + " oidHenkilo " + oidHenkilo));
-        this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma
-                .toHistoria(kasittelija, KayttoOikeudenTila.SULJETTU, LocalDateTime.now(), "Käyttöoikeuden sulkeminen"));
-        this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
-
+        myonnettyKayttoOikeusService.poista(myonnettyKayttoOikeusRyhmaTapahtuma,
+                new MyonnettyKayttoOikeusService.DeleteDetails(kasittelija,
+                        KayttoOikeudenTila.SULJETTU, "Käyttöoikeuden sulkeminen"));
     }
 
 
