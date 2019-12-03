@@ -10,8 +10,6 @@ public abstract class KutsujaValidator {
 
     public abstract boolean isKutsujaYksiloity(String kutsujaOid);
 
-    @Component
-    @Profile("!(yksilointiDisabled | dev)")
     public static class Enabled extends KutsujaValidator {
         private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
@@ -25,10 +23,7 @@ public abstract class KutsujaValidator {
         }
     }
 
-    @Component
-    @Profile("yksilointiDisabled | dev")
     public static class Disabled extends KutsujaValidator {
-
         public boolean isKutsujaYksiloity(String kutsujaOid) {
             return true;
         }
