@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.*;
 import java.util.function.Function;
@@ -58,9 +57,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final CommonProperties commonProperties;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final MyontooikeusService myontooikeusService;
     private final TimeService timeService;
+    private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
 
     @Override
     public KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId) {
@@ -332,15 +331,9 @@ public class KayttoOikeusServiceImpl extends AbstractService implements KayttoOi
         kayttoOikeusRyhma.setPassivoitu(true);
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> kayttooikeudet = myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByKayttoOikeusRyhmaId(id);
 
-        for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttooikeudet) {
-            String henkiloOid = kayttoOikeus.getOrganisaatioHenkilo().getHenkilo().getOidHenkilo();
-
-            KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
-                    kasittelija, KayttoOikeudenTila.SULJETTU,
-                    LocalDateTime.now(), "Oikeudet poistetaan käyttöoikeusryhmän passivoinnin myötä");
-            kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-            myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
-        }
+        MyonnettyKayttoOikeusService.DeleteDetails deleteDetails = new MyonnettyKayttoOikeusService.DeleteDetails(
+                kasittelija, KayttoOikeudenTila.SULJETTU, "Oikeudet poistetaan käyttöoikeusryhmän passivoinnin myötä");
+        kayttooikeudet.forEach(kayttoOikeus -> myonnettyKayttoOikeusService.poista(kayttoOikeus, deleteDetails));
         LOGGER.info("Käyttöoikeusryhmän passivoinnin myötä poistettiin {} käyttöoikeutta", kayttooikeudet.size());
     }
 

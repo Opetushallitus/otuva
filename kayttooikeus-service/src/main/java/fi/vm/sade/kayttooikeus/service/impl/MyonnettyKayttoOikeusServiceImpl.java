@@ -1,27 +1,20 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
-
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import java.util.Optional;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
@@ -30,29 +23,18 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyonnettyKayttoOikeusServiceImpl.class);
 
-    private final PermissionCheckerService permissionCheckerService;
-    private final HenkiloDataRepository henkiloDataRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     @Override
-    public void poistaVanhentuneet() {
-        poistaVanhentuneet(permissionCheckerService.getCurrentUserOid());
-    }
-
-    @Override
-    public void poistaVanhentuneet(String kasittelijaOid) {
+    public void poistaVanhentuneet(DeleteDetails details) {
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto aloitetaan");
-        Henkilo kasittelija = henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
-                .orElseThrow(() -> new DataInconsistencyException("Henkilöä ei löydy käyttäjän OID:lla " + kasittelijaOid));
         List<MyonnettyKayttoOikeusRyhmaTapahtuma> kayttoOikeudet = myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findByVoimassaLoppuPvmBefore(LocalDate.now());
 
         for (MyonnettyKayttoOikeusRyhmaTapahtuma kayttoOikeus : kayttoOikeudet) {;
             OrganisaatioHenkilo organisaatioHenkilo = kayttoOikeus.getOrganisaatioHenkilo();
             Henkilo henkilo = organisaatioHenkilo.getHenkilo();
-            String henkiloOid = henkilo.getOidHenkilo();
             henkilo.getHenkiloVarmennettavas().stream()
                     .filter(HenkiloVarmentaja::isTila)
                     .forEach(henkiloVarmentajaSuhde -> {
@@ -61,11 +43,7 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                                 .ifPresent(myonnettyKayttooikeus -> henkiloVarmentajaSuhde.setTila(true));
                     });
 
-            KayttoOikeusRyhmaTapahtumaHistoria historia = kayttoOikeus.toHistoria(
-                    kasittelija, KayttoOikeudenTila.VANHENTUNUT,
-                    LocalDateTime.now(), "Oikeuksien poisto, vanhentunut");
-            kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
-            myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(kayttoOikeus);
+            poista(kayttoOikeus, details);
         }
         LOGGER.info("Vanhentuneiden käyttöoikeuksien poisto päättyy: poistettiin {} käyttöoikeutta", kayttoOikeudet.size());
     }
@@ -84,6 +62,38 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
                 .filter(myonnettyKayttooikeus -> poistuvatKayttoOikeudet.stream()
                         .noneMatch(kayttoOikeus -> kayttoOikeus.getId().equals(myonnettyKayttooikeus.getId())))
                 .findFirst();
+    }
+
+    @Override
+    public void poista(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details) {
+        OrganisaatioHenkilo organisaatioHenkilo = myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo();
+        poistaInternal(myonnettyKayttoOikeusRyhmaTapahtuma, details);
+        if (organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().isEmpty()) {
+            organisaatioHenkilo.setPassivoitu(true);
+        }
+    }
+
+    @Override
+    public void passivoi(OrganisaatioHenkilo organisaatioHenkilo, DeleteDetails details) {
+        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().forEach(kayttooikeus -> poistaInternal(kayttooikeus, details));
+        organisaatioHenkilo.setPassivoitu(true);
+    }
+
+    private void poistaInternal(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details) {
+        OrganisaatioHenkilo organisaatioHenkilo = myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo();
+        KayttoOikeusRyhmaTapahtumaHistoria historia = myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(
+                details.getKasittelija(), details.getTila(), LocalDateTime.now(), details.getSyy());
+        if (organisaatioHenkilo.getKayttoOikeusRyhmaHistorias() == null) {
+            organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(new HashSet<>());
+        }
+        organisaatioHenkilo.getKayttoOikeusRyhmaHistorias().add(historia);
+        if (organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas() == null) {
+            organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(new HashSet<>());
+        }
+        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().remove(myonnettyKayttoOikeusRyhmaTapahtuma);
+
+        kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
+        myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
     }
 
 }

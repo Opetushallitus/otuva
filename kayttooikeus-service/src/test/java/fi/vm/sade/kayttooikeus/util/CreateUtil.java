@@ -96,6 +96,7 @@ public class CreateUtil {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = new MyonnettyKayttoOikeusRyhmaTapahtuma();
         myonnettyKayttoOikeusRyhmaTapahtuma.setId(id);
         myonnettyKayttoOikeusRyhmaTapahtuma.setKayttoOikeusRyhma(createKayttoOikeusRyhmaWithViite(kayttooikeusryhmaId));
+        myonnettyKayttoOikeusRyhmaTapahtuma.setOrganisaatioHenkilo(new OrganisaatioHenkilo());
         return myonnettyKayttoOikeusRyhmaTapahtuma;
     }
 

@@ -16,6 +16,7 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -27,7 +28,6 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloOmattiedotDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -47,10 +47,9 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
 
     private final PermissionCheckerService permissionCheckerService;
     private final KayttoOikeusService kayttoOikeusService;
+    private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
 
-    private final KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
@@ -112,27 +111,12 @@ public class HenkiloServiceImpl extends AbstractService implements HenkiloServic
             kasittelijaOid = getCurrentUserOid();
         }
         final String kasittelijaOidFinal = kasittelijaOid;
+        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
+                .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
         List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloRepository.findByHenkilo(henkilo);
-        for (OrganisaatioHenkilo oh : orgHenkilos) {
-            oh.setPassivoitu(true);
-            Set<MyonnettyKayttoOikeusRyhmaTapahtuma> mkorts = oh.getMyonnettyKayttoOikeusRyhmas();
-            if (!CollectionUtils.isEmpty(mkorts)) {
-                for (Iterator<MyonnettyKayttoOikeusRyhmaTapahtuma> mkortIterator = mkorts.iterator(); mkortIterator.hasNext();) {
-                    MyonnettyKayttoOikeusRyhmaTapahtuma mkort = mkortIterator.next();
-                    // Create event
-                    Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
-                            .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
-                    KayttoOikeusRyhmaTapahtumaHistoria deleteEvent = mkort.toHistoria(
-                            kasittelija, KayttoOikeudenTila.SULJETTU,
-                            LocalDateTime.now(), "Oikeuksien poisto, koko henkilön passivointi");
-                    this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(deleteEvent);
-
-                    // Remove kayttooikeus
-                    mkortIterator.remove();
-                    this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.deleteById(mkort.getId());
-                }
-            }
-        }
+        MyonnettyKayttoOikeusService.DeleteDetails deleteDetails = new MyonnettyKayttoOikeusService.DeleteDetails(
+                kasittelija, KayttoOikeudenTila.SULJETTU, "Oikeuksien poisto, koko henkilön passivointi");
+        orgHenkilos.forEach(orgHenkilo -> myonnettyKayttoOikeusService.passivoi(orgHenkilo, deleteDetails));
 
         henkilo.getHenkiloVarmennettavas().forEach(henkiloVarmentaja -> henkiloVarmentaja.setTila(false));
     }

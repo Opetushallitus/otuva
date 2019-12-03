@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.HenkiloVarmentaja;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
@@ -8,6 +9,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,7 +91,8 @@ public class MyonnettyKayttoOikeusServiceImplTest {
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(eq("varmentaja")))
                 .willReturn(varmentajanOikeudet);
 
-        this.myonnettyKayttoOikeusService.poistaVanhentuneet("kasittelija");
+        this.myonnettyKayttoOikeusService.poistaVanhentuneet(new MyonnettyKayttoOikeusService.DeleteDetails(henkilo,
+                KayttoOikeudenTila.VANHENTUNUT, "Oikeus vanhentunut"));
 
         assertThat(henkiloVarmentaja.isTila()).isTrue();
         verify(kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1)).save(any());
@@ -127,7 +133,8 @@ public class MyonnettyKayttoOikeusServiceImplTest {
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(eq("varmentaja")))
                 .willReturn(varmentajanOikeudet);
 
-        this.myonnettyKayttoOikeusService.poistaVanhentuneet("kasittelija");
+        this.myonnettyKayttoOikeusService.poistaVanhentuneet(new MyonnettyKayttoOikeusService.DeleteDetails(henkilo,
+                KayttoOikeudenTila.VANHENTUNUT, "Oikeus vanhentunut"));
 
         assertThat(henkiloVarmentaja.isTila()).isFalse();
         verify(kayttoOikeusRyhmaTapahtumaHistoriaDataRepository, times(1)).save(any());

@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -40,11 +41,7 @@ public class HenkiloServiceImplTest {
     @Mock
     private PermissionCheckerService permissionCheckerServiceMock;
     @Mock
-    private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepositoryMock;
-    @Mock
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepositoryMock;
-    @Mock
-    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock;
     @Mock
     private HenkiloDataRepository henkiloDataRepositoryMock;
     @Mock
@@ -58,6 +55,8 @@ public class HenkiloServiceImplTest {
     @Mock
     private KayttoOikeusService kayttoOikeusService;
     @Mock
+    private MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
+    @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
     @Mock
     private ObjectMapper objectMapper;
@@ -70,9 +69,8 @@ public class HenkiloServiceImplTest {
                 henkiloHibernateRepositoryMock,
                 permissionCheckerServiceMock,
                 kayttoOikeusService,
-                kayttoOikeusRyhmaTapahtumaHistoriaDataRepositoryMock,
+                myonnettyKayttoOikeusService,
                 organisaatioHenkiloRepositoryMock,
-                myonnettyKayttoOikeusRyhmaTapahtumaRepositoryMock,
                 henkiloDataRepositoryMock,
                 kayttajatiedotRepositoryMock,
                 kayttoOikeusRyhmaRepository,

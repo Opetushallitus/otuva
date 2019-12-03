@@ -1,20 +1,39 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import lombok.Data;
+
 public interface MyonnettyKayttoOikeusService {
 
     /**
      * Poistaa vanhentuneet käyttöoikeudet henkilöiltä.
+     *
+     * @param details toiminnon lisätiedot
      */
-    void poistaVanhentuneet();
+    void poistaVanhentuneet(DeleteDetails details);
 
     /**
-     * Poistaa vanhentuneet käyttöoikeudet henkilöiltä. Tämä metodi on tehty
-     * vain sisäistä ajastusta varten. Jos muutetaan käyttämään ulkoista
-     * ajastusta, voidaan tämä metodi poistaa ja käyttää
-     * {@link #poistaVanhentuneet()} -metodia.
-     *
-     * @param kasittelijaOid käsittelijä oid
+     * Poistaa myönnetyn käyttöoikeuden. Passivoi samalla organisaation henkilöltä jos oli viimeinen käyttöoikeus.
+     * @param myonnettyKayttoOikeusRyhmaTapahtuma poistettava käyttöoikeus
+     * @param details toiminnon lisätiedot
      */
-    void poistaVanhentuneet(String kasittelijaOid);
+    void poista(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details);
+
+    /**
+     * Poistaa henkilön käyttöoikeudet organisaatiosta ja passivoi organisaation henkilöltä.
+     * @param organisaatioHenkilo passivoitava henkilön organisaatio
+     * @param details toiminnon lisätiedot
+     */
+    void passivoi(OrganisaatioHenkilo organisaatioHenkilo, DeleteDetails details);
+
+    @Data
+    class DeleteDetails {
+        private final Henkilo kasittelija;
+        private final KayttoOikeudenTila tila;
+        private final String syy;
+    }
 
 }
