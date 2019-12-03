@@ -17,6 +17,7 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.validators.KutsujaValidator;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,7 @@ public class KutsuServiceImpl implements KutsuService {
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final IdentificationRepository identificationRepository;
     private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+    private final KutsujaValidator kutsujaValidator;
 
     private final CommonProperties commonProperties;
 
@@ -99,8 +101,7 @@ public class KutsuServiceImpl implements KutsuService {
             this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             this.kayttooikeusryhmaLimitationsAreValid(kutsujaOid, kutsuCreateDto.getOrganisaatiot());
         }
-        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsujaOid);
-        if (StringUtils.isEmpty(kutsuja.getHetu()) || !kutsuja.isYksiloityVTJ()) {
+        if (!kutsujaValidator.isKutsujaYksiloity(kutsujaOid)) {
             throw new ForbiddenException("To create new invitation user needs to have hetu and be identified from VTJ");
         }
 
