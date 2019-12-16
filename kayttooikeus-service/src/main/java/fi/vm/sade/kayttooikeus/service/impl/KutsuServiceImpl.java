@@ -97,7 +97,9 @@ public class KutsuServiceImpl implements KutsuService {
         if (!Objects.equals(kayttajaOid, kutsujaOid)) {
             throwIfNotInHierarchy(kutsuCreateDto);
         }
-        if (!this.permissionCheckerService.isCurrentUserAdmin()) {
+        boolean currentUserHasGrantPrivileges = this.permissionCheckerService.isCurrentUserAdmin()
+                || this.permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_KUTSU_CRUD);
+        if (!currentUserHasGrantPrivileges) {
             this.organisaatioViiteLimitationsAreValidThrows(kutsuCreateDto.getOrganisaatiot());
             this.kayttooikeusryhmaLimitationsAreValid(kutsujaOid, kutsuCreateDto.getOrganisaatiot());
         }
