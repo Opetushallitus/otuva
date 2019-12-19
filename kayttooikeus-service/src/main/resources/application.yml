@@ -42,6 +42,13 @@ spring:
       # https://hibernate.atlassian.net/browse/HHH-12368
       hibernate.jdbc.lob.non_contextual_creation: true
 
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+
 server:
   servlet:
     context-path: /kayttooikeus-service
