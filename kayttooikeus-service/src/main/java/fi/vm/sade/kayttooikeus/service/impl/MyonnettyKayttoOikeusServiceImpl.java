@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +67,8 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
     @Override
     public void poista(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details) {
         OrganisaatioHenkilo organisaatioHenkilo = myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo();
-        poistaInternal(myonnettyKayttoOikeusRyhmaTapahtuma, details);
+        organisaatioHenkilo.getKayttoOikeusRyhmaHistorias().add(poistaInternal(myonnettyKayttoOikeusRyhmaTapahtuma, details));
+        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().remove(myonnettyKayttoOikeusRyhmaTapahtuma);
         if (organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().isEmpty()) {
             organisaatioHenkilo.setPassivoitu(true);
         }
@@ -75,25 +76,18 @@ public class MyonnettyKayttoOikeusServiceImpl implements MyonnettyKayttoOikeusSe
 
     @Override
     public void passivoi(OrganisaatioHenkilo organisaatioHenkilo, DeleteDetails details) {
-        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().forEach(kayttooikeus -> poistaInternal(kayttooikeus, details));
+        Iterator<MyonnettyKayttoOikeusRyhmaTapahtuma> iterator = organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().iterator();
+        while (iterator.hasNext()) {
+            organisaatioHenkilo.getKayttoOikeusRyhmaHistorias().add(poistaInternal(iterator.next(), details));
+            iterator.remove();
+        }
         organisaatioHenkilo.setPassivoitu(true);
     }
 
-    private void poistaInternal(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details) {
-        OrganisaatioHenkilo organisaatioHenkilo = myonnettyKayttoOikeusRyhmaTapahtuma.getOrganisaatioHenkilo();
-        KayttoOikeusRyhmaTapahtumaHistoria historia = myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(
-                details.getKasittelija(), details.getTila(), LocalDateTime.now(), details.getSyy());
-        if (organisaatioHenkilo.getKayttoOikeusRyhmaHistorias() == null) {
-            organisaatioHenkilo.setKayttoOikeusRyhmaHistorias(new HashSet<>());
-        }
-        organisaatioHenkilo.getKayttoOikeusRyhmaHistorias().add(historia);
-        if (organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas() == null) {
-            organisaatioHenkilo.setMyonnettyKayttoOikeusRyhmas(new HashSet<>());
-        }
-        organisaatioHenkilo.getMyonnettyKayttoOikeusRyhmas().remove(myonnettyKayttoOikeusRyhmaTapahtuma);
-
-        kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(historia);
+    private KayttoOikeusRyhmaTapahtumaHistoria poistaInternal(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma, DeleteDetails details) {
         myonnettyKayttoOikeusRyhmaTapahtumaRepository.delete(myonnettyKayttoOikeusRyhmaTapahtuma);
+        return kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.save(myonnettyKayttoOikeusRyhmaTapahtuma.toHistoria(
+                details.getKasittelija(), details.getTila(), LocalDateTime.now(), details.getSyy()));
     }
 
 }
