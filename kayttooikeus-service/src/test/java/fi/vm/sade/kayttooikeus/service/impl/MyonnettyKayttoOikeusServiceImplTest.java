@@ -17,10 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +65,8 @@ public class MyonnettyKayttoOikeusServiceImplTest {
         OrganisaatioHenkilo poistuvanOikeudenOrganisaatioHenkilo = OrganisaatioHenkilo.builder()
                 .organisaatioOid("1.2.0.0.1")
                 .henkilo(varmentavaHenkilo)
+                .myonnettyKayttoOikeusRyhmas(new HashSet<>())
+                .kayttoOikeusRyhmaHistorias(new HashSet<>())
                 .build();
         MyonnettyKayttoOikeusRyhmaTapahtuma poistuvaKayttooikeus = MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                 .organisaatioHenkilo(poistuvanOikeudenOrganisaatioHenkilo)
@@ -118,6 +117,8 @@ public class MyonnettyKayttoOikeusServiceImplTest {
         OrganisaatioHenkilo poistuvanOikeudenOrganisaatioHenkilo = OrganisaatioHenkilo.builder()
                 .organisaatioOid("1.2.0.0.1")
                 .henkilo(varmentavaHenkilo)
+                .myonnettyKayttoOikeusRyhmas(new HashSet<>())
+                .kayttoOikeusRyhmaHistorias(new HashSet<>())
                 .build();
         MyonnettyKayttoOikeusRyhmaTapahtuma poistuvaKayttooikeus = MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
                 .organisaatioHenkilo(poistuvanOikeudenOrganisaatioHenkilo)
