@@ -3,9 +3,9 @@ package fi.vm.sade.kayttooikeus.dto;
 import fi.vm.sade.kayttooikeus.dto.validate.ContainsLanguages;
 import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import javax.validation.Valid;
 
 @Getter
 @Setter
@@ -17,7 +17,7 @@ public class KayttoOikeusRyhmaModifyDto {
     @NotNull
     @ContainsLanguages
     private TextGroupDto nimi;
-    @ContainsLanguages
+    @ContainsLanguages(languages = {"FI", "SV"})
     private TextGroupDto kuvaus;
     @NotNull
     @Valid

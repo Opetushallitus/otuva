@@ -56,5 +56,17 @@
         "text": "ryhmän nimi sv"
       }
     ]
+  },
+  "kuvaus": {
+    "texts": [
+      {
+        "lang": "FI",
+        "text": "ryhmän kuvaus"
+      },
+      {
+        "lang": "SV",
+        "text": "ryhmän kuvaus sv"
+      }
+    ]
   }
 }
