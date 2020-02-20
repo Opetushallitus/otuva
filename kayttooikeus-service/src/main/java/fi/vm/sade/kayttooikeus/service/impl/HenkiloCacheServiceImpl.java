@@ -37,7 +37,7 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
             Henkilo matchingHenkilo = matchingHenkiloList.stream()
                     .filter(henkilo -> henkilo.getOidHenkilo().equals(henkiloHakuDto.getOidHenkilo()))
                     .findFirst()
-                    .orElseGet(() -> this.henkiloDataRepository.save(new Henkilo(henkiloHakuDto.getOidHenkilo())));
+                    .orElseGet(() -> new Henkilo(henkiloHakuDto.getOidHenkilo()));
             matchingHenkilo.setEtunimetCached(henkiloHakuDto.getEtunimet());
             matchingHenkilo.setSukunimiCached(henkiloHakuDto.getSukunimi());
             matchingHenkilo.setKutsumanimiCached(henkiloHakuDto.getKutsumanimi());

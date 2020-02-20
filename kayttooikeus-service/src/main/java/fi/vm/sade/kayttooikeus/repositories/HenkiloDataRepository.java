@@ -13,6 +13,7 @@ public interface HenkiloDataRepository extends JpaRepository<Henkilo, Long>, Hen
 
     Long countByEtunimetCachedNotNull();
 
+    @EntityGraph("henkiloperustietohaku")
     List<Henkilo> findByOidHenkiloIn(List<String> oidHenkilo);
 
     @EntityGraph("henkilohaku")
