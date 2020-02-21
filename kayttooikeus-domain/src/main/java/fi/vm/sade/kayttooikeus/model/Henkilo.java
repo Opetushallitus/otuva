@@ -21,6 +21,13 @@ import java.util.Set;
         attributeNodes = {
             @NamedAttributeNode("organisaatioHenkilos"),
         }
+    ),
+    @NamedEntityGraph(
+            name = "henkiloperustietohaku",
+            attributeNodes = {
+                    @NamedAttributeNode("organisaatioHenkilos"),
+                    @NamedAttributeNode("kayttajatiedot")
+            }
     )
 })
 public class Henkilo implements Identifiable {

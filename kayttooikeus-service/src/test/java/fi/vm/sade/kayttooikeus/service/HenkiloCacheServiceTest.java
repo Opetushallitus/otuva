@@ -61,9 +61,9 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
         Optional<ScheduleTimestamps> henkiloCacheModified = Optional.of(new ScheduleTimestamps(timestamp, "henkilocache"));
         given(this.scheduleTimestampsDataRepository.findFirstByIdentifier("henkilocache"))
                 .willReturn(henkiloCacheModified);
-        given(this.oppijanumerorekisteriClient.getModifiedSince(timestamp, 0L, 1000L))
+        given(this.oppijanumerorekisteriClient.getModifiedSince(timestamp, 0L, 2000L))
                 .willReturn(Lists.newArrayList("1.2.3.4.5"));
-        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(1000L), anyList()))
+        given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(2000L), anyList()))
                 .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
                         "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
         given(this.henkiloDataRepository.findByOidHenkiloIn(anyList()))
