@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Primary;
 public class HttpClientConfiguration {
 
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.kayttooikeus-service.backend";
+    private static final int ORGANISAATIO_CLIENT_TIMEOUT_MS = 20000;
     public static final String HTTP_CLIENT_OPPIJANUMEROREKISTERI = "httpClientOppijanumerorekisteri";
     public static final String HTTP_CLIENT_ORGANISAATIO = "httpClientOrganisaatio";
     public static final String HTTP_CLIENT_VIESTINTA = "httpClientViestinta";
@@ -41,7 +42,11 @@ public class HttpClientConfiguration {
                 .webCasUrl(properties.url("cas.url"))
                 .casServiceUrl(properties.url("organisaatio-service.security-check"))
                 .build();
-        return new OphHttpClient.Builder(CALLER_ID).authenticator(authenticator).build();
+        return new OphHttpClient.Builder(CALLER_ID)
+                .timeoutMs(ORGANISAATIO_CLIENT_TIMEOUT_MS)
+                .setSocketTimeoutMs(ORGANISAATIO_CLIENT_TIMEOUT_MS)
+                .authenticator(authenticator)
+                .build();
     }
 
     @Bean(HTTP_CLIENT_VIESTINTA)
