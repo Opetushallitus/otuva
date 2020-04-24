@@ -4,6 +4,8 @@ import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.kayttooikeus.config.properties.ServiceUsersProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -11,8 +13,10 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class HttpClientConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientConfiguration.class);
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.kayttooikeus-service.backend";
-    private static final int ORGANISAATIO_CLIENT_TIMEOUT_MS = 20000;
+
+    public static final String DEFAULT_TIMEOUT = String.valueOf(10000);
     public static final String HTTP_CLIENT_OPPIJANUMEROREKISTERI = "httpClientOppijanumerorekisteri";
     public static final String HTTP_CLIENT_ORGANISAATIO = "httpClientOrganisaatio";
     public static final String HTTP_CLIENT_VIESTINTA = "httpClientViestinta";
@@ -36,6 +40,8 @@ public class HttpClientConfiguration {
 
     @Bean(HTTP_CLIENT_ORGANISAATIO)
     public OphHttpClient httpClientOrganisaatio(UrlConfiguration properties, ServiceUsersProperties serviceUsersProperties) {
+        int timeout = Integer.parseInt(properties.getOrElse("organisaatio-service.timeout", DEFAULT_TIMEOUT));
+        LOGGER.info("Organisaatio HTTP client timeout: {} ms", timeout);
         CasAuthenticator authenticator = new CasAuthenticator.Builder()
                 .username(serviceUsersProperties.getOrganisaatio().getUsername())
                 .password(serviceUsersProperties.getOrganisaatio().getPassword())
@@ -43,8 +49,8 @@ public class HttpClientConfiguration {
                 .casServiceUrl(properties.url("organisaatio-service.security-check"))
                 .build();
         return new OphHttpClient.Builder(CALLER_ID)
-                .timeoutMs(ORGANISAATIO_CLIENT_TIMEOUT_MS)
-                .setSocketTimeoutMs(ORGANISAATIO_CLIENT_TIMEOUT_MS)
+                .timeoutMs(timeout)
+                .setSocketTimeoutMs(timeout)
                 .authenticator(authenticator)
                 .build();
     }
