@@ -24,7 +24,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void getLakkautetutOidsTest() {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/hierarkia/hae"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))
@@ -51,7 +51,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void getOrganisaatioPerustiedotCachedRoot() {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/hierarkia/hae"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))
@@ -76,7 +76,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     @Test
     public void getOrganisaatioPerustiedotCachedNotRoot() {
         onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/hierarkia/hae"))
+                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
                 .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))

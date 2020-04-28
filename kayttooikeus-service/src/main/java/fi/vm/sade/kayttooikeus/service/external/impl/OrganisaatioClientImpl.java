@@ -58,12 +58,8 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
 
     @Override
     public synchronized long refreshCache() {
-        Map<String, String> queryParamsAktiivisetSuunnitellut = new HashMap<String, String>() {{
-            put("aktiiviset", "true");
-            put("suunnitellut", "true");
-            put("lakkautetut", "true");
-        }};
-        String haeHierarchyUrl = this.urlConfiguration.url("organisaatio-service.organisaatio.v4.hae", queryParamsAktiivisetSuunnitellut);
+        String haeHierarchyUrl = this.urlConfiguration.url(
+                "organisaatio-service.organisaatio.v4.jalkelaiset", rootOrganizationOid);
         // Add organisations to cache (active, incoming and passive)
         List<OrganisaatioPerustieto> organisaatiosWithoutRootOrg =
                 retrying(io(() -> get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
