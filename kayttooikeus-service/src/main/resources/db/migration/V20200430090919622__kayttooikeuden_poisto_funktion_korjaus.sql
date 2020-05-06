@@ -24,4 +24,3 @@ end;
 
 $_$;
 
-alter function public.deletekayttooikeus(character varying, character varying) owner to oph;
