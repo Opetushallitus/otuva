@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
-                <version>4.1</version>
+                <version>4.4</version>
             </dependency>
             <dependency>
                 <groupId>com.carrotsearch</groupId>
@@ -226,8 +226,7 @@ vcsRevision=${revision}
 buildTtime=${maven.build.timestamp}
 ]]>
                                     </echo>
-                                    <loadfile property="buildversiontxt"
-                                              srcFile="${project.build.directory}/classes/static/buildversion.txt"/>
+                                    <loadfile property="buildversiontxt" srcFile="${project.build.directory}/classes/static/buildversion.txt"/>
                                     <echo message="${buildversiontxt}"/>
                                     <echo file="target/mavenversion.txt">${project.version}</echo>
                                 </target>
