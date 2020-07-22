@@ -19,6 +19,9 @@ install:
   - git clone https://github.com/Opetushallitus/ci-tools.git
   - source ci-tools/common/setup-tools.sh
   - export ARTIFACT_NAME="cas-oppija"
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  - source ./install-jdk.sh --url 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk'
+  - java -version
 
 script:
   - ./gradlew clean build -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
