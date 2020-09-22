@@ -14,5 +14,5 @@ public class CasOppijaConstants {
     public static final String AUTHENTICATION_ATTRIBUTE_CLIENT_PRINCIPAL_ID = "clientPrincipalId";
 
     public static final String REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT = "pac4jSamlLogout";
-
+    public static final boolean VALTUUDET_ENABLED = true;
 }

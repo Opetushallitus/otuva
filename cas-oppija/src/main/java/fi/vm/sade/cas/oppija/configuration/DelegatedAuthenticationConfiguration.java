@@ -1,5 +1,6 @@
 package fi.vm.sade.cas.oppija.configuration;
 
+import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutExecuteAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutPrepareAction;
 import org.apereo.cas.CentralAuthenticationService;
@@ -132,6 +133,10 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
+                // Initial login action to collect url parameters
+                ActionList startActionList = getLoginFlow().getStartActionList();
+                startActionList.add(new SamlLoginPrepareAction(getLoginFlow()));
+
                 // fix delegatedAuthenticationAction success transition
                 ActionState realSubmitState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_REAL_SUBMIT, ActionState.class);
                 TransitionDefinition successTransition = realSubmitState.getTransition(CasWebflowConstants.TRANSITION_ID_SUCCESS);
