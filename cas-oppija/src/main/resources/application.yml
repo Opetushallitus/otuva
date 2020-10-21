@@ -13,6 +13,15 @@ server.tomcat.remoteIpHeader:
 cas.server.name: http://localhost:8080
 cas.server.prefix: http://localhost:8080/cas-oppija
 
+cas.httpWebRequest.cors.enabled: true
+cas.httpWebRequest.cors.allowCredentials: true
+cas.httpWebRequest.cors.allowOrigins[0]: http://localhost
+cas.httpWebRequest.cors.allowOrigins[1]: http://localhost-en
+cas.httpWebRequest.cors.allowOrigins[2]: http://localhost-sv
+cas.httpWebRequest.cors.allowOrigins[3]: "*"
+cas.httpWebRequest.cors.allowMethods[0]: "*"
+cas.httpWebRequest.cors.allowHeaders[0]: "*"
+
 cas.httpWebRequest.header.xframe: false
 cas.httpWebRequest.header.xss: false
 cas.httpWebRequest.header.xcontent: false
@@ -26,6 +35,7 @@ cas.authn.authenticationAttributeRelease.onlyRelease:
 
 cas.tgc.secure: false
 cas.tgc.path: /cas-oppija
+cas.tgc.pinToSession: false
 
 cas.warningCookie.secure: false
 cas.warningCookie.path: /cas-oppija
@@ -65,3 +75,5 @@ valtuudet.api-key: key
 valtuudet.oauth-password: password
 service-user.username: user
 service-user.password: pass
+
+

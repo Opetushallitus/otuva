@@ -1,5 +1,6 @@
 package fi.vm.sade.cas.oppija.configuration.action;
 
+import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.Pac4jUtils;
 import org.apereo.cas.web.support.WebUtils;
 import org.pac4j.core.client.Client;
@@ -25,9 +26,11 @@ public class SamlLogoutExecuteAction extends AbstractAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(SamlLogoutExecuteAction.class);
 
     private final Clients clients;
+    private final CasConfigurationProperties casProperties;
 
-    public SamlLogoutExecuteAction(Clients clients) {
+    public SamlLogoutExecuteAction(Clients clients, CasConfigurationProperties casProperties) {
         this.clients = clients;
+        this.casProperties = casProperties;
     }
 
     @Override
@@ -46,7 +49,6 @@ public class SamlLogoutExecuteAction extends AbstractAction {
                 LOGGER.debug("No SAML2 client found: " + e.getMessage(), e);
                 client = null;
             }
-
             if (client instanceof SAML2Client) {
                 var saml2Client = (SAML2Client) client;
                 LOGGER.debug("Located SAML2 client [{}]", saml2Client);
@@ -63,6 +65,10 @@ public class SamlLogoutExecuteAction extends AbstractAction {
     }
 
     protected Event handleLogout(RedirectAction action, RequestContext context) {
+        // Set logout service redirect url manually to correctly redirect back to service.
+        if (context.getExternalContext().getRequestParameterMap().contains("service")) {
+            casProperties.getLogout().setRedirectUrl(context.getExternalContext().getRequestParameterMap().get("service"));
+        }
         switch (action.getType()) {
             case REDIRECT:
                 WebUtils.putLogoutRedirectUrl(context, action.getLocation());

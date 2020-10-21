@@ -49,6 +49,7 @@ import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
 /**
  * This class should include only fixes to default cas delegated authentication configuration.
@@ -139,10 +140,10 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
 
                 // fix delegatedAuthenticationAction success transition
                 ActionState realSubmitState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_REAL_SUBMIT, ActionState.class);
-                TransitionDefinition successTransition = realSubmitState.getTransition(CasWebflowConstants.TRANSITION_ID_SUCCESS);
+                TransitionDefinition successTransition = realSubmitState.getTransition(TRANSITION_ID_SUCCESS);
                 String successTargetStateId = successTransition.getTargetStateId();
                 TransitionableState state = getState(getLoginFlow(), CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION);
-                createTransitionForState(state, CasWebflowConstants.TRANSITION_ID_SUCCESS, successTargetStateId, true);
+                createTransitionForState(state, TRANSITION_ID_SUCCESS, successTargetStateId, true);
 
                 // add delegatedAuthenticationAction cancel transition
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,
@@ -162,7 +163,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 DecisionState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT, DecisionState.class);
                 ActionList entryActionList = finishLogoutState.getEntryActionList();
                 clear(entryActionList, entryActionList::remove);
-                entryActionList.add(new SamlLogoutExecuteAction(clients));
+                entryActionList.add(new SamlLogoutExecuteAction(clients, casProperties));
             }
         });
 
