@@ -31,8 +31,7 @@ public class SamlLoginPrepareAction extends AbstractAction {
                 context.getExternalContext().getRequestParameterMap().get("service"));
         if (context.getExternalContext().getRequestParameterMap().contains("valtuudet")) {
             this.loginFlow.getAttributes().put("valtuudet", context.getExternalContext().getRequestParameterMap().getBoolean("valtuudet"));
-        } else if (context.getExternalContext().getRequestParameterMap().contains("service")
-                && context.getExternalContext().getRequestParameterMap().get("service").contains("initsession")) {
+        } else if (context.getExternalContext().getRequestParameterMap().contains("service")) {
             this.loginFlow.getAttributes().put("valtuudet", VALTUUDET_ENABLED);
         }
         return success();
