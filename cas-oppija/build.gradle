@@ -99,12 +99,15 @@ tasks.findByName("jibDockerBuild")
     .finalizedBy(deleteWebAppFromJib)
 
 configurations.all {
+
     resolutionStrategy {
         cacheChangingModulesFor 0, "seconds"
         cacheDynamicVersionsFor 0, "seconds"
 
         preferProjectModules()
-
+        force 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
+        force 'com.fasterxml.jackson.core:jackson-core:2.9.8'
+        force 'com.fasterxml.jackson.core:jackson-annotations:2.9.8'
         def failIfConflict = project.hasProperty("failOnVersionConflict") && Boolean.valueOf(project.getProperty("failOnVersionConflict"))
         if (failIfConflict) {
             failOnVersionConflict()

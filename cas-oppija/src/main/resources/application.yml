@@ -59,7 +59,20 @@ spring.datasource.platform: postgresql
 spring.flyway.enabled: true
 spring.flyway.out-of-order: true
 
+#cas.webflow.autoconfigure: true
+#cas.webflow.alwaysPauseRedirect: false
+#cas.webflow.refresh: true
+#cas.webflow.redirectSameState: false
+
+cas.webflow.session.lockTimeout: 30
+cas.webflow.session.compress: false
+cas.webflow.session.maxConversations: 5
+cas.webflow.session.storage: true
+
 spring.session.store-type: jdbc
+spring.session.jdbc.initialize-schema: never
+spring.session.jdbc.schema=classpath: org/springframework/session/jdbc/schema-postgres.sql
+spring.session.jdbc.table-name: SPRING_SESSION
 
 # Custom configuration
 
