@@ -10,6 +10,8 @@ import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.interrupt.InterruptInquirer;
 import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.services.RegisteredService;
+import org.apereo.cas.web.support.WebUtils;
+import org.pac4j.core.context.Pac4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,6 +19,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +58,11 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
                 requestContext.getActiveFlow().getAttributes().get("valtuudet"),
                 isValtuudetEnabled);
-        if (isValtuudetEnabled) {
+
+        HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
+        String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
+
+        if (isValtuudetEnabled && "suomi.fi".equals(clientName)) {
             return inquire(authentication, service, language);
         } else {
             return InterruptResponse.none();

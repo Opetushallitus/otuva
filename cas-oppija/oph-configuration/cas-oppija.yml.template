@@ -52,7 +52,31 @@ cas.authn.pac4j.saml:
     mappedAttributes:
       - name: urn:oid:2.5.4.3
         mappedTo: personName
-
+{% if cas_oppija_enable_fakesuomifi == true %}
+  - clientName: ${cas.custom.properties.fakeSuomiFiClientName}
+    autoRedirect: {{ cas_oppija_fakesuomifi_auto_redirect | default('true') }}
+    keystorePath: {{ cas_oppija_fakesuomifi_keystore_path }}
+    keystorePassword: {{ cas_oppija_suomifi_keystore_password }}
+    keystoreAlias: {{ cas_oppija_suomifi_keystore_alias }}
+    privateKeyPassword: {{ cas_oppija_suomifi_private_key_password }}
+    serviceProviderEntityId: {{ cas_oppija_fakesuomifi_service_provider_entity_id }}
+    serviceProviderMetadataPath: {{ cas_oppija_fakesuomifi_service_provider_metadata_path }}
+    identityProviderMetadataPath: {{ cas_oppija_fakesuomifi_identity_provider_metadata_path }}
+    wantsAssertionsSigned: false
+    principalAttributeId: nationalIdentificationNumber
+    requestedAttributes:
+      - name: urn:oid:1.2.246.21
+        friendlyName: nationalIdentificationNumber
+        nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
+      - name: urn:oid:2.5.4.3
+        friendlyName: cn
+        nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
+    mappedAttributes:
+      - name: urn:oid:2.5.4.3
+        mappedTo: personName
+{% endif %}
 
 cas.logout.followServiceRedirects: true
 cas.logout.redirectParameter: service

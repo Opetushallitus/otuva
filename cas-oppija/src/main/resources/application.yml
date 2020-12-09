@@ -78,6 +78,7 @@ spring.session.jdbc.table-name: SPRING_SESSION
 
 cas.custom.properties:
   suomiFiClientName: suomi.fi
+  fakeSuomiFiClientName: fakesuomi.fi
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
 valtuudet.enabled: false

@@ -1,9 +1,5 @@
 package fi.vm.sade.cas.oppija.configuration;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutExecuteAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutPrepareAction;
@@ -39,7 +35,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.webflow.definition.StateDefinition;
 import org.springframework.webflow.definition.TransitionDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
