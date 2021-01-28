@@ -3,6 +3,7 @@ package fi.vm.sade.cas.oppija.surrogate.interrupt;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateCredential;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateImpersonatorData;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateService;
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.principal.Principal;
@@ -45,6 +46,7 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
         // user is already authenticating as surrogate
         if (SurrogateCredential.class.isInstance(credential)) {
+            LOGGER.info("User is already authenticating as surrogate {}" + credential.getId());
             return InterruptResponse.none();
         }
         String language = Optional.ofNullable(requestContext.getExternalContext().getLocale())
@@ -54,15 +56,18 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
 
         boolean isValtuudetEnabled = requestContext.getActiveFlow().getAttributes().contains("valtuudet")
                 ? (Boolean) requestContext.getActiveFlow().getAttributes().get("valtuudet") : VALTUUDET_ENABLED;
-        LOGGER.info("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {}",
-                requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
-                requestContext.getActiveFlow().getAttributes().get("valtuudet"),
-                isValtuudetEnabled);
 
         HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
 
-        if (isValtuudetEnabled && "suomi.fi".equals(clientName)) {
+        LOGGER.info("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {}",
+                requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
+                requestContext.getActiveFlow().getAttributes().get("valtuudet"),
+                isValtuudetEnabled,
+                clientName,
+                credential.getId());
+
+        if (isValtuudetEnabled && !"fakesuomi.fi".equals(clientName)) {
             return inquire(authentication, service, language);
         } else {
             return InterruptResponse.none();
