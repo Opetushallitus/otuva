@@ -60,14 +60,15 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
         HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
 
-        LOGGER.info("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {}",
+        LOGGER.info("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {} | {}",
                 requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
                 requestContext.getActiveFlow().getAttributes().get("valtuudet"),
                 isValtuudetEnabled,
                 clientName,
-                credential.getId());
+                credential.getId(),
+                service);
 
-        if (isValtuudetEnabled && !"fakesuomi.fi".equals(clientName)) {
+        if (service.getId().contains("valtuudet=true")) {
             return inquire(authentication, service, language);
         } else {
             return InterruptResponse.none();

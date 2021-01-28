@@ -30,10 +30,22 @@ public class SamlLoginPrepareAction extends AbstractAction {
                 context.getExternalContext().getRequestParameterMap().contains("service"),
                 context.getExternalContext().getRequestParameterMap().get("service"));
         if (context.getExternalContext().getRequestParameterMap().contains("valtuudet")) {
+            LOGGER.info("SamlLoginPrepareAction: if -> put valtuudet to flow.");
             this.loginFlow.getAttributes().put("valtuudet", context.getExternalContext().getRequestParameterMap().getBoolean("valtuudet"));
         } else if (context.getExternalContext().getRequestParameterMap().contains("service")) {
+            LOGGER.info("SamlLoginPrepareAction: else if -> put default valtuudet to flow: " + VALTUUDET_ENABLED);
             this.loginFlow.getAttributes().put("valtuudet", VALTUUDET_ENABLED);
+        } else {
+            LOGGER.info("SamlLoginPrepareAction: ELSE - DO NOTHING.");
         }
+        LOGGER.info("SamlLoginPrepareAction returning VALTUUDET | Service: {} " +
+                        "| Context contains valtuudet: {} " +
+                        "| Context valtuudet: {} " +
+                        "| loginFlow valtuudet: {} ",
+                context.getExternalContext().getRequestParameterMap().get("service"),
+                context.getExternalContext().getRequestParameterMap().contains("valtuudet"),
+                context.getExternalContext().getRequestParameterMap().get("valtuudet"),
+                this.loginFlow.getAttributes().get("valtuudet"));
         return success();
     }
 }
