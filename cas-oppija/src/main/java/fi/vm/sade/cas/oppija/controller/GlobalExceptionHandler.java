@@ -31,7 +31,10 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<Void> handle(UserException exception, HttpServletRequest request, HttpStatus status) {
-        LOGGER.warn("Request to '{}' threw '{}', response is '{}'", toRequestLine(request), exception, status);
+        // Skipping oppija-raamit UnauthorizedException logging, this is normal behaviour
+        if (!request.getRequestURI().contains("oppija-raamit") && !status.equals(HttpStatus.UNAUTHORIZED)) {
+            LOGGER.warn("Request to '{}' threw '{}', response is '{}'", toRequestLine(request), exception, status);
+        }
         return ResponseEntity.status(status).build();
     }
 
