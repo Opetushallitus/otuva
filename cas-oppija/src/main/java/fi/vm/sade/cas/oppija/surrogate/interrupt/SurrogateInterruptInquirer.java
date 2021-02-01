@@ -46,7 +46,7 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
         // user is already authenticating as surrogate
         if (SurrogateCredential.class.isInstance(credential)) {
-            LOGGER.info("User is already authenticating as surrogate {}" + credential.getId());
+            LOGGER.debug("User is already authenticating as surrogate {}" + credential.getId());
             return InterruptResponse.none();
         }
         String language = Optional.ofNullable(requestContext.getExternalContext().getLocale())
@@ -60,7 +60,7 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
         HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
 
-        LOGGER.info("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {} | {}",
+        LOGGER.debug("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {} | {}",
                 requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
                 requestContext.getActiveFlow().getAttributes().get("valtuudet"),
                 isValtuudetEnabled,
