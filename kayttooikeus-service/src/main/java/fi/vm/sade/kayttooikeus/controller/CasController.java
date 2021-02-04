@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 @Slf4j
@@ -41,8 +42,6 @@ public class CasController {
     private final HenkiloService henkiloService;
     private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
-    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-
     private final OphProperties ophProperties;
 
     @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
@@ -120,7 +119,7 @@ public class CasController {
                            @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
         // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
         if (StringUtils.hasLength(kutsuToken)) {
-            String redirectUrl = this.vahvaTunnistusService.kasitteleKutsunTunnistus(kutsuToken, kielisyys, hetu, etunimet, sukunimi);
+            String redirectUrl = this.vahvaTunnistusService.kasitteleKutsunTunnistus(kutsuToken, kielisyys, hetu, decodeShibbolethHeader(etunimet), decodeShibbolethHeader(sukunimi));
             response.sendRedirect(redirectUrl);
         }
         // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 1
@@ -133,6 +132,13 @@ public class CasController {
             String redirectUrl = this.vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(hetu, kielisyys);
             response.sendRedirect(redirectUrl);
         }
+    }
+
+    protected String decodeShibbolethHeader(String input) {
+        // Dekoodataan etunimet ja sukunimi manuaalisesti, koska shibboleth välittää ASCII-enkoodatut request headerit UTF-8 -merkistössä
+        Charset iso = Charset.forName("ISO-8859-1");
+        Charset utf8 = Charset.forName("UTF-8");
+        return new String(input.getBytes(iso), utf8);
     }
 
     private String getVahvaTunnistusRedirectUrl(String loginToken, String kielisyys, String hetu) {
