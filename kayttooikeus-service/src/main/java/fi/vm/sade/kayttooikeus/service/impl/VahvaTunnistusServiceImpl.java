@@ -76,12 +76,6 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
 
     @Override
     public String kasitteleKutsunTunnistus(String kutsuToken, String kielisyys, String hetu, String etunimet, String sukunimi) {
-        // Dekoodataan etunimet ja sukunimi manuaalisesti, koska shibboleth välittää ASCII-enkoodatut request headerit UTF-8 -merkistössä
-        Charset windows1252 = Charset.forName("Windows-1252");
-        Charset utf8 = Charset.forName("UTF-8");
-        etunimet = new String(etunimet.getBytes(windows1252), utf8);
-        sukunimi = new String(sukunimi.getBytes(windows1252), utf8);
-
         return identificationService.updateKutsuAndGenerateTemporaryKutsuToken(kutsuToken, hetu, etunimet, sukunimi)
                 .map(temporaryKutsuToken -> ophProperties.url("henkilo-ui.rekisteroidy", singletonMap("temporaryKutsuToken", temporaryKutsuToken)))
                 .orElseGet(() -> ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanhakutsu"));
