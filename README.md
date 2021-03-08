@@ -5,11 +5,11 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 ## Teknologiat
 
 ## Vaatimukset
-- Java 1.8.0_92 (ei toiminut 1.8.0_60)
+- Java 11
 
 ### Palvelin
 * Tomcat 8
-* Java 8
+* Java 11
 * Spring Boot
 * QueryDSL
 * PostgreSQL
