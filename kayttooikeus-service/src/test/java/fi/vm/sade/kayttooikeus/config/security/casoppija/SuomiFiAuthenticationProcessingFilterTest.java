@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.ETUNIMET_ALT_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.ETUNIMET_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.HETU_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.SUKUNIMI_ATTRIBUTE;
@@ -82,6 +83,20 @@ public class SuomiFiAuthenticationProcessingFilterTest {
         SuomiFiUserDetails details = filter.extractUserDetails(assertion);
         assertEquals("123456-7890", details.hetu);
         assertEquals("Testi", details.sukunimi);
+        assertEquals("Testi-Petteri Einari", details.etunimet);
+    }
+
+    @Test
+    public void extractUserDetails_palauttaaEtunimetVaihtoehtoisellaAvaimella() {
+        Assertion assertion = mock(Assertion.class);
+        AttributePrincipal principal = mock(AttributePrincipal.class);
+        Map<String, Object> attributes = Map.of(
+                ETUNIMET_ALT_ATTRIBUTE, "Testi-Petteri Einari"
+        );
+        when(assertion.isValid()).thenReturn(true);
+        when(assertion.getPrincipal()).thenReturn(principal);
+        when(principal.getAttributes()).thenReturn(attributes);
+        SuomiFiUserDetails details = filter.extractUserDetails(assertion);
         assertEquals("Testi-Petteri Einari", details.etunimet);
     }
 
