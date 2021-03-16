@@ -16,7 +16,8 @@ public class SuomiFiAuthenticationProcessingFilter extends AbstractPreAuthentica
 
     public static final String HETU_ATTRIBUTE = "nationalIdentificationNumber";
     public static final String SUKUNIMI_ATTRIBUTE = "sn";
-    public static final String ETUNIMET_ATTRIBUTE = "firstName";
+    public static final String ETUNIMET_ATTRIBUTE = "FirstName";
+    public static final String ETUNIMET_ALT_ATTRIBUTE = "firstName";
     static final String OPPIJA_TICKET_PARAM_NAME = "ticket";
     static final String SUOMI_FI_DETAILS_ATTR_KEY = "suomiFiDetails";
 
@@ -66,7 +67,9 @@ public class SuomiFiAuthenticationProcessingFilter extends AbstractPreAuthentica
         Map<String, Object> attributes = assertion.getPrincipal().getAttributes();
         String hetu = (String) attributes.get(HETU_ATTRIBUTE);
         String sukunimi = (String) attributes.get(SUKUNIMI_ATTRIBUTE);
-        String etunimet = (String) attributes.get(ETUNIMET_ATTRIBUTE);
+        // epäselvää, millä attribuutilla etunimet ovat - esimerkeissä ristiriitaista tietoa!
+        String etunimet = (String) attributes.getOrDefault(
+                ETUNIMET_ATTRIBUTE, attributes.get(ETUNIMET_ALT_ATTRIBUTE));
         return new SuomiFiUserDetails(hetu, sukunimi, etunimet);
     }
 
