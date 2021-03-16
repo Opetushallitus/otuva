@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationDetails;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
@@ -8,7 +9,6 @@ import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.properties.OphProperties;
@@ -21,14 +21,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -102,43 +107,42 @@ public class CasController {
     @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
             notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
-    public IdentifiedHenkiloTypeDto getIdentityByAuthToken(@PathVariable("token") String authToken) throws IOException {
+    public IdentifiedHenkiloTypeDto getIdentityByAuthToken(@PathVariable("token") String authToken) {
         return identificationService.findByTokenAndInvalidateToken(authToken);
     }
 
-    // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
-    public void requestGet(HttpServletResponse response,
+    public void requestGet(HttpServletRequest request, HttpServletResponse response,
+                           Principal principal,
                            @RequestParam(value="loginToken", required = false) String loginToken,
                            @RequestParam(value="kutsuToken", required = false) String kutsuToken,
-                           @RequestParam(value = "kielisyys", required = false) String kielisyys,
-                           @RequestHeader(value = "nationalidentificationnumber", required = false) String hetu,
-                           @RequestHeader(value = "firstname", required = false) String etunimet,
-                           @RequestHeader(value = "sn", required = false) String sukunimi) throws IOException {
-        // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
+                           @RequestParam(value = "locale", required = false) String kielisyys)
+            throws IOException {
+        assert(principal != null);
+        assert(principal instanceof PreAuthenticatedAuthenticationToken);
+        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) principal;
+        SuomiFiAuthenticationDetails details =
+                (SuomiFiAuthenticationDetails) token.getDetails();
+        // kirjataan ulos, jotta virkailija-CAS ei hämmenny
+        handleOppijaLogout(request, response);
         if (StringUtils.hasLength(kutsuToken)) {
-            String redirectUrl = this.vahvaTunnistusService.kasitteleKutsunTunnistus(kutsuToken, kielisyys, hetu, decodeShibbolethHeader(etunimet), decodeShibbolethHeader(sukunimi));
-            response.sendRedirect(redirectUrl);
-        }
-        // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 1
-        else if (StringUtils.hasLength(loginToken)) {
+            // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
+            response.sendRedirect(getRedirectViaLoginUrl(
+                    vahvaTunnistusService.kasitteleKutsunTunnistus(
+                    kutsuToken, kielisyys, details.hetu,
+                    details.etunimet, details.sukunimi)));
+        } else if (StringUtils.hasLength(loginToken)) {
+            // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 1
             // Joko päästetään suoraan sisään tai käytetään lisätietojen keräyssivun kautta
-            String redirectUrl = getVahvaTunnistusRedirectUrl(loginToken, kielisyys, hetu);
+            String redirectUrl = getRedirectViaLoginUrl(
+                    getVahvaTunnistusRedirectUrl(loginToken, kielisyys, details.hetu));
             response.sendRedirect(redirectUrl);
+        } else {
+            response.sendRedirect(getRedirectViaLoginUrl(
+                    vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(details.hetu, kielisyys)));
         }
-        else {
-            String redirectUrl = this.vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(hetu, kielisyys);
-            response.sendRedirect(redirectUrl);
-        }
-    }
-
-    protected String decodeShibbolethHeader(String input) {
-        // Dekoodataan etunimet ja sukunimi manuaalisesti, koska shibboleth välittää ASCII-enkoodatut request headerit UTF-8 -merkistössä
-        Charset iso = Charset.forName("ISO-8859-1");
-        Charset utf8 = Charset.forName("UTF-8");
-        return new String(input.getBytes(iso), utf8);
     }
 
     private String getVahvaTunnistusRedirectUrl(String loginToken, String kielisyys, String hetu) {
@@ -148,6 +152,12 @@ public class CasController {
             log.error("User failed strong identification", e);
             return ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken);
         }
+    }
+
+    private String getRedirectViaLoginUrl(String originalUrl) {
+        // kierrätetään CAS-oppijan logoutista, jotta CAS-virkailijaa ei hämmennetä
+        // sen sessiolla, tiketeillä tms.
+        return ophProperties.url("cas.oppija.logout", originalUrl);
     }
 
     @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -229,4 +239,11 @@ public class CasController {
         return this.henkiloService.getMyRoles();
     }
 
+    private void handleOppijaLogout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null){
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        SecurityContextHolder.getContext().setAuthentication(null);
+    }
 }

@@ -65,6 +65,7 @@ import static org.mockito.Mockito.*;
 @WithMockUser
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
+
     @Autowired
     private KutsuService kutsuService;
 
