@@ -41,6 +41,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
 
+    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+
     @Autowired
     private VahvaTunnistusService vahvaTunnistusService;
     @Autowired
@@ -90,7 +92,7 @@ public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
         identificationService.updateLoginToken(loginToken, hetu);
 
         VahvaTunnistusRequestDto requestDto = new VahvaTunnistusRequestDto();
-        requestDto.setSalasana("Salasana123!");
+        requestDto.setSalasana(TEST_PASWORD);
         requestDto.setTyosahkopostiosoite(tyosahkopostiosoite);
         VahvaTunnistusResponseDto responseDto = vahvaTunnistusService.tunnistaudu(loginToken, requestDto);
 
@@ -122,7 +124,7 @@ public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
         identificationService.updateLoginToken(loginToken, hetu);
 
         VahvaTunnistusRequestDto requestDto = new VahvaTunnistusRequestDto();
-        requestDto.setSalasana("Salasana123!");
+        requestDto.setSalasana(TEST_PASWORD);
         requestDto.setTyosahkopostiosoite(tyosahkopostiosoite);
         VahvaTunnistusResponseDto responseDto = vahvaTunnistusService.tunnistaudu(loginToken, requestDto);
 

@@ -66,6 +66,8 @@ import static org.mockito.Mockito.*;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
+    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+
     @Autowired
     private KutsuService kutsuService;
 
@@ -737,7 +739,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doReturn(Optional.empty()).when(this.oppijanumerorekisteriClient).getHenkiloByHetu(any());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), "arpauser", "stronkPassword1!");
+                new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
 
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
@@ -786,7 +788,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doReturn(Optional.empty()).when(this.oppijanumerorekisteriClient).getHenkiloByHetu(any());
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), "arpauser", "stronkPassword1!");
+                new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
 
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
@@ -811,7 +813,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("valid hetu");
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), "arpauser", "stronkPassword1!");
+                new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
         HenkiloDto henkiloDto = new HenkiloDto();
         henkiloDto.setOidHenkilo("123");
 
@@ -848,7 +850,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doReturn(Optional.of(new HenkiloDto().builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
 
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), "arpauser", "stronkPassword1!");
+                new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
@@ -895,7 +897,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         doReturn(Optional.of(new HenkiloDto().builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
 
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), "arpauser", "stronkPassword1!");
+                new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(new HenkiloDto());
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));

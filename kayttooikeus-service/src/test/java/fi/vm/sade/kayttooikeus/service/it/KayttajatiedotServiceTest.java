@@ -26,6 +26,8 @@ import static org.assertj.core.api.Assertions.*;
 @RunWith(SpringRunner.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
+    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+
     @Autowired
     private KayttajatiedotService kayttajatiedotService;
 
@@ -128,7 +130,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     public void testValidateUsernamePassword() throws Exception {
         final String henkiloOid = "1.2.246.562.24.27470134096";
         String username = "eetu.esimerkki@geemail.fi";
-        String password = "paSsword&23";
+        String password = TEST_PASWORD;
         populate(henkilo(henkiloOid));
         populate(kayttajatiedot(henkilo(henkiloOid), username));
         kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
@@ -154,15 +156,15 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
                 .isInstanceOf(UnauthorizedException.class);
 
         // käyttäjällä on salasana
-        kayttajatiedotService.changePasswordAsAdmin("oid2", "IFuRzDC5+aYLSSqE");
+        kayttajatiedotService.changePasswordAsAdmin("oid2", TEST_PASWORD);
         assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
                 .isInstanceOf(UnauthorizedException.class);
-        KayttajatiedotReadDto readDto = kayttajatiedotService.getByUsernameAndPassword("USER2", "IFuRzDC5+aYLSSqE");
+        KayttajatiedotReadDto readDto = kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASWORD);
         assertThat(readDto).extracting(KayttajatiedotReadDto::getUsername).isEqualTo("user2");
 
         // käyttäjä on passivoitu
         henkiloService.passivoi("oid2", "oid1");
-        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("USER2", "IFuRzDC5+aYLSSqE"))
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASWORD))
                 .isInstanceOf(UnauthorizedException.class);
     }
 }

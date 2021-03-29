@@ -13,17 +13,18 @@ public class AuthProperties {
     private CryptoService cryptoService = new CryptoService();
     private Password password = new Password();
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class CryptoService {
         private String staticSalt;
     }
-    @Getter @Setter
+
+    @Getter
+    @Setter
     public static class Password {
-        private Integer minLen = 10;
-        private Integer minAmountSpecialChars = 1;
-        private Integer minAmountNumbers = 1;
-        private Boolean lowerAndUpperCase = true;
-
+        private Integer minLen = 20;
+        private Integer minAmountSpecialChars = 0;
+        private Integer minAmountNumbers = 0;
+        private Boolean lowerAndUpperCase = false;
     }
-
 }

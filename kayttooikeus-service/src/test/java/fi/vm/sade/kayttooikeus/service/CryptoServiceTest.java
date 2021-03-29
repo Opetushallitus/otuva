@@ -8,6 +8,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -21,6 +23,12 @@ public class CryptoServiceTest {
         AuthProperties authProperties = new AuthProperties();
         authProperties.getCryptoService().setStaticSalt("a4hgs4c4CSy54CS59hyjhs48gfsdFAA42V43a3Daefs2f84hdaESFayh3a3gc2aW");
         this.cryptoService = spy(new CryptoServiceImpl(authProperties));
+
+        // Note: these should match settings of AuthProperties.Password
+        ReflectionTestUtils.setField(this.cryptoService, "passwordMinLen", 20);
+        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmoungSpecialChars", 0);
+        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmountNumbers", 0);
+        ReflectionTestUtils.setField(this.cryptoService, "passwordLowerAndUpperCase", false);
     }
 
     @Test
@@ -114,28 +122,30 @@ public class CryptoServiceTest {
         assertThat((end-now) < time ).isTrue(); //"testCheck Execution time failed, " + rounds + " rounds took longer than " + time,
     }
 
-    @Test
-    public void testPasswordStrenghtIsotJaPienet() {
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinLen", 8);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmoungSpecialChars", 0);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmountNumbers", 0);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordLowerAndUpperCase", true);
 
-        assertThat(cryptoService.isStrongPassword("abcdEfghi")).isEmpty(); //"On vahva salasana",
-        assertThat(cryptoService.isStrongPassword("abcdefghi")).isNotEmpty(); //"Ei ole vahva salasana",
+    @Test
+    public void testPasswordStrengthBad() {
+        String[] fixtures = new String[]{
+                "",
+                "aaaaaaaaaaaaaaaaaaa",
+                "Testi12345!#€%",
+                "test Test 1234 #"
+        };
+        Arrays.asList(fixtures).forEach(candidate -> {
+            assertThat(cryptoService.isStrongPassword(candidate)).isNotEmpty();
+        });
     }
 
     @Test
-    public void testPasswordStrenghtErikoismerkitJaIsotJaPienet() {
-
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinLen", 8);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmoungSpecialChars", 2);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmountNumbers", 0);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordLowerAndUpperCase", true);
-
-        assertThat(cryptoService.isStrongPassword("a&cdEfg#i")).isEmpty(); //"On vahva salasana",
-        assertThat(cryptoService.isStrongPassword("a&cdefg#i")).isNotEmpty(); //"Ei ole vahva salasana! Iso kirjain puuttuu!",
-        assertThat(cryptoService.isStrongPassword("a&cdefgHi")).isNotEmpty(); // "Ei ole vahva salasana! Toinen erikoismerkkipuuttuu!",
+    public void testPasswordStrengthOk() {
+        String[] fixtures = new String[]{
+                "|                  |",
+                "aaaaaaaaaaaaaaaaaaaa",
+                "Testi12345!#€%......",
+                "test Test 1234 #...."
+        };
+        Arrays.asList(fixtures).forEach(candidate -> {
+            assertThat(cryptoService.isStrongPassword(candidate)).isEmpty();
+        });
     }
-
 }
