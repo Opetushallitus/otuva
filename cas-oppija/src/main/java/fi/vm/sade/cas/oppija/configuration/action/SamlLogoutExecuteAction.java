@@ -65,10 +65,6 @@ public class SamlLogoutExecuteAction extends AbstractAction {
     }
 
     protected Event handleLogout(RedirectAction action, RequestContext context) {
-        // Set logout service redirect url manually to correctly redirect back to service.
-        if (context.getExternalContext().getRequestParameterMap().contains("service")) {
-            casProperties.getLogout().setRedirectUrl(context.getExternalContext().getRequestParameterMap().get("service"));
-        }
         switch (action.getType()) {
             case REDIRECT:
                 WebUtils.putLogoutRedirectUrl(context, action.getLocation());
