@@ -3,6 +3,7 @@ package fi.vm.sade.cas.oppija.configuration;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutExecuteAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutPrepareAction;
+import fi.vm.sade.cas.oppija.configuration.action.ServiceRedirectCookieAction;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -147,6 +148,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,
                         '\'' + CasWebflowConfigurer.FLOW_ID_LOGOUT + '\'', true);
                 createTransitionForState(state, CasWebflowConstants.TRANSITION_ID_CANCEL, cancelState.getId());
+                cancelState.getEntryActionList().add(new ServiceRedirectCookieAction());
 
                 // add delegatedAuthenticationAction logout transition
                 createTransitionForState(state, TRANSITION_ID_LOGOUT, CasWebflowConstants.STATE_ID_TERMINATE_SESSION);
