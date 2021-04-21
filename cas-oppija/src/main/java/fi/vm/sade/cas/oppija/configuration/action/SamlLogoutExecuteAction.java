@@ -1,11 +1,8 @@
 package fi.vm.sade.cas.oppija.configuration.action;
 
-import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.Pac4jUtils;
 import org.apereo.cas.web.support.WebUtils;
 import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.redirect.RedirectAction;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.profile.SAML2Profile;
@@ -25,12 +22,10 @@ public class SamlLogoutExecuteAction extends AbstractAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SamlLogoutExecuteAction.class);
 
-    private final Clients clients;
-    private final CasConfigurationProperties casProperties;
+    private final Pac4jClientProvider clientProvider;
 
-    public SamlLogoutExecuteAction(Clients clients, CasConfigurationProperties casProperties) {
-        this.clients = clients;
-        this.casProperties = casProperties;
+    public SamlLogoutExecuteAction(Pac4jClientProvider clientProvider) {
+        this.clientProvider = clientProvider;
     }
 
     @Override
@@ -39,16 +34,8 @@ public class SamlLogoutExecuteAction extends AbstractAction {
             var request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
             var response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
             var context = Pac4jUtils.getPac4jJ2EContext(request, response);
-
-            Client<?, ?> client;
             SAML2Profile profile = requestContext.getRequestScope().get(REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT, SAML2Profile.class);
-            try {
-                var currentClientName = profile == null ? null : profile.getClientName();
-                client = currentClientName == null ? null : clients.findClient(currentClientName);
-            } catch (final TechnicalException e) {
-                LOGGER.debug("No SAML2 client found: " + e.getMessage(), e);
-                client = null;
-            }
+            Client<?, ?> client = clientProvider.getClient(profile);
             if (client instanceof SAML2Client) {
                 var saml2Client = (SAML2Client) client;
                 LOGGER.debug("Located SAML2 client [{}]", saml2Client);
@@ -65,10 +52,6 @@ public class SamlLogoutExecuteAction extends AbstractAction {
     }
 
     protected Event handleLogout(RedirectAction action, RequestContext context) {
-        // Set logout service redirect url manually to correctly redirect back to service.
-        if (context.getExternalContext().getRequestParameterMap().contains("service")) {
-            casProperties.getLogout().setRedirectUrl(context.getExternalContext().getRequestParameterMap().get("service"));
-        }
         switch (action.getType()) {
             case REDIRECT:
                 WebUtils.putLogoutRedirectUrl(context, action.getLocation());

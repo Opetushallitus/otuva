@@ -16,14 +16,14 @@ public class SamlLoginPrepareAction extends AbstractAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SamlLoginPrepareAction.class);
 
-    private Flow loginFlow;
+    private final Flow loginFlow;
 
     public SamlLoginPrepareAction(Flow loginFlow) {
         this.loginFlow = loginFlow;
     }
 
     @Override
-    protected Event doExecute(RequestContext context) throws Exception {
+    protected Event doExecute(RequestContext context) {
         LOGGER.debug("VALTUUDET | Context contains valtuudet: {} | Valtuudet: {} | Context contains service: {} | Service: {}",
                 context.getExternalContext().getRequestParameterMap().contains("valtuudet"),
                 context.getExternalContext().getRequestParameterMap().get("valtuudet"),

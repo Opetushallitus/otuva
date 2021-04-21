@@ -1,8 +1,11 @@
 package fi.vm.sade.cas.oppija.configuration;
 
+import fi.vm.sade.cas.oppija.configuration.action.Pac4jClientProvider;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutExecuteAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutPrepareAction;
+import fi.vm.sade.cas.oppija.configuration.action.ServiceRedirectAction;
+import fi.vm.sade.cas.oppija.configuration.action.StoreServiceParamAction;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -158,10 +161,14 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                         new SamlLogoutPrepareAction(ticketGrantingTicketCookieGenerator, ticketRegistrySupport));
                 createStateDefaultTransition(singleLogoutPrepareAction, startState.getId());
                 setStartState(getLogoutFlow(), singleLogoutPrepareAction);
+
                 DecisionState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT, DecisionState.class);
                 ActionList entryActionList = finishLogoutState.getEntryActionList();
                 clear(entryActionList, entryActionList::remove);
-                entryActionList.add(new SamlLogoutExecuteAction(clients, casProperties));
+                Pac4jClientProvider clientProvider = new Pac4jClientProvider(clients);
+                entryActionList.add(new StoreServiceParamAction(casProperties));
+                entryActionList.add(new SamlLogoutExecuteAction(clientProvider));
+                entryActionList.add(new ServiceRedirectAction(clientProvider));
             }
         });
 
