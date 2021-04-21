@@ -5,7 +5,7 @@
         <Property name="root.log.level">{{ env_loglevel }}</Property>
 {# raw-endraw -välillä template engine ei tee mitään! #}
 {% raw %}
-        <Property name="cas-oppija.log.level">${env:CAS_OPPIJA_LOG_LEVEL:-debug}</Property>
+        <Property name="cas-oppija.log.level">${env:CAS_OPPIJA_LOG_LEVEL:-info}</Property>
     </Properties>
 
     <Appenders>
