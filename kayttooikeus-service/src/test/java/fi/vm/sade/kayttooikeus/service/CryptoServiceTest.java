@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -26,9 +27,6 @@ public class CryptoServiceTest {
 
         // Note: these should match settings of AuthProperties.Password
         ReflectionTestUtils.setField(this.cryptoService, "passwordMinLen", 20);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmoungSpecialChars", 0);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordMinAmountNumbers", 0);
-        ReflectionTestUtils.setField(this.cryptoService, "passwordLowerAndUpperCase", false);
     }
 
     @Test
@@ -137,15 +135,32 @@ public class CryptoServiceTest {
     }
 
     @Test
-    public void testPasswordStrengthOk() {
+    public void testPasswordStrengthOK() {
         String[] fixtures = new String[]{
-                "|                  |",
-                "aaaaaaaaaaaaaaaaaaaa",
-                "Testi12345!#€%......",
-                "test Test 1234 #...."
+                "____________________aA!1",
+                "____________________A!1",
+                "____________________a!1",
+                "____________________aA!"
         };
         Arrays.asList(fixtures).forEach(candidate -> {
             assertThat(cryptoService.isStrongPassword(candidate)).isEmpty();
+        });
+    }
+
+    @Test
+    public void testPasswordStrengthNOK() {
+        Object[][] fixtures = new Object[][]{
+                {null, Arrays.asList("validPassword.empty")},
+                {"", Arrays.asList("validPassword.short;20")},
+                {"AAAAAAAAAAAAAAAAAAAA-", Arrays.asList("validPassword.forbidden")},
+                {"AAAAAAAAAAAAAAAAAAAA!", Arrays.asList("validPassword.lowercase", "validPassword.numbers")},
+                {"AAAAAAAAAAAAAAAAAAAA1", Arrays.asList("validPassword.lowercase", "validPassword.nospecial")},
+                {"aaaaaaaaaaaaaaaaaaaa!", Arrays.asList("validPassword.uppercase", "validPassword.numbers")},
+                {"aaaaaaaaaaaaaaaaaaaa1", Arrays.asList("validPassword.uppercase", "validPassword.nospecial")},
+                {"AAAAAAAAAAAAAAAAAAAAa", Arrays.asList("validPassword.nospecial", "validPassword.numbers")},
+        };
+        Arrays.asList(fixtures).forEach(testCase -> {
+            assertThat(cryptoService.isStrongPassword((String)testCase[0])).isEqualTo(testCase[1]);
         });
     }
 }

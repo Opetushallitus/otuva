@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.*;
 @RunWith(SpringRunner.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
-    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+    private static final String TEST_PASWORD = "This_is_example_of_strong_password";
 
     @Autowired
     private KayttajatiedotService kayttajatiedotService;

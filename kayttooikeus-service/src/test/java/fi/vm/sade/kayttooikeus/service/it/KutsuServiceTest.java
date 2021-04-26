@@ -66,7 +66,7 @@ import static org.mockito.Mockito.*;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
-    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+    private static final String TEST_PASWORD = "This_is_example_of_strong_password";
 
     @Autowired
     private KutsuService kutsuService;

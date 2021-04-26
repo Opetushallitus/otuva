@@ -17,12 +17,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Service
 public class CryptoServiceImpl implements CryptoService {
-
-    private static final Logger log = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     private static final int iterations =  2 * 1024;
     private static final int saltLen = 128;
@@ -31,23 +32,18 @@ public class CryptoServiceImpl implements CryptoService {
 
     private String STATIC_SALT;
 
-    private static final String SPECIAL_CHARACTERS = "!@#$%^&*()~`-=_+[]{}|:\";',./<>?";
+    private static final Pattern forbidden = Pattern.compile("[^a-zA-Z0-9!#$%*_+=?]");
+    private static final Pattern lowercase = Pattern.compile("[a-z]");
+    private static final Pattern uppercase = Pattern.compile("[A-Z]");
+    private static final Pattern special = Pattern.compile("[!#$%*_+=?]");
+    private static final Pattern numbers = Pattern.compile("[0-9]");
 
     private Integer passwordMinLen;
-
-    private Integer passwordMinAmoungSpecialChars;
-
-    private Integer passwordMinAmountNumbers;
-
-    private Boolean passwordLowerAndUpperCase;
 
     @Autowired
     public CryptoServiceImpl(AuthProperties authProperties) {
         this.STATIC_SALT = authProperties.getCryptoService().getStaticSalt();
         this.passwordMinLen = authProperties.getPassword().getMinLen();
-        this.passwordMinAmoungSpecialChars = authProperties.getPassword().getMinAmountSpecialChars();
-        this.passwordMinAmountNumbers = authProperties.getPassword().getMinAmountNumbers();
-        this.passwordLowerAndUpperCase = authProperties.getPassword().getLowerAndUpperCase();
     }
 
     /**
@@ -86,7 +82,6 @@ public class CryptoServiceImpl implements CryptoService {
         return hashOfInput.equals(storedHash);
     }
 
-
     // using PBKDF2 from Sun, an alternative is https://github.com/wg/scrypt
     // cf. http://www.unlimitednovelty.com/2012/03/dont-use-bcrypt.html
     private String hash(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -99,51 +94,85 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public List<String> isStrongPassword(String password) {
         List<String> errors = new ArrayList<>();
-        if (password == null) {
-            errors.add("validPassword.empty");
+
+        if ( isEmpty(password, errors)) {
             return errors;
         }
+
         password = password.trim();
+
+        if ( hasForbiddenCharacters(password, errors) ) {
+            return errors;
+        }
+
+        if ( isTooShort(password, errors)) {
+            return errors;
+        }
+
+        if ( Stream.of(
+                hasLowercase(password, errors),
+                hasUppercase(password, errors),
+                hasSpecial(password, errors),
+                hasNumbers(password, errors)
+        ).filter(a -> a).count() >= 3 ) {
+            return Collections.EMPTY_LIST;
+        }
+
+        return errors;
+    }
+
+    private boolean isEmpty(String password, List<String> errors) {
+        if (password == null) {
+            errors.add("validPassword.empty");
+        }
+        return password == null;
+    }
+
+    private boolean isTooShort(String password, List<String> errors) {
         if (password.length() < passwordMinLen) {
             errors.add("validPassword.short;" + passwordMinLen);
         }
-        char[] allchars = password.toCharArray();
-        int upcase = 0;
-        int lowcase = 0;
-        int digit = 0;
-        int special = 0;
+        return password.length() < passwordMinLen;
+    }
 
-        for (char c : allchars) {
-            if (Character.isUpperCase(c)) {
-                ++upcase;
-            } else if (Character.isLowerCase(c)) {
-                ++lowcase;
-            } else if (Character.isDigit(c)) {
-                ++digit;
-            } else if (SPECIAL_CHARACTERS.contains(String.valueOf(c))) {
-                ++special;
-            }
+    private boolean hasForbiddenCharacters(String password, List<String> errors) {
+        if ( forbidden.matcher(password).find() ) {
+            errors.add("validPassword.forbidden");
+            return true;
         }
-        if (passwordLowerAndUpperCase) {
-            if (upcase == 0 || lowcase == 0) {
-                errors.add("validPassword.uppercase");
-            }
+        return false;
+    }
+
+    private Boolean hasLowercase(String password, List<String> errors) {
+        if ( lowercase.matcher(password).find() ) {
+            return true;
         }
-        if (digit < passwordMinAmountNumbers) {
-            if (1 == passwordMinAmountNumbers) {
-                errors.add("validPassword.number");
-            } else {
-                errors.add("validPassword.nonumber;" + passwordMinAmountNumbers);
-            }
+        errors.add("validPassword.lowercase");
+        return false;
+    }
+
+    private Boolean hasUppercase(String password, List<String> errors) {
+        if ( uppercase.matcher(password).find() ) {
+            return true;
         }
-        if (special < passwordMinAmoungSpecialChars) {
-            if (passwordMinAmoungSpecialChars == 1) {
-                errors.add("validPassword.special");
-            } else {
-                errors.add("validPassword.nospecial;" + passwordMinAmoungSpecialChars);
-            }
+        errors.add("validPassword.uppercase");
+        return false;
+    }
+
+    private Boolean hasSpecial(String password, List<String> errors) {
+        if ( special.matcher(password).find() ) {
+            return true;
         }
-        return errors;
+        errors.add("validPassword.nospecial");
+        return false;
+    }
+
+    private Boolean hasNumbers(String password, List<String> errors) {
+        if ( numbers.matcher(password).find() ) {
+            return true;
+        }
+        errors.add("validPassword.numbers");
+        return false;
     }
 
     @Override

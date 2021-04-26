@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
 
-    private static final String TEST_PASWORD = "salasanan pitää olla minimissään 20 merkkiä pitkä";
+    private static final String TEST_PASWORD = "This_is_example_of_strong_password";
 
     @Autowired
     private VahvaTunnistusService vahvaTunnistusService;

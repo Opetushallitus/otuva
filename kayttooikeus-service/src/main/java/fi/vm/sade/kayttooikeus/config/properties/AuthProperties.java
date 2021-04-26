@@ -23,8 +23,5 @@ public class AuthProperties {
     @Setter
     public static class Password {
         private Integer minLen = 20;
-        private Integer minAmountSpecialChars = 0;
-        private Integer minAmountNumbers = 0;
-        private Boolean lowerAndUpperCase = false;
     }
 }
