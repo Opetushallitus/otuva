@@ -8,6 +8,8 @@
 # Aseta vähintään nämä ympäristökohtaiset arvot
 
 spring:
+  messages:
+    use-code-as-default-message: true
   datasource:
     url: jdbc:postgresql://{{postgresql_kayttooikeus_host}}:{{port_postgresql}}/{{postgresql_kayttooikeus_db | default('authentication')}}?ApplicationName=kayttooikeus-service
     username: {{postgres_app_user}}
