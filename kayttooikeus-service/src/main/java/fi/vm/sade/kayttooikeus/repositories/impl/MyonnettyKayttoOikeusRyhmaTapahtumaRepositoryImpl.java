@@ -74,6 +74,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                         myonnettyKayttoOikeusRyhmaTapahtuma.tila.as("tila"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.kasittelija.oidHenkilo.as("kasittelijaOid"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.nimi.id.as("ryhmaNamesId"),
+                        myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.kuvaus.id.as("ryhmaKuvausId"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.voimassaAlkuPvm.as("alkuPvm"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.voimassaLoppuPvm.as("voimassaPvm"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.aikaleima.as("kasitelty"),

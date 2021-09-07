@@ -47,6 +47,7 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
                         korth.tila.as("tila"),
                         korth.kasittelija.oidHenkilo.as("kasittelijaOid"),
                         korth.kayttoOikeusRyhma.nimi.id.as("ryhmaNamesId"),
+                        korth.kayttoOikeusRyhma.kuvaus.id.as("ryhmaKuvausId"),
                         korth.aikaleima.as("kasitelty"),
                         korth.syy.as("muutosSyy")
                 )).where(booleanBuilder).fetch();
