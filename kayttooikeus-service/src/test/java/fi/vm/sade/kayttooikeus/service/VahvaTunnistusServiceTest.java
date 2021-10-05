@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.service;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
@@ -14,6 +13,7 @@ import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
@@ -167,7 +167,7 @@ public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
         henkiloDto.setOidHenkilo(oid);
         henkiloDto.setHetu(hetu);
         henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto.builder()
-                .ryhmaKuvaus(YhteystietojenTyypit.TYOOSOITE)
+                .ryhmaKuvaus(YhteystietoUtil.TYOOSOITE)
                 .yhteystieto(YhteystietoDto.builder()
                         .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .yhteystietoArvo("oid123@example.com")

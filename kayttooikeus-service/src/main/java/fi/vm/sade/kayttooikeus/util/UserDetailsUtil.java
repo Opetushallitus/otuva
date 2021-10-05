@@ -70,26 +70,6 @@ public class UserDetailsUtil {
                 .orElse(DEFAULT_LANGUAGE_CODE);
     }
 
-    /**
-     * Emails are parsed and preferred using YhteystiedotComparator
-     * 1. work email
-     * 2. home email
-     * 3. other email
-     * 4. free time email
-     * @param henkilo
-     * @return First email by priority
-     */
-    public static Optional<String> getEmailByPriority(HenkiloDto henkilo) {
-        YhteystiedotComparator yhteystiedotComparator = new YhteystiedotComparator();
-        return henkilo.getYhteystiedotRyhma().stream()
-                .sorted(yhteystiedotComparator)
-                .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
-                .filter(yhteystietoDto -> yhteystietoDto.getYhteystietoTyyppi().equals(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        && !StringUtils.isEmpty(yhteystietoDto.getYhteystietoArvo()))
-
-                .map(YhteystietoDto::getYhteystietoArvo).findFirst();
-    }
-
     public static OrganisaatioPerustieto createUnknownOrganisation(String organisaatioOid) {
         return new OrganisaatioPerustieto().toBuilder()
                 .oid(organisaatioOid)

@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.service;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
@@ -12,8 +11,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
-import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -27,21 +26,24 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 @RunWith(SpringRunner.class)
 public class EmailServiceTest extends AbstractServiceTest {
+
+    private static final String HENKILO_OID = "1.2.3.4.5";
+    private static final String WORK_EMAIL = "testi@example.com";
+
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
 
@@ -60,51 +62,92 @@ public class EmailServiceTest extends AbstractServiceTest {
     @Test
     @WithMockUser(username = "user1")
     public void sendExpirationReminderTest() {
-        HenkiloPerustietoDto perustiedot = new HenkiloPerustietoDto();
-        KielisyysDto kielisyys = new KielisyysDto();
-        kielisyys.setKieliKoodi("FI");
-        perustiedot.setAsiointiKieli(kielisyys);
-        given(oppijanumerorekisteriClient.getHenkilonPerustiedot("1.2.3.4.5")).willReturn(of(perustiedot));
-        HenkiloDto henkiloDto = new HenkiloDto();
-        henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto
-                .builder()
-                .ryhmaKuvaus(YhteystietojenTyypit.TYOOSOITE)
-                .yhteystieto(YhteystietoDto.builder()
-                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .yhteystietoArvo("testi@example.com")
-                        .build())
-                .build()));
-        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
+        given(oppijanumerorekisteriClient.getHenkilonPerustiedot(HENKILO_OID)).willReturn(of(getPerustiedot()));
+        given(oppijanumerorekisteriClient.getHenkiloByOid(HENKILO_OID)).willReturn(getHenkilo());
         given(ryhmasahkopostiClient.sendRyhmasahkoposti(any(EmailData.class)))
                 .willReturn("");
-        emailService.sendExpirationReminder("1.2.3.4.5", asList(
+
+        emailService.sendExpirationReminder(HENKILO_OID, Collections.singletonList(
                 ExpiringKayttoOikeusDto.builder()
-                    .henkiloOid("1.2.3.4.5")
-                    .myonnettyTapahtumaId(1L)
-                    .ryhmaName("RYHMA")
-                    .ryhmaDescription(new TextGroupDto(2L).put("FI", "Kuvaus")
-                            .put("EN", "Desc"))
-                    .voimassaLoppuPvm(LocalDate.now().plusMonths(3))
-                .build(),
-                ExpiringKayttoOikeusDto.builder()
-                    .henkiloOid("1.2.3.4.5")
-                    .myonnettyTapahtumaId(3L)
-                    .ryhmaName("RYHMA2")
-                    .ryhmaDescription(new TextGroupDto(3L).put("FI", "Kuvaus2")
-                            .put("EN", "Desc2"))
-                    .voimassaLoppuPvm(LocalDate.now().plusMonths(3))
-                .build()
-            ));
+                        .henkiloOid(HENKILO_OID)
+                        .myonnettyTapahtumaId(1L)
+                        .ryhmaName("RYHMA")
+                        .ryhmaDescription(new TextGroupDto(2L).put("FI", "Kuvaus")
+                                .put("EN", "Desc"))
+                        .voimassaLoppuPvm(LocalDate.of(2021, 10, 8))
+                        .build())
+        );
+
         verify(ryhmasahkopostiClient, times(1)).sendRyhmasahkoposti(
                 argThat(new TypeSafeMatcher<EmailData>() {
                     @Override
                     public void describeTo(Description description) {
                         description.appendText("Not valid email.");
                     }
+
                     @Override
                     protected boolean matchesSafely(EmailData item) {
                         return item.getRecipient().size() == 1
-                                && item.getRecipient().get(0).getEmail().equals("testi@example.com")
+                                && item.getRecipient().get(0).getEmail().equals(WORK_EMAIL)
+                                && !item.getRecipient().get(0).getRecipientReplacements().isEmpty()
+                                && item.getRecipient().get(0).getRecipientReplacements().size() == 3
+                                && "kayttooikeusryhmat".equals(item.getRecipient().get(0).getRecipientReplacements().get(1).getName())
+                                && "Kuvaus (8.10.2021)".equals(item.getRecipient().get(0).getRecipientReplacements().get(1).getValue());
+                    }
+                })
+        );
+    }
+
+    private HenkiloPerustietoDto getPerustiedot() {
+        HenkiloPerustietoDto perustiedot = new HenkiloPerustietoDto();
+        KielisyysDto kielisyys = new KielisyysDto();
+        kielisyys.setKieliKoodi("FI");
+        perustiedot.setAsiointiKieli(kielisyys);
+        return perustiedot;
+    }
+
+    private HenkiloDto getHenkilo() {
+        HenkiloDto henkiloDto = new HenkiloDto();
+        henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto
+                .builder()
+                .ryhmaKuvaus(YhteystietoUtil.TYOOSOITE)
+                .yhteystieto(YhteystietoDto.builder()
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                        .yhteystietoArvo(WORK_EMAIL)
+                        .build())
+                .build()));
+        return henkiloDto;
+    }
+
+    @Test
+    @WithMockUser(username = "user1")
+    public void sendExpirationReminderNoWorkEmailTest() {
+        given(oppijanumerorekisteriClient.getHenkilonPerustiedot(HENKILO_OID)).willReturn(of(getPerustiedot()));
+        given(oppijanumerorekisteriClient.getHenkiloByOid(HENKILO_OID)).willReturn(new HenkiloDto());
+
+        emailService.sendExpirationReminder(HENKILO_OID, Collections.EMPTY_LIST);
+
+        verify(ryhmasahkopostiClient, never()).sendRyhmasahkoposti(any());
+    }
+
+    @Test
+    @WithMockUser(username = "user1")
+    public void NewRequisitionNotificationTest() {
+        given(oppijanumerorekisteriClient.getHenkiloByOid(HENKILO_OID)).willReturn(getHenkilo());
+
+        emailService.sendNewRequisitionNotificationEmails(Collections.singleton(HENKILO_OID));
+
+        verify(ryhmasahkopostiClient, times(1)).sendRyhmasahkoposti(
+                argThat(new TypeSafeMatcher<EmailData>() {
+                    @Override
+                    public void describeTo(Description description) {
+                        description.appendText("Not valid email.");
+                    }
+
+                    @Override
+                    protected boolean matchesSafely(EmailData item) {
+                        return item.getRecipient().size() == 1
+                                && item.getRecipient().get(0).getEmail().equals(WORK_EMAIL)
                                 && !item.getRecipient().get(0).getRecipientReplacements().isEmpty();
                     }
                 })
@@ -112,17 +155,27 @@ public class EmailServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    @WithMockUser(username = "user1")
+    public void NewRequisitionNotificationNoWorkEmailTest() {
+        given(oppijanumerorekisteriClient.getHenkiloByOid(HENKILO_OID)).willReturn(new HenkiloDto());
+
+        emailService.sendNewRequisitionNotificationEmails(Collections.singleton(HENKILO_OID));
+
+        verify(ryhmasahkopostiClient, never()).sendRyhmasahkoposti(any());
+    }
+
+    @Test
     public void sendEmailKayttooikeusAnomusKasitelty() {
         HenkiloDto henkiloDto = new HenkiloDto();
-        henkiloDto.setOidHenkilo("1.2.3.4.5");
-        henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(CreateUtil.createYhteystietoSahkoposti("arpa@kuutio.fi", YhteystietojenTyypit.MUU_OSOITE),
-                CreateUtil.createYhteystietoSahkoposti("arpa2@kuutio.fi", YhteystietojenTyypit.TYOOSOITE),
-                CreateUtil.createYhteystietoSahkoposti("arpa3@kuutio.fi", YhteystietojenTyypit.VAPAA_AJAN_OSOITE)));
+        henkiloDto.setOidHenkilo(HENKILO_OID);
+        henkiloDto.setYhteystiedotRyhma(Sets.newHashSet(CreateUtil.createYhteystietoSahkoposti("arpa@kuutio.fi", "yhteystietotyyppi7"),
+                CreateUtil.createYhteystietoSahkoposti("arpa2@kuutio.fi", YhteystietoUtil.TYOOSOITE),
+                CreateUtil.createYhteystietoSahkoposti("arpa3@kuutio.fi", "yhteystietotyyppi3")));
         henkiloDto.setAsiointiKieli(new KielisyysDto("sv", "svenska"));
         henkiloDto.setEtunimet("arpa noppa");
         henkiloDto.setKutsumanimi("arpa");
         henkiloDto.setSukunimi("kuutio");
-        given(this.oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5")).willReturn(henkiloDto);
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(HENKILO_OID)).willReturn(henkiloDto);
         given(this.kayttoOikeusRyhmaRepository.findById(10L)).willReturn(of(KayttoOikeusRyhma.builder()
                 .tunniste("kayttooikeusryhmatunniste")
                 .nimi(new TextGroup())
@@ -133,7 +186,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                 = new UpdateHaettuKayttooikeusryhmaDto(10L, "MYONNETTY", startDate, endDate, null);
 
         Henkilo henkilo = new Henkilo();
-        henkilo.setOidHenkilo("1.2.3.4.5");
+        henkilo.setOidHenkilo(HENKILO_OID);
         Anomus anomus = Anomus.builder().sahkopostiosoite("arpa@kuutio.fi")
                 .henkilo(henkilo)
                 .anomuksenTila(AnomuksenTila.KASITELTY)
@@ -149,7 +202,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                                 .tunniste("Käyttöoikeusryhmä").build())
                         .build()))
                 .build();
-        anomus.getHaettuKayttoOikeusRyhmas().stream().forEach( h -> h.getKayttoOikeusRyhma().setId(10L));
+        anomus.getHaettuKayttoOikeusRyhmas().stream().forEach(h -> h.getKayttoOikeusRyhma().setId(10L));
 
         this.emailService.sendEmailAnomusKasitelty(anomus, updateHaettuKayttooikeusryhmaDto, 10L);
 
@@ -159,7 +212,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         assertThat(emailData.getRecipient()).hasSize(1);
         assertThat(emailData.getRecipient().get(0).getRecipientReplacements()).hasSize(3)
                 .extracting("name").containsExactlyInAnyOrder("vastaanottaja", "rooli", "linkki");
-        assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("1.2.3.4.5");
+        assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo(HENKILO_OID);
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
         assertThat(emailData.getRecipient().get(0).getLanguageCode()).isEqualTo("sv");
@@ -173,7 +226,9 @@ public class EmailServiceTest extends AbstractServiceTest {
     @Test
     public void sendInvitationEmail() {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
-        organisaatioPerustieto.setNimi(new HashMap<String, String>(){{put("fi", "suomenkielinennimi");}});
+        organisaatioPerustieto.setNimi(new HashMap<String, String>() {{
+            put("fi", "suomenkielinennimi");
+        }});
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))

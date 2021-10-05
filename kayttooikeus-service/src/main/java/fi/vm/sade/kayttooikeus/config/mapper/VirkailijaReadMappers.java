@@ -1,10 +1,8 @@
 package fi.vm.sade.kayttooikeus.config.mapper;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajaReadDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.springframework.context.annotation.Bean;
@@ -24,10 +22,7 @@ public class VirkailijaReadMappers {
             @Override
             public void mapBtoA(HenkiloYhteystiedotDto b, KayttajaReadDto a, MappingContext context) {
                 a.setOid(b.getOidHenkilo());
-                a.setSahkoposti(YhteystietoUtil.getYhteystietoArvo(b.getYhteystiedotRyhma(),
-                        YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
-                        YhteystietojenTyypit.PRIORITY_ORDER)
-                        .orElse(null));
+                a.setSahkoposti(YhteystietoUtil.getWorkEmail(b.getYhteystiedotRyhma()).orElse(null));
             }
         };
     }
