@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -71,6 +72,37 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
         this.mvc.perform(get("/kayttooikeus/kayttaja/current").accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeus/currentUserHistoria.json")));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
+    public void listKayttoOikeusForUserTest() throws Exception {
+        given(this.kayttoOikeusService.listMyonnettyKayttoOikeusForUser(any(), any(), any()))
+                .willReturn(singletonList(KayttooikeusPerustiedotDto.builder()
+                        .kayttajaTyyppi(KayttajaTyyppi.OPPIJA)
+                        .oidHenkilo("string")
+                        .username("string")
+                        .organisaatiot(singleton(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.builder()
+                                .organisaatioOid("string")
+                                .kayttooikeudet(singleton(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto.KayttooikeusOikeudetDto.builder()
+                                        .oikeus("string")
+                                        .palvelu("string")
+                                        .build()))
+                                .build()))
+                        .build()));
+        this.mvc.perform(get("/kayttooikeus/kayttaja?hetu=123456-7890").accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResource("classpath:kayttooikeus/kayttooikeusForUser.json")));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
+    public void listKayttoOikeusForUserAccessLogMaskingTest() throws Exception {
+        given(this.kayttoOikeusService.listMyonnettyKayttoOikeusForUser(any(), any(), any()))
+                .willReturn(Collections.EMPTY_LIST);
+        this.mvc.perform(get("/kayttooikeus/kayttaja?hetu=123456-7890").accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
     }
 
     @Test
