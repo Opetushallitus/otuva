@@ -17,7 +17,7 @@ public class AccessLogConfiguration {
     public WebServerFactoryCustomizer containerCustomizer() {
         return container -> {
             if (container instanceof TomcatServletWebServerFactory) {
-                ((TomcatServletWebServerFactory) container).addContextCustomizers((TomcatContextCustomizer) context -> {
+                ((TomcatServletWebServerFactory) container).addContextCustomizers(context -> {
                     LogbackValve logbackValve = new LogbackValve();
                     logbackValve.setFilename("logback-access.xml");
                     context.getPipeline().addValve(logbackValve);

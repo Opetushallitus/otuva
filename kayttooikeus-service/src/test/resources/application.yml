@@ -50,3 +50,6 @@ kayttooikeus:
     enabled: false
     run-on-startup: false
     pool_size: 1
+
+logback:
+  access: true
