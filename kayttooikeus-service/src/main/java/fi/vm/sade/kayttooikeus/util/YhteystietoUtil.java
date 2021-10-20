@@ -1,32 +1,41 @@
 package fi.vm.sade.kayttooikeus.util;
 
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import static java.util.Comparator.comparing;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class YhteystietoUtil {
 
-    private YhteystietoUtil() {
-    }
+    public static final String TYOOSOITE = "yhteystietotyyppi2";
 
-    public static Optional<String> getYhteystietoArvo(
-            Iterable<YhteystiedotRyhmaDto> yhteystietoRyhmat,
-            YhteystietoTyyppi tyyppi, String... ryhmaKuvausJarjestys) {
-        if (yhteystietoRyhmat == null) {
-            return Optional.empty();
-        }
-        return StreamSupport.stream(yhteystietoRyhmat.spliterator(), false)
-                .sorted(comparing(YhteystiedotRyhmaDto::getRyhmaKuvaus,
-                        new CustomOrderComparator<>(ryhmaKuvausJarjestys)))
-                .flatMap(t -> t.getYhteystieto().stream()
-                        .filter(u -> tyyppi.equals(u.getYhteystietoTyyppi()))
-                        .filter(u -> u.getYhteystietoArvo() != null
-                                && !u.getYhteystietoArvo().isEmpty()))
-                .map(YhteystietoDto::getYhteystietoArvo)
+    public static Optional<String> getWorkEmail(Collection<YhteystiedotRyhmaDto> contactInformation) {
+        return getStream(contactInformation)
+                .filter(yhteystiedot -> TYOOSOITE.equals(yhteystiedot.getRyhmaKuvaus()))
+                .sorted(Comparator.comparing(YhteystiedotRyhmaDto::getId, Comparator.reverseOrder()))
+                .map(getEmailAddressFromYhteystietoryhma())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .findFirst();
     }
 
+    private static Stream<YhteystiedotRyhmaDto> getStream(Collection<YhteystiedotRyhmaDto> contactInformation) {
+        return Optional
+                .ofNullable(contactInformation)
+                .orElse(Collections.EMPTY_SET)
+                .stream();
+    }
+
+    private static Function<YhteystiedotRyhmaDto, Optional<String>> getEmailAddressFromYhteystietoryhma() {
+        return yhteystiedot -> yhteystiedot.getYhteystieto().stream()
+                .filter(yhteystieto -> yhteystieto.getYhteystietoTyyppi() == YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                .filter(yhteystieto -> yhteystieto.getYhteystietoArvo() != null && !yhteystieto.getYhteystietoArvo().isEmpty())
+                .map(yhteystieto -> yhteystieto.getYhteystietoArvo())
+                .findFirst();
+    }
 }

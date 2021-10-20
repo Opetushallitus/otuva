@@ -19,6 +19,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsujaValidator;
 import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -335,7 +336,7 @@ public class KutsuServiceImpl implements KutsuService {
             YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
             Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
             yhteystietoDtos.add(yhteystietoDto);
-            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
+            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
         }
 
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
@@ -347,7 +348,7 @@ public class KutsuServiceImpl implements KutsuService {
         HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
         yhteystietoDtos.add(yhteystietoDto);
         Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
-        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
+        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
     }
 

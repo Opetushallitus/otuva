@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
-import fi.vm.sade.kayttooikeus.dto.YhteystietojenTyypit;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -13,6 +12,7 @@ import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import fi.vm.sade.properties.OphProperties;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.nio.charset.Charset;
 import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
@@ -111,9 +110,7 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
     }
 
     private String getRedirectUrl(String loginToken, String kielisyys, Boolean salasananVaihto, HenkiloDto henkiloByLoginToken) {
-        boolean sahkopostinAsetus = !HenkiloUtils
-                .getYhteystieto(henkiloByLoginToken, YhteystietojenTyypit.TYOOSOITE, YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                .isPresent();
+        boolean sahkopostinAsetus = !YhteystietoUtil.getWorkEmail(henkiloByLoginToken.getYhteystiedotRyhma()).isPresent();
         boolean salasananVaihtoBool = Boolean.TRUE.equals(salasananVaihto);
         // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
         if (sahkopostinAsetus || salasananVaihtoBool) {

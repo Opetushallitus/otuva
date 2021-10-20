@@ -2,7 +2,10 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.AnomusKasiteltyRecipientDto;
+import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
+import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
@@ -19,7 +22,6 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
@@ -40,6 +42,7 @@ import java.text.DateFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -119,16 +122,15 @@ public class EmailServiceImpl implements EmailService {
             recipient.setRecipientReplacements(replacements);
             EmailMessage message = this.generateEmailMessage(ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME, languageCode);
             this.ryhmasahkopostiClient.sendRyhmasahkoposti(new EmailData(Lists.newArrayList(recipient), message));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Error sending requisition handled email", e);
         }
     }
 
     private AnomusKasiteltyRecipientDto createAnomusKasiteltyDto(Anomus anomus, UpdateHaettuKayttooikeusryhmaDto updateHaettuKayttooikeusDto, String languageCode, Long kayttooikeusryhmaId) {
-        KayttoOikeusRyhma kayttooikeusryhma = this.kayttoOikeusRyhmaRepository.findById(kayttooikeusryhmaId).orElseThrow(() -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt id:llä: " + kayttooikeusryhmaId.toString()));
+        KayttoOikeusRyhma kayttooikeusryhma = this.kayttoOikeusRyhmaRepository.findById(kayttooikeusryhmaId).orElseThrow(() -> new NotFoundException("Käyttöoikeusryhmää ei löytynyt id:llä: " + kayttooikeusryhmaId));
         String kayttooikeusryhmaNimi = LocalisationUtils.getText(languageCode, kayttooikeusryhma.getNimi(), kayttooikeusryhma::getTunniste);
-        if(KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
+        if (KayttoOikeudenTila.valueOf(updateHaettuKayttooikeusDto.getKayttoOikeudenTila()) == KayttoOikeudenTila.MYONNETTY) {
             return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.MYONNETTY);
         }
         return new AnomusKasiteltyRecipientDto(kayttooikeusryhmaNimi, KayttoOikeudenTila.HYLATTY, updateHaettuKayttooikeusDto.getHylkaysperuste());
@@ -148,26 +150,28 @@ public class EmailServiceImpl implements EmailService {
     @Transactional
     public void sendExpirationReminder(String henkiloOid, List<ExpiringKayttoOikeusDto> tapahtumas) {
         // Not grouped by language code since might change to one TX / receiver in the future.
-        
+
         HenkiloPerustietoDto henkilonPerustiedot = oppijanumerorekisteriClient.getHenkilonPerustiedot(henkiloOid)
                 .orElseThrow(() -> new NotFoundException("Henkilö not found by henkiloOid=" + henkiloOid));
         String languageCode = UserDetailsUtil.getLanguageCode(henkilonPerustiedot, "fi", "sv");
-        
+
         EmailData email = new EmailData();
         email.setEmail(this.generateEmailMessage(KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME, languageCode));
-        getEmailRecipient(henkiloOid, languageCode, tapahtumas).ifPresent(recipient -> {
+
+        getEmailRecipient(henkiloOid, emailAddress -> henkilo -> getEmailRecipient(henkiloOid, languageCode, tapahtumas, emailAddress, henkilo)).ifPresent(recipient -> {
             email.setRecipient(singletonList(recipient));
             ryhmasahkopostiClient.sendRyhmasahkoposti(email);
         });
     }
 
-    private Optional<EmailRecipient> getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet) {
+    private Optional<EmailRecipient> getEmailRecipient(String henkiloOid, Function<String, Function<HenkiloDto, EmailRecipient>> emailAddressMapper) {
         HenkiloDto henkilo = oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
-        Optional<String> yhteystietoArvo = YhteystietoUtil.getYhteystietoArvo(henkilo.getYhteystiedotRyhma(),
-                YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
-                YhteystietojenTyypit.PRIORITY_ORDER);
-        return yhteystietoArvo.map(sahkoposti -> getEmailRecipient(henkiloOid, langugeCode, kayttoOikeudet, sahkoposti, henkilo));
+        Optional<String> emailAddress = YhteystietoUtil.getWorkEmail(henkilo.getYhteystiedotRyhma());
+        return emailAddress
+                .map(emailAddressMapper)
+                .map(recipientMapper -> recipientMapper.apply(henkilo));
     }
+
 
     private EmailRecipient getEmailRecipient(String henkiloOid, String langugeCode, List<ExpiringKayttoOikeusDto> kayttoOikeudet, String email, HenkiloDto henkilo) {
         List<ReportedRecipientReplacementDTO> replacements = new ArrayList<>();
@@ -196,20 +200,11 @@ public class EmailServiceImpl implements EmailService {
     @Transactional
     public void sendNewRequisitionNotificationEmails(Set<String> henkiloOids) {
         henkiloOids.stream()
-                .map(this::getRecipient)
+                .map(oid -> getEmailRecipient(oid, emailAddress -> henkilo -> createRecipient(henkilo, emailAddress)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(groupingBy(EmailRecipient::getLanguageCode))
                 .forEach(this::sendNewRequisitionNotificationEmail);
-    }
-
-    private Optional<EmailRecipient> getRecipient(String henkiloOid) {
-        HenkiloDto henkiloDto = oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
-        Optional<String> yhteystietoArvo = YhteystietoUtil.getYhteystietoArvo(
-                henkiloDto.getYhteystiedotRyhma(),
-                YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI,
-                YhteystietojenTyypit.PRIORITY_ORDER);
-        return yhteystietoArvo.map(sahkoposti -> createRecipient(henkiloDto, sahkoposti));
     }
 
     private EmailRecipient createRecipient(HenkiloDto henkilo, String sahkoposti) {
@@ -265,7 +260,7 @@ public class EmailServiceImpl implements EmailService {
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
                         .map(org -> new OranizationReplacement(new TextGroupMapDto(
                                         this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid()
-                                        )
+                                                )
                                                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + org.getOrganisaatioOid()))
                                                 .getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
                                         org.getRyhmat().stream().map(KayttoOikeusRyhma::getNimi)

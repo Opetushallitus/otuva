@@ -21,6 +21,7 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -639,7 +640,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
         YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuEmail);
         existingYhteystietoDtos.add(existingYhteystietoDto);
-        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
         existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
         existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq(henkiloOid))).willReturn(existingHenkiloDto);
@@ -666,7 +667,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Set<YhteystietoDto> existingYhteystietoDtos = new HashSet<>();
         YhteystietoDto existingYhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, "teppo.toinenposti@domain.com");
         existingYhteystietoDtos.add(existingYhteystietoDto);
-        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietojenTyypit.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
+        YhteystiedotRyhmaDto existingYhteystiedotRyhmaDto = new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", true, existingYhteystietoDtos);
         existingYhteystiedotRyhmaDtos.add(existingYhteystiedotRyhmaDto);
         existingHenkiloDto.setYhteystiedotRyhma(existingYhteystiedotRyhmaDtos);
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(eq(henkiloOid))).willReturn(existingHenkiloDto);
