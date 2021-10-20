@@ -80,6 +80,12 @@ public class AccessLogTest {
         assertEquals("GET /123456-890AA HTTP/1.1", resolveLog(output));
     }
 
+    @Test
+    public void handlesOids() {
+        restTemplate.getForEntity("/1.2.246.562.24.43116640405", String.class);
+        assertEquals("GET /1.2.246.562.24.43116640405 HTTP/1.1", resolveLog(output));
+    }
+
     private String resolveLog(ByteArrayOutputStream output) {
         for (String s : output.toString().split(System.getProperty("line.separator"), 10)) {
             if (s.startsWith("GET")) {
