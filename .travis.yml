@@ -18,14 +18,18 @@ env:
     # AWS_SECRET_ACCESS_KEY
     - secure: "KLaKEDNgFMnE8DqmeoML75sa1knq1xUXYmpovXNoS0WWrDqpOplTTEIwslN385OiqgNxAql1rorEZoQPKnQZ/+WsYQKH5Xl1Vg+sZ1BHiMorzW+2m9rpGWyND6wROov+HDIZ6z6vWNPDkVVRo0NUyqdaUvx89OBgVLbQHiyaaF7nnh9bCHskOBXR6LpUAhaGhR5gyeCMNtomZmvYaH9EF8jylFDdF5M/NLar3D6+7i6kGmiGwLmN5y4fxJ6dF4RKUZfbtCanlSOYNl0Jw4oMERsxx5/sxeCppOZt01BJiLTVcEnqRGd0ZeYm5acP6o8y4h3Bi/2njzEkjmBi8e8V918VaurK9RGcMmcV+mf2KkAwhbcRo5pruFq07GnXgzfcrgevtx35N4jNHh5qZVGIyDBmEnvauWiKEyi091Pqd8mB6n6Zol/eMczVv/0+TRNnB4XkCYmrdINBN7WVMxl2vqJtGABXU149cWO8u3W9GYKfrSW6giMDyFKisXojOMp70cpP+kxiZ87Sf72GTK1vhT8ARgdo+vVYpW6C7ywjZMwHxaVoIUJZWt/kecwkWFUZGOMZTAOawqyj/OOr1fGj/ImlFUKwyo/m2xkR+z223ZlqTRi888CHQgiplmEZui1lc3O9GDd2G/OoQEvu3F0x6oB7L4PMXQbSpieNsLcaKCk="
 
+addons:
+  sonarcloud:
+    organization: "opetushallitus"
+    token:
+      secure: "iI4dNyQDVlvHh81BZku7NMK7HjNWOO+YOU9LgS0uzb/IREBfCc957dDgDjb8kf8/MqyjPuBwxyzsFm19pu9YVN4dfXfy/11SPdgvfq5F+JL4cXVHgNuCp7bCF37fBuQkOZSsnfWDu8Cyar7dYWU0sO6m8n8xyRk94a1moiSIYKtuCWnusbDQUDOlOx6GDEqD/VzkLEUhjBVSmavC7jv84Y5dpHF+hU+eT16PNvl543YBiw46PGrgy2Bor1ti4QFnJkDd+q0Aumgz4zEBcN99ouEkst7Gzy02QcDWSSfFATRKA01PlPaIe4QsW3fABk4ETX5QDaArbf/J5MCwSOFwApivnfgG7DOyq6CP8eRIz/cBJTuL4KnvG6VhWB+TCV1YW6efXqmFYn8zRcNYB8xKP5CSWOkm/L5b5pkB9J4avBIC1TSsBi1+66I99N7Wyj/YBtoRdG0jPAYeYCwTADZly+MicP6iDc16S/yOL+FNjeXyBf81EI4XSZR0iEc9+Wi+ZgG2o4VyjSYiTkkNGEhT/6jY9XPEAYCVwhg8sRMv4Bu4yKBYrDrrO/lK6+Ka47e0XRcMHuiIWmgnV66qUWEjWLuLOjzNKdYy+x7TJggZSVrUaet5rr3KRAIW3iAXQiL071H5UMlLiIVQeYft6JT+qJdlOFCDltGXnqCvlbWfA2U="
 install:
   - git clone https://github.com/Opetushallitus/ci-tools.git
   - source ci-tools/common/setup-tools.sh
   - export ARTIFACT_NAME="kayttooikeus"
 
 script:
-  - mvn -P ci clean install -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
-
+  - mvn -P ci clean install sonar:sonar -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER} -Dsonar.projectKey=Opetushallitus_kayttooikeus
   - mv kayttooikeus-service/target/kayttooikeus-service-*SNAPSHOT.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
   - cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
 
