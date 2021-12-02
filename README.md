@@ -7,13 +7,18 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 ## Vaatimukset
 - Java 11
 
-### Palvelin
-* Tomcat 8
-* Java 11
+### Avainteknologiat
+
 * Spring Boot
-* QueryDSL
+* Spring Security (CAS)
 * PostgreSQL
+* QueryDSL
 * JPA / Hibernate 5
+* Flyway
+* Orika
+* Lombok
+* Swagger
+* DB-scheduler
 
 ### Käännösautomaatio
 * Maven 3
