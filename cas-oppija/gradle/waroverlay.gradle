@@ -1,6 +1,11 @@
 buildscript {
     repositories {
-        maven { url "https://dl.bintray.com/scalding/maven" }
+        maven {
+            url "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
+            mavenContent {
+                releasesOnly()
+            }
+        }
         mavenCentral()
     }
     dependencies {
