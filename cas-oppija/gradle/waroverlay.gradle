@@ -1,12 +1,7 @@
 buildscript {
     repositories {
-        maven {
-            url "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
-            mavenContent {
-                releasesOnly()
-            }
-        }
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.scaldingspoon.gradle:gradle-waroverlay-plugin:0.9.3"
