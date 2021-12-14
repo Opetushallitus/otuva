@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,16 +39,20 @@ public class HenkiloCacheServiceImpl implements HenkiloCacheService {
                     .filter(henkilo -> henkilo.getOidHenkilo().equals(henkiloHakuDto.getOidHenkilo()))
                     .findFirst()
                     .orElseGet(() -> new Henkilo(henkiloHakuDto.getOidHenkilo()));
-            matchingHenkilo.setEtunimetCached(henkiloHakuDto.getEtunimet());
-            matchingHenkilo.setSukunimiCached(henkiloHakuDto.getSukunimi());
-            matchingHenkilo.setKutsumanimiCached(henkiloHakuDto.getKutsumanimi());
+            matchingHenkilo.setEtunimetCached(trim(henkiloHakuDto.getEtunimet()));
+            matchingHenkilo.setSukunimiCached(trim(henkiloHakuDto.getSukunimi()));
+            matchingHenkilo.setKutsumanimiCached(trim(henkiloHakuDto.getKutsumanimi()));
             matchingHenkilo.setDuplicateCached(henkiloHakuDto.getDuplicate());
             matchingHenkilo.setPassivoituCached(henkiloHakuDto.getPassivoitu());
-            matchingHenkilo.setHetuCached(henkiloHakuDto.getHetu());
+            matchingHenkilo.setHetuCached(trim(henkiloHakuDto.getHetu()));
             saveList.add(matchingHenkilo);
         });
         this.henkiloDataRepository.saveAll(saveList);
         log.info(saveList.size() + " henkilöä tallennettiin cacheen");
         return onrHenkilohakuResultDto.isEmpty() || onrHenkilohakuResultDto.size() < count;
+    }
+
+    protected static String trim(String input) {
+        return Optional.ofNullable(input).map(String::trim).orElseGet(() -> null);
     }
 }
