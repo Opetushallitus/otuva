@@ -43,7 +43,7 @@ import java.util.Set;
                 "       text txt " +
                 "WHERE " +
                 "       h.id = oh.henkilo_id " +
-                "       AND txt.lang = 'FI'" +
+                "       AND txt.lang = :lang" +
                 "       AND txt.textgroup_id = kor.textgroup_id " +
                 "       AND h2.id = mkt.kasittelija_henkilo_id " +
                 "       AND kor.id = mkt.kayttooikeusryhma_id " +
