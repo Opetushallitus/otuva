@@ -10,10 +10,13 @@ import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.impl.KayttoOikeusServiceImpl;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.properties.OphProperties;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +37,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+@Slf4j
 @Component
 public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriClient {
 
@@ -273,6 +277,19 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 .mapWith(json -> io(() -> objectMapper.readValue(json, HenkiloOmattiedotDto.class)).get())
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
+    }
+
+    @Override
+    public String resolveLanguageCodeForCurrentUser() {
+        try {
+            String currentUserOid = UserDetailsUtil.getCurrentUserOid();
+            HenkiloDto currentUser = getHenkiloByOid(currentUserOid);
+            String languageCode = UserDetailsUtil.getLanguageCode(currentUser);
+            return languageCode.toUpperCase();
+        } catch ( Exception e ) {
+            log.error("Could not resolve preferred language for user, using \"{}\" as fallback", KayttoOikeusServiceImpl.FI, e);
+            return KayttoOikeusServiceImpl.FI;
+        }
     }
 
     @Getter @Setter
