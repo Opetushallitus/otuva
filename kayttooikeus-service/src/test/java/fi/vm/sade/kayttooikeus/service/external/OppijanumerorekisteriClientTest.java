@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service.external;
 
 
 import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
+import fi.vm.sade.kayttooikeus.service.impl.KayttoOikeusServiceImpl;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
@@ -159,5 +160,10 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         Throwable henkiloByHetu = catchThrowable(() -> client.getHenkiloByHetu("160198-943U"));
 
         assertThat(henkiloByHetu).isInstanceOf(UnhandledHttpStatusCodeException.class);
+    }
+
+    @Test
+    public void resolveLanguageCodeForCurrentUserHandlesErrors() {
+        assertThat(client.resolveLanguageCodeForCurrentUser()).isEqualTo(KayttoOikeusServiceImpl.FI);
     }
 }

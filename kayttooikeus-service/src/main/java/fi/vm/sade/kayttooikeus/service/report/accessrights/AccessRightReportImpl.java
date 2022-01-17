@@ -30,17 +30,16 @@ public class AccessRightReportImpl implements AccessRightReport {
     @Override
     public List<AccessRightReportRow> getForOrganisation(final String oid) {
         final String lang = onrClient.resolveLanguageCodeForCurrentUser();
-        final Map<String, OrganisaatioWithChildrenDto> orgs = resolveOrgs(oid);
+        final Map<String, OrganisaatioWithChildrenDto> orgs = resolveHierarchy(oid);
         @SuppressWarnings("unchecked") final List<AccessRightReportRow> result = em
                 .createNamedQuery("AccessRightReport")
                 .setParameter("oids", orgs.keySet())
                 .setParameter("lang", lang)
                 .getResultList();
-        enrichOrganisationName(result, orgs, lang);
-        return result;
+        return enrich(result, orgs, lang);
     }
 
-    protected Map<String, OrganisaatioWithChildrenDto> resolveOrgs(final String oid) {
+    protected Map<String, OrganisaatioWithChildrenDto> resolveHierarchy(final String oid) {
         return flatten(organisaatioService.getByOid(oid)).stream()
                 .collect(Collectors.toMap(OrganisaatioWithChildrenDto::getOid, Function.identity()));
     }
@@ -52,10 +51,13 @@ public class AccessRightReportImpl implements AccessRightReport {
         ).collect(Collectors.toList());
     }
 
-    private void enrichOrganisationName(final List<AccessRightReportRow> result,
-                                        final Map<String, OrganisaatioWithChildrenDto> orgs,
-                                        final String lang) {
-        result.forEach(resultRow -> resultRow.setOrganisationName(resolveOrgName(resultRow.getOrganisationOid(), orgs, lang)));
+    private List<AccessRightReportRow> enrich(final List<AccessRightReportRow> result,
+                                              final Map<String, OrganisaatioWithChildrenDto> orgs,
+                                              final String lang) {
+        return result.stream().map(resultRow -> {
+            resultRow.setOrganisationName(resolveOrgName(resultRow.getOrganisationOid(), orgs, lang));
+            return resultRow;
+        }).collect(Collectors.toList());
     }
 
     private String resolveOrgName(final String organisationOid,

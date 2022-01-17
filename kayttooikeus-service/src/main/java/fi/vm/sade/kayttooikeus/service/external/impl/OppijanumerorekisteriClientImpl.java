@@ -16,6 +16,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.properties.OphProperties;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,6 +37,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+@Slf4j
 @Component
 public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriClient {
 
@@ -285,6 +287,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
             String languageCode = UserDetailsUtil.getLanguageCode(currentUser);
             return languageCode.toUpperCase();
         } catch ( Exception e ) {
+            log.error("Could not resolve preferred language for user, using \"{}\" as fallback", KayttoOikeusServiceImpl.FI, e);
             return KayttoOikeusServiceImpl.FI;
         }
     }

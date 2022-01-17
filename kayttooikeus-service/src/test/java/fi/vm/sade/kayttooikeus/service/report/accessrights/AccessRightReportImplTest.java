@@ -82,7 +82,7 @@ public class AccessRightReportImplTest extends AbstractRepositoryTest {
         OrganisaatioWithChildrenDto root = mockOrg(ORG, List.of(level1));
         when(organisaatioService.getByOid(ORG)).thenReturn(root);
 
-        Map<String, OrganisaatioWithChildrenDto> result = accessRightReport.resolveOrgs(ORG);
+        Map<String, OrganisaatioWithChildrenDto> result = accessRightReport.resolveHierarchy(ORG);
 
         assertThat(result)
                 .hasSize(3)
