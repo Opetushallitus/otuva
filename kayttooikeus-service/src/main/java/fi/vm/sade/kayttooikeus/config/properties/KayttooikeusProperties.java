@@ -24,15 +24,16 @@ public class KayttooikeusProperties {
         @Getter @Setter
         public static class Configuration {
             private Long organisaatiocache; // Default in ScheduledTasks.java
-            private String vanhentuneetkayttooikeudet = "0 0 3 * * ?";
             private Integer vanhentuneetkayttooikeudetHour = 3;
-            private String lakkautetutOrganisaatiot = "0 0 5 * * ?";
             private Integer lakkautetutOrganisaatiotHour = 5;
-            private String kayttooikeusmuistutus = "0 30 4 * * ?";
             private Integer kayttooikeusmuistutusHour = 4;
             private Integer kayttooikeusmuistutusMinute = 30;
-            private String kayttooikeusanomusilmoitukset = "0 0 2 * * ?";
             private Integer kayttooikeusanomusilmoituksetHour = 2;
+            private Integer discardExpiredInvitationsHour = 1;
+            private Integer discardExpiredInvitationsMinute = 30;
+            private Integer discardExpiredApplicationsHour = 1;
+            private Integer discardExpiredApplicationsMinute = 45;
+            private Integer expirationThreshold = 2;
             private Long henkiloNimiCache = 100000L;
         }
 

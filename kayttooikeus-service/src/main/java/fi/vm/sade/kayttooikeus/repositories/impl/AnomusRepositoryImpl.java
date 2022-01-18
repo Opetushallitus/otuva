@@ -2,18 +2,20 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
-import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
-import fi.vm.sade.kayttooikeus.model.*;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
+import fi.vm.sade.kayttooikeus.model.Anomus;
+import fi.vm.sade.kayttooikeus.model.QAnomus;
 import fi.vm.sade.kayttooikeus.repositories.AnomusRepositoryCustom;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
 
 @Repository
 public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
@@ -48,26 +50,14 @@ public class AnomusRepositoryImpl implements AnomusRepositoryCustom {
     }
 
     @Override
-    public List<Anomus> getOphAdminAnomukset() {
-        QHaettuKayttoOikeusRyhma qHaettuKayttoOikeusRyhma = QHaettuKayttoOikeusRyhma.haettuKayttoOikeusRyhma;
-        QAnomus qAnomus = QAnomus.anomus;
-        QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        QKayttoOikeus qKayttoOikeus = QKayttoOikeus.kayttoOikeus;
-
-        JPAQuery<Anomus> query = new JPAQuery<>(entityManager)
-                .select(qAnomus)
-                .from(qHaettuKayttoOikeusRyhma)
-                .join(qHaettuKayttoOikeusRyhma.anomus, qAnomus)
-                .join(qHaettuKayttoOikeusRyhma.kayttoOikeusRyhma, qKayttoOikeusRyhma)
-                .join(qKayttoOikeusRyhma.kayttoOikeus, qKayttoOikeus)
+    public Collection<Anomus> findExpired(Period threshold) {
+        QAnomus anomus = QAnomus.anomus;
+        return new JPAQueryFactory(entityManager)
+                .from(anomus)
+                .select(anomus)
                 .where(
-                        qKayttoOikeus.rooli.eq(KayttooikeusRooli.VASTUUKAYTTAJAT.getName())
-                                .and(qAnomus.anomuksenTila.eq(AnomuksenTila.ANOTTU))
-                                .and(qHaettuKayttoOikeusRyhma.tyyppi.isNull())
-                                .and(qKayttoOikeusRyhma.passivoitu.isFalse())
-                );
-
-        return query.fetch();
+                        anomus.anomuksenTila.eq(AnomuksenTila.ANOTTU)
+                                .and(anomus.anottuPvm.lt(LocalDateTime.now().minus(threshold))))
+                .fetch();
     }
-
 }

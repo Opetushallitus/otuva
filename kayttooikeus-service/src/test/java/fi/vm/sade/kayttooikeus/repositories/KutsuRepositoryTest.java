@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
@@ -102,4 +103,31 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                 .containsExactly("VASTUUKAYTTAJAT");
     }
 
+
+    @Test
+    public void findExpiredInvitations() {
+        populate(kutsu("", "", "")
+                .aikaleima(LocalDateTime.now().minus(Period.ofMonths(2)))
+        );
+        assertThat(kutsuRepository.findExpired(Period.ofMonths(1))).hasSize(1);
+        assertThat(kutsuRepository.findExpired(Period.ofMonths(3))).isEmpty();
+    };
+
+    @Test
+    public void findExpiredInvitationsIgnoresRemoved() {
+        populate(kutsu("", "", "")
+                .poistettu(LocalDateTime.now())
+                .aikaleima(LocalDateTime.now().minus(Period.ofMonths(2)))
+        );
+        assertThat(kutsuRepository.findExpired(Period.ZERO)).isEmpty();
+    };
+
+    @Test
+    public void findExpiredInvitationsIgnoresWrongStatus() {
+        populate(kutsu("", "", "")
+                .tila(KutsunTila.KAYTETTY)
+                .aikaleima(LocalDateTime.now().minus(Period.ofMonths(2)))
+        );
+        assertThat(kutsuRepository.findExpired(Period.ZERO)).isEmpty();
+    };
 }

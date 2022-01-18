@@ -23,6 +23,7 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindException;
 
@@ -30,6 +31,7 @@ import javax.validation.ValidationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
     public List<HaettuKayttooikeusryhmaDto> listHaetutKayttoOikeusRyhmat(String oidHenkilo, boolean activeOnly) {
         AnomusCriteria criteria = new AnomusCriteria();
         criteria.setAnojaOid(oidHenkilo);
-        if(activeOnly) {
+        if (activeOnly) {
             criteria.setAnomuksenTilat(EnumSet.of(AnomuksenTila.ANOTTU));
             criteria.setKayttoOikeudenTilas(EnumSet.of(KayttoOikeudenTila.ANOTTU));
         }
@@ -429,7 +431,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
     private MyonnettyKayttoOikeusRyhmaTapahtuma findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(String oidHenkilo,
                                                                                                 OrganisaatioHenkilo organisaatioHenkilo,
                                                                                                 KayttoOikeusRyhma kayttoOikeusRyhma) {
-        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =  this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository
                 .findMyonnettyTapahtuma(kayttoOikeusRyhma.getId(),
                         organisaatioHenkilo.getOrganisaatioOid(), oidHenkilo)
                 .orElseGet(() -> this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.save(MyonnettyKayttoOikeusRyhmaTapahtuma.builder()
@@ -453,7 +455,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
         if (!kayttajaOid.equals(anomus.getHenkilo().getOidHenkilo())) {
             throw new ForbiddenException(String.format("Käyttäjällä '%s' ei ole oikeuksia perua haettua käyttöoikeusryhmää '%s'", kayttajaOid, haettuKayttoOikeusRyhma.getId()));
         }
-        anomus.getHaettuKayttoOikeusRyhmas().removeIf( h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()) );
+        anomus.getHaettuKayttoOikeusRyhmas().removeIf(h -> h.getId().equals(haettuKayttoOikeusRyhma.getId()));
         if (anomus.getHaettuKayttoOikeusRyhmas().isEmpty()) {
             anomus.setAnomuksenTila(AnomuksenTila.PERUTTU);
         }
@@ -479,7 +481,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                 new MyonnettyKayttoOikeusService.DeleteDetails(kasittelija,
                         KayttoOikeudenTila.SULJETTU, "Käyttöoikeuden sulkeminen"));
     }
-
 
 
     // Käsittelee admin, OPH-virkailija ja virkailija tyyppisiä käyttäjiä. Kaksi ensimmäistä käyttäytyvät tässä samoin.
@@ -520,6 +521,24 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    @Override
+    @Transactional
+    public Collection<Anomus> findExpired(Period threshold) {
+        return anomusRepository.findExpired(threshold);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void discard(Anomus anomus) {
+        anomus.setAnomuksenTila(AnomuksenTila.HYLATTY);
+        anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
+        anomus.setKasittelija(resolveAdminUser());
+    }
+
+    private Henkilo resolveAdminUser() {
+        return henkiloDataRepository.findByOidHenkilo(commonProperties.getAdminOid()).orElse(null);
+    }
+
     private void regularUserChecks(Map<String, Set<Long>> kayttooikeusByOrganisation, Map<String, Set<Long>> myontooikeudet) {
         // Myöntöviite (saako käyttäjä myöntää näitä käyttöoikeusryhmiä)
         kayttooikeusByOrganisation.entrySet().removeIf(entry -> {
@@ -545,9 +564,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
             if (value == null) {
                 value = new HashSet<>();
             }
-            if (!value.contains(ryhmaId)) {
-                value.add(ryhmaId);
-            }
+            value.add(ryhmaId);
             return value;
         };
     }

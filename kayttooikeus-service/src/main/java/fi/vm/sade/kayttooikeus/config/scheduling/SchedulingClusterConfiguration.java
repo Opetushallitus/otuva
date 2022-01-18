@@ -29,14 +29,18 @@ public class SchedulingClusterConfiguration {
                         KasitteleOrganisaatioLakkautusTask kasitteleOrganisaatioLakkautusTask,
                         SendExpirationRemindersTask sendExpirationRemindersTask,
                         CasClientSessionCleanerTask casClientSessionCleanerTask,
-                        UpdateHenkiloNimiCacheTask updateHenkiloNimiCacheTask) {
+                        UpdateHenkiloNimiCacheTask updateHenkiloNimiCacheTask,
+                        DiscardExpiredInvitationsTask discardExpiredInvitationsTask,
+                        DiscardExpiredApplicationsTask discardExpiredApplicationsTask) {
         Scheduler scheduler = Scheduler.create(dataSource)
                 .startTasks(lahetaUusienAnomuksienIlmoituksetTask,
                         poistaVanhentuneetKayttooikeudetTask,
                         kasitteleOrganisaatioLakkautusTask,
                         sendExpirationRemindersTask,
                         casClientSessionCleanerTask,
-                        updateHenkiloNimiCacheTask)
+                        updateHenkiloNimiCacheTask,
+                        discardExpiredInvitationsTask,
+                        discardExpiredApplicationsTask)
                 .threads(this.kayttooikeusProperties.getScheduling().getPool_size())
                 .build();
         scheduler.start();

@@ -14,6 +14,7 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.MANDATORY)
 public interface KutsuRepository extends CrudRepository<Kutsu, Long>, KutsuRepositoryCustom {
     Optional<Kutsu> findById(Long id);
+
     Optional<Kutsu> findByTemporaryTokenAndTilaAndTemporaryTokenCreatedGreaterThan(String temporaryToken, KutsunTila kutsunTila, LocalDateTime created);
 
     default Optional<Kutsu> findByTemporaryTokenIsValidIsActive(String temporaryToken) {

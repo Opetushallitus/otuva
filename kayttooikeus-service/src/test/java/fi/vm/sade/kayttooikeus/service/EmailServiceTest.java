@@ -10,10 +10,13 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
+import fi.vm.sade.kayttooikeus.service.impl.EmailServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
+import fi.vm.sade.ryhmasahkoposti.api.dto.EmailMessage;
+import fi.vm.sade.ryhmasahkoposti.api.dto.EmailRecipient;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
@@ -43,6 +46,11 @@ public class EmailServiceTest extends AbstractServiceTest {
 
     private static final String HENKILO_OID = "1.2.3.4.5";
     private static final String WORK_EMAIL = "testi@example.com";
+
+    private static final String TEST_LANG = "fi";
+    private static final String TEST_EMAIL = "arpa@kuutio.fi";
+    private static final String TEST_FIRST_NAME = "arpa";
+    private static final String TEST_LAST_NAME = "kuutio";
 
     @MockBean
     private RyhmasahkopostiClient ryhmasahkopostiClient;
@@ -265,5 +273,107 @@ public class EmailServiceTest extends AbstractServiceTest {
         assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("fi");
         assertThat(emailData.getEmail().getFrom()).isNull();
         assertThat(emailData.getEmail().getTemplateName()).isEqualTo("kayttooikeus_kutsu_v2");
+    }
+
+    @Test
+    public void sendDiscardedInvitationNotificationSuccess() {
+        Kutsu invitation = Kutsu.builder()
+                .kieliKoodi(TEST_LANG)
+                .sahkoposti(TEST_EMAIL)
+                .etunimi(TEST_FIRST_NAME)
+                .sukunimi(TEST_LAST_NAME)
+                .build();
+
+        emailService.sendDiscardNotification(invitation);
+        ArgumentCaptor<EmailData> captor = ArgumentCaptor.forClass(EmailData.class);
+        verify(ryhmasahkopostiClient).sendRyhmasahkoposti(captor.capture());
+
+        EmailData emailData = captor.getValue();
+        assertThat(emailData.getReplacements().isEmpty()).isTrue();
+        assertThat(emailData.getRecipient().size()).isEqualTo(1);
+
+        EmailMessage message = emailData.getEmail();
+        assertThat(message.getTemplateName()).isEqualTo(EmailServiceImpl.DISCARDED_INVITATION_EMAIL_TEMPLATE);
+        assertThat(message.getLanguageCode()).isEqualTo(TEST_LANG);
+
+        EmailRecipient recipient = emailData.getRecipient().get(0);
+        assertThat(recipient.getEmail()).isEqualTo(TEST_EMAIL);
+        assertThat(recipient.getName()).isEqualTo(String.format("%s %s", TEST_FIRST_NAME, TEST_LAST_NAME));
+        assertThat(recipient.getLanguageCode()).isEqualTo(TEST_LANG);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void sendDiscardedInvitationNotificationFailure() {
+        when(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).thenThrow(new RuntimeException("BOOM!"));
+        emailService.sendDiscardNotification(Kutsu.builder().build());
+    }
+
+    @Test
+    public void sendDiscardedApplicationNotificationSuccess() {
+
+        Henkilo henkilo = mock(Henkilo.class);
+        when(henkilo.getKutsumanimiCached()).thenReturn(TEST_FIRST_NAME);
+        when(henkilo.getSukunimiCached()).thenReturn(TEST_LAST_NAME);
+
+        Anomus application = mock(Anomus.class);
+        when(application.getHenkilo()).thenReturn(henkilo);
+        when(application.getSahkopostiosoite()).thenReturn(TEST_EMAIL);
+
+        KielisyysDto kielisyysDto = mock(KielisyysDto.class);
+        when(kielisyysDto.getKieliKoodi()).thenReturn(TEST_LANG);
+
+        HenkiloDto henkiloDto = mock(HenkiloDto.class);
+        when(henkiloDto.getAsiointiKieli()).thenReturn(kielisyysDto);
+
+        given(oppijanumerorekisteriClient.getHenkiloByOid(any())).willReturn(henkiloDto);
+
+        emailService.sendDiscardNotification(application);
+        ArgumentCaptor<EmailData> captor = ArgumentCaptor.forClass(EmailData.class);
+        verify(ryhmasahkopostiClient).sendRyhmasahkoposti(captor.capture());
+
+        EmailData emailData = captor.getValue();
+        assertThat(emailData.getReplacements().isEmpty()).isTrue();
+        assertThat(emailData.getRecipient().size()).isEqualTo(1);
+
+        EmailMessage message = emailData.getEmail();
+        assertThat(message.getTemplateName()).isEqualTo(EmailServiceImpl.DISCARDED_APPLICATION_EMAIL_TEMPLATE);
+        assertThat(message.getLanguageCode()).isEqualTo(TEST_LANG);
+
+        EmailRecipient recipient = emailData.getRecipient().get(0);
+        assertThat(recipient.getEmail()).isEqualTo(TEST_EMAIL);
+        assertThat(recipient.getName()).isEqualTo(String.format("%s %s", TEST_FIRST_NAME, TEST_LAST_NAME));
+        assertThat(recipient.getLanguageCode()).isEqualTo(TEST_LANG);
+    }
+
+    @Test
+    public void sendDiscardedApplicationNotificationResolveLangFailure() {
+
+        Henkilo henkilo = mock(Henkilo.class);
+        when(henkilo.getKutsumanimiCached()).thenReturn(TEST_FIRST_NAME);
+        when(henkilo.getSukunimiCached()).thenReturn(TEST_LAST_NAME);
+
+        Anomus application = mock(Anomus.class);
+        when(application.getHenkilo()).thenReturn(henkilo);
+        when(application.getSahkopostiosoite()).thenReturn(TEST_EMAIL);
+
+        emailService.sendDiscardNotification(application);
+        ArgumentCaptor<EmailData> captor = ArgumentCaptor.forClass(EmailData.class);
+        verify(ryhmasahkopostiClient).sendRyhmasahkoposti(captor.capture());
+
+        EmailData emailData = captor.getValue();
+        assertThat(emailData.getReplacements().isEmpty()).isTrue();
+        assertThat(emailData.getRecipient().size()).isEqualTo(1);
+
+        EmailMessage message = emailData.getEmail();
+        assertThat(message.getTemplateName()).isEqualTo(EmailServiceImpl.DISCARDED_APPLICATION_EMAIL_TEMPLATE);
+
+        EmailRecipient recipient = emailData.getRecipient().get(0);
+        assertThat(recipient.getEmail()).isEqualTo(TEST_EMAIL);
+        assertThat(recipient.getName()).isEqualTo(String.format("%s %s", TEST_FIRST_NAME, TEST_LAST_NAME));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void sendDiscardedApplicationNotificationFailure() {
+        emailService.sendDiscardNotification(Anomus.builder().build());
     }
 }

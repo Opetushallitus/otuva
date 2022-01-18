@@ -19,10 +19,10 @@ import static java.util.stream.Collectors.*;
 @Service
 public class TaskExecutorServiceImpl implements TaskExecutorService {
     private static final Logger logger = LoggerFactory.getLogger(TaskExecutorServiceImpl.class);
-    
+
     private final KayttoOikeusService kayttoOikeusService;
     private final EmailService emailService;
-    
+
     @Autowired
     public TaskExecutorServiceImpl(KayttoOikeusService kayttoOikeusService,
                                    EmailService emailService) {
@@ -45,10 +45,10 @@ public class TaskExecutorServiceImpl implements TaskExecutorService {
                 ++remindersSent;
             } catch (Exception e) {
                 logger.error("Failed to send expiration reminder for "
-                        + "henkiloOid="+tapahtumasByHenkilo.getKey() 
+                        + "henkiloOid=" + tapahtumasByHenkilo.getKey()
                         + " tapahtumas=[" + tapahtumasByHenkilo.getValue().stream()
-                                .map(ExpiringKayttoOikeusDto::toString).collect(joining(", "))+"]"
-                        + ": reason: "+e.getMessage(), e);
+                        .map(ExpiringKayttoOikeusDto::toString).collect(joining(", ")) + "]"
+                        + ": reason: " + e.getMessage(), e);
             }
         }
         return remindersSent;

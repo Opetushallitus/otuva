@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,6 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -58,60 +60,42 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class, CommonProperties.class, MyontooikeusServiceImpl.class, MyonnettyKayttoOikeusServiceImpl.class})
 public class KayttooikeusAnomusServiceTest {
-    @Autowired
-    private OrikaBeanMapper orikaBeanMapper;
-
-    @MockBean
-    private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
-
-    @MockBean
-    private LocalizationService localizationService;
-
-    @MockBean
-    private HenkiloDataRepository henkiloDataRepository;
-
-    @MockBean
-    private HenkiloHibernateRepository henkiloHibernateRepository;
-
-    @MockBean
-    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-
-    @MockBean
-    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
-
-    @MockBean
-    private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-
-    @MockBean
-    private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
-
-    @MockBean
-    private PermissionCheckerService permissionCheckerService;
-
-    @MockBean
-    private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
-
-    @MockBean
-    private OrganisaatioClient organisaatioClient;
-
-    @MockBean
-    private AnomusRepository anomusRepository;
-
-    @MockBean
-    private EmailService emailService;
-
-    @MockBean
-    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
-    @MockBean
-    private OrganisaatioService organisaatioService;
-
-    @Captor
-    private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
+    @Autowired
+    private OrikaBeanMapper orikaBeanMapper;
+    @MockBean
+    private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
+    @MockBean
+    private LocalizationService localizationService;
+    @MockBean
+    private HenkiloDataRepository henkiloDataRepository;
+    @MockBean
+    private HenkiloHibernateRepository henkiloHibernateRepository;
+    @MockBean
+    private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
+    @MockBean
+    private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
+    @MockBean
+    private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
+    @MockBean
+    private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
+    @MockBean
+    private PermissionCheckerService permissionCheckerService;
+    @MockBean
+    private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
+    @MockBean
+    private OrganisaatioClient organisaatioClient;
+    @MockBean
+    private AnomusRepository anomusRepository;
+    @MockBean
+    private EmailService emailService;
+    @MockBean
+    private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    @MockBean
+    private OrganisaatioService organisaatioService;
+    @Captor
+    private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
     @SpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
@@ -529,7 +513,7 @@ public class KayttooikeusAnomusServiceTest {
                 .willReturn(Optional.of(myonnettyKayttoOikeusRyhmaTapahtuma));
 
         KayttoOikeusRyhma grantKayttooikeusryhma = createKayttooikeusryhma(2001L);
-        this.kayttooikeusAnomusService.grantPreValidatedKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1",LocalDate.now().plusYears(1),
+        this.kayttooikeusAnomusService.grantPreValidatedKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1", LocalDate.now().plusYears(1),
                 Lists.newArrayList(grantKayttooikeusryhma), "1.2.3.4.1");
 
         ArgumentCaptor<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmaTapahtumaArgumentCaptor =
@@ -1036,4 +1020,32 @@ public class KayttooikeusAnomusServiceTest {
         assertThat(currentHenkiloCanGrant.get("1.2.0.0.1")).containsExactlyInAnyOrder(2001L, 2002L);
     }
 
+    @Test
+    public void findExpiredApplications() {
+        assertThat(kayttooikeusAnomusService.findExpired(Period.ZERO)).isEmpty();
+    }
+
+    @Test
+    public void discardApplication() {
+        Henkilo admin = mock(Henkilo.class);
+        when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(admin));
+        Anomus application = Mockito.mock(Anomus.class);
+
+        kayttooikeusAnomusService.discard(application);
+
+        verify(application, times(1)).setAnomuksenTila(AnomuksenTila.HYLATTY);
+        verify(application, times(1)).setAnomusTilaTapahtumaPvm(any(LocalDateTime.class));
+        verify(application, times(1)).setKasittelija(admin);
+    }
+
+    @Test
+    public void discardApplicationAdminNotFound() {
+        Anomus application = Mockito.mock(Anomus.class);
+
+        kayttooikeusAnomusService.discard(application);
+
+        verify(application, times(1)).setAnomuksenTila(AnomuksenTila.HYLATTY);
+        verify(application, times(1)).setAnomusTilaTapahtumaPvm(any(LocalDateTime.class));
+        verify(application, times(1)).setKasittelija(null);
+    }
 }
