@@ -13,7 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import java.util.stream.Stream;
 
 @Repository
@@ -41,23 +42,22 @@ public class AccessRightReportImpl implements AccessRightReport {
 
     protected Map<String, OrganisaatioWithChildrenDto> resolveHierarchy(final String oid) {
         return flatten(organisaatioService.getByOid(oid)).stream()
-                .collect(Collectors.toMap(OrganisaatioWithChildrenDto::getOid, Function.identity()));
+                .collect(toMap(OrganisaatioWithChildrenDto::getOid, Function.identity()));
     }
 
     private List<OrganisaatioWithChildrenDto> flatten(final OrganisaatioWithChildrenDto node) {
         return Stream.concat(
                 Stream.of(node),
                 node.getChildren().stream().map(this::flatten).flatMap(Collection::stream)
-        ).collect(Collectors.toList());
+        ).collect(toList());
     }
 
     private List<AccessRightReportRow> enrich(final List<AccessRightReportRow> result,
                                               final Map<String, OrganisaatioWithChildrenDto> orgs,
                                               final String lang) {
-        return result.stream().map(resultRow -> {
-            resultRow.setOrganisationName(resolveOrgName(resultRow.getOrganisationOid(), orgs, lang));
-            return resultRow;
-        }).collect(Collectors.toList());
+        return result.stream()
+                .map(resultRow -> resultRow.withOrganisation(resolveOrgName(resultRow.getOrganisationOid(), orgs, lang)))
+                        .collect(toList());
     }
 
     private String resolveOrgName(final String organisationOid,

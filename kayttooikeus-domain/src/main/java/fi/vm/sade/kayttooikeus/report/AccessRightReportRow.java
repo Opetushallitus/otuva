@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.report;
 
-import lombok.Generated;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -21,9 +19,9 @@ public class AccessRightReportRow {
     private final Date endDate;
     private final Date modified;
     private final String modifiedBy;
-    @Setter
     private String organisationName;
 
+    @Builder(toBuilder = true, access = AccessLevel.PRIVATE)
     public AccessRightReportRow(
             BigInteger id,
             String personName,
@@ -47,5 +45,9 @@ public class AccessRightReportRow {
         this.endDate = endDate;
         this.modified = modified;
         this.modifiedBy = modifiedBy;
+    }
+
+    public AccessRightReportRow withOrganisation(String name) {
+        return toBuilder().organisationName(name).build();
     }
 }
