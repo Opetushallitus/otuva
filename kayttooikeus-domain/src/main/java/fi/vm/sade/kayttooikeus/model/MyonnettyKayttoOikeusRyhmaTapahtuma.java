@@ -24,7 +24,7 @@ import java.util.Set;
                 "(SELECT DISTINCT id, henkilo_id, organisaatio_oid FROM organisaatiohenkilo oh WHERE oh.organisaatio_oid IN :oids) " +
                 "SELECT " +
                 "       mkt.id," +
-                "       h.etunimet_cached || ' ' || h.sukunimi_cached as henkilo," +
+                "       h.sukunimi_cached || ' ' || h.etunimet_cached as henkilo," +
                 "       h.oidhenkilo," +
                 "       '' as organisaatio_nimi," +
                 "       oh.organisaatio_oid," +
