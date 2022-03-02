@@ -4,6 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.Test;
@@ -18,7 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class KayttajatiedotRepositoryImplTest {
 
     @Autowired
-    private KayttajatiedotRepositoryImpl repository;
+    private KayttajatiedotRepository repository;
 
     @MockBean
     PermissionCheckerService permissionCheckerService;
@@ -35,4 +36,8 @@ public class KayttajatiedotRepositoryImplTest {
         assertThat(kayttajatiedot).isEmpty();
     }
 
+    @Test
+    public void cleanObsoletedIdentification() { // NOSONAR
+        repository.cleanObsoletedIdentifications();
+    }
 }

@@ -35,6 +35,8 @@ public class KayttooikeusProperties {
             private Integer discardExpiredApplicationsMinute = 45;
             private Integer expirationThreshold = 2;
             private Long henkiloNimiCache = 100000L;
+            private Integer identificationCleanupHour = 1;
+            private Integer identificationCleanupMinute = 15;
         }
 
     }

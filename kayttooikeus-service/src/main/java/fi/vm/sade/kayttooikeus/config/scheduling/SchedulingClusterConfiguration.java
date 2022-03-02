@@ -31,7 +31,8 @@ public class SchedulingClusterConfiguration {
                         CasClientSessionCleanerTask casClientSessionCleanerTask,
                         UpdateHenkiloNimiCacheTask updateHenkiloNimiCacheTask,
                         DiscardExpiredInvitationsTask discardExpiredInvitationsTask,
-                        DiscardExpiredApplicationsTask discardExpiredApplicationsTask) {
+                        DiscardExpiredApplicationsTask discardExpiredApplicationsTask,
+                        IdentificationCleanupTask identificationCleanupTask) { // NOSONAR
         Scheduler scheduler = Scheduler.create(dataSource)
                 .startTasks(lahetaUusienAnomuksienIlmoituksetTask,
                         poistaVanhentuneetKayttooikeudetTask,
@@ -40,7 +41,8 @@ public class SchedulingClusterConfiguration {
                         casClientSessionCleanerTask,
                         updateHenkiloNimiCacheTask,
                         discardExpiredInvitationsTask,
-                        discardExpiredApplicationsTask)
+                        discardExpiredApplicationsTask,
+                        identificationCleanupTask)
                 .threads(this.kayttooikeusProperties.getScheduling().getPool_size())
                 .build();
         scheduler.start();
