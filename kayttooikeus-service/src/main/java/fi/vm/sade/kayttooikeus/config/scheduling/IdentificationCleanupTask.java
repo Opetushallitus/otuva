@@ -29,7 +29,8 @@ public class IdentificationCleanupTask extends RecurringTask {
 
     @Override
     public void execute(TaskInstance<Void> taskInstance, ExecutionContext executionContext) {
-        log.info("Purging mismatching identifications");
-        kayttajatiedotRepository.cleanObsoletedIdentifications();
+        log.info("Start identification cleanup process");
+        int rows = kayttajatiedotRepository.cleanObsoletedIdentifications();
+        log.info("Removed {} mismatching rows", rows);
     }
 }

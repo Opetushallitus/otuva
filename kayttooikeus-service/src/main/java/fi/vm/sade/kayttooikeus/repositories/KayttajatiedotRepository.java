@@ -17,13 +17,10 @@ public interface KayttajatiedotRepository extends CrudRepository<Kayttajatiedot,
 
     @Modifying
     @Transactional
-    @Query(value= "DELETE FROM identification WHERE id IN (" +
-            "   SELECT i.id FROM " +
-            "       identification i, " +
-            "       kayttajatiedot k" +
-            "   WHERE " +
-            "       i.idpentityid != 'haka' " +
-            "       AND k.henkiloid = i.henkilo_id " +
-            "       AND k.username != i.identifier)", nativeQuery = true)
-    void cleanObsoletedIdentifications();
+    @Query(value = "DELETE FROM identification WHERE id IN (" +
+            "SELECT i.id FROM identification i " +
+            "LEFT JOIN kayttajatiedot k ON i.henkilo_id = k.henkiloid " +
+            "WHERE i.idpentityid IN ('cas', 'vetuma') " +
+            "AND i.identifier != COALESCE(k.username, ''))", nativeQuery = true)
+    int cleanObsoletedIdentifications();
 }

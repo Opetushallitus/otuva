@@ -26,7 +26,6 @@ public class IdentificationCleanupTaskTest {
 
     @Test
     public void execute() {
-
         identificationCleanupTask.execute(null, null);
         verify(kayttajatiedotRepository, times(1)).cleanObsoletedIdentifications();
     }
