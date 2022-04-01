@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.12</version>
+        <version>2.6.6</version>
     </parent>
 
     <modules>
@@ -48,7 +48,7 @@
         <!-- Utils -->
         <commons.io.version>1.3.2</commons.io.version>
 
-        <springfox.version>2.7.0</springfox.version>
+        <springfox.version>3.0.0</springfox.version>
 
         <!-- buildversion.txt generation plugin -->
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
@@ -107,17 +107,6 @@
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-http</artifactId>
                 <version>0.5.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${springfox.version}</version>
             </dependency>
 
             <dependency>

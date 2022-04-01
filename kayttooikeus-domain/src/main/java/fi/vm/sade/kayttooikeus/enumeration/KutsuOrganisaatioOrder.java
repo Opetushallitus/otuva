@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.enumeration;
 
-import com.google.common.collect.Lists;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import org.springframework.data.domain.Sort;
@@ -12,9 +11,9 @@ import java.util.stream.Collectors;
 import static fi.vm.sade.kayttooikeus.model.QKutsu.kutsu;
 
 public enum KutsuOrganisaatioOrder {
-    NIMI(Lists.newArrayList(kutsu.sukunimi, kutsu.etunimi)),
-    SAHKOPOSTI(Lists.newArrayList(kutsu.sahkoposti)),
-    AIKALEIMA(Lists.newArrayList(kutsu.aikaleima)),
+    NIMI(List.of(kutsu.sukunimi, kutsu.etunimi)),
+    SAHKOPOSTI(List.of(kutsu.sahkoposti)),
+    AIKALEIMA(List.of(kutsu.aikaleima)),
     ;
 
     private List<ComparableExpressionBase> orders;

@@ -96,7 +96,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
         mvc.perform(post("/henkilo/{henkiloOid}/password", "1.2.3.4.5")
                 .content("Hacked=1").contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isUnsupportedMediaType());
-        verifyZeroInteractions(kayttajatiedotService);
+        verifyNoInteractions(kayttajatiedotService);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
         mvc.perform(post("/henkilo/{henkiloOid}/password", "1.2.3.4.5")
                 .content("\"1.2.3.4.5\""))
                 .andExpect(status().isUnsupportedMediaType());
-        verifyZeroInteractions(kayttajatiedotService);
+        verifyNoInteractions(kayttajatiedotService);
     }
 
 }

@@ -774,7 +774,7 @@ public class KayttooikeusAnomusServiceTest {
 
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
 
-        verifyZeroInteractions(organisaatioClient);
+        verifyNoInteractions(organisaatioClient);
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
         );
@@ -811,7 +811,7 @@ public class KayttooikeusAnomusServiceTest {
 
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
 
-        verifyZeroInteractions(organisaatioClient);
+        verifyNoInteractions(organisaatioClient);
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
         );
@@ -845,8 +845,8 @@ public class KayttooikeusAnomusServiceTest {
 
         kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now());
 
-        verifyZeroInteractions(organisaatioClient);
-        verifyZeroInteractions(henkiloHibernateRepository);
+        verifyNoInteractions(organisaatioClient);
+        verifyNoInteractions(henkiloHibernateRepository);
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactly("adminTilatullaRyhmällä");
