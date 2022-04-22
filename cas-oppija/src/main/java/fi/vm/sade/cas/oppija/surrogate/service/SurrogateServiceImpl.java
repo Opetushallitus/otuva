@@ -60,14 +60,13 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
     private String createCallbackUrl(org.apereo.cas.authentication.principal.Service service, String token) {
-        UriComponentsBuilder redirectUrlBuilder = UriComponentsBuilder
-                .fromHttpUrl(environment.getRequiredProperty("cas.server.prefix") + "/login")
-                .queryParam(TOKEN_PARAMETER_NAME, token);
+        String callbackUrl = environment.getRequiredProperty("cas.server.prefix") + "/login?" + TOKEN_PARAMETER_NAME + "=" + token;
         String serviceUrl = service != null ? service.getId() : null;
         if (serviceUrl != null) {
-            redirectUrlBuilder.queryParam("service", serviceUrl);
+            callbackUrl = callbackUrl + "&service=" + serviceUrl;
         }
-        return redirectUrlBuilder.toUriString();
+        LOGGER.info("CallbackUrl: " + callbackUrl);
+        return callbackUrl;
     }
 
     public SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException {
