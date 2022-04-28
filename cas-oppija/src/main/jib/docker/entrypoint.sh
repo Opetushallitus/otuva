@@ -13,29 +13,17 @@ fi
 
 if [ $ENTRYPOINT_DEBUG == "true" ]; then
   JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} -Ddebug=true"
+  echo -e "\nChecking java..."
+  java -version
+  if [ -d /etc/cas ] ; then
+      echo -e "\nListing CAS configuration under /etc/cas..."
+      ls -R /etc/cas
+    fi
+    echo -e "\nRemote debugger configured on port ${JVM_DEBUG_PORT} with suspend=${JVM_DEBUG_SUSPEND}: ${JVM_DEBUG}"
+    echo -e "\nJava args: ${JVM_MEM_OPTS} ${JVM_EXTRA_OPTS}"
+
 fi
 
-echo -e "\nChecking java..."
-java -version
-
-echo -e "\nCreating CAS configuration directories..."
-mkdir -p /etc/cas/config
-mkdir -p /etc/cas/services
-
-echo "Listing provided CAS docker artifacts..."
-ls -R docker/cas
-
-echo -e "\nMoving CAS configuration artifacts..."
-mv docker/cas/thekeystore /etc/cas 2>/dev/null
-mv docker/cas/config/*.* /etc/cas/config 2>/dev/null
-mv docker/cas/services/*.* /etc/cas/services 2>/dev/null
-
-if [ -d /etc/cas ]; then
-  echo -e "\nListing CAS configuration under /etc/cas..."
-  ls -R /etc/cas
-fi
-echo -e "\nRemote debugger configured on port ${JVM_DEBUG_PORT} with suspend=${JVM_DEBUG_SUSPEND}: ${JVM_DEBUG}"
-echo -e "\nJava args: ${JVM_MEM_OPTS} ${JVM_EXTRA_OPTS}"
 
 echo -e "\nRunning CAS @ cas.war"
 # shellcheck disable=SC2086
