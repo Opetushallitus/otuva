@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+All loggers are asynchronous because of log42.component.properties in cas-server-core-logging-api.
+Set -Dlog4j2.contextSelector=org.apache.logging.log4j.core.selector.BasicContextSelector or override log42.component.properties to turn off async
+-->
 <!-- Specify the refresh internal in seconds. -->
 <Configuration monitorInterval="5" packages="org.apereo.cas.logging">
     <Properties>
         <Property name="baseDir">/var/log</Property>
-
         <Property name="cas.log.level">info</Property>
         <Property name="spring.webflow.log.level">warn</Property>
         <Property name="spring.security.log.level">info</Property>
@@ -15,28 +18,69 @@
         <Property name="pac4j.log.level">warn</Property>
         <Property name="opensaml.log.level">warn</Property>
         <Property name="hazelcast.log.level">warn</Property>
+        <Property name="log.console.stacktraces">true</Property>
+        <Property name="log.file.stacktraces">false</Property>
+        <!-- -Dlog.stacktraceappender=null to disable stacktrace log -->
+        <Property name="log.stacktraceappender">casStackTraceFile</Property>
+        <Property name="log.include.location">false</Property>
     </Properties>
     <Appenders>
+        <Null name="null" />
+
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d %p [%c] - &lt;%m&gt;}%n"/>
+            <PatternLayout pattern="%highlight{%d %p [%c] - &lt;%m&gt;}%n" alwaysWriteExceptions="${sys:log.console.stacktraces}"/>
         </Console>
+
         <RollingFile name="file" fileName="${baseDir}/cas.log" append="true"
-                     filePattern="${baseDir}/cas-%d{yyyy-MM-dd-HH}-%i.log">
-            <PatternLayout pattern="%d %p [%c] - &lt;%m&gt;%n"/>
+                     filePattern="${baseDir}/cas-%d{yyyy-MM-dd-HH}-%i.log"
+                     immediateFlush="false">
+            <PatternLayout pattern="%highlight{%d %p [%c] - &lt;%m&gt;%n}"
+                           alwaysWriteExceptions="${sys:log.file.stacktraces}" />
             <Policies>
                 <OnStartupTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="10 MB"/>
                 <TimeBasedTriggeringPolicy />
             </Policies>
+            <DefaultRolloverStrategy max="5" compressionLevel="9">
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/*.log.gz" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
-        <RollingFile name="auditlogfile" fileName="${baseDir}/cas_audit.log" append="true"
-                     filePattern="${baseDir}/cas_audit-%d{yyyy-MM-dd-HH}-%i.log">
-            <PatternLayout pattern="%d %p [%c] - %m%n"/>
+
+        <RollingFile name="stacktracefile" fileName="${baseDir}/cas_stacktrace.log" append="true"
+                     filePattern="${baseDir}/cas_stacktrace-%d{yyyy-MM-dd-HH}-%i.log"
+                     immediateFlush="false">
+            <PatternLayout pattern="%highlight{%d %p [%c] - &lt;%m&gt;%n}" />
             <Policies>
                 <OnStartupTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="10 MB"/>
                 <TimeBasedTriggeringPolicy />
             </Policies>
+            <DefaultRolloverStrategy max="5" compressionLevel="9">
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/*.log.gz" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="auditlogfile" fileName="${baseDir}/cas_audit.log" append="true"
+                     filePattern="${baseDir}/cas_audit-%d{yyyy-MM-dd-HH}-%i.log"
+                     immediateFlush="false">
+            <PatternLayout pattern="%d %p [%c] - %m%n" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="5" compressionLevel="9">
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/*.log.gz" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
 
         <CasAppender name="casAudit">
@@ -44,6 +88,10 @@
         </CasAppender>
         <CasAppender name="casFile">
             <AppenderRef ref="file" />
+        </CasAppender>
+        <CasAppender name="casStackTraceFile">
+            <AppenderRef ref="stacktracefile" />
+            <ExceptionOnlyFilter/>
         </CasAppender>
         <CasAppender name="casConsole">
             <AppenderRef ref="console" />
@@ -106,14 +154,29 @@
             <AppenderRef ref="casAudit"/>
         </AsyncLogger>
 
-        <!-- All Loggers inherit appenders specified here, unless additivity="false" on the Logger -->
-        <AsyncRoot level="warn">
+        <AsyncLogger name="com.couchbase" level="warn" />
+        <AsyncLogger name="org.apache" level="error"/>
+        <AsyncLogger name="com.netflix" level="warn"/>
+        <AsyncLogger name="org.quartz" level="warn"/>
+        <AsyncLogger name="org.thymeleaf" level="warn"/>
+        <AsyncLogger name="org.pac4j" level="${sys:pac4j.log.level}"/>
+
+        <AsyncLogger name="org.opensaml" level="${sys:opensaml.log.level}"/>
+        <AsyncLogger name="PROTOCOL_MESSAGE" level="${sys:opensaml.log.level}" />
+
+        <AsyncLogger name="net.sf.ehcache" level="warn"/>
+        <AsyncLogger name="net.jradius" level="warn"/>
+        <AsyncLogger name="org.openid4java" level="warn"/>
+        <AsyncLogger name="org.ldaptive" level="${sys:ldap.log.level}"/>
+        <AsyncLogger name="com.hazelcast" level="${sys:hazelcast.log.level}" />
+        <AsyncLogger name="org.jasig.spring" level="warn" />
+        <AsyncLogger name="org.apache.cxf" level="warn" />
+        <AsyncLogger name="org.apache.http" level="warn" />
+
+        <AsyncRoot level="warn" includeLocation="${sys:log.include.location}">
             <AppenderRef ref="casFile"/>
-            <!-- 
-                 For deployment to an application server running as service, 
-                 delete the casConsole appender below
-            -->
             <AppenderRef ref="casConsole"/>
+            <AppenderRef ref="${sys:log.stacktraceappender}"/>
         </AsyncRoot>
     </Loggers>
 </Configuration>

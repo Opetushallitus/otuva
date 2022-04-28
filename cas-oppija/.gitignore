@@ -1,23 +1,42 @@
+
+### STS ###
+.apt_generated
 .classpath
-!/.project
+.factorypath
 .project
 .settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+!/.project
 .history
 .vscode
 target/
-out/
 .idea/
 .DS_Store
-.idea
 overlays/
 .gradle/
 build/
 log/
 bin/
 *.war
-*.iml
 *.log
 tmp/
 ./apache-tomcat
-buildversion.txt
 apache-tomcat.zip
+config-metadata.properties
