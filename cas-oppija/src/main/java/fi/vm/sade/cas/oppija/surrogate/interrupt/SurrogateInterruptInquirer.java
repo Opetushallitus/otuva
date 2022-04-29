@@ -10,7 +10,6 @@ import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.interrupt.InterruptInquirer;
 import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.services.RegisteredService;
-import org.apereo.cas.web.support.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,7 +17,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.webflow.execution.RequestContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,14 +24,12 @@ import java.util.Optional;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
 import static fi.vm.sade.cas.oppija.CasOppijaUtils.resolveAttribute;
-import static org.pac4j.core.util.Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER;
 
 @Component
 @ConditionalOnProperty("valtuudet.enabled")
 public class SurrogateInterruptInquirer implements InterruptInquirer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SurrogateInterruptInquirer.class);
-    private static final String ATTRIBUTE_NAME_VALTUUDET = "valtuudet";
 
     private final SurrogateService surrogateService;
     private final Environment environment;
@@ -54,26 +50,7 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 .map(Locale::getLanguage)
                 .filter(SUPPORTED_LANGUAGES::contains)
                 .orElse(DEFAULT_LANGUAGE);
-
-        boolean isValtuudetEnabled = requestContext.getActiveFlow().getAttributes().contains(ATTRIBUTE_NAME_VALTUUDET)
-                ? (Boolean) requestContext.getActiveFlow().getAttributes().get(ATTRIBUTE_NAME_VALTUUDET) : VALTUUDET_ENABLED;
-
-        HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
-        String clientName = request.getParameter(DEFAULT_CLIENT_NAME_PARAMETER);
-
-        LOGGER.debug("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {} | {}",
-                requestContext.getActiveFlow().getAttributes().contains(ATTRIBUTE_NAME_VALTUUDET),
-                requestContext.getActiveFlow().getAttributes().get(ATTRIBUTE_NAME_VALTUUDET),
-                isValtuudetEnabled,
-                clientName,
-                credential.getId(),
-                service);
-
-        if (service.getId().contains("valtuudet=true")) {
-            return inquire(authentication, service, language);
-        } else {
-            return InterruptResponse.none();
-        }
+        return inquire(authentication, service, language);
     }
 
     private InterruptResponse inquire(Authentication authentication, Service service, String language) {

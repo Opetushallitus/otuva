@@ -27,14 +27,28 @@ public class SurrogateAuthenticationAction extends AbstractNonInteractiveCredent
     }
 
     @Override
-    protected Event doPreExecute(RequestContext context) throws Exception {
-        final HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);
-        String code = request.getParameter(CODE_PARAMETER_NAME);
-        if (code == null || code.isEmpty()) {
+    protected Event doPreExecute(RequestContext context) {
+        try {
+           final HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);
+            String code = request.getParameter(CODE_PARAMETER_NAME);
+            if (code == null || code.isEmpty()) {
+                return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
+            }
+            return super.doPreExecute(context);
+        } catch (Exception e) {
             return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
         }
-        return super.doPreExecute(context);
     }
+    @Override
+    protected Event doExecute(RequestContext context) {
+        try {
+            /*final HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);*/
+            return super.doExecute(context);
+        } catch (Exception e) {
+            return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
+        }
+    }
+
 
     @Override
     protected Credential constructCredentialsFromRequest(RequestContext context) {

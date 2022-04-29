@@ -1,6 +1,6 @@
 package fi.vm.sade.cas.oppija.surrogate.configuration;
 
-/*
+
 import fi.vm.sade.cas.oppija.service.PersonService;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateCredential;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateService;
@@ -47,10 +47,9 @@ public class SurrogateConfiguration implements CasWebflowExecutionPlanConfigurer
 
         @Override
         public boolean supports(Credential credential) {
-            return SurrogateCredential.class.isInstance(credential);
+            return credential instanceof SurrogateCredential;
         }
 
     }
 
 }
-*/

@@ -1,5 +1,5 @@
 package fi.vm.sade.cas.oppija.configuration;
-/*
+
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.interrupt.InterruptInquirer;
@@ -7,6 +7,7 @@ import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.interrupt.webflow.InterruptUtils;
 import org.apereo.cas.interrupt.webflow.InterruptWebflowConfigurer;
 import org.apereo.cas.interrupt.webflow.actions.InquireInterruptAction;
+import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
@@ -14,7 +15,7 @@ import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -32,12 +33,12 @@ import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
-*/
+
 /**
  * This class should include only fixes to default cas interrupt configuration.
  *
  * @see InterruptInquiryExecutionPlanConfiguration actual interrupt configuration
- *//*
+ */
 
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
@@ -45,17 +46,22 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
 
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
-    private final ApplicationContext applicationContext;
+    private final ConfigurableApplicationContext applicationContext;
     private final CasConfigurationProperties casProperties;
+    private final CasCookieBuilder ticketGrantingTicketCookieGenerator;
 
     public InterruptConfiguration(FlowBuilderServices flowBuilderServices,
                                   @Qualifier("loginFlowRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
-                                  ApplicationContext applicationContext,
-                                  CasConfigurationProperties casProperties) {
+                                  ConfigurableApplicationContext applicationContext,
+                                  CasConfigurationProperties casProperties,
+                                  @Qualifier("ticketGrantingTicketCookieGenerator")
+                                  CasCookieBuilder ticketGrantingTicketCookieGenerator
+    ) {
         this.flowBuilderServices = flowBuilderServices;
         this.loginFlowDefinitionRegistry = loginFlowDefinitionRegistry;
         this.applicationContext = applicationContext;
         this.casProperties = casProperties;
+        this.ticketGrantingTicketCookieGenerator = ticketGrantingTicketCookieGenerator;
     }
 
     @Override
@@ -111,7 +117,7 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     // override default inquireInterruptAction to add new interruptRedirect transition
     @Bean
     public InquireInterruptAction inquireInterruptAction(List<InterruptInquirer> interruptInquirers) {
-        return new InquireInterruptAction(interruptInquirers) {
+        return new InquireInterruptAction(interruptInquirers, casProperties, ticketGrantingTicketCookieGenerator) {
             @Override
             protected Event doExecute(RequestContext requestContext) {
                 Event event = super.doExecute(requestContext);
@@ -130,4 +136,4 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     }
 
 }
-*/
+
