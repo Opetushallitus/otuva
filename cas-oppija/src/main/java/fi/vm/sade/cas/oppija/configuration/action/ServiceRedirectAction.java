@@ -24,7 +24,7 @@ public class ServiceRedirectAction extends AbstractServiceParamAction {
     @Override
     protected Event doExecute(RequestContext context) {
         SAML2Profile profile = context.getRequestScope().get(REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT, SAML2Profile.class);
-        Client<?, ?> client = clientProvider.getClient(profile);
+        Client client = clientProvider.getClient(profile);
         if (client instanceof SAML2Client) {
             return null; // SAML logout kesken, ei aseteta redirectiä!
         }
@@ -33,7 +33,7 @@ public class ServiceRedirectAction extends AbstractServiceParamAction {
         var response = WebUtils.getHttpServletResponseFromExternalWebflowContext(context);
         var service = getServiceRedirectCookie(request);
         if (service != null) {
-            LOGGER.debug("Found service redirect cookie, setting logout redirect url: " + service);
+            LOGGER.debug("Found service redirect cookie, setting logout redirect url: {}", service);
             WebUtils.putLogoutRedirectUrl(context, service);
             clearServiceRedirectCookie(response);
         }

@@ -1,5 +1,6 @@
 package fi.vm.sade.cas.oppija;
 
+/*
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -65,3 +66,4 @@ public class CasOppijaUtilsTest {
     }
 
 }
+*/

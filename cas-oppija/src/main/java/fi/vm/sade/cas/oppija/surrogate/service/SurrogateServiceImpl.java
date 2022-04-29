@@ -1,4 +1,5 @@
 package fi.vm.sade.cas.oppija.surrogate.service;
+/*
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.cas.oppija.surrogate.*;
@@ -115,3 +116,4 @@ public class SurrogateServiceImpl implements SurrogateService {
     }
 
 }
+*/

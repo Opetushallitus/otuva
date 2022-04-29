@@ -163,6 +163,7 @@ dependencies {
     implementation"org.apereo.cas:cas-server-support-pac4j-core"
     implementation"org.apereo.cas:cas-server-support-pac4j-core-clients"
     implementation"org.apereo.cas:cas-server-support-pac4j-webflow"
+    implementation "org.apereo.cas:cas-server-support-pac4j-api"
     implementation"org.apereo.cas:cas-server-support-session-jdbc"
     implementation"org.apereo.cas:cas-server-support-interrupt-api"
     implementation"org.apereo.cas:cas-server-support-interrupt-core"
@@ -170,6 +171,7 @@ dependencies {
     implementation"org.apereo.cas:cas-server-webapp-config"
     implementation"org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.13.2'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
     implementation 'com.github.kagkarlsson:db-scheduler:11.0'
     implementation 'org.flywaydb:flyway-core:8.5.9'
     implementation 'org.opensaml:opensaml-core:4.0.1'

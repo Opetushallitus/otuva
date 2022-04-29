@@ -18,10 +18,11 @@ public class Pac4jClientProvider {
     }
 
     public Client getClient(SAML2Profile profile) {
-        Client<?, ?> client = null;
+        Client client = null;
         try {
             var currentClientName = profile == null ? null : profile.getClientName();
-            client = currentClientName == null ? null : clients.findClient(currentClientName);
+            client = currentClientName == null ? null : clients.findClient(currentClientName)
+                    .orElseThrow(() -> new TechnicalException("no client found with name" + currentClientName));
         } catch (final TechnicalException e) {
             LOGGER.debug("No SAML2 client found: " + e.getMessage(), e);
         }

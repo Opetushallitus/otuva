@@ -1,5 +1,6 @@
-package fi.vm.sade.cas.oppija.configuration.action;
 
+package fi.vm.sade.cas.oppija.configuration.action;
+/*
 import org.apereo.cas.util.Pac4jUtils;
 import org.apereo.cas.web.support.WebUtils;
 import org.pac4j.core.client.Client;
@@ -14,10 +15,12 @@ import org.springframework.webflow.execution.RequestContext;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT;
 
+*/
 /**
  * SAML logout action. Expects SAML profile to be in request scope ({@link SamlLogoutPrepareAction}).
  * Implementation is mostly derived from DelegatedAuthenticationSAML2ClientLogoutAction.
- */
+ *//*
+
 public class SamlLogoutExecuteAction extends AbstractAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SamlLogoutExecuteAction.class);
@@ -62,3 +65,4 @@ public class SamlLogoutExecuteAction extends AbstractAction {
     }
 
 }
+*/

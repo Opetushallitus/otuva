@@ -1,5 +1,6 @@
-package fi.vm.sade.cas.oppija.configuration.action;
 
+package fi.vm.sade.cas.oppija.configuration.action;
+/*
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
@@ -19,11 +20,13 @@ import static java.util.stream.Collectors.toMap;
 import static org.apereo.cas.authentication.principal.ClientCredential.AUTHENTICATION_ATTRIBUTE_CLIENT_NAME;
 import static org.apereo.cas.util.CollectionUtils.firstElement;
 
+*/
 /**
  * Adds SAML profile to request scope to create identity provider logout after service provider logout.
  *
  * @see SamlLogoutExecuteAction
- */
+ *//*
+
 public class SamlLogoutPrepareAction extends AbstractAction {
 
     private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
@@ -74,3 +77,4 @@ public class SamlLogoutPrepareAction extends AbstractAction {
     }
 
 }
+*/

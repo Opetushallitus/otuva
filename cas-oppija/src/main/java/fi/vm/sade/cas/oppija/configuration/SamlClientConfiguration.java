@@ -1,5 +1,6 @@
-package fi.vm.sade.cas.oppija.configuration;
 
+package fi.vm.sade.cas.oppija.configuration;
+/*
 import fi.vm.sade.cas.oppija.service.PersonService;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.principal.Principal;
@@ -136,11 +137,13 @@ public class SamlClientConfiguration {
         };
     }
 
-    /**
+    */
+/**
      * <vetuma xmlns="urn:vetuma:SAML:2.0:extensions">
      *     <LG>sv</LG>
      * </vetuma>
-     */
+     *//*
+
     private XSAny createLanguageExtension(String languageCode) {
         XSAny lg = new XSAnyBuilder().buildObject(new QName("LG"));
         lg.setTextContent(languageCode);
@@ -150,3 +153,4 @@ public class SamlClientConfiguration {
     }
 
 }
+*/

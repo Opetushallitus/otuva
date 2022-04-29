@@ -5,7 +5,7 @@ import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.webflow.definition.StateDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
@@ -29,7 +29,7 @@ public class SurrogateAuthenticationWebflowConfigurer extends AbstractCasWebflow
 
     public SurrogateAuthenticationWebflowConfigurer(FlowBuilderServices flowBuilderServices,
                                                     @Qualifier("loginFlowRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
-                                                    ApplicationContext applicationContext,
+                                                    ConfigurableApplicationContext applicationContext,
                                                     CasConfigurationProperties casProperties,
                                                     SurrogateAuthenticationAction surrogateAuthenticationAction) {
         super(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties);

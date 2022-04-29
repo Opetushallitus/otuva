@@ -1,4 +1,5 @@
 package fi.vm.sade.cas.oppija.configuration;
+/*
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.interrupt.InterruptInquirer;
@@ -31,11 +32,13 @@ import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
+*/
 /**
  * This class should include only fixes to default cas interrupt configuration.
  *
  * @see InterruptInquiryExecutionPlanConfiguration actual interrupt configuration
- */
+ *//*
+
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
@@ -127,3 +130,4 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     }
 
 }
+*/

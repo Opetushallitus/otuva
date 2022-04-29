@@ -1,5 +1,6 @@
 package fi.vm.sade.cas.oppija.surrogate.auth;
 
+/*
 import fi.vm.sade.cas.oppija.service.PersonService;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateAuthenticationDto;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateCredential;
@@ -88,3 +89,4 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
     }
 
 }
+*/

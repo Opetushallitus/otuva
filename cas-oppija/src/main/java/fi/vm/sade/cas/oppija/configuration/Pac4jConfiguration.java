@@ -1,25 +1,10 @@
 package fi.vm.sade.cas.oppija.configuration;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.apereo.cas.util.serialization.StringSerializer;
-import org.apereo.cas.web.pac4j.DelegatedSessionCookieManager;
-import org.apereo.cas.web.pac4j.SessionStoreCookieSerializer;
-import org.apereo.cas.web.support.CookieRetrievingCookieGenerator;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.webflow.conversation.impl.ContainedConversation;
-import org.springframework.webflow.conversation.impl.ConversationContainer;
-
-import java.util.Map;
 
 @Configuration
 public class Pac4jConfiguration {
+/*
 
     private CookieRetrievingCookieGenerator pac4jSessionStoreCookieGenerator;
     private Module pac4jJacksonModule;
@@ -87,5 +72,6 @@ public class Pac4jConfiguration {
             return new ContainedConversation(null, null, null);
         }
     }
+*/
 
 }

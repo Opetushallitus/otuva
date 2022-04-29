@@ -1,5 +1,6 @@
-package fi.vm.sade.cas.oppija.configuration;
 
+package fi.vm.sade.cas.oppija.configuration;
+/*
 import fi.vm.sade.cas.oppija.configuration.action.Pac4jClientProvider;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.SamlLogoutExecuteAction;
@@ -54,9 +55,11 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
+*/
 /**
  * This class should include only fixes to default cas delegated authentication configuration.
- */
+ *//*
+
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
@@ -259,3 +262,4 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     }
 
 }
+*/
