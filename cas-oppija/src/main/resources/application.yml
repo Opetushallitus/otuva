@@ -88,8 +88,7 @@ spring:
     url: jdbc:postgresql://localhost:25432/cas-oppija
     username: cas-oppija
     password: cas-oppija
-    spring.datasource:
-      driver-class-name: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver
   sql:
     init:
       platform: postgresql
