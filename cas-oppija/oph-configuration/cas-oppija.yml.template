@@ -50,8 +50,7 @@ cas.authn.pac4j.saml:
         name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
         required: true
     mapped-attributes:
-      - name: urn:oid:2.5.4.3
-        mapped-to: personName
+      - personName->urn:oid:2.5.4.3
 {% if cas_oppija_enable_fakesuomifi == true %}
   - client-name: ${cas.custom.properties.fakeSuomiFiClientName}
     auto-redirect: {{ cas_oppija_fakesuomifi_auto_redirect | default('true') }}
@@ -74,8 +73,7 @@ cas.authn.pac4j.saml:
         name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
         required: true
     mapped-attributes:
-      - name: urn:oid:2.5.4.3
-        mapped-to: person-name
+      - person-name->urn:oid:2.5.4.3
 {% endif %}
 
 cas.logout.follow-service-redirects: true
