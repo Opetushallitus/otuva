@@ -128,6 +128,7 @@ public class SamlClientConfiguration {
             public Collection<IndirectClient> build() {
                 val newClients = new LinkedHashSet<IndirectClient>();
                 configureSamlClient(newClients);
+                LOGGER.debug("configured SamlClient:{}", newClients.iterator().next().toString());
                 return newClients;
             }
 
