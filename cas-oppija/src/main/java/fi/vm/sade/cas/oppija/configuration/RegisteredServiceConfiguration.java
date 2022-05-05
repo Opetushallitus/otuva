@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 
@@ -30,13 +31,15 @@ public class RegisteredServiceConfiguration {
 
     private static class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePolicy {
 
-       /* @Override
-        protected Map<String, Object> returnFinalAttributesCollection(Map<String, Object> attributesToRelease, RegisteredService service) {
+        @Override
+        protected Map<String, List<Object>> returnFinalAttributesCollection(Map<String, List<Object>> attributesToRelease, RegisteredService service) {
             // pac4j adds both saml name (e.g. urn:oid:2.5.4.3) and friendly name (e.g. cn) to principal attributes
             // and cas converts all attributes containing ":" into numbers which is not allowed in xml tags
             attributesToRelease.entrySet().removeIf(entry -> entry.getKey().contains(":"));
             return attributesToRelease;
-        }*/
+        }
+
+
 
     }
 
