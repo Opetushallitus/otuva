@@ -63,7 +63,7 @@ management.endpoint.health.enabled: true
 
 
 server:
-  port: 8081
+  port: 8080
   servlet:
     context-path: /cas-oppija
     encoding:
