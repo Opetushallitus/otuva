@@ -55,6 +55,7 @@ cas:
       maxConversations: 5
       storage: true
 
+management.endpoint.health.enabled: true
 
 
 # Spring Boot configuration
@@ -113,14 +114,22 @@ spring:
 cas.custom.properties:
   suomiFiClientName: suomi.fi
   fakeSuomiFiClientName: fakesuomi.fi
+
+# Read as Properties from Environment
+
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
+
+# Valtuudet config
 valtuudet.enabled: false
 valtuudet.required: false
+
 valtuudet.host: http://localhost:8080
-valtuudet.client-id: client
+valtuudet.client-id: client    # Who needs this?
 valtuudet.api-key: key
 valtuudet.oauth-password: password
+
+
 service-user.username: user
 service-user.password: pass
 
