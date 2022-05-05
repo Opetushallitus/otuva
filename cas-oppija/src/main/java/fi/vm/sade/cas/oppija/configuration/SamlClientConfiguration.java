@@ -1,4 +1,3 @@
-
 package fi.vm.sade.cas.oppija.configuration;
 
 import fi.vm.sade.cas.oppija.service.PersonService;
@@ -76,9 +75,7 @@ public class SamlClientConfiguration {
         @Override
         public Principal createPrincipal(String id, Map<String, List<Object>> attributes) {
             try {
-                resolveNationalIdentificationNumber(attributes)
-                        .flatMap(this::findOidByNationalIdentificationNumber)
-                        .ifPresent((String oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
+                resolveNationalIdentificationNumber(attributes).flatMap(this::findOidByNationalIdentificationNumber).ifPresent((String oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
             } catch (Exception e) {
                 LOGGER.error("Unable to get oid by national identification number", e);
             }
@@ -98,14 +95,9 @@ public class SamlClientConfiguration {
 
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientAuthenticationHandler
     @Bean
-    public AuthenticationHandler clientAuthenticationHandler(ObjectProvider<ServicesManager> servicesManager,
-                                                             PersonService personService,
-                                                             Clients builtClients,
-                                                             @Qualifier(DelegatedClientUserProfileProvisioner.BEAN_NAME) final DelegatedClientUserProfileProvisioner clientUserProfileProvisioner,
-                                                             @Qualifier("delegatedClientDistributedSessionStore") final SessionStore delegatedClientDistributedSessionStore) {
+    public AuthenticationHandler clientAuthenticationHandler(ObjectProvider<ServicesManager> servicesManager, PersonService personService, Clients builtClients, @Qualifier(DelegatedClientUserProfileProvisioner.BEAN_NAME) final DelegatedClientUserProfileProvisioner clientUserProfileProvisioner, @Qualifier("delegatedClientDistributedSessionStore") final SessionStore delegatedClientDistributedSessionStore) {
         var pac4j = casProperties.getAuthn().getPac4j().getCore();
-        var h = new DelegatedClientAuthenticationHandler(pac4j.getName(), pac4j.getOrder(), servicesManager.getIfAvailable(),
-                clientPrincipalFactory(personService), builtClients, clientUserProfileProvisioner, delegatedClientDistributedSessionStore) {
+        var h = new DelegatedClientAuthenticationHandler(pac4j.getName(), pac4j.getOrder(), servicesManager.getIfAvailable(), clientPrincipalFactory(personService), builtClients, clientUserProfileProvisioner, delegatedClientDistributedSessionStore) {
             @Override
             protected String determinePrincipalIdFrom(UserProfile profile, BaseClient client) {
                 String id = super.determinePrincipalIdFrom(profile, client);
@@ -118,17 +110,14 @@ public class SamlClientConfiguration {
     }
 
     @Bean
-    public DelegatedClientFactory<IndirectClient> pac4jDelegatedClientFactory(
-            Collection<DelegatedClientFactoryCustomizer> customizers,
-            CasSSLContext casSSLContext,
-            ApplicationContext applicationContext
-    ) {
+    public DelegatedClientFactory<IndirectClient> pac4jDelegatedClientFactory(Collection<DelegatedClientFactoryCustomizer> customizers, CasSSLContext casSSLContext, ApplicationContext applicationContext) {
         return new DefaultDelegatedClientFactory(casProperties, customizers, casSSLContext, applicationContext) {
             @Override
             public Collection<IndirectClient> build() {
                 val newClients = new LinkedHashSet<IndirectClient>();
                 configureSamlClient(newClients);
-                LOGGER.debug("configured SamlClient:{}", newClients.iterator().next().toString());
+                LOGGER.debug("configured SamlClient:{}",
+                        newClients.iterator().hasNext() ? newClients.iterator().next() : "none");
                 return newClients;
             }
 
@@ -137,9 +126,7 @@ public class SamlClientConfiguration {
             protected void configureClient(IndirectClient client, Pac4jBaseClientProperties props) {
                 super.configureClient(client, props);
                 Map<String, String> customProperties = casProperties.getCustom().getProperties();
-                if (client instanceof SAML2Client &&
-                        (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()) ||
-                                Objects.equals(customProperties.get("fakeSuomiFiClientName"), client.getName()))) {
+                if (client instanceof SAML2Client && (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()) || Objects.equals(customProperties.get("fakeSuomiFiClientName"), client.getName()))) {
                     SAML2Client saml2Client = (SAML2Client) client;
                     SAML2Configuration configuration = saml2Client.getConfiguration();
                     configuration.setSpLogoutRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
@@ -154,10 +141,7 @@ public class SamlClientConfiguration {
 
     private Supplier<List<XSAny>> createExtensions() {
         return () -> {
-            String language = Optional.of(LocaleContextHolder.getLocale())
-                    .map(Locale::getLanguage)
-                    .filter(SUPPORTED_LANGUAGES::contains)
-                    .orElse(DEFAULT_LANGUAGE);
+            String language = Optional.of(LocaleContextHolder.getLocale()).map(Locale::getLanguage).filter(SUPPORTED_LANGUAGES::contains).orElse(DEFAULT_LANGUAGE);
             return List.of(createLanguageExtension(language));
         };
     }
