@@ -12,8 +12,8 @@ cas.server.tomcat.http-proxy:
     scheme: https
     protocol: HTTP/1.1
 
-cas.ticket.tgt.max-time-to-live-in-seconds: {{ cas_oppija_tgt_max_time_to_live_in_seconds | default('3600') }}
-cas.ticket.tgt.time-to-kill-in-seconds: {{ cas_oppija_tgt_time_to_kill_in_seconds | default('3600') }}
+cas.ticket.tgt.primary.max-time-to-live-in-seconds: {{ cas_oppija_tgt_max_time_to_live_in_seconds | default('3600') }}
+cas.ticket.tgt.primary.time-to-kill-in-seconds: {{ cas_oppija_tgt_time_to_kill_in_seconds | default('3600') }}
 
 cas.tgc.secure: true
 
@@ -26,12 +26,8 @@ cas.webflow.crypto:
     encryption.key: {{ cas_oppija_webflow_encryption_key }}
     signing.key: {{ cas_oppija_webflow_signing_key }}
 
-cas.authn.pac4j.cookie.crypto:
-    encryption.key: {{ cas_oppija_pac4j_cookie_encryption_key }}
-    signing.key: {{ cas_oppija_pac4j_cookie_signing_key }}
 cas.authn.pac4j.saml:
   - client-name: ${cas.custom.properties.suomiFiClientName}
-    auto-redirect: {{ cas_oppija_suomifi_auto_redirect | default('true') }}
     keystore-path: {{ cas_oppija_suomifi_keystore_path }}
     keystore-password: {{ cas_oppija_suomifi_keystore_password }}
     keystore-alias: {{ cas_oppija_suomifi_keystore_alias }}
@@ -53,7 +49,6 @@ cas.authn.pac4j.saml:
       - personName->urn:oid:2.5.4.3
 {% if cas_oppija_enable_fakesuomifi == true %}
   - client-name: ${cas.custom.properties.fakeSuomiFiClientName}
-    auto-redirect: {{ cas_oppija_fakesuomifi_auto_redirect | default('true') }}
     keystore-path: {{ cas_oppija_fakesuomifi_keystore_path }}
     keystore-password: {{ cas_oppija_suomifi_keystore_password }}
     keystore-alias: {{ cas_oppija_suomifi_keystore_alias }}
