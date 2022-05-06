@@ -101,7 +101,7 @@ cas.webflow.session.storage: true
 
 spring.session.store-type: jdbc
 spring.session.jdbc.initialize-schema: never
-spring.session.jdbc.schema: "classpath:org/springframework/session/jdbc/schema-postgres.sql"
+spring.session.jdbc.schema: "classpath:org/springframework/session/jdbc/schema-postgresql.sql"
 spring.session.jdbc.table-name: SPRING_SESSION
 
 server.tomcat.accesslog:
