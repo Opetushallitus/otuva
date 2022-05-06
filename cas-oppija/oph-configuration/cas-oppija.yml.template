@@ -101,7 +101,7 @@ cas.webflow.session.storage: true
 
 spring.session.store-type: jdbc
 spring.session.jdbc.initialize-schema: never
-spring.session.jdbc.schema=classpath: org/springframework/session/jdbc/schema-postgres.sql
+spring.session.jdbc.schema: "classpath:org/springframework/session/jdbc/schema-postgres.sql"
 spring.session.jdbc.table-name: SPRING_SESSION
 
 server.tomcat.accesslog:
@@ -115,16 +115,15 @@ server.tomcat.accesslog:
     rename-on-rotate: true
     max-days: 7
 
-# Custom configuration
+# Oph properties overrides
 
-cas.custom.properties:
-    whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
-    host.virkailija: https://{{ host_virkailija }}
-    valtuudet.enabled: {{ cas_oppija_suomifi_valtuudet_enabled | default('true') }}
-    valtuudet.required: {{ cas_oppija_suomifi_valtuudet_required | default('true') }}
-    valtuudet.host: {{ cas_oppija_suomifi_host_valtuudet }}
-    valtuudet.client-id: {{ cas_oppija_suomifi_valtuudet_client_id }}
-    valtuudet.api-key: {{ cas_oppija_suomifi_valtuudet_api_key }}
-    valtuudet.oauth-password: {{ cas_oppija_suomifi_valtuudet_oauth_password }}
-    service-user.username: {{ cas_oppija_service_user_username }}
-    service-user.password: {{ cas_oppija_service_user_password }}
+whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
+host.virkailija: https://{{ host_virkailija }}
+valtuudet.enabled: {{ cas_oppija_suomifi_valtuudet_enabled | default('true') }}
+valtuudet.required: {{ cas_oppija_suomifi_valtuudet_required | default('true') }}
+valtuudet.host: {{ cas_oppija_suomifi_host_valtuudet }}
+valtuudet.client-id: {{ cas_oppija_suomifi_valtuudet_client_id }}
+valtuudet.api-key: {{ cas_oppija_suomifi_valtuudet_api_key }}
+valtuudet.oauth-password: {{ cas_oppija_suomifi_valtuudet_oauth_password }}
+service-user.username: {{ cas_oppija_service_user_username }}
+service-user.password: {{ cas_oppija_service_user_password }}
