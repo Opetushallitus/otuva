@@ -189,6 +189,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jul'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-web'
+    annotationProcessor "org.springframework:spring-context-indexer:5.3.19"
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
     testImplementation 'org.assertj:assertj-core'
