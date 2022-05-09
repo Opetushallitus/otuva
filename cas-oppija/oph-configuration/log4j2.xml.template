@@ -22,7 +22,6 @@
     <Loggers>
         <AsyncLogger name="org.apereo.inspektr.audit.support" level="info" includeLocation="true" />
         <AsyncLogger name="fi.vm.sade.cas.oppija" level="${sys:cas-oppija.log.level}" includeLocation="true"/>
-        <AsyncLogger name="org.opensaml.core.config" level="debug" includeLocation="true=" />
         <AsyncRoot level="${root.log.level}">
             <AppenderRef ref="file"/>
         </AsyncRoot>
