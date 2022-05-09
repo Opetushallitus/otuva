@@ -181,6 +181,7 @@ dependencies {
     }
     implementation"org.postgresql:postgresql"
     implementation"org.springframework.security:spring-security-config"
+    implementation "org.springframework:spring-context-indexer"
     implementation"fi.vm.sade.java-utils:java-http:0.5.0-SNAPSHOT"
     implementation"fi.vm.sade.java-utils:suomifi-valtuudet-client:0.1.0-SNAPSHOT"
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api'
