@@ -10,13 +10,10 @@ cas:
         - "*"
       enabled: true
       allow-credentials: true
-      allow-origins:
-        - http://localhost
-        - http://localhost-en
-        - http://localhost-sv
-        - "*"
       allow-methods:
         - "*"
+      allow-origin-patterns:
+        - "http://localhost*"
     header:
       xframe: false
       xss: false
