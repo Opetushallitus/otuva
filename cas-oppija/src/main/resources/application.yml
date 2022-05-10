@@ -12,8 +12,8 @@ cas:
       allow-credentials: true
       allow-methods:
         - "*"
-      allow-origin-patterns:
-        - "http://localhost*"
+      allow-origin-patterns: [ "http://localhost:[*]", "https://localhost:[*]", "https://testi.apro.tunnistus.fi"]
+
     header:
       xframe: false
       xss: false
@@ -28,6 +28,10 @@ cas:
     authentication-attribute-release:
       only-release:
         - clientName
+    pac4j:
+      cookie:
+        enabled: true
+
   tgc:
     secure: false
     path: /cas-oppija
@@ -44,7 +48,7 @@ cas:
     registry:
       cleaner:
         schedule:
-          enabled: false
+          enabled: true
   webflow:
     session:
       lockTimeout: 30
