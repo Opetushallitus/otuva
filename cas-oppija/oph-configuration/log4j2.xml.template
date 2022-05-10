@@ -12,7 +12,7 @@
         <RollingFile name="file" fileName="/root/logs/cas-oppija.log" append="true"
                      filePattern="/root/logs/cas-oppija-%d{yyyy-MM-dd-HH}-%i.log">
             <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} %-5p {%X{user}} [%t] %-5p %c: %m%n"/>
-             <ThresholdFilter level="debug" /><!-- trace suoraan roskiin -->
+             <ThresholdFilter level="trace" /><!-- trace suoraan roskiin -->
             <Policies>
                 <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
@@ -22,6 +22,7 @@
     <Loggers>
         <AsyncLogger name="org.apereo.inspektr.audit.support" level="info" includeLocation="true" />
         <AsyncLogger name="fi.vm.sade.cas.oppija" level="${sys:cas-oppija.log.level}" includeLocation="true"/>
+        <AsyncLogger name="org.apereo.cas.web.flow" level="trace" includeLocation="true" />
         <AsyncRoot level="${root.log.level}">
             <AppenderRef ref="file"/>
         </AsyncRoot>
