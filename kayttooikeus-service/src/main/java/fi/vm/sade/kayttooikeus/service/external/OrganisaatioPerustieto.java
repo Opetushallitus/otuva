@@ -101,7 +101,24 @@ public class OrganisaatioPerustieto {
     public Stream<OrganisaatioPerustieto> parents() {
         return parent == null ? Stream.empty() : parent.andParents();
     }
-    
+
+    /**
+     * This method can be used to distinguish between organisation and group. Oid is built up
+     * is such a way that both organisation types contain distinct "type-class" part.
+     * Structure of oid: hard-coded-prefix.type-class.10+-digit-suffix.
+     * For organisations, the type-class part is known to be "10". Given the oid structure, the substring
+     * ".10." can only exist for organisation oid:s.
+     *
+     * @see <a href="https://wiki.eduuni.fi/display/OPHPALV/OID-Solmuluokat">documentation</a>
+     * @see <a href="https://github.com/Opetushallitus/java-utils/blob/master/oid-generator/src/main/java/fi/vm/sade/oidgenerator/OIDGenerator.java">implementation</a>
+     *
+     * @return boolean indication whether this entity is organisation
+     */
+    @JsonIgnore
+    public boolean isOrganisaatio() {
+        return Optional.ofNullable(oid).map(str -> str.indexOf(".10.") >= 0).orElse(false);
+    }
+
     public int getHierarchyLevel() {
         int level = 1;
         OrganisaatioPerustieto node = this;

@@ -59,15 +59,23 @@ public class OrganisaatioServiceImplTest {
     @Test
     public void getOrganisaatioNames() {
         OrganisaatioPerustieto org = OrganisaatioPerustieto.builder()
-                .oid("oid")
+                .oid("org.10.oid")
                 .nimi(Collections.singletonMap("lang", "name"))
                 .build();
+        OrganisaatioPerustieto noOid = OrganisaatioPerustieto.builder()
+                .oid(null)
+                .nimi(Collections.singletonMap("this", "should not be in results"))
+                .build();
+        OrganisaatioPerustieto group = OrganisaatioPerustieto.builder()
+                .oid("group.28.oid")
+                .nimi(Collections.singletonMap("groups", "are filtered from output"))
+                .build();
 
-        when(organisaatioClientMock.stream()).thenReturn(Stream.of(org));
+        when(organisaatioClientMock.stream()).thenReturn(Stream.of(org, noOid, group));
 
         Map<String, Map<String, String>> result = organisaatioServiceImpl.getOrganisationNames();
 
-        assertThat(result).hasSize(1).containsKey("oid");
-        assertThat(result.get("oid")).containsEntry("lang", "name");
+        assertThat(result).hasSize(1).containsKey("org.10.oid");
+        assertThat(result.get("org.10.oid")).containsEntry("lang", "name");
     }
 }
