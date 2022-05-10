@@ -16,12 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,6 +31,35 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrganisaatioServiceImpl.class);
 
     private final OrganisaatioClient organisaatioClient;
+
+    private static Predicate<OrganisaatioPerustieto> getPredicate(OrganisaatioCriteriaDto criteria,
+                                                                  BinaryOperator<Predicate<OrganisaatioPerustieto>> accumulator) {
+        return getPredicates(criteria).stream().reduce(organisaatio -> true, accumulator);
+    }
+
+    private static Collection<Predicate<OrganisaatioPerustieto>> getPredicates(OrganisaatioCriteriaDto criteria) {
+        Collection<Predicate<OrganisaatioPerustieto>> predicates = new ArrayList<>();
+        Optional.ofNullable(criteria.getTyyppi()).ifPresent(tyyppi -> predicates.add(tyyppiPredicate(tyyppi)));
+        Optional.ofNullable(criteria.getTila()).ifPresent(tila -> predicates.add(tilaPredicate(tila)));
+        return predicates;
+    }
+
+    private static Predicate<OrganisaatioPerustieto> tyyppiPredicate(OrganisaatioTyyppi tyyppi) {
+        return (OrganisaatioPerustieto organisaatio) -> {
+            switch (tyyppi) {
+                case ORGANISAATIO:
+                    return !organisaatio.getTyypit().contains("Ryhma");
+                case RYHMA:
+                    return organisaatio.getTyypit().contains("Ryhma");
+                default:
+                    throw new IllegalArgumentException("Tuntematon tyyppi: " + tyyppi);
+            }
+        };
+    }
+
+    private static Predicate<OrganisaatioPerustieto> tilaPredicate(Set<OrganisaatioStatus> tila) {
+        return (OrganisaatioPerustieto organisaatio) -> tila.contains(organisaatio.getStatus());
+    }
 
     @Override
     public void updateOrganisaatioCache() {
@@ -97,33 +124,11 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
                 .orElseThrow(() -> new NotFoundException(oid));
     }
 
-    private static Predicate<OrganisaatioPerustieto> getPredicate(OrganisaatioCriteriaDto criteria,
-                                                                  BinaryOperator<Predicate<OrganisaatioPerustieto>> accumulator) {
-        return getPredicates(criteria).stream().reduce(organisaatio -> true, accumulator);
-    }
-
-    private static Collection<Predicate<OrganisaatioPerustieto>> getPredicates(OrganisaatioCriteriaDto criteria) {
-        Collection<Predicate<OrganisaatioPerustieto>> predicates = new ArrayList<>();
-        Optional.ofNullable(criteria.getTyyppi()).ifPresent(tyyppi -> predicates.add(tyyppiPredicate(tyyppi)));
-        Optional.ofNullable(criteria.getTila()).ifPresent(tila -> predicates.add(tilaPredicate(tila)));
-        return predicates;
-    }
-
-    private static Predicate<OrganisaatioPerustieto> tyyppiPredicate(OrganisaatioTyyppi tyyppi) {
-        return (OrganisaatioPerustieto organisaatio) -> {
-            switch (tyyppi) {
-                case ORGANISAATIO:
-                    return !organisaatio.getTyypit().contains("Ryhma");
-                case RYHMA:
-                    return organisaatio.getTyypit().contains("Ryhma");
-                default:
-                    throw new IllegalArgumentException("Tuntematon tyyppi: " + tyyppi);
-            }
-        };
-    }
-
-    private static Predicate<OrganisaatioPerustieto> tilaPredicate(Set<OrganisaatioStatus> tila) {
-        return (OrganisaatioPerustieto organisaatio) -> tila.contains(organisaatio.getStatus());
+    @Override
+    public Map<String, Map<String, String>> getOrganisationNames() {
+        return organisaatioClient
+                .stream()
+                .collect(Collectors.toMap(OrganisaatioPerustieto::getOid, OrganisaatioPerustieto::getNimi));
     }
 
 }

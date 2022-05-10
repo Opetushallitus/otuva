@@ -5,6 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface OrganisaatioService {
 
@@ -17,4 +18,6 @@ public interface OrganisaatioService {
     OrganisaatioWithChildrenDto getRootWithChildrenBy(OrganisaatioCriteriaDto criteria);
 
     OrganisaatioWithChildrenDto getByOid(String oid);
+
+    Map<String, Map<String, String>> getOrganisationNames();
 }

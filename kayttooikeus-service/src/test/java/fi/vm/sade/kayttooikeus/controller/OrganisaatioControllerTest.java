@@ -11,12 +11,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -82,4 +90,16 @@ public class OrganisaatioControllerTest extends AbstractControllerTest {
         verify(organisaatioService).getByOid(eq("oid123"));
     }
 
+    @Test
+    @WithMockUser
+    public void getOrganisationNames() throws Exception {
+        when(organisaatioService.getOrganisationNames()).thenReturn(Map.of("oid", Map.of("lang", "name")));
+        this.mvc.perform(get("/organisaatio/names"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(getFixture("/organisaatio/getOrganisationNames.json")));
+    }
+
+    private String getFixture(String fileName) throws Exception {
+        return Files.readString(Paths.get(getClass().getResource(fileName).toURI()), StandardCharsets.UTF_8);
+    }
 }

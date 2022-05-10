@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/organisaatio", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -35,4 +36,8 @@ public class OrganisaatioController {
         return organisaatioService.getByOid(oid);
     }
 
+    @GetMapping("/names")
+    public Map<String, Map<String, String>> getOrganisationNames() {
+        return organisaatioService.getOrganisationNames();
+    }
 }

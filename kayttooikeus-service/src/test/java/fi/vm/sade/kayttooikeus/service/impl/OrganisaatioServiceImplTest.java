@@ -10,9 +10,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,4 +56,18 @@ public class OrganisaatioServiceImplTest {
         verify(organisaatioClientMock).refreshCache();
     }
 
+    @Test
+    public void getOrganisaatioNames() {
+        OrganisaatioPerustieto org = OrganisaatioPerustieto.builder()
+                .oid("oid")
+                .nimi(Collections.singletonMap("lang", "name"))
+                .build();
+
+        when(organisaatioClientMock.stream()).thenReturn(Stream.of(org));
+
+        Map<String, Map<String, String>> result = organisaatioServiceImpl.getOrganisationNames();
+
+        assertThat(result).hasSize(1).containsKey("oid");
+        assertThat(result.get("oid")).containsEntry("lang", "name");
+    }
 }
