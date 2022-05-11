@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
+import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioTyyppi;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.junit.Before;
@@ -60,18 +61,16 @@ public class OrganisaatioServiceImplTest {
     public void getOrganisaatioNames() {
         OrganisaatioPerustieto org = OrganisaatioPerustieto.builder()
                 .oid("org.10.oid")
+                .organisaatiotyypit(List.of("organisaatiotyyppi_03"))
                 .nimi(Collections.singletonMap("lang", "name"))
-                .build();
-        OrganisaatioPerustieto noOid = OrganisaatioPerustieto.builder()
-                .oid(null)
-                .nimi(Collections.singletonMap("this", "should not be in results"))
                 .build();
         OrganisaatioPerustieto group = OrganisaatioPerustieto.builder()
                 .oid("group.28.oid")
+                .organisaatiotyypit(List.of("Ryhma"))
                 .nimi(Collections.singletonMap("groups", "are filtered from output"))
                 .build();
 
-        when(organisaatioClientMock.stream()).thenReturn(Stream.of(org, noOid, group));
+        when(organisaatioClientMock.stream()).thenReturn(Stream.of(org, group));
 
         Map<String, Map<String, String>> result = organisaatioServiceImpl.getOrganisationNames();
 

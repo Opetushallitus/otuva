@@ -128,7 +128,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
     public Map<String, Map<String, String>> getOrganisationNames() {
         return organisaatioClient
                 .stream()
-                .filter(OrganisaatioPerustieto::isOrganisaatio)
+                .filter(tyyppiPredicate(OrganisaatioTyyppi.ORGANISAATIO))
                 .collect(Collectors.toMap(OrganisaatioPerustieto::getOid, OrganisaatioPerustieto::getNimi));
     }
 
