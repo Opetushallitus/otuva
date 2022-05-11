@@ -1,9 +1,9 @@
-
 package fi.vm.sade.cas.oppija.configuration;
 
 import fi.vm.sade.cas.oppija.configuration.action.*;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
+import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.*;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.apereo.cas.web.flow.configurer.DefaultLogoutWebflowConfigurer;
@@ -57,13 +57,13 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     private final Clients clients;
 
     public DelegatedAuthenticationConfiguration(FlowBuilderServices flowBuilderServices,
-                                                @Qualifier("loginFlowRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
-                                                @Qualifier("logoutFlowRegistry") FlowDefinitionRegistry logoutFlowDefinitionRegistry,
+                                                @Qualifier(CasWebflowConstants.BEAN_NAME_LOGIN_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                                @Qualifier(CasWebflowConstants.BEAN_NAME_LOGOUT_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry logoutFlowDefinitionRegistry,
                                                 ConfigurableApplicationContext applicationContext,
                                                 CasConfigurationProperties casProperties,
                                                 DelegatedClientAuthenticationConfigurationContext delegatedClientAuthenticationConfigurationContext,
                                                 DelegatedClientAuthenticationWebflowManager delegatedClientAuthenticationWebflowManager,
-                                                @Qualifier("ticketGrantingTicketCookieGenerator") CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
+                                                @Qualifier(CasCookieBuilder.BEAN_NAME_TICKET_GRANTING_COOKIE_BUILDER) CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
                                                 TicketRegistrySupport ticketRegistrySupport,
                                                 Clients clients) {
         this.flowBuilderServices = flowBuilderServices;
@@ -85,27 +85,28 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 loginFlowDefinitionRegistry, logoutFlowDefinitionRegistry, applicationContext,
                 casProperties));
 
-        LOGGER.debug("default web flow configured at first");
+        LOGGER.debug("default web flow configured");
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
-                // Initial login action to collect url parameters
+                // Initial login action to collect url parameters: valtuudet & services
                 ActionList startActionList = getLoginFlow().getStartActionList();
                 startActionList.add(new SamlLoginPrepareAction(getLoginFlow()));
-                LOGGER.trace("configuring additional web flow, initial login action");
+                LOGGER.trace("configuring additional web flow, url parameters collected");
 
                 // fix delegatedAuthenticationAction success transition
                 ActionState realSubmitState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_REAL_SUBMIT, ActionState.class);
                 TransitionDefinition successTransition = realSubmitState.getTransition(TRANSITION_ID_SUCCESS);
                 String successTargetStateId = successTransition.getTargetStateId();
-                TransitionableState state = getState(getLoginFlow(), CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION);
+                LOGGER.trace("ActionState {} has transition {} with target state: {} ", CasWebflowConstants.STATE_ID_REAL_SUBMIT, TRANSITION_ID_SUCCESS, successTargetStateId );
+                TransitionableState state = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_DELEGATED_AUTHENTICATION);
                 createTransitionForState(state, TRANSITION_ID_SUCCESS, successTargetStateId, true);
-                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction success transition");
+                LOGGER.trace("configuring additional web flow, State {}, transition {} target is set also to {}",CasWebflowConstants.STATE_ID_DELEGATED_AUTHENTICATION, TRANSITION_ID_SUCCESS, successTargetStateId);
                 // add delegatedAuthenticationAction cancel transition
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,
                         '\'' + CasWebflowConfigurer.FLOW_ID_LOGOUT + '\'', true);
                 createTransitionForState(state, CasWebflowConstants.TRANSITION_ID_CANCEL, cancelState.getId());
-                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction cancel transition");
+                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction cancel transition target is now:{}", cancelState.getId());
                 // add delegatedAuthenticationAction logout transition
                 createTransitionForState(state, TRANSITION_ID_LOGOUT, CasWebflowConstants.STATE_ID_TERMINATE_SESSION);
                 LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction logout transition");
@@ -191,8 +192,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
 
             private Event handleLogout(HttpAction httpAction, RequestContext requestContext) {
                 if (httpAction.getCode() == HttpConstants.TEMPORARY_REDIRECT) {
-                    String redirectUrl = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext)
-                            .getHeader(HttpConstants.LOCATION_HEADER);
+                    String redirectUrl = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext).getHeader(HttpConstants.LOCATION_HEADER);
                     WebUtils.putLogoutRedirectUrl(requestContext, redirectUrl);
                     return result(TRANSITION_ID_LOGOUT);
                 }
