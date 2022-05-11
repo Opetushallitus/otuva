@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}" lang="fi">
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -15,7 +16,7 @@
     <div layout:fragment="content" class="row">
         <div class="col-md" th:if="${delegatedAuthenticationProviderDominant == null}">
             <div th:replace="fragments/loginform :: loginform">
-                <a href="fragments/loginform.html">Login Form goes here</a>
+                <a href="../fragments/loginform.html">Login Form goes here</a>
             </div>
         </div>
         <div id="notices" class="col-md mt-3 mt-md-0"  th:if="${delegatedAuthenticationProviderDominant == null}">
