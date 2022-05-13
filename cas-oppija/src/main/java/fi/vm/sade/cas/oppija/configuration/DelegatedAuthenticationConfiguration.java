@@ -7,11 +7,8 @@ import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.*;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.apereo.cas.web.flow.configurer.DefaultLogoutWebflowConfigurer;
-import org.apereo.cas.web.support.WebUtils;
 import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator;
 import org.pac4j.core.client.Clients;
-import org.pac4j.core.context.HttpConstants;
-import org.pac4j.core.exception.http.HttpAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,14 +22,11 @@ import org.springframework.webflow.definition.TransitionDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.*;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
-import org.springframework.webflow.execution.Action;
-import org.springframework.webflow.execution.Event;
-import org.springframework.webflow.execution.RequestContext;
-import org.springframework.webflow.execution.RequestContextHolder;
 
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
+import static fi.vm.sade.cas.oppija.configuration.LogoutOnErrorDelegatedAuthenticationAction.TRANSITION_ID_LOGOUT;
 import static java.util.stream.Collectors.toList;
 import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
@@ -44,14 +38,11 @@ import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
     private static final Logger LOGGER = LoggerFactory.getLogger(DelegatedAuthenticationConfiguration.class);
-    private static final String TRANSITION_ID_LOGOUT = "logout";
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
     private final FlowDefinitionRegistry logoutFlowDefinitionRegistry;
     private final ConfigurableApplicationContext applicationContext;
     private final CasConfigurationProperties casProperties;
-    private final DelegatedClientAuthenticationConfigurationContext delegatedClientAuthenticationConfigurationContext;
-    private final DelegatedClientAuthenticationWebflowManager delegatedClientAuthenticationWebflowManager;
     private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
     private final TicketRegistrySupport ticketRegistrySupport;
     private final Clients clients;
@@ -61,8 +52,6 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                                                 @Qualifier(CasWebflowConstants.BEAN_NAME_LOGOUT_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry logoutFlowDefinitionRegistry,
                                                 ConfigurableApplicationContext applicationContext,
                                                 CasConfigurationProperties casProperties,
-                                                DelegatedClientAuthenticationConfigurationContext delegatedClientAuthenticationConfigurationContext,
-                                                DelegatedClientAuthenticationWebflowManager delegatedClientAuthenticationWebflowManager,
                                                 @Qualifier(CasCookieBuilder.BEAN_NAME_TICKET_GRANTING_COOKIE_BUILDER) CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
                                                 TicketRegistrySupport ticketRegistrySupport,
                                                 Clients clients) {
@@ -71,8 +60,6 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
         this.logoutFlowDefinitionRegistry = logoutFlowDefinitionRegistry;
         this.applicationContext = applicationContext;
         this.casProperties = casProperties;
-        this.delegatedClientAuthenticationConfigurationContext = delegatedClientAuthenticationConfigurationContext;
-        this.delegatedClientAuthenticationWebflowManager = delegatedClientAuthenticationWebflowManager;
         this.ticketGrantingTicketCookieGenerator = ticketGrantingTicketCookieGenerator;
         this.ticketRegistrySupport = ticketRegistrySupport;
         this.clients = clients;
@@ -166,41 +153,6 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
         };
     }
 
-    // override default delegatedAuthenticationAction to automatically logout on error
-    /*@Bean
-    public Action delegatedAuthenticationAction() {
-        return new DelegatedClientAuthenticationAction(
-                delegatedClientAuthenticationConfigurationContext,
-                delegatedClientAuthenticationWebflowManager
-        ) {
-            @Override
-            public Event doExecute(RequestContext context) {
-                try {
-                    return super.doExecute(context);
-                } catch (Exception e) {
-                    return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
-                }
-            }
-
-            @Override
-            protected Event stopWebflow(Exception e, RequestContext requestContext) {
-                if (e instanceof HttpAction) {
-                    return handleLogout((HttpAction) e, RequestContextHolder.getRequestContext());
-                }
-                return super.stopWebflow(e, requestContext);
-            }
-
-            private Event handleLogout(HttpAction httpAction, RequestContext requestContext) {
-                if (httpAction.getCode() == HttpConstants.TEMPORARY_REDIRECT) {
-                    String redirectUrl = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext).getHeader(HttpConstants.LOCATION_HEADER);
-                    WebUtils.putLogoutRedirectUrl(requestContext, redirectUrl);
-                    return result(TRANSITION_ID_LOGOUT);
-                }
-                throw new IllegalArgumentException("Unhandled logout response code: " + httpAction.getCode());
-            }
-        };
-    }
-*/
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
         StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover);
     }
