@@ -6,6 +6,7 @@ import org.pac4j.core.client.Client;
 import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.session.JEESessionStore;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.exception.http.FoundAction;
 import org.pac4j.core.exception.http.RedirectionAction;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.profile.SAML2Profile;
@@ -38,7 +39,6 @@ public class SamlLogoutExecuteAction extends AbstractAction {
         try {
             var request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
             var response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
-            //var context = WebUtils.getPac4jJ2EContext(request, response);
             var context = new JEEContext(request, response); // TODO Oikein??
 
 
@@ -57,7 +57,7 @@ public class SamlLogoutExecuteAction extends AbstractAction {
                 );
 
                 if (action.isPresent()) {
-                    // SLF4J_LOGGER.debug("Preparing logout message to send is [{}]", action.get().getLocation());
+                    SLF4J_LOGGER.debug("Preparing logout message to send is [{}]", action);
                     return handleLogout(action.get(), requestContext);
                 }
 
@@ -83,11 +83,11 @@ public class SamlLogoutExecuteAction extends AbstractAction {
 
     // TODO fix tshis
     protected Event handleLogout(RedirectionAction action, RequestContext context) {
-        if (action.getCode() == 302) {
-            WebUtils.putLogoutRedirectUrl(context, null);
+        if (action.getCode() == 302 && action instanceof FoundAction) {
+            WebUtils.putLogoutRedirectUrl(context, ((FoundAction) action).getLocation());
             return null;
         }
-        throw new IllegalArgumentException("Unhandled logout request code: " + action.getCode());
+        throw new IllegalArgumentException("Unhandled logout request code: " + action.getCode() + " action of class:" + action.getClass());
     }
 
 }
