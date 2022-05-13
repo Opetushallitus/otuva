@@ -28,10 +28,6 @@ cas:
     authentication-attribute-release:
       only-release:
         - clientName
-    pac4j:
-      cookie:
-        enabled: true
-
   tgc:
     secure: false
     path: /cas-oppija
@@ -49,12 +45,6 @@ cas:
       cleaner:
         schedule:
           enabled: true
-  webflow:
-    session:
-      lockTimeout: 30
-      compress: false
-      maxConversations: 5
-      storage: true
 
 management.endpoint.health.enabled: true
 
@@ -87,7 +77,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:25432/cas-oppija
+    url: jdbc:postgresql://localhost:5432/cas-oppija
     username: cas-oppija
     password: cas-oppija
     driver-class-name: org.postgresql.Driver
@@ -122,8 +112,8 @@ whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
 
 # Valtuudet config
-valtuudet.enabled: false
-valtuudet.required: false
+valtuudet.enabled: true
+valtuudet.required: true
 
 valtuudet.host: http://localhost:8080
 valtuudet.client-id: client    # Who needs this?

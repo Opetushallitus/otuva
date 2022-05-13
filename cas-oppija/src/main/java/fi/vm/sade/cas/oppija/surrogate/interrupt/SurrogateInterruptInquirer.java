@@ -10,6 +10,8 @@ import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.interrupt.InterruptInquirer;
 import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.services.RegisteredService;
+import org.apereo.cas.web.support.WebUtils;
+import org.pac4j.core.util.Pac4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,6 +19,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,7 +53,26 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 .map(Locale::getLanguage)
                 .filter(SUPPORTED_LANGUAGES::contains)
                 .orElse(DEFAULT_LANGUAGE);
-        return inquire(authentication, service, language);
+
+        boolean isValtuudetEnabled = requestContext.getActiveFlow().getAttributes().contains("valtuudet")
+                ? (Boolean) requestContext.getActiveFlow().getAttributes().get("valtuudet") : VALTUUDET_ENABLED;
+
+        HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
+        String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
+
+        LOGGER.debug("VALTUUDET | RequestContext contains valtuudet: {} | Valtuudet: {} | isValtuudetEnabled: {} | clientName: {} | Credential: {} | {}",
+                requestContext.getActiveFlow().getAttributes().contains("valtuudet"),
+                requestContext.getActiveFlow().getAttributes().get("valtuudet"),
+                isValtuudetEnabled,
+                clientName,
+                credential.getId(),
+                service);
+
+        if (service.getId().contains("valtuudet=true")) {
+            return inquire(authentication, service, language);
+        } else {
+            return InterruptResponse.none();
+        }
     }
 
     private InterruptResponse inquire(Authentication authentication, Service service, String language) {

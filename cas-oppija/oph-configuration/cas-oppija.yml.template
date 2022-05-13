@@ -28,6 +28,7 @@ cas.webflow.crypto:
 
 cas.authn.pac4j.saml:
   - client-name: ${cas.custom.properties.suomiFiClientName}
+    auto-redirect-type: SERVER
     keystore-path: {{ cas_oppija_suomifi_keystore_path }}
     keystore-password: {{ cas_oppija_suomifi_keystore_password }}
     keystore-alias: {{ cas_oppija_suomifi_keystore_alias }}
@@ -49,6 +50,7 @@ cas.authn.pac4j.saml:
       - personName->urn:oid:2.5.4.3
 {% if cas_oppija_enable_fakesuomifi == true %}
   - client-name: ${cas.custom.properties.fakeSuomiFiClientName}
+    auto-redirect-type: SERVER
     keystore-path: {{ cas_oppija_fakesuomifi_keystore_path }}
     keystore-password: {{ cas_oppija_suomifi_keystore_password }}
     keystore-alias: {{ cas_oppija_suomifi_keystore_alias }}
@@ -68,7 +70,7 @@ cas.authn.pac4j.saml:
         name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
         required: true
     mapped-attributes:
-      - person-name->urn:oid:2.5.4.3
+      - personName->urn:oid:2.5.4.3
 {% endif %}
 
 cas.logout.follow-service-redirects: true
@@ -94,10 +96,11 @@ spring.datasource.password: {{ postgresql_cas_app_password }}
 #cas.webflow.refresh: true
 #cas.webflow.redirect-same-state: false
 
-cas.webflow.session.lock-timeout: 30
-cas.webflow.session.compress: false
-cas.webflow.session.max-conversations: 5
-cas.webflow.session.storage: true
+#TODO these break redirect behaviour so are these really needed?
+#cas.webflow.session.lock-timeout: 30
+#cas.webflow.session.compress: false
+#cas.webflow.session.max-conversations: 5
+cas.webflow.session.storage: false
 
 spring.session.store-type: jdbc
 spring.session.jdbc.initialize-schema: never

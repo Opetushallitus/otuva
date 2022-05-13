@@ -42,22 +42,12 @@ public class RegisteredServiceConfiguration {
 
     @Bean
     public List<RegisteredService> inMemoryRegisteredServices(Environment environment) {
-        RegisteredServiceDelegatedAuthenticationPolicy delegatedAuthenticationPolicy = new DefaultRegisteredServiceDelegatedAuthenticationPolicy().setAllowedProviders(List.of("suomi.fi")).setExclusive(true).setPermitUndefined(true);
-        RegisteredServiceAccessStrategy exclusivelySuomiFiServiceAccessStrategy =
-                new DefaultRegisteredServiceAccessStrategy()
-                        .setDelegatedAuthenticationPolicy(delegatedAuthenticationPolicy)
-                        .setEnabled(true);
-
-
         RegexRegisteredService regexRegisteredService = new RegexRegisteredService();
         regexRegisteredService.setId(1L);
         regexRegisteredService.setName("Services");
         regexRegisteredService.setServiceId(environment.getRequiredProperty("whitelist.regexp"));
         regexRegisteredService.setProxyPolicy(registeredServiceProxyPolicy());
         regexRegisteredService.setAttributeReleasePolicy(registeredServiceAttributeReleasePolicy());
-        regexRegisteredService.setAccessStrategy(exclusivelySuomiFiServiceAccessStrategy);
-
-
         return singletonList(regexRegisteredService);
     }
 
