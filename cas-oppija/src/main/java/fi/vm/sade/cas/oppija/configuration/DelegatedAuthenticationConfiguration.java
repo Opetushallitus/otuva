@@ -167,7 +167,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     }
 
     // override default delegatedAuthenticationAction to automatically logout on error
-    @Bean
+    /*@Bean
     public Action delegatedAuthenticationAction() {
         return new DelegatedClientAuthenticationAction(
                 delegatedClientAuthenticationConfigurationContext,
@@ -200,7 +200,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
             }
         };
     }
-
+*/
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
         StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover);
     }
