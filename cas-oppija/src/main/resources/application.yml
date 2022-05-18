@@ -45,10 +45,6 @@ cas:
       cleaner:
         schedule:
           enabled: true
-  webflow:
-    session:
-      storage: true
-
 
 management.endpoint.health.enabled: true
 
