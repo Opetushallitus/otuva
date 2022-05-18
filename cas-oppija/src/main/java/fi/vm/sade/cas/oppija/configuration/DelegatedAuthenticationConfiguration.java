@@ -72,6 +72,31 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 loginFlowDefinitionRegistry, logoutFlowDefinitionRegistry, applicationContext,
                 casProperties));
 
+        /*
+        @startuml
+        state OPHCustomizationsForDelegatedAuthentication {
+        state LoginFlow {
+
+        [*] --> SamlLoginPrepareAction
+        SamlLoginPrepareAction: req params valtuudet & service to context param map
+
+        STATE_ID_REAL_SUBMIT --> successTargetStateX : TRANSITION_ID_SUCCESS
+        STATE_ID_REAL_SUBMIT: *original*
+        STATE_ID_DELEGATED_AUTHENTICATION: *custom*
+        STATE_ID_DELEGATED_AUTHENTICATION --> successTargetStateX : TRANSITION_ID_SUCCESS
+        STATE_ID_DELEGATED_AUTHENTICATION --> STATE_ID_LOGOUT_VIEW  : TRANSITION_ID_CANCEL
+        STATE_ID_DELEGATED_AUTHENTICATION --> STATE_ID_TERMINATE_SESSION : TRANSITION_ID_LOGOUT
+        }
+        ---
+        state LogoutFlow {
+        [*] --> samlLogoutPrepareAction : set as default entry transition!
+        STATE_ID_FINISH_LOGOUT --> [*]
+        StoreServiceParamsAction --> STATE_ID_FINISH_LOGOUT : entryAction: for storing service\n(from request) to cookie _oph_service
+        SamlLogoutExecuteAction --> STATE_ID_FINISH_LOGOUT : entryAction: logout action obtained from \n REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT\nand redirect url put to flow scope.
+        }
+        }
+        @enduml
+        */
         LOGGER.debug("default web flow configured");
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
