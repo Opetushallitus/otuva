@@ -1,9 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.*
-import org.gradle.internal.logging.text.*
-import org.apereo.cas.metadata.*
-import java.nio.file.*
-import static org.gradle.internal.logging.text.StyledTextOutput.Style
-
 buildscript {
     repositories {
         if (project.privateRepoUrl) {
@@ -164,7 +158,8 @@ dependencies {
     implementation"org.apereo.cas:cas-server-support-pac4j-core-clients"
     implementation"org.apereo.cas:cas-server-support-pac4j-webflow"
     implementation "org.apereo.cas:cas-server-support-pac4j-api"
-    implementation"org.apereo.cas:cas-server-support-session-jdbc"
+    implementation "org.apereo.cas:cas-server-support-redis-ticket-registry"
+    implementation "org.apereo.cas:cas-server-support-session-redis"
     implementation"org.apereo.cas:cas-server-support-interrupt-api"
     implementation"org.apereo.cas:cas-server-support-interrupt-core"
     implementation"org.apereo.cas:cas-server-support-interrupt-webflow"

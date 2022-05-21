@@ -45,6 +45,13 @@ cas:
       cleaner:
         schedule:
           enabled: true
+      redis:
+        enabled: true
+        port: 6379
+        host: localhost
+        crypto:
+          enabled: true
+
   webflow:
     session:
       storage: true
@@ -64,8 +71,6 @@ server:
       charset: UTF-8
       force: true
       enabled: true
-
-
   ssl:
     enabled: false
   forward-headers-strategy: NONE
@@ -78,30 +83,30 @@ server:
     include-stacktrace: never
 
 
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/cas-oppija
-    username: cas-oppija
-    password: cas-oppija
-    driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      platform: postgresql
-  flyway:
-    enabled: true
-    out-of-order: true
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/cas-oppija
+#    username: cas-oppija
+#    password: cas-oppija
+#    driver-class-name: org.postgresql.Driver
+#  sql:
+#    init:
+#      platform: postgresql
+#  flyway:
+#    enabled: true
+#    out-of-order: true
 
 #cas.webflow.autoconfigure: true
 #cas.webflow.alwaysPauseRedirect: false
 #cas.webflow.refresh: true
 #cas.webflow.redirectSameState: false
 
-  session:
-    store-type: jdbc
-    jdbc:
-      initialize-schema: never
-      schema: "classpath:org/springframework/session/jdbc/schema-postgresql.sql"
-      table-name: SPRING_SESSION
+ # session:
+ #   store-type: jdbc
+ #   jdbc:
+ #     initialize-schema: never
+ #     schema: "classpath:org/springframework/session/jdbc/schema-postgresql.sql"
+ #     table-name: SPRING_SESSION
 
 # Custom configuration
 

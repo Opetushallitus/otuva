@@ -26,6 +26,10 @@ cas.webflow.crypto:
     encryption.key: {{ cas_oppija_webflow_encryption_key }}
     signing.key: {{ cas_oppija_webflow_signing_key }}
 
+cas.ticket.redis.enabled: true
+cas.ticket.redis.host: casoppija.redis.hahtuvaopintopolku.fi
+cas.ticket.redis.port: 6379
+
 cas.authn.pac4j.saml:
   - client-name: ${cas.custom.properties.suomiFiClientName}
     auto-redirect-type: {{ cas_oppija_fakesuomifi_auto_redirect_type | default('CLIENT') }}
@@ -86,15 +90,6 @@ cas.slo.asynchronous: {{ cas_oppija_slo_asynchronous | default('false') }}
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
-spring.datasource.url: jdbc:postgresql://{{ cas_oppija_datasource_host }}:{{ cas_oppija_datasource_port | default('5432') }}/{{ cas_oppija_datasource_dbname | default('cas-oppija') }}
-spring.datasource.username: {{ postgres_app_user }}
-spring.datasource.password: {{ postgresql_cas_app_password }}
-
-spring.session.store-type: jdbc
-spring.session.jdbc.initialize-schema: never
-spring.session.jdbc.schema: "classpath:org/springframework/session/jdbc/schema-postgresql.sql"
-spring.session.jdbc.table-name: SPRING_SESSION
 
 server.tomcat.accesslog:
     enabled: true
