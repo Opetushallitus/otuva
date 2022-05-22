@@ -9,6 +9,7 @@ import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.apereo.cas.web.flow.configurer.DefaultLogoutWebflowConfigurer;
 import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.context.session.SessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +47,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
     private final TicketRegistrySupport ticketRegistrySupport;
     private final Clients clients;
+    private final SessionStore sessionStore;
 
     public DelegatedAuthenticationConfiguration(FlowBuilderServices flowBuilderServices,
                                                 @Qualifier(CasWebflowConstants.BEAN_NAME_LOGIN_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
@@ -54,7 +56,8 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                                                 CasConfigurationProperties casProperties,
                                                 @Qualifier(CasCookieBuilder.BEAN_NAME_TICKET_GRANTING_COOKIE_BUILDER) CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
                                                 TicketRegistrySupport ticketRegistrySupport,
-                                                Clients clients) {
+                                                Clients clients,
+                                                SessionStore sessionStore) {
         this.flowBuilderServices = flowBuilderServices;
         this.loginFlowDefinitionRegistry = loginFlowDefinitionRegistry;
         this.logoutFlowDefinitionRegistry = logoutFlowDefinitionRegistry;
@@ -63,6 +66,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
         this.ticketGrantingTicketCookieGenerator = ticketGrantingTicketCookieGenerator;
         this.ticketRegistrySupport = ticketRegistrySupport;
         this.clients = clients;
+        this.sessionStore = sessionStore;
     }
 
     @Override
@@ -131,12 +135,12 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 setStartState(getLogoutFlow(), singleLogoutPrepareAction);
                 LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction saml-initiated logout support");
 
-                ActionState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT, ActionState.class);
+                TransitionableState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT);
                 ActionList entryActionList = finishLogoutState.getEntryActionList();
                 clear(entryActionList, entryActionList::remove);
                 Pac4jClientProvider clientProvider = new Pac4jClientProvider(clients);
                 entryActionList.add(new StoreServiceParamAction(casProperties));
-                entryActionList.add(new SamlLogoutExecuteAction(clientProvider));
+                entryActionList.add(new SamlLogoutExecuteAction(clientProvider, sessionStore));
                 entryActionList.add(new ServiceRedirectAction(clientProvider));
                 LOGGER.debug("default web flow customization for delegateAuthentication 1st phase completed");
             }
@@ -179,7 +183,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
     }
 
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
-        StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover);
+        StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover::accept);
     }
 
 }

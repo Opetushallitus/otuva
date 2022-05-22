@@ -39,15 +39,14 @@ public class SurrogateAuthenticationAction extends AbstractNonInteractiveCredent
             return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
         }
     }
-    @Override
+    /*@Override
     protected Event doExecute(RequestContext context) {
         try {
-            /*final HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);*/
             return super.doExecute(context);
         } catch (Exception e) {
             return result(CasWebflowConstants.TRANSITION_ID_CANCEL);
         }
-    }
+    }*/
 
 
     @Override

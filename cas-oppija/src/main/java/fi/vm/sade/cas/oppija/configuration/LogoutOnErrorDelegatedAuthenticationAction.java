@@ -6,7 +6,7 @@ import org.apereo.cas.web.flow.DelegatedClientAuthenticationConfigurationContext
 import org.apereo.cas.web.flow.DelegatedClientAuthenticationWebflowManager;
 import org.apereo.cas.web.support.WebUtils;
 import org.pac4j.core.context.HttpConstants;
-import org.pac4j.core.exception.http.HttpAction;
+import org.pac4j.saml.exceptions.SAMLException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.webflow.execution.Action;
@@ -35,19 +35,16 @@ public class LogoutOnErrorDelegatedAuthenticationAction {
 
             @Override
             protected Event stopWebflow(Exception e, RequestContext requestContext) {
-                if (e instanceof HttpAction) {
-                    return handleLogout((HttpAction) e, RequestContextHolder.getRequestContext());
+                if (e instanceof SAMLException) {
+                    return handleLogout(RequestContextHolder.getRequestContext());
                 }
                 return super.stopWebflow(e, requestContext);
             }
 
-            private Event handleLogout(HttpAction httpAction, RequestContext requestContext) {
-                if (httpAction.getCode() == HttpConstants.TEMPORARY_REDIRECT) {
-                    String redirectUrl = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext).getHeader(HttpConstants.LOCATION_HEADER);
-                    WebUtils.putLogoutRedirectUrl(requestContext, redirectUrl);
-                    return result(TRANSITION_ID_LOGOUT);
-                }
-                throw new IllegalArgumentException("Unhandled logout response code: " + httpAction.getCode());
+            private Event handleLogout(RequestContext requestContext) {
+                String redirectUrl = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext).getHeader(HttpConstants.LOCATION_HEADER);
+                WebUtils.putLogoutRedirectUrl(requestContext, redirectUrl);
+                return result(TRANSITION_ID_LOGOUT);
             }
         };
     }

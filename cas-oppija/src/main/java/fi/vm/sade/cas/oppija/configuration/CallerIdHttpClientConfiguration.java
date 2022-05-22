@@ -4,10 +4,6 @@ import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
-import lombok.val;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
@@ -26,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import javax.net.ssl.HostnameVerifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 @Configuration
@@ -83,6 +78,8 @@ public class CallerIdHttpClientConfiguration {
         SimpleHttpClientFactoryBean c = buildHttpClientFactoryBean();
         c.setRedirectsEnabled(redirectEnabled);
         c.setCircularRedirectsAllowed(redirectEnabled);
+        c.setSslSocketFactory(trustStoreSslSocketFactory);
+        c.setHostnameVerifier(hostnameVerifier);
         return c.getObject();
     }
 
@@ -93,18 +90,15 @@ public class CallerIdHttpClientConfiguration {
         c.setConnectionTimeout(Beans.newDuration(httpClient.getConnectionTimeout()).toMillis());
         c.setReadTimeout((int) Beans.newDuration(httpClient.getReadTimeout()).toMillis());
 
-        if (StringUtils.isNotBlank(httpClient.getProxyHost()) && httpClient.getProxyPort() > 0) {
+       /* if (StringUtils.isNotBlank(httpClient.getProxyHost()) && httpClient.getProxyPort() > 0)
             c.setProxy(new HttpHost(httpClient.getProxyHost(), httpClient.getProxyPort()));
-        }
-        c.setSslSocketFactory(trustStoreSslSocketFactory);
-        c.setHostnameVerifier(hostnameVerifier);
-        c.setSslContext(casSslContext.getSslContext());
-        c.setTrustManagers(casSslContext.getTrustManagers());
-        val defaultHeaders = new ArrayList<Header>();
-        httpClient.getDefaultHeaders().forEach((name, value) -> defaultHeaders.add(new BasicHeader(name, value)));
-        defaultHeaders.add(new BasicHeader("Caller-Id", CALLER_ID));
-        defaultHeaders.add(new BasicHeader("CSRF", CALLER_ID));
-        c.setDefaultHeaders(defaultHeaders);
+        }*/
+        c.setDefaultHeaders(
+                Arrays.asList(
+                        new BasicHeader("Caller-Id", CALLER_ID),
+                        new BasicHeader("CSRF", CALLER_ID)
+                )
+        );
         CookieStore cookieStore = new BasicCookieStore();
         cookieStore.addCookie(new BasicClientCookie("CSRF", CALLER_ID));
         c.setCookieStore(cookieStore);

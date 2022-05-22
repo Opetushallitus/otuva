@@ -45,6 +45,11 @@ public class RegisteredServiceConfiguration {
         RegexRegisteredService regexRegisteredService = new RegexRegisteredService();
         regexRegisteredService.setId(1L);
         regexRegisteredService.setName("Services");
+        // TODO tämä tuntuu hajottavan asiat vaikka logi huutaa puutteesta.
+        //DefaultRegisteredServiceAccessStrategy strategy = new DefaultRegisteredServiceAccessStrategy();
+        //DefaultRegisteredServiceDelegatedAuthenticationPolicy policy = new DefaultRegisteredServiceDelegatedAuthenticationPolicy(new LinkedHashSet<>(Arrays.asList("Suomi.fi", "Fakesuomi.fi")), true, false);
+        //strategy.setDelegatedAuthenticationPolicy(policy);
+        //regexRegisteredService.setAccessStrategy(strategy);
         regexRegisteredService.setServiceId(environment.getRequiredProperty("whitelist.regexp"));
         regexRegisteredService.setProxyPolicy(registeredServiceProxyPolicy());
         regexRegisteredService.setAttributeReleasePolicy(registeredServiceAttributeReleasePolicy());
