@@ -4,10 +4,10 @@ package fi.vm.sade.cas.oppija.configuration.action;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
+import org.apereo.cas.web.flow.actions.BaseCasWebflowAction;
 import org.apereo.cas.web.support.WebUtils;
 import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator;
 import org.pac4j.saml.profile.SAML2Profile;
-import org.springframework.webflow.action.AbstractAction;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 
@@ -28,7 +28,7 @@ import static org.apereo.cas.util.CollectionUtils.firstElement;
  * @see SamlLogoutExecuteAction
  */
 
-public class SamlLogoutPrepareAction extends AbstractAction {
+public class SamlLogoutPrepareAction extends BaseCasWebflowAction {
 
     private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
     private final TicketRegistrySupport ticketRegistrySupport;
