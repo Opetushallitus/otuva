@@ -20,6 +20,9 @@ cas:
       xcontent: false
       hsts: false
   authn:
+    pac4j:
+      core:
+        lazy-init: false
     accept:
       users:
     errors:
