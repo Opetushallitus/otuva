@@ -22,7 +22,7 @@ cas:
   authn:
     pac4j:
       core:
-        lazy-init: false
+        lazy-init: true
     accept:
       users:
     errors:
