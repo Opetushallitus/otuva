@@ -18,6 +18,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.webflow.definition.TransitionDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.ActionList;
 import org.springframework.webflow.engine.ActionState;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
 
 /**
@@ -36,7 +38,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer {
+public class DelegatedAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
     private static final Logger LOGGER = LoggerFactory.getLogger(DelegatedAuthenticationConfiguration.class);
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
@@ -68,7 +70,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
         this.sessionStore = sessionStore;
     }
 
-    @Bean
+    /*@Bean
     public CasWebflowConfigurer delegatedAuthenticationWebflowConfigurer() {
         return new DelegatedAuthenticationWebflowConfigurer(
                 flowBuilderServices, loginFlowDefinitionRegistry,
@@ -83,7 +85,7 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 return Ordered.HIGHEST_PRECEDENCE + 1;
             }
         };
-    }
+    }*/
 
     @Bean
     Pac4jClientProvider clientProvider() {
@@ -101,6 +103,15 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 ActionList startActionList = getLoginFlow().getStartActionList();
                 startActionList.add(new SamlLoginPrepareAction(getLoginFlow()));
                 LOGGER.trace("configuring additional web flow, url parameters collected");
+
+
+                // fix delegatedAuthenticationAction success transition
+                ActionState realSubmitState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_REAL_SUBMIT, ActionState.class);
+                TransitionDefinition successTransition = realSubmitState.getTransition(TRANSITION_ID_SUCCESS);
+                String successTargetStateId = successTransition.getTargetStateId();
+                LOGGER.trace("ActionState {} has transition {} with target state: {} ", CasWebflowConstants.STATE_ID_REAL_SUBMIT, TRANSITION_ID_SUCCESS, successTargetStateId );
+                TransitionableState state = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_DELEGATED_AUTHENTICATION);
+                createTransitionForState(state, TRANSITION_ID_SUCCESS, successTargetStateId, true);
 
                 // add delegatedAuthenticationAction cancel transition
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,
@@ -134,6 +145,12 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 LOGGER.debug("default web flow customization for delegateAuthentication 1st phase completed");
             }
         });
+    }
+    @Override
+    public int getOrder() {
+        // This CasWebflowExecutionPlanConfigurer must be run before SurrogateConfiguration to able to cancel auth
+        // but after InterruptConfiguration to enable surrogate authentication after delegated authentication
+        return Ordered.HIGHEST_PRECEDENCE + 1;
     }
 
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {

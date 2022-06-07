@@ -14,14 +14,17 @@ import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.binding.expression.Expression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.webflow.action.ExternalRedirectAction;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.ActionList;
 import org.springframework.webflow.engine.ActionState;
+import org.springframework.webflow.engine.EndState;
 import org.springframework.webflow.engine.TransitionSet;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 import org.springframework.webflow.execution.Event;
@@ -42,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer {
+public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer, Ordered {
 
     private final FlowBuilderServices flowBuilderServices;
     private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
@@ -76,7 +79,9 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
                 ActionState inquireInterruptAction = getState(getLoginFlow(), "inquireInterruptAction", ActionState.class);
                 TransitionSet transitions = inquireInterruptAction.getTransitionSet();
                 transitions.add(createTransition("interruptRedirect", "redirectInterrupt"));
-                createEndState(getLoginFlow(), "redirectInterrupt", "flowScope.interruptRedirectUrl", true);
+                EndState valtuudetRedirectEndstate = createEndState(getLoginFlow(), "redirectInterrupt");
+                Expression expression = createExpression("flowScope.interruptRedirectUrl");
+                valtuudetRedirectEndstate.getEntryActionList().add(new ExternalRedirectAction(expression));
             }
         });
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
@@ -92,6 +97,13 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
 
     }
 
+    @Override
+    public int getOrder() {
+        // This CasWebflowExecutionPlanConfigurer must be run before DelegatedAuthenticationConfiguration to enable
+        // surrogate authentication after delegated authentication
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
     private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
         StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover::accept);
     }
@@ -101,10 +113,8 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     public CasWebflowConfigurer interruptWebflowConfigurer() {
         return new InterruptWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
-            public int getOrder() {
-                // This CasWebflowExecutionPlanConfigurer must be run before DelegatedAuthenticationConfiguration to enable
-                // surrogate authentication after delegated authentication
-                return Ordered.HIGHEST_PRECEDENCE;
+            protected void doInitialize() {
+                // nop
             }
         };
 

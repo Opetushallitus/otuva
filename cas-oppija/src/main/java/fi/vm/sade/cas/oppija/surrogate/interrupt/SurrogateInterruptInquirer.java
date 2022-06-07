@@ -54,8 +54,14 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 .filter(SUPPORTED_LANGUAGES::contains)
                 .orElse(DEFAULT_LANGUAGE);
 
+        boolean valtuudetFromRequest = false;
+        try {
+            valtuudetFromRequest = (Boolean) requestContext.getActiveFlow().getAttributes().get("valtuudet");
+        } catch (ClassCastException ignored) {
+        }
+
         boolean isValtuudetEnabled = requestContext.getActiveFlow().getAttributes().contains("valtuudet")
-                ? (Boolean) requestContext.getActiveFlow().getAttributes().get("valtuudet") : VALTUUDET_ENABLED;
+                ? valtuudetFromRequest : VALTUUDET_ENABLED;
 
         HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         String clientName = request.getParameter(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER);
@@ -68,7 +74,8 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 credential != null ? credential.getId() : credential ,
                 service);
 
-        if (service != null && service.getId().contains("valtuudet=true")) {
+        if (isValtuudetEnabled) {
+            requestContext.getActiveFlow().getAttributes().put("valtuudet", false);
             return inquire(authentication, service, language);
         } else {
             return InterruptResponse.none();
