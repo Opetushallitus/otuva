@@ -18,6 +18,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.webflow.definition.TransitionDefinition;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.ActionList;
 import org.springframework.webflow.engine.ActionState;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
 
 /**
@@ -101,6 +103,12 @@ public class DelegatedAuthenticationConfiguration implements CasWebflowExecution
                 ActionList startActionList = getLoginFlow().getStartActionList();
                 startActionList.add(new SamlLoginPrepareAction(getLoginFlow()));
                 LOGGER.trace("configuring additional web flow, url parameters collected");
+
+                ActionState realSubmitState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_REAL_SUBMIT, ActionState.class);
+                TransitionDefinition successTransition = realSubmitState.getTransition(TRANSITION_ID_SUCCESS);
+                String successTargetStateId = successTransition.getTargetStateId();
+                TransitionableState state = getState(getLoginFlow(), CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION);
+                createTransitionForState(state, TRANSITION_ID_SUCCESS, successTargetStateId, true);
 
                 // add delegatedAuthenticationAction cancel transition
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,

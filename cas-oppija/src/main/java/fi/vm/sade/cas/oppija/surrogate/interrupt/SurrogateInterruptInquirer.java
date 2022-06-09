@@ -75,7 +75,7 @@ public class SurrogateInterruptInquirer implements InterruptInquirer {
                 service);
 
         if (isValtuudetEnabled) {
-            requestContext.getActiveFlow().getAttributes().put("valtuudet", false);
+            //requestContext.getActiveFlow().getAttributes().put("valtuudet", false);
             return inquire(authentication, service, language);
         } else {
             return InterruptResponse.none();
