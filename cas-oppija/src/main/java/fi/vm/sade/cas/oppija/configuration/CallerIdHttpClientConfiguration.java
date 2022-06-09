@@ -89,10 +89,6 @@ public class CallerIdHttpClientConfiguration {
         HttpClientProperties httpClient = casProperties.getHttpClient();
         c.setConnectionTimeout(Beans.newDuration(httpClient.getConnectionTimeout()).toMillis());
         c.setReadTimeout((int) Beans.newDuration(httpClient.getReadTimeout()).toMillis());
-
-       /* if (StringUtils.isNotBlank(httpClient.getProxyHost()) && httpClient.getProxyPort() > 0)
-            c.setProxy(new HttpHost(httpClient.getProxyHost(), httpClient.getProxyPort()));
-        }*/
         c.setDefaultHeaders(
                 Arrays.asList(
                         new BasicHeader("Caller-Id", CALLER_ID),
