@@ -1,4 +1,4 @@
-package fi.vm.sade.cas.oppija.configuration;
+package fi.vm.sade.cas.oppija.configuration.action;
 
 import fi.vm.sade.cas.oppija.CasOppijaConstants;
 import org.apereo.cas.web.flow.CasWebflowConstants;

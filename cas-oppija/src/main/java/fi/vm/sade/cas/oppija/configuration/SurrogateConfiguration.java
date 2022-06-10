@@ -1,11 +1,11 @@
-package fi.vm.sade.cas.oppija.surrogate.configuration;
+package fi.vm.sade.cas.oppija.configuration;
 
 
+import fi.vm.sade.cas.oppija.configuration.webflow.SurrogateAuthenticationWebflowConfigurer;
 import fi.vm.sade.cas.oppija.service.PersonService;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateCredential;
 import fi.vm.sade.cas.oppija.surrogate.SurrogateService;
 import fi.vm.sade.cas.oppija.surrogate.auth.SurrogateAuthenticationHandler;
-import fi.vm.sade.cas.oppija.surrogate.auth.SurrogateAuthenticationWebflowConfigurer;
 import org.apereo.cas.authentication.*;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;

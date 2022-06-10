@@ -111,21 +111,6 @@ public class SamlClientConfiguration {
     @Bean
     public DelegatedClientFactory<IndirectClient> pac4jDelegatedClientFactory(Collection<DelegatedClientFactoryCustomizer> customizers, CasSSLContext casSSLContext, ApplicationContext applicationContext) {
         return new DefaultDelegatedClientFactory(casProperties, customizers, casSSLContext, applicationContext) {
-            /*@Override
-            public Collection<IndirectClient> build() {
-                if(this.getClients().isEmpty()) {
-                    val newClients = new LinkedHashSet<IndirectClient>();
-                    configureSamlClient(newClients);
-                    LOGGER.debug("configured SamlClient:{}",
-                            newClients.iterator().hasNext() ? newClients.iterator().next() : "none");
-                };
-                val newClients = new LinkedHashSet<IndirectClient>();
-                configureSamlClient(newClients);
-                LOGGER.debug("configured SamlClient:{}",
-                        newClients.iterator().hasNext() ? newClients.iterator().next() : "none");
-                return newClients;
-            }*/
-
 
             @Override
             protected void configureClient(IndirectClient client, Pac4jBaseClientProperties props) {

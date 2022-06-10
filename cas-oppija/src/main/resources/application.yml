@@ -43,9 +43,8 @@ cas:
       endpoint:
         health:
           access: PERMIT
-        #springWebflow:
-        #  access: IP_ADDRESS
-        #  required-ip-addresses: 127.0.0.1
+        springWebflow:
+          access: PERMIT
   ticket:
     registry:
       cleaner:
@@ -67,15 +66,17 @@ cas:
       compress: false
 
 management:
-  #endpoints:
-  #  web:
-  #    exposure:
-  #      include: springWebflow
+  endpoints:
+    web:
+     exposure:
+      include:
+       - springWebflow
+       - health
   endpoint:
     health:
       enabled: true
-    #springWebflow:
-    #  enabled: true
+    springWebflow:
+      enabled: true
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
