@@ -24,8 +24,8 @@ import static org.apereo.cas.web.flow.CasWebflowConstants.STATE_ID_HANDLE_AUTHN_
 @Component
 public class SurrogateAuthenticationWebflowConfigurer extends AbstractCasWebflowConfigurer {
 
-    private static final String STATE_ID_CODE_PARAMETER_DECISION = "surrogateAuthenticationDecision";
-    private static final String STATE_ID_TOKEN_PARAMETER_DECISION = "surrogateAuthenticationDecision";
+    private static final String STATE_ID_CODE_PARAMETER_DECISION = "surrogateCodeParamDecision";
+    private static final String STATE_ID_TOKEN_PARAMETER_DECISION = "surrogateTokenParamDecision";
     private static final String STATE_ID_SURROGATE_ACTION = "surrogateAuthenticationAction";
     private static final String STATE_ID_SURROGATE_CANCEL = "surrogateAuthenticationCancel";
 
