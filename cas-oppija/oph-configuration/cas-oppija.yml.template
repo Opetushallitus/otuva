@@ -27,7 +27,7 @@ cas.webflow.crypto:
     signing.key: {{ cas_oppija_webflow_signing_key }}
 
 cas.ticket.registry.redis.enabled: true
-cas.ticket.registry.redis.host: casoppija.redis.hahtuvaopintopolku.fi
+cas.ticket.registry.redis.host: {{ cas_oppija_redis_url }}
 cas.ticket.registry.redis.port: 6379
 
 cas.authn.pac4j.saml:
