@@ -1,6 +1,6 @@
 # CAS-oppija
 
-This project is based on [cas-overlay-template (branch 6.0)](https://github.com/apereo/cas-overlay-template/tree/6.0).
+This project is based on [cas-overlay-template (branch 6.5)](https://github.com/apereo/cas-overlay-template/tree/6.5).
 
 ## Requirements
 
