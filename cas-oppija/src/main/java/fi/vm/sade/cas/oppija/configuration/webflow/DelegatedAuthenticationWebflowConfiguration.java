@@ -25,10 +25,7 @@ import org.springframework.webflow.engine.EndState;
 import org.springframework.webflow.engine.TransitionableState;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 
-import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.toList;
+import static fi.vm.sade.cas.oppija.CasOppijaConstants.STATE_ID_SAML_LOGOUT_PREPARE;
 import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
 
@@ -94,56 +91,50 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
 
-        LOGGER.debug("default delegateweb flow configured");
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
-                // Initial login action to collect url parameters: valtuudet & services
+                /* Initial login action to collect url parameters: valtuudet & services
+                 StartActionList from loginflow gets run before initial state, so SamlLoginPrepareAction is always run in llogin flow.
+                 It maybe could be replaced with a new decicisionState
+                 */
                 ActionList startActionList = getLoginFlow().getStartActionList();
                 startActionList.add(new SamlLoginPrepareAction(getLoginFlow()));
-                LOGGER.trace("configuring additional web flow, url parameters collected");
 
+                /* Delegated authentication state success transition is modified to redirect to STATE_ID_INQUIRE_INTERRUPT_ACTION */
                 ActionState interruptActionState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_INQUIRE_INTERRUPT_ACTION, ActionState.class);
                 TransitionableState delegatedAuthenticationState = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_DELEGATED_AUTHENTICATION);
                 createTransitionForState(delegatedAuthenticationState, TRANSITION_ID_SUCCESS, interruptActionState.getId(), true);
 
-                // add delegatedAuthenticationAction cancel transition
+                // add delegatedAuthenticationAction cancel transition to logout
                 EndState cancelState = super.createEndState(getLoginFlow(), CasWebflowConstants.TRANSITION_ID_CANCEL,
                         '\'' + CasWebflowConfigurer.FLOW_ID_LOGOUT + '\'', true);
                 createTransitionForState(delegatedAuthenticationState, CasWebflowConstants.TRANSITION_ID_CANCEL, cancelState.getId());
 
-                // add delegatedAuthenticationAction logout from idp (Suomifi) redirect to login flow
+                // add delegatedAuthenticationAction logout from idp (Suomifi) redirect to login flow. Check delegatedAuthenticationAction.
                 ActionState IdpLogoutActionState = createActionState(getLoginFlow(), CasOppijaConstants.STATE_ID_IDP_LOGOUT, CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_CLIENT_FINISH_LOGOUT);
                 createTransitionForState(delegatedAuthenticationState, CasOppijaConstants.TRANSITION_ID_IDP_LOGOUT, IdpLogoutActionState.getId());
                 createStateDefaultTransition(IdpLogoutActionState, CasWebflowConstants.TRANSITION_ID_REDIRECT);
 
-                //EndState returnFromIpdLogoutState = super.createEndState(getLoginFlow(), TRANSITION_ID_LOGOUT,
-                //        '\'' + CasWebflowConfigurer.FLOW_ID_LOGOUT + '\'', true);
-                //createTransitionForState(delegatedAuthenticationState, TRANSITION_ID_LOGOUT, returnFromIpdLogoutState.getId());
-                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction cancel transition target is now:{}", cancelState.getId());
-                // add delegatedAuthenticationAction logout transition
-                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction logout transition added");
-                // add saml service provider initiated logout support
+                // add saml service provider initiated logout support (Is this needed? TODO all logout stuff should be moved to own configuration?)
                 setLogoutFlowDefinitionRegistry(DelegatedAuthenticationWebflowConfiguration.this.logoutFlowDefinitionRegistry);
-                // logout flow begins
+                /* logout flow begins
+                 Logout flow start state is set to samlLogoutPrepare, and SamlLogoutPrepareAction is added to action list.
+                 Also a default transition to original logout start state*/
                 TransitionableState startState = getStartState(getLogoutFlow());
-                ActionState singleLogoutPrepareAction = createActionState(getLogoutFlow(), "samlLogoutPrepareAction",
+                ActionState singleLogoutPrepareAction = createActionState(getLogoutFlow(), STATE_ID_SAML_LOGOUT_PREPARE,
                         new SamlLogoutPrepareAction(ticketGrantingTicketCookieGenerator, ticketRegistrySupport));
                 createStateDefaultTransition(singleLogoutPrepareAction, startState.getId());
                 setStartState(getLogoutFlow(), singleLogoutPrepareAction);
-                LOGGER.trace("configuring additional web flow, delegatedAuthenticationAction saml-initiated logout support");
+
+                // Following actions are added to exit axionlist of logout flow. Maybe these could be implemented some other way?
+                // TODO check if these are actually needed or can it be implemented using cas own states.
                 TransitionableState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT);
                 ActionList entryActionList = finishLogoutState.getExitActionList();
                 entryActionList.add(new StoreServiceParamAction(casProperties));
                 entryActionList.add(new ServiceRedirectAction(clientProvider()));
-                LOGGER.debug("default web flow customization for delegateAuthentication 1st phase completed");
             }
         });
     }
-
-    private static <E, T extends Iterable<E>> void clear(T iterable, Consumer<E> remover) {
-        StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover);
-    }
-
 }
 

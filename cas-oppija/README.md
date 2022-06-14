@@ -5,18 +5,42 @@ This project is based on [cas-overlay-template (branch 6.0)](https://github.com/
 ## Requirements
 
 Java 11
+Redis
 
 Project includes gradle wrapper so it doesn't have to be installed. Just use `./gradlew` (unix) and `gradlew.bat` (win).
 
-## Database
+## Redis
 
-    docker run --name cas-oppija-db -p 5432:5432 -e POSTGRES_USER=cas-oppija -e POSTGRES_PASSWORD=cas-oppija -e POSTGRES_DB=cas-oppija -d postgres:11.5
+Requires a Redis instance running on port 6379. Sessions and ticketRegistry are saved and updated in Redis. Easiest way is to run some redis docker image.
 
-## Build
+##Spring Webflow
+There are a lot of custom Webflow configuration. So learning some is essential to manage this service
+###Flow basics:
+####State:
+There are at least 3 types of states that we use in configuration:
+    
+- ActionState(runs actions and has transitions to other states), 
+    
+- DecicionState(Transfers to another state based on some kind of evaluate statement),
+    
+- EndState(ends current flow and has actions and a possible redirect parameter)
+####Transition:
+Transitions are events that signal flow state transformation to some other state.
+####Action
+Each State, when entered, excecutes related actions. Actions result in an event that causes some transition in flow.
+###Existing flow json endpoint
+Cas provides an actuator endpoint that lists the current login and logout flow configurations.
+This is very helpful in debugging so use it! it is available at path /cas-oppija/actuator/springWebflow
 
-    gradle build
+it can be toggled on using the
+``management.endpoint.springWebflow.enabled: true``
+property.
 
-## Run
+## build
+
+    ./gradlew clean build
+
+## Running the application
 
     java -jar build/libs/cas.war
 

@@ -72,13 +72,11 @@ public class InterruptWebflowConfiguration implements CasWebflowExecutionPlanCon
 
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
-        // this is from default interruptWebflowConfigurer bean:
-        //plan.registerWebflowConfigurer(new InterruptWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties));
-
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
-                // add redirect transition
+                /* Redirect endstate to valtuudet is created using the url parameter from flowScope
+                and a transition to it from inquireinterruptaction is created. See inquireInterruptAction */
                 EndState valtuudetRedirectEndstate = createEndState(getLoginFlow(), STATE_ID_VALTUUDET_INTERRUPT_ACTION);
                 Expression expression = createExpression("flowScope.".concat(VALTUUDET_REDIRECT_URL_PARAMETER));
                 valtuudetRedirectEndstate.getEntryActionList().add(new ExternalRedirectAction(expression));
@@ -90,7 +88,7 @@ public class InterruptWebflowConfiguration implements CasWebflowExecutionPlanCon
         plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
-                // fix interrupt inquirers called twice after successful login
+                // fix interrupt inquirers called twice after successful login (this seems to aactually be needed in 6.5 cause the flow is defaultly interrupted multiple times).
                 ActionState state = getState(getLoginFlow(), CasWebflowConstants.STATE_ID_CREATE_TICKET_GRANTING_TICKET, ActionState.class);
                 ActionList actions = state.getActionList();
                 clear(actions, actions::remove);
@@ -104,7 +102,6 @@ public class InterruptWebflowConfiguration implements CasWebflowExecutionPlanCon
         StreamSupport.stream(iterable.spliterator(), false).collect(toList()).forEach(remover::accept);
     }
 
-    // override default interruptWebflowConfigurer to be able to override its flow definitions (see above)
     @Bean
     public CasWebflowConfigurer interruptWebflowConfigurer() {
         return new InterruptWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
@@ -118,6 +115,7 @@ public class InterruptWebflowConfiguration implements CasWebflowExecutionPlanCon
 
     }
 
+    // TODO this should maybe be moved to an own file and moved to actions package.
     // override default inquireInterruptAction to add new interruptRedirect transition
     @Bean
     public InquireInterruptAction inquireInterruptAction(List<InterruptInquirer> interruptInquirers) {

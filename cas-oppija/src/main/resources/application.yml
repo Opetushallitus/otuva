@@ -107,31 +107,6 @@ spring:
     redis:
       namespace: spring:session
 
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/cas-oppija
-#    username: cas-oppija
-#    password: cas-oppija
-#    driver-class-name: org.postgresql.Driver
-#  sql:
-#    init:
-#      platform: postgresql
-#  flyway:
-#    enabled: true
-#    out-of-order: true
-
-#cas.webflow.autoconfigure: true
-#cas.webflow.alwaysPauseRedirect: false
-#cas.webflow.refresh: true
-#cas.webflow.redirectSameState: false
-
- # session:
- #   store-type: jdbc
- #   jdbc:
- #     initialize-schema: never
- #     schema: "classpath:org/springframework/session/jdbc/schema-postgresql.sql"
- #     table-name: SPRING_SESSION
-
 # Custom configuration
 
 cas.custom.properties:

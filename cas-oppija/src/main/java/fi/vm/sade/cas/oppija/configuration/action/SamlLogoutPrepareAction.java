@@ -70,7 +70,7 @@ public class SamlLogoutPrepareAction extends BaseCasWebflowAction {
         HttpServletRequest request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);
         return ticketGrantingTicketCookieGenerator.retrieveCookieValue(request);
     }
-    // TODO: Check if this function is actually needed?
+
     protected static Map<String, Object> transformAttributes(Map<String, List<Object>> attributes) {
         // cas stores attribute value as list but pac4j expects them mostly be single item
         return attributes.entrySet().stream()

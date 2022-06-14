@@ -17,6 +17,7 @@ public class CasOppijaConstants {
     public static final String TRANSITION_ID_IDP_LOGOUT = "IdpLogout";
     public static final String STATE_ID_IDP_LOGOUT = "IdpLogout";
     public static final String STATE_ID_VALTUUDET_INTERRUPT_ACTION = "ValtuudetInterruptActionState";
+    public static final String STATE_ID_SAML_LOGOUT_PREPARE = "samlLogoutPrepare";
     public static final String TRANSITION_ID_VALTUUDET_INTERRUPT = "ValtuudetInterruptTransition";
     public static final String VALTUUDET_REDIRECT_URL_PARAMETER = "ValtuudetInterruptRedirectUrl";
     public static final boolean VALTUUDET_ENABLED = true;

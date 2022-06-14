@@ -45,19 +45,29 @@ public class SurrogateAuthenticationWebflowConfigurer extends AbstractCasWebflow
     protected void doInitialize() {
         Flow loginFlow = super.getLoginFlow();
         StateDefinition originalStartState = loginFlow.getStartState();
-
+        /* This is the flow for returning from Valtuuded service.
+        Token indicates that its coming from service.
+        If token is available and code is not, ITS A CANCEL BUTTON PRESS so it should be transitioned to logout
+         */
         String tokenDecision = String.format("requestParameters.%1$s != null && !requestParameters.%1$s.isEmpty()",
                 TOKEN_PARAMETER_NAME);
         String codeDecision = String.format("requestParameters.%1$s != null && !requestParameters.%1$s.isEmpty()",
                CODE_PARAMETER_NAME);
         EndState cancelState = super.createEndState(loginFlow, STATE_ID_SURROGATE_CANCEL,
                 '\'' + CasWebflowConfigurer.FLOW_ID_LOGOUT + '\'', true);
+
+        /* first check token by STATE_ID_CODE_PARAMETER_DECISION, then check code by STATE_ID_TOKEN_PARAMETER_DECISION
+            if no token -> original startState, if token -> STATE_ID_CODE_PARAMETER_DECISION, then if no code -> cancelState,
+            if code -> STATE_ID_SURROGATE_ACTION
+         */
         DecisionState codeDecisionState = super.createDecisionState(loginFlow, STATE_ID_CODE_PARAMETER_DECISION, codeDecision,
                 STATE_ID_SURROGATE_ACTION, cancelState.getId());
         DecisionState tokenDecisionState = super.createDecisionState(loginFlow, STATE_ID_TOKEN_PARAMETER_DECISION, tokenDecision,
                 codeDecisionState.getId(), originalStartState.getId());
         loginFlow.setStartState(tokenDecisionState);
-
+        /*
+        Create STATE_ID_SURROGATE_ACTION and its transitions so that it will continue cas own flow afterwards.
+         */
         ActionState actionState = super.createActionState(loginFlow, STATE_ID_SURROGATE_ACTION, surrogateAuthenticationAction);
         super.createTransitionForState(actionState, CasWebflowConstants.TRANSITION_ID_SUCCESS,
                 CasWebflowConstants.STATE_ID_CREATE_TICKET_GRANTING_TICKET);
