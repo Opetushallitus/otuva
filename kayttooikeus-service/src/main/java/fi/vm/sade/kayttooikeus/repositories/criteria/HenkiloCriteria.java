@@ -88,7 +88,7 @@ public class HenkiloCriteria {
             }
         }
         if (StringUtils.hasLength(kayttajatunnus)) {
-            builder.and(henkilo.kayttajatiedot.username.eq(kayttajatunnus));
+            builder.and(henkilo.kayttajatiedot.username.containsIgnoreCase(kayttajatunnus));
         }
         if (sukunimi != null) {
             builder.and(henkilo.sukunimiCached.startsWithIgnoreCase(sukunimi));
