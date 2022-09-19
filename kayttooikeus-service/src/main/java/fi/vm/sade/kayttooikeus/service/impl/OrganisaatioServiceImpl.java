@@ -57,6 +57,10 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         };
     }
 
+    private static Predicate<OrganisaatioPerustieto> hasChildren() {
+        return (OrganisaatioPerustieto organisaatio) -> organisaatio.getChildren() != null && !organisaatio.getChildren().isEmpty();
+    }
+
     private static Predicate<OrganisaatioPerustieto> tilaPredicate(Set<OrganisaatioStatus> tila) {
         return (OrganisaatioPerustieto organisaatio) -> tila.contains(organisaatio.getStatus());
     }
@@ -129,6 +133,7 @@ public class OrganisaatioServiceImpl implements OrganisaatioService {
         return organisaatioClient
                 .stream()
                 .filter(tyyppiPredicate(OrganisaatioTyyppi.ORGANISAATIO))
+                .filter(hasChildren())
                 .collect(Collectors.toMap(OrganisaatioPerustieto::getOid, OrganisaatioPerustieto::getNimi));
     }
 
