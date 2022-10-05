@@ -121,7 +121,7 @@ public class KutsuServiceImpl implements KutsuService {
 
         Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
 
-        this.emailService.sendInvitationEmail(persistedNewKutsu);
+        this.emailService.sendInvitationEmail(persistedNewKutsu, kutsuCreateDto.getKutsujaForEmail());
 
         return persistedNewKutsu.getId();
     }
@@ -226,7 +226,7 @@ public class KutsuServiceImpl implements KutsuService {
         }
         kutsuToRenew.setAikaleima(LocalDateTime.now());
         kutsuToRenew = kutsuRepository.save(kutsuToRenew);
-        emailService.sendInvitationEmail(kutsuToRenew);
+        emailService.sendInvitationEmail(kutsuToRenew, null);
     }
 
     @Override

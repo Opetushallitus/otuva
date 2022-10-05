@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
@@ -16,7 +17,7 @@ public interface EmailService {
 
     void sendNewRequisitionNotificationEmails(Set<String> henkiloOids);
 
-    void sendInvitationEmail(Kutsu kutsu);
+    void sendInvitationEmail(Kutsu kutsu, String kutsujaForEmail);
 
     void sendDiscardNotification(Kutsu invitation);
 
