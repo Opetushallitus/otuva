@@ -226,7 +226,7 @@ public class KutsuServiceImpl implements KutsuService {
         }
         kutsuToRenew.setAikaleima(LocalDateTime.now());
         kutsuToRenew = kutsuRepository.save(kutsuToRenew);
-        emailService.sendInvitationEmail(kutsuToRenew, null);
+        emailService.sendInvitationEmail(kutsuToRenew);
     }
 
     @Override

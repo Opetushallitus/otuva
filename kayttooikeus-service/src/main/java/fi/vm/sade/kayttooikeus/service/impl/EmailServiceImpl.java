@@ -226,14 +226,14 @@ public class EmailServiceImpl implements EmailService {
         ryhmasahkopostiClient.sendRyhmasahkoposti(data);
     }
 
+    public void sendInvitationEmail(Kutsu kutsu) {
+        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsu.getKutsuja());
+        String kutsujaForEmail = String.format("%s %s", kutsuja.getKutsumanimi(), kutsuja.getSukunimi());
+        sendInvitationEmail(kutsu, kutsujaForEmail);
+    }
+
     public void sendInvitationEmail(Kutsu kutsu, String kutsujaForEmail) {
-        if (kutsujaForEmail == null) {
-            HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsu.getKutsuja());
-            kutsujaForEmail = String.format("%s %s", kutsuja.getKutsumanimi(), kutsuja.getSukunimi());
-        }
-
         EmailData emailData = new EmailData();
-
         EmailMessage email = new EmailMessage();
         email.setTemplateName(KUTSUTTU_EMAIL_TEMPLATE_NAME);
         email.setLanguageCode(kutsu.getKieliKoodi());

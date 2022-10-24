@@ -259,7 +259,7 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .aikaleima(LocalDateTime.now())
                 .build();
 
-        this.emailService.sendInvitationEmail(kutsu, null);
+        this.emailService.sendInvitationEmail(kutsu);
         ArgumentCaptor<EmailData> emailDataArgumentCaptor = ArgumentCaptor.forClass(EmailData.class);
         verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
         EmailData emailData = emailDataArgumentCaptor.getValue();

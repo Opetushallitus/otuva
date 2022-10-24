@@ -19,6 +19,8 @@ public interface EmailService {
 
     void sendInvitationEmail(Kutsu kutsu, String kutsujaForEmail);
 
+    void sendInvitationEmail(Kutsu kutsu);
+
     void sendDiscardNotification(Kutsu invitation);
 
     void sendDiscardNotification(Anomus application);
