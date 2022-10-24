@@ -268,8 +268,8 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .extracting("name")
                 .containsExactlyInAnyOrder("vastaanottaja", "organisaatiot", "linkki", "kutsuja", "voimassa", "saate");
         assertTrue(emailData.getRecipient().get(0).getRecipientReplacements().stream().anyMatch(r -> Objects.equals(r.getName(), "kutsuja") && Objects.equals(r.getValue(), kutsuja.toString()) ));
-        assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
-        assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
+        assertThat(emailData.getRecipient().get(0).getOid()).isEmpty();
+        assertThat(emailData.getRecipient().get(0).getOidType()).isEmpty();
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
         assertThat(emailData.getRecipient().get(0).getLanguageCode()).isEqualTo("fi");
@@ -317,8 +317,8 @@ public class EmailServiceTest extends AbstractServiceTest {
                 .containsExactlyInAnyOrder("vastaanottaja", "organisaatiot", "linkki", "kutsuja", "voimassa", "saate");
 
         assertTrue(emailData.getRecipient().get(0).getRecipientReplacements().stream().anyMatch(r -> Objects.equals(r.getName(), "kutsuja") && Objects.equals(r.getValue(), expectedKutsuja) ));
-        assertThat(emailData.getRecipient().get(0).getOid()).isEqualTo("");
-        assertThat(emailData.getRecipient().get(0).getOidType()).isEqualTo("");
+        assertThat(emailData.getRecipient().get(0).getOid()).isEmpty();
+        assertThat(emailData.getRecipient().get(0).getOidType()).isEmpty();
         assertThat(emailData.getRecipient().get(0).getEmail()).isEqualTo("arpa@kuutio.fi");
         assertThat(emailData.getRecipient().get(0).getName()).isEqualTo("arpa kuutio");
         assertThat(emailData.getRecipient().get(0).getLanguageCode()).isEqualTo("fi");
