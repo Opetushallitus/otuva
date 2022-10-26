@@ -40,6 +40,9 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         henkilohakuCriteriaDto.setSukunimi(palvelukayttajaCriteriaDto.getNameQuery());
         henkilohakuCriteriaDto.setKayttajatunnus(palvelukayttajaCriteriaDto.getNameQuery());
         henkilohakuCriteriaDto.setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
+        henkilohakuCriteriaDto.setSubOrganisation(palvelukayttajaCriteriaDto.getSubOrganisation());
+        henkilohakuCriteriaDto.setPassivoitu(true);
+        henkilohakuCriteriaDto.setNoOrganisation(true);
 
         OrderByHenkilohaku orderBy = OrderByHenkilohaku.HENKILO_NIMI_ASC;
         Collection<HenkilohakuResultDto> palvelukayttajat = henkilohakuBuilderService.getBuilder(henkilohakuCriteriaDto)
