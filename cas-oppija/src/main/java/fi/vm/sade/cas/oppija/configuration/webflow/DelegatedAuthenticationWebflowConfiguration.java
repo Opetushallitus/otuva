@@ -1,7 +1,8 @@
 package fi.vm.sade.cas.oppija.configuration.webflow;
 
 import fi.vm.sade.cas.oppija.CasOppijaConstants;
-import fi.vm.sade.cas.oppija.configuration.action.*;
+import fi.vm.sade.cas.oppija.configuration.action.Pac4jClientProvider;
+import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
 import org.apereo.cas.web.cookie.CasCookieBuilder;
@@ -25,7 +26,6 @@ import org.springframework.webflow.engine.EndState;
 import org.springframework.webflow.engine.TransitionableState;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 
-import static fi.vm.sade.cas.oppija.CasOppijaConstants.STATE_ID_SAML_LOGOUT_PREPARE;
 import static org.apereo.cas.web.flow.CasWebflowConstants.TRANSITION_ID_SUCCESS;
 
 
@@ -122,17 +122,17 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
                  Logout flow start state is set to samlLogoutPrepare, and SamlLogoutPrepareAction is added to action list.
                  Also a default transition to original logout start state*/
                 TransitionableState startState = getStartState(getLogoutFlow());
-                ActionState singleLogoutPrepareAction = createActionState(getLogoutFlow(), STATE_ID_SAML_LOGOUT_PREPARE,
-                        new SamlLogoutPrepareAction(ticketGrantingTicketCookieGenerator, ticketRegistrySupport));
-                createStateDefaultTransition(singleLogoutPrepareAction, startState.getId());
-                setStartState(getLogoutFlow(), singleLogoutPrepareAction);
+               // ActionState singleLogoutPrepareAction = createActionState(getLogoutFlow(), STATE_ID_SAML_LOGOUT_PREPARE,
+               //         new SamlLogoutPrepareAction(ticketGrantingTicketCookieGenerator, ticketRegistrySupport));
+               // createStateDefaultTransition(singleLogoutPrepareAction, startState.getId());
+              //  setStartState(getLogoutFlow(), singleLogoutPrepareAction);
 
                 // Following actions are added to exit axionlist of logout flow. Maybe these could be implemented some other way?
                 // TODO check if these are actually needed or can it be implemented using cas own states.
-                TransitionableState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT);
-                ActionList entryActionList = finishLogoutState.getExitActionList();
-                entryActionList.add(new StoreServiceParamAction(casProperties));
-                entryActionList.add(new ServiceRedirectAction(clientProvider()));
+                //TransitionableState finishLogoutState = getState(getLogoutFlow(), CasWebflowConstants.STATE_ID_FINISH_LOGOUT);
+               // ActionList entryActionList = finishLogoutState.getExitActionList();
+               // entryActionList.add(new StoreServiceParamAction(casProperties));
+             //   entryActionList.add(new ServiceRedirectAction(clientProvider()));
             }
         });
     }

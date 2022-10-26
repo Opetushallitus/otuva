@@ -132,8 +132,7 @@ service-user.username: user
 service-user.password: pass
 
 #implementation "org.apereo.cas:cas-server-support-reports:${project.'cas.version'}"
-#management.endpoints.web.exposure.include: springWebflow
-#management.endpoint.springWebflow.enabled: true
+management.endpoint.springWebflow.enabled: true
 #cas.monitor.endpoints.endpoint.springWebflow.access: IP_ADDRESS
 #cas.monitor.endpoints.endpoint.springWebflow.required-ip-addresses: 127.0.0.1
 
