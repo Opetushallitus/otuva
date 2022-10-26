@@ -4,23 +4,28 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Class that contains {@link Henkilo}'s password hash and salt. Only on may
- * exist per {@link Henkilo}* 
+ * exist per {@link Henkilo}*
  */
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "kayttajatiedot") 
+@Table(name = "kayttajatiedot")
 public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "henkiloid", nullable = false, unique = true)
     private Henkilo henkilo;
-    
+
+    @OneToOne(mappedBy = "kayttajatiedot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private LoginCounter loginCounter;
+
     /**
      * Username for Henkilo
      */
@@ -30,7 +35,7 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
     /**
      * this is the permanent security token "salted hash", authtokens under
      * identification are used for temporary authentication
-     * 
+     * <p>
      * Null token disables weak login
      */
     @Column(name = "password")
@@ -53,6 +58,12 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
      */
     @Column(name = "invalidated")
     private Boolean invalidated = false;
+
+    public void incrementLoginCount() {
+        loginCounter = Optional.ofNullable(loginCounter)
+                .orElse(LoginCounter.builder().kayttajatiedot(this).build());
+        loginCounter.increment();
+    }
 
     @PrePersist
     @PreUpdate
