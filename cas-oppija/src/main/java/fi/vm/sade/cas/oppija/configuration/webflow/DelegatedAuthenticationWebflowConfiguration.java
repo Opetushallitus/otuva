@@ -111,15 +111,11 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
                 createTransitionForState(delegatedAuthenticationState, CasWebflowConstants.TRANSITION_ID_CANCEL, cancelState.getId());
 
                 // add delegatedAuthenticationAction logout from idp (Suomifi) redirect to login flow. Check delegatedAuthenticationAction.
-                ActionState IdpLogoutActionState = createActionState(getLoginFlow(), CasOppijaConstants.STATE_ID_IDP_LOGOUT, CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_CLIENT_FINISH_LOGOUT);
-                createTransitionForState(delegatedAuthenticationState, CasOppijaConstants.TRANSITION_ID_IDP_LOGOUT, IdpLogoutActionState.getId());
-                IdpLogoutActionState.getExitActionList().add(new ServiceRedirectAction());
-                createStateDefaultTransition(IdpLogoutActionState, CasWebflowConstants.TRANSITION_ID_REDIRECT);
-
-                //Logout flow starts from terminate session state, Here we add the storage of return url action to a cookie when logout starts
-                Flow logoutFlow = getLogoutFlow();
-                TransitionableState terminateSessionState = getState(logoutFlow, CasWebflowConstants.STATE_ID_TERMINATE_SESSION);
-                terminateSessionState.getEntryActionList().add(new StoreServiceParamAction(casProperties));
+                ActionState idpLogoutActionState = createActionState(getLoginFlow(), CasOppijaConstants.STATE_ID_IDP_LOGOUT, CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_CLIENT_FINISH_LOGOUT);
+                idpLogoutActionState.getActionList().add(new StoreServiceParamAction(casProperties));
+                createTransitionForState(delegatedAuthenticationState, CasOppijaConstants.TRANSITION_ID_IDP_LOGOUT, idpLogoutActionState.getId());
+                idpLogoutActionState.getExitActionList().add(new ServiceRedirectAction());
+                createStateDefaultTransition(idpLogoutActionState, CasWebflowConstants.TRANSITION_ID_REDIRECT);
             }
         });
     }
