@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.*;
 @RunWith(SpringRunner.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
-    private static final String TEST_PASWORD = "This_is_example_of_strong_password";
+    private static final String TEST_PASSWORD = "This_is_example_of_strong_password";
 
     @Autowired
     private KayttajatiedotService kayttajatiedotService;
@@ -127,13 +127,12 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     @WithMockUser(username = "user1")
-    public void testValidateUsernamePassword() throws Exception {
+    public void testValidateUsernamePassword() {
         final String henkiloOid = "1.2.246.562.24.27470134096";
         String username = "eetu.esimerkki@geemail.fi";
-        String password = TEST_PASWORD;
         populate(henkilo(henkiloOid));
         populate(kayttajatiedot(henkilo(henkiloOid), username));
-        kayttajatiedotService.changePasswordAsAdmin(henkiloOid, password);
+        kayttajatiedotService.changePasswordAsAdmin(henkiloOid, TEST_PASSWORD);
         Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByUsername(username);
         assertThat(kayttajatiedot)
                 .isNotEmpty()
@@ -156,15 +155,33 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
                 .isInstanceOf(UnauthorizedException.class);
 
         // käyttäjällä on salasana
-        kayttajatiedotService.changePasswordAsAdmin("oid2", TEST_PASWORD);
+        kayttajatiedotService.changePasswordAsAdmin("oid2", TEST_PASSWORD);
         assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("user2", "pass2"))
                 .isInstanceOf(UnauthorizedException.class);
-        KayttajatiedotReadDto readDto = kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASWORD);
+        KayttajatiedotReadDto readDto = kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASSWORD);
         assertThat(readDto).extracting(KayttajatiedotReadDto::getUsername).isEqualTo("user2");
 
         // käyttäjä on passivoitu
         henkiloService.passivoi("oid2", "oid1");
-        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASWORD))
+        assertThatThrownBy(() -> kayttajatiedotService.getByUsernameAndPassword("USER2", TEST_PASSWORD))
                 .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    @WithMockUser(username = "counterTest")
+    public void countSuccessfullLogins() {
+        populate(henkilo("counterTest"));
+        populate(kayttajatiedot(henkilo("counterTest"), "counterTest"));
+        kayttajatiedotService.changePasswordAsAdmin("counterTest", TEST_PASSWORD);
+
+        Kayttajatiedot userDetails = kayttajatiedotRepository.findByUsername("counterTest").orElseThrow();
+        assertThat(userDetails.getLoginCounter()).isNull();
+
+        kayttajatiedotService.getByUsernameAndPassword("counterTest", TEST_PASSWORD);
+        kayttajatiedotService.getByUsernameAndPassword("counterTest", TEST_PASSWORD);
+
+        userDetails = kayttajatiedotRepository.findByUsername("counterTest").orElseThrow();
+        assertThat(userDetails.getLoginCounter()).isNotNull();
+        assertThat(userDetails.getLoginCounter().getCount()).isEqualTo(2);
     }
 }
