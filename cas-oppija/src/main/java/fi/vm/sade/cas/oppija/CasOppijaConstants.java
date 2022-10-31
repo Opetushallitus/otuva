@@ -13,6 +13,7 @@ public class CasOppijaConstants {
 
     public static final String AUTHENTICATION_ATTRIBUTE_CLIENT_PRINCIPAL_ID = "clientPrincipalId";
 
+    public static final String REQUEST_SCOPE_ATTRIBUTE_SAML_LOGOUT = "pac4jSamlLogout";
     public static final String TRANSITION_ID_IDP_LOGOUT = "IdpLogout";
     public static final String STATE_ID_IDP_LOGOUT = "IdpLogout";
     public static final String STATE_ID_VALTUUDET_INTERRUPT_ACTION = "ValtuudetInterruptActionState";
