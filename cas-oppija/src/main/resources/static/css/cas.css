@@ -1,7 +1,7 @@
 /* Root / Reset */
 
 
-:root:root {
+:root {
     --mdc-text-button-label-text-color: #f7f7f7;
     --mdc-theme-error: #d9534f;
     --cas-theme-primary: #153e50;
@@ -16,7 +16,7 @@
     --mdc-theme-primary: var(--cas-theme-primary, #153e50);
 }
 
-body important {
+body {
     display: flex;
     height: 100vh;
     margin: 0;
