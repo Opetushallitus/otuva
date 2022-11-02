@@ -1,0 +1,12 @@
+<footer class="py-3 d-flex justify-content-center align-items-center cas-footer">
+    <div class="footer-divider">
+        <span class="oph-brand mx-auto">
+            <a th:href="@{/}">
+                <img id="oph-logo" class="oph-logo"
+                     th:title="${#strings.defaultString(#themes.code('cas.theme.name'), 'Opetushallitus')}"
+                     th:src="@{${#strings.defaultString(#themes.code('cas.logo.file'), '/images/oph_logo_vaaka.svg')}}"
+                />
+            </a>
+        </span>
+    </div>
+</footer>
