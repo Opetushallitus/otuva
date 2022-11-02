@@ -107,12 +107,19 @@ div#content {
     height: 48px;
     width: auto;
 }
+.opinto-logo {
+    width: auto;
+}
+
+.oph-logo {
+    width: 150px;
+}
 
 header>nav .oph-brand path.cls-1 {
     fill: white;
 }
 
-header>nav .oph-brand .oph-logo {
+header>nav .oph-brand .opintopolku-logo {
     height: 100%;
 }
 
