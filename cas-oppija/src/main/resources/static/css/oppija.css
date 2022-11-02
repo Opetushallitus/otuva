@@ -13,13 +13,17 @@
     --mdc-theme-primary: #3A7A10;
 }
 
-.oppija-body {
+.oppija-fragment {
+    font-family: "Open Sans", sans-serif, Arial;
+}
+.oppija-header-bar {
+    background-color: #3A7A10;
+    color: white;
     display: flex;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
+    position: fixed;
     flex-direction: column;
     justify-content: space-between;
-    font-family: "Open Sans", sans-serif, Arial;
-    background: #F5F7F9;
+    box-sizing: border-box;
+    width: 100%;
+    z-index: 4;
 }

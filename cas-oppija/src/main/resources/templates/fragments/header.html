@@ -11,28 +11,24 @@
     <link href="../../static/css/oppija.css" rel="stylesheet" th:remove="tag"/>
 </head>
 
-<body class="oppija-body">
-<div th:fragment="header">
-
-    <header id="app-bar" class="mdc-top-app-bar">
-        <nav class="mdc-top-app-bar__row">
-            <div class="container-fluid container-fluid d-flex align-items-center justify-content-between">
-                <section class="mdc-top-app-bar__section">
-                    <span class="oph-brand mx-auto">
-                        <a th:href="@{/}">
-                            <img id="oph-logo" class="oph-logo"
-                                 th:title="${#strings.defaultString(#themes.code('cas.theme.name'), 'Opintopolku.fi')}"
-                                 th:src="@{${#strings.defaultString(#themes.code('cas.logo.file'), '/images/opintopolku-logo.png')}}"
-                            />
-                        </a>
-                    </span>
-                </section>
-            </div>
-        </nav>
-    </header>
-</div>
-
-
+<body>
+    <div th:fragment="header" class="oppija-fragment">
+        <header id="app-bar" class="oppija-header-bar">
+            <nav class="mdc-top-app-bar__row">
+                <div class="container-fluid container-fluid d-flex align-items-center justify-content-between">
+                    <section class="mdc-top-app-bar__section">
+                        <span class="oph-brand mx-auto">
+                            <a th:href="@{/}">
+                                <img id="oph-logo" class="oph-logo"
+                                     th:title="${#strings.defaultString(#themes.code('cas.theme.name'), 'Opintopolku.fi')}"
+                                     th:src="@{${#strings.defaultString(#themes.code('cas.logo.file'), '/images/opintopolku-logo.png')}}"
+                                />
+                            </a>
+                        </span>
+                    </section>
+                </div>
+            </nav>
+        </header>
+    </div>
 </body>
-
 </html>

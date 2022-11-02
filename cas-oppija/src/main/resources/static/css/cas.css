@@ -3,17 +3,17 @@
 
 :root {
     --mdc-text-button-label-text-color: #f7f7f7;
-    --mdc-theme-error: #d9534f;
-    --cas-theme-primary: #153e50;
-    --cas-theme-primary-bg: rgba(21, 62, 80, 0.2);
-    --cas-theme-button-bg: #26418f;
+    --mdc-theme-error: #CC3300;
+    --cas-theme-primary: #3A7A10;
+    --cas-theme-primary-bg: #F5F7F9;
+    --cas-theme-button-bg: #26418f; /* not in use */
     --cas-theme-primary-light: #006d85;
-    --cas-theme-secondary: #74C163;
-    --cas-theme-success: var(--cas-theme-secondary);
-    --cas-theme-danger: var(--mdc-theme-error);
-    --cas-theme-warning: #e6a210;
-    --cas-theme-border-light: 1px solid rgba(0, 0, 0, .2);
-    --mdc-theme-primary: var(--cas-theme-primary, #153e50);
+    --cas-theme-secondary: #CCFFCC;
+    --cas-theme-success: #9CFF5A;
+    --cas-theme-danger: #CC3300;
+    --cas-theme-warning: #CC3300;
+    --cas-theme-border-light: 1px solid #B2B2B2;
+    --mdc-theme-primary: #3A7A10;
 }
 
 body {
