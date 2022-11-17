@@ -25,6 +25,9 @@ cas.tgc.crypto:
 cas.webflow.crypto:
     encryption.key: {{ cas_oppija_webflow_encryption_key }}
     signing.key: {{ cas_oppija_webflow_signing_key }}
+cas.ticket.registry.redis.crypto:
+    encryption.key: {{ cas_oppija_ticket_registry_redis_encryption_key }}
+    signing.key: {{ cas_oppija_ticket_registry_redis_signing_key }}
 
 cas.ticket.registry.redis.enabled: true
 cas.ticket.registry.redis.host: {{ cas_oppija_redis_url }}
