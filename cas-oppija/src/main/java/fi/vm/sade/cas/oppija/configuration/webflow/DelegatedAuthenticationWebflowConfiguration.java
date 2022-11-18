@@ -116,7 +116,7 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
                 // add delegatedAuthenticationAction logout from idp (Suomifi) redirect to login flow. Check delegatedAuthenticationAction.
                 ActionState idpLogoutActionState = createActionState(getLoginFlow(), CasOppijaConstants.STATE_ID_IDP_LOGOUT, CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_CLIENT_FINISH_LOGOUT);
                 createTransitionForState(delegatedAuthenticationState, CasOppijaConstants.TRANSITION_ID_IDP_LOGOUT, idpLogoutActionState.getId());
-                idpLogoutActionState.getExitActionList().add(new ServiceRedirectAction());
+                idpLogoutActionState.getActionList().add(new ServiceRedirectAction());
                 createStateDefaultTransition(idpLogoutActionState, CasWebflowConstants.STATE_ID_REDIRECT_VIEW);
 
                 //Logout flow starts from terminate session state, Here we add the storage of return url action to a cookie when logout starts
