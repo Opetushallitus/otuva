@@ -29,7 +29,7 @@ public class ServiceRedirectAction extends AbstractServiceParamAction {
             JEEHttpActionAdapter.INSTANCE.adapt(new FoundAction(service), webContext);
             LOGGER.debug("Found service redirect cookie, setting logout redirect url: {}", service);
         }
-        return null;
+        return success();
     }
 
 }
