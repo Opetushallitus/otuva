@@ -8,11 +8,12 @@ import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.RegisteredServiceAttributeReleasePolicy;
+import org.apereo.cas.services.RegisteredServiceAttributeReleasePolicyContext;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
+import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.support.ArgumentExtractor;
-import org.apereo.cas.web.support.CookieRetrievingCookieGenerator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 import static fi.vm.sade.cas.oppija.controller.ControllerUtils.wrapExceptionToApplicationException;
@@ -28,12 +30,12 @@ import static fi.vm.sade.cas.oppija.controller.ControllerUtils.wrapExceptionToAp
 @RequestMapping("/user")
 public class UserController {
 
-    private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
+    private final CasCookieBuilder ticketGrantingTicketCookieGenerator;
     private final TicketRegistry ticketRegistry;
     private final ArgumentExtractor argumentExtractor;
     private final ServicesManager servicesManager;
 
-    public UserController(@Qualifier("ticketGrantingTicketCookieGenerator") CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
+    public UserController(@Qualifier("ticketGrantingTicketCookieGenerator") CasCookieBuilder ticketGrantingTicketCookieGenerator,
                           TicketRegistry ticketRegistry,
                           ArgumentExtractor argumentExtractor,
                           ServicesManager servicesManager) {
@@ -44,16 +46,19 @@ public class UserController {
     }
 
     @GetMapping(value = "/current/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> getAttributes(HttpServletRequest request) {
+    //TODO: return Map value type  changed from Object to List<Object>!!!!
+    public Map<String, List<Object>> getAttributes(HttpServletRequest request) {
         return wrapExceptionToApplicationException(() -> getAttributesInternal(request));
     }
 
-    private Map<String, Object> getAttributesInternal(HttpServletRequest request) {
+    private Map<String, List<Object>> getAttributesInternal(HttpServletRequest request) {
         Principal principal = getPrincipal(request);
         Service service = getService(request);
         RegisteredService registeredService = getRegisteredService(service);
         RegisteredServiceAttributeReleasePolicy attributeReleasePolicy = registeredService.getAttributeReleasePolicy();
-        return attributeReleasePolicy.getAttributes(principal, service, registeredService);
+        RegisteredServiceAttributeReleasePolicyContext context = RegisteredServiceAttributeReleasePolicyContext.builder().principal(principal).service(service).registeredService(registeredService).build();
+
+        return attributeReleasePolicy.getAttributes(context);
     }
 
     private Principal getPrincipal(HttpServletRequest request) {

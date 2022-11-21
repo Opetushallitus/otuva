@@ -1,13 +1,13 @@
 package fi.vm.sade.cas.oppija.configuration.action;
 
-import org.springframework.webflow.action.AbstractAction;
+import org.apereo.cas.web.flow.actions.BaseCasWebflowAction;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
-public abstract class AbstractServiceParamAction extends AbstractAction {
+public abstract class AbstractServiceParamAction extends BaseCasWebflowAction {
     protected static final String SERVICE_COOKIE = "_oph_service";
     /*
      * Keksin eliniän tarvitsee kattaa vain SAML-logout ja sitä seuraavat redirectit;

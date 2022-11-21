@@ -8,12 +8,12 @@ import org.apereo.cas.authentication.*;
 import org.apereo.cas.authentication.metadata.BasicCredentialMetaData;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
-import org.pac4j.core.profile.UserProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
@@ -37,7 +37,7 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
 
     @Override
     public boolean supports(Credential credential) {
-        return SurrogateCredential.class.isInstance(credential);
+        return credential instanceof SurrogateCredential;
     }
 
     @Override
@@ -47,35 +47,32 @@ public class SurrogateAuthenticationHandler implements AuthenticationHandler {
 
     @Override
     public AuthenticationHandlerExecutionResult authenticate(Credential credential) throws GeneralSecurityException, PreventedException {
-        return authenticate(SurrogateCredential.class.cast(credential));
+        return authenticate((SurrogateCredential) credential);
     }
 
     public AuthenticationHandlerExecutionResult authenticate(SurrogateCredential credential) throws GeneralSecurityException, PreventedException {
         try {
-            SurrogateAuthenticationDto dto = surrogateService.getAuthentication(credential.getToken(), credential.getCode());
+            SurrogateAuthenticationDto dto = surrogateService.getAuthentication(credential.getId(), credential.getCode());
             credential.setAuthenticationAttributes(dto.impersonatorData.authenticationAttributes);
             return createHandlerResult(credential, createPrincipal(dto));
-        } catch (GeneralSecurityException e) {
-            LOGGER.warn(e.getMessage());
-            throw e;
         } catch (Exception e) {
             throw new PreventedException(e);
         }
     }
 
     private Principal createPrincipal(SurrogateAuthenticationDto dto) {
-        String id = dto.impersonatorData.principalId + UserProfile.SEPARATOR + dto.nationalIdentificationNumber;
-        Map<String, Object> attributes = new LinkedHashMap<>();
+        String id = dto.impersonatorData.principalId + ":" + dto.nationalIdentificationNumber;
+        Map<String, List<Object>> attributes = new LinkedHashMap<>();
         dto.impersonatorData.principalAttributes.entrySet().stream()
-                .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), entry.getValue()));
-        attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, dto.nationalIdentificationNumber);
+                .forEach(entry -> attributes.put(impersonatorAttributeKey(entry.getKey()), List.of(entry.getValue())));
+        attributes.put(ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, List.of(dto.nationalIdentificationNumber));
         try {
             personService.findOidByNationalIdentificationNumber(dto.nationalIdentificationNumber)
-                    .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, oid));
+                    .ifPresent(oid -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
         } catch (Exception e) {
             LOGGER.error("Unable to get oid by national identification number", e);
         }
-        attributes.put(ATTRIBUTE_NAME_PERSON_NAME, dto.name);
+        attributes.put(ATTRIBUTE_NAME_PERSON_NAME, List.of(dto.name));
         return principalFactory.createPrincipal(id, attributes);
     }
 

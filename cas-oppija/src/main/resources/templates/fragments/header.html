@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <title>Header Fragment</title>
+
+    <link href="../../static/css/cas.css" rel="stylesheet" th:remove="tag"/>
+</head>
+
+<body>
+    <div th:fragment="header" class="oppija-fragment">
+        <header id="app-bar" class="oppija-header-bar">
+            <nav class="mdc-top-app-bar__row">
+                <div class="container-fluid container-fluid d-flex align-items-center justify-content-between">
+                    <section class="mdc-top-app-bar__section">
+                        <span class="oph-brand mx-auto">
+                            <a th:href="@{/}">
+                                <img id="oph-logo" class="opintopolku-logo"
+                                     th:title="${#strings.defaultString(#themes.code('cas.theme.name'), 'Opintopolku.fi')}"
+                                     th:src="@{${#strings.defaultString(#themes.code('cas.logo.file'), '/images/opintopolku-logo.png')}}"
+                                />
+                            </a>
+                        </span>
+                    </section>
+                </div>
+            </nav>
+        </header>
+    </div>
+</body>
+</html>

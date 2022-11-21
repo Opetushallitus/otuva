@@ -1,5 +1,6 @@
 package fi.vm.sade.cas.oppija.surrogate.service;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.cas.oppija.surrogate.*;
 import fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException;
@@ -25,11 +26,11 @@ import static fi.vm.sade.cas.oppija.surrogate.SurrogateConstants.TOKEN_PARAMETER
 public class SurrogateServiceImpl implements SurrogateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SurrogateServiceImpl.class);
-    private final static String ATTRIBUTE_NAME_SURROGATE = "surrogate";
+    private static final String ATTRIBUTE_NAME_SURROGATE = "surrogate";
 
     private final Environment environment;
     private final TicketRegistry ticketRegistry;
-    private final TransientSessionTicketFactory transientSessionTicketFactory;
+    private final TransientSessionTicketFactory<TransientSessionTicket> transientSessionTicketFactory;
     private final ValtuudetClient valtuudetClient;
 
     public SurrogateServiceImpl(OphHttpClient httpClient,
@@ -37,7 +38,7 @@ public class SurrogateServiceImpl implements SurrogateService {
                                 SurrogateProperties properties,
                                 Environment environment,
                                 TicketRegistry ticketRegistry,
-                                TransientSessionTicketFactory transientSessionTicketFactory) {
+                                TransientSessionTicketFactory<TransientSessionTicket> transientSessionTicketFactory) {
         this.environment = environment;
         this.ticketRegistry = ticketRegistry;
         this.transientSessionTicketFactory = transientSessionTicketFactory;
@@ -54,19 +55,27 @@ public class SurrogateServiceImpl implements SurrogateService {
 
         ticket.put(ATTRIBUTE_NAME_SURROGATE, new SurrogateData(impersonatorData,
                 new SurrogateRequestData(callbackUrl, session.sessionId)));
-        ticketRegistry.addTicket(ticket);
+
+
+        try {
+            ticketRegistry.addTicket(ticket);
+        } catch (Exception e) {
+            LOGGER.warn("saving to ticketstore failed {}", e.getMessage());
+            return null;
+        }
 
         return redirectUrl;
     }
 
     private String createCallbackUrl(org.apereo.cas.authentication.principal.Service service, String token) {
-        String callbackUrl = environment.getRequiredProperty("cas.server.prefix") + "/login?" + TOKEN_PARAMETER_NAME + "=" + token;
+        UriComponentsBuilder redirectUrlBuilder = UriComponentsBuilder
+                .fromHttpUrl(environment.getRequiredProperty("cas.server.prefix") + "/login")
+                .queryParam(TOKEN_PARAMETER_NAME, token);
         String serviceUrl = service != null ? service.getId() : null;
         if (serviceUrl != null) {
-            callbackUrl = callbackUrl + "&service=" + serviceUrl;
+            redirectUrlBuilder.queryParam("service", serviceUrl);
         }
-        LOGGER.info("CallbackUrl: " + callbackUrl);
-        return callbackUrl;
+        return redirectUrlBuilder.toUriString();
     }
 
     public SurrogateAuthenticationDto getAuthentication(String token, String code) throws GeneralSecurityException {
@@ -87,7 +96,12 @@ public class SurrogateServiceImpl implements SurrogateService {
             LOGGER.warn(message);
             throw new LoginException(message);
         }
-        ticketRegistry.deleteTicket(ticket);
+
+        try {
+            ticketRegistry.deleteTicket(ticket);
+        } catch (Exception e) {
+            throw new GeneralSecurityException("ticket registry delete operation failed", e);
+        }
         return getAuthentication(data, code);
     }
 
@@ -109,7 +123,7 @@ public class SurrogateServiceImpl implements SurrogateService {
         boolean authorized = valtuudetClient.isAuthorizedToPerson(data.requestData.sessionId, accessToken, person.personId);
 
         if (!authorized) {
-            throw new SurrogateNotAllowedException(String.format("User is not allowed to authenticate as %s", person.personId));
+            throw new SurrogateNotAllowedException("Sinulla ei ole oikeutta asioida valitsemasi henkilön puolesta tässä palvelussa. Voit lukea lisää toisen henkilön puolesta asioinnista tällä sivulla: https://www.suomi.fi/ohjeet-ja-tuki/tietoa-valtuuksista/toisen-henkilon-puolesta-asiointi.");
         }
         return new SurrogateAuthenticationDto(data.impersonatorData, person.personId, person.name);
     }

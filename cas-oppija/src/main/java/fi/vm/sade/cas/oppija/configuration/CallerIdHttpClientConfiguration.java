@@ -5,16 +5,18 @@ import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 import fi.vm.sade.properties.OphProperties;
 import org.apache.http.client.CookieStore;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicHeader;
+import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.authentication.HttpClientProperties;
 import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.util.http.SimpleHttpClientFactoryBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -23,20 +25,24 @@ import javax.net.ssl.HostnameVerifier;
 import java.util.Arrays;
 
 @Configuration
-public class HttpClientConfiguration {
+@EnableConfigurationProperties(CasConfigurationProperties.class)
+public class CallerIdHttpClientConfiguration {
 
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.cas-oppija";
 
     private final CasConfigurationProperties casProperties;
-    private final SSLConnectionSocketFactory trustStoreSslSocketFactory;
+    private final CasSSLContext casSslContext;
     private final HostnameVerifier hostnameVerifier;
+    private final LayeredConnectionSocketFactory trustStoreSslSocketFactory;
 
-    public HttpClientConfiguration(CasConfigurationProperties casProperties,
-                                   SSLConnectionSocketFactory trustStoreSslSocketFactory,
-                                   HostnameVerifier hostnameVerifier) {
+    public CallerIdHttpClientConfiguration(CasConfigurationProperties casProperties,
+                                           CasSSLContext casSslContext,
+                                           HostnameVerifier hostnameVerifier,
+                                           LayeredConnectionSocketFactory trustStoreSslSocketFactory) {
         this.casProperties = casProperties;
-        this.trustStoreSslSocketFactory = trustStoreSslSocketFactory;
+        this.casSslContext = casSslContext;
         this.hostnameVerifier = hostnameVerifier;
+        this.trustStoreSslSocketFactory = trustStoreSslSocketFactory;
     }
 
     @Bean

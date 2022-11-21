@@ -24,6 +24,8 @@ public class StoreServiceParamAction extends AbstractServiceParamAction {
         if (service != null) {
             setServiceRedirectCookie(response, service);
             LOGGER.debug("Set service redirect cookie to value: " + service);
+        } else {
+            setServiceRedirectCookie(response, casProperties.getLogout().getRedirectUrl());
         }
         return null;
     }

@@ -1,93 +1,138 @@
 # CAS configuration
-# https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
+# https://apereo.github.io/cas/6.5.x/configuration/Configuration-Management.html etc...
+cas:
+  server:
+    name: "http://localhost:8081"
+    prefix: "http://localhost:8081/cas-oppija"
+  http-web-request:
+    cors:
+      allow-headers:
+        - "*"
+      enabled: true
+      allow-credentials: true
+      allow-methods:
+        - "*"
+      allow-origin-patterns: [ "http://localhost:[*]", "https://localhost:[*]", "https://testi.apro.tunnistus.fi"]
 
-server.servlet.context-path: /cas-oppija
-server.port: 8080
-server.ssl.enabled: false
-server.useForwardHeaders: false
+    header:
+      xframe: false
+      xss: false
+      xcontent: false
+      hsts: false
+  authn:
+    pac4j:
+      core:
+        lazy-init: true
+    accept:
+      users:
+    errors:
+      exceptions:
+        - fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException
+    authentication-attribute-release:
+      only-release:
+        - clientName
+  tgc:
+    secure: false
+    path: /cas-oppija
+    pin-to-session: false
+  warning-cookie:
+    secure: false
+    path: /cas-oppija
+  monitor:
+    endpoints:
+      endpoint:
+        health:
+          access: PERMIT
+        springWebflow:
+          access: PERMIT
+  ticket:
+    registry:
+      cleaner:
+        schedule:
+          enabled: true
+      redis:
+        enabled: true
+        port: 6379
+        host: localhost
+        crypto:
+          enabled: true
+          encryption:
+            key: 2luPkLicgX9IjOh_bwxXGQ
+          signing:
+            key: ext7kseHCJ4VFDE2twpnHJLMOo-FWqD8oRnQMF-bM9npNH0yFweN7I8-mAkIKk6uYh78gYpSQ1TvnIhOReocjw
+  webflow:
+    session:
+      storage: true
+      compress: false
 
-server.tomcat.portHeader:
-server.tomcat.protocolHeader:
-server.tomcat.remoteIpHeader:
-
-cas.server.name: http://localhost:8080
-cas.server.prefix: http://localhost:8080/cas-oppija
-
-cas.httpWebRequest.cors.enabled: true
-cas.httpWebRequest.cors.allowCredentials: true
-cas.httpWebRequest.cors.allowOrigins[0]: http://localhost
-cas.httpWebRequest.cors.allowOrigins[1]: http://localhost-en
-cas.httpWebRequest.cors.allowOrigins[2]: http://localhost-sv
-cas.httpWebRequest.cors.allowOrigins[3]: "*"
-cas.httpWebRequest.cors.allowMethods[0]: "*"
-cas.httpWebRequest.cors.allowHeaders[0]: "*"
-
-cas.httpWebRequest.header.xframe: false
-cas.httpWebRequest.header.xss: false
-cas.httpWebRequest.header.xcontent: false
-cas.httpWebRequest.header.hsts: false
-
-cas.authn.accept.users:
-cas.authn.exceptions.exceptions:
-  - fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException
-cas.authn.authenticationAttributeRelease.onlyRelease:
-  - clientName
-
-cas.tgc.secure: false
-cas.tgc.path: /cas-oppija
-cas.tgc.pinToSession: false
-
-cas.warningCookie.secure: false
-cas.warningCookie.path: /cas-oppija
-
-management.endpoint.health.enabled: true
-cas.monitor.endpoints.endpoint.health.access: PERMIT
-
-cas.ticket.registry.cleaner.schedule.enabled: false
+management:
+  endpoints:
+    web:
+     exposure:
+      include:
+       - springWebflow
+       - health
+  endpoint:
+    health:
+      enabled: true
+    springWebflow:
+      enabled: true
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
-server.error.include-stacktrace: never
 
-spring.datasource.url: jdbc:postgresql://localhost:5432/cas-oppija
-spring.datasource.username: cas-oppija
-spring.datasource.password: cas-oppija
-spring.datasource.driver-class-name: org.postgresql.Driver
-spring.datasource.platform: postgresql
+server:
+  port: 8080
+  servlet:
+    context-path: /cas-oppija
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  ssl:
+    enabled: false
+  forward-headers-strategy: NONE
+  tomcat:
+    remoteip:
+      port-header:
+      protocol-header:
+      remote-ip-header:
+  error:
+    include-stacktrace: never
 
-spring.flyway.enabled: true
-spring.flyway.out-of-order: true
-
-#cas.webflow.autoconfigure: true
-#cas.webflow.alwaysPauseRedirect: false
-#cas.webflow.refresh: true
-#cas.webflow.redirectSameState: false
-
-cas.webflow.session.lockTimeout: 30
-cas.webflow.session.compress: false
-cas.webflow.session.maxConversations: 5
-cas.webflow.session.storage: true
-
-spring.session.store-type: jdbc
-spring.session.jdbc.initialize-schema: never
-spring.session.jdbc.schema=classpath: org/springframework/session/jdbc/schema-postgres.sql
-spring.session.jdbc.table-name: SPRING_SESSION
+spring:
+  session:
+    store-type: redis
+    redis:
+      namespace: spring:session
 
 # Custom configuration
 
 cas.custom.properties:
   suomiFiClientName: suomi.fi
   fakeSuomiFiClientName: fakesuomi.fi
+
+# Read as Properties from Environment
+
 whitelist.regexp: ^https?://.*
 host.virkailija: http://localhost:8080
-valtuudet.enabled: false
-valtuudet.required: false
+
+# Valtuudet config
+valtuudet.enabled: true
+valtuudet.required: true
+
 valtuudet.host: http://localhost:8080
-valtuudet.client-id: client
+valtuudet.client-id: client    # Who needs this?
 valtuudet.api-key: key
 valtuudet.oauth-password: password
+
+
 service-user.username: user
 service-user.password: pass
 
+#implementation "org.apereo.cas:cas-server-support-reports:${project.'cas.version'}"
+management.endpoint.springWebflow.enabled: true
+#cas.monitor.endpoints.endpoint.springWebflow.access: IP_ADDRESS
+#cas.monitor.endpoints.endpoint.springWebflow.required-ip-addresses: 127.0.0.1
 
