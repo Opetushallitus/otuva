@@ -85,6 +85,8 @@ cas.logout.follow-service-redirects: true
 cas.logout.redirect-parameter: service
 cas.logout.redirect-url: {{ cas_oppija_logout_redirect_url }}
 
+cas.service-registry.json.location: file:///root/oph-configuration/cas-oppija
+
 cas.http-web-request.cors.allow-origins[0]: {{ oppija_base_url_fi }}
 cas.http-web-request.cors.allow-origins[1]: {{ oppija_base_url_en }}
 cas.http-web-request.cors.allow-origins[2]: {{ oppija_base_url_sv }}
