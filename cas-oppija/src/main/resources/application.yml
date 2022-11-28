@@ -65,6 +65,8 @@ cas:
       storage: true
       compress: false
 
+cas.service-registry.json.location: classpath:/opintopolku-1.json
+
 management:
   endpoints:
     web:

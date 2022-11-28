@@ -1,0 +1,13 @@
+{
+  "@class": "org.apereo.cas.services.RegexRegisteredService",
+  "serviceId": "^https?://.*",
+  "name": "opintopolku",
+  "id": 1,
+  "proxyPolicy": {
+    "@class": "org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicy",
+    "pattern": "^https?://.*"
+  },
+  "attributeReleasePolicy": {
+    "@class": "fi.vm.sade.cas.oppija.configuration.CasOppijaAttributeReleasePolicy"
+  }
+}
