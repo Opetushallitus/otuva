@@ -71,21 +71,21 @@ public class KayttajatiedotRepositoryImplTest extends AbstractServiceIntegration
     public void findPassiveServiceUsersSkipIncorrectUserType() {
         populate(virkailija("foo").withUsername("bar"));
         populate(virkailija("qux").withUsername("xyz").withLoginCounter());
-        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).hasSize(0);
-        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().plusDays(1))).hasSize(0);
+        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).isEmpty();
+        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().plusDays(1))).isEmpty();
     }
 
     @Test
     public void findPassiveServiceUsersHavingLoginCounter() {
         populate(palvelukayttaja("foo").withUsername("bar").withLoginCounter());
-        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).hasSize(0);
+        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).isEmpty();
         assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().plusDays(1))).hasSize(1);
     }
 
     @Test
     public void findPassiveServiceUsersNotHavingLoginCounter() {
         populate(palvelukayttaja("foo").withUsername("bar"));
-        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).hasSize(0);
+        assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().minusDays(1))).isEmpty();
         assertThat(repository.findPassiveServiceUsers(LocalDateTime.now().plusDays(1))).hasSize(1);
     }
 }
