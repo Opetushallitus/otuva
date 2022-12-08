@@ -66,10 +66,15 @@ public class HenkiloPopulator implements Populator<Henkilo> {
         return this;
     }
 
+    public HenkiloPopulator withLoginCounter() {
+        this.kayttajatiedot.incrementLoginCount();
+        return this;
+    }
+
     @Override
     public Henkilo apply(EntityManager entityManager) {
         Henkilo existing = first(entityManager.createQuery("select h from Henkilo h where h.oidHenkilo = :oid")
-                    .setParameter("oid", oid));
+                .setParameter("oid", oid));
         if (existing != null) {
             return existing;
         }
