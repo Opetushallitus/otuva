@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -26,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 @RequiredArgsConstructor
 @Slf4j
 @ConditionalOnProperty(name = "kayttooikeus.scheduling.run-on-startup", matchIfMissing = true)
+@Profile("!dev")
 public class SchedulingConfiguration implements SchedulingConfigurer {
 
     private final KayttooikeusProperties kayttooikeusProperties;
