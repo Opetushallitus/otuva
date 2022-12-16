@@ -41,9 +41,6 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         }
 
         Kayttajatiedot kayttajatiedot = mapper.map(createDto, Kayttajatiedot.class);
-        if (!isUsernameUnique(kayttajatiedot.getUsername(), Optional.ofNullable(henkilo.getOidHenkilo()))) {
-            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-        }
         return saveKayttajatiedot(henkilo, kayttajatiedot);
     }
 
@@ -60,9 +57,6 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         if (StringUtils.hasLength(username)) {
             Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo);
             if (kayttajatiedot.isPresent()) {
-                if (!isUsernameUnique(username, Optional.ofNullable(oidHenkilo))) {
-                    throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-                }
                 kayttajatiedot.get().setUsername(username);
             }
             else {
@@ -96,9 +90,6 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     private KayttajatiedotReadDto updateKayttajatiedot(Henkilo henkilo, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
-        if (!isUsernameUnique(kayttajatiedotUpdateDto.getUsername(), Optional.ofNullable(henkilo.getOidHenkilo()))) {
-            throw new IllegalArgumentException("Käyttäjänimi on jo käytössä");
-        }
         Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot()).orElseGet(() -> {
             if (!KayttajaTyyppi.PALVELU.equals(henkilo.getKayttajaTyyppi())) {
                 throw new ValidationException("Vain palvelukäyttäjälle voi lisätä käyttäjätunnuksen");
