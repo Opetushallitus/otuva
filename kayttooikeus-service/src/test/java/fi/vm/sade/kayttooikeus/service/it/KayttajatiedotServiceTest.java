@@ -50,35 +50,6 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    public void createShouldThrowOnDuplicateUsername() {
-        String oid = "1.2.3.4.5";
-        populate(kayttajatiedot(henkilo("toinen"), "user1"));
-        KayttajatiedotCreateDto createDto = new KayttajatiedotCreateDto();
-        createDto.setUsername("USER1");
-
-        Throwable throwable = catchThrowable(() -> kayttajatiedotService.create(oid, createDto));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("on jo käytössä");
-    }
-
-    @Test
-    public void updateShouldThrowOnDuplicateUsername() {
-        String oid = "1.2.3.4.5";
-        populate(henkilo(oid));
-        populate(kayttajatiedot(henkilo("toinen"), "user1"));
-        KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
-        updateDto.setUsername("USER1");
-
-        Throwable throwable = catchThrowable(() -> kayttajatiedotService.updateKayttajatiedot(oid, updateDto));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Käyttäjänimi on jo käytössä");
-    }
-
-    @Test
     public void updateShouldNotThrowIfUsernameNotChanged() {
         String oid = "1.2.3.4.5";
         populate(kayttajatiedot(henkilo(oid), "user1"));
