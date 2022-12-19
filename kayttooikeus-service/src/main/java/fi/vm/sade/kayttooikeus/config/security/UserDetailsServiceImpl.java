@@ -48,7 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, Kayttajarooli
         return streamRooliByKayttajaOid(kayttajaOid).collect(toSet());
     }
 
-    private Stream<String> streamRooliByKayttajaOid(String kayttajaOid) {
+    Stream<String> streamRooliByKayttajaOid(String kayttajaOid) {
         return myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOrganisaatioPalveluRooliByOid(kayttajaOid)
                 .stream()
                 .flatMap(UserDetailsServiceImpl::getRoolit)
