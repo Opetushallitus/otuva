@@ -29,7 +29,7 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
     /**
      * Username for Henkilo
      */
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false, columnDefinition = "citext")
     private String username;
 
     /**
