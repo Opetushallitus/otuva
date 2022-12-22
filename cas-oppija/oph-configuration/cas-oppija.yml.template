@@ -110,7 +110,6 @@ server.tomcat.accesslog:
 
 # Oph properties overrides
 
-whitelist.regexp: {{ cas_oppija_whitelist_regexp }}
 host.virkailija: https://{{ host_virkailija }}
 valtuudet.enabled: {{ cas_oppija_suomifi_valtuudet_enabled | default('true') }}
 valtuudet.required: {{ cas_oppija_suomifi_valtuudet_required | default('true') }}
