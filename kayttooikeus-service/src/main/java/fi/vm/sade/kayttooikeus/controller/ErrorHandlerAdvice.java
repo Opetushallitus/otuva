@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -95,6 +96,13 @@ public class ErrorHandlerAdvice {
             locale = FI;
         }
         return locale;
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    @ResponseBody
+    public Map<String,Object> dataIntegrityViolatingRequest(HttpServletRequest req, DataIntegrityViolationException exception) {
+        return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.

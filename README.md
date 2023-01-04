@@ -70,7 +70,7 @@ service-users.default.password: <oma_virkailija_salasana>
 Palvelu löytyy käynnistymisen jälkeen osoitteesta <http://localhost:8080/kayttooikeus-service>.
 
 #### Backend-palvelun käynnistäminen dev-profiililla
-Tämä ei ole kehityksessä tällä hetkellä yleisesti käytetty tapa. Tällöin kirjautuminen lokaaliin palveluun tapahtuu basic authilla koodissa määritellyillä tunnuksilla.
+dev-profiilissa kirjautuminen lokaaliin palveluun tapahtuu basic authilla niin, että käyttäjänimi on haluttu käyttäjän oid ja salasana `password`.
 
     java -jar -Dspring.profiles.active=dev -Dspring.config.additional-location=/<path>/<to>/oph-configuration/kayttooikeus.yml kayttooikeus-service/target/kayttooikeus-service-1.0.0-SNAPSHOT.jar
 

@@ -7,6 +7,8 @@ import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +27,7 @@ import static java.util.stream.Collectors.toSet;
  * {@link UserDetailsService}-toteutus joka muodostaa käyttäjän roolit tietokannasta.
  *
  */
+@Profile("!dev")
 @Component
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService, KayttajarooliProvider {
@@ -45,7 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, Kayttajarooli
         return streamRooliByKayttajaOid(kayttajaOid).collect(toSet());
     }
 
-    private Stream<String> streamRooliByKayttajaOid(String kayttajaOid) {
+    Stream<String> streamRooliByKayttajaOid(String kayttajaOid) {
         return myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOrganisaatioPalveluRooliByOid(kayttajaOid)
                 .stream()
                 .flatMap(UserDetailsServiceImpl::getRoolit)

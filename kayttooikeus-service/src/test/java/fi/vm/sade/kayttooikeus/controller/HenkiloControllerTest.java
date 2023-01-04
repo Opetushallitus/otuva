@@ -9,9 +9,11 @@ import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,6 +27,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -106,6 +109,15 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .content("\"1.2.3.4.5\""))
                 .andExpect(status().isUnsupportedMediaType());
         verifyNoInteractions(kayttajatiedotService);
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
+    public void changeUsernameReturnsBadRequestOnDuplicateUsername() throws Exception {
+        given(this.kayttajatiedotService.updateKayttajatiedot(any(), any())).willThrow(new DataIntegrityViolationException("error"));
+        mvc.perform(put("/henkilo/{oid}/kayttajatiedot", "1.2.3.4.6")
+                .content("{\"username\": \"pirjo\"}").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
 }
