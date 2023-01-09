@@ -15,6 +15,7 @@ public class KayttajaCriteriaDto {
 
     private KayttajaTyyppi kayttajaTyyppi;
     private Set<String> organisaatioOids;
+    private Set<String> kayttoOikeusRyhmaNimet;
     private Map<String, Collection<String>> kayttooikeudet;
 
     // oppijanumerorekisterin hakuehdot

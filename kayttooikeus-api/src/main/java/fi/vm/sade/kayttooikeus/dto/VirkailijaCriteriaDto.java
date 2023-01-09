@@ -14,6 +14,7 @@ import java.util.Set;
 public class VirkailijaCriteriaDto {
 
     private Set<String> organisaatioOids;
+    private Set<String> kayttoOikeusRyhmaNimet;
     private Map<String, Collection<String>> kayttooikeudet;
 
     // oppijanumerorekisterin hakuehdot
