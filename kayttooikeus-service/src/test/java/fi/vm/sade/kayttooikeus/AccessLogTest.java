@@ -57,6 +57,12 @@ public class AccessLogTest {
     }
 
     @Test
+    public void sensitiveInformationInPathIsMaskedNewSpec() {
+        restTemplate.getForEntity("/123456X7890", String.class);
+        assertEquals("GET /123456X**** HTTP/1.1", resolveLog(output));
+    }
+
+    @Test
     public void sensitiveInformationInRequestParameterIsMasked() {
         restTemplate.getForEntity("/?test=123456-7890", String.class);
         assertEquals("GET /?test=123456-**** HTTP/1.1", resolveLog(output));
