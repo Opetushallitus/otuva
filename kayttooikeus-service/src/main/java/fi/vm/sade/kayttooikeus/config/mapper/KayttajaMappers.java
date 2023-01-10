@@ -24,6 +24,7 @@ public class KayttajaMappers {
                 destination.setKayttajaTyyppi(source.getKayttajaTyyppi());
                 destination.setPassivoitu(source.getPassivoitu());
                 destination.setOrganisaatioOids(source.getOrganisaatioOids());
+                destination.setKayttoOikeusRyhmaNimet(source.getKayttoOikeusRyhmaNimet());
                 destination.setKayttooikeudet(Optional.ofNullable(source.getKayttooikeudet())
                         .map(kayttooikeudet -> kayttooikeudet.entrySet().stream()
                                 .flatMap(entry -> entry.getValue().stream().map(value -> entry.getKey() + "_" + value))
