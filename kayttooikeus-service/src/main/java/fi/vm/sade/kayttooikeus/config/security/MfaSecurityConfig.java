@@ -15,8 +15,12 @@ import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 public class MfaSecurityConfig extends WebSecurityConfigurerAdapter {
   public static final String ROLE = "APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ";
 
+  private CasProperties casProperties;
+
   @Autowired
-  private CasProperties mfaProps;
+  public MfaSecurityConfig(CasProperties casProperties) {
+      this.casProperties = casProperties;
+  }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -38,8 +42,8 @@ public class MfaSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.inMemoryAuthentication()
-              .withUser(mfaProps.getMfa().getUsername())
-              .password("{noop}" + mfaProps.getMfa().getPassword())
+              .withUser(casProperties.getMfa().getUsername())
+              .password("{noop}" + casProperties.getMfa().getPassword())
               .roles(ROLE);
   }
 }
