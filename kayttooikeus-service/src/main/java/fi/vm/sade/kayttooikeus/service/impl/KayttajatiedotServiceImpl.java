@@ -168,4 +168,9 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         kayttajatiedot.setSalt(salt);
         kayttajatiedot.setPassword(hash);
     }
+
+    @Override
+    public Optional<String> getMfaProvider(String username) {
+        return kayttajatiedotRepository.findMfaProviderByUsername(username);
+    }
 }

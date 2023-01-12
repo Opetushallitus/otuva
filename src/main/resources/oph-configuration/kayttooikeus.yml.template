@@ -20,6 +20,9 @@ spring:
       max-lifetime: {{postgresql_kayttooikeus_max_lifetime | default('900000')}}
 cas:
   service: https://{{host_virkailija}}/kayttooikeus-service
+  mfa:
+    username: {{cas_mfa_username}}
+    password: {{cas_mfa_password}}
 
 host:
   host-virkailija: {{host_virkailija}}

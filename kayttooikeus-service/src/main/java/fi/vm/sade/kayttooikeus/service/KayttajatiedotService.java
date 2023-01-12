@@ -35,4 +35,6 @@ public interface KayttajatiedotService {
     void throwIfOldPassword(String oidHenkilo, String password);
 
     KayttajatiedotReadDto getByUsernameAndPassword(String username, String password);
+
+    Optional<String> getMfaProvider(String username);
 }

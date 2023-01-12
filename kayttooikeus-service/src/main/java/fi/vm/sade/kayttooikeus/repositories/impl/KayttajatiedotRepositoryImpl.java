@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
+import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
@@ -57,6 +58,18 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
                 .select(qHenkilo.oidHenkilo)
                 .fetchOne();
         return Optional.ofNullable(oid);
+    }
+
+    @Override
+    public Optional<String> findMfaProviderByUsername(String username) {
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+
+        MfaProvider mfaProvider = new JPAQuery<>(em)
+                .from(qKayttajatiedot)
+                .where(qKayttajatiedot.username.equalsIgnoreCase(username))
+                .select(qKayttajatiedot.mfaProvider)
+                .fetchOne();
+        return Optional.ofNullable(mfaProvider).flatMap(m -> Optional.of(m.getMfaProvider()));
     }
 
 }
