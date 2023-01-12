@@ -22,10 +22,9 @@ import java.util.Optional;
 public class MfaControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
+    private String username = "cas";
+    private String password = "mfa";
 
-    @Autowired
-    private CasProperties properties;
-  
     @Test
     public void getMfaTriggerRequiresBasicAuth() throws Exception {
         when(kayttajatiedotService.getMfaProvider(any())).thenReturn(Optional.of("mfa-gauth"));
@@ -39,7 +38,7 @@ public class MfaControllerTest extends AbstractControllerTest {
     public void getMfaTriggerReturnsMfaProvider() throws Exception {
         when(kayttajatiedotService.getMfaProvider(any())).thenReturn(Optional.of("mfa-gauth"));
         mvc.perform(post("/mfa/trigger")
-            .with(httpBasic(properties.getMfa().getUsername(), properties.getMfa().getPassword()))
+            .with(httpBasic(username, password))
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"principalId\":\"username\",\"serviceId\":\"service\"}"))
             .andExpect(status().isOk())
@@ -50,7 +49,7 @@ public class MfaControllerTest extends AbstractControllerTest {
     public void getMfaTriggerReturnsEmptyStringIfNoMfaProvider() throws Exception {
         when(kayttajatiedotService.getMfaProvider(any())).thenReturn(Optional.empty());
         mvc.perform(post("/mfa/trigger")
-            .with(httpBasic(properties.getMfa().getUsername(), properties.getMfa().getPassword()))
+            .with(httpBasic(username, password))
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"principalId\":\"username\",\"serviceId\":\"service\"}"))
             .andExpect(status().isOk())
