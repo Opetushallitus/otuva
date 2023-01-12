@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -20,10 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(properties = {
-  "cas.mfa.username=cas",
-  "cas.mfa.password=mfa",
-})
 public class MfaControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
