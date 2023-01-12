@@ -57,7 +57,7 @@ server:
     session:
       cookie:
         name: JSESSIONID
-  port: 8080
+  port: 8081
 
 cas:
   service: http://localhost:${server.port}/kayttooikeus-service

@@ -1,9 +1,10 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -27,11 +28,8 @@ public class MfaControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
 
-    @Value("${cas.mfa.username}")
-    private String username;
-  
-    @Value("${cas.mfa.password}")
-    private String password;
+    @Autowired
+    private CasProperties properties;
   
     @Test
     public void getMfaTriggerRequiresBasicAuth() throws Exception {
@@ -46,7 +44,7 @@ public class MfaControllerTest extends AbstractControllerTest {
     public void getMfaTriggerReturnsMfaProvider() throws Exception {
         when(kayttajatiedotService.getMfaProvider(any())).thenReturn(Optional.of("mfa-gauth"));
         mvc.perform(post("/mfa/trigger")
-            .with(httpBasic(username, password))
+            .with(httpBasic(properties.getMfa().getUsername(), properties.getMfa().getPassword()))
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"principalId\":\"username\",\"serviceId\":\"service\"}"))
             .andExpect(status().isOk())
@@ -57,7 +55,7 @@ public class MfaControllerTest extends AbstractControllerTest {
     public void getMfaTriggerReturnsEmptyStringIfNoMfaProvider() throws Exception {
         when(kayttajatiedotService.getMfaProvider(any())).thenReturn(Optional.empty());
         mvc.perform(post("/mfa/trigger")
-            .with(httpBasic(username, password))
+            .with(httpBasic(properties.getMfa().getUsername(), properties.getMfa().getPassword()))
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"principalId\":\"username\",\"serviceId\":\"service\"}"))
             .andExpect(status().isOk())

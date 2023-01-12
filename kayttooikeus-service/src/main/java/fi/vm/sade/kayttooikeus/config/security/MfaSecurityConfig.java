@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -8,16 +8,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
+
 @Configuration
 @Order(1)
 public class MfaSecurityConfig extends WebSecurityConfigurerAdapter {
   public static final String ROLE = "APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ";
 
-  @Value("${cas.mfa.username}")
-  private String username;
-
-  @Value("${cas.mfa.password}")
-  private String password;
+  @Autowired
+  private CasProperties mfaProps;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -39,8 +38,8 @@ public class MfaSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.inMemoryAuthentication()
-              .withUser(username)
-              .password("{noop}" + password)
+              .withUser(mfaProps.getMfa().getUsername())
+              .password("{noop}" + mfaProps.getMfa().getPassword())
               .roles(ROLE);
   }
 }
