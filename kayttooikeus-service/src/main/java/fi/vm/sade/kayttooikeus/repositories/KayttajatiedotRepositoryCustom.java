@@ -13,4 +13,5 @@ public interface KayttajatiedotRepositoryCustom {
 
     Optional<String> findOidByUsername(String username);
 
+    Optional<String> findMfaProviderByUsername(String username);
 }

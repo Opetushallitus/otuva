@@ -14,4 +14,11 @@ public class CasProperties {
     private String service;
     private Boolean sendRenew;
     private String key;
+    private MfaAuth mfa = new MfaAuth();
+
+    @Getter @Setter
+    public static class MfaAuth {
+        private String username;
+        private String password;
+    }
 }

@@ -3,6 +3,9 @@ package fi.vm.sade.kayttooikeus.model;
 import lombok.*;
 
 import javax.persistence.*;
+
+import fi.vm.sade.kayttooikeus.dto.MfaProvider;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -58,6 +61,10 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
      */
     @Column(name = "invalidated")
     private Boolean invalidated = false;
+
+    @Column(name = "mfaprovider")
+    @Enumerated(EnumType.STRING)
+    private MfaProvider mfaProvider;
 
     public void incrementLoginCount() {
         loginCounter = Optional.ofNullable(loginCounter)

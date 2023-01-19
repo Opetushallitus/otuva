@@ -11,7 +11,6 @@ import org.jasig.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.cas.ServiceProperties;
@@ -24,10 +23,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-@Profile("!dev")
 @Configuration
-@Order(2)
+@Order(3)
 @EnableGlobalMethodSecurity(jsr250Enabled = false, prePostEnabled = true, securedEnabled = true)
 @EnableWebSecurity
 public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
@@ -137,7 +136,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v2/api-docs").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(casAuthenticationFilter())
+                .addFilterAfter(casAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint())
                 .and()
                 .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);

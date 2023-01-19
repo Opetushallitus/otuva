@@ -22,6 +22,9 @@ cas:
   service: http://localhost/kayttooikeus-service
   send-renew: false
   key: kayttooikeus-service
+  mfa:
+    username: cas
+    password: mfa
 
 host:
   host-virkailija: localhost
