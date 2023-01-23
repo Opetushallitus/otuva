@@ -80,13 +80,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         QGoogleAuthToken qGoogleAuthToken = QGoogleAuthToken.googleAuthToken;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QHenkilo qHenkilo = QHenkilo.henkilo;
-        System.out.println(new JPAQuery<>(em)
-        .from(qGoogleAuthToken)
-        .join(qGoogleAuthToken.henkilo, qHenkilo)
-        .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
-        .where(qKayttajatiedot.username.equalsIgnoreCase(username))
-        .select(qGoogleAuthToken)
-        .fetchOne().toString());
+
         GoogleAuthToken mfaToken = new JPAQuery<>(em)
                 .from(qGoogleAuthToken)
                 .join(qGoogleAuthToken.henkilo, qHenkilo)
