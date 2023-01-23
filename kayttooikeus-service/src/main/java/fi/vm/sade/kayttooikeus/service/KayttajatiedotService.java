@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.service;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
+import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 
 import java.util.Optional;
@@ -37,4 +38,6 @@ public interface KayttajatiedotService {
     KayttajatiedotReadDto getByUsernameAndPassword(String username, String password);
 
     Optional<String> getMfaProvider(String username);
+
+    Optional<GoogleAuthToken> getGoogleAuthToken(String username);
 }

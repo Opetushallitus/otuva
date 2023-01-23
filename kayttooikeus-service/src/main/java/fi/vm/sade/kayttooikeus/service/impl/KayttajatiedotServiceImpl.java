@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
@@ -172,5 +173,10 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     public Optional<String> getMfaProvider(String username) {
         return kayttajatiedotRepository.findMfaProviderByUsername(username);
+    }
+
+    @Override
+    public Optional<GoogleAuthToken> getGoogleAuthToken(String username) {
+        return kayttajatiedotRepository.findGoogleAuthToken(username);
     }
 }

@@ -2,9 +2,12 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
+
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
+import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.QGoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepositoryCustom;
@@ -70,6 +73,29 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
                 .select(qKayttajatiedot.mfaProvider)
                 .fetchOne();
         return Optional.ofNullable(mfaProvider).flatMap(m -> Optional.of(m.getMfaProvider()));
+    }
+
+    @Override
+    public Optional<GoogleAuthToken> findGoogleAuthToken(String username) {
+        QGoogleAuthToken qGoogleAuthToken = QGoogleAuthToken.googleAuthToken;
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+        System.out.println(new JPAQuery<>(em)
+        .from(qGoogleAuthToken)
+        .join(qGoogleAuthToken.henkilo, qHenkilo)
+        .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
+        .where(qKayttajatiedot.username.equalsIgnoreCase(username))
+        .select(qGoogleAuthToken)
+        .fetchOne().toString());
+        GoogleAuthToken mfaToken = new JPAQuery<>(em)
+                .from(qGoogleAuthToken)
+                .join(qGoogleAuthToken.henkilo, qHenkilo)
+                .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
+                .where(qKayttajatiedot.username.equalsIgnoreCase(username))
+                .select(qGoogleAuthToken)
+                .fetchOne();
+
+        return Optional.ofNullable(mfaToken);
     }
 
 }
