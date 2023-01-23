@@ -21,7 +21,7 @@ import java.time.Month;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
-public class MfaControllerTest extends AbstractControllerTest {
+public class CasMfaControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
     private String username = "cas";

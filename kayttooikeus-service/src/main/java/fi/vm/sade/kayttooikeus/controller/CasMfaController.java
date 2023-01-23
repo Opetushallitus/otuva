@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +23,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(value = "/mfa")
 @RequiredArgsConstructor
-public class MfaController {
+public class CasMfaController {
     private final KayttajatiedotService kayttajatiedotService;
 
     @PostMapping(value = "/trigger", consumes = MediaType.APPLICATION_JSON_VALUE)
