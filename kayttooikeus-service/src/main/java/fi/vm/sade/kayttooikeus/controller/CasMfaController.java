@@ -55,16 +55,11 @@ public class CasMfaController {
     @PreAuthorize("hasAnyRole(" +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
-    public void getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         var username = request.getHeader("username");
-        var token = kayttajatiedotService
+        return kayttajatiedotService
           .getGoogleAuthToken(username)
           .map(t -> mapGoogleAuthTokenToCas(t, username))
           .orElseThrow();
-        ObjectMapper mapper = new ObjectMapper();
-        String serializedJson = mapper.writeValueAsString(token);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(serializedJson);
-        response.getWriter().flush();
     }
 }
