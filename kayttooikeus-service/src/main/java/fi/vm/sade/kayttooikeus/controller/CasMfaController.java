@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import lombok.RequiredArgsConstructor;
 
-import org.jose4j.lang.JoseException;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +55,7 @@ public class CasMfaController {
     @PreAuthorize("hasAnyRole(" +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
-    public void getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws IOException, JoseException {
+    public void getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         var username = request.getHeader("username");
         var token = kayttajatiedotService
           .getGoogleAuthToken(username)
