@@ -121,12 +121,7 @@ public class KutsuServiceImpl implements KutsuService {
 
         Kutsu persistedNewKutsu = this.kutsuRepository.save(newKutsu);
 
-        Optional<String> kutsuja = Optional.ofNullable(kutsuCreateDto.getKutsujaForEmail());
-        if (kutsuja.isPresent()) {
-            emailService.sendInvitationEmail(persistedNewKutsu, kutsuja.get());
-        } else {
-            emailService.sendInvitationEmail(persistedNewKutsu);
-        }
+        emailService.sendInvitationEmail(persistedNewKutsu, Optional.ofNullable(kutsuCreateDto.getKutsujaForEmail()));
 
         return persistedNewKutsu.getId();
     }

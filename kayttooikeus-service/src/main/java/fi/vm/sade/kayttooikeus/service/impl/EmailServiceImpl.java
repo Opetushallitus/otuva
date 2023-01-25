@@ -227,12 +227,10 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public void sendInvitationEmail(Kutsu kutsu) {
-        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsu.getKutsuja());
-        String kutsujaForEmail = String.format("%s %s", kutsuja.getKutsumanimi(), kutsuja.getSukunimi());
-        sendInvitationEmail(kutsu, kutsujaForEmail);
+        sendInvitationEmail(kutsu, Optional.empty());
     }
 
-    public void sendInvitationEmail(Kutsu kutsu, String kutsujaForEmail) {
+    public void sendInvitationEmail(Kutsu kutsu, Optional<String> inviterOverride) {
         EmailData emailData = new EmailData();
         EmailMessage email = new EmailMessage();
         email.setTemplateName(KUTSUTTU_EMAIL_TEMPLATE_NAME);
@@ -247,16 +245,14 @@ public class EmailServiceImpl implements EmailService {
         recipient.setLanguageCode(kutsu.getKieliKoodi());
         recipient.setName(kutsu.getEtunimi() + " " + kutsu.getSukunimi());
 
-        Map<String, String> targetUrlQueryParams = new HashMap<String, String>() {{
-            put("kutsuToken", kutsu.getSalaisuus());
-            put("locale", kutsu.getKieliKoodi());
-        }};
-        String kayttooikeusTunnistusUrl = this.urlProperties
-                .url("kayttooikeus-service.cas.tunnistus", targetUrlQueryParams);
-        Map<String, String> urlQueryParams = new HashMap<String, String>() {{
-            put("service", kayttooikeusTunnistusUrl);
-            put("locale", kutsu.getKieliKoodi().toUpperCase());
-        }};
+        Map<String, String> targetUrlQueryParams = Map.of(
+            "kutsuToken", kutsu.getSalaisuus(),
+            "locale", kutsu.getKieliKoodi());
+
+        Map<String, String> urlQueryParams = Map.of(
+            "service", urlProperties.url("kayttooikeus-service.cas.tunnistus", targetUrlQueryParams),
+            "locale", kutsu.getKieliKoodi().toUpperCase());
+
         recipient.setRecipientReplacements(asList(replacement("linkki", this.urlProperties
                         .url("cas.oppija.identification", urlQueryParams)),
                 replacement("vastaanottaja", mapper.map(kutsu, SahkopostiHenkiloDto.class)),
@@ -272,7 +268,7 @@ public class EmailServiceImpl implements EmailService {
                                 )
                         ).sorted(comparing(OranizationReplacement::getName)).collect(toList())),
                 replacement("saate", kutsu.getSaate()),
-                replacement("kutsuja", kutsujaForEmail),
+                replacement("kutsuja", inviterOverride.orElseGet(() -> resolveInviterName(kutsu))),
                 replacement("voimassa", kutsu.getAikaleima().plusMonths(1).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
         ));
         emailData.setRecipient(singletonList(recipient));
@@ -280,6 +276,11 @@ public class EmailServiceImpl implements EmailService {
         logger.info("Sending invitation email to {}", kutsu.getSahkoposti());
         String response = this.ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
         logger.info("Sent invitation email to {}, ryhmasahkoposti-result: {}", kutsu.getSahkoposti(), response);
+    }
+
+    private String resolveInviterName(Kutsu kutsu) {
+        HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsu.getKutsuja());
+        return String.format("%s %s", kutsuja.getKutsumanimi(), kutsuja.getSukunimi());
     }
 
     @Override

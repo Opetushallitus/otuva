@@ -526,7 +526,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
 
-        verify(emailService, times(1)).sendInvitationEmail(any());
+        verify(emailService, times(1)).sendInvitationEmail(any(Kutsu.class), eq(Optional.empty()));
     }
 
     @Test
@@ -609,7 +609,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
 
-        verify(emailService, times(1)).sendInvitationEmail(any(), eq(kutsujaForEmail));
+        verify(emailService, times(1)).sendInvitationEmail(any(), eq(Optional.of(kutsujaForEmail)));
     }
 
     @Test(expected = ForbiddenException.class)
