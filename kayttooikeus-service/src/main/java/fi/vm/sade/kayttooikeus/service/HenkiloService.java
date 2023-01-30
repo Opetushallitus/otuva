@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
+import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -92,4 +94,6 @@ public interface HenkiloService {
      */
     @Deprecated
     MeDto getMe() throws JsonProcessingException;
+
+    Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince);
 }
