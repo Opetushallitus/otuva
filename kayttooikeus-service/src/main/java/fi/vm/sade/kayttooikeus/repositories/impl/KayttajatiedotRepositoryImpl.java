@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
+
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
@@ -73,6 +74,24 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         return Optional.ofNullable(mfaProvider).flatMap(m -> Optional.of(m.getMfaProvider()));
     }
 
+    @Override
+    public Optional<GoogleAuthToken> findGoogleAuthToken(String username) {
+        QGoogleAuthToken qGoogleAuthToken = QGoogleAuthToken.googleAuthToken;
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+
+        GoogleAuthToken mfaToken = new JPAQuery<>(em)
+                .from(qGoogleAuthToken)
+                .join(qGoogleAuthToken.henkilo, qHenkilo)
+                .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
+                .where(qKayttajatiedot.username.equalsIgnoreCase(username))
+                .select(qGoogleAuthToken)
+                .fetchOne();
+
+        return Optional.ofNullable(mfaToken);
+    }
+
+    @Override
     public Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
         return new JPAQuery<Henkilo>(em)

@@ -3,13 +3,13 @@ package fi.vm.sade.kayttooikeus.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
 public class MfaTriggerDto {
-    @NotNull
+    @NotEmpty
     private String principalId;
-    @NotNull
+    @NotEmpty
     private String serviceId;
 }

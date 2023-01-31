@@ -64,6 +64,14 @@ public class ErrorHandlerAdvice {
                         exception.getMessage() :
                         messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
     }
+
+    @ResponseStatus(value = HttpStatus.NOT_FOUND) // 404 missing optional value
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseBody
+    public Map<String,Object> noSuchElement(HttpServletRequest req, NoSuchElementException exception) {
+        return handleException(req, exception, "error_NotFoundException",
+                messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
+    }
     
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
     @ExceptionHandler(AccessDeniedException.class)
