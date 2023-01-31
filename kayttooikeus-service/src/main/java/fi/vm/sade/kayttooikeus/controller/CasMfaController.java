@@ -10,8 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -55,7 +53,7 @@ public class CasMfaController {
     @PreAuthorize("hasAnyRole(" +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
-    public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) {
         var username = request.getHeader("username");
         return kayttajatiedotService
           .getGoogleAuthToken(username)
