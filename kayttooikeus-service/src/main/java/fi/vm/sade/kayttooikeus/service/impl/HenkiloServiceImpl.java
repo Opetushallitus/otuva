@@ -246,9 +246,9 @@ public class HenkiloServiceImpl implements HenkiloService {
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oid));
         return this.getAppRolesSorted(
-                String.format("LANG_%s", omattiedotDto.getAsiointikieli()),
-                String.format("USER_%s", henkilo.getKayttajatiedot().getUsername()),
-                Optional.ofNullable(henkilo.getKayttajaTyyppi()).map(KayttajaTyyppi::name).orElse(VIRKAILIJA.name()))
+                        String.format("LANG_%s", omattiedotDto.getAsiointikieli()),
+                        String.format("USER_%s", henkilo.getKayttajatiedot().getUsername()),
+                        Optional.ofNullable(henkilo.getKayttajaTyyppi()).map(KayttajaTyyppi::name).orElse(VIRKAILIJA.name()))
                 .collect(Collectors.toList());
     }
 
@@ -286,5 +286,11 @@ public class HenkiloServiceImpl implements HenkiloService {
         meDto.setRoles(this.objectMapper.writeValueAsString(roles));
         meDto.setGroups(getAppRolesSorted(langRole, kayttajatyyppiRole).toArray(String[]::new));
         return meDto;
+    }
+
+    @Override
+    @Transactional
+    public Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince) {
+        return kayttajatiedotRepository.findPassiveServiceUsers(passiveSince);
     }
 }

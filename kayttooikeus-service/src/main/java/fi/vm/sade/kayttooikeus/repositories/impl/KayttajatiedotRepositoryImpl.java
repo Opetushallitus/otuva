@@ -3,17 +3,16 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
-import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
-import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.model.QGoogleAuthToken;
-import fi.vm.sade.kayttooikeus.model.QHenkilo;
-import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaContext;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCustom {
@@ -92,4 +91,18 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         return Optional.ofNullable(mfaToken);
     }
 
+    @Override
+    public Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince) {
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+        return new JPAQuery<Henkilo>(em)
+                .select(qKayttajatiedot.henkilo)
+                .from(qKayttajatiedot)
+                .leftJoin(qKayttajatiedot.loginCounter, QLoginCounter.loginCounter)
+                .where(
+                        qKayttajatiedot.henkilo.kayttajaTyyppi.eq(KayttajaTyyppi.PALVELU).and(
+                                (qKayttajatiedot.loginCounter.id.isNotNull().and(qKayttajatiedot.loginCounter.lastLogin.before(passiveSince)))
+                                        .or(qKayttajatiedot.loginCounter.id.isNull().and(qKayttajatiedot.createdAt.before(passiveSince)))
+                        )
+                ).fetch();
+    }
 }

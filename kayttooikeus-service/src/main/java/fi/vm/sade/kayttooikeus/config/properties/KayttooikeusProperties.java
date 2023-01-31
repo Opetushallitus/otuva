@@ -37,6 +37,9 @@ public class KayttooikeusProperties {
             private Long henkiloNimiCache = 100000L;
             private Integer identificationCleanupHour = 1;
             private Integer identificationCleanupMinute = 15;
+            private Integer disableInactiveServiceUsersHour = 7;
+            private Integer disableInactiveServiceUsersMinute = 15;
+            private String disableInactiveServiceUsersThreshold = "P1Y";
         }
 
     }

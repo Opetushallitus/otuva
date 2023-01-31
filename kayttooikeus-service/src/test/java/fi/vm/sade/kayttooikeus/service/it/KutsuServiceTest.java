@@ -13,6 +13,7 @@ import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.repositories.populate.*;
+import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
@@ -97,6 +98,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private OrganisaatioService organisaatioService;
+
+    @MockBean
+    private EmailService emailService;
 
     @Captor
     private ArgumentCaptor<Collection<KayttoOikeusRyhma>> kayttooikeusRyhmaCollectionCaptor;
@@ -521,11 +525,14 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
+
+        verify(emailService, times(1)).sendInvitationEmail(any(Kutsu.class), eq(Optional.empty()));
     }
 
     @Test
     @WithMockUser(username = "1.2.3", authorities = {"ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD", "ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD_1.2.3.4.5"})
     public void createKutsuAsPalvelukayttaja() {
+        final String kutsujaForEmail = "makkara";
         given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
         doReturn(HenkiloDto.builder()
                 .kutsumanimi("kutsun")
@@ -582,6 +589,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         kutsuOrganisaatio.setOrganisaatioOid("1.2.3.4.1");
         kutsuOrganisaatio.setKayttoOikeusRyhmat(Stream.of(kutsuKayttoOikeusRyhma).collect(toSet()));
         kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
+        kutsu.setKutsujaForEmail(kutsujaForEmail);
 
         long id = kutsuService.createKutsu(kutsu);
         KutsuReadDto tallennettu = kutsuService.getKutsu(id);
@@ -600,6 +608,8 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         Kutsu entity = this.em.find(Kutsu.class, id);
         assertThat(entity.getSalaisuus()).isNotEmpty();
+
+        verify(emailService, times(1)).sendInvitationEmail(any(), eq(Optional.of(kutsujaForEmail)));
     }
 
     @Test(expected = ForbiddenException.class)

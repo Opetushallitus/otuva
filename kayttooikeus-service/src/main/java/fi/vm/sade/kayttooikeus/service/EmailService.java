@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface EmailService {
@@ -16,7 +17,7 @@ public interface EmailService {
 
     void sendNewRequisitionNotificationEmails(Set<String> henkiloOids);
 
-    void sendInvitationEmail(Kutsu kutsu, String kutsujaForEmail);
+    void sendInvitationEmail(Kutsu kutsu, Optional<String> inviterOverride);
 
     void sendInvitationEmail(Kutsu kutsu);
 
