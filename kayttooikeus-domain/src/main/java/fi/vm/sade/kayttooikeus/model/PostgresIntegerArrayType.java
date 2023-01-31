@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -35,19 +36,19 @@ public class PostgresIntegerArrayType implements UserType {
       if (value != null && st != null) {
           Array array = session.connection().createArrayOf("int", (Integer[])value);
           st.setArray(index, array);
-      } else {
+      } else if (st != null) {
           st.setNull(index, sqlTypes()[0]);
       }
   }
 
   @Override
   public boolean equals(Object x, Object y) throws HibernateException {
-    return ((Integer[]) x).equals((Integer[]) x);
+    return Arrays.equals((Integer[]) x, (Integer[]) y);
   }
 
   @Override
   public int hashCode(Object x) throws HibernateException {
-    return ((Integer[]) x).hashCode();
+    return Arrays.hashCode((Integer[]) x);
   }
 
   @Override
