@@ -104,12 +104,19 @@ public class HenkiloServiceImpl implements HenkiloService {
     }
 
     private void passivoi(Henkilo henkilo, String kasittelijaOid) {
-
         Henkilo kasittelija = resolveKasittelija(kasittelijaOid);
-
         poistaKayttajatiedot(henkilo);
         poistaOikeudet(henkilo, kasittelija, "Oikeuksien poisto, koko henkilön passivointi");
         poistaVarmennustiedot(henkilo);
+    }
+
+    private Henkilo resolveKasittelija(String kasittelijaOid) {
+        if (StringUtils.isEmpty(kasittelijaOid)) {
+            kasittelijaOid = UserDetailsUtil.getCurrentUserOid();
+        }
+        final String kasittelijaOidFinal = kasittelijaOid;
+        return this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
+                .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
     }
 
     private void poistaKayttajatiedot(Henkilo henkilo) {
@@ -117,6 +124,10 @@ public class HenkiloServiceImpl implements HenkiloService {
         kayttajatiedotRepository.deleteByHenkilo(henkilo);
     }
 
+    @Override
+    public void poistaOikeudet(Henkilo henkilo, String kasittelijaOid, String selite) {
+        poistaOikeudet(henkilo, resolveKasittelija(kasittelijaOid), selite);
+    }
 
     private void poistaOikeudet(Henkilo henkilo, Henkilo kasittelija, String selite) {
         List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloRepository.findByHenkilo(henkilo);
@@ -127,15 +138,6 @@ public class HenkiloServiceImpl implements HenkiloService {
 
     private void poistaVarmennustiedot(Henkilo henkilo) {
         henkilo.getHenkiloVarmennettavas().forEach(henkiloVarmentaja -> henkiloVarmentaja.setTila(false));
-    }
-
-    private Henkilo resolveKasittelija(String kasittelijaOid) {
-        if (StringUtils.isEmpty(kasittelijaOid)) {
-            kasittelijaOid = UserDetailsUtil.getCurrentUserOid();
-        }
-        final String kasittelijaOidFinal = kasittelijaOid;
-        return this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
-                .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
     }
 
     @Override

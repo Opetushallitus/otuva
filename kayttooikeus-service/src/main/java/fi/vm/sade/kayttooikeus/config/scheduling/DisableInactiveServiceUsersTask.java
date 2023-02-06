@@ -46,7 +46,7 @@ public class DisableInactiveServiceUsersTask extends RecurringTask {
                 .map(henkilo -> {
                     try {
                         log.info("Inactive service found. Passivating {}", henkilo.getOidHenkilo());
-                        henkiloService.passivoi(henkilo.getOidHenkilo(), systemUserOid);
+                        henkiloService.poistaOikeudet(henkilo, systemUserOid, "Inactive service user");
                         return true;
                     } catch (Exception e) {
                         log.error("Error during service user passivation", e);
