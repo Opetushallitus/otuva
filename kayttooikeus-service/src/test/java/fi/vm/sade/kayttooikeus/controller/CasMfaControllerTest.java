@@ -92,6 +92,6 @@ public class CasMfaControllerTest extends AbstractControllerTest {
             .header("username", "username")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().string("[\"java.util.ArrayList\",[{\"scratchCodes\":[\"java.util.ArrayList\",[1,2,3]],\"id\":1,\"secretKey\":\"ADADFADAAADFADAFADFA\",\"validationCode\":124356,\"username\":\"username\",\"name\":\"laite\",\"registrationDate\":\"1979-04-02T03:04\",\"@class\":\"org.apereo.cas.gauth.credential.GoogleAuthenticatorAccount\"}]]"));
+            .andExpect(content().string("[\"java.util.ArrayList\",[{\"scratchCodes\":[\"java.util.ArrayList\",[1,2,3]],\"id\":1,\"secretKey\":\"ADADFADAAADFADAFADFA\",\"validationCode\":124356,\"username\":\"username\",\"name\":\"laite\",\"registrationDate\":\"1979-04-02T03:04Z\",\"@class\":\"org.apereo.cas.gauth.credential.GoogleAuthenticatorAccount\"}]]"));
     }
 }
