@@ -43,7 +43,7 @@ public class CasMfaController {
         token.setUsername(username);
         token.setValidationCode(dto.getValidationCode());
         token.setScratchCodes(List.of("java.util.ArrayList", List.of(dto.getScratchCodes())));
-        token.setRegistrationDate(dto.getRegistrationDate().toString());
+        token.setRegistrationDate(dto.getRegistrationDate().toString() + "Z");
         token.setName(dto.getName());
         token.setSecretKey(dto.getSecretKey());
         return List.of("java.util.ArrayList", List.of(token));
