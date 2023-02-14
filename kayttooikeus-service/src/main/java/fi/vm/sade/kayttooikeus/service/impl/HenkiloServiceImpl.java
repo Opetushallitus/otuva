@@ -104,20 +104,39 @@ public class HenkiloServiceImpl implements HenkiloService {
     }
 
     private void passivoi(Henkilo henkilo, String kasittelijaOid) {
-        henkilo.setKayttajatiedot(null);
-        kayttajatiedotRepository.deleteByHenkilo(henkilo);
+        Henkilo kasittelija = resolveKasittelija(kasittelijaOid);
+        poistaKayttajatiedot(henkilo);
+        poistaOikeudet(henkilo, kasittelija, "Oikeuksien poisto, koko henkilön passivointi");
+        poistaVarmennustiedot(henkilo);
+    }
 
+    private Henkilo resolveKasittelija(String kasittelijaOid) {
         if (StringUtils.isEmpty(kasittelijaOid)) {
             kasittelijaOid = UserDetailsUtil.getCurrentUserOid();
         }
         final String kasittelijaOidFinal = kasittelijaOid;
-        Henkilo kasittelija = this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
+        return this.henkiloDataRepository.findByOidHenkilo(kasittelijaOid)
                 .orElseThrow(() -> new NotFoundException("Käsittelija not found by oid " + kasittelijaOidFinal));
+    }
+
+    private void poistaKayttajatiedot(Henkilo henkilo) {
+        henkilo.setKayttajatiedot(null);
+        kayttajatiedotRepository.deleteByHenkilo(henkilo);
+    }
+
+    @Override
+    public void poistaOikeudet(Henkilo henkilo, String kasittelijaOid, String selite) {
+        poistaOikeudet(henkilo, resolveKasittelija(kasittelijaOid), selite);
+    }
+
+    private void poistaOikeudet(Henkilo henkilo, Henkilo kasittelija, String selite) {
         List<OrganisaatioHenkilo> orgHenkilos = this.organisaatioHenkiloRepository.findByHenkilo(henkilo);
         MyonnettyKayttoOikeusService.DeleteDetails deleteDetails = new MyonnettyKayttoOikeusService.DeleteDetails(
-                kasittelija, KayttoOikeudenTila.SULJETTU, "Oikeuksien poisto, koko henkilön passivointi");
+                kasittelija, KayttoOikeudenTila.SULJETTU, selite);
         orgHenkilos.forEach(orgHenkilo -> myonnettyKayttoOikeusService.passivoi(orgHenkilo, deleteDetails));
+    }
 
+    private void poistaVarmennustiedot(Henkilo henkilo) {
         henkilo.getHenkiloVarmennettavas().forEach(henkiloVarmentaja -> henkiloVarmentaja.setTila(false));
     }
 

@@ -48,6 +48,8 @@ public interface HenkiloService {
      */
     void passivoi(String henkiloOid, String kasittelijaOid);
 
+    void poistaOikeudet(Henkilo henkilo, String kasittelijaOid, String selite);
+
     Collection<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
 
     Long henkilohakuCount(HenkilohakuCriteriaDto henkilohakuCriteriaDto);
