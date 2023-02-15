@@ -52,7 +52,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateShouldNotThrowIfUsernameNotChanged() {
         String oid = "1.2.3.4.5";
-        populate(kayttajatiedot(henkilo(oid), "user1"));
+        populate(kayttajatiedot(henkilo(oid), "user1", null));
         KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
         updateDto.setUsername("user1");
 
@@ -87,7 +87,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateShouldReturnIfPalveluWithoutUsername() {
         String oid = "1.2.3.4.5";
-        populate(kayttajatiedot(henkilo(oid).withTyyppi(KayttajaTyyppi.PALVELU), "user1"));
+        populate(kayttajatiedot(henkilo(oid).withTyyppi(KayttajaTyyppi.PALVELU), "user1", null));
         KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
         updateDto.setUsername("user1");
 
@@ -102,7 +102,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         final String henkiloOid = "1.2.246.562.24.27470134096";
         String username = "eetu.esimerkki@geemail.fi";
         populate(henkilo(henkiloOid));
-        populate(kayttajatiedot(henkilo(henkiloOid), username));
+        populate(kayttajatiedot(henkilo(henkiloOid), username, null));
         kayttajatiedotService.changePasswordAsAdmin(henkiloOid, TEST_PASSWORD);
         Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotRepository.findByUsername(username);
         assertThat(kayttajatiedot)
@@ -142,7 +142,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "counterTest")
     public void countSuccessfullLogins() {
         populate(henkilo("counterTest"));
-        populate(kayttajatiedot(henkilo("counterTest"), "counterTest"));
+        populate(kayttajatiedot(henkilo("counterTest"), "counterTest", null));
         kayttajatiedotService.changePasswordAsAdmin("counterTest", TEST_PASSWORD);
 
         Kayttajatiedot userDetails = kayttajatiedotRepository.findByUsername("counterTest").orElseThrow();
