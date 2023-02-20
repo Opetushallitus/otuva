@@ -150,7 +150,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateIdentificationAndGenerateTokenForHenkiloByOid() {
         String oid = "oid1";
-        populate(kayttajatiedot(henkilo(oid), "user1", null));
+        populate(kayttajatiedot(henkilo(oid), "user1"));
 
         String token1 = identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(oid);
         assertThat(identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, "vetuma"))

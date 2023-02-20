@@ -64,7 +64,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void getByKayttajatunnus() {
-        populate(kayttajatiedot(henkilo("oid1"), "user1", null));
+        populate(kayttajatiedot(henkilo("oid1"), "user1"));
 
         HenkiloReadDto dto = henkiloService.getByKayttajatunnus("user1");
 
@@ -76,7 +76,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void passivoiHenkilo() {
         // Käsittelijä
-        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "Käsittelijä", null));
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "Käsittelijä"));
         // Passivoitava
         String oidHenkilo = "1.2.3.4.5";
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(myonnettyKayttoOikeus(
@@ -112,8 +112,8 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void henkilohakuCountWithUsername() {
-        populate(kayttajatiedot(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio"), "noppa", null));
-        populate(kayttajatiedot(henkilo("1.2.3.4.3").withNimet("toinen", "sukunimi"), "heppa", null));
+        populate(kayttajatiedot(henkilo("1.2.3.4.2").withNimet("arpa", "kuutio"), "noppa"));
+        populate(kayttajatiedot(henkilo("1.2.3.4.3").withNimet("toinen", "sukunimi"), "heppa"));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, true,
                 null, null, null, null, null, "noppa", null, null);
@@ -270,7 +270,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.00000000001"})
     public void getOmatTiedotOphVirkailija() {
-        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "username", null));
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "username"));
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.1", "1.2.3.4.100"),
                 kayttoOikeusRyhma("tunniste").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         OmatTiedotDto omatTiedotDto = this.henkiloService.getOmatTiedot();

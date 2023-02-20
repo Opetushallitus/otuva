@@ -12,16 +12,14 @@ public class KayttajatiedotPopulator implements Populator<Kayttajatiedot> {
     private final String username;
     private final MfaProvider mfaProvider;
 
-    public KayttajatiedotPopulator(Populator<Henkilo> henkilo, String username) {
-        this.henkilo = henkilo;
-        this.username = username;
-        this.mfaProvider = null;
-    }
-
     public KayttajatiedotPopulator(Populator<Henkilo> henkilo, String username, MfaProvider mfaProvider) {
         this.henkilo = henkilo;
         this.username = username;
         this.mfaProvider = mfaProvider;
+    }
+
+    public static KayttajatiedotPopulator kayttajatiedot(Populator<Henkilo> henkilo, String username) {
+        return new KayttajatiedotPopulator(henkilo, username, null);
     }
 
     public static KayttajatiedotPopulator kayttajatiedot(Populator<Henkilo> henkilo, String username, MfaProvider mfaProvider) {

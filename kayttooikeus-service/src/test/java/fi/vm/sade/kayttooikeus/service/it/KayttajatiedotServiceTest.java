@@ -52,7 +52,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateShouldNotThrowIfUsernameNotChanged() {
         String oid = "1.2.3.4.5";
-        populate(kayttajatiedot(henkilo(oid), "user1", null));
+        populate(kayttajatiedot(henkilo(oid), "user1"));
         KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
         updateDto.setUsername("user1");
 
@@ -87,7 +87,7 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void updateShouldReturnIfPalveluWithoutUsername() {
         String oid = "1.2.3.4.5";
-        populate(kayttajatiedot(henkilo(oid).withTyyppi(KayttajaTyyppi.PALVELU), "user1", null));
+        populate(kayttajatiedot(henkilo(oid).withTyyppi(KayttajaTyyppi.PALVELU), "user1"));
         KayttajatiedotUpdateDto updateDto = new KayttajatiedotUpdateDto();
         updateDto.setUsername("user1");
 
