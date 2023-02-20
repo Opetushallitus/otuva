@@ -23,6 +23,8 @@ cas:
   mfa:
     username: {{cas_mfa_username}}
     password: {{cas_mfa_password}}
+    encryption-key: {{cas_gauth_encryption_key}}
+    signing-key: {{cas_gauth_signing_key}}
 
 host:
   host-virkailija: {{host_virkailija}}
