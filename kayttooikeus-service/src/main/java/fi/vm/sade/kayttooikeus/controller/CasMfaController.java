@@ -6,6 +6,7 @@ import fi.vm.sade.kayttooikeus.dto.MfaTriggerDto;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -16,26 +17,24 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.keys.AesKey;
 import org.jose4j.lang.JoseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/mfa")
 @RequiredArgsConstructor
 public class CasMfaController {
-    private static final Logger logger = LoggerFactory.getLogger(CasMfaController.class);
     private final KayttajatiedotService kayttajatiedotService;
     private final CasProperties casProperties;
 
@@ -53,9 +52,7 @@ public class CasMfaController {
     }
 
     private String encryptAndSign(String payload) throws JoseException {
-        var keys = new HashMap<String, Object>(2);
-        keys.put("kty", "oct");
-        keys.put("k", casProperties.getMfa().getEncryptionKey());
+        Map<String, Object> keys = Map.of("kty", "oct", "k", casProperties.getMfa().getEncryptionKey());
         var key = JsonWebKey.Factory.newJwk(keys).getKey();
 
         var jwe = new JsonWebEncryption();
@@ -95,7 +92,7 @@ public class CasMfaController {
             token.setSecretKey(encryptAndSign(dto.getSecretKey()));
             return List.of("java.util.ArrayList", List.of(token));
         } catch (Exception e) {
-            logger.error("Error while creating a Google Auth response", e);
+            log.error("Error while creating a Google Auth response", e);
             return null;
         }
     }
