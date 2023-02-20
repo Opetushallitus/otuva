@@ -16,14 +16,14 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.keys.AesKey;
 import org.jose4j.lang.JoseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,6 +35,7 @@ import javax.validation.Valid;
 @RequestMapping(value = "/mfa")
 @RequiredArgsConstructor
 public class CasMfaController {
+    private static final Logger logger = LoggerFactory.getLogger(CasMfaController.class);
     private final KayttajatiedotService kayttajatiedotService;
     private final CasProperties casProperties;
 
@@ -94,6 +95,7 @@ public class CasMfaController {
             token.setSecretKey(encryptAndSign(dto.getSecretKey()));
             return List.of("java.util.ArrayList", List.of(token));
         } catch (Exception e) {
+            logger.error("Error while creating a Google Auth response", e);
             return null;
         }
     }
@@ -102,7 +104,7 @@ public class CasMfaController {
     @PreAuthorize("hasAnyRole(" +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
-    public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) throws JoseException {
+    public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) {
         var username = request.getHeader("username");
         return kayttajatiedotService
           .getGoogleAuthToken(username)
