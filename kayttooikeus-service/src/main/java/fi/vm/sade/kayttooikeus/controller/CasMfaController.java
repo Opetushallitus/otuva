@@ -94,8 +94,6 @@ public class CasMfaController {
             token.setSecretKey(encryptAndSign(dto.getSecretKey()));
             return List.of("java.util.ArrayList", List.of(token));
         } catch (Exception e) {
-            System.out.println("'PASKAA'");
-            System.out.println(e);
             return null;
         }
     }
