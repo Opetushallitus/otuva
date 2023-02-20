@@ -246,11 +246,13 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void getOmatTiedotAdmin() {
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "username", MfaProvider.GAUTH));
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.1", "1.2.3.4.100"),
                 kayttoOikeusRyhma("tunniste").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_REKISTERINPITAJA))));
         OmatTiedotDto omatTiedotDto = this.henkiloService.getOmatTiedot();
         assertThat(omatTiedotDto.getIsAdmin()).isTrue();
         assertThat(omatTiedotDto.getIsMiniAdmin()).isTrue();
+        assertThat(omatTiedotDto.getMfaProvider()).isEqualTo(MfaProvider.GAUTH);
         assertThat(omatTiedotDto.getOidHenkilo()).isEqualTo("1.2.3.4.1");
         assertThat(omatTiedotDto.getOrganisaatiot())
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)
@@ -268,11 +270,13 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.00000000001"})
     public void getOmatTiedotOphVirkailija() {
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "username"));
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.1", "1.2.3.4.100"),
                 kayttoOikeusRyhma("tunniste").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         OmatTiedotDto omatTiedotDto = this.henkiloService.getOmatTiedot();
         assertThat(omatTiedotDto.getIsAdmin()).isFalse();
         assertThat(omatTiedotDto.getIsMiniAdmin()).isTrue();
+        assertThat(omatTiedotDto.getMfaProvider()).isNull();
         assertThat(omatTiedotDto.getOidHenkilo()).isEqualTo("1.2.3.4.1");
         assertThat(omatTiedotDto.getOrganisaatiot())
                 .extracting(KayttooikeusPerustiedotDto.KayttooikeusOrganisaatiotDto::getOrganisaatioOid)

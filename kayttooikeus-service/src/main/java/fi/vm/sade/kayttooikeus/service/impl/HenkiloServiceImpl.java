@@ -225,6 +225,7 @@ public class HenkiloServiceImpl implements HenkiloService {
 
         Henkilo currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid)
                 .orElseThrow(() -> new IllegalStateException(String.format("Kirjautunutta käyttäjää %s ei löydy käyttöoikeuspalvelusta", currentUserOid)));
+        omatTiedotDto.setMfaProvider(currentUser.getKayttajatiedot().getMfaProvider());
         Collection<Long> tilatutAnomusilmoitukset = currentUser.getAnomusilmoitus().stream()
                 .map(KayttoOikeusRyhma::getId)
                 .collect(Collectors.toSet());
