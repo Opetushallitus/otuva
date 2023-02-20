@@ -8,12 +8,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -91,7 +94,18 @@ public class CasMfaControllerTest extends AbstractControllerTest {
             .with(httpBasic(username, password))
             .header("username", "username")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().string("[\"java.util.ArrayList\",[{\"scratchCodes\":[\"java.util.ArrayList\",[1,2,3]],\"id\":1,\"secretKey\":\"ADADFADAAADFADAFADFA\",\"validationCode\":124356,\"username\":\"username\",\"name\":\"laite\",\"registrationDate\":\"1979-04-02T03:04Z\",\"@class\":\"org.apereo.cas.gauth.credential.GoogleAuthenticatorAccount\"}]]"));
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.[0]").value("java.util.ArrayList"),
+                jsonPath("$.[1].[0].id").value(1),
+                jsonPath("$.[1].[0].name").value("laite"),
+                jsonPath("$.[1].[0].scratchCodes.[0]").value("java.util.ArrayList"),
+                jsonPath("$.[1].[0].scratchCodes.[1]").value(containsInAnyOrder(new Integer[]{1,2,3})),
+                jsonPath("$.[1].[0].secretKey").value(matchesPattern("^[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+$")),
+                jsonPath("$.[1].[0].validationCode").value(124356),
+                jsonPath("$.[1].[0].username").value("username"),
+                jsonPath("$.[1].[0].@class").value("org.apereo.cas.gauth.credential.GoogleAuthenticatorAccount"),
+                jsonPath("$.[1].[0].registrationDate").value("1979-04-02T03:04Z")
+            );
     }
 }
