@@ -66,6 +66,8 @@ cas:
   mfa:
     username: cas
     password: mfa
+    encryption-key: LNLuxm3B5mQiIwggT9vPewkGM7JeDebZWCBjdXxCWQY
+    signing-key: zMpvJwj7bEMW41YMJbAJzXHaSSH3A1JjzLfwXMSWth9yTFM3Ny3eHXmm9r5AEzU83rYNwGT__SicfrA-7ygRdA
 
 host:
   host-virkailija: localhost:${server.port}

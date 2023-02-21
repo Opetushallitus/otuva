@@ -20,5 +20,7 @@ public class CasProperties {
     public static class MfaAuth {
         private String username;
         private String password;
+        private String encryptionKey;
+        private String signingKey;
     }
 }
