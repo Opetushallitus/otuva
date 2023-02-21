@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import dev.samstevens.totp.code.CodeVerifier;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import dev.samstevens.totp.qr.QrData;
 import dev.samstevens.totp.qr.QrDataFactory;
@@ -15,12 +16,11 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.MfaService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
@@ -31,6 +31,7 @@ public class MfaServiceImpl implements MfaService {
     private final SecretGenerator secretGenerator;
     private final QrDataFactory qrDataFactory;
     private final QrGenerator qrGenerator;
+    private final CodeVerifier verifier;
     private final PermissionCheckerService permissionCheckerService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
@@ -67,5 +68,29 @@ public class MfaServiceImpl implements MfaService {
         } catch (QrGenerationException qre) {
             throw new RuntimeException("Failed to generate QR data", qre);
         }
+    }
+
+    @Override
+    public boolean enableGoogleAuth(String tokenToVerify) {
+        String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
+        Henkilo currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid)
+            .orElseThrow(() -> new IllegalStateException(String.format("Käyttäjää %s ei löydy", currentUserOid)));
+        Kayttajatiedot kayttajatiedot = currentUser.getKayttajatiedot();
+        GoogleAuthToken token = kayttajatiedotRepository.findGoogleAuthToken(kayttajatiedot.getUsername()).orElseThrow();
+
+        if (kayttajatiedot.getMfaProvider() != null || token.getRegistrationDate() != null) {
+            return false;
+        }
+
+        if (!verifier.isValidCode(token.getSecretKey(), tokenToVerify)) {
+            throw new ValidationException("Invalid token");
+        }
+
+        token.setRegistrationDate(LocalDateTime.now());
+        googleAuthTokenRepository.save(token);
+        kayttajatiedot.setMfaProvider(MfaProvider.GAUTH);
+        kayttajatiedotRepository.save(kayttajatiedot);
+
+        return true;
     }
 }
