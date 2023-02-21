@@ -85,10 +85,10 @@ public class CasMfaController {
             var token = new CasGoogleAuthToken();
             token.setId(dto.getId());
             token.setUsername(username);
-            token.setValidationCode(dto.getValidationCode());
-            token.setScratchCodes(List.of("java.util.ArrayList", List.of(dto.getScratchCodes())));
+            token.setValidationCode(0l);
+            token.setScratchCodes(List.of("java.util.ArrayList", List.of()));
             token.setRegistrationDate(dto.getRegistrationDate().toString() + "Z");
-            token.setName(dto.getName());
+            token.setName("device");
             token.setSecretKey(encryptAndSign(dto.getSecretKey()));
             return List.of("java.util.ArrayList", List.of(token));
         } catch (Exception e) {

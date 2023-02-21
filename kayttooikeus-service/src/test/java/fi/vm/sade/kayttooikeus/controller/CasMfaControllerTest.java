@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -84,11 +84,8 @@ public class CasMfaControllerTest extends AbstractControllerTest {
     public void getGoogleAuthTokenReturnsToken() throws Exception {
         var token = new GoogleAuthToken();
         token.setId(1);
-        token.setName("laite");
-        token.setScratchCodes(new Integer[]{1,2,3});
         token.setRegistrationDate(LocalDateTime.of(1979, Month.APRIL, 2, 3, 4, 0, 0));
         token.setSecretKey("ADADFADAAADFADAFADFA");
-        token.setValidationCode(124356l);
         when(kayttajatiedotService.getGoogleAuthToken(any())).thenReturn(Optional.of(token));
         mvc.perform(get("/mfa/token")
             .with(httpBasic(username, password))
@@ -98,11 +95,11 @@ public class CasMfaControllerTest extends AbstractControllerTest {
                 status().isOk(),
                 jsonPath("$.[0]").value("java.util.ArrayList"),
                 jsonPath("$.[1].[0].id").value(1),
-                jsonPath("$.[1].[0].name").value("laite"),
+                jsonPath("$.[1].[0].name").value("device"),
                 jsonPath("$.[1].[0].scratchCodes.[0]").value("java.util.ArrayList"),
-                jsonPath("$.[1].[0].scratchCodes.[1]").value(containsInAnyOrder(new Integer[]{1,2,3})),
+                jsonPath("$.[1].[0].scratchCodes.[1]").value(emptyArray()),
                 jsonPath("$.[1].[0].secretKey").value(matchesPattern("^[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+$")),
-                jsonPath("$.[1].[0].validationCode").value(124356),
+                jsonPath("$.[1].[0].validationCode").value(0),
                 jsonPath("$.[1].[0].username").value("username"),
                 jsonPath("$.[1].[0].@class").value("org.apereo.cas.gauth.credential.GoogleAuthenticatorAccount"),
                 jsonPath("$.[1].[0].registrationDate").value("1979-04-02T03:04Z")

@@ -262,6 +262,11 @@
             <groupId>org.bitbucket.b_c</groupId>
             <artifactId>jose4j</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dev.samstevens.totp</groupId>
+            <artifactId>totp-spring-boot-starter</artifactId>
+        </dependency>
     </dependencies>
 
 
