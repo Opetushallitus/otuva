@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -127,6 +128,17 @@ public class MfaServiceImplTest {
         when(codeVerifier.isValidCode(any(), any())).thenReturn(false);
 
         assertThrows(ValidationException.class, () -> mfaServiceImpl.enableGoogleAuth("123456"));
+        verify(googleAuthTokenRepository, times(0)).save(any());
+        verify(kayttajatiedotRepository, times(0)).save(any());
+    }
+
+    @Test
+    public void enableGoogleAuthThrowsIfNoTokenFound() {
+        when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
+        when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.empty());
+        when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
+
+        assertThrows(NoSuchElementException.class, () -> mfaServiceImpl.enableGoogleAuth("123456"));
         verify(googleAuthTokenRepository, times(0)).save(any());
         verify(kayttajatiedotRepository, times(0)).save(any());
     }
