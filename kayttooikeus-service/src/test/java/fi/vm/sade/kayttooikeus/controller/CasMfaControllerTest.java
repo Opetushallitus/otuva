@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -97,7 +97,7 @@ public class CasMfaControllerTest extends AbstractControllerTest {
                 jsonPath("$.[1].[0].id").value(1),
                 jsonPath("$.[1].[0].name").value("device"),
                 jsonPath("$.[1].[0].scratchCodes.[0]").value("java.util.ArrayList"),
-                jsonPath("$.[1].[0].scratchCodes.[1]").value(emptyArray()),
+                jsonPath("$.[1].[0].scratchCodes.[1]").value(empty()),
                 jsonPath("$.[1].[0].secretKey").value(matchesPattern("^[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+$")),
                 jsonPath("$.[1].[0].validationCode").value(0),
                 jsonPath("$.[1].[0].username").value("username"),
