@@ -14,8 +14,8 @@ import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping(value = "/mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags = "MFA API")
+@RequestMapping(value = "/mfasetup", produces = MediaType.APPLICATION_JSON_VALUE)
+@Api(tags = "MFA setup API")
 @RequiredArgsConstructor
 public class MfaSetupController {
     private final MfaService mfaService;
