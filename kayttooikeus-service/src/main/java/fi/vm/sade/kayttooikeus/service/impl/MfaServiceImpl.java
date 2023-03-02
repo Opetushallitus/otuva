@@ -94,12 +94,19 @@ public class MfaServiceImpl implements MfaService {
         Kayttajatiedot kayttajatiedot = currentUser.getKayttajatiedot();
         GoogleAuthToken token = kayttajatiedotRepository.findGoogleAuthToken(kayttajatiedot.getUsername())
                 .orElseThrow();
+        String secretKey;
+        try {
+            secretKey = Crypto.decrypt(commonProperties.getCryptoPassword(), token.getSalt(),
+                    token.getSecretKey(), token.getIv());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to decrypt secret key", e);
+        }
 
-        if (kayttajatiedot.getMfaProvider() != null || token.getRegistrationDate() != null) {
+        if (kayttajatiedot.getMfaProvider() != null || token.getRegistrationDate() != null || secretKey == null) {
             return false;
         }
 
-        if (!verifier.isValidCode(token.getSecretKey(), tokenToVerify)) {
+        if (!verifier.isValidCode(secretKey, tokenToVerify)) {
             throw new ValidationException("Invalid token");
         }
 
