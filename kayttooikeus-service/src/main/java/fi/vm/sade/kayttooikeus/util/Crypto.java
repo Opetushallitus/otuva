@@ -15,13 +15,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Crypto {
   private static final SecureRandom secureRandom = new SecureRandom();
-  private static final String algorithm = "AES/CBC/PKCS5Padding";
+  private static final String algorithm = "AES/GCM/NoPadding";
 
   public static byte[] getIv() {
     byte[] iv = new byte[16];
@@ -49,9 +50,8 @@ public class Crypto {
       InvalidAlgorithmParameterException, InvalidKeyException,
       BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
     SecretKey key = getSecretKey(password, salt);
-    IvParameterSpec ivSpec = new IvParameterSpec(iv);
     Cipher cipher = Cipher.getInstance(algorithm);
-    cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+    cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
     byte[] cipherText = cipher.doFinal(input.getBytes());
     return Base64.getEncoder().encodeToString(cipherText);
   }
@@ -62,9 +62,8 @@ public class Crypto {
       BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
     byte[] iv = Base64.getDecoder().decode(base64EncodedIv);
     SecretKey key = getSecretKey(password, salt);
-    IvParameterSpec ivSpec = new IvParameterSpec(iv);
     Cipher cipher = Cipher.getInstance(algorithm);
-    cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+    cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
     byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText));
     return new String(plainText);
   }
