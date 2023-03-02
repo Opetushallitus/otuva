@@ -25,6 +25,12 @@ public class GoogleAuthToken {
     @Column(name = "secret_key", nullable = false)
     private String secretKey;
 
+    @Column(name = "salt", nullable = false)
+    private String salt;
+
+    @Column(name = "iv", nullable = false)
+    private String iv;
+
     @Column(name = "registration_date", nullable = true)
     private LocalDateTime registrationDate;
 }

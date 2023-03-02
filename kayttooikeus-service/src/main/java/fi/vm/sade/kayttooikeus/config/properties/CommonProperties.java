@@ -13,6 +13,7 @@ public class CommonProperties {
     private String rootOrganizationOid = "1.2.246.562.10.00000000001";
     private String groupOrganizationId;
     private String adminOid;
+    private String cryptoPassword;
     private String organisaatioRyhmaPrefix = "1.2.246.562.28";
     private String organisaatioPrefix = "1.2.246.562.10";
     private String yhteystiedotRyhmaAlkuperaVirkailijaUi = "alkupera2";

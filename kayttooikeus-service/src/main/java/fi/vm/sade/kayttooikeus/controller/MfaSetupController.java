@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(value = "/mfasetup", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags = "MFA setup API")
+@Api(value = "/mfasetup", tags = "MFA setup API")
 @RequiredArgsConstructor
 public class MfaSetupController {
     private final MfaService mfaService;

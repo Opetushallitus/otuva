@@ -1,10 +1,12 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.CasGoogleAuthToken;
 import fi.vm.sade.kayttooikeus.dto.MfaTriggerDto;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.util.Crypto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +39,7 @@ import javax.validation.Valid;
 public class CasMfaController {
     private final KayttajatiedotService kayttajatiedotService;
     private final CasProperties casProperties;
+    private final CommonProperties commonProperties;
 
     @PostMapping(value = "/trigger", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole(" +
@@ -44,8 +47,8 @@ public class CasMfaController {
             "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
     public void getMfaProvider(HttpServletResponse response, @Valid @RequestBody MfaTriggerDto dto) throws IOException {
         var mfaProvider = kayttajatiedotService
-          .getMfaProvider(dto.getPrincipalId())
-          .orElse("");
+                .getMfaProvider(dto.getPrincipalId())
+                .orElse("");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().write(mfaProvider);
         response.getWriter().flush();
@@ -82,6 +85,8 @@ public class CasMfaController {
     // maps a MFA token to something that CAS can deserialize
     private Object mapGoogleAuthTokenToCas(GoogleAuthToken dto, String username) {
         try {
+            String secretKey = Crypto.decrypt(commonProperties.getCryptoPassword(), dto.getSalt(), dto.getSecretKey(),
+                    dto.getIv());
             var token = new CasGoogleAuthToken();
             token.setId(dto.getId());
             token.setUsername(username);
@@ -89,7 +94,7 @@ public class CasMfaController {
             token.setScratchCodes(List.of("java.util.ArrayList", List.of()));
             token.setRegistrationDate(dto.getRegistrationDate().toString() + "Z");
             token.setName("device");
-            token.setSecretKey(encryptAndSign(dto.getSecretKey()));
+            token.setSecretKey(encryptAndSign(secretKey));
             return List.of("java.util.ArrayList", List.of(token));
         } catch (Exception e) {
             log.error("Error while creating a Google Auth response", e);
@@ -104,8 +109,8 @@ public class CasMfaController {
     public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) {
         var username = request.getHeader("username");
         return kayttajatiedotService
-          .getGoogleAuthToken(username)
-          .map(t -> mapGoogleAuthTokenToCas(t, username))
-          .orElseThrow();
+                .getGoogleAuthToken(username)
+                .map(t -> mapGoogleAuthTokenToCas(t, username))
+                .orElseThrow();
     }
 }

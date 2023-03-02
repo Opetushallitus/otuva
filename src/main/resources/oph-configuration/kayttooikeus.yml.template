@@ -46,6 +46,7 @@ service-users:
 
 common:
   admin-oid: {{kayttooikeus_admin_oid}}
+  crypto-password: {{kayttooikeus_crypto_password}}
 
 kayttooikeus:
   uses-ssl-proxy: true

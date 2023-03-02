@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ import dev.samstevens.totp.qr.QrGenerator;
 import dev.samstevens.totp.qr.ZxingPngQrGenerator;
 import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.GoogleAuthSetupDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
@@ -27,6 +30,7 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
+import fi.vm.sade.kayttooikeus.util.Crypto;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -58,28 +62,36 @@ public class MfaServiceImplTest {
     private KayttajatiedotRepository kayttajatiedotRepository;
     @Mock
     private GoogleAuthTokenRepository googleAuthTokenRepository;
+    @Mock
+    private CommonProperties commonProperties;
 
     private String secretKey = secretGenerator.generate();
     private Kayttajatiedot kayttajatiedot = Kayttajatiedot.builder().build();
     private Henkilo henkilo = Henkilo.builder().kayttajatiedot(kayttajatiedot).build();
-    private GoogleAuthToken token = new GoogleAuthToken(1, henkilo, secretKey, null);
+    private String salt = Crypto.getSalt();
+    private byte[] iv = Crypto.getIv();
+    private String secretKeyCipher;
+    private GoogleAuthToken token;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
+        secretKeyCipher = Crypto.encrypt("password", salt, secretKey, iv);
+        token = new GoogleAuthToken(1, henkilo, secretKeyCipher, salt, Base64.getEncoder().encodeToString(iv), null);
         mfaServiceImpl = new MfaServiceImpl(
-            secretGenerator,
-            qrDataFactory,
-            qrGenerator,
-            codeVerifier,
-            permissionCheckerService,
-            henkiloDataRepository,
-            kayttajatiedotRepository,
-            googleAuthTokenRepository
-        );
+                secretGenerator,
+                qrDataFactory,
+                qrGenerator,
+                codeVerifier,
+                permissionCheckerService,
+                henkiloDataRepository,
+                kayttajatiedotRepository,
+                googleAuthTokenRepository,
+                commonProperties);
     }
 
     @Test
     public void setupGoogleAuthUsesExistingGauthToken() {
+        when(commonProperties.getCryptoPassword()).thenReturn("password");
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(token));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
@@ -87,12 +99,13 @@ public class MfaServiceImplTest {
         GoogleAuthSetupDto dto = mfaServiceImpl.setupGoogleAuth();
 
         verify(googleAuthTokenRepository, times(0)).save(any());
-        assertThat(dto.getSecretKey(), equalTo(token.getSecretKey()));
+        assertThat(dto.getSecretKey(), equalTo(secretKey));
         assertThat(dto.getQrCodeDataUri(), startsWith("data:image/png;base64,"));
     }
 
     @Test
     public void setupGoogleAuthCreatesNewGauthToken() {
+        when(commonProperties.getCryptoPassword()).thenReturn("password");
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.empty());
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
@@ -158,7 +171,8 @@ public class MfaServiceImplTest {
 
     @Test
     public void enableGoogleAuthDoesNothingIfUserIsRegisteredAlready() {
-        GoogleAuthToken tokenWithRegistrationDate = new GoogleAuthToken(1, henkilo, secretKey, LocalDateTime.now());
+        GoogleAuthToken tokenWithRegistrationDate = new GoogleAuthToken(1, henkilo, secretKeyCipher, salt,
+                new String(iv, StandardCharsets.UTF_8), LocalDateTime.now());
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(tokenWithRegistrationDate));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
