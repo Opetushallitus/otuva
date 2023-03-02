@@ -119,6 +119,7 @@ public class MfaServiceImplTest {
 
     @Test
     public void enableGoogleAuthEnablesGoogleAuth() throws Exception {
+        when(commonProperties.getCryptoPassword()).thenReturn("password");
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(token));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
@@ -133,6 +134,7 @@ public class MfaServiceImplTest {
 
     @Test
     public void enableGoogleAuthThrowsIfInvalidCode() {
+        when(commonProperties.getCryptoPassword()).thenReturn("password");
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(token));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
