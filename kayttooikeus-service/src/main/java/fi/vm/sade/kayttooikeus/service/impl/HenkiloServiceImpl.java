@@ -125,6 +125,7 @@ public class HenkiloServiceImpl implements HenkiloService {
     }
 
     @Override
+    @Transactional
     public void poistaOikeudet(Henkilo henkilo, String kasittelijaOid, String selite) {
         poistaOikeudet(henkilo, resolveKasittelija(kasittelijaOid), selite);
     }
