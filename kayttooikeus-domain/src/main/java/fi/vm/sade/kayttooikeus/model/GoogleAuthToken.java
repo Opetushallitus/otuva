@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
-import org.hibernate.annotations.Type;
-
 @Entity
 @Getter @Setter
 @Builder
@@ -24,21 +22,15 @@ public class GoogleAuthToken {
     @JoinColumn(name = "henkilo_id", nullable = false, unique = true)
     private Henkilo henkilo;
 
-    @Column(name = "scratch_codes", nullable = false, columnDefinition = "int[]")
-    @Type(type = "fi.vm.sade.kayttooikeus.model.PostgresIntegerArrayType")
-    @Builder.Default()
-    private Integer[] scratchCodes = new Integer[0];
-
     @Column(name = "secret_key", nullable = false)
     private String secretKey;
 
-    @Column(name = "validation_code", nullable = false)
-    private Long validationCode;
+    @Column(name = "salt", nullable = false)
+    private String salt;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "iv", nullable = false)
+    private String iv;
 
-    @Column(name = "registration_date", nullable = false)
-    @Builder.Default()
-    private LocalDateTime registrationDate = LocalDateTime.now();
+    @Column(name = "registration_date", nullable = true)
+    private LocalDateTime registrationDate;
 }
