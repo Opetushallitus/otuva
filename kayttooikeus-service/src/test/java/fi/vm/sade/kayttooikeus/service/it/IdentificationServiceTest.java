@@ -24,8 +24,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.virkailija;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
@@ -170,17 +172,43 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         String oid = "1.2.3.4.5";
         populate(identification("email", "test@example.com", henkilo(oid)));
 
-        assertThat(identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, Stream.of("tunniste1", "tunniste2").collect(toSet())))
+        assertThat(identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid, Stream.of("tunniste1", "tunniste2").collect(toSet())))
                 .containsExactlyInAnyOrder("tunniste1", "tunniste2");
-        assertThat(identificationService.getHakatunnuksetByHenkiloAndIdp(oid)).containsExactlyInAnyOrder("tunniste1", "tunniste2");
-        assertThat(identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, Stream.of("tunniste2", "tunniste3").collect(toSet())))
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid)).containsExactlyInAnyOrder("tunniste1", "tunniste2");
+        assertThat(identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid, Stream.of("tunniste2", "tunniste3").collect(toSet())))
                 .containsExactlyInAnyOrder("tunniste2", "tunniste3");
-        assertThat(identificationService.getHakatunnuksetByHenkiloAndIdp(oid)).containsExactlyInAnyOrder("tunniste2", "tunniste3");
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid)).containsExactlyInAnyOrder("tunniste2", "tunniste3");
 
         assertThat(identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, "email"))
                 .extracting(Identification::getIdentifier)
                 .containsExactly("test@example.com");
     }
+
+    @Test
+    public void updateMpassidTunnus() {
+        String oid = "1.2.3.4.5";
+        populate(identification("email", "test@example.com", henkilo(oid)));
+
+        identificationService.updateTunnisteetByHenkiloAndIdp("mpassid", oid, Set.of("MPASSOID.391ea8eb34f1e27024ab1342603537bdbd494900"));
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp("mpassid", oid))
+                .containsExactlyInAnyOrder("MPASSOID.391ea8eb34f1e27024ab1342603537bdbd494900");
+    }
+    @Test
+    public void bothHakaAndMpassidTunnusCanCoexist() {
+        String oid = "1.2.3.4.5";
+        populate(identification("email", "test@example.com", henkilo(oid)));
+
+        identificationService.updateTunnisteetByHenkiloAndIdp("mpassid", oid, Set.of("MPASSOID.391ea8eb34f1e27024ab1342603537bdbd494900"));
+        identificationService.updateTunnisteetByHenkiloAndIdp("haka", oid, Set.of("user@yliopisto.fi"));
+
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp("mpassid", oid)).containsExactlyInAnyOrder("MPASSOID.391ea8eb34f1e27024ab1342603537bdbd494900");
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp("haka", oid)).containsExactlyInAnyOrder("user@yliopisto.fi");
+
+        identificationService.updateTunnisteetByHenkiloAndIdp("mpassid", oid, Set.of());
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp("mpassid", oid)).isEmpty();
+        assertThat(identificationService.getTunnisteetByHenkiloAndIdp("haka", oid)).containsExactlyInAnyOrder("user@yliopisto.fi");
+    }
+
 
     @Test
     public void updateKutsuAndGenerateTemporaryKutsuToken() {

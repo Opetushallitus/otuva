@@ -27,8 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
-import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
+import static fi.vm.sade.kayttooikeus.model.Identification.*;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.ifPresentOrElse;
 import static java.util.stream.Collectors.joining;
 
@@ -97,21 +96,23 @@ public class IdentificationServiceImpl implements IdentificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Set<String> getHakatunnuksetByHenkiloAndIdp(String oid) {
-        List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
+    public Set<String> getTunnisteetByHenkiloAndIdp(String identityProvider, String oid) {
+        validateLinkitettyIdentityProvider(identityProvider);
+        List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, identityProvider);
         return identifications.stream().map(Identification::getIdentifier).collect(Collectors.toSet());
     }
 
     @Override
     @Transactional
-    public Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnukset) {
+    public Set<String> updateTunnisteetByHenkiloAndIdp(String identityProvider, String oid, Set<String> tunnukset) {
+        validateLinkitettyIdentityProvider(identityProvider);
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found"));
 
-        // haka-tunniste tulee olla uniikki
-        if (!hakatunnukset.isEmpty()) {
+        // tunniste tulee olla uniikki
+        if (!tunnukset.isEmpty()) {
             Set<String> duplikaatit = identificationRepository
-                    .findByidpEntityIdAndIdentifierIn(HAKA_AUTHENTICATION_IDP, hakatunnukset).stream()
+                    .findByidpEntityIdAndIdentifierIn(identityProvider, tunnukset).stream()
                     .filter(identification -> !identification.getHenkilo().equals(henkilo))
                     .map(Identification::getIdentifier)
                     .collect(Collectors.toSet());
@@ -121,19 +122,26 @@ public class IdentificationServiceImpl implements IdentificationService {
             }
         }
 
-        List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, HAKA_AUTHENTICATION_IDP);
+        List<Identification> identifications = findIdentificationsByHenkiloAndIdp(oid, identityProvider);
         List<String> identifiers = identifications.stream().map(Identification::getIdentifier).collect(Collectors.toList());
         // poistot
         identifications.stream()
-                .filter(identification -> !hakatunnukset.contains(identification.getIdentifier()))
+                .filter(identification -> !tunnukset.contains(identification.getIdentifier()))
                 .forEach(identificationRepository::delete);
         // lisäykset
-        hakatunnukset.stream()
-                .filter(hakatunnus -> !identifiers.contains(hakatunnus))
-                .map(hakatunnus -> new Identification(henkilo, HAKA_AUTHENTICATION_IDP, hakatunnus))
+        tunnukset.stream()
+                .filter(tunnus -> !identifiers.contains(tunnus))
+                .map(tunnus -> new Identification(henkilo, identityProvider, tunnus))
                 .forEach(identificationRepository::save);
 
-        return hakatunnukset;
+        return tunnukset;
+    }
+
+    private void validateLinkitettyIdentityProvider(String identityProvider) {
+        Set<String> validIdentityProviders = Set.of(HAKA_AUTHENTICATION_IDP, MPASSID_AUTHENTICATION_IDP);
+        if (!validIdentityProviders.contains(identityProvider)) {
+            throw new ValidationException(String.format("IdP '%s' ei ole tunnettu", identityProvider));
+        }
     }
 
     @Override
