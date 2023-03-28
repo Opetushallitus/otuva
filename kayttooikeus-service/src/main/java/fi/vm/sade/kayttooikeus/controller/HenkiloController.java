@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
+
 @RestController
 @RequestMapping(value = "/henkilo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 @Api(tags = "Henkilöön liittyvät operaatiot")
@@ -141,7 +143,7 @@ public class HenkiloController {
     public Set<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @ApiParam("Henkilön OID") String oid,
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.getHakatunnuksetByHenkiloAndIdp(oid);
+        return identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
@@ -155,8 +157,43 @@ public class HenkiloController {
                                                  @RequestBody Set<String> hakatunnisteet,
                                                  @RequestHeader(value = "External-Permission-Service", required = false)
                                                                   ExternalPermissionService permissionService) {
-        return identificationService.updateHakatunnuksetByHenkiloAndIdp(oid, hakatunnisteet);
+        return identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid, hakatunnisteet);
 
+    }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
+    @GetMapping("/{oid}/idp/{identityProvider}")
+    @ApiOperation(value = "Hakee henkilön linkitetyt tunnisteet.",
+            notes = "Hakee annetun henkilön linkitetyt tunnisteet.",
+            authorizations = {@Authorization("ROLE_APP_KAYTTOOIKEUS_CRUD"),
+                    @Authorization("ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")},
+            response = Set.class)
+    public Set<String> getHenkilosLinkitetytTunnisteet(
+            @PathVariable("oid") @ApiParam("Henkilön OID") String oid,
+            @PathVariable("identityProvider") @ApiParam("Identity Provider")
+            String identityProvider,
+            @RequestHeader(value = "External-Permission-Service", required = false)
+            ExternalPermissionService permissionService
+    ) {
+        return identificationService.getTunnisteetByHenkiloAndIdp(identityProvider, oid);
+    }
+
+    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
+    @PutMapping(value = "/{oid}/idp/{identityProvider}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ApiOperation(
+            value = "Päivittää linkitetyt tunnisteet",
+            notes = "Päivittää annetun henkilön linkitetyt tunnisteet.",
+            authorizations = @Authorization("ROLE_APP_KAYTTOOIKEUS_CRUD, ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA"),
+            response = Set.class
+    )
+    public Set<String> updateHenkilosLinkiettytTunnisteet(
+            @PathVariable("oid") @ApiParam("Henkilön OID") String oid,
+            @PathVariable("identityProvider") @ApiParam("Identity Provider") String identityProvider,
+            @RequestBody Set<String> tunnisteet,
+            @RequestHeader(value = "External-Permission-Service", required = false)
+            ExternalPermissionService permissionService
+    ) {
+        return identificationService.updateTunnisteetByHenkiloAndIdp(identityProvider, oid, tunnisteet);
     }
 
     @GetMapping("/{oid}/kayttooikeudet")

@@ -18,9 +18,8 @@ public interface IdentificationService {
 
     String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo);
 
-    Set<String> getHakatunnuksetByHenkiloAndIdp(String oid);
-
-    Set<String> updateHakatunnuksetByHenkiloAndIdp(String oid, Set<String> hakatunnisteet);
+    Set<String> getTunnisteetByHenkiloAndIdp(String identityProvider, String oid);
+    Set<String> updateTunnisteetByHenkiloAndIdp(String identityProvider, String oid, Set<String> hakatunnisteet);
 
     Optional<String> updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi);
 

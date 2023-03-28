@@ -367,15 +367,15 @@ public class KutsuServiceImpl implements KutsuService {
                     oppijanumerorekisteriClient.yhdistaHenkilot(henkiloOid, asList(oidByIdentification));
 
                     // poistetaan duplikaatilta haka-tunniste
-                    Set<String> identifications = identificationService.getHakatunnuksetByHenkiloAndIdp(oidByIdentification);
+                    Set<String> identifications = identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oidByIdentification);
                     identifications.remove(kutsuByToken.getHakaIdentifier());
-                    identificationService.updateHakatunnuksetByHenkiloAndIdp(oidByIdentification, identifications);
+                    identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oidByIdentification, identifications);
                 }
             });
             // If haka identifier is provided add it to henkilo identifiers
-            Set<String> hakaIdentifiers = this.identificationService.getHakatunnuksetByHenkiloAndIdp(henkiloOid);
+            Set<String> hakaIdentifiers = this.identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
-            this.identificationService.updateHakatunnuksetByHenkiloAndIdp(henkiloOid, hakaIdentifiers);
+            this.identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid, hakaIdentifiers);
             if (!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
                 this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
             }
