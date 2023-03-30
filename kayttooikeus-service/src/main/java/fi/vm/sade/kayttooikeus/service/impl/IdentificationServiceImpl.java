@@ -136,12 +136,32 @@ public class IdentificationServiceImpl implements IdentificationService {
 
         return tunnukset;
     }
-
     private void validateLinkitettyIdentityProvider(String identityProvider) {
         Set<String> validIdentityProviders = Set.of(HAKA_AUTHENTICATION_IDP, MPASSID_AUTHENTICATION_IDP);
         if (!validIdentityProviders.contains(identityProvider)) {
             throw new ValidationException(String.format("IdP '%s' ei ole tunnettu", identityProvider));
         }
+    }
+
+    @Override
+    @Transactional
+    public boolean getMpassidLoginEnabled(String oid) {
+        String oppijanumero = oppijanumerorekisteriClient.getHenkiloByOid(oid).getOppijanumero();
+        return getTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid).stream()
+                .anyMatch(tunniste -> tunniste.equals(oppijanumero));
+    }
+
+    @Override
+    @Transactional
+    public void setMpassidLoginEnabled(String oid, boolean enabled) {
+        String oppijanumero = oppijanumerorekisteriClient.getHenkiloByOid(oid).getOppijanumero();
+        Set<String> tunnisteet = getTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid);
+        if (enabled) {
+            tunnisteet.add(oppijanumero);
+        } else {
+            tunnisteet.remove(oppijanumero);
+        }
+        updateTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid, tunnisteet);
     }
 
     @Override
