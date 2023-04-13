@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpEntity;
@@ -161,6 +162,26 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         Supplier<HenkiloDto> action = () -> httpClient.<HenkiloDto>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(json -> io(() -> objectMapper.readValue(json, HenkiloDto.class)).get())
+                .orElseThrow(() -> noContentOrNotFoundException(url));
+        return retrying(action, 2).get().orFail(mapper(url));
+    }
+
+    @Override
+    public Map<String, HenkiloDto> getMasterHenkilosByOidList(List<String> oids) {
+        if (oids.isEmpty()) { return Map.of(); }
+
+        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.masterHenkilosByOidList");
+        OphHttpRequest request = OphHttpRequest.Builder
+                .post(url)
+                .setEntity(new OphHttpEntity.Builder()
+                        .content(io(() -> objectMapper.writeValueAsString(oids)).get())
+                        .contentType(ContentType.APPLICATION_JSON)
+                        .build())
+                .build();
+        TypeReference<Map<String, HenkiloDto>> typeRef = new TypeReference<>() {};
+        Supplier<Map<String, HenkiloDto>> action = () -> httpClient.<Map<String, HenkiloDto>>execute(request)
+                .expectedStatus(200)
+                .mapWith(json -> io(() -> objectMapper.readValue(json, typeRef)).get())
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
     }

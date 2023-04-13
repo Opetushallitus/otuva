@@ -5,10 +5,7 @@ import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.singletonList;
 
@@ -33,6 +30,8 @@ public interface OppijanumerorekisteriClient {
     List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount);
 
     HenkiloDto getHenkiloByOid(String oid);
+
+    Map<String, HenkiloDto> getMasterHenkilosByOidList(List<String> oid);
 
     Optional<HenkiloDto> findHenkiloByOid(String oid);
 
