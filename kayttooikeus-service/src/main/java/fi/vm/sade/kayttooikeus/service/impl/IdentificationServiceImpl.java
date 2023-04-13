@@ -14,6 +14,7 @@ import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,10 +71,23 @@ public class IdentificationServiceImpl implements IdentificationService {
     @Override
     @Transactional(readOnly = true)
     public String getHenkiloOidByIdpAndIdentifier(String idpKey, String idpIdentifier) {
+        if ("mpassid".equals(idpKey)) {
+            return getHenkiloByOppijanumero(idpIdentifier).map(HenkiloDto::getOidHenkilo)
+                .orElseGet(() -> getHenkiloOidFromExplicityIdpIdentifierMapping(idpKey, idpIdentifier));
+        }
+        return getHenkiloOidFromExplicityIdpIdentifierMapping(idpKey, idpIdentifier);
+    }
+
+    public String getHenkiloOidFromExplicityIdpIdentifierMapping(String idpKey, String idpIdentifier) {
         return this.identificationRepository.findByidpEntityIdAndIdentifier(idpKey, idpIdentifier)
                 .orElseThrow(() -> new NotFoundException("Identification not found"))
                 .getHenkilo()
                 .getOidHenkilo();
+    }
+
+    private Optional<HenkiloDto> getHenkiloByOppijanumero(String oppijanumero) {
+        Map<String, HenkiloDto> masters = oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(oppijanumero));
+        return Optional.ofNullable(masters.get(oppijanumero));
     }
 
     @Override

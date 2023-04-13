@@ -23,6 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -209,6 +211,30 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertThat(identificationService.getTunnisteetByHenkiloAndIdp("haka", oid)).containsExactlyInAnyOrder("user@yliopisto.fi");
     }
 
+    @Test
+    public void mpassidLoginChecksOppijanumero() {
+        String oppijanumeroOid = "1.2.3.4.5";
+        String duplikaattiOid = "1.2.3.4.6";
+        populate(henkilo(oppijanumeroOid));
+        populate(henkilo(duplikaattiOid).withDuplikate(true));
+
+        HenkiloDto masterHenkilo = HenkiloDto.builder()
+            .oidHenkilo(oppijanumeroOid)
+            .oppijanumero(oppijanumeroOid)
+            .etunimet("Teemu")
+            .kutsumanimi("Teemu")
+            .sukunimi("Testi")
+            .hetu("11111-1111")
+            .sukupuoli("1")
+            .passivoitu(false)
+            .yhteystiedotRyhma(Set.of())
+            .build();
+        given(oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(duplikaattiOid)))
+                .willReturn(Map.of(duplikaattiOid, masterHenkilo));
+
+        assertThat(identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid))
+                .isEqualTo(oppijanumeroOid);
+    }
 
     @Test
     public void updateKutsuAndGenerateTemporaryKutsuToken() {
