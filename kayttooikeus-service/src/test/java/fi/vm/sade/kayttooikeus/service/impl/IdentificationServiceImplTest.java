@@ -42,9 +42,6 @@ public class IdentificationServiceImplTest {
     private TunnistusTokenDataRepository tunnistusTokenDataRepositoryMock;
 
     @Mock
-    private KayttoOikeusService kayttoOikeusServiceMock;
-
-    @Mock
     private OrikaBeanMapper mapperMock;
 
     @Mock
@@ -54,7 +51,7 @@ public class IdentificationServiceImplTest {
     public void setup() {
         identificationServiceImpl = new IdentificationServiceImpl(identificationRepositoryMock,
                 henkiloDataRepositoryMock, kutsuRepositoryMock, tunnistusTokenDataRepositoryMock,
-                kayttoOikeusServiceMock, mapperMock, oppijanumerorekisteriClientMock);
+                mapperMock, oppijanumerorekisteriClientMock);
     }
 
     @Test
