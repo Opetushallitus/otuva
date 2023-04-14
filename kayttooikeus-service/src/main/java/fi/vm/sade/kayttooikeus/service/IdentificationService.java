@@ -20,8 +20,6 @@ public interface IdentificationService {
 
     Set<String> getTunnisteetByHenkiloAndIdp(String identityProvider, String oid);
     Set<String> updateTunnisteetByHenkiloAndIdp(String identityProvider, String oid, Set<String> hakatunnisteet);
-    boolean getMpassidLoginEnabled(String oid);
-    void setMpassidLoginEnabled(String oid, boolean enabled);
 
     Optional<String> updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi);
 

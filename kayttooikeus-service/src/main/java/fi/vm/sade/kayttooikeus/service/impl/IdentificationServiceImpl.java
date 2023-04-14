@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -42,8 +41,6 @@ public class IdentificationServiceImpl implements IdentificationService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final KutsuRepository kutsuRepository;
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
-
-    private final KayttoOikeusService kayttoOikeusService;
 
     private final OrikaBeanMapper mapper;
 
@@ -156,27 +153,6 @@ public class IdentificationServiceImpl implements IdentificationService {
         if (!validIdentityProviders.contains(identityProvider)) {
             throw new ValidationException(String.format("IdP '%s' ei ole tunnettu", identityProvider));
         }
-    }
-
-    @Override
-    @Transactional
-    public boolean getMpassidLoginEnabled(String oid) {
-        String oppijanumero = oppijanumerorekisteriClient.getHenkiloByOid(oid).getOppijanumero();
-        return getTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid).stream()
-                .anyMatch(tunniste -> tunniste.equals(oppijanumero));
-    }
-
-    @Override
-    @Transactional
-    public void setMpassidLoginEnabled(String oid, boolean enabled) {
-        String oppijanumero = oppijanumerorekisteriClient.getHenkiloByOid(oid).getOppijanumero();
-        Set<String> tunnisteet = getTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid);
-        if (enabled) {
-            tunnisteet.add(oppijanumero);
-        } else {
-            tunnisteet.remove(oppijanumero);
-        }
-        updateTunnisteetByHenkiloAndIdp(MPASSID_AUTHENTICATION_IDP, oid, tunnisteet);
     }
 
     @Override

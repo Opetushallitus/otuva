@@ -13,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
-import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -177,28 +176,6 @@ public class HenkiloController {
             ExternalPermissionService permissionService
     ) {
         return identificationService.getTunnisteetByHenkiloAndIdp(identityProvider, oid);
-    }
-
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
-    @GetMapping("/{oid}/mpassidLoginEnabled")
-    @Hidden
-    public boolean getMpassidLoginEnabled(
-            @PathVariable("oid") String oid,
-            @RequestHeader(value = "External-Permission-Service", required = false)
-            ExternalPermissionService permissionService
-    ) {
-        return identificationService.getMpassidLoginEnabled(oid);
-    }
-
-    @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
-    @PutMapping("/{oid}/mpassidLoginEnabled")
-    @Hidden
-    public void putMpassidLoginEnabled(
-            @PathVariable("oid") String oid,
-            @RequestBody boolean enabled,
-            ExternalPermissionService permissionService
-    ) {
-        identificationService.setMpassidLoginEnabled(oid, enabled);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
