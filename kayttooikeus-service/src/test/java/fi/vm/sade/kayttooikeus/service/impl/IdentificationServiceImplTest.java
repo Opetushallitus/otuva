@@ -4,10 +4,7 @@ import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
-import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -47,11 +44,14 @@ public class IdentificationServiceImplTest {
     @Mock
     private OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
 
+    @Mock
+    private KayttajatiedotRepository kayttajatiedotRepositoryMock;
+
     @Before
     public void setup() {
         identificationServiceImpl = new IdentificationServiceImpl(identificationRepositoryMock,
                 henkiloDataRepositoryMock, kutsuRepositoryMock, tunnistusTokenDataRepositoryMock,
-                mapperMock, oppijanumerorekisteriClientMock);
+                mapperMock, oppijanumerorekisteriClientMock, kayttajatiedotRepositoryMock);
     }
 
     @Test

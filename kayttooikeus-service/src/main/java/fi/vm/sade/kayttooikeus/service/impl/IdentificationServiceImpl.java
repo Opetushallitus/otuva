@@ -3,10 +3,7 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.IdentifiedHenkiloTypeDto;
 import fi.vm.sade.kayttooikeus.model.*;
-import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
-import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
-import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
@@ -45,6 +42,7 @@ public class IdentificationServiceImpl implements IdentificationService {
     private final OrikaBeanMapper mapper;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final KayttajatiedotRepository kayttajatiedotRepository;
 
     @Override
     @Transactional
@@ -69,7 +67,9 @@ public class IdentificationServiceImpl implements IdentificationService {
     @Transactional(readOnly = true)
     public String getHenkiloOidByIdpAndIdentifier(String idpKey, String idpIdentifier) {
         if ("mpassid".equals(idpKey)) {
-            return getHenkiloByOppijanumero(idpIdentifier).map(HenkiloDto::getOidHenkilo)
+            return getHenkiloByOppijanumero(idpIdentifier)
+                .map(HenkiloDto::getOidHenkilo)
+                .filter(oid -> kayttajatiedotRepository.findByHenkiloOidHenkilo(oid).isPresent())
                 .orElseGet(() -> getHenkiloOidFromExplicityIdpIdentifierMapping(idpKey, idpIdentifier));
         }
         return getHenkiloOidFromExplicityIdpIdentifierMapping(idpKey, idpIdentifier);
