@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -51,6 +52,9 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     OppijanumerorekisteriClient oppijanumerorekisteriClient;
+
+    @MockBean
+    KayttajatiedotRepository kayttajatiedotRepository;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -231,9 +235,36 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
             .build();
         given(oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(duplikaattiOid)))
                 .willReturn(Map.of(duplikaattiOid, masterHenkilo));
+        given(kayttajatiedotRepository.findByHenkiloOidHenkilo(oppijanumeroOid))
+                .willReturn(Optional.of(Kayttajatiedot.builder().build()));
 
         assertThat(identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid))
                 .isEqualTo(oppijanumeroOid);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void doesntAllowMpassidLoginWithoutKayttajatiedot() {
+        String oppijanumeroOid = "1.2.3.4.5";
+        String duplikaattiOid = "1.2.3.4.6";
+        populate(henkilo(oppijanumeroOid));
+        populate(henkilo(duplikaattiOid).withDuplikate(true));
+
+        HenkiloDto masterHenkilo = HenkiloDto.builder()
+                .oidHenkilo(oppijanumeroOid)
+                .oppijanumero(oppijanumeroOid)
+                .etunimet("Teemu")
+                .kutsumanimi("Teemu")
+                .sukunimi("Testi")
+                .hetu("11111-1111")
+                .sukupuoli("1")
+                .passivoitu(false)
+                .yhteystiedotRyhma(Set.of())
+                .build();
+        given(oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(duplikaattiOid)))
+                .willReturn(Map.of(duplikaattiOid, masterHenkilo));
+        given(kayttajatiedotRepository.findByHenkiloOidHenkilo(oppijanumeroOid)).willReturn(Optional.empty());
+
+        identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid);
     }
 
     @Test
