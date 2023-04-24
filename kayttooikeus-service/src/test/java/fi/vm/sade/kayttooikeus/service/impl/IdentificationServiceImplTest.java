@@ -5,9 +5,13 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.*;
-import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
+import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
+import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +41,6 @@ public class IdentificationServiceImplTest {
     private KutsuRepository kutsuRepositoryMock;
     @Mock
     private TunnistusTokenDataRepository tunnistusTokenDataRepositoryMock;
-
     @Mock
     private OrikaBeanMapper mapperMock;
 
