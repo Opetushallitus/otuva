@@ -6,6 +6,7 @@ import dev.samstevens.totp.qr.QrData;
 import dev.samstevens.totp.qr.QrDataFactory;
 import dev.samstevens.totp.qr.QrGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
+import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.GoogleAuthSetupDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
@@ -42,6 +43,7 @@ public class MfaServiceImpl implements MfaService {
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final GoogleAuthTokenRepository googleAuthTokenRepository;
     private final CommonProperties commonProperties;
+    private final HenkiloHelper henkiloHelper;
 
     private String getNewGoogleAuthSecretKey(Henkilo henkilo) throws Exception {
         String secretKey = secretGenerator.generate();
@@ -54,11 +56,16 @@ public class MfaServiceImpl implements MfaService {
         return secretKey;
     }
 
-    @Override
-    public GoogleAuthSetupDto setupGoogleAuth() {
+    private Henkilo getCurrentUserOrThrow() {
         String currentUserOid = permissionCheckerService.getCurrentUserOid();
-        Henkilo currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid)
+        return henkiloDataRepository.findByOidHenkilo(currentUserOid)
                 .orElseThrow(() -> new IllegalStateException(String.format("Käyttäjää %s ei löydy", currentUserOid)));
+    }
+
+    @Override
+    @Transactional
+    public GoogleAuthSetupDto setupGoogleAuth() {
+        Henkilo currentUser = getCurrentUserOrThrow();
         String username = currentUser.getKayttajatiedot().getUsername();
 
         try {
@@ -87,10 +94,9 @@ public class MfaServiceImpl implements MfaService {
     }
 
     @Override
+    @Transactional
     public boolean enableGoogleAuth(String tokenToVerify) {
-        String currentUserOid = this.permissionCheckerService.getCurrentUserOid();
-        Henkilo currentUser = henkiloDataRepository.findByOidHenkilo(currentUserOid)
-                .orElseThrow(() -> new IllegalStateException(String.format("Käyttäjää %s ei löydy", currentUserOid)));
+        Henkilo currentUser = getCurrentUserOrThrow();
         Kayttajatiedot kayttajatiedot = currentUser.getKayttajatiedot();
         GoogleAuthToken token = kayttajatiedotRepository.findGoogleAuthToken(kayttajatiedot.getUsername())
                 .orElseThrow();
@@ -115,6 +121,23 @@ public class MfaServiceImpl implements MfaService {
         googleAuthTokenRepository.save(token);
         kayttajatiedot.setMfaProvider(MfaProvider.GAUTH);
         kayttajatiedotRepository.save(kayttajatiedot);
+        henkiloHelper.logEnableGauthMfa(permissionCheckerService.getCurrentUserOid());
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean disableGoogleAuth() {
+        Henkilo currentUser = getCurrentUserOrThrow();
+        Kayttajatiedot kayttajatiedot = currentUser.getKayttajatiedot();
+        GoogleAuthToken token = kayttajatiedotRepository.findGoogleAuthToken(kayttajatiedot.getUsername())
+                .orElseThrow();
+
+        kayttajatiedot.setMfaProvider(null);
+        kayttajatiedotRepository.save(kayttajatiedot);
+        googleAuthTokenRepository.delete(token);
+        henkiloHelper.logDisableGauthMfa(permissionCheckerService.getCurrentUserOid());
 
         return true;
     }

@@ -31,4 +31,5 @@ public interface IdentificationService {
 
     String consumeLoginToken(String loginToken, String identification_idp);
 
+    String getIdpEntityIdForCurrentSession();
 }

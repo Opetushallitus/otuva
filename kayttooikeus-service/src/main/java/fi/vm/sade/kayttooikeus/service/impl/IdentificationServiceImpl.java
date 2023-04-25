@@ -13,6 +13,9 @@ import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.cas.authentication.CasAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +41,6 @@ public class IdentificationServiceImpl implements IdentificationService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final KutsuRepository kutsuRepository;
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
-
     private final OrikaBeanMapper mapper;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
@@ -209,6 +211,13 @@ public class IdentificationServiceImpl implements IdentificationService {
         tunnistusToken.setKaytetty(LocalDateTime.now());
         Kayttajatiedot kayttajatiedot = henkilo.getKayttajatiedot();
         return generateAuthTokenForHenkilo(henkilo, authentication_idp, kayttajatiedot.getUsername());
+    }
+
+    @Override
+    public String getIdpEntityIdForCurrentSession() {
+        CasAuthenticationToken token = (CasAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        Map<String, Object> attributes = token.getAssertion().getPrincipal().getAttributes();
+        return (String) attributes.get("idpEntityId");
     }
 
     private List<Identification> findIdentificationsByHenkiloAndIdp(String oid, String idp) {
