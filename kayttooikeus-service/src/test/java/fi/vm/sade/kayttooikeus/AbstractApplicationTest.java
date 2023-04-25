@@ -1,13 +1,13 @@
 package fi.vm.sade.kayttooikeus;
 
 import fi.vm.sade.kayttooikeus.config.ApplicationTest;
-import org.apache.commons.io.IOUtils;
 import org.intellij.lang.annotations.Language;
 import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @ApplicationTest
 public abstract class AbstractApplicationTest {
@@ -35,7 +35,7 @@ public abstract class AbstractApplicationTest {
      */
     protected String resource(@Language("spring-resource-reference") String resource) {
         try {
-            return IOUtils.toString(applicationContext.getResource(resource).getInputStream(), "UTF-8");
+            return new String(applicationContext.getResource(resource).getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not load resource: " + resource + ", cause: " + e.getMessage(), e);
         }

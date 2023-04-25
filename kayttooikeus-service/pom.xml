@@ -55,10 +55,6 @@
             <artifactId>ryhmasahkoposti-api</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>com.wordnik</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
@@ -186,10 +182,6 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch</groupId>
