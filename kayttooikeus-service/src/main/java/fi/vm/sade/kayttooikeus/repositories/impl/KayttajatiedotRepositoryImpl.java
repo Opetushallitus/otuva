@@ -31,7 +31,8 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         KayttajatiedotReadDto dto = new JPAQuery<>(em)
                 .from(qKayttajatiedot).join(qKayttajatiedot.henkilo, qHenkilo)
                 .where(qHenkilo.oidHenkilo.eq(henkiloOid))
-                .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.username))
+                .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.username,
+                        qKayttajatiedot.mfaProvider))
                 .fetchOne();
         return Optional.ofNullable(dto);
     }
@@ -100,9 +101,10 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
                 .leftJoin(qKayttajatiedot.loginCounter, QLoginCounter.loginCounter)
                 .where(
                         qKayttajatiedot.henkilo.kayttajaTyyppi.eq(KayttajaTyyppi.PALVELU).and(
-                                (qKayttajatiedot.loginCounter.id.isNotNull().and(qKayttajatiedot.loginCounter.lastLogin.before(passiveSince)))
-                                        .or(qKayttajatiedot.loginCounter.id.isNull().and(qKayttajatiedot.createdAt.before(passiveSince)))
-                        )
-                ).fetch();
+                                (qKayttajatiedot.loginCounter.id.isNotNull()
+                                        .and(qKayttajatiedot.loginCounter.lastLogin.before(passiveSince)))
+                                        .or(qKayttajatiedot.loginCounter.id.isNull()
+                                                .and(qKayttajatiedot.createdAt.before(passiveSince)))))
+                .fetch();
     }
 }
