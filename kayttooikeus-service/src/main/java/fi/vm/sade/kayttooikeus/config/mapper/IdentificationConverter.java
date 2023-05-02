@@ -13,12 +13,17 @@ import org.springframework.stereotype.Component;
 public class IdentificationConverter extends CustomConverter<Identification, IdentifiedHenkiloTypeDto> {
 
     @Override
-    public IdentifiedHenkiloTypeDto convert(Identification identification, Type<? extends IdentifiedHenkiloTypeDto> destinationType, MappingContext mappingContext) {
+    public IdentifiedHenkiloTypeDto convert(Identification identification,
+            Type<? extends IdentifiedHenkiloTypeDto> destinationType, MappingContext mappingContext) {
         Henkilo henkilo = identification.getHenkilo();
         return IdentifiedHenkiloTypeDto.builder()
                 .oidHenkilo(henkilo.getOidHenkilo())
                 .henkiloTyyppi(henkilo.getKayttajaTyyppi())
-                .kayttajatiedot(henkilo.getKayttajatiedot() != null ? new KayttajatiedotReadDto(henkilo.getKayttajatiedot().getUsername()) : null)
+                .kayttajatiedot(
+                        henkilo.getKayttajatiedot() != null
+                                ? new KayttajatiedotReadDto(henkilo.getKayttajatiedot().getUsername(),
+                                        henkilo.getKayttajatiedot().getMfaProvider())
+                                : null)
                 .idpEntityId(identification.getIdpEntityId())
                 .build();
     }

@@ -56,7 +56,7 @@ public class CasControllerTest extends AbstractControllerTest {
                 .willReturn(IdentifiedHenkiloTypeDto.builder()
                         .oidHenkilo("1.2.3.4.5")
                         .henkiloTyyppi(KayttajaTyyppi.VIRKAILIJA)
-                        .kayttajatiedot(new KayttajatiedotReadDto("teemuuser"))
+                        .kayttajatiedot(new KayttajatiedotReadDto("teemuuser", null))
                         .build());
 
         this.mvc.perform(get("/cas/auth/token/mytoken"))
