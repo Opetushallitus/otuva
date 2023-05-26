@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
 
 import static fi.vm.sade.cas.oppija.CasOppijaConstants.*;
 import static java.util.stream.Collectors.toList;
-import static org.apereo.cas.web.flow.CasWebflowConstants.STATE_ID_INQUIRE_INTERRUPT_ACTION;
+import static org.apereo.cas.web.flow.CasWebflowConstants.STATE_ID_INQUIRE_INTERRUPT;
 
 
 /**
@@ -80,7 +80,7 @@ public class InterruptWebflowConfiguration implements CasWebflowExecutionPlanCon
                 EndState valtuudetRedirectEndstate = createEndState(getLoginFlow(), STATE_ID_VALTUUDET_INTERRUPT_ACTION);
                 Expression expression = createExpression("flowScope.".concat(VALTUUDET_REDIRECT_URL_PARAMETER));
                 valtuudetRedirectEndstate.getEntryActionList().add(new ExternalRedirectAction(expression));
-                ActionState serviceTicketActionState = getState(getLoginFlow(), STATE_ID_INQUIRE_INTERRUPT_ACTION, ActionState.class);
+                ActionState serviceTicketActionState = getState(getLoginFlow(), STATE_ID_INQUIRE_INTERRUPT, ActionState.class);
                 TransitionSet transitions = serviceTicketActionState.getTransitionSet();
                 transitions.add(createTransition(TRANSITION_ID_VALTUUDET_INTERRUPT , STATE_ID_VALTUUDET_INTERRUPT_ACTION));
             }
