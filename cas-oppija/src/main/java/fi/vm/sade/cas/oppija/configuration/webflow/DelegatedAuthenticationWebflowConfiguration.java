@@ -6,13 +6,9 @@ import fi.vm.sade.cas.oppija.configuration.action.SamlLoginPrepareAction;
 import fi.vm.sade.cas.oppija.configuration.action.ServiceRedirectAction;
 import fi.vm.sade.cas.oppija.configuration.action.StoreServiceParamAction;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.ticket.registry.TicketRegistrySupport;
-import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.*;
 import org.apereo.cas.web.flow.configurer.AbstractCasWebflowConfigurer;
-import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator;
 import org.pac4j.core.client.Clients;
-import org.pac4j.core.context.session.SessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,10 +40,7 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
     private final FlowDefinitionRegistry delegationRedirectFlowRegistry;
     private final ConfigurableApplicationContext applicationContext;
     private final CasConfigurationProperties casProperties;
-    //private final CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator;
-    //private final TicketRegistrySupport ticketRegistrySupport;
     private final Clients clients;
-    private final SessionStore sessionStore;
 
     public DelegatedAuthenticationWebflowConfiguration(FlowBuilderServices flowBuilderServices,
                                                        @Qualifier(CasWebflowConstants.BEAN_NAME_LOGIN_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
@@ -55,20 +48,14 @@ public class DelegatedAuthenticationWebflowConfiguration implements CasWebflowEx
                                                        @Qualifier("delegatedClientRedirectFlowRegistry") FlowDefinitionRegistry delegationRedirectFlowRegistry,
                                                        ConfigurableApplicationContext applicationContext,
                                                        CasConfigurationProperties casProperties,
-                                                       //@Qualifier(CasCookieBuilder.BEAN_NAME_TICKET_GRANTING_COOKIE_BUILDER) CookieRetrievingCookieGenerator ticketGrantingTicketCookieGenerator,
-                                                       //TicketRegistrySupport ticketRegistrySupport,
-                                                       Clients clients,
-                                                       SessionStore sessionStore) {
+                                                       Clients clients) {
         this.flowBuilderServices = flowBuilderServices;
         this.loginFlowDefinitionRegistry = loginFlowDefinitionRegistry;
         this.logoutFlowDefinitionRegistry = logoutFlowDefinitionRegistry;
         this.delegationRedirectFlowRegistry = delegationRedirectFlowRegistry;
         this.applicationContext = applicationContext;
         this.casProperties = casProperties;
-        //this.ticketGrantingTicketCookieGenerator = ticketGrantingTicketCookieGenerator;
-        //this.ticketRegistrySupport = ticketRegistrySupport;
         this.clients = clients;
-        this.sessionStore = sessionStore;
     }
 
     @Bean
