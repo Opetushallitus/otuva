@@ -19,6 +19,8 @@ cas.tgc.secure: true
 
 cas.warning-cookie.secure: true
 
+cas.tgc.pin-to-session: true
+cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
 cas.tgc.crypto:
     encryption.key: {{ cas_oppija_tgc_encryption_key }}
     signing.key: {{ cas_oppija_tgc_signing_key }}

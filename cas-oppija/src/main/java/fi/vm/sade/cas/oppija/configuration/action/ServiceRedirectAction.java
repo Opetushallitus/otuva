@@ -2,9 +2,9 @@ package fi.vm.sade.cas.oppija.configuration.action;
 
 import lombok.val;
 import org.apereo.cas.web.support.WebUtils;
-import org.pac4j.core.context.JEEContext;
+import org.pac4j.jee.context.JEEContext;
 import org.pac4j.core.exception.http.FoundAction;
-import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
+import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.webflow.execution.Event;

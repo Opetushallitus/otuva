@@ -1,5 +1,7 @@
 package fi.vm.sade.cas.oppija.configuration;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import fi.vm.sade.cas.oppija.service.PersonService;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.CasSSLContext;
@@ -8,11 +10,12 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.authentication.principal.provision.DelegatedClientUserProfileProvisioner;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.pac4j.Pac4jBaseClientProperties;
+import org.apereo.cas.configuration.model.support.pac4j.Pac4jDelegatedAuthenticationCoreProperties;
+import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.services.ServicesManager;
-import org.apereo.cas.support.pac4j.authentication.DefaultDelegatedClientFactory;
-import org.apereo.cas.support.pac4j.authentication.DelegatedClientFactory;
-import org.apereo.cas.support.pac4j.authentication.DelegatedClientFactoryCustomizer;
+import org.apereo.cas.support.pac4j.authentication.clients.DefaultDelegatedClientFactory;
+import org.apereo.cas.support.pac4j.authentication.clients.DelegatedClientFactory;
+import org.apereo.cas.support.pac4j.authentication.clients.DelegatedClientFactoryCustomizer;
 import org.apereo.cas.support.pac4j.authentication.handler.support.DelegatedClientAuthenticationHandler;
 import org.opensaml.core.xml.schema.XSAny;
 import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
@@ -25,6 +28,7 @@ import org.pac4j.core.logout.handler.LogoutHandler;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.config.SAML2Configuration;
+import org.pac4j.saml.store.SAMLMessageStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -109,24 +113,31 @@ public class SamlClientConfiguration {
     }
 
     @Bean
-    public DelegatedClientFactory<IndirectClient> pac4jDelegatedClientFactory(Collection<DelegatedClientFactoryCustomizer> customizers, CasSSLContext casSSLContext, ApplicationContext applicationContext) {
-        return new DefaultDelegatedClientFactory(casProperties, customizers, casSSLContext, applicationContext) {
+    public DelegatedClientFactory pac4jDelegatedClientFactory(Collection<DelegatedClientFactoryCustomizer> customizers, CasSSLContext casSSLContext, ApplicationContext applicationContext, ObjectProvider<SAMLMessageStoreFactory> samlMessageStoreFactory) {
+        Pac4jDelegatedAuthenticationCoreProperties core = casProperties.getAuthn().getPac4j().getCore();
+        Cache<String, Collection<IndirectClient>> clientsCache = Caffeine.newBuilder()
+                .maximumSize(core.getCacheSize())
+                .expireAfterAccess(Beans.newDuration(core.getCacheDuration()))
+                .build();
+        return new DefaultDelegatedClientFactory(casProperties, customizers, casSSLContext, samlMessageStoreFactory, clientsCache) {
 
             @Override
-            protected void configureClient(IndirectClient client, Pac4jBaseClientProperties props) {
-                super.configureClient(client, props);
+            protected Collection<IndirectClient> loadClients() {// (IndirectClient client, Pac4jBaseClientProperties props) {
+                Collection<IndirectClient> clients = buildSaml2IdentityProviders(casProperties);
                 Map<String, String> customProperties = casProperties.getCustom().getProperties();
-                if (client instanceof SAML2Client && (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()) || Objects.equals(customProperties.get("fakeSuomiFiClientName"), client.getName()))) {
-                    SAML2Client saml2Client = (SAML2Client) client;
-                    SAML2Configuration configuration = saml2Client.getConfiguration();
-                    configuration.setSpLogoutRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-                    configuration.setSpLogoutResponseBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
-                    configuration.setSpLogoutRequestSigned(true);
-                    configuration.setLogoutHandler(new LogoutHandler() {
-                    });
-                    configuration.setAuthnRequestExtensions(createExtensions());
-                    client.init();
+                for (IndirectClient client : clients) {
+                    if (client instanceof SAML2Client && (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()) || Objects.equals(customProperties.get("fakeSuomiFiClientName"), client.getName()))) {
+                        SAML2Client saml2Client = (SAML2Client) client;
+                        SAML2Configuration configuration = saml2Client.getConfiguration();
+                        configuration.setSpLogoutRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                        configuration.setSpLogoutResponseBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+                        configuration.setSpLogoutRequestSigned(true);
+                        configuration.setLogoutHandler(new LogoutHandler() {});
+                        configuration.setAuthnRequestExtensions(createExtensions());
+                        client.init();
+                    }
                 }
+               return clients;
             }
         };
     }
