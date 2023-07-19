@@ -108,7 +108,7 @@ server.tomcat.accesslog:
     request-attributes-enabled: true
     rotate: true
     rename-on-rotate: true
-    max-days: 7
+    max-days: {{ cas_oppija_tomcat_access_log_max_days | default('7') }}
 
 # Oph properties overrides
 
