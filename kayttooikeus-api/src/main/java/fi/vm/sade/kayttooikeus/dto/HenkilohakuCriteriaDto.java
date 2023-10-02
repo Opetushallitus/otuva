@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
+import fi.vm.sade.kayttooikeus.dto.validate.NoNullElements;
 import lombok.*;
 
 import java.util.Set;
@@ -20,6 +21,7 @@ public class HenkilohakuCriteriaDto {
 
     private String nameQuery;
 
+    @NoNullElements
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
