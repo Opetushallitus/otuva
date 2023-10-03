@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.dto;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Getter
@@ -20,7 +21,7 @@ public class HenkilohakuCriteriaDto {
 
     private String nameQuery;
 
-    private Set<String> organisaatioOids;
+    private Set<@NotNull String> organisaatioOids;
     private Long kayttooikeusryhmaId;
 
 }
