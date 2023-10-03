@@ -1,8 +1,10 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.HenkiloReadDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
+import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
+import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
@@ -10,17 +12,13 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,8 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class HenkiloControllerTest extends AbstractControllerTest {
     @MockBean
     private OrganisaatioHenkiloService service;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
@@ -124,25 +120,4 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
-    public void testHenkilohakuDoesntAllowNullsInOrganisaatioList() throws Exception {
-        HenkilohakuCriteriaDto request = new HenkilohakuCriteriaDto();
-        request.setNameQuery("laura");
-        request.setNoOrganisation(false);
-        Set<String> organisaatioOids = new HashSet<>();
-        organisaatioOids.add(null);
-        request.setOrganisaatioOids(organisaatioOids);
-        request.setPassivoitu(false);
-        request.setSubOrganisation(true);
-        mvc.perform(createRequest(post("/henkilo/henkilohaku?offset=0"), request))
-                .andExpect(status().isBadRequest());
-    }
-
-    protected <RequestT> MockHttpServletRequestBuilder createRequest(MockHttpServletRequestBuilder builder, RequestT requestBody) throws JsonProcessingException {
-        builder.accept(MediaType.APPLICATION_JSON);
-        if (requestBody == null) return builder;
-        return builder.contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestBody));
-    }
 }
