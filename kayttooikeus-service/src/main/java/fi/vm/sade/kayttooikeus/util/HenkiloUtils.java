@@ -2,14 +2,8 @@ package fi.vm.sade.kayttooikeus.util;
 
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.Set;
 
 public final class HenkiloUtils {
 
@@ -24,6 +18,13 @@ public final class HenkiloUtils {
         LocalDateTime sixMonthsAgo = now.minusMonths(6);
         if(henkilo.getSahkopostivarmennusAikaleima() == null || henkilo.getSahkopostivarmennusAikaleima().isBefore(sixMonthsAgo)) {
             return LogInRedirectType.EMAIL_VERIFICATION;
+        }
+
+        LocalDateTime yearAgo = now.minusMonths(12);
+        if (henkilo.getKayttajatiedot() != null
+                && henkilo.getKayttajatiedot().getPasswordChange() != null 
+                && henkilo.getKayttajatiedot().getPasswordChange().isBefore(yearAgo)) {
+            return LogInRedirectType.PASSWORD_CHANGE;
         }
 
         return null;

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -168,6 +169,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         String hash = this.cryptoService.getSaltedHash(password, salt);
         kayttajatiedot.setSalt(salt);
         kayttajatiedot.setPassword(hash);
+        kayttajatiedot.setPasswordChange(LocalDateTime.now());
     }
 
     @Override

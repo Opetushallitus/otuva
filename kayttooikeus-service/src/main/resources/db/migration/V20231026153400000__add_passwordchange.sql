@@ -1,0 +1,2 @@
+ALTER TABLE kayttajatiedot ADD COLUMN passwordchange timestamp without time zone default null;
+ALTER TABLE kayttajatiedot ALTER COLUMN passwordchange timestamp without time zone default current_timestamp;
