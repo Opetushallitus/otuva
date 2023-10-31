@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
 import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
+import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
@@ -47,6 +48,7 @@ public class CasController {
     private final HenkiloService henkiloService;
     private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
+    private final KayttajatiedotService kayttajatiedotService;
     private final OphProperties ophProperties;
 
     @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
@@ -192,9 +194,15 @@ public class CasController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
+    @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Vaihtaa käyttäjän salasanan tilapäisen loginTokenin perusteella")
+    public CasRedirectParametersResponse changePassword(@RequestBody @Validated ChangePasswordRequest changePassword) {
+        return this.kayttajatiedotService.changePassword(changePassword);
+    }
+
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
-    public EmailVerificationResponseDto emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
+    public CasRedirectParametersResponse emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
                                                           @PathVariable String loginToken) {
         return this.emailVerificationService.emailVerification(henkiloUpdate, loginToken);
     }
@@ -208,7 +216,7 @@ public class CasController {
 
     @GetMapping(value = "/emailverification/redirectByLoginToken/{loginToken}")
     @ApiOperation("Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
-    public EmailVerificationResponseDto getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
+    public CasRedirectParametersResponse getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
         return this.emailVerificationService.redirectUrlByLoginToken(loginToken);
     }
 

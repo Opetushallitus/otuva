@@ -11,6 +11,7 @@ public class TunnistusTokenPopulator implements Populator<TunnistusToken> {
     private final Populator<Henkilo> henkilo;
     private String loginToken;
     private LocalDateTime aikaleima;
+    private LocalDateTime kaytetty;
 
     private TunnistusTokenPopulator(Populator<Henkilo> henkilo) {
         this.henkilo = henkilo;
@@ -30,12 +31,18 @@ public class TunnistusTokenPopulator implements Populator<TunnistusToken> {
         return this;
     }
 
+    public TunnistusTokenPopulator kaytetty(LocalDateTime kaytetty) {
+        this.kaytetty = kaytetty;
+        return this;
+    }
+
     @Override
     public TunnistusToken apply(EntityManager entityManager) {
         TunnistusToken tunnistusToken = new TunnistusToken();
         tunnistusToken.setHenkilo(henkilo.apply(entityManager));
         tunnistusToken.setLoginToken(loginToken);
         tunnistusToken.setAikaleima(aikaleima);
+        tunnistusToken.setKaytetty(kaytetty);
         entityManager.persist(tunnistusToken);
         return tunnistusToken;
     }

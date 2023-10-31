@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dto.EmailVerificationResponseDto;
+import fi.vm.sade.kayttooikeus.dto.CasRedirectParametersResponse;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
@@ -34,7 +34,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
-    public EmailVerificationResponseDto emailVerification(HenkiloUpdateDto henkiloUpdateDto, String loginToken) {
+    public CasRedirectParametersResponse emailVerification(HenkiloUpdateDto henkiloUpdateDto, String loginToken) {
         TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new NotFoundException(String.format("Logintoken %s on vanhentunut tai sitä ei löydy", loginToken)));
 
@@ -48,7 +48,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now());
 
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        return EmailVerificationResponseDto.builder()
+        return CasRedirectParametersResponse.builder()
                 .authToken(authToken)
                 .service(ophProperties.url("virkailijan-tyopoyta"))
                 .build();
@@ -56,14 +56,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
-    public EmailVerificationResponseDto redirectUrlByLoginToken(String loginToken) {
+    public CasRedirectParametersResponse redirectUrlByLoginToken(String loginToken) {
         TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
                 .orElseThrow(() -> new NotFoundException(String.format("Login tokenia %s ei löydy tai se on vanhentunut", loginToken)));
         if(tunnistusToken.getKaytetty() != null){
             throw new LoginTokenException(String.format("Login token %s on jo käytetty", loginToken));
         }
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        return EmailVerificationResponseDto.builder()
+        return CasRedirectParametersResponse.builder()
                 .authToken(authToken)
                 .service(ophProperties.url("virkailijan-tyopoyta"))
                 .build();

@@ -1,14 +1,20 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
+import fi.vm.sade.kayttooikeus.dto.CasRedirectParametersResponse;
+import fi.vm.sade.kayttooikeus.dto.ChangePasswordRequest;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
+import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.exception.LoginTokenException;
+import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
+import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import org.junit.Test;
@@ -17,11 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
+import static fi.vm.sade.kayttooikeus.repositories.populate.TunnistusTokenPopulator.tunnistusToken;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(SpringRunner.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
@@ -36,6 +45,9 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private KayttajatiedotRepository kayttajatiedotRepository;
+
+    @Autowired
+    private CryptoService cryptoService;
 
     @Test
     @WithMockUser(username = "user1")
@@ -154,5 +166,77 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
         userDetails = kayttajatiedotRepository.findByUsername("counterTest").orElseThrow();
         assertThat(userDetails.getLoginCounter()).isNotNull();
         assertThat(userDetails.getLoginCounter().getCount()).isEqualTo(2);
+    }
+
+    @Test
+    @WithMockUser(username = "changePasswordWeak")
+    public void changePasswordFailsOnWeakPassword() {
+        populate(henkilo("changePasswordWeak"));
+        populate(kayttajatiedot(henkilo("changePasswordWeak"), "changePasswordWeak", null));
+        kayttajatiedotService.changePasswordAsAdmin("changePasswordWeak", TEST_PASSWORD);
+
+        assertThrows(PasswordException.class, () -> kayttajatiedotService.changePassword(
+            new ChangePasswordRequest("token", TEST_PASSWORD, "newPassword")));
+    }
+
+    @Test
+    @WithMockUser(username = "changePasswordInvalid")
+    public void changePasswordFailsOnInvalidLoginToken() {
+        populate(henkilo("changePasswordInvalid"));
+        populate(kayttajatiedot(henkilo("changePasswordInvalid"), "changePasswordInvalid", null));
+        kayttajatiedotService.changePasswordAsAdmin("changePasswordInvalid", TEST_PASSWORD);
+
+        assertThrows(LoginTokenNotFoundException.class, () -> kayttajatiedotService.changePassword(
+            new ChangePasswordRequest("token", TEST_PASSWORD, TEST_PASSWORD + "123!")));
+    }
+
+    @Test
+    @WithMockUser(username = "changePasswordUsed")
+    public void changePasswordFailsOnUsedLoginToken() {
+        populate(henkilo("changePasswordUsed"));
+        populate(kayttajatiedot(henkilo("changePasswordUsed"), "changePasswordUsed", null));
+        populate(tunnistusToken(henkilo("changePasswordUsed"))
+                .loginToken("loginToken123")
+                .aikaleima(LocalDateTime.now())
+                .kaytetty(LocalDateTime.now()));
+        kayttajatiedotService.changePasswordAsAdmin("changePasswordUsed", TEST_PASSWORD);
+
+        assertThrows(LoginTokenNotFoundException.class, () -> kayttajatiedotService.changePassword(
+            new ChangePasswordRequest("loginToken123", TEST_PASSWORD, TEST_PASSWORD + "123!")));
+    }
+
+    @Test
+    @WithMockUser(username = "changePasswordMatch")
+    public void changePasswordFailsWhenCurrentPasswordDoesntMatch() {
+        populate(henkilo("changePasswordMatch"));
+        populate(kayttajatiedot(henkilo("changePasswordMatch"), "changePasswordMatch", null));
+        populate(tunnistusToken(henkilo("changePasswordMatch"))
+                .loginToken("loginToken123")
+                .aikaleima(LocalDateTime.now()));
+        kayttajatiedotService.changePasswordAsAdmin("changePasswordMatch", TEST_PASSWORD);
+
+        assertThrows(LoginTokenException.class, () -> kayttajatiedotService.changePassword(
+            new ChangePasswordRequest("loginToken123", TEST_PASSWORD + "123!", TEST_PASSWORD + "1")));
+    }
+
+    @Test
+    @WithMockUser(username = "changePasswordSuccess")
+    public void changePasswordHappyPath() {
+        populate(henkilo("changePasswordSuccess"));
+        populate(kayttajatiedot(henkilo("changePasswordSuccess"), "changePasswordSuccess", null));
+        populate(tunnistusToken(henkilo("changePasswordSuccess"))
+                .loginToken("loginToken123")
+                .aikaleima(LocalDateTime.now()));
+        kayttajatiedotService.changePasswordAsAdmin("changePasswordSuccess", TEST_PASSWORD);
+
+        String newPassword = TEST_PASSWORD + "123!";
+        CasRedirectParametersResponse response = kayttajatiedotService.changePassword(
+            new ChangePasswordRequest("loginToken123", TEST_PASSWORD, newPassword));
+        assertThat(response.getAuthToken()).isNotNull();
+        assertThat(response.getService()).endsWith("virkailijan-tyopoyta");
+
+        Kayttajatiedot kayttajatiedot = kayttajatiedotRepository.findByUsername("changePasswordSuccess").orElseThrow();
+        assertThat(cryptoService.check(newPassword, kayttajatiedot.getPassword(), kayttajatiedot.getSalt())).isTrue();
+        assertThat(kayttajatiedot.getPasswordChange()).isAfter(LocalDateTime.now().minusMinutes(1));
     }
 }

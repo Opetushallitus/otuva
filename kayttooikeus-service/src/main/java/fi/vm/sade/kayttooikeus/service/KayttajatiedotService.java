@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import fi.vm.sade.kayttooikeus.dto.CasRedirectParametersResponse;
+import fi.vm.sade.kayttooikeus.dto.ChangePasswordRequest;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
@@ -26,6 +28,8 @@ public interface KayttajatiedotService {
     KayttajatiedotReadDto updateKayttajatiedot(String henkiloOid, KayttajatiedotUpdateDto kayttajatiedot);
 
     void changePasswordAsAdmin(String oid, String newPassword);
+
+    CasRedirectParametersResponse changePassword(ChangePasswordRequest changePassword);
 
     void throwIfUsernameExists(String username);
 

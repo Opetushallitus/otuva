@@ -5,16 +5,21 @@ import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
+import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.*;
+import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import static fi.vm.sade.kayttooikeus.model.Identification.CAS_AUTHENTICATION_IDP;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -28,6 +33,8 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final OrikaBeanMapper mapper;
     private final CryptoService cryptoService;
+    private final IdentificationService identificationService;
+    private final OphProperties ophProperties;
 
     @Override
     @Transactional
@@ -114,6 +121,25 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     public void changePasswordAsAdmin(String oid, String newPassword) {
         this.cryptoService.throwIfNotStrongPassword(newPassword);
         this.changePassword(oid, newPassword);
+    }
+
+    @Override
+    @Transactional
+    public CasRedirectParametersResponse changePassword(ChangePasswordRequest changePassword) {
+        this.cryptoService.throwIfNotStrongPassword(changePassword.newPassword);
+        TunnistusToken tunnistusToken = identificationService.getByValidLoginToken(changePassword.loginToken);
+        if(tunnistusToken == null || tunnistusToken.getKaytetty() != null){
+            throw new LoginTokenException();
+        }
+        Henkilo henkilo = tunnistusToken.getHenkilo();
+        if (!cryptoService.check(changePassword.currentPassword, henkilo.getKayttajatiedot().getPassword(), henkilo.getKayttajatiedot().getSalt())) {
+            throw new LoginTokenException();
+        }
+
+        changePassword(henkilo.getOidHenkilo(), changePassword.newPassword);
+
+        String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
+        return new CasRedirectParametersResponse(authToken, ophProperties.url("virkailijan-tyopoyta"));
     }
 
     @Override
