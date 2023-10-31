@@ -194,10 +194,10 @@ public class CasController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation("Vaihtaa käyttäjän salasanan tilapäisen loginTokenin perusteella")
     public CasRedirectParametersResponse changePassword(@RequestBody @Validated ChangePasswordRequest changePassword) {
-        return this.kayttajatiedotService.changePassword(changePassword);
+        return kayttajatiedotService.changePassword(changePassword);
     }
 
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
