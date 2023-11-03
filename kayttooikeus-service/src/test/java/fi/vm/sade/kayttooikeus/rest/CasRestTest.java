@@ -96,7 +96,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        containsString(urlEncode("/henkilo-ui/rekisteroidy?temporaryKutsuToken="))));
+                        containsString(urlEncode("/henkilo-ui/kayttaja/rekisteroidy?temporaryKutsuToken="))));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/vahvatunnistusinfo/virhe/kielisyys123/vanhakutsu"))));
+                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/vanhakutsu"))));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        containsString(urlEncode("/henkilo-ui/uudelleenrekisterointi/kielisyys123/loginToken123/"))));
+                        containsString(urlEncode("/henkilo-ui/kayttaja/uudelleenrekisterointi/kielisyys123/loginToken123/"))));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/vahvatunnistusinfo/virhe/kielisyys123/vanha"))));
+                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/vanha"))));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/vahvatunnistusinfo/virhe/kielisyys123/loginToken123"))));
+                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/loginToken123"))));
     }
 
     @Test
@@ -169,7 +169,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        containsString(urlEncode("/henkilo-ui/uudelleenrekisterointi/kielisyys123/"))));
+                        containsString(urlEncode("/henkilo-ui/kayttaja/uudelleenrekisterointi/kielisyys123/"))));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class CasRestTest {
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/vahvatunnistusinfo/virhe/kielisyys123/eiloydy"))));
+                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/eiloydy"))));
     }
 
     private String urlEncode(String url) {
