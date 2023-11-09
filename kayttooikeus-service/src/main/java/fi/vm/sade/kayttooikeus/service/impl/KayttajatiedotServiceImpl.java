@@ -100,7 +100,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     private KayttajatiedotReadDto updateKayttajatiedot(Henkilo henkilo, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
         Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot()).orElseGet(() -> {
-            if (!KayttajaTyyppi.PALVELU.equals(henkilo.getKayttajaTyyppi())) {
+            if (!henkilo.isPalvelu()) {
                 throw new ValidationException("Vain palvelukäyttäjälle voi lisätä käyttäjätunnuksen");
             }
             return new Kayttajatiedot();

@@ -95,4 +95,8 @@ public class Henkilo implements Identifiable {
     public boolean isVirkailija() {
         return KayttajaTyyppi.VIRKAILIJA.equals(kayttajaTyyppi);
     }
+
+    public boolean isPalvelu() {
+        return KayttajaTyyppi.PALVELU.equals(kayttajaTyyppi);
+    }
 }

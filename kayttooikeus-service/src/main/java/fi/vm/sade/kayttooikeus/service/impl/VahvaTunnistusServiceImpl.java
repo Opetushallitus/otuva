@@ -90,7 +90,7 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
 
     private String kirjaaVahvaTunnistus(TunnistusToken tunnistusToken, String kielisyys, String hetu) {
         HenkiloDto henkiloByLoginToken = oppijanumerorekisteriClient.getHenkiloByOid(tunnistusToken.getHenkilo().getOidHenkilo());
-        if (KayttajaTyyppi.PALVELU.equals(tunnistusToken.getHenkilo().getKayttajaTyyppi())) {
+        if (tunnistusToken.getHenkilo().isPalvelu()) {
             log.error("Palvelukäyttäjänä kirjautuminen on estetty");
             return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "palvelukayttaja");
         }

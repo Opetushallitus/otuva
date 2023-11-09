@@ -11,6 +11,10 @@ public final class HenkiloUtils {
     }
 
     public static LogInRedirectType getLoginRedirectType(Henkilo henkilo, boolean isVahvastiTunnistettu, LocalDateTime now) {
+        if (henkilo.isPalvelu()) {
+            return null;
+        }
+
         if(Boolean.FALSE.equals(isVahvastiTunnistettu)) {
             return LogInRedirectType.STRONG_IDENTIFICATION;
         }

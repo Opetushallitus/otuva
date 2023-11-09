@@ -193,7 +193,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         if (callingUserRoles.contains(ROLE_PALVELUKAYTTAJA_CRUD)
                 && allowedRoles.contains(ROLE_PALVELUKAYTTAJA_CRUD)) {
             // käyttöoikeudella saa muokata vain palvelukäyttäjiä
-            if (!KayttajaTyyppi.PALVELU.equals(henkilo.get().getKayttajaTyyppi())) {
+            if (!henkilo.get().isPalvelu()) {
                 allowedRoles.remove(ROLE_PALVELUKAYTTAJA_CRUD);
             }
         }
