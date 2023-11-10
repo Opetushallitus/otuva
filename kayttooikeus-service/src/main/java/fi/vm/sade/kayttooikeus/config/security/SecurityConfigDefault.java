@@ -130,6 +130,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
                 .antMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
                 .antMatchers("/cas/emailverification/redirectByLoginToken/*").permitAll()
                 .antMatchers("/cas/salasananvaihto").permitAll()
+                .antMatchers("/cas/loginparams").permitAll()
                 .antMatchers("/userDetails", "/userDetails/*").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()

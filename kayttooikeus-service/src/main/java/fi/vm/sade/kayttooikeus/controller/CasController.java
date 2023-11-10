@@ -200,6 +200,12 @@ public class CasController {
         return kayttajatiedotService.changePassword(changePassword);
     }
 
+    @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ApiOperation("Palauttaa CAS-kirjautumiseen vaaditut parametrit")
+    public CasLoginParametersResponse getChangePasswordLoginParams(@PathVariable String loginToken) {
+        return new CasLoginParametersResponse(ophProperties.url("virkailijan-tyopoyta"));
+    }
+
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public CasRedirectParametersResponse emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
