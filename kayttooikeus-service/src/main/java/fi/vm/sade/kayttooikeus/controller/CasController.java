@@ -202,7 +202,7 @@ public class CasController {
 
     @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ApiOperation("Palauttaa CAS-kirjautumiseen vaaditut parametrit")
-    public CasLoginParametersResponse getChangePasswordLoginParams(@PathVariable String loginToken) {
+    public CasLoginParametersResponse getChangePasswordLoginParams() {
         return new CasLoginParametersResponse(ophProperties.url("virkailijan-tyopoyta"));
     }
 
