@@ -2,6 +2,8 @@ package fi.vm.sade.cas.oppija.configuration;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
+import fi.vm.sade.cas.oppija.exception.SystemException;
 import fi.vm.sade.cas.oppija.service.PersonService;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.CasSSLContext;
@@ -78,9 +80,17 @@ public class SamlClientConfiguration {
         @Override
         public Principal createPrincipal(String id, Map<String, List<Object>> attributes) {
             try {
-                resolveNationalIdentificationNumber(attributes).flatMap(this::findOidByNationalIdentificationNumber).ifPresent((String oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
+                Optional<String> oidByHetu = resolveNationalIdentificationNumber(attributes)
+                    .flatMap(this::findOidByNationalIdentificationNumber);
+                if (oidByHetu.isPresent()) {
+                    attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oidByHetu.get()));
+                } else {
+                    resolveEidasId(attributes)
+                        .flatMap(this::findOidByEidasId)
+                        .ifPresent((oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
+                }
             } catch (Exception e) {
-                LOGGER.error("Unable to get oid by national identification number", e);
+                LOGGER.error("Unable to get oid", e);
             }
 
             return principalFactory.createPrincipal(id, attributes);
@@ -90,10 +100,17 @@ public class SamlClientConfiguration {
             return resolveAttribute(attributes, ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class);
         }
 
+        private Optional<String> resolveEidasId(Map<String, List<Object>> attributes) {
+            return resolveAttribute(attributes, ATTRIBUTE_NAME_EIDAS_ID, String.class);
+        }
+
         private Optional<String> findOidByNationalIdentificationNumber(String nationalIdentificationNumber) {
             return personService.findOidByNationalIdentificationNumber(nationalIdentificationNumber);
         }
 
+        private Optional<String> findOidByEidasId(String eidasId) throws SystemException {
+            return personService.findOidByEidasId(eidasId);
+        }
     }
 
     // override bean Pac4jAuthenticationEventExecutionPlanConfiguration#clientAuthenticationHandler
