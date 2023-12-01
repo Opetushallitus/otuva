@@ -281,6 +281,41 @@ public class EmailServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    public void sendInvitationEmailInFinnishIfAsiointikieliIsEnglish() {
+        OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
+        organisaatioPerustieto.setNimi(new HashMap<String, String>() {{
+            put("fi", "suomenkielinennimi");
+        }});
+        SahkopostiHenkiloDto kutsuja = new SahkopostiHenkiloDto();
+        kutsuja.setKutsumanimi("kutsun");
+        kutsuja.setSukunimi("kutsuja");
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
+                .willReturn(Optional.of(organisaatioPerustieto));
+        given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))
+                .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());
+        Kutsu kutsu = Kutsu.builder()
+                .kieliKoodi("en")
+                .sahkoposti("arpa@kuutio.fi")
+                .salaisuus("salaisuushash")
+                .etunimi("arpa")
+                .sukunimi("kuutio")
+                .saate(null)
+                .organisaatiot(Sets.newHashSet(KutsuOrganisaatio.builder()
+                        .organisaatioOid("1.2.3.4.1")
+                        .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().nimi(new TextGroup()).build()))
+                        .build()))
+                .aikaleima(LocalDateTime.now())
+                .build();
+
+        this.emailService.sendInvitationEmail(kutsu);
+        ArgumentCaptor<EmailData> emailDataArgumentCaptor = ArgumentCaptor.forClass(EmailData.class);
+        verify(this.ryhmasahkopostiClient).sendRyhmasahkoposti(emailDataArgumentCaptor.capture());
+        EmailData emailData = emailDataArgumentCaptor.getValue();
+
+        assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("fi");
+    }
+
+    @Test
     public void sendInvitationEmailAsServiceKutsuja() {
         OrganisaatioPerustieto organisaatioPerustieto = new OrganisaatioPerustieto();
         organisaatioPerustieto.setNimi(new HashMap<String, String>() {{
