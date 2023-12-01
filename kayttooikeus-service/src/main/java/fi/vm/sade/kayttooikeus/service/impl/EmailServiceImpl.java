@@ -54,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
     public static final String DISCARDED_APPLICATION_EMAIL_TEMPLATE = "kayttooikeus_anomus_poistoilmoitus";
     private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
+    private static final List<String> SUPPORTED_ASIOINTIKIELI = List.of("fi", "sv");
     private static final Locale DEFAULT_LOCALE = new Locale(DEFAULT_LANGUAGE_CODE);
     private static final String KAYTTOOIKEUSMUISTUTUS_EMAIL_TEMPLATE_NAME = "kayttooikeusmuistutus_email_v2";
     private static final String KAYTTOOIKEUSANOMUSILMOITUS_EMAIL_TEMPLATE_NAME = "kayttooikeushakemusilmoitus_email_v2";
@@ -234,7 +235,7 @@ public class EmailServiceImpl implements EmailService {
         EmailData emailData = new EmailData();
         EmailMessage email = new EmailMessage();
         email.setTemplateName(KUTSUTTU_EMAIL_TEMPLATE_NAME);
-        email.setLanguageCode(kutsu.getKieliKoodi());
+        email.setLanguageCode(validateAsiointikieliForEmailLanguage(kutsu.getKieliKoodi()));
         email.setCallingProcess(CALLING_PROCESS);
         email.setCharset("UTF-8");
         email.setHtml(true);
@@ -286,7 +287,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendDiscardNotification(Kutsu invitation) {
         EmailData emailData = new EmailData();
-        emailData.setEmail(getMessageTemplate(DISCARDED_INVITATION_EMAIL_TEMPLATE, invitation.getKieliKoodi()));
+        emailData.setEmail(getMessageTemplate(DISCARDED_INVITATION_EMAIL_TEMPLATE, validateAsiointikieliForEmailLanguage(invitation.getKieliKoodi())));
         emailData.setRecipient(singletonList(resolveRecipient(invitation)));
         ryhmasahkopostiClient.sendRyhmasahkoposti(emailData);
     }
@@ -302,13 +303,17 @@ public class EmailServiceImpl implements EmailService {
 
     private String resolveLanguageCode(Henkilo henkilo) {
         try {
-            return oppijanumerorekisteriClient.getHenkiloByOid(henkilo.getOidHenkilo())
-                    .getAsiointiKieli().getKieliKoodi();
+            return validateAsiointikieliForEmailLanguage(oppijanumerorekisteriClient.getHenkiloByOid(henkilo.getOidHenkilo())
+                    .getAsiointiKieli().getKieliKoodi());
         } catch ( NullPointerException npe) {
             logger.error("Failed to resolve language code for {}. Using '{}' as fallback",
                     henkilo.getOidHenkilo(), DEFAULT_LANGUAGE_CODE);
         }
         return DEFAULT_LANGUAGE_CODE;
+    }
+
+    private String validateAsiointikieliForEmailLanguage(String asiointikieli) {
+        return SUPPORTED_ASIOINTIKIELI.contains(asiointikieli) ? asiointikieli : DEFAULT_LANGUAGE_CODE;
     }
 
     private EmailMessage getMessageTemplate(String templateName, String languageCode) {
