@@ -26,6 +26,7 @@ public final class HenkiloUtils {
 
         LocalDateTime yearAgo = now.minusMonths(12);
         if (henkilo.getKayttajatiedot() != null
+                && henkilo.getKayttajatiedot().getPassword() != null
                 && henkilo.getKayttajatiedot().getPasswordChange() != null 
                 && henkilo.getKayttajatiedot().getPasswordChange().isBefore(yearAgo)) {
             return LogInRedirectType.PASSWORD_CHANGE;

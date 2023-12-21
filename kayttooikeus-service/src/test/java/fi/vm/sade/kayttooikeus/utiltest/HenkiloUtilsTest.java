@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.utiltest;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +60,24 @@ public class HenkiloUtilsTest {
         henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now().minusMonths(5));
         LogInRedirectType loginRedirectType = HenkiloUtils.getLoginRedirectType(henkilo, isVahvastiTunnistettu, LocalDateTime.now());
         assertThat(loginRedirectType).isNull();
+    }
+
+    @Test
+    public void doesNotRedirectToPasswordChangeWithoutPassword() {
+        Henkilo henkilo = createHenkilo("123");
+        henkilo.setKayttajatiedot(Kayttajatiedot.builder().passwordChange(LocalDateTime.now().minusYears(2)).build());
+        henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now().minusMonths(5));
+        LogInRedirectType loginRedirectType = HenkiloUtils.getLoginRedirectType(henkilo, true, LocalDateTime.now());
+        assertThat(loginRedirectType).isNull();
+    }
+
+    @Test
+    public void redirectsToPasswordChange() {
+        Henkilo henkilo = createHenkilo("123");
+        henkilo.setKayttajatiedot(Kayttajatiedot.builder().password("passu").passwordChange(LocalDateTime.now().minusYears(2)).build());
+        henkilo.setSahkopostivarmennusAikaleima(LocalDateTime.now().minusMonths(5));
+        LogInRedirectType loginRedirectType = HenkiloUtils.getLoginRedirectType(henkilo, true, LocalDateTime.now());
+        assertThat(loginRedirectType).isEqualTo(LogInRedirectType.PASSWORD_CHANGE);
     }
 
 
