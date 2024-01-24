@@ -18,8 +18,8 @@ import javax.persistence.*;
  *         myöntää vain organisaatiopalvelun ryhmille.
  *     </li>
  *     <li>
- *         <strong>oppilaitostyypin koodi</strong>: käyttöoikeusryhmä voidaan myöntää vain tietyille oppilaitoksille.
- *         Esim. "15" = käyttöoikeusryhmä voidaan myöntää lukioille.
+ *         <strong>oppilaitostyypin koodiuri</strong>: käyttöoikeusryhmä voidaan myöntää vain tietyille oppilaitoksille.
+ *         Esim. "oppilaitostyyppi_15" = käyttöoikeusryhmä voidaan myöntää lukioille.
  *     </li>
  *     <li>
  *         <strong>organisaatiotyypin koodiuri</strong>: käyttöoikeusryhmä voidaan myöntää vain tietyn tyypin

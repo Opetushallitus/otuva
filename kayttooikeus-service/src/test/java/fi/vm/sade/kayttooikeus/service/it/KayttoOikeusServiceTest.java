@@ -147,8 +147,8 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.6")
     public void listPossibleRyhmasByOrganizationTest(){
-        OrganisaatioPerustieto oppilaitos11 = oppilaitos("1.2.246.562.10.12345678911", "11");
-        OrganisaatioPerustieto oppilaitos12 = oppilaitos("1.2.246.562.10.12345678912", "12");
+        OrganisaatioPerustieto oppilaitos11 = oppilaitos("1.2.246.562.10.12345678911", "oppilaitostyyppi_11");
+        OrganisaatioPerustieto oppilaitos12 = oppilaitos("1.2.246.562.10.12345678912", "oppilaitostyyppi_12");
         OrganisaatioPerustieto koulutustoimija1 = new OrganisaatioPerustieto();
         koulutustoimija1.setOid("1.2.246.562.10.12345678910");
         koulutustoimija1.setChildren(asList(oppilaitos11, oppilaitos12));
@@ -220,7 +220,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     private static OrganisaatioPerustieto oppilaitos(String oid, String oppilaitostyyppi) {
         OrganisaatioPerustieto organisaatio = new OrganisaatioPerustieto();
         organisaatio.setOid(oid);
-        organisaatio.setOppilaitostyyppi(String.format("oppilaitostyyppi_%s#1", oppilaitostyyppi));
+        organisaatio.setOppilaitostyyppi(String.format("%s#1", oppilaitostyyppi));
         return organisaatio;
     }
 

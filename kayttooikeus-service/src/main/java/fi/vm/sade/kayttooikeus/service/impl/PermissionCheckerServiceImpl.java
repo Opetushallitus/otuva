@@ -422,11 +422,17 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     private static boolean organisaatioLimitationCheck(String organisaatioOid, Set<String> viiteSet, OrganisaatioPerustieto childOrganisation) {
         return viiteSet.stream().anyMatch(organisaatioViite ->
-                                    organisaatioViite
-                                            .equals(!org.springframework.util.StringUtils.isEmpty(childOrganisation.getOppilaitostyyppi())
-                                                    // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
-                                                    ? childOrganisation.getOppilaitostyyppi().substring(17, 19)
-                                                    : null)
+                                    organisaatioViite.equals(oppilaitostyyppiWithoutVersion(childOrganisation))
                                             || organisaatioOid.equals(childOrganisation.getOid()) && childOrganisation.hasAnyOrganisaatiotyyppi(organisaatioViite));
+    }
+
+    private static String oppilaitostyyppiWithoutVersion(OrganisaatioPerustieto childOrganisation) {
+        String oppilaitostyyppi = childOrganisation.getOppilaitostyyppi();
+        if (!org.springframework.util.StringUtils.isEmpty(oppilaitostyyppi)) {
+            // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
+            return oppilaitostyyppi.split("#")[0];
+        } else {
+            return null;
+        }
     }
 }
