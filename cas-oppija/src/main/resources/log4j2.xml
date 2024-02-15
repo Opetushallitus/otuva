@@ -11,9 +11,8 @@
         </Console>
     </Appenders>
     <Loggers>
-        <AsyncLogger name="fi.vm.sade.javautils.http.HttpServletRequestUtils" level="ERROR"/>
-        <AsyncLogger name="org.apache.coyote.http11.Http11Processor" level="DEBUG" />
-        <AsyncLogger name="fi.vm.sade.cas.oppija" level="${sys:cas-oppija.log.level}" includeLocation="true"/>
+        <AsyncLogger name="org.apereo.cas" level="debug"/>
+        <AsyncLogger name="fi.vm" level="debug"/>
         <AsyncRoot level="info">
             <AppenderRef ref="console"/>
         </AsyncRoot>

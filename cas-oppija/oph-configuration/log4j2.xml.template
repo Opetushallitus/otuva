@@ -20,9 +20,9 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <AsyncLogger name="org.apereo.inspektr.audit.support" level="info" includeLocation="true" />
-        <AsyncLogger name="fi.vm.sade.cas.oppija" level="${sys:cas-oppija.log.level}" includeLocation="true"/>
-        <AsyncRoot level="${root.log.level}">
+        <AsyncLogger name="org.apereo.cas" level="debug" />
+        <AsyncLogger name="fi.vm" level="debug" />
+        <AsyncRoot level="info">
             <AppenderRef ref="file"/>
         </AsyncRoot>
     </Loggers>
