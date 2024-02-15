@@ -159,10 +159,7 @@ dependencies {
     implementation"org.apereo.cas:cas-server-support-pac4j-core-clients"
     implementation"org.apereo.cas:cas-server-support-pac4j-webflow"
     implementation "org.apereo.cas:cas-server-support-pac4j-api"
-    implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'org.springframework.session:spring-session-core'
-    implementation "org.apereo.cas:cas-server-support-redis-ticket-registry"
-    implementation "org.apereo.cas:cas-server-support-session-redis"
     implementation"org.apereo.cas:cas-server-support-interrupt-api"
     implementation"org.apereo.cas:cas-server-support-interrupt-core"
     implementation"org.apereo.cas:cas-server-support-interrupt-webflow"
@@ -194,6 +191,12 @@ dependencies {
     implementation "org.apereo.cas:cas-server-core-api-configuration-model"
     implementation "org.apereo.cas:cas-server-webapp-init"
     implementation "org.apereo.cas:cas-server-support-reports" //to enable springwebflow actuator endpoint
+
+    // Postgres
+    implementation "org.apereo.cas:cas-server-support-jpa-ticket-registry"
+    implementation "org.apereo.cas:cas-server-support-session-jdbc"
+    implementation "org.flywaydb:flyway-core"
+    runtimeOnly "org.postgresql:postgresql"
 
     if (project.hasProperty("casModules")) {
         def dependencies = project.getProperty("casModules").split(",")

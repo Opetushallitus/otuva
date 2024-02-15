@@ -45,25 +45,26 @@ cas:
           access: PERMIT
         springWebflow:
           access: PERMIT
-  ticket:
-    registry:
-      cleaner:
-        schedule:
-          enabled: true
-      redis:
-        enabled: true
-        port: 6379
-        host: localhost
-        crypto:
-          enabled: true
-          encryption:
-            key: 2luPkLicgX9IjOh_bwxXGQ
-          signing:
-            key: ext7kseHCJ4VFDE2twpnHJLMOo-FWqD8oRnQMF-bM9npNH0yFweN7I8-mAkIKk6uYh78gYpSQ1TvnIhOReocjw
   webflow:
     session:
       storage: true
       compress: false
+
+
+spring.datasource.url: jdbc:postgresql://localhost:5081/casoppija
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.datasource.username: app
+spring.datasource.password: app
+spring.flyway.enabled: true
+cas.ticket.registry.core.enable-locking: false
+cas.ticket.registry.cleaner.schedule.enabled: true
+cas.ticket.registry.jpa.enabled: true
+cas.ticket.registry.jpa.ddl-auto: validate
+cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQLDialect
+cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
+cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.ticket.registry.jpa.user: ${spring.datasource.username}
+cas.ticket.registry.jpa.password: ${spring.datasource.password}
 
 cas.service-registry.json.location: classpath:/opintopolku-1.json
 
@@ -85,7 +86,7 @@ management:
 
 
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /cas-oppija
     encoding:
@@ -102,12 +103,6 @@ server:
       remote-ip-header:
   error:
     include-stacktrace: never
-
-spring:
-  session:
-    store-type: redis
-    redis:
-      namespace: spring:session
 
 # Custom configuration
 

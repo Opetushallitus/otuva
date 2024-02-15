@@ -1,6 +1,8 @@
 # CAS configuration
 # https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
 
+server.port: 8080
+
 logging.config: file:/root/oph-configuration/log4j2.xml
 
 cas.server.name: https://{{ host_oppija }}
@@ -27,13 +29,9 @@ cas.tgc.crypto:
 cas.webflow.crypto:
     encryption.key: {{ cas_oppija_webflow_encryption_key }}
     signing.key: {{ cas_oppija_webflow_signing_key }}
-cas.ticket.registry.redis.crypto:
-    encryption.key: {{ cas_oppija_ticket_registry_redis_encryption_key }}
-    signing.key: {{ cas_oppija_ticket_registry_redis_signing_key }}
 
-cas.ticket.registry.redis.enabled: true
-cas.ticket.registry.redis.host: {{ cas_oppija_redis_url }}
-cas.ticket.registry.redis.port: 6379
+spring.datasource.url: jdbc:postgresql://{{ cas_oppija_postgres_host }}:{{ cas_oppija_postgres_port }}/{{ cas_oppija_postgres_db }}
+spring.datasource.password: {{ cas_oppija_postgres_password }}
 
 cas.authn.pac4j.saml:
   - client-name: ${cas.custom.properties.suomiFiClientName}
