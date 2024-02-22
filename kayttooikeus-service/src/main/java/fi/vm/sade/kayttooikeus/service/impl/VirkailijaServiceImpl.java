@@ -1,23 +1,41 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
+import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class VirkailijaServiceImpl implements VirkailijaService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VirkailijaServiceImpl.class);
 
-    private final KayttajaService kayttajaService;
+    private final PermissionCheckerService permissionCheckerService;
+    private final HenkiloHibernateRepository henkiloHibernateRepository;
+    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
+    private final CommonProperties commonProperties;
     private final KayttajatiedotService kayttajatiedotService;
     private final CryptoService cryptoService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
@@ -57,10 +75,35 @@ public class VirkailijaServiceImpl implements VirkailijaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Iterable<KayttajaReadDto> list(VirkailijaCriteriaDto virkailijaCriteria) {
-        KayttajaCriteriaDto kayttajaCriteria = mapper.map(virkailijaCriteria, KayttajaCriteriaDto.class);
-        kayttajaCriteria.setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
-        return kayttajaService.list(kayttajaCriteria);
+    public Iterable<KayttajaReadDto> list(VirkailijaCriteriaDto criteria) {
+        LOGGER.info("Haetaan käyttäjät {}", criteria);
+
+        if (criteria.getOrganisaatioOids() == null && criteria.getKayttooikeudet() == null) {
+            throw new IllegalArgumentException("Pakollinen hakuehto 'organisaatioOids' tai 'kayttooikeudet' puuttuu");
+        }
+
+        Set<String> henkiloOids = getHenkiloOids(criteria);
+        if (henkiloOids.isEmpty()) {
+            return emptyList();
+        }
+
+        HenkiloHakuCriteria oppijanumerorekisteriCriteria = mapper.map(criteria, HenkiloHakuCriteria.class);
+        oppijanumerorekisteriCriteria.setHenkiloOids(henkiloOids);
+        return oppijanumerorekisteriClient.listYhteystiedot(oppijanumerorekisteriCriteria).stream()
+                .map(henkilo -> mapper.map(henkilo, KayttajaReadDto.class))
+                .collect(toList());
     }
 
+    private Set<String> getHenkiloOids(VirkailijaCriteriaDto kayttajaCriteria) {
+        OrganisaatioHenkiloCriteria organisaatioHenkiloCriteria = mapper.map(kayttajaCriteria, OrganisaatioHenkiloCriteria.class);
+
+        String kayttajaOid = permissionCheckerService.getCurrentUserOid();
+        List<String> organisaatioOids = organisaatioHenkiloRepository.findUsersOrganisaatioHenkilosByPalveluRoolis(
+                kayttajaOid, PalveluRooliGroup.KAYTTAJAHAKU);
+        if (!organisaatioOids.contains(commonProperties.getRootOrganizationOid())) {
+            organisaatioHenkiloCriteria.setOrRetainOrganisaatioOids(organisaatioOids);
+        }
+
+        return henkiloHibernateRepository.findOidsBy(organisaatioHenkiloCriteria);
+    }
 }

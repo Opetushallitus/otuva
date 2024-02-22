@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.config.mapper;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajaCriteriaDto;
+import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MappingContext;
@@ -10,18 +10,19 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Optional;
 
+import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
 import static java.util.stream.Collectors.toList;
 
 @Configuration
 public class KayttajaMappers {
 
     @Bean
-    public CustomConverter<KayttajaCriteriaDto, OrganisaatioHenkiloCriteria> kayttajaCriteriaDtoOrganisaatioHenkiloCriteriaConverter() {
-        return new CustomConverter<KayttajaCriteriaDto, OrganisaatioHenkiloCriteria>() {
+    CustomConverter<VirkailijaCriteriaDto, OrganisaatioHenkiloCriteria> virkailijaCriteriaDtoOrganisaatioHenkiloCriteriaConverter() {
+        return new CustomConverter<VirkailijaCriteriaDto, OrganisaatioHenkiloCriteria>() {
             @Override
-            public OrganisaatioHenkiloCriteria convert(KayttajaCriteriaDto source, Type<? extends OrganisaatioHenkiloCriteria> destinationType, MappingContext mappingContext) {
+            public OrganisaatioHenkiloCriteria convert(VirkailijaCriteriaDto source, Type<? extends OrganisaatioHenkiloCriteria> destinationType, MappingContext mappingContext) {
                 OrganisaatioHenkiloCriteria destination = new OrganisaatioHenkiloCriteria();
-                destination.setKayttajaTyyppi(source.getKayttajaTyyppi());
+                destination.setKayttajaTyyppi(VIRKAILIJA);
                 destination.setPassivoitu(source.getPassivoitu());
                 destination.setOrganisaatioOids(source.getOrganisaatioOids());
                 destination.setKayttoOikeusRyhmaNimet(source.getKayttoOikeusRyhmaNimet());

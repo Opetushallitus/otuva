@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.KayttajaCriteriaDto;
+import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
@@ -60,7 +60,7 @@ public class OrikaMappingTest extends AbstractServiceIntegrationTest {
 
     @Test
     public void kayttajaCriteriaDtoToOrganisaatioHenkiloCriteriaWithoutKayttooikeudet() {
-        KayttajaCriteriaDto kayttajaCriteriaDto = new KayttajaCriteriaDto();
+        VirkailijaCriteriaDto kayttajaCriteriaDto = new VirkailijaCriteriaDto();
         kayttajaCriteriaDto.setOrganisaatioOids(Stream.of("oid1", "oid2").collect(toSet()));
         kayttajaCriteriaDto.setKayttooikeudet(null);
 
@@ -73,7 +73,7 @@ public class OrikaMappingTest extends AbstractServiceIntegrationTest {
 
     @Test
     public void kayttajaCriteriaDtoToOrganisaatioHenkiloCriteriaWithKayttooikeudet() {
-        KayttajaCriteriaDto kayttajaCriteriaDto = new KayttajaCriteriaDto();
+        VirkailijaCriteriaDto kayttajaCriteriaDto = new VirkailijaCriteriaDto();
         kayttajaCriteriaDto.setOrganisaatioOids(null);
         kayttajaCriteriaDto.setKayttooikeudet(singletonMap("KAYTTOOIKEUS", Stream.of("CRUD", "READ").collect(toCollection(LinkedHashSet::new))));
 
