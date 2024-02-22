@@ -78,8 +78,8 @@ public class VirkailijaServiceImpl implements VirkailijaService {
     public Iterable<KayttajaReadDto> list(VirkailijaCriteriaDto criteria) {
         LOGGER.info("Haetaan käyttäjät {}", criteria);
 
-        if (criteria.getOrganisaatioOids() == null && criteria.getKayttooikeudet() == null) {
-            throw new IllegalArgumentException("Pakollinen hakuehto 'organisaatioOids' tai 'kayttooikeudet' puuttuu");
+        if (criteria.getOrganisaatioOids() == null && criteria.getKayttooikeudet() == null && criteria.getKayttoOikeusRyhmaNimet() == null) {
+            throw new IllegalArgumentException("Pakollinen hakuehto (organisaatioOids, kayttooikeudet tai kayttoOikeusRyhmaNimet) puuttuu");
         }
 
         Set<String> henkiloOids = getHenkiloOids(criteria);
