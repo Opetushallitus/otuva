@@ -72,7 +72,7 @@ cas:
 host:
   host-virkailija: localhost:${server.port}
   host-oppija: localhost:${server.port}
-  host-cas: localhost:${server.port}
+  host-cas: localhost:8080
   host-shibboleth: localhost:${server.port}
   host-varda: localhost:${server.port}
 
