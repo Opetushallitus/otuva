@@ -23,46 +23,10 @@ Käyttöoikeuspalvelu on henkilö-palvelusta eriytetty käyttöoikeusryhmien ja 
 ## Testien ajaminen
 
     mvn clean test
-    
-## Kääntäminen
-
-    mvn clean install
-
-## Tietokanta
-
-    docker run --name kayttooikeus-db -p 5432:5432 -e POSTGRES_USER=oph -e POSTGRES_PASSWORD=oph -e POSTGRES_DB=kayttooikeus -d postgres:10.6
 
 ## Käynnistäminen
 
-    java -jar kayttooikeus-service/target/kayttooikeus-service-1.0.1-SNAPSHOT.jar
-
-Ilman parametreja sovellus käyttää [application.yml](kayttooikeus-service/src/main/resources/application.yml)
--tiedoston mukaisia oletuskonfiguraatioita.
-
-Konfiguraatioiden muuttaminen komentoriviparametreilla (baseUrl-parametrilla määritellään missä osoitteessa muut
-sovelluksen käyttämät palvelut sijaitsevat):
-
-    java -jar kayttooikeus-service/target/kayttooikeus-service-0.1.2-SNAPSHOT.jar \
-        -DbaseUrl=https://<testiympäristö_host> \
-        -Dspring.datasource.username=<tietokannan_tunnus> \
-        -Dspring.datasource.password=<tietokannan_salasana> \
-        -Dservice-users.default.username=<oma_virkailija_tunnus> \
-        -Dservice-users.default.password=<oma_virkailija_salasana>
-
-Kaikki paitsi baseUrl-konfiguraatio on myös mahdollista laittaa erilliseen tiedostoon:
-
-```yaml
-spring.datasource.username: <tietokannan_tunnus>
-spring.datasource.password: <tietokannan_salasana>
-service-users.default.username: <oma_virkailija_tunnus>
-service-users.default.password: <oma_virkailija_salasana>
-```
-
-...jolloin ajaminen:
-
-    java -jar kayttooikeus-service/target/kayttooikeus-service-0.1.2-SNAPSHOT.jar \
-        -DbaseUrl=https://<testiympäristö_host> \
-        -Dspring.config.additional-location=<path/to/configfile>/kayttooikeus.yml
+    ./start-local-env.sh
 
 Palvelu löytyy käynnistymisen jälkeen osoitteesta <http://localhost:8080/kayttooikeus-service>.
 
