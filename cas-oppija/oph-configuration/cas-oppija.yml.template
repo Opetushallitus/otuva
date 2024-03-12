@@ -80,7 +80,9 @@ cas.authn.pac4j.saml:
       - personName->urn:oid:2.5.4.3
 {% endif %}
 
+management.endpoints.web.exposure.include: health,springWebflow
 management.endpoint.springWebflow.enabled: {{ cas_oppija_permit_webflow_json_endpoint | default('false') }}
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
 cas.logout.follow-service-redirects: true
 cas.logout.redirect-parameter: service
 cas.logout.redirect-url: {{ cas_oppija_logout_redirect_url }}
