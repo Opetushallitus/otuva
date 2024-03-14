@@ -1,9 +1,11 @@
 # CAS configuration
 # https://apereo.github.io/cas/6.5.x/configuration/Configuration-Management.html etc...
 
+
 # CAS session lifetime configuration
-cas.ticket.tgt.primary.max-time-to-live-in-seconds: 18000
-cas.ticket.tgt.primary.time-to-kill-in-seconds: 18000
+cas.ticket.tgt.primary.max-time-to-live-in-seconds: PT5H
+cas.ticket.tgt.primary.time-to-kill-in-seconds: PT5H
+
 
 cas:
   server:
