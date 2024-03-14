@@ -14,9 +14,6 @@ cas.server.tomcat.http-proxy:
     scheme: https
     protocol: HTTP/1.1
 
-cas.ticket.tgt.primary.max-time-to-live-in-seconds: {{ cas_oppija_tgt_max_time_to_live_in_seconds | default('18000') }}
-cas.ticket.tgt.primary.time-to-kill-in-seconds: {{ cas_oppija_tgt_time_to_kill_in_seconds | default('18000') }}
-
 cas.tgc.secure: true
 
 cas.warning-cookie.secure: true
