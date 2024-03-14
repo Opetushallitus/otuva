@@ -3,9 +3,7 @@
 
 
 # CAS session lifetime configuration
-cas.ticket.tgt.primary.max-time-to-live-in-seconds: PT5H
-cas.ticket.tgt.primary.time-to-kill-in-seconds: PT5H
-
+cas.ticket.tgt.timeout.max-time-to-live-in-seconds: PT5H
 
 cas:
   server:
