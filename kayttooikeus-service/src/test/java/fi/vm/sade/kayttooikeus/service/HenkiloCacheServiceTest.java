@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.config.scheduling.UpdateHenkiloNimiCacheTask;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
@@ -26,7 +25,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringRunner.class)
-//@TestPropertySource(properties = {"kayttooikeus.scheduling.enabled=TRUE"})
 public class HenkiloCacheServiceTest extends AbstractServiceTest {
 
     @MockBean
@@ -46,7 +44,6 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
     @Before
     public void setup() {
         this.scheduledTasks = new UpdateHenkiloNimiCacheTask(
-                new KayttooikeusProperties(),
                 this.henkiloDataRepository,
                 this.henkiloCacheService,
                 this.scheduleTimestampsDataRepository,
@@ -70,7 +67,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
                 .willReturn(Lists.newArrayList(henkilo));
         given(this.henkiloDataRepository.countByEtunimetCachedNotNull()).willReturn(1L);
 
-        this.scheduledTasks.execute(null, null);
+        this.scheduledTasks.execute();
 
         assertThat(henkilo.getEtunimetCached()).isEqualTo("arpa arpa2");
         assertThat(henkilo.getSukunimiCached()).isEqualTo("kuutio");
