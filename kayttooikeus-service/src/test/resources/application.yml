@@ -17,7 +17,8 @@ hikari:
     maximum-pool-size: 5
     connection-timeout: 10000
     max-lifetime: 60000
-
+db-scheduler:
+  enabled: false
 cas:
   service: http://localhost/kayttooikeus-service
   send-renew: false
@@ -55,7 +56,6 @@ kayttooikeus:
   scheduling:
     enabled: false
     run-on-startup: false
-    pool_size: 1
 
 logback:
   access: true

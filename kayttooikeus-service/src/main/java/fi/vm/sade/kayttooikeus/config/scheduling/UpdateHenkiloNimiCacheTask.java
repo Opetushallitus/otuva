@@ -1,57 +1,33 @@
 package fi.vm.sade.kayttooikeus.config.scheduling;
 
-import com.github.kagkarlsson.scheduler.task.ExecutionContext;
-import com.github.kagkarlsson.scheduler.task.FixedDelay;
-import com.github.kagkarlsson.scheduler.task.RecurringTask;
-import com.github.kagkarlsson.scheduler.task.TaskInstance;
-import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.model.ScheduleTimestamps;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloCacheService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @see SchedulingClusterConfiguration ajastuksen aktivointi
- */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-public class UpdateHenkiloNimiCacheTask extends RecurringTask {
+public class UpdateHenkiloNimiCacheTask {
     private final HenkiloDataRepository henkiloDataRepository;
     private final HenkiloCacheService henkiloCacheService;
     private final ScheduleTimestampsDataRepository scheduleTimestampsDataRepository;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @Autowired
-    public UpdateHenkiloNimiCacheTask(KayttooikeusProperties kayttooikeusProperties,
-                                      HenkiloDataRepository henkiloDataRepository,
-                                      HenkiloCacheService henkiloCacheService,
-                                      ScheduleTimestampsDataRepository scheduleTimestampsDataRepository,
-                                      OppijanumerorekisteriClient oppijanumerorekisteriClient) {
-        super("update henkilo nimi cache task",
-                FixedDelay.of(Duration.ofMillis(kayttooikeusProperties.getScheduling().getConfiguration().getHenkiloNimiCache())));
-        this.henkiloDataRepository = henkiloDataRepository;
-        this.henkiloCacheService = henkiloCacheService;
-        this.scheduleTimestampsDataRepository = scheduleTimestampsDataRepository;
-        this.oppijanumerorekisteriClient = oppijanumerorekisteriClient;
-    }
-
-    @Override
     @Transactional
-    public void execute(TaskInstance<Void> taskInstance, ExecutionContext executionContext) {
+    public void execute() {
         // Update existing cache
         if (this.henkiloDataRepository.countByEtunimetCachedNotNull() > 0L) {
             updateExistingHenkiloCache();

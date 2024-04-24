@@ -29,13 +29,13 @@ public class DiscardExpiredInvitationsTaskTest {
         kayttooikeusProperties = mock(KayttooikeusProperties.class, Answers.RETURNS_DEEP_STUBS);
         service = mock(KutsuService.class, Answers.RETURNS_DEEP_STUBS);
         emailService = mock(EmailService.class, Answers.RETURNS_DEEP_STUBS);
-        discardExpiredInvitationsTask = new DiscardExpiredInvitationsTask(kayttooikeusProperties, service, emailService);
+        discardExpiredInvitationsTask = new DiscardExpiredInvitationsTask(emailService);
     }
 
     @Test
     public void executeEmpty() {
         when(service.findExpired(any(Period.class))).thenReturn(Collections.emptyList());
-        discardExpiredInvitationsTask.execute(null, null);
+        discardExpiredInvitationsTask.expire("invitations", service,  Period.ofMonths(2));
         verify(service, times(1)).findExpired(any(Period.class));
     }
 
@@ -43,7 +43,7 @@ public class DiscardExpiredInvitationsTaskTest {
     public void executeSuccess() {
         Kutsu invitation = mock(Kutsu.class, Answers.RETURNS_DEEP_STUBS);
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(invitation));
-        discardExpiredInvitationsTask.execute(null, null);
+        discardExpiredInvitationsTask.expire("invitations", service,  Period.ofMonths(2));
         verify(service, times(1)).discard(invitation);
         verify(emailService, times(1)).sendDiscardNotification(invitation);
     }
@@ -53,7 +53,7 @@ public class DiscardExpiredInvitationsTaskTest {
         Kutsu invitation = mock(Kutsu.class, Answers.RETURNS_DEEP_STUBS);
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(invitation));
         doThrow(new RuntimeException()).when(emailService).sendDiscardNotification(invitation);
-        discardExpiredInvitationsTask.execute(null, null);
+        discardExpiredInvitationsTask.expire("invitations", service,  Period.ofMonths(2));
         verify(service, times(1)).discard(invitation);
         verify(emailService, times(1)).sendDiscardNotification(invitation);
     }

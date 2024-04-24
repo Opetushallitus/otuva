@@ -29,13 +29,13 @@ public class DiscardExpiredApplicationsTaskTest {
         kayttooikeusProperties = mock(KayttooikeusProperties.class, Answers.RETURNS_DEEP_STUBS);
         service = mock(KayttooikeusAnomusService.class, Answers.RETURNS_DEEP_STUBS);
         emailService = mock(EmailService.class, Answers.RETURNS_DEEP_STUBS);
-        discardExpiredApplicationsTask = new DiscardExpiredApplicationsTask(kayttooikeusProperties, service, emailService);
+        discardExpiredApplicationsTask = new DiscardExpiredApplicationsTask(emailService);
     }
 
     @Test
     public void executeEmpty() {
         when(service.findExpired(any(Period.class))).thenReturn(Collections.emptyList());
-        discardExpiredApplicationsTask.execute(null, null);
+        discardExpiredApplicationsTask.expire("applications", service,  Period.ofMonths(2));
         verify(service, times(1)).findExpired(any(Period.class));
     }
 
@@ -43,7 +43,7 @@ public class DiscardExpiredApplicationsTaskTest {
     public void executeSuccess() {
         Anomus application = mock(Anomus.class, Answers.RETURNS_DEEP_STUBS);
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(application));
-        discardExpiredApplicationsTask.execute(null, null);
+        discardExpiredApplicationsTask.expire("applications", service,  Period.ofMonths(2));
         verify(service, times(1)).discard(application);
         verify(emailService, times(1)).sendDiscardNotification(application);
     }
@@ -53,7 +53,7 @@ public class DiscardExpiredApplicationsTaskTest {
         Anomus application = mock(Anomus.class, Answers.RETURNS_DEEP_STUBS);
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(application));
         doThrow(new RuntimeException()).when(emailService).sendDiscardNotification(application);
-        discardExpiredApplicationsTask.execute(null, null);
+        discardExpiredApplicationsTask.expire("applications", service, Period.ofMonths(2));
         verify(service, times(1)).discard(application);
         verify(emailService, times(1)).sendDiscardNotification(application);
     }

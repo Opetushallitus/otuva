@@ -16,7 +16,6 @@ public class KayttooikeusProperties {
     public static class Scheduling {
         private Boolean enabled = false;
         private Boolean runOnStartup = true;
-        private Integer pool_size = 2;
         private Long organisaatioRetryTime = 300000L;
 
         private Configuration configuration = new Configuration();
