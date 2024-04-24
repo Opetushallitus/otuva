@@ -56,6 +56,14 @@ kayttooikeus:
   scheduling:
     enabled: false
     run-on-startup: false
+  tasks:
+    export:
+      enabled: false
+      bucket-name: none
+      copy-to-lampi: false
+      lampi-bucket-name: none
+      lampi-role-arn: none
+      lampi-external-id: none
 
 logback:
   access: true

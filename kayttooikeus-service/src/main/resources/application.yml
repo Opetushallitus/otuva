@@ -101,6 +101,15 @@ kayttooikeus:
   disable-same-site-cookie: false
   scheduling:
     enabled: true
+  tasks:
+    export:
+      enabled: false
+      bucket-name: none
+      copy-to-lampi: false
+      lampi-bucket-name: none
+      lampi-role-arn: none
+      lampi-external-id: none
+
 
 auth:
   crypto-service:

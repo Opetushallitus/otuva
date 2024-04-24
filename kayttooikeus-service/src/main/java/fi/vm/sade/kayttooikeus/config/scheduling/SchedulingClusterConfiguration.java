@@ -10,6 +10,7 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.config.security.OphSessionMappingStorage;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
+import fi.vm.sade.kayttooikeus.export.ExportTask;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
@@ -50,6 +51,7 @@ public class SchedulingClusterConfiguration {
     private final DiscardExpiredApplicationsTask discardExpiredApplicationsTask;
     private final DiscardExpiredInvitationsTask discardExpiredInvitationsTask;
     private final DisableInactiveServiceUsersTask disableInactiveServiceUsersTask;
+    private final ExportTask exportTask;
 
     @Bean
     Task<Void> lahetaUusienAnomuksienIlmoituksetTask() {
@@ -144,5 +146,13 @@ public class SchedulingClusterConfiguration {
                 .recurring(new TaskWithoutDataDescriptor("Disable inactive service users"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getDisableInactiveServiceUsersHour(), 0)))
                 .execute((instance, ctx) -> disableInactiveServiceUsersTask.execute());
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "kayttooikeus.tasks.export.enabled", matchIfMissing = true)
+    Task<Void> exportTask() {
+        return Tasks
+                .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofHours(1)))
+                .execute((instance, ctx) -> exportTask.execute());
     }
 }
