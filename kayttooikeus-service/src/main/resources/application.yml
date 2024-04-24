@@ -100,7 +100,7 @@ kayttooikeus:
   uses-ssl-proxy: false
   disable-same-site-cookie: false
   scheduling:
-    enabled: false
+    enabled: true
 
 auth:
   crypto-service:

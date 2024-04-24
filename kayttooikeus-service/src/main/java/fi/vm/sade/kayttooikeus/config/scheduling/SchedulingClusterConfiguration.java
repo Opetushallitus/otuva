@@ -95,7 +95,7 @@ public class SchedulingClusterConfiguration {
     }
 
     @Bean
-    Task<Void> updateHenkiloNimiCacheTask() {
+    Task<Void> updateHenkiloNimiCache() {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("update henkilo nimi cache task"),
                         FixedDelay.of(Duration.ofMillis(kayttooikeusProperties.getScheduling().getConfiguration().getHenkiloNimiCache())))
@@ -117,7 +117,7 @@ public class SchedulingClusterConfiguration {
     }
 
     @Bean
-    Task<Void> discardExpiredInvitationsTask() {
+    Task<Void> discardExpiredInvitations() {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("expire-invitations-task"),
                         new Daily(LocalTime.of(
@@ -128,7 +128,7 @@ public class SchedulingClusterConfiguration {
     }
 
     @Bean
-    Task<Void> discardExpiredApplicationsTask() {
+    Task<Void> discardExpiredApplications() {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("expire-applications-task"),
                         new Daily(LocalTime.of(
@@ -139,7 +139,7 @@ public class SchedulingClusterConfiguration {
     }
 
     @Bean
-    Task<Void> disableInactiveServiceUsersTask() {
+    Task<Void> disableInactiveServiceUsers() {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("Disable inactive service users"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getDisableInactiveServiceUsersHour(), 0)))
