@@ -150,7 +150,7 @@ public class SchedulingClusterConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "kayttooikeus.tasks.export.enabled", matchIfMissing = true)
-    Task<Void> exportTask() {
+    Task<Void> exportTaskSchedule() {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofHours(1)))
                 .execute((instance, ctx) -> exportTask.execute());
