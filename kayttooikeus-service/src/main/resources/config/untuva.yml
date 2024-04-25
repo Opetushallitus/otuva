@@ -1,4 +1,4 @@
-kayttooikeus.tasks.export.enabled: false
+kayttooikeus.tasks.export.enabled: true
 kayttooikeus.tasks.export.bucket-name: oph-yleiskayttoiset-export-untuva
 kayttooikeus.tasks.export.copy-to-lampi: false
 kayttooikeus.tasks.export.lampi-bucket-name: oph-lampi-dev
