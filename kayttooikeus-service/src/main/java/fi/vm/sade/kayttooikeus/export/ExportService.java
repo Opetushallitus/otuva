@@ -51,7 +51,7 @@ public class ExportService {
         jdbcTemplate.execute("DROP SCHEMA IF EXISTS exportnew CASCADE");
         jdbcTemplate.execute("CREATE SCHEMA exportnew");
         jdbcTemplate.execute("""
-                CREATE TABLE exportnew.kayttooikeusryhma_kayttooikeus AS
+                CREATE TABLE exportnew.kayttooikeusryhma_relaatio AS
                 SELECT
                     kayttooikeusryhma_id,
                     kayttooikeus_id
