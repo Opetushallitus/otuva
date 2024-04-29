@@ -54,8 +54,8 @@ public class ExportService {
                 CREATE TABLE exportnew.kayttooikeusryhma_kayttooikeus AS
                 SELECT
                     kayttooikeusryhma_id,
-                    kayttooikeus_id,
-                FROM kayttooikeusryhma_relaatio
+                    kayttooikeus_id
+                FROM kayttooikeusryhma_kayttooikeus
                 """);
         jdbcTemplate.execute("""
                 CREATE TABLE exportnew.kayttooikeus AS
