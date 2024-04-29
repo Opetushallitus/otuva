@@ -112,7 +112,7 @@ public class ExportService {
     }
 
     private static final String KAYTTOOIKEUS_QUERY = "SELECT id, palvelu, kayttooikeus, rooli FROM export.kayttooikeus";
-    private static final String KAYTTOOIKEUSRYHMA_QUERY = "SELECT id, nimi, kuvaus, kayttajatyyppi FROM export.kayttooikeus";
+    private static final String KAYTTOOIKEUSRYHMA_QUERY = "SELECT id, nimi, kuvaus, kayttajatyyppi FROM export.kayttooikeusryhma";
     private static final String KAYTTOOIKEUSRYHMA_RELAATIO_QUERY = "SELECT kayttooikeusryhma_id, kayttooikeus_id FROM export.kayttooikeusryhma_relaatio";
     private static final String HENKILO_KAYTTOOIKEUS_QUERY = "SELECT henkilo_oid, organisaatio_oid, kayttooikeusryhma_id, voimassaalkupvm, voimassaloppupvm FROM export.henkilo_kayttooikeusryhma";
     private static final String HENKILO_KAYTTOOIKEUS_HISTORIA_QUERY = "SELECT henkilo_oid, organisaatio_oid, kayttooikeusryhma_id, arkistointiaika FROM export.henkilo_kayttooikeusryhma_historia";
