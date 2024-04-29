@@ -51,6 +51,13 @@ public class ExportService {
         jdbcTemplate.execute("DROP SCHEMA IF EXISTS exportnew CASCADE");
         jdbcTemplate.execute("CREATE SCHEMA exportnew");
         jdbcTemplate.execute("""
+                CREATE TABLE exportnew.kayttooikeusryhma_kayttooikeus
+                SELECT
+                    kayttooikeusryhma_id,
+                    kayttooikeus_id,
+                FROM kayttooikeusryhma_relaatio
+                """);
+        jdbcTemplate.execute("""
                 CREATE TABLE exportnew.kayttooikeus AS
                 SELECT
                     k.id AS id,
@@ -64,11 +71,26 @@ public class ExportService {
                 LEFT JOIN text_group tgp ON p.textgroup_id = tgp.id
                 LEFT JOIN text tp ON tp.textgroup_id = tgp.id AND tp.lang = 'FI'
                 """);
+        jdbcTemplate.execute("""
+                CREATE TABLE exportnew.kayttooikeusryhma AS
+                SELECT
+                    k.id AS id,
+                    tk.text AS nimi,
+                    tp.text AS kuvaus,
+                    k.allowed_usertype AS kayttajatyyppi
+                FROM kayttooikeusryhma k
+                LEFT JOIN text_group tgk ON k.textgroup_id = tgk.id
+                LEFT JOIN text tk ON tk.textgroup_id = tgk.id AND tk.lang = 'FI'
+                LEFT JOIN text_group tgp ON k.kuvaus_id = tgp.id
+                LEFT JOIN text tp ON tp.textgroup_id = tgp.id AND tp.lang = 'FI'
+                """);
         jdbcTemplate.execute("DROP SCHEMA IF EXISTS export CASCADE");
         jdbcTemplate.execute("ALTER SCHEMA exportnew RENAME TO export");
     }
 
     private static final String KAYTTOOIKEUS_QUERY = "SELECT id, palvelu, kayttooikeus, rooli FROM export.kayttooikeus";
+    private static final String KAYTTOOIKEUSRYHMA_QUERY = "SELECT id, nimi, kuvaus, kayttajatyyppi FROM export.kayttooikeus";
+    private static final String KAYTTOOIKEUSRYHMA_RELAATIO_QUERY = "SELECT kayttooikeusryhma_id, kayttooikeus_id FROM export.kayttooikeusryhma_relaatio";
 
     public void generateExportFiles() throws IOException {
         generateCsvExports();
@@ -77,6 +99,8 @@ public class ExportService {
 
     void generateCsvExports() {
         exportQueryToS3(S3_PREFIX + "/csv/kayttooikeus.csv", KAYTTOOIKEUS_QUERY);
+        exportQueryToS3(S3_PREFIX + "/csv/kayttooikeusryhma.csv", KAYTTOOIKEUSRYHMA_QUERY);
+        exportQueryToS3(S3_PREFIX + "/csv/kayttooikeusryhma_kayttooikeus.csv", KAYTTOOIKEUSRYHMA_RELAATIO_QUERY);
     }
 
     List<File> generateJsonExports() throws IOException {
@@ -88,7 +112,21 @@ public class ExportService {
                         rs.getString("rooli")
                 )
         ));
-        return List.of(kayttooikeusFile);
+        var kayttooikeusryhmaFile = exportQueryToS3AsJson(KAYTTOOIKEUSRYHMA_QUERY, S3_PREFIX + "/json/kayttooikeusryhma.json", unchecked(rs ->
+                new Kayttooikeusryhma(
+                        rs.getLong("id"),
+                        rs.getString("nimi"),
+                        rs.getString("kuvaus"),
+                        rs.getString("kayttajatyyppi")
+                )
+        ));
+        var kayttooikeusryhmaRelaatioFile = exportQueryToS3AsJson(KAYTTOOIKEUSRYHMA_RELAATIO_QUERY, S3_PREFIX + "/json/kayttooikeusryhma_relaatio.json", unchecked(rs ->
+                new KayttooikeusryhmaRelaatio(
+                        rs.getLong("kayttooikeusryhma_id"),
+                        rs.getLong("kayttooikeus_id")
+                )
+        ));
+        return List.of(kayttooikeusFile, kayttooikeusryhmaFile, kayttooikeusryhmaRelaatioFile);
     }
 
     private interface ThrowingFunction<T, R, E extends Throwable> {
@@ -152,10 +190,14 @@ public class ExportService {
     public void copyExportFilesToLampi() throws IOException {
         var csvManifest = new ArrayList<ExportManifest.ExportFileDetails>();
         csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeus.csv"));
+        csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeusryhma.csv"));
+        csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeusryhma_relaatio.csv"));
         writeManifest(S3_PREFIX + "/csv/manifest.json", new ExportManifest(csvManifest));
 
         var jsonManifest = new ArrayList<ExportManifest.ExportFileDetails>();
         jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeus.json"));
+        jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeusryhma.json"));
+        jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeusryhma_relaatio.json"));
         writeManifest(S3_PREFIX + "/json/manifest.json", new ExportManifest(jsonManifest));
     }
 
@@ -205,3 +247,5 @@ public class ExportService {
 }
 
 record Kayttooikeus(Long id, String palvelu, String kayttooikeus, String rooli){}
+record Kayttooikeusryhma(Long id, String palvelu, String kayttooikeus, String rooli){}
+record KayttooikeusryhmaRelaatio(Long kayttooikeusryhmaId, Long kayttooikeusId){}
