@@ -51,7 +51,7 @@ public class ExportService {
         jdbcTemplate.execute("DROP SCHEMA IF EXISTS exportnew CASCADE");
         jdbcTemplate.execute("CREATE SCHEMA exportnew");
         jdbcTemplate.execute("""
-                CREATE TABLE exportnew.kayttooikeusryhma_relaatio AS
+                CREATE TABLE exportnew.kayttooikeusryhma_kayttooikeus AS
                 SELECT
                     kayttooikeusryhma_id,
                     kayttooikeus_id
@@ -113,7 +113,7 @@ public class ExportService {
 
     private static final String KAYTTOOIKEUS_QUERY = "SELECT id, palvelu, kayttooikeus, rooli FROM export.kayttooikeus";
     private static final String KAYTTOOIKEUSRYHMA_QUERY = "SELECT id, nimi, kuvaus, kayttajatyyppi FROM export.kayttooikeusryhma";
-    private static final String KAYTTOOIKEUSRYHMA_RELAATIO_QUERY = "SELECT kayttooikeusryhma_id, kayttooikeus_id FROM export.kayttooikeusryhma_relaatio";
+    private static final String KAYTTOOIKEUSRYHMA_RELAATIO_QUERY = "SELECT kayttooikeusryhma_id, kayttooikeus_id FROM export.kayttooikeusryhma_kayttooikeus";
     private static final String HENKILO_KAYTTOOIKEUS_QUERY = "SELECT henkilo_oid, organisaatio_oid, kayttooikeusryhma_id, voimassaalkupvm, voimassaloppupvm FROM export.henkilo_kayttooikeusryhma";
     private static final String HENKILO_KAYTTOOIKEUS_HISTORIA_QUERY = "SELECT henkilo_oid, organisaatio_oid, kayttooikeusryhma_id, arkistointiaika FROM export.henkilo_kayttooikeusryhma_historia";
 
@@ -147,7 +147,7 @@ public class ExportService {
                         rs.getString("kayttajatyyppi")
                 )
         ));
-        var kayttooikeusryhmaRelaatioFile = exportQueryToS3AsJson(KAYTTOOIKEUSRYHMA_RELAATIO_QUERY, S3_PREFIX + "/json/kayttooikeusryhma_relaatio.json", unchecked(rs ->
+        var kayttooikeusryhmaRelaatioFile = exportQueryToS3AsJson(KAYTTOOIKEUSRYHMA_RELAATIO_QUERY, S3_PREFIX + "/json/kayttooikeusryhma_kayttooikeus.json", unchecked(rs ->
                 new KayttooikeusryhmaRelaatio(
                         rs.getLong("kayttooikeusryhma_id"),
                         rs.getLong("kayttooikeus_id")
@@ -241,7 +241,7 @@ public class ExportService {
         var csvManifest = new ArrayList<ExportManifest.ExportFileDetails>();
         csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeus.csv"));
         csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeusryhma.csv"));
-        csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeusryhma_relaatio.csv"));
+        csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/kayttooikeusryhma_kayttooikeus.csv"));
         csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/henkilo_kayttooikeusryhma.csv"));
         csvManifest.add(copyFileToLampi(S3_PREFIX + "/csv/henkilo_kayttooikeusryhma_historia.csv"));
         writeManifest(S3_PREFIX + "/csv/manifest.json", new ExportManifest(csvManifest));
@@ -249,7 +249,7 @@ public class ExportService {
         var jsonManifest = new ArrayList<ExportManifest.ExportFileDetails>();
         jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeus.json"));
         jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeusryhma.json"));
-        jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeusryhma_relaatio.json"));
+        jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/kayttooikeusryhma_kayttooikeus.json"));
         jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/henkilo_kayttooikeusryhma.json"));
         jsonManifest.add(copyFileToLampi(S3_PREFIX + "/json/henkilo_kayttooikeusryhma_historia.json"));
         writeManifest(S3_PREFIX + "/json/manifest.json", new ExportManifest(jsonManifest));
