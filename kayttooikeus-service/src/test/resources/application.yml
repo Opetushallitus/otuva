@@ -63,3 +63,5 @@ kayttooikeus:
 
 logback:
   access: true
+
+kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6,1.2.3.4.7

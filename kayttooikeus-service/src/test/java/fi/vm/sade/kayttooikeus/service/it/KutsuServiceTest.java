@@ -305,7 +305,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         HenkiloPopulator kutsuja = HenkiloPopulator.henkilo("kutsujaOid");
         populate(myonnettyKayttoOikeus(organisaatioHenkilo(kutsuja, "1.2.246.562.10.1").passivoitu(), kayttoOikeusRyhma("käyttöoikeusryhmä1")));
         populate(myonnettyKayttoOikeus(organisaatioHenkilo(kutsuja, "1.2.246.562.10.2"), kayttoOikeusRyhma("käyttöoikeusryhmä2")));
-        Kutsu kutsu = populate(kutsu("Essi", "Esimerkki", "a@example.com").kutsuja("kutsujaOid").organisaatio(kutsuOrganisaatio("1.2.246.562.10.1")));
+        populate(kutsu("Essi", "Esimerkki", "a@example.com").kutsuja("kutsujaOid").organisaatio(kutsuOrganisaatio("1.2.246.562.10.1")));
 
         KutsuOrganisaatioOrder order = KutsuOrganisaatioOrder.AIKALEIMA;
         Sort.Direction direction = Sort.Direction.ASC;
@@ -612,6 +612,67 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         verify(emailService, times(1)).sendInvitationEmail(any(), eq(Optional.of(kutsujaForEmail)));
     }
 
+    @Test
+    @WithMockUser(username = "1.2.3.4.6", authorities = {"ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD", "ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD_1.2.3.4.6"})
+    public void createKutsuAsPalvelukayttajaOnAllowlist() {
+        final String kutsujaForEmail = "makkara";
+        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
+
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(palvelukayttaja("1.2.3.4.6"), "1.2.3.4.5"),
+                kayttoOikeusRyhma("RYHMA3")
+                        .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_KUTSU_CRUD))));
+        MyonnettyKayttoOikeusRyhmaTapahtuma myonnetty = populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(virkailija("1.2.4"), "1.2.3.4.5"),
+                kayttoOikeusRyhma("kayttoOikeusRyhma")
+                        .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
+        KayttoOikeusRyhma myonnettava = populate(kayttoOikeusRyhma("RYHMA2")
+                .withOrganisaatiorajoite("1.2.3.4.1")
+                .withNimi(text("fi", "Käyttöoikeusryhmä")));
+        populate(kayttoOikeusRyhmaMyontoViite(myonnetty.getKayttoOikeusRyhma().getId(),
+                myonnettava.getId()));
+
+        KutsuCreateDto.KutsuKayttoOikeusRyhmaCreateDto kutsuKayttoOikeusRyhma = new KutsuCreateDto.KutsuKayttoOikeusRyhmaCreateDto();
+        kutsuKayttoOikeusRyhma.setId(myonnettava.getId());
+        given(this.organisaatioClient.getActiveParentOids(eq("1.2.3.4.1")))
+                .willReturn(asList("1.2.3.4.1", "1.2.3.4.5"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any()))
+                .willReturn(Stream.of("1.2.3.4.5", "1.2.3.4.1").collect(toSet()));
+
+        KutsuCreateDto kutsu = new KutsuCreateDto();
+        kutsu.setKutsujaOid("1.2.4");
+        kutsu.setEtunimi("Etu");
+        kutsu.setSukunimi("Suku");
+        kutsu.setSahkoposti("example@example.com");
+        kutsu.setAsiointikieli(Asiointikieli.fi);
+        kutsu.setOrganisaatiot(new LinkedHashSet<>());
+        KutsuCreateDto.KutsuOrganisaatioCreateDto kutsuOrganisaatio = new KutsuCreateDto.KutsuOrganisaatioCreateDto();
+        kutsuOrganisaatio.setOrganisaatioOid("1.2.3.4.1");
+        kutsuOrganisaatio.setKayttoOikeusRyhmat(Stream.of(kutsuKayttoOikeusRyhma).collect(toSet()));
+        kutsu.getOrganisaatiot().add(kutsuOrganisaatio);
+        kutsu.setKutsujaForEmail(kutsujaForEmail);
+
+        long id = kutsuService.createKutsu(kutsu);
+        KutsuReadDto tallennettu = kutsuService.getKutsu(id);
+
+        assertThat(tallennettu)
+                .returns(Asiointikieli.fi, KutsuReadDto::getAsiointikieli)
+                .returns("1.2.4", KutsuReadDto::getKutsujaOid);
+        assertThat(tallennettu.getOrganisaatiot())
+                .hasSize(1)
+                .flatExtracting(KutsuReadDto.KutsuOrganisaatioReadDto::getKayttoOikeusRyhmat)
+                .hasSize(1)
+                .extracting(KutsuReadDto.KutsuKayttoOikeusRyhmaReadDto::getNimi)
+                .flatExtracting(TextGroupMapDto::getTexts)
+                .extracting("fi")
+                .containsExactly("Käyttöoikeusryhmä");
+
+        Kutsu entity = this.em.find(Kutsu.class, id);
+        assertThat(entity.getSalaisuus()).isNotEmpty();
+
+        verify(emailService, times(1)).sendInvitationEmail(any(), eq(Optional.of(kutsujaForEmail)));
+    }
+
     @Test(expected = ForbiddenException.class)
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void createKutsuAsAdminWithNoHetuOrVtjYksiloity() {
@@ -860,7 +921,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 "2.1.0.1"))
                 .getHenkilo();
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        doReturn(Optional.of(new HenkiloDto().builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
+        doReturn(Optional.of(HenkiloDto.builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
 
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);
@@ -907,7 +968,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 "2.1.0.1"))
                 .getHenkilo();
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
-        doReturn(Optional.of(new HenkiloDto().builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
+        doReturn(Optional.of(HenkiloDto.builder().oidHenkilo("1.2.0.0.2").build())).when(this.oppijanumerorekisteriClient).getHenkiloByHetu("hetu");
 
         HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
                 new KielisyysDto("fi", null), "arpauser", TEST_PASWORD);

@@ -97,7 +97,7 @@ kayttooikeus:
       lampi-bucket-name: none
       lampi-role-arn: none
       lampi-external-id: none
-
+kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 
 auth:
   crypto-service:

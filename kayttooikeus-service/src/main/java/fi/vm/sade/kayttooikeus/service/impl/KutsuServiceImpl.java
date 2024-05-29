@@ -23,6 +23,7 @@ import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -63,10 +64,12 @@ public class KutsuServiceImpl implements KutsuService {
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final IdentificationRepository identificationRepository;
-    private final KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
     private final KutsujaValidator kutsujaValidator;
 
     private final CommonProperties commonProperties;
+
+    @Value("${kayttooikeus.kutsu.allowlist-oids}")
+    private String kutsuAllowlistOids;
 
     @Override
     @Transactional(readOnly = true)
@@ -90,10 +93,7 @@ public class KutsuServiceImpl implements KutsuService {
                 .build();
     }
 
-    @Override
-    @Transactional
-    public long createKutsu(KutsuCreateDto kutsuCreateDto) {
-        final String kayttajaOid = this.permissionCheckerService.getCurrentUserOid();
+    private String validateAndGetKutsujaOid(KutsuCreateDto kutsuCreateDto, String kayttajaOid) {
         Henkilo kayttaja = henkiloDataRepository.findByOidHenkilo(kayttajaOid)
                 .orElseThrow(() -> new DataInconsistencyException(String.format("Käyttäjää '%s' ei löytynyt", kayttajaOid)));
         String kutsujaOid = getKutsujaOid(kayttaja, kutsuCreateDto);
@@ -109,6 +109,17 @@ public class KutsuServiceImpl implements KutsuService {
         if (!kutsujaValidator.isKutsujaYksiloity(kutsujaOid)) {
             throw new ForbiddenException("To create new invitation user needs to have hetu and be identified from VTJ");
         }
+        return kutsujaOid;
+    }
+
+    @Override
+    @Transactional
+    public long createKutsu(KutsuCreateDto kutsuCreateDto) {
+        final String kayttajaOid = this.permissionCheckerService.getCurrentUserOid();
+        List<String> allowedKutsuOids = Arrays.asList(kutsuAllowlistOids.split(","));
+        String kutsujaOid = allowedKutsuOids.contains(kayttajaOid)
+            ? kutsuCreateDto.getKutsujaOid()
+            : validateAndGetKutsujaOid(kutsuCreateDto, kayttajaOid);
 
         final Kutsu newKutsu = mapper.map(kutsuCreateDto, Kutsu.class);
         this.validateKayttooikeusryhmat(newKutsu);

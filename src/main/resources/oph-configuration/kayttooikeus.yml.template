@@ -53,6 +53,7 @@ kayttooikeus:
   disable-same-site-cookie: {{kayttooikeus_disable_same_site_cookie | default('false')}}
   scheduling:
     enabled: true
+kayttooikeus.kutsu.allowlist-oids: {{kayttooikeus_kutsu_allowlist | default('')}}
 
 auth:
   crypto-service:
