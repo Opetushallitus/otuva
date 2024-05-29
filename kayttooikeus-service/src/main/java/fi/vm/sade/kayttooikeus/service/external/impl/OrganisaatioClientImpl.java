@@ -42,8 +42,8 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final OrikaBeanMapper orikaBeanMapper;
 
     private OrganisaatioCache cache;
-    
-    
+
+
     public OrganisaatioClientImpl(@Qualifier(HTTP_CLIENT_ORGANISAATIO) OphHttpClient httpClient,
                                   UrlConfiguration urlConfiguration,
                                   ObjectMapper objectMapper,
@@ -104,6 +104,20 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     @Override
     public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String oid) {
         return this.cache.getByOid(oid);
+    }
+
+    @Override
+    public Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCachedOrRefetch(String oid) {
+        Optional<OrganisaatioPerustieto> cachedOrg = cache.getByOid(oid);
+        if (cachedOrg.isPresent()) {
+            return cachedOrg;
+        } else {
+            try {
+                return Optional.of(fetchPerustiedot(oid));
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }
     }
 
     @Override

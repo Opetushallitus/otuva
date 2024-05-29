@@ -241,7 +241,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         SahkopostiHenkiloDto kutsuja = new SahkopostiHenkiloDto();
         kutsuja.setKutsumanimi("kutsun");
         kutsuja.setSukunimi("kutsuja");
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCachedOrRefetch(any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))
                 .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());
@@ -289,7 +289,7 @@ public class EmailServiceTest extends AbstractServiceTest {
         SahkopostiHenkiloDto kutsuja = new SahkopostiHenkiloDto();
         kutsuja.setKutsumanimi("kutsun");
         kutsuja.setSukunimi("kutsuja");
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCachedOrRefetch(any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))
                 .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());
@@ -324,7 +324,7 @@ public class EmailServiceTest extends AbstractServiceTest {
 
         String expectedKutsuja =  "Varda Info";
 
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any()))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCachedOrRefetch(any()))
                 .willReturn(Optional.of(organisaatioPerustieto));
         given(this.oppijanumerorekisteriClient.getHenkiloByOid(any()))
                 .willReturn(HenkiloDto.builder().kutsumanimi("kutsun").sukunimi("kutsuja").build());

@@ -27,6 +27,8 @@ public interface OrganisaatioClient {
 
     Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCached(String organisaatioOid);
 
+    Optional<OrganisaatioPerustieto> getOrganisaatioPerustiedotCachedOrRefetch(String organisaatioOid);
+
     /**
      * @param organisaatioOid Haettava organisaatio
      * @return Haetun organisaation ja tämän yläorganisaatioiden oidit

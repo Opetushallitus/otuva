@@ -258,12 +258,14 @@ public class EmailServiceImpl implements EmailService {
                         .url("cas.oppija.identification", urlQueryParams)),
                 replacement("vastaanottaja", mapper.map(kutsu, SahkopostiHenkiloDto.class)),
                 replacement("organisaatiot", kutsu.getOrganisaatiot().stream()
-                        .map(org -> new OranizationReplacement(new TextGroupMapDto(
-                                        this.organisaatioClient.getOrganisaatioPerustiedotCached(org.getOrganisaatioOid()
-                                                )
+                        .map(org -> new OranizationReplacement(
+                                        new TextGroupMapDto(
+                                            organisaatioClient.getOrganisaatioPerustiedotCachedOrRefetch(org.getOrganisaatioOid())
                                                 .orElseThrow(() -> new NotFoundException("Organisation not found with oid " + org.getOrganisaatioOid()))
-                                                .getNimi()).getOrAny(kutsu.getKieliKoodi()).orElse(null),
-                                        org.getRyhmat().stream().map(KayttoOikeusRyhma::getNimi)
+                                                .getNimi()
+                                        ).getOrAny(kutsu.getKieliKoodi()).orElse(null),
+                                        org.getRyhmat().stream()
+                                                .map(KayttoOikeusRyhma::getNimi)
                                                 .map(desc -> desc.getOrAny(kutsu.getKieliKoodi()).orElse(null))
                                                 .filter(Objects::nonNull).sorted().collect(toList())
                                 )
