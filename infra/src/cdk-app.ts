@@ -28,6 +28,10 @@ class DnsStack extends cdk.Stack {
     new route53.HostedZone(this, "OtuvaHostedZone", {
       zoneName: ssm.StringParameter.valueFromLookup(this, "/otuva/zoneName"),
     });
+
+    route53.HostedZone.fromLookup(this, "YleiskayttoisetHostedZone", {
+      domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
+    });
   }
 }
 
