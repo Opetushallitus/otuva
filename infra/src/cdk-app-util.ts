@@ -118,6 +118,14 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
             value: `/env/${env}/region`,
           },
+          DOCKER_USERNAME: {
+            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+            value: "/docker/username",
+          },
+          DOCKER_PASSWORD: {
+            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+            value: "/docker/password",
+          },
         },
         buildSpec: codebuild.BuildSpec.fromObject({
           version: "0.2",
@@ -131,7 +139,10 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
               },
             },
             pre_build: {
-              commands: [`git checkout ${tag}`],
+              commands: [
+                "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
+                `git checkout ${tag}`,
+              ],
             },
             build: {
               commands: [
