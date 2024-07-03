@@ -105,7 +105,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         projectName: prefix(`Deploy${capitalizedEnv}`),
         concurrentBuildLimit: 1,
         environment: {
-          buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+          buildImage: codebuild.LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0,
           computeType: codebuild.ComputeType.SMALL,
           privileged: true,
         },
