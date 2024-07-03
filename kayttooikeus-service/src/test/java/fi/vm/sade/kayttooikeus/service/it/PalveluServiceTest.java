@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.service.PalveluService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.t
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
+@Sql("/truncate_tables.sql")
 public class PalveluServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private PalveluService palveluService;
