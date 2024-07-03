@@ -152,6 +152,14 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
                 `./scripts/tag-green-build-${env}.sh`,
               ],
             },
+            post_build:
+              env === "hahtuva"
+                ? {
+                    commands: [
+                      `aws codepipeline start-pipeline-execution --name ${prefix(`DeployDev`)}`,
+                    ],
+                  }
+                : {},
           },
         }),
       },
