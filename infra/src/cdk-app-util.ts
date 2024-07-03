@@ -125,11 +125,18 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             "git-credential-helper": "yes",
           },
           phases: {
+            install: {
+              "runtime-versions": {
+                java: "corretto21",
+              },
+            },
             pre_build: {
               commands: [`git checkout ${tag}`],
             },
             build: {
               commands: [
+                "docker compose up -d",
+                "mvn clean test",
                 `./deploy-${env}.sh`,
                 `./scripts/tag-green-build-${env}.sh`,
               ],
