@@ -38,7 +38,16 @@ const PolicyDocument = JSON.stringify({
     },
     {
       Effect: "Allow",
-      Action: ["ec2:*", "rds:*", "secretsmanager:*", "iam:*"],
+      Action: [
+        "cloudwatch:*",
+        "ec2:*",
+        "ecr:*",
+        "ecs:*",
+        "iam:*",
+        "logs:*",
+        "rds:*",
+        "secretsmanager:*",
+      ],
       Resource: "*",
     },
   ],
