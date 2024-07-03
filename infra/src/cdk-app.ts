@@ -10,7 +10,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as logs from "aws-cdk-lib/aws-logs";
-import * as ecs_patterns from "aws-cdk-lib/aws-ecs-patterns";
 
 import { ALARM_TOPIC_ARN, prefix, QUALIFIER, VPC_NAME } from "./shared-account";
 
@@ -81,6 +80,11 @@ class ApplicationStack extends cdk.Stack {
       readers: [],
     });
 
+    const cluster = new ecs.Cluster(this, "Cluster", {
+      vpc,
+      clusterName: "kayttooikeus",
+    });
+
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
@@ -90,6 +94,7 @@ class ApplicationStack extends cdk.Stack {
       directory: path.join(__dirname, "../../"),
       file: "Dockerfile",
       exclude: ["infra/"],
+      platform: ecr_assets.Platform.LINUX_ARM64,
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(
@@ -98,6 +103,10 @@ class ApplicationStack extends cdk.Stack {
       {
         cpu: 1024,
         memoryLimitMiB: 2048,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        },
       },
     );
     const appPort = 8080;
@@ -110,18 +119,6 @@ class ApplicationStack extends cdk.Stack {
         postgres_host: database.clusterEndpoint.hostname,
         postgres_port: database.clusterEndpoint.port.toString(),
         postgres_database: "kayttooikeus",
-        ssm_lampi_role_arn: "",
-        ssm_lampi_external_id: "",
-        ssm_postgresql_kayttooikeus_app_password: "",
-        ssm_cas_mfa_username: "",
-        ssm_cas_mfa_password: "",
-        ssm_cas_gauth_encryption_key: "",
-        ssm_cas_gauth_signing_key: "",
-        ssm_kayttooikeus_username: "",
-        ssm_kayttooikeus_password: "",
-        ssm_kayttooikeus_crypto_password: "",
-        ssm_kayttooikeus_kutsu_allowlist: "",
-        ssm_auth_cryptoservice_static_salt: "",
       },
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
@@ -132,9 +129,51 @@ class ApplicationStack extends cdk.Stack {
           database.secret!,
           "password",
         ),
+        ssm_lampi_role_arn: this.ssmSecret("LampiRoleArn"),
+        ssm_lampi_external_id: this.ssmSecret("LampiExternalId"),
+        ssm_cas_mfa_username: this.ssmSecret("CasMfaUsername"),
+        ssm_cas_mfa_password: this.ssmSecret("CasMfaPassword"),
+        ssm_cas_gauth_encryption_key: this.ssmSecret("CasGauthEncryptionKey"),
+        ssm_cas_gauth_signing_key: this.ssmSecret("CasGauthSigningKey"),
+        ssm_kayttooikeus_username: this.ssmSecret("PalvelukayttajaUsername"),
+        ssm_kayttooikeus_password: this.ssmSecret("PalvelukayttajaPassword"),
+        ssm_kayttooikeus_crypto_password: this.ssmSecret("CryptoPassword"),
+        ssm_kayttooikeus_kutsu_allowlist: this.ssmSecret("KutsuAllowlist"),
+        ssm_auth_cryptoservice_static_salt: this.ssmSecret(
+          "CryptoserviceStaticSalt",
+        ),
       },
       portMappings: [{ containerPort: appPort, hostPort: appPort }],
     });
+
+    const appSecurityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
+      vpc,
+    });
+
+    const service = new ecs.FargateService(this, "Service", {
+      cluster,
+      taskDefinition,
+      desiredCount: 0,
+      maxHealthyPercent: 200,
+      minHealthyPercent: 0,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [appSecurityGroup],
+    });
+
+    dbSecurityGroup.addIngressRule(
+      appSecurityGroup,
+      ec2.Port.tcp(database.clusterEndpoint.port),
+    );
+  }
+
+  ssmSecret(name: string): ecs.Secret {
+    return ecs.Secret.fromSsmParameter(
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        `Param${name}`,
+        { parameterName: `/kayttooikeus/${name}` },
+      ),
+    );
   }
 }
 
