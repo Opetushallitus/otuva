@@ -22,6 +22,7 @@ const PolicyDocument = JSON.stringify({
       Effect: "Allow",
       Action: [
         "acm:*",
+        "application-autoscaling:*",
         "cloudwatch:*",
         "ec2:*",
         "ecr:*",

@@ -2,7 +2,8 @@ const environments = ["hahtuva", "dev", "qa", "prod"] as const;
 type EnvironmentName = (typeof environments)[number];
 
 const defaultConfig = {
-  desiredCount: 0,
+  minCapacity: 0,
+  maxCapacity: 0,
 };
 
 export type Config = typeof defaultConfig;
@@ -29,6 +30,8 @@ export function getConfig(): Config {
 
 export const hahtuva: Config = {
   ...defaultConfig,
+  minCapacity: 1,
+  maxCapacity: 2,
 };
 
 export const dev: Config = {

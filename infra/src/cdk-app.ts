@@ -160,12 +160,27 @@ class ApplicationStack extends cdk.Stack {
     const service = new ecs.FargateService(this, "Service", {
       cluster,
       taskDefinition,
-      desiredCount: config.desiredCount,
+      desiredCount: config.minCapacity,
+      minHealthyPercent: 100,
       maxHealthyPercent: 200,
-      minHealthyPercent: 0,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [appSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+    });
+    const scaling = service.autoScaleTaskCount({
+      minCapacity: config.minCapacity,
+      maxCapacity: config.maxCapacity,
+    });
+
+    // Scaling roughly the same as DownScalingPolicy and
+    scaling.scaleOnMetric("ServiceScaling", {
+      metric: service.metricCpuUtilization(),
+      scalingSteps: [
+        { upper: 15, change: -1 },
+        { lower: 50, change: +1 },
+        { lower: 65, change: +2 },
+        { lower: 80, change: +3 },
+      ],
     });
 
     dbSecurityGroup.addIngressRule(
