@@ -39,3 +39,7 @@ kayttooikeus.scheduling.enabled: true
 kayttooikeus.kutsu.allowlist-oids: ${ssm_kayttooikeus_kutsu_allowlist}
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
+
+userdetails.use-basic-auth: true
+userdetails.username: ${ssm_userdetails_username}
+userdetails.password: ${ssm_userdetails_password}

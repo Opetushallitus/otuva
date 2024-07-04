@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedG
 
 @Profile("!dev")
 @Configuration
-@Order(2)
+@Order(3)
 public class TunnistusSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String OPPIJA_TICKET_VALIDATOR_QUALIFIER = "oppijaTicketValidator";
