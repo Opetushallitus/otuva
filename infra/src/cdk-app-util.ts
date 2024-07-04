@@ -141,6 +141,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             pre_build: {
               commands: [
                 "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
+                "sudo yum install -y perl-Digest-SHA", // for shasum command
                 `git checkout ${tag}`,
               ],
             },
