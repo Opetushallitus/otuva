@@ -132,6 +132,7 @@ public class ExportService {
     }
 
     void generateCsvExports() {
+        jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS aws_s3 CASCADE");
         exportQueryToS3(S3_PREFIX + "/csv/kayttooikeus.csv", KAYTTOOIKEUS_QUERY);
         exportQueryToS3(S3_PREFIX + "/csv/kayttooikeusryhma.csv", KAYTTOOIKEUSRYHMA_QUERY);
         exportQueryToS3(S3_PREFIX + "/csv/kayttooikeusryhma_kayttooikeus.csv", KAYTTOOIKEUSRYHMA_RELAATIO_QUERY);
