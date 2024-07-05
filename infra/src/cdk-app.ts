@@ -76,6 +76,7 @@ class ApplicationStack extends cdk.Stack {
       credentials: rds.Credentials.fromGeneratedSecret("kayttooikeus"),
       storageType: rds.DBClusterStorageType.AURORA,
       writer: rds.ClusterInstance.provisioned("writer", {
+        enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
           ec2.InstanceSize.LARGE,
