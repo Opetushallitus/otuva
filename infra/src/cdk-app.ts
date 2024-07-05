@@ -73,7 +73,9 @@ class ApplicationStack extends cdk.Stack {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_12_17,
       }),
-      credentials: rds.Credentials.fromGeneratedSecret("kayttooikeus"),
+      credentials: rds.Credentials.fromGeneratedSecret("kayttooikeus", {
+        secretName: prefix("DatabaseSecret"),
+      }),
       storageType: rds.DBClusterStorageType.AURORA,
       writer: rds.ClusterInstance.provisioned("writer", {
         enablePerformanceInsights: true,
@@ -176,6 +178,7 @@ class ApplicationStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [appSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+      enableExecuteCommand: true,
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,

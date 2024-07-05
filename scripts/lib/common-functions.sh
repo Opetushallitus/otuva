@@ -1,3 +1,5 @@
+export repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+
 function require_docker {
   require_command docker
   docker ps >/dev/null 2>&1 || fatal "Running 'docker ps' failed. Is docker daemon running? Aborting."
