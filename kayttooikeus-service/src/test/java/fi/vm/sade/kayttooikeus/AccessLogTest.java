@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,14 +17,6 @@ import java.io.PrintStream;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * This test boots up tomcat server and tests masking of sensitive
- * information in access log produced. Behavior is same as in
- * final product, but access log format is more terse for brevity.
- *
- * check <a href="file:../resources/logback-access.xml">logback-access.xml</a>
- * in test resources to see the tested regexp.
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AccessLogTest {
@@ -94,10 +88,22 @@ public class AccessLogTest {
 
     private String resolveLog(ByteArrayOutputStream output) {
         for (String s : output.toString().split(System.getProperty("line.separator"), 10)) {
-            if (s.startsWith("GET")) {
-                return s;
-            }
+            var result = tryParse(s);
+            if (result != null) return result.request;
         }
         return "FAIL";
     }
+
+    private AccessLogLine tryParse(String s) {
+        try {
+            return objectMapper.readValue(s, AccessLogLine.class);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+    record AccessLogLine(String request) {}
 }
