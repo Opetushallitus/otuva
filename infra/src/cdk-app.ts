@@ -12,6 +12,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53_targets from "aws-cdk-lib/aws-route53-targets";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
 import { ALARM_TOPIC_ARN, prefix, QUALIFIER, VPC_NAME } from "./shared-account";
@@ -62,6 +63,8 @@ class ApplicationStack extends cdk.Stack {
       { vpc },
     );
 
+    const exportBucket = new s3.Bucket(this, "ExportBucket", {});
+
     const database = new rds.DatabaseCluster(this, "Database", {
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
@@ -79,6 +82,7 @@ class ApplicationStack extends cdk.Stack {
         ),
       }),
       readers: [],
+      s3ExportBuckets: [exportBucket],
     });
 
     const cluster = new ecs.Cluster(this, "Cluster", {
@@ -110,6 +114,8 @@ class ApplicationStack extends cdk.Stack {
         },
       },
     );
+    exportBucket.grantReadWrite(taskDefinition.taskRole);
+
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
@@ -119,6 +125,7 @@ class ApplicationStack extends cdk.Stack {
         postgres_host: database.clusterEndpoint.hostname,
         postgres_port: database.clusterEndpoint.port.toString(),
         postgres_database: "kayttooikeus",
+        export_bucket_name: exportBucket.bucketName,
       },
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
