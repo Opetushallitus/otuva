@@ -13,13 +13,16 @@ import org.springframework.context.annotation.Configuration;
 public class AccessLogConfiguration {
 
     @Bean
-    @ConditionalOnProperty(name = "logback.access")
     public WebServerFactoryCustomizer containerCustomizer() {
         return container -> {
             if (container instanceof TomcatServletWebServerFactory) {
                 ((TomcatServletWebServerFactory) container).addContextCustomizers(context -> {
                     LogbackValve logbackValve = new LogbackValve();
-                    logbackValve.setFilename("logback-access.xml");
+                    if (System.getProperties().contains("logback.access")) {
+                        logbackValve.setFilename("logback-access.xml");
+                    } else {
+                        logbackValve.setFilename("logback-access-stdout.xml");
+                    }
                     context.getPipeline().addValve(logbackValve);
                 });
             }
