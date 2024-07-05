@@ -7,8 +7,17 @@
         </encoder>
     </appender>
 
+    <appender name="AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="STDOUT-CONSOLE"/>
     </root>
+    <logger name="fi.vm.sade.kayttooikeus.config.AuditlogConfiguration" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT"/>
+    </logger>
 </configuration>
 
