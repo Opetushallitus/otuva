@@ -34,6 +34,7 @@ const PolicyDocument = JSON.stringify({
         "route53:*",
         "s3:*",
         "secretsmanager:*",
+        "wafv2:*",
       ],
       Resource: "*",
     },

@@ -15,6 +15,7 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53_targets from "aws-cdk-lib/aws-route53-targets";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 
 import { ALARM_TOPIC_ARN, prefix, QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
@@ -269,6 +270,97 @@ class ApplicationStack extends cdk.Stack {
         path: "/kayttooikeus-service/actuator/health",
         port: appPort.toString(),
       },
+    });
+
+    this.ipRestrictions(alb);
+  }
+
+  getIpAddresses(name: string): string[] {
+    const parameterValue = ssm.StringParameter.valueFromLookup(
+      this,
+      `/ip-addresses/${name}`,
+    );
+    return parameterValue.split(",");
+  }
+
+  ipRestrictions(alb: elasticloadbalancingv2.ApplicationLoadBalancer) {
+    const config = getConfig();
+
+    const ipSet = new wafv2.CfnIPSet(this, "UserDetailsIPSet", {
+      ipAddressVersion: "IPV4",
+      scope: "REGIONAL",
+      addresses: [
+        ...this.getIpAddresses("OpintopolkuVPN"),
+        ...this.getIpAddresses("OpintopolkuAWS"),
+        ...this.getIpAddresses("Valtori"),
+      ],
+    });
+
+    const pathPatternSet = new wafv2.CfnRegexPatternSet(
+      this,
+      "UserDetailsPathPatternSet",
+      {
+        scope: "REGIONAL",
+        regularExpressionList: [
+          "/kayttooikeus-service/userDetails",
+          "/kayttooikeus-service/userDetails/.*",
+        ],
+      },
+    );
+
+    const denyAccessRule: wafv2.CfnWebACL.RuleProperty = {
+      name: "UserDetailsAllowRule",
+      priority: 1,
+      action: {
+        block: {},
+      },
+      statement: {
+        andStatement: {
+          statements: [
+            {
+              notStatement: {
+                statement: {
+                  ipSetReferenceStatement: {
+                    arn: ipSet.attrArn,
+                  },
+                },
+              },
+            },
+            {
+              regexPatternSetReferenceStatement: {
+                arn: pathPatternSet.attrArn,
+                fieldToMatch: {
+                  uriPath: {},
+                },
+                textTransformations: [{ priority: 1, type: "NONE" }],
+              },
+            },
+          ],
+        },
+      },
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: false,
+        metricName: "UserDetailsAllowRule",
+        sampledRequestsEnabled: true,
+      },
+    };
+
+    const acl = new wafv2.CfnWebACL(this, "UserDetailsACL", {
+      defaultAction: {
+        allow: {},
+      },
+      scope: "REGIONAL",
+      rules: [denyAccessRule],
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: false,
+        metricName: "UserDetailsWebACL",
+        sampledRequestsEnabled: true,
+      },
+    });
+
+    new wafv2.CfnWebACLAssociation(this, "UserDetailsACLAssociation", {
+      resourceArn: alb.loadBalancerArn,
+      webAclArn: acl.attrArn,
     });
   }
 
