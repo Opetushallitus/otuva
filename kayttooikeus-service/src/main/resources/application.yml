@@ -88,8 +88,6 @@ kayttooikeus:
       lampi-external-id: none
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 
-userdetails.use-basic-auth: false
-
 auth:
   crypto-service:
     static-salt: mock
