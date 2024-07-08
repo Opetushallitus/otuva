@@ -8,6 +8,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as elasticloadbalancingv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as route53 from "aws-cdk-lib/aws-route53";
@@ -139,7 +140,7 @@ class ApplicationStack extends cdk.Stack {
           database.secret!,
           "password",
         ),
-        ssm_lampi_role_arn: this.ssmSecret("LampiRoleArn"),
+        ssm_lampi_role_arn: this.ssmString("LampiRoleArn2"),
         ssm_lampi_external_id: this.ssmSecret("LampiExternalId"),
         ssm_cas_mfa_username: this.ssmSecret("CasMfaUsername"),
         ssm_cas_mfa_password: this.ssmSecret("CasMfaPassword"),
@@ -164,6 +165,18 @@ class ApplicationStack extends cdk.Stack {
         },
       ],
     });
+
+    taskDefinition.addToTaskRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["sts:AssumeRole"],
+        resources: [
+          ssm.StringParameter.valueFromLookup(
+            this,
+            "/kayttooikeus/LampiRoleArn2",
+          ),
+        ],
+      }),
+    );
 
     const appSecurityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
       vpc,
@@ -257,6 +270,16 @@ class ApplicationStack extends cdk.Stack {
         port: appPort.toString(),
       },
     });
+  }
+
+  ssmString(name: string): ecs.Secret {
+    return ecs.Secret.fromSsmParameter(
+      ssm.StringParameter.fromStringParameterName(
+        this,
+        `Param${name}`,
+        `/kayttooikeus/${name}`,
+      ),
+    );
   }
 
   ssmSecret(name: string): ecs.Secret {
