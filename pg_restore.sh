@@ -23,19 +23,17 @@ function main {
 
   start_tunnel
   sleep 3
-  start_psql "$@"
+  start_pg_restore "$@"
 }
 
-function start_psql {
+function start_pg_restore {
   info "Fetching password from AWS Secrets manager"
   username="$(aws secretsmanager get-secret-value --secret-id "${DB_SECRET}" --query 'SecretString' --output text | jq -r '.username')"
   password="$(aws secretsmanager get-secret-value --secret-id "${DB_SECRET}" --query 'SecretString' --output text | jq -r '.password')"
 
   info "Connecting to localhost:$TUNNEL_PORT"
-  export PSQLRC="$repo/scripts/psqlrc"
-  if [ ! -f "${PSQLRC}" ]; then fatal "${PSQLRC} not found"; fi
   cd "$repo"
-  PGPASSWORD=$password psql --user "$username" --host localhost --port $TUNNEL_PORT --dbname kayttooikeus "$@"
+  PGPASSWORD=$password pg_restore --user "$username" --host localhost --port $TUNNEL_PORT --dbname kayttooikeus "$@"
 }
 
 function start_tunnel {
@@ -73,4 +71,4 @@ function is_container_healthy {
 }
 
 
-main "$@"
+time main "$@"

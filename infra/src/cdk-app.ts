@@ -95,6 +95,12 @@ class ApplicationStack extends cdk.Stack {
       clusterName: "kayttooikeus",
     });
 
+    const bastion = new Bastion(this, "Bastion", { cluster });
+    dbSecurityGroup.addIngressRule(
+      bastion.securityGroup,
+      ec2.Port.tcp(database.clusterEndpoint.port),
+    );
+
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
@@ -190,14 +196,12 @@ class ApplicationStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [appSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.minutes(5),
-      enableExecuteCommand: true,
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,
       maxCapacity: config.maxCapacity,
     });
 
-    // Scaling roughly the same as DownScalingPolicy and
     scaling.scaleOnMetric("ServiceScaling", {
       metric: service.metricCpuUtilization(),
       scalingSteps: [
@@ -380,6 +384,58 @@ class ApplicationStack extends cdk.Stack {
         { parameterName: `/kayttooikeus/${name}` },
       ),
     );
+  }
+}
+
+type BastionProps = {
+  cluster: ecs.Cluster;
+};
+
+class Bastion extends constructs.Construct {
+  readonly securityGroup: ec2.SecurityGroup;
+
+  constructor(scope: constructs.Construct, id: string, props: BastionProps) {
+    super(scope, id);
+
+    const bastionImage = new ecr_assets.DockerImageAsset(this, "BastionImage", {
+      directory: path.join(__dirname, "../../"),
+      file: "Dockerfile.bastion",
+      exclude: ["infra/"],
+      platform: ecr_assets.Platform.LINUX_ARM64,
+    });
+
+    const taskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      "BastionTaskDefinition",
+      {
+        cpu: 512,
+        memoryLimitMiB: 1024,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        },
+      },
+    );
+
+    taskDefinition.addContainer("BastionContainer", {
+      image: ecs.ContainerImage.fromDockerImageAsset(bastionImage),
+    });
+
+    this.securityGroup = new ec2.SecurityGroup(this, "BastionSecurityGroup", {
+      vpc: props.cluster.vpc,
+    });
+
+    new ecs.FargateService(this, "BastionService", {
+      cluster: props.cluster,
+      taskDefinition,
+      serviceName: prefix("Bastion"),
+      desiredCount: 1,
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [this.securityGroup],
+      enableExecuteCommand: true,
+    });
   }
 }
 
