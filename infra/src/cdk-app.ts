@@ -1,6 +1,5 @@
 import * as path from "node:path";
 
-import * as aws_sns from "aws-cdk-lib/aws-sns";
 import * as cdk from "aws-cdk-lib";
 import * as certificatemanager from "aws-cdk-lib/aws-certificatemanager";
 import * as constructs from "constructs";
@@ -16,6 +15,7 @@ import * as route53_targets from "aws-cdk-lib/aws-route53-targets";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
+import { AuditLogExport } from "./AuditLogExport";
 
 import { ALARM_TOPIC_ARN, prefix, QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
@@ -31,7 +31,6 @@ class CdkApp extends cdk.App {
     };
 
     new DnsStack(this, prefix("DnsStack"), stackProps);
-    new AlarmStack(this, prefix("AlarmStack"), stackProps);
     new ApplicationStack(this, prefix("ApplicationStack"), stackProps);
   }
 }
@@ -46,17 +45,11 @@ class DnsStack extends cdk.Stack {
   }
 }
 
-class AlarmStack extends cdk.Stack {
-  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
-    super(scope, id, props);
-    aws_sns.Topic.fromTopicArn(this, "AlarmTopic", ALARM_TOPIC_ARN);
-  }
-}
-
 class ApplicationStack extends cdk.Stack {
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
     const config = getConfig();
+
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
     const dbSecurityGroup = new ec2.SecurityGroup(
@@ -105,6 +98,8 @@ class ApplicationStack extends cdk.Stack {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
     });
+
+    new AuditLogExport(this, "AuditLogExport", { logGroup });
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
       directory: path.join(__dirname, "../../"),
