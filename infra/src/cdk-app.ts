@@ -16,8 +16,9 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { AuditLogExport } from "./AuditLogExport";
+import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import { ALARM_TOPIC_ARN, prefix, QUALIFIER, VPC_NAME } from "./shared-account";
+import { prefix, QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -91,6 +92,15 @@ class ApplicationStack extends cdk.Stack {
     const bastion = new Bastion(this, "Bastion", { cluster });
     dbSecurityGroup.addIngressRule(
       bastion.securityGroup,
+      ec2.Port.tcp(database.clusterEndpoint.port),
+    );
+
+    const backup = new DatabaseBackupToS3(this, "DatabaseBackupToS3", {
+      cluster,
+      database,
+    });
+    dbSecurityGroup.addIngressRule(
+      backup.securityGroup,
       ec2.Port.tcp(database.clusterEndpoint.port),
     );
 

@@ -28,6 +28,7 @@ const PolicyDocument = JSON.stringify({
         "ecr:*",
         "ecs:*",
         "elasticloadbalancing:*",
+        "events:*",
         "firehose:*",
         "iam:*",
         "lambda:*",
