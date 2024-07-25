@@ -15,7 +15,7 @@ spring.datasource.hikari.maximum-pool-size: 20
 spring.datasource.hikari.connection-timeout: 10000
 spring.datasource.hikari.max-lifetime: 900000
 
-cas.service: https://kayttooikeus.hahtuva.yleiskayttoiset.opintopolku.fi/kayttooikeus-service
+cas.service: https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service
 cas.mfa.username: ${ssm_cas_mfa_username}
 cas.mfa.password: ${ssm_cas_mfa_password}
 cas.mfa.encryption-key: ${ssm_cas_gauth_encryption_key}
