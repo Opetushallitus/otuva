@@ -31,7 +31,14 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       file: "Dockerfile",
       platform: ecr_assets.Platform.LINUX_ARM64,
     });
-    const backupBucket = new s3.Bucket(this, "BackupBucket", {});
+    const backupBucket = new s3.Bucket(this, "BackupBucket", {
+      lifecycleRules: [
+        {
+          prefix: "daily/",
+          expiration: cdk.Duration.days(30),
+        },
+      ],
+    });
 
     this.securityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
       vpc: cluster.vpc,
