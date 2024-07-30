@@ -37,6 +37,15 @@ export class DatabaseBackupToS3 extends constructs.Construct {
           prefix: "daily/",
           expiration: cdk.Duration.days(30),
         },
+        {
+          prefix: "monthly/",
+          transitions: [
+            {
+              storageClass: s3.StorageClass.GLACIER,
+              transitionAfter: cdk.Duration.days(30),
+            },
+          ],
+        },
       ],
     });
 
