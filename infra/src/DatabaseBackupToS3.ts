@@ -132,7 +132,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       `arn:aws:sns:${stack.region}:${stack.account}:${alarmTopicName}`,
     );
 
-    [(dailyFailureAlarm, monthlyFailureAlarm)].forEach((alarm) => {
+    [dailyFailureAlarm, monthlyFailureAlarm].forEach((alarm) => {
       alarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
       alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
     });
