@@ -14,13 +14,13 @@ import * as sns from "aws-cdk-lib/aws-sns";
 import * as path from "node:path";
 
 type DatabaseBackupToS3Props = {
-  cluster: ecs.Cluster;
-  database: rds.DatabaseCluster;
+  ecsCluster: ecs.Cluster;
+  dbCluster: rds.DatabaseCluster;
+  dbName: string;
 };
 
 export class DatabaseBackupToS3 extends constructs.Construct {
   readonly securityGroup: ec2.SecurityGroup;
-  readonly dbName = "kayttooikeus";
 
   constructor(
     scope: constructs.Construct,
@@ -28,7 +28,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     props: DatabaseBackupToS3Props,
   ) {
     super(scope, id);
-    const { cluster, database } = props;
+    const { ecsCluster, dbCluster, dbName } = props;
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
       directory: path.join(__dirname, "../../backup"),
@@ -54,7 +54,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     });
 
     this.securityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
-      vpc: cluster.vpc,
+      vpc: ecsCluster.vpc,
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(
@@ -83,16 +83,16 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       filterPattern: logs.FilterPattern.stringValue("msg", "=", "success"),
     });
 
-    const capitalizedDbname = `${this.dbName.charAt(0).toUpperCase()}${this.dbName.slice(1)}`;
+    const capitalizedDbname = `${dbName.charAt(0).toUpperCase()}${dbName.slice(1)}`;
     const dailyFailureAlarm = new cloudwatch.Alarm(this, "DailyFailureAlarm", {
       alarmName: `${capitalizedDbname}DailyBackupToS3Failure`,
-      alarmDescription: `Päivittäinen ${this.dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
+      alarmDescription: `Päivittäinen ${dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
       metric: metricFilter.metric().with({
         statistic: "Minimum",
         period: cdk.Duration.hours(1),
         dimensionsMap: {
           frequency: "daily",
-          dbname: this.dbName,
+          dbname: dbName,
         },
       }),
       threshold: 1,
@@ -107,13 +107,13 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       "MonthlyFailureAlarm",
       {
         alarmName: `${capitalizedDbname}MonthlyBackupToS3Failure`,
-        alarmDescription: `Kuukausittainen ${this.dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
+        alarmDescription: `Kuukausittainen ${dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
         metric: metricFilter.metric().with({
           statistic: "Minimum",
           period: cdk.Duration.days(1),
           dimensionsMap: {
             frequency: "monthly",
-            dbname: this.dbName,
+            dbname: dbName,
           },
         }),
         threshold: 1,
@@ -141,18 +141,18 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
       logging: new ecs.AwsLogDriver({ logGroup, streamPrefix: "backup" }),
       environment: {
-        DB_HOSTNAME: database.clusterEndpoint.hostname,
-        DB_PORT: database.clusterEndpoint.port.toString(),
-        DB_NAME: this.dbName,
+        DB_HOSTNAME: dbCluster.clusterEndpoint.hostname,
+        DB_PORT: dbCluster.clusterEndpoint.port.toString(),
+        DB_NAME: dbName,
         S3_BUCKET: backupBucket.bucketName,
       },
       secrets: {
         DB_USERNAME: ecs.Secret.fromSecretsManager(
-          database.secret!,
+          dbCluster.secret!,
           "username",
         ),
         DB_PASSWORD: ecs.Secret.fromSecretsManager(
-          database.secret!,
+          dbCluster.secret!,
           "password",
         ),
       },
@@ -163,7 +163,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     });
     rule.addTarget(
       new events_targets.EcsTask({
-        cluster,
+        cluster: ecsCluster,
         taskDefinition,
         securityGroups: [this.securityGroup],
       }),

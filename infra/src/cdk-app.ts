@@ -96,8 +96,9 @@ class ApplicationStack extends cdk.Stack {
     );
 
     const backup = new DatabaseBackupToS3(this, "DatabaseBackupToS3", {
-      cluster,
-      database,
+      ecsCluster: cluster,
+      dbCluster: database,
+      dbName: "kayttooikeus",
     });
     dbSecurityGroup.addIngressRule(
       backup.securityGroup,
