@@ -34,6 +34,7 @@ function copy_dump_as_daily_backup {
 
   echo "Copying dump as daily backup file $s3_url"
   aws s3 cp "$dump_file" "$s3_url"
+  log_daily_backup_success
   echo "Copied dump as daily backup file $s3_url"
 }
 
@@ -62,7 +63,24 @@ function copy_dump_as_monthly_backup {
 
   echo "Copying dump as monthly backup file $s3_url"
   aws s3 cp "$dump_file" "$s3_url"
+  log_monthly_backup_success
   echo "Copied dump as monthly backup file $s3_url"
+}
+
+function log_monthly_backup_success {
+  log_backup_success "$DB_NAME" "monthly"
+}
+
+function log_daily_backup_success {
+  log_backup_success "$DB_NAME" "daily"
+}
+
+function log_backup_success {
+  local dbname=$1
+  local frequency=$2
+  local now
+  now=$(date +"%Y-%m-%dT%H:%M:%S%z");
+  echo "{\"timestamp\": \"$now\", \"msg\": \"success\", \"dbname\": \"$dbname\", \"frequency\": \"$frequency\"}"
 }
 
 main

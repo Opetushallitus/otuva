@@ -8,6 +8,9 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as events from "aws-cdk-lib/aws-events";
 import * as events_targets from "aws-cdk-lib/aws-events-targets";
 import * as ecr_assets from "aws-cdk-lib/aws-ecr-assets";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import * as cloudwatch_actions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as sns from "aws-cdk-lib/aws-sns";
 import * as path from "node:path";
 
 type DatabaseBackupToS3Props = {
@@ -17,6 +20,7 @@ type DatabaseBackupToS3Props = {
 
 export class DatabaseBackupToS3 extends constructs.Construct {
   readonly securityGroup: ec2.SecurityGroup;
+  readonly dbName = "kayttooikeus";
 
   constructor(
     scope: constructs.Construct,
@@ -68,6 +72,70 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     backupBucket.grantReadWrite(taskDefinition.taskRole);
 
     const logGroup = new logs.LogGroup(this, "LogGroup", {});
+    const metricFilter = logGroup.addMetricFilter("SuccessMetricFilter", {
+      metricNamespace: "Database backup to S3",
+      metricName: "Success",
+      metricValue: "1",
+      dimensions: {
+        dbname: "$.dbname",
+        frequency: "$.frequency",
+      },
+      filterPattern: logs.FilterPattern.stringValue("msg", "=", "success"),
+    });
+
+    const capitalizedDbname = `${this.dbName.charAt(0).toUpperCase()}${this.dbName.slice(1)}`;
+    const dailyFailureAlarm = new cloudwatch.Alarm(this, "DailyFailureAlarm", {
+      alarmName: `${capitalizedDbname}DailyBackupToS3Failure`,
+      alarmDescription: `Päivittäinen ${this.dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
+      metric: metricFilter.metric().with({
+        statistic: "Minimum",
+        period: cdk.Duration.hours(1),
+        dimensionsMap: {
+          frequency: "daily",
+          dbname: this.dbName,
+        },
+      }),
+      threshold: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+      evaluationPeriods: 24,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+      actionsEnabled: true,
+    });
+
+    const monthlyFailureAlarm = new cloudwatch.Alarm(
+      this,
+      "MonthlyFailureAlarm",
+      {
+        alarmName: `${capitalizedDbname}MonthlyBackupToS3Failure`,
+        alarmDescription: `Kuukausittainen ${this.dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
+        metric: metricFilter.metric().with({
+          statistic: "Minimum",
+          period: cdk.Duration.days(1),
+          dimensionsMap: {
+            frequency: "monthly",
+            dbname: this.dbName,
+          },
+        }),
+        threshold: 1,
+        comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+        evaluationPeriods: 31,
+        treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+        actionsEnabled: true,
+      },
+    );
+
+    const alarmTopicName = "alarm";
+    const stack = cdk.Stack.of(this);
+    const alarmTopic = sns.Topic.fromTopicArn(
+      this,
+      "AlarmTopic",
+      `arn:aws:sns:${stack.region}:${stack.account}:${alarmTopicName}`,
+    );
+
+    [(dailyFailureAlarm, monthlyFailureAlarm)].forEach((alarm) => {
+      alarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
+      alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
+    });
 
     taskDefinition.addContainer("Container", {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
@@ -75,7 +143,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       environment: {
         DB_HOSTNAME: database.clusterEndpoint.hostname,
         DB_PORT: database.clusterEndpoint.port.toString(),
-        DB_NAME: "kayttooikeus",
+        DB_NAME: this.dbName,
         S3_BUCKET: backupBucket.bucketName,
       },
       secrets: {
