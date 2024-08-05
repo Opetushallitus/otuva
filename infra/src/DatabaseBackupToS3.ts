@@ -72,9 +72,9 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     backupBucket.grantReadWrite(taskDefinition.taskRole);
 
     const logGroup = new logs.LogGroup(this, "LogGroup", {});
-    const metricFilter = logGroup.addMetricFilter("SuccessMetricFilter", {
+    const metricFilter = logGroup.addMetricFilter("BackupSizeMetricFilter", {
       metricNamespace: "Database backup to S3",
-      metricName: "Backup size",
+      metricName: "BackupSize",
       metricValue: "$.size",
       dimensions: {
         dbname: "$.dbname",
