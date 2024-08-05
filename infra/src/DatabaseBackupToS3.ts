@@ -80,7 +80,11 @@ export class DatabaseBackupToS3 extends constructs.Construct {
         dbname: "$.dbname",
         frequency: "$.frequency",
       },
-      filterPattern: logs.FilterPattern.exists("size"),
+      filterPattern: logs.FilterPattern.all(
+        logs.FilterPattern.exists("$.size"),
+        logs.FilterPattern.exists("$.dbname"),
+        logs.FilterPattern.exists("$.frequency"),
+      ),
     });
 
     const capitalizedDbname = `${dbName.charAt(0).toUpperCase()}${dbName.slice(1)}`;
