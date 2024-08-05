@@ -74,13 +74,13 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     const logGroup = new logs.LogGroup(this, "LogGroup", {});
     const metricFilter = logGroup.addMetricFilter("SuccessMetricFilter", {
       metricNamespace: "Database backup to S3",
-      metricName: "Success",
-      metricValue: "1",
+      metricName: "Backup size",
+      metricValue: "$.size",
       dimensions: {
         dbname: "$.dbname",
         frequency: "$.frequency",
       },
-      filterPattern: logs.FilterPattern.stringValue("msg", "=", "success"),
+      filterPattern: logs.FilterPattern.exists("size"),
     });
 
     const capitalizedDbname = `${dbName.charAt(0).toUpperCase()}${dbName.slice(1)}`;
@@ -89,7 +89,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       alarmDescription: `Päivittäinen ${dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
       metric: metricFilter.metric().with({
         statistic: "Minimum",
-        period: cdk.Duration.hours(1),
+        period: cdk.Duration.hours(3),
         dimensionsMap: {
           frequency: "daily",
           dbname: dbName,
@@ -97,7 +97,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
       }),
       threshold: 1,
       comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
-      evaluationPeriods: 24,
+      evaluationPeriods: 8,
       treatMissingData: cloudwatch.TreatMissingData.BREACHING,
       actionsEnabled: true,
     });
@@ -110,7 +110,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
         alarmDescription: `Kuukausittainen ${dbName} tietokannan backup ei ole siirtynyt S3:seen yli 24 tuntiin`,
         metric: metricFilter.metric().with({
           statistic: "Minimum",
-          period: cdk.Duration.days(1),
+          period: cdk.Duration.hours(3),
           dimensionsMap: {
             frequency: "monthly",
             dbname: dbName,
@@ -118,7 +118,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
         }),
         threshold: 1,
         comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
-        evaluationPeriods: 31,
+        evaluationPeriods: 8,
         treatMissingData: cloudwatch.TreatMissingData.BREACHING,
         actionsEnabled: true,
       },
@@ -159,7 +159,7 @@ export class DatabaseBackupToS3 extends constructs.Construct {
     });
 
     const rule = new events.Rule(this, "Rule", {
-      schedule: events.Schedule.cron({ minute: "0", hour: "6" }),
+      schedule: events.Schedule.cron({ minute: "0", hour: "*" }),
     });
     rule.addTarget(
       new events_targets.EcsTask({

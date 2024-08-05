@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
 
-readonly dump_dir="/output"
-readonly dump_file="$dump_dir/$DB_NAME.dump"
+readonly dump_file="$(mktemp)"
+
+function cleanup {
+  echo "Deleting dump file $dump_file"
+  rm -f "$dump_file"
+}
+
+trap cleanup EXIT
 
 function main {
-  create_dump
-
   local seconds_from_epoch
   seconds_from_epoch=$(date +%s)
 
-  copy_dump_as_daily_backup "$seconds_from_epoch"
-  copy_dump_as_monthly_backup "$seconds_from_epoch"
+  ensure_daily_backup_stored_in_s3 "$seconds_from_epoch"
+  ensure_monthly_backup_stored_in_s3 "$seconds_from_epoch"
 }
 
 function create_dump {
-  mkdir -p "$dump_dir"
   PGPASSWORD="$DB_PASSWORD" pg_dump \
     --user "$DB_USERNAME" \
     --host $DB_HOSTNAME \
@@ -23,64 +26,112 @@ function create_dump {
     --dbname $DB_NAME \
     --format custom \
     --file "$dump_file"
-  ls -la "$dump_dir"
 }
 
-function copy_dump_as_daily_backup {
+function ensure_daily_backup_stored_in_s3 {
   local seconds_from_epoch=$1
-  local formatted_date
-  formatted_date=$(date -d @"$seconds_from_epoch" +%Y-%m-%d)
-  local s3_url="s3://$S3_BUCKET/daily/$DB_NAME/$formatted_date-$DB_NAME.dump"
-
-  echo "Copying dump as daily backup file $s3_url"
-  aws s3 cp "$dump_file" "$s3_url"
-  log_daily_backup_success
-  echo "Copied dump as daily backup file $s3_url"
+  ensure_backup_is_stored_in_s3 "$S3_BUCKET" "$DB_NAME" "daily" "$seconds_from_epoch"
 }
 
-function copy_dump_as_monthly_backup {
+function ensure_monthly_backup_stored_in_s3 {
   local seconds_from_epoch=$1
+  ensure_backup_is_stored_in_s3 "$S3_BUCKET" "$DB_NAME" "monthly" "$seconds_from_epoch"
+}
+
+function ensure_backup_is_stored_in_s3 {
+  local bucket=$1
+  local dbname=$2
+  local frequency=$3
+  local seconds_from_epoch=$4
+  local date_format
+  date_format=$(date_format_for_frequency "$frequency")
   local formatted_date
-  formatted_date=$(date -d @"$seconds_from_epoch" +%Y-%m)
-  local key="monthly/$DB_NAME/$formatted_date-$DB_NAME.dump"
-  local s3_url="s3://$S3_BUCKET/$key"
+  formatted_date=$(date -d @"$seconds_from_epoch" "$date_format")
+  local key="$frequency/$dbname/$formatted_date-$dbname.dump"
 
-  echo "Checking whether monthly backup file $s3_url exists and has size > 0"
-  local output=$(aws s3api head-object --bucket "$S3_BUCKET" --key "$key" 2>&1)
-
-  if echo "$output" | grep -q 'ContentLength'; then
-    local size
-    size=$(echo "$output" | jq -r '.ContentLength')
-    if [ "$size" -gt 0 ]; then
-      echo "Monthly backup file $s3_url exists and has size > 0. Nothing to do."
-      return 0
-    else
-      echo "Monthly backup file $s3_url exists but is empty"
-    fi
+  echo "Checking whether key $key exists in bucket $bucket"
+  if ! key_exists_in_bucket "$bucket" "$key"; then
+    echo "Key $key does not exist in bucket $bucket"
+    echo "Copying dump to bucket $bucket with key $key"
+    copy_dump_to_bucket "$bucket" "$key"
   else
-    echo "Monthly backup file $s3_url does not exist"
+    echo "Key $key exists in bucket $bucket"
   fi
 
-  echo "Copying dump as monthly backup file $s3_url"
-  aws s3 cp "$dump_file" "$s3_url"
-  log_monthly_backup_success
-  echo "Copied dump as monthly backup file $s3_url"
+  echo "Checking size of object with key $key in bucket $bucket"
+  local size
+  size=$(size_of_object_in_bucket "$bucket" "$key")
+  echo "Object with key $key in bucket $bucket has size $size"
+
+  local timestamp
+  timestamp=$(date +"%Y-%m-%dT%H:%M:%S%z")
+  echo "{\"timestamp\": \"$timestamp\", \"size\": \"$size\", \"dbname\": \"$dbname\", \"frequency\": \"$frequency\", \"bucket\": \"$bucket\", \"key\": \"$key\"}"
 }
 
-function log_monthly_backup_success {
-  log_backup_success "$DB_NAME" "monthly"
+function date_format_for_frequency {
+  local frequency=$1
+
+  case "$frequency" in
+      "daily")
+          echo "+%Y-%m-%d"
+          ;;
+      "monthly")
+          echo "+%Y-%m"
+          ;;
+      *)
+          echo "Unknown frequency."
+          return 1
+          ;;
+  esac
 }
 
-function log_daily_backup_success {
-  log_backup_success "$DB_NAME" "daily"
+function copy_dump_to_bucket {
+  local bucket=$1
+  local key=$2
+  local url=$(s3_url $bucket $key)
+
+  ensure_dump_created
+
+  aws s3 cp "$dump_file" "$url"
 }
 
-function log_backup_success {
-  local dbname=$1
-  local frequency=$2
-  local now
-  now=$(date +"%Y-%m-%dT%H:%M:%S%z");
-  echo "{\"timestamp\": \"$now\", \"msg\": \"success\", \"dbname\": \"$dbname\", \"frequency\": \"$frequency\"}"
+function ensure_dump_created {
+  echo "Checking if dump $dump_file already exists"
+  if ! ls "$dump_file"; then
+    echo "Creating dump $dump_file"
+    create_dump
+  else
+    echo "Dump $dump_file already exists"
+  fi
+}
+
+function key_exists_in_bucket {
+  local bucket=$1
+  local key=$2
+
+  aws s3 ls $(s3_url $bucket $key) > /dev/null 2>&1
+}
+
+function size_of_object_in_bucket {
+  local bucket=$1
+  local key=$2
+  local output=$(aws s3api head-object --bucket "$bucket" --key "$key" 2>&1 || true)
+  local size
+
+  if echo "$output" | grep -q 'ContentLength'; then
+    size=$(echo "$output" | jq -r '.ContentLength')
+  else
+    size=0
+  fi
+
+  echo $size
+}
+
+function s3_url {
+  local bucket=$1
+  local key=$2
+
+  echo "s3://$bucket/$key"
 }
 
 main
