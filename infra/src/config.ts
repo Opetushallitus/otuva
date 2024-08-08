@@ -36,6 +36,8 @@ export const hahtuva: Config = {
 
 export const dev: Config = {
   ...defaultConfig,
+  minCapacity: 1,
+  maxCapacity: 2,
 };
 
 export const qa: Config = {
