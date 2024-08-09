@@ -42,6 +42,8 @@ export const dev: Config = {
 
 export const qa: Config = {
   ...defaultConfig,
+  minCapacity: 1,
+  maxCapacity: 2,
 };
 
 export const prod: Config = {
