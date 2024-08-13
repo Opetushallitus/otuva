@@ -138,7 +138,7 @@ class ApplicationStack extends cdk.Stack {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
       logging: new ecs.AwsLogDriver({ logGroup, streamPrefix: "app" }),
       environment: {
-        ENV: getEnvironment() === "hahtuva" ? "hahtuva2" : getEnvironment(),
+        ENV: getEnvironment(),
         postgres_host: database.clusterEndpoint.hostname,
         postgres_port: database.clusterEndpoint.port.toString(),
         postgres_database: "kayttooikeus",
