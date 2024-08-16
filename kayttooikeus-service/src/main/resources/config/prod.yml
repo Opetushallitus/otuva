@@ -2,6 +2,7 @@ server.port: 8080
 
 kayttooikeus.tasks.export.enabled: true
 kayttooikeus.tasks.export.bucket-name: ${export_bucket_name}
+kayttooikeus.tasks.export.use-crt-client: true
 kayttooikeus.tasks.export.copy-to-lampi: false
 kayttooikeus.tasks.export.lampi-bucket-name: oph-lampi-prod
 kayttooikeus.tasks.export.lampi-role-arn: ${ssm_lampi_role_arn}

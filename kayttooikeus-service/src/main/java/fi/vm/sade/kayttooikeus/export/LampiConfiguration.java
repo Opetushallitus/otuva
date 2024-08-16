@@ -18,6 +18,8 @@ public class LampiConfiguration {
     private String lampiRoleArn;
     @Value("${kayttooikeus.tasks.export.lampi-external-id}")
     private String lampiExternalId;
+    @Value("${kayttooikeus.tasks.export.use-crt-client:false}")
+    private boolean useCrtClient;
 
     @Bean
     StsAssumeRoleCredentialsProvider lampiCredentialsProvider(AwsCredentialsProvider opinpolkuCredentialsProvider) {
@@ -38,9 +40,16 @@ public class LampiConfiguration {
 
     @Bean
     S3AsyncClient lampiS3Client(StsAssumeRoleCredentialsProvider lampiCredentialsProvider) {
-        return S3AsyncClient.builder()
-                .credentialsProvider(lampiCredentialsProvider)
-                .region(REGION)
-                .build();
+        if (!useCrtClient) {
+            return S3AsyncClient.builder()
+                    .credentialsProvider(lampiCredentialsProvider)
+                    .region(REGION)
+                    .build();
+        } else {
+            return S3AsyncClient.crtBuilder()
+                    .credentialsProvider(lampiCredentialsProvider)
+                    .region(REGION)
+                    .build();
+        }
     }
 }
