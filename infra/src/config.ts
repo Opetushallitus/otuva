@@ -48,4 +48,6 @@ export const qa: Config = {
 
 export const prod: Config = {
   ...defaultConfig,
+  minCapacity: 2,
+  maxCapacity: 8,
 };
