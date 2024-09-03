@@ -42,7 +42,7 @@ class ContinousDeploymentStack extends cdk.Stack {
           prefix(`${capitalize(env)}ContinuousDeploymentPipeline`),
           connection,
           env,
-          { owner: "Opetushallitus", name: "kayttooikeus", branch: "master" },
+          { owner: "Opetushallitus", name: "otuva", branch: "master" },
           props,
         ),
     );
