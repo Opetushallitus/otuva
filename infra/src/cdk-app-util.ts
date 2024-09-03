@@ -99,7 +99,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
     const testCommands =
-      env === "hahtuva" ? ["docker compose up -d", "mvn clean test"] : [];
+      env === "hahtuva" ? ["scripts/ci/run-tests.sh"] : [];
     const deployProject = new codebuild.PipelineProject(
       this,
       `Deploy${capitalizedEnv}Project`,
