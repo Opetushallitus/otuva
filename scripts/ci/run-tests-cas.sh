@@ -7,7 +7,6 @@ trap "docker compose down" EXIT
 
 function main {
   cd "$repo/cas-virkailija"
-  docker compose up -d
   ./gradlew clean build test
 }
 
