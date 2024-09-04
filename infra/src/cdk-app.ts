@@ -33,6 +33,7 @@ class CdkApp extends cdk.App {
 
     new DnsStack(this, prefix("DnsStack"), stackProps);
     new ApplicationStack(this, prefix("ApplicationStack"), stackProps);
+    new CasApplicationStack(this, "CasApplicationStack", stackProps);
   }
 }
 
@@ -441,6 +442,35 @@ class Bastion extends constructs.Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [this.securityGroup],
       enableExecuteCommand: true,
+    });
+  }
+}
+
+class CasApplicationStack extends cdk.Stack {
+  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+    super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {vpcName: VPC_NAME});
+
+    const database = new rds.DatabaseCluster(this, "Database", {
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      defaultDatabaseName: "cas",
+      engine: rds.DatabaseClusterEngine.auroraPostgres({
+        version: rds.AuroraPostgresEngineVersion.VER_12_17,
+      }),
+      credentials: rds.Credentials.fromGeneratedSecret("cas", {
+        secretName: "DatabaseSecret",
+      }),
+      storageType: rds.DBClusterStorageType.AURORA,
+      writer: rds.ClusterInstance.provisioned("writer", {
+        enablePerformanceInsights: true,
+        instanceType: ec2.InstanceType.of(
+            ec2.InstanceClass.T4G,
+            ec2.InstanceSize.LARGE,
+        ),
+      }),
+      readers: [],
     });
   }
 }
