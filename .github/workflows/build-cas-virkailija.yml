@@ -22,12 +22,13 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2
       - name: Build
+        working-directory: ./cas-virkailija
         run: ./gradlew clean build -Dbranch=$GITHUB_REF_NAME -Drevision=$GITHUB_SHA -DbuildNumber=$GITHUB_RUN_NUMBER/$GITHUB_RUN_ATTEMPT
       - name: Upload cas-war
         uses: actions/upload-artifact@v4
         with:
           name: cas-war
-          path: build/libs/cas.war
+          path: cas-virkailija/build/libs/cas.war
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
@@ -56,4 +57,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: ./cas-virkailija
         run: ./gradlew build sonarqube
