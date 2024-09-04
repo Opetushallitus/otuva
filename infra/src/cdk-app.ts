@@ -18,7 +18,7 @@ import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import { legacyPrefix, CDK_QUALIFIER, VPC_NAME } from "./shared-account";
+import { prefix, legacyPrefix, CDK_QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -33,7 +33,7 @@ class CdkApp extends cdk.App {
 
     new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
     new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
-    new CasApplicationStack(this, "CasApplicationStack", stackProps);
+    new CasVirkailijaApplicationStack(this, prefix("CasVirkailijaApplicationStack"), stackProps);
   }
 }
 
@@ -446,7 +446,7 @@ class Bastion extends constructs.Construct {
   }
 }
 
-class CasApplicationStack extends cdk.Stack {
+class CasVirkailijaApplicationStack extends cdk.Stack {
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
@@ -460,7 +460,7 @@ class CasApplicationStack extends cdk.Stack {
         version: rds.AuroraPostgresEngineVersion.VER_12_17,
       }),
       credentials: rds.Credentials.fromGeneratedSecret("cas", {
-        secretName: "DatabaseSecret",
+        secretName: prefix("CasVirkailijaDatabaseSecret"),
       }),
       storageType: rds.DBClusterStorageType.AURORA,
       writer: rds.ClusterInstance.provisioned("writer", {
