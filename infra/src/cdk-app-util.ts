@@ -98,8 +98,22 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       });
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
-    const testCommands =
-      env === "hahtuva" ? ["scripts/ci/run-tests.sh"] : [];
+
+    const runTests = env === "hahtuva"
+    if (runTests) {
+      const testStage = pipeline.addStage({ stageName: "Test" });
+      testStage.addAction(new codepipeline_actions.CodeBuildAction({
+        actionName: "TestKayttooikeus",
+        input: sourceOutput,
+        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests.sh"]),
+      }));
+      testStage.addAction(new codepipeline_actions.CodeBuildAction({
+        actionName: "TestCas",
+        input: sourceOutput,
+        project: makeTestProject(this, env, tag, "TestCas", ["scripts/ci/run-tests-cas.sh"]),
+      }));
+    }
+
     const deployProject = new codebuild.PipelineProject(
       this,
       `Deploy${capitalizedEnv}Project`,
@@ -149,7 +163,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             },
             build: {
               commands: [
-                ...testCommands,
                 `./deploy-${env}.sh`,
                 `./scripts/tag-green-build-${env}.sh`,
               ],
@@ -192,6 +205,63 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const deployStage = pipeline.addStage({ stageName: "Deploy" });
     deployStage.addAction(deployAction);
   }
+}
+
+function makeTestProject(scope: constructs.Construct, env: string, tag: string, name: string, testCommands: string[]): codebuild.PipelineProject {
+  return new codebuild.PipelineProject(
+    scope,
+    `${name}${capitalize(env)}Project`,
+    {
+      projectName: legacyPrefix(`${name}${capitalize(env)}`),
+      concurrentBuildLimit: 1,
+      environment: {
+        buildImage: codebuild.LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0,
+        computeType: codebuild.ComputeType.SMALL,
+        privileged: true,
+      },
+      environmentVariables: {
+        CDK_DEPLOY_TARGET_ACCOUNT: {
+          type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+          value: `/env/${env}/account_id`,
+        },
+        CDK_DEPLOY_TARGET_REGION: {
+          type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+          value: `/env/${env}/region`,
+        },
+        DOCKER_USERNAME: {
+          type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+          value: "/docker/username",
+        },
+        DOCKER_PASSWORD: {
+          type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+          value: "/docker/password",
+        },
+      },
+      buildSpec: codebuild.BuildSpec.fromObject({
+        version: "0.2",
+        env: {
+          "git-credential-helper": "yes",
+        },
+        phases: {
+          install: {
+            "runtime-versions": {
+              java: "corretto21",
+            },
+          },
+          pre_build: {
+            commands: [
+              "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
+              "sudo yum install -y perl-Digest-SHA", // for shasum command
+              `git checkout ${tag}`,
+            ],
+          },
+          build: {
+            commands: testCommands
+          },
+        },
+      }),
+    }
+  )
 }
 
 function capitalize(s: string) {
