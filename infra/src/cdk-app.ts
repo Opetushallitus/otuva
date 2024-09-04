@@ -18,7 +18,7 @@ import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import { legacyPrefix, QUALIFIER, VPC_NAME } from "./shared-account";
+import { legacyPrefix, CDK_QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -477,7 +477,7 @@ class CasApplicationStack extends cdk.Stack {
 
 const app = new CdkApp({
   defaultStackSynthesizer: new cdk.DefaultStackSynthesizer({
-    qualifier: QUALIFIER,
+    qualifier: CDK_QUALIFIER,
   }),
 });
 app.synth();

@@ -1,4 +1,4 @@
-export const QUALIFIER = "kayttooike";
+export const CDK_QUALIFIER = "kayttooike";
 
 export function legacyPrefix(name: string): string {
   return `Kayttooikeus${name}`;

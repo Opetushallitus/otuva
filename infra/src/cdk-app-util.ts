@@ -7,7 +7,7 @@ import * as codepipeline_actions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as constructs from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import { legacyPrefix, QUALIFIER } from "./shared-account";
+import { legacyPrefix, CDK_QUALIFIER } from "./shared-account";
 
 class CdkAppUtil extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -175,10 +175,10 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             effect: iam.Effect.ALLOW,
             actions: ["sts:AssumeRole"],
             resources: [
-              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${QUALIFIER}-lookup-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
-              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${QUALIFIER}-file-publishing-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
-              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${QUALIFIER}-image-publishing-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
-              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${QUALIFIER}-deploy-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
+              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-lookup-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
+              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-file-publishing-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
+              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-image-publishing-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
+              `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-deploy-role-${deploymentTargetAccount}-${deploymentTargetRegion}`,
             ],
           }),
         ],
@@ -200,7 +200,7 @@ function capitalize(s: string) {
 
 const app = new CdkAppUtil({
   defaultStackSynthesizer: new cdk.DefaultStackSynthesizer({
-    qualifier: QUALIFIER,
+    qualifier: CDK_QUALIFIER,
   }),
 });
 app.synth();
