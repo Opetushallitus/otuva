@@ -32,8 +32,12 @@ class CdkApp extends cdk.App {
     };
 
     new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
+    const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
     new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
-    new CasVirkailijaApplicationStack(this, prefix("CasVirkailijaApplicationStack"), stackProps);
+    new CasVirkailijaApplicationStack(this, prefix("CasVirkailijaApplicationStack"), {
+      ecsCluster: ecsStack.cluster,
+      ...stackProps
+    } );
   }
 }
 
@@ -43,6 +47,19 @@ class DnsStack extends cdk.Stack {
 
     new route53.HostedZone(this, "OtuvaHostedZone", {
       zoneName: ssm.StringParameter.valueFromLookup(this, "/otuva/zoneName"),
+    });
+  }
+}
+
+class ECSStack extends cdk.Stack {
+  public cluster: ecs.Cluster;
+
+  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+    super(scope, id, props);
+
+    this.cluster = new ecs.Cluster(this, "Cluster", {
+      vpc: ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME }),
+      clusterName: prefix(""),
     });
   }
 }
@@ -446,8 +463,12 @@ class Bastion extends constructs.Construct {
   }
 }
 
+type CasVirkailijaApplicationStackProps = cdk.StackProps & {
+  ecsCluster: ecs.Cluster
+}
+
 class CasVirkailijaApplicationStack extends cdk.Stack {
-  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+  constructor(scope: constructs.Construct, id: string, props: CasVirkailijaApplicationStackProps) {
     super(scope, id, props);
 
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", {vpcName: VPC_NAME});
@@ -472,6 +493,158 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       }),
       readers: [],
     });
+
+    const logGroup = new logs.LogGroup(this, "AppLogGroup", {
+      logGroupName: prefix("/cas-virkailija"),
+      retention: logs.RetentionDays.INFINITE,
+    });
+
+    const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
+      directory: path.join(__dirname, "../../cas-virkailija"),
+      file: "Dockerfile",
+      platform: ecr_assets.Platform.LINUX_ARM64,
+    });
+
+    const taskDefinition = new ecs.FargateTaskDefinition(
+        this,
+        "TaskDefinition",
+        {
+          cpu: 2048,
+          memoryLimitMiB: 8192,
+          runtimePlatform: {
+            operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+            cpuArchitecture: ecs.CpuArchitecture.ARM64,
+          },
+        },
+    );
+
+    const appPort = 8080;
+    taskDefinition.addContainer("AppContainer", {
+      image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
+      logging: new ecs.AwsLogDriver({ logGroup, streamPrefix: "app" }),
+      environment: {
+        ENV: getEnvironment(),
+        cas_postgres_host: database.clusterEndpoint.hostname,
+        cas_postgres_port: database.clusterEndpoint.port.toString(),
+        cas_postgres_database: "cas",
+      },
+      secrets: {
+        cas_postgres_username: ecs.Secret.fromSecretsManager(
+            database.secret!,
+            "username",
+        ),
+        cas_postgres_password: ecs.Secret.fromSecretsManager(
+            database.secret!,
+            "password",
+        ),
+        cas_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
+        cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
+        cas_webflow_encryption_key: this.ssmSecret("WebflowEncryptionKey"),
+        cas_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
+        cas_mfa_username: this.ssmSecret("CasMfaUsername", "kayttooikeus"),
+        cas_mfa_password: this.ssmSecret("CasMfaPassword", "kayttooikeus"),
+        cas_gauth_encryption_key: this.ssmSecret("CasGauthEncryptionKey", "kayttooikeus"),
+        cas_gauth_signing_key: this.ssmSecret("CasGauthSigningKey", "kayttooikeus"),
+        serviceprovider_app_username_to_usermanagement: this.ssmSecret("AppUsernameToUserManagement", "service-provider"),
+        serviceprovider_app_password_to_usermanagement: this.ssmSecret("AppPasswordToUserManagement", "service-provider"),
+      },
+      portMappings: [
+        {
+          name: "cas-virkailija",
+          containerPort: appPort,
+          appProtocol: ecs.AppProtocol.http,
+        },
+      ],
+    });
+
+    const config = getConfig();
+    const service = new ecs.FargateService(this, "Service", {
+      cluster: props.ecsCluster,
+      taskDefinition,
+      desiredCount: config.minCapacity,
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      healthCheckGracePeriod: cdk.Duration.minutes(5),
+    });
+    const scaling = service.autoScaleTaskCount({
+      minCapacity: config.minCapacity,
+      maxCapacity: config.maxCapacity,
+    });
+
+    scaling.scaleOnMetric("ServiceScaling", {
+      metric: service.metricCpuUtilization(),
+      scalingSteps: [
+        { upper: 15, change: -1 },
+        { lower: 50, change: +1 },
+        { lower: 65, change: +2 },
+        { lower: 80, change: +3 },
+      ],
+    });
+
+    database.connections.allowDefaultPortFrom(service)
+
+    const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
+        this,
+        "LoadBalancer",
+        {
+          vpc,
+          internetFacing: true,
+        },
+    );
+
+    const sharedHostedZone = route53.HostedZone.fromLookup(
+        this,
+        "YleiskayttoisetHostedZone",
+        {
+          domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
+        },
+    );
+    const albHostname = `cas.${sharedHostedZone.zoneName}`;
+    const albRecord = new route53.ARecord(this, "ALBARecord", {
+      zone: sharedHostedZone,
+      recordName: albHostname,
+      target: route53.RecordTarget.fromAlias(
+          new route53_targets.LoadBalancerTarget(alb),
+      ),
+    });
+
+    const albCertificate = new certificatemanager.Certificate(
+        this,
+        "AlbCertificate",
+        {
+          domainName: albHostname,
+          validation:
+              certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
+        },
+    );
+
+    const listener = alb.addListener("Listener", {
+      protocol: elasticloadbalancingv2.ApplicationProtocol.HTTPS,
+      port: 443,
+      open: true,
+      certificates: [albCertificate],
+    });
+
+    listener.addTargets("ServiceTarget", {
+      port: appPort,
+      targets: [service],
+      healthCheck: {
+        enabled: true,
+        interval: cdk.Duration.seconds(10),
+        path: "/cas/actuator/health",
+        port: appPort.toString(),
+      },
+    });
+  }
+  ssmSecret(name: string, prefix: string = "cas"): ecs.Secret {
+    return ecs.Secret.fromSsmParameter(
+        ssm.StringParameter.fromSecureStringParameterAttributes(
+            this,
+            `Param${name}`,
+            { parameterName: `/${prefix}/${name}` },
+        ),
+    );
   }
 }
 
