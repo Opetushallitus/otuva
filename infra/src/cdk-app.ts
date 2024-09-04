@@ -18,7 +18,7 @@ import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import { prefix, QUALIFIER, VPC_NAME } from "./shared-account";
+import { legacyPrefix, QUALIFIER, VPC_NAME } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -31,8 +31,8 @@ class CdkApp extends cdk.App {
       },
     };
 
-    new DnsStack(this, prefix("DnsStack"), stackProps);
-    new ApplicationStack(this, prefix("ApplicationStack"), stackProps);
+    new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
+    new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
     new CasApplicationStack(this, "CasApplicationStack", stackProps);
   }
 }
@@ -71,7 +71,7 @@ class ApplicationStack extends cdk.Stack {
         version: rds.AuroraPostgresEngineVersion.VER_12_17,
       }),
       credentials: rds.Credentials.fromGeneratedSecret("kayttooikeus", {
-        secretName: prefix("DatabaseSecret"),
+        secretName: legacyPrefix("DatabaseSecret"),
       }),
       storageType: rds.DBClusterStorageType.AURORA,
       writer: rds.ClusterInstance.provisioned("writer", {
@@ -435,7 +435,7 @@ class Bastion extends constructs.Construct {
     new ecs.FargateService(this, "BastionService", {
       cluster: props.cluster,
       taskDefinition,
-      serviceName: prefix("Bastion"),
+      serviceName: legacyPrefix("Bastion"),
       desiredCount: 1,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,

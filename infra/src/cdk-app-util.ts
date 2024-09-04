@@ -7,7 +7,7 @@ import * as codepipeline_actions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as constructs from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import { prefix, QUALIFIER } from "./shared-account";
+import { legacyPrefix, QUALIFIER } from "./shared-account";
 
 class CdkAppUtil extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -17,7 +17,7 @@ class CdkAppUtil extends cdk.App {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: process.env.CDK_DEFAULT_REGION,
     };
-    new ContinousDeploymentStack(this, prefix("ContinuousDeploymentStack"), {
+    new ContinousDeploymentStack(this, legacyPrefix("ContinuousDeploymentStack"), {
       env,
     });
   }
@@ -39,7 +39,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       (env) =>
         new ContinousDeploymentPipelineStack(
           this,
-          prefix(`${capitalize(env)}ContinuousDeploymentPipeline`),
+          legacyPrefix(`${capitalize(env)}ContinuousDeploymentPipeline`),
           connection,
           env,
           { owner: "Opetushallitus", name: "otuva", branch: "master" },
@@ -73,7 +73,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       this,
       `Deploy${capitalizedEnv}Pipeline`,
       {
-        pipelineName: prefix(`Deploy${capitalizedEnv}`),
+        pipelineName: legacyPrefix(`Deploy${capitalizedEnv}`),
         pipelineType: PipelineType.V1,
       },
     );
@@ -104,7 +104,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       this,
       `Deploy${capitalizedEnv}Project`,
       {
-        projectName: prefix(`Deploy${capitalizedEnv}`),
+        projectName: legacyPrefix(`Deploy${capitalizedEnv}`),
         concurrentBuildLimit: 1,
         environment: {
           buildImage: codebuild.LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0,

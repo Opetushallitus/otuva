@@ -6,7 +6,7 @@ import * as kinesisfirehose_alpha from "@aws-cdk/aws-kinesisfirehose-alpha";
 import * as kinesisfirehose_destinations_alpha from "@aws-cdk/aws-kinesisfirehose-destinations-alpha";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import { prefix } from "./shared-account";
+import { legacyPrefix } from "./shared-account";
 
 export type AuditLogExportProps = {
   logGroup: logs.LogGroup;
@@ -34,7 +34,7 @@ export class AuditLogExport extends constructs.Construct {
       this,
       "AuditDeliveryStream",
       {
-        deliveryStreamName: prefix("Audit"),
+        deliveryStreamName: legacyPrefix("Audit"),
         destinations: [destination],
       },
     );
