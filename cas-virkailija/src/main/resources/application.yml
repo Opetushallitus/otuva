@@ -1,0 +1,134 @@
+# CAS configuration
+# https://apereo.github.io/cas/6.4.x/configuration/Configuration-Properties.html
+
+server:
+  port: 8080
+  ssl.enabled: false
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  forward-headers-strategy: NONE
+  tomcat:
+    remoteip:
+      port-header:
+      protocol-header:
+      remote-ip-header:
+server.tomcat.accesslog.enabled: true
+server.tomcat.accesslog.directory: /root/logs
+server.tomcat.accesslog.prefix: localhost_access_log
+server.tomcat.accesslog.suffix: .txt
+server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}"
+server.tomcat.accesslog.request-attributes-enabled: true
+server.tomcat.accesslog.rotate: true
+server.tomcat.accesslog.rename-on-rotate: true
+server.tomcat.accesslog.max-days: 7
+
+management:
+  endpoint:
+    health:
+      status:
+        order: WARN,DOWN,OUT_OF_SERVICE,UNKNOWN,UP
+
+
+cas:
+  http-web-request.header:
+    xframe: false
+    xss: false
+    xcontent: false
+    hsts: false
+  ticket:
+    tgt:
+      primary:
+        time-to-kill-in-seconds: 28800
+        max-time-to-live-in-seconds: 28800
+
+cas.ticket.registry.cleaner.schedule.enabled: true
+
+# postgres
+spring.datasource.url: jdbc:postgresql://localhost:5080/cas
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.datasource.username: cas
+spring.datasource.password: cas
+spring.flyway.enabled: true
+cas.ticket.registry.jpa.ddl-auto: validate
+cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQLDialect
+cas.ticket.registry.core.enable-locking: false
+cas.ticket.registry.jpa.enabled: true
+cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
+cas.ticket.registry.jpa.password: ${spring.datasource.password}
+cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.ticket.registry.jpa.user: ${spring.datasource.username}
+
+cas.slo.asynchronous: false
+cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
+
+cas.authn.accept.users:
+
+management.endpoints.web.exposure.include: health,springWebflow,auditevents
+management.endpoint.health.enabled: true
+cas.monitor.endpoints.endpoint.health.access: PERMIT
+management.endpoint.springWebflow.enabled: true
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
+management.endpoint.auditevents.enabled: true
+cas.monitor.endpoints.endpoint.auditevents.access: PERMIT
+
+cas.tgc.secure: false
+cas.tgc.path: /cas
+
+cas.warning-cookie.secure: false
+cas.warning-cookie.path: /cas
+
+cas.logout.follow-service-redirects: true
+
+cas.locale.default-value: fi
+
+cas.view.default-redirect-url: http://localhost:8080
+cas.sso.services.allow-missing-service-parameter: false
+
+cas.custom.properties.hakaUrl: http://localhost:8080/service-provider-app/saml/login/alias/hakasp
+cas.custom.properties.mpassidUrl: http://localhost:8080/service-provider-app/saml/login/alias/mpassidtestsp?idp=https://mpass-proxy-test.csc.fi/idp/shibboleth
+cas.custom.properties.suomifiUrl: http://untuvaopintopolku.fi/cas-oppija/login
+cas.custom.properties.suomifiUrlTarget: http://localhost:8101/kayttooikeus-service/cas/tunnistus?locale=
+cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
+
+cas.authn.mfa.triggers.rest.url: http://localhost:8101/kayttooikeus-service/mfa/trigger
+cas.authn.mfa.triggers.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}
+cas.authn.mfa.triggers.rest.method: POST
+cas.authn.mfa.triggers.rest.basic-auth-username: cas
+cas.authn.mfa.triggers.rest.basic-auth-password: mfa
+cas.authn.mfa.gauth.bypass.principal-attribute-name: idpEntityId
+cas.authn.mfa.gauth.bypass.principal-attribute-value: vetuma
+cas.authn.mfa.gauth.cleaner.schedule.enabled: false
+cas.authn.mfa.gauth.core.issuer: Opetushallitus
+cas.authn.mfa.gauth.core.label: Opintopolku
+cas.authn.mfa.gauth.crypto.encryption.key: LNLuxm3B5mQiIwggT9vPewkGM7JeDebZWCBjdXxCWQY
+cas.authn.mfa.gauth.crypto.signing.key: zMpvJwj7bEMW41YMJbAJzXHaSSH3A1JjzLfwXMSWth9yTFM3Ny3eHXmm9r5AEzU83rYNwGT__SicfrA-7ygRdA
+cas.authn.mfa.gauth.rest.token-url: http://localhost:8101/kayttooikeus-service/mfa/token
+cas.authn.mfa.gauth.rest.url: http://localhost:8101/kayttooikeus-service/mfa/token
+cas.authn.mfa.gauth.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}
+cas.authn.mfa.gauth.rest.basic-auth-username: cas
+cas.authn.mfa.gauth.rest.basic-auth-password: mfa
+
+# Spring Boot configuration
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+
+# Custom configuration
+
+proxy.callback.ignore-errors: false
+host.cas: localhost:8080
+host.virkailija: localhost:8080
+# Käyttöoikeuspalvelun userDetails rajapintaa kutsutaan ALB:n hostnamella (host.alb) IP-rajauksen tms takia. Lokaalisti ajettaessa kutsutaan suoraan palvelua.
+host.alb: localhost:8101
+kayttooikeus.baseurl: http://localhost:8101
+serviceprovider.app.username.to.usermanagement: user1
+serviceprovider.app.password.to.usermanagement: pass1
+stuck.service.ticket.retrieval.ips.to.inspect: none
+stuck.service.ticket.retrieval.thread.dump.interval.seconds: 15
+stuck.service.ticket.retrieval.thread.dump.times: 40
+require-strong-identification: false
+require-strong-identification.usernamelist: example11,example12
+email-verification-enabled: false
+email-verification-enabled.usernamelist: example21,example22

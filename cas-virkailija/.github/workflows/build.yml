@@ -1,0 +1,121 @@
+name: CAS-virkailija
+on:
+  workflow_dispatch:
+    inputs:
+      application:
+        description: 'Name of the application (example: cas)'
+        required: false
+        type: string
+        default: cas
+      build:
+        description: 'Build before deploy'
+        required: true
+        type: choice
+        options:
+          - true
+          - false
+      image-tag:
+        description: 'Image tag (example: ga-956).'
+        required: false
+        type: string
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - hahtuva
+          - untuva
+          - pallero
+          - sade
+  push:
+    branches: [ master ]
+  pull_request:
+  
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.build == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+      - name: Build
+        run: ./gradlew clean build -Dbranch=$GITHUB_REF_NAME -Drevision=$GITHUB_SHA -DbuildNumber=$GITHUB_RUN_NUMBER/$GITHUB_RUN_ATTEMPT
+      - name: Upload cas-war
+        uses: actions/upload-artifact@v4
+        with:
+          name: cas-war
+          path: build/libs/cas.war
+  sonarcloud:
+    if: ${{ github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.build == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew build sonarqube
+  deploy-container:
+    if: ${{ github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.build == 'true') }}
+    needs: [build]
+    uses: Opetushallitus/.github/.github/workflows/push-scan-java-ecr.yml@fa66f9f5740c9758087d4782252ca4a691e0dab6
+    with:
+      application: cas
+      base-image: baseimage-fatjar-openjdk21:master
+      configfolder: oph-configuration
+      jarfile: cas.war
+      jarfolder: .
+      download-artifact: true
+      download-artifact-name: cas-war
+    secrets:
+      AWS_UTILITY_ROLE_ARN: ${{ secrets.AWS_OPH_UTILITY_ROLE_ARN }}
+
+  deploy-existing-image:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build == 'false' }}
+    uses: Opetushallitus/.github/.github/workflows/deploy-from-ecr-to-ecs.yml@main
+    with:
+      application: ${{ inputs.application }}
+      environment: ${{ inputs.environment }}
+      image-tag: ${{ inputs.image-tag }}
+    secrets: inherit
+
+  deploy-built-image:
+    needs: [deploy-container]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build == 'true' }}
+    uses: Opetushallitus/.github/.github/workflows/deploy-from-ecr-to-ecs.yml@main
+    with:
+      application: ${{ inputs.application }}
+      environment: ${{ inputs.environment }}
+      image-tag: ga-${{ github.run_number }}
+    secrets: inherit

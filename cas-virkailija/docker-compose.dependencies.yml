@@ -1,0 +1,11 @@
+version: "3"
+services:
+  postgres:
+    container_name: cas-virkailija-postgres
+    image: postgres:12.17
+    ports:
+      - 5080:5432
+    environment:
+      POSTGRES_DB: cas
+      POSTGRES_USER: cas
+      POSTGRES_PASSWORD: cas

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <title>Login Form Fragment</title>
+    <link href="../../static/css/cas.css" rel="stylesheet" th:remove="tag"/>
+</head>
+<body>
+<main role="main" class="container">
+    <div class="row">
+        <div class="col-md">
+            <ul th:fragment="linkit" id="palvelunimet" class="list-inline w-100 list-inline-bullet d-none d-md-block">
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.opintopolku.lyhytNimi}">Opintopolku</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.koski.lyhytNimi}">KOSKI</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.ehoks.lyhytNimi}">eHOKS</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.valpas.lyhytNimi}">Valpas</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.varda.lyhytNimi}">Varda</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.eperusteet.lyhytNimi}">ePerusteet</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.yki.lyhytNimi}">YKI</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.vkt.lyhytNimi}">VKT</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.arvo.lyhytNimi}">Arvo</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.oiva.lyhytNimi}">Oiva</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.valssi.lyhytNimi}">Valssi</span>
+                </li>
+                <li class="list-inline-item">
+                    <span th:text="#{palvelut.mpassid.lyhytNimi}">MPASSid</span>
+                </li>
+            </ul>
+            <div th:fragment="palveluinfot" id="palveluinfot">
+                <div class="card">
+                    <div id="carousel-opintopolku" class="card-body">
+                        <p th:text="#{palvelut.opintopolku.nimi}"></p>
+                        <p th:utext="#{palvelut.opintopolku.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-koski" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.koski.nimi}"></p>
+                        <p th:utext="#{palvelut.koski.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-ehoks" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.ehoks.nimi}"></p>
+                        <p th:utext="#{palvelut.ehoks.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-valpas" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.valpas.nimi}"></p>
+                        <p th:utext="#{palvelut.valpas.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-varda" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.varda.nimi}"></p>
+                        <p th:utext="#{palvelut.varda.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-eperusteet" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.eperusteet.nimi}"></p>
+                        <p th:utext="#{palvelut.eperusteet.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-yki" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.yki.nimi}"></p>
+                        <p th:utext="#{palvelut.yki.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-vkt" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.vkt.nimi}"></p>
+                        <p th:utext="#{palvelut.vkt.kuvaus}"></p>
+                    </div>
+
+                    <div id="carousel-arvo" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.arvo.nimi}"></p>
+                        <p th:utext="#{palvelut.arvo.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-oiva" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.oiva.nimi}"></p>
+                        <p th:utext="#{palvelut.oiva.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-valssi" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.valssi.nimi}"></p>
+                        <p th:utext="#{palvelut.valssi.kuvaus}"></p>
+                    </div>
+                    <div id="carousel-mpassid" class="card-body" style="display: none;">
+                        <p th:text="#{palvelut.mpassid.nimi}"></p>
+                        <p th:utext="#{palvelut.mpassid.kuvaus}"></p>
+                    </div>
+                </div>
+                <nav id="carousel-nav">
+                    <ul>
+                        <li class="arrow arrow-left"></li>
+                        <li>
+                            <input id="carousel-button-opintopolku" type="radio" name="carousel"/>
+                            <label for="carousel-button-opintopolku"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-koski" type="radio" name="carousel" />
+                            <label for="carousel-button-koski"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-ehoks" type="radio" name="carousel" />
+                            <label for="carousel-button-ehoks"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-valpas" type="radio" name="carousel" />
+                            <label for="carousel-button-valpas"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-varda" type="radio" name="carousel" />
+                            <label for="carousel-button-varda"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-eperusteet" type="radio" name="carousel" />
+                            <label for="carousel-button-eperusteet"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-yki" type="radio" name="carousel" />
+                            <label for="carousel-button-yki"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-vkt" type="radio" name="carousel" />
+                            <label for="carousel-button-vkt"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-arvo" type="radio" name="carousel" />
+                            <label for="carousel-button-arvo"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-oiva" type="radio" name="carousel" />
+                            <label for="carousel-button-oiva"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-valssi" type="radio" name="carousel" />
+                            <label for="carousel-button-valssi"></label>
+                        </li>
+                        <li>
+                            <input id="carousel-button-mpassid" type="radio" name="carousel" />
+                            <label for="carousel-button-mpassid"></label>
+                        </li>
+                        <li class="arrow arrow-right"></li>
+                    </ul>
+                </nav>
+                <script type="text/javascript">
+                    function selectCard(cardId) {
+                        document.querySelectorAll("#palveluinfot .card-body").forEach(card => {
+                            card.style.display = card.id === cardId ? "block" : "none"
+                        })
+                    }
+
+                    document.querySelector("#carousel-nav .arrow-left").addEventListener("click", event => {
+                        const checked = document.querySelector("#carousel-nav input:checked")
+                        const last = Array.from(document.querySelectorAll("#carousel-nav input")).at(-1)
+                        const prev = checked.parentElement.previousElementSibling.querySelector("input")
+                        if (prev) prev.click()
+                        else last.click()
+                    })
+                    document.querySelector("#carousel-nav .arrow-right").addEventListener("click", event => {
+                        const checked = document.querySelector("#carousel-nav input:checked")
+                        const first = Array.from(document.querySelectorAll("#carousel-nav input")).at(0)
+                        const next = checked.parentElement.nextElementSibling.querySelector("input")
+                        if (next) next.click()
+                        else first.click()
+                    })
+                    document.querySelector("#carousel-button-opintopolku").checked = true
+                    document.querySelectorAll("#palveluinfot input").forEach(input => {
+                        const cardId = input.id.replace("-button", "")
+                        input.addEventListener("click", () => selectCard(cardId))
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

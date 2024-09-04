@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <title>Login Form Fragment</title>
+    <link href="../../static/css/cas.css" rel="stylesheet" th:remove="tag"/>
+</head>
+<body>
+<main role="main" class="container">
+    <div class="row">
+        <div class="col-md">
+            <div th:fragment="mpassid" class="card mx-auto mb-2">
+                <div class="card-body">
+                    <p class="card-text" th:utext="#{mpassidLogin.description}" />
+                    <p class="card-text">
+                        <!--
+                        Note that mpassidUrl has idp query parameter in it so the redirect param has to be
+                        prefixed with & instead of ? unlike in Haka login URL :)
+                        -->
+                        <a id="mpassid-button"
+                           th:with="parameters=${service != null} ? '&redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
+                           th:href="${cas.custom.properties['mpassidUrl']} + ${parameters}">
+                            <img width="108px" height="20px" src="/cas/images/mpassid-teksti.svg" />
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
