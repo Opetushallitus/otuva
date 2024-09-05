@@ -4,7 +4,7 @@
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.128.0-alpha.0",
     "@aws-sdk/client-iam": "^3.515.0",
     "@aws-sdk/client-sts": "^3.515.0",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.14.15",
     "aws-cdk": "^2.128.0",
     "aws-cdk-lib": "^2.128.0",
     "constructs": "^10.3.0",
