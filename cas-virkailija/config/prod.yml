@@ -1,3 +1,5 @@
+kayttooikeus.baseurl: https://kayttooikeus.prod.yleiskayttoiset.opintopolku.fi
+
 cas.server.tomcat.http-proxy.enabled: true
 cas.server.tomcat.http-proxy.secure: true
 cas.server.tomcat.http-proxy.scheme: https
