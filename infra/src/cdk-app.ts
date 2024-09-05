@@ -316,6 +316,7 @@ class ApplicationStack extends cdk.Stack {
       ipAddressVersion: "IPV4",
       scope: "REGIONAL",
       addresses: [
+        ...this.getIpAddresses("YleiskayttoisetAWS"),
         ...this.getIpAddresses("OpintopolkuVPN"),
         ...this.getIpAddresses("OpintopolkuAWS"),
         ...this.getIpAddresses("Valtori"),
