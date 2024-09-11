@@ -2,8 +2,6 @@
 set -o errexit -o nounset -o pipefail
 source "$( dirname "${BASH_SOURCE[0]}" )/scripts/lib/common-functions.sh"
 
-IMAGE_TAG="kayttooikeus-psql-tunnel"
-
 function main {
   export ENV="$1"; shift
   export_aws_credentials "$ENV"
@@ -17,6 +15,8 @@ function main {
     export TUNNEL_PORT="6774"
   fi
 
+  export IMAGE_TAG="kayttooikeus-psql-tunnel"
+  export DB_NAME="kayttooikeus"
   export DB_SECRET="KayttooikeusDatabaseSecret"
 
   start_tunnel
@@ -33,7 +33,7 @@ function start_psql {
   export PSQLRC="$repo/scripts/psqlrc"
   if [ ! -f "${PSQLRC}" ]; then fatal "${PSQLRC} not found"; fi
   cd "$repo"
-  PGPASSWORD=$password psql --user "$username" --host localhost --port $TUNNEL_PORT --dbname kayttooikeus "$@"
+  PGPASSWORD=$password psql --user "$username" --host localhost --port $TUNNEL_PORT --dbname $DB_NAME "$@"
 }
 
 function start_tunnel {
