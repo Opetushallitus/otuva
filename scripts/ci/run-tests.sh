@@ -8,6 +8,7 @@ trap "docker compose down" EXIT
 function main {
   cd "$repo"
   docker compose up -d
+  cd "$repo/kayttooikeus-service"
   mvn clean install
 }
 

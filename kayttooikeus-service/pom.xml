@@ -3,41 +3,107 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>kayttooikeuspalvelu</artifactId>
-        <groupId>fi.vm.sade.kayttooikeus</groupId>
-        <version>1.1.4-SNAPSHOT</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>kayttooikeus-service</artifactId>
     <name>Käyttöoikeuspalvelu :: Service</name>
+    <organization>
+        <name>The Finnish Board of Education - Opetushallitus</name>
+    </organization>
+    <inceptionYear>2016</inceptionYear>
+    <licenses>
+        <license>
+            <name>European Union Public Licence</name>
+            <url>http://ec.europa.eu/idabc/eupl</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
 
     <properties>
-        <database.name>kayttooikeus</database.name>
-        <database.user>oph</database.user>
-        <database.password>oph</database.password>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.fileEncoding>UTF-8</project.build.fileEncoding>
+
+        <maven.compiler.release>21</maven.compiler.release>
+
+        <oppijanumerorekisteri.version>0.3.0-SNAPSHOT</oppijanumerorekisteri.version>
+        <organisaatio.version>2016-9-SNAPSHOT</organisaatio.version>
+        <ryhmasahkoposti.version>14.8-SNAPSHOT</ryhmasahkoposti.version>
+
+        <!-- Sade utils -->
+        <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
+
+        <springfox.version>3.0.0</springfox.version>
+
+        <!-- buildversion.txt generation plugin -->
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+
+        <!-- QA -->
+        <jadler.version>1.3.0</jadler.version>
+
+        <orika.version>1.5.4</orika.version>
+        <lombok.version>1.18.34</lombok.version>
+
+        <sonar.organization>opetushallitus</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>**/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>oph-sade-artifactory-snapshots</id>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>oph-sade-artifactory-releases</id>
+            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.25.36</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>fi.vm.sade.kayttooikeus</groupId>
-            <artifactId>kayttooikeus-domain</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.kayttooikeus</groupId>
-            <artifactId>kayttooikeus-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
         </dependency>
 
         <!-- Opintopolku -->
         <dependency>
             <groupId>fi.vm.sade.oppijanumerorekisteri</groupId>
             <artifactId>oppijanumerorekisteri-api</artifactId>
+            <version>${oppijanumerorekisteri.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
+            <version>${organisaatio.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.wordnik</groupId>
@@ -53,6 +119,7 @@
         <dependency>
             <groupId>fi.vm.sade.viestintapalvelu</groupId>
             <artifactId>ryhmasahkoposti-api</artifactId>
+            <version>${ryhmasahkoposti.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.wordnik</groupId>
@@ -63,14 +130,17 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-cas-servlet-filter</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-properties</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-http</artifactId>
+            <version>0.5.0-SNAPSHOT</version>
         </dependency>
 
 
@@ -168,6 +238,7 @@
         <dependency>
             <groupId>ma.glasnost.orika</groupId>
             <artifactId>orika-core</artifactId>
+            <version>${orika.version}</version>
         </dependency>
 
         <dependency>
@@ -186,6 +257,7 @@
         <dependency>
             <groupId>com.carrotsearch</groupId>
             <artifactId>java-sizeof</artifactId>
+            <version>0.0.5</version>
         </dependency>
 
         <!-- Test -->
@@ -197,11 +269,13 @@
         <dependency>
             <groupId>net.jadler</groupId>
             <artifactId>jadler-all</artifactId>
+            <version>${jadler.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.jadler</groupId>
             <artifactId>jadler-jdk</artifactId>
+            <version>${jadler.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -222,11 +296,13 @@
         <dependency>
             <groupId>fi.vm.sade</groupId>
             <artifactId>auditlogger</artifactId>
+            <version>${auditlog.api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
         </dependency>
 
         <dependency>
@@ -236,6 +312,7 @@
         <dependency>
             <groupId>com.github.kagkarlsson</groupId>
             <artifactId>db-scheduler-spring-boot-starter</artifactId>
+            <version>14.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
@@ -246,11 +323,13 @@
         <dependency>
             <groupId>org.bitbucket.b_c</groupId>
             <artifactId>jose4j</artifactId>
+            <version>0.9.6</version>
         </dependency>
 
         <dependency>
             <groupId>dev.samstevens.totp</groupId>
             <artifactId>totp-spring-boot-starter</artifactId>
+            <version>1.7.1</version>
         </dependency>
 
         <dependency>
@@ -270,10 +349,34 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql</artifactId>
+            <version>${querydsl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-java8</artifactId>
+        </dependency>
     </dependencies>
 
-
     <build>
+        <finalName>kayttooikeus</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -285,75 +388,89 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- Generate buildversion.txt -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <version>5.0.0</version>
+                            <classifier>jpa</classifier>
+                        </path>
+                        <path>
+                            <groupId>javax.persistence</groupId>
+                            <artifactId>javax.persistence-api</artifactId>
+                            <version>2.2</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.7</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>reserve-db-port</id>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>reserve-network-port</goal>
+                            <goal>jar</goal>
                         </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>database.port</portName>
-                            </portNames>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.43.4</version>
-                <configuration>
-                    <images>
-                        <image>
-                            <alias>database</alias>
-                            <name>postgres:12-alpine</name>
-                            <run>
-                                <env>
-                                    <POSTGRES_USER>${database.user}</POSTGRES_USER>
-                                    <POSTGRES_PASSWORD>${database.password}</POSTGRES_PASSWORD>
-                                    <POSTGRES_DB>${database.name}</POSTGRES_DB>
-                                </env>
-                                <ports>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <port>${database.port}:5432</port>
-                                </ports>
-                                <wait>
-                                    <log>PostgreSQL init process complete; ready for start up.</log>
-                                </wait>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>start-db</id>
-                        <phase>pre-integration-test</phase>
+                        <id>attach-javadocs</id>
                         <goals>
-                            <goal>start</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.util=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
                     <execution>
-                        <id>stop-db</id>
-                        <phase>post-integration-test</phase>
                         <goals>
-                            <goal>stop</goal>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- attached to Maven test phase -->
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
