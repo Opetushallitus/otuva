@@ -33,10 +33,11 @@ class CdkApp extends cdk.App {
 
     new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
     const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
-    new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
+    const appStack = new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
     new CasVirkailijaApplicationStack(this, prefix("CasVirkailijaApplicationStack"), {
       ecsCluster: ecsStack.cluster,
-      ...stackProps
+      ...stackProps,
+      bastion: appStack.bastion,
     } );
   }
 }
@@ -65,6 +66,8 @@ class ECSStack extends cdk.Stack {
 }
 
 class ApplicationStack extends cdk.Stack {
+  readonly bastion: ec2.BastionHostLinux
+
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
     const config = getConfig();
@@ -107,11 +110,11 @@ class ApplicationStack extends cdk.Stack {
       clusterName: "kayttooikeus",
     });
 
-    const bastion = new ec2.BastionHostLinux(this, "BastionHost", {
+    this.bastion = new ec2.BastionHostLinux(this, "BastionHost", {
       vpc,
       instanceName: prefix("Bastion")
     });
-    database.connections.allowDefaultPortFrom(bastion.connections);
+    database.connections.allowDefaultPortFrom(this.bastion.connections);
 
     const backup = new DatabaseBackupToS3(this, "DatabaseBackupToS3", {
       ecsCluster: cluster,
@@ -413,6 +416,7 @@ class ApplicationStack extends cdk.Stack {
 
 type CasVirkailijaApplicationStackProps = cdk.StackProps & {
   ecsCluster: ecs.Cluster
+  bastion: ec2.BastionHostLinux
 }
 
 class CasVirkailijaApplicationStack extends cdk.Stack {
@@ -531,6 +535,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     });
 
     database.connections.allowDefaultPortFrom(service)
+    database.connections.allowDefaultPortFrom(props.bastion.connections)
 
     const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
         this,
