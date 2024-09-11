@@ -1,6 +1,8 @@
 import * as path from "node:path";
 
 import * as cdk from "aws-cdk-lib";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import * as cloudwatch_actions from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as certificatemanager from "aws-cdk-lib/aws-certificatemanager";
 import * as constructs from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -13,12 +15,13 @@ import * as rds from "aws-cdk-lib/aws-rds";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53_targets from "aws-cdk-lib/aws-route53-targets";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import { prefix, legacyPrefix, CDK_QUALIFIER, VPC_NAME } from "./shared-account";
+import {prefix, legacyPrefix, CDK_QUALIFIER, VPC_NAME, ALARM_TOPIC_ARN} from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -130,6 +133,7 @@ class ApplicationStack extends cdk.Stack {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
     });
+    this.exportFailureAlarm(logGroup);
 
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
@@ -301,6 +305,29 @@ class ApplicationStack extends cdk.Stack {
     });
 
     this.ipRestrictions(alb);
+  }
+
+  exportFailureAlarm(logGroup: logs.LogGroup) {
+    const alarmTopic = sns.Topic.fromTopicArn(this, "AlarmTopic", ALARM_TOPIC_ARN)
+    const metricFilter = logGroup.addMetricFilter("ExportTaskSuccessMetricFilter", {
+      filterPattern: logs.FilterPattern.literal("\"Kayttooikeus export task completed\""),
+      metricName: prefix("KayttooikeusExportTaskSuccess"),
+      metricNamespace: "Otuva",
+      metricValue: "1",
+    })
+    const alarm = new cloudwatch.Alarm(this, "ExportFailingAlarm", {
+      alarmName: prefix("KayttooikeusExportFailing"),
+      metric: metricFilter.metric({
+        statistic: "Sum",
+        period: cdk.Duration.hours(1)
+      }),
+      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+      threshold: 0,
+      evaluationPeriods: 8,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+    })
+    alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
+    alarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
   }
 
   getIpAddresses(name: string): string[] {
