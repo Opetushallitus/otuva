@@ -131,9 +131,8 @@ class ApplicationStack extends cdk.Stack {
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
-      directory: path.join(__dirname, "../../"),
+      directory: path.join(__dirname, "../../kayttooikeus-service"),
       file: "Dockerfile",
-      exclude: ["infra/"],
       platform: ecr_assets.Platform.LINUX_ARM64,
     });
 
