@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
 
-readonly dump_file="$(mktemp)"
+readonly dump_dir="$(mktemp --directory)"
+readonly dump_file="${dump_dir}/dump"
 
 function cleanup {
   echo "Deleting dump file $dump_file"
