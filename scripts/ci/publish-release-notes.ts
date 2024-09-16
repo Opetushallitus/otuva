@@ -7,34 +7,47 @@ const ENVIRONMENT_NAME = process.env.ENVIRONMENT_NAME
 async function main(): Promise<void> {
   const notes = generateReleaseNotes();
   if (notes.commits.length > 0) {
-    const fullNotes = notes.commits.join('\n')
-    console.log(fullNotes)
-
-    await sendToSlack(formatSlackMessage(notes.header, fullNotes));
+    const messages = formatSlackMessages(notes.commits, notes.header)
+    for (const message of messages) {
+      await sendToSlack(message);
+    }
   } else {
     console.log("No changes found.");
   }
 }
 
-function formatSlackMessage(header, notes: string): object {
-  return {
-    blocks: [{
-      type: "header",
-      text: {
-        type: "plain_text",
-        text: header
-      }
-    }, {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: notes,
-      }
-    }]
+function formatSlackMessages(commits: string[], header?: string): SlackMessage[] {
+  const fullText = commits.join('\n');
+  if (fullText.length > 3000) {
+    const half = Math.floor(commits.length / 2);
+    return [
+      ...formatSlackMessages(commits.slice(0, half), header),
+      ...formatSlackMessages(commits.slice(half))
+    ]
+  } else {
+    const blocks = []
+    if (header) {
+      blocks.push(makeSlackHeader(header))
+    }
+    blocks.push(makeSlackMarkdown(fullText))
+    return [{ blocks }]
   }
 }
 
-async function sendToSlack(message: object): Promise<void> {
+type SlackMessage = { blocks: SlackMessageBlock[] }
+type SlackMessageBlockHeader = { type: "header", text: { type: "plain_text", text: string } }
+type SlackMessageBlockMarkdown = { type: "section", text: { type: "mrkdwn", text: string } }
+type SlackMessageBlock = SlackMessageBlockHeader | SlackMessageBlockMarkdown
+
+function makeSlackHeader(text: string): SlackMessageBlockHeader {
+  return { type: "header", text: { type: "plain_text", text } }
+}
+function makeSlackMarkdown(text: string): SlackMessageBlockMarkdown {
+  return { type: "section", text: { type: "mrkdwn", text } }
+}
+
+async function sendToSlack(message: SlackMessage): Promise<void> {
+  console.log("Sending message to Slack:", JSON.stringify(message));
   const response = await fetch(SLACK_NOTIFICATIONS_CHANNEL_WEBHOOK_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -51,6 +64,15 @@ type ReleaseNotes = {
   commits: string[];
 }
 
+function parseDateTimeFromTag(tag: string): string {
+  const date = new Date(Number(tag.split('-')[2]) * 1000)
+  return new Intl.DateTimeFormat('fi-FI', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'Europe/Helsinki'
+  }).format(date)
+}
+
 function generateReleaseNotes(): ReleaseNotes {
   const tags = getLastNTags(2);
   if (tags.length < 2) {
@@ -58,7 +80,7 @@ function generateReleaseNotes(): ReleaseNotes {
     return {header: "", commits: []};
   }
 
-  const date = new Date(Number(tags[1].split('-')[2]) * 1000)
+  const date = parseDateTimeFromTag(tags[1])
   const header = `🎁 Changes in ${REPOSITORY_NAME} ${ENVIRONMENT_NAME} deployment on ${date}`
 
   const releaseNotes: string[] = [];
