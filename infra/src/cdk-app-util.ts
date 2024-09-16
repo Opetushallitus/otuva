@@ -142,6 +142,10 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
             value: "/docker/password",
           },
+          SLACK_NOTIFICATIONS_CHANNEL_WEBHOOK_URL: {
+            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+            value: `/env/${env}/slack-notifications-channel-webhook`,
+          },
         },
         buildSpec: codebuild.BuildSpec.fromObject({
           version: "0.2",
@@ -165,6 +169,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
               commands: [
                 `./deploy-${env}.sh`,
                 `./scripts/tag-green-build-${env}.sh`,
+                `./scripts/ci/publish-release-notes-${env}.sh || true`,
               ],
             },
           },
