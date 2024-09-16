@@ -16,7 +16,6 @@ function main {
   fi
 
   export IMAGE_TAG="cas-virkailija-psql-tunnel"
-  export DB_NAME="cas"
   export DB_SECRET="OtuvaCasVirkailijaDatabaseSecret"
 
   start_tunnel
@@ -28,12 +27,13 @@ function start_psql {
   info "Fetching password from AWS Secrets manager"
   username="$(aws secretsmanager get-secret-value --secret-id "${DB_SECRET}" --query 'SecretString' --output text | jq -r '.username')"
   password="$(aws secretsmanager get-secret-value --secret-id "${DB_SECRET}" --query 'SecretString' --output text | jq -r '.password')"
+  dbname="$( aws secretsmanager get-secret-value --secret-id "${DB_SECRET}" --query 'SecretString' --output text | jq -r '.dbname')"
 
   info "Connecting to localhost:$TUNNEL_PORT"
   export PSQLRC="$repo/scripts/psqlrc"
   if [ ! -f "${PSQLRC}" ]; then fatal "${PSQLRC} not found"; fi
   cd "$repo"
-  PGPASSWORD=$password psql --user "$username" --host localhost --port $TUNNEL_PORT --dbname $DB_NAME "$@"
+  PGPASSWORD=$password psql --user "$username" --host localhost --port $TUNNEL_PORT --dbname $dbname "$@"
 }
 
 function start_tunnel {
