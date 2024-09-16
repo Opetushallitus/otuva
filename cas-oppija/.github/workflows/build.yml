@@ -1,0 +1,52 @@
+name: CAS-oppija
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'corretto'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@8be796e9fabbf26029c310405208e8af4aa51652
+
+      - name: Build
+        run: ./gradlew clean build -Dbranch=$GITHUB_REF_NAME -Drevision=$GITHUB_SHA -DbuildNumber=$GITHUB_RUN_NUMBER/$GITHUB_RUN_ATTEMPT
+
+      - name: Upload cas-war
+        uses: actions/upload-artifact@v4
+        with:
+          name: cas-war
+          path: build/libs/cas.war
+
+  deploy-container:
+    needs: [build]
+    uses: Opetushallitus/.github/.github/workflows/push-scan-java-ecr.yml@fa66f9f5740c9758087d4782252ca4a691e0dab6
+    with:
+      application: cas-oppija
+      base-image: baseimage-fatjar-openjdk11:master
+      configfolder: oph-configuration
+      jarfile: cas.war
+      jarfolder: .
+      download-artifact: true
+      download-artifact-name: cas-war
+    secrets:
+      AWS_UTILITY_ROLE_ARN: ${{ secrets.AWS_OPH_UTILITY_ROLE_ARN }}
