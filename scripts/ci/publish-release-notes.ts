@@ -80,7 +80,7 @@ function generateReleaseNotes(): ReleaseNotes {
     return {header: "", commits: []};
   }
 
-  const date = parseDateTimeFromTag(tags[1])
+  const date = parseDateTimeFromTag(tags[0])
   const header = `🎁 Changes in ${REPOSITORY_NAME} ${ENVIRONMENT_NAME} deployment on ${date}`
 
   const releaseNotes: string[] = [];
