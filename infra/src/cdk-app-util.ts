@@ -105,12 +105,17 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       testStage.addAction(new codepipeline_actions.CodeBuildAction({
         actionName: "TestKayttooikeus",
         input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests.sh"]),
+        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests.sh"], "corretto21"),
       }));
       testStage.addAction(new codepipeline_actions.CodeBuildAction({
-        actionName: "TestCas",
+        actionName: "TestCasVirkailija",
         input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestCas", ["scripts/ci/run-tests-cas.sh"]),
+        project: makeTestProject(this, env, tag, "TestCasVirkailija", ["scripts/ci/run-tests-cas-virkailija.sh"], "corretto21"),
+      }));
+      testStage.addAction(new codepipeline_actions.CodeBuildAction({
+        actionName: "TestCasOppija",
+        input: sourceOutput,
+        project: makeTestProject(this, env, tag, "TestCasOppija", ["scripts/ci/run-tests-cas-oppija.sh"], "corretto11"),
       }));
     }
 
@@ -212,7 +217,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
   }
 }
 
-function makeTestProject(scope: constructs.Construct, env: string, tag: string, name: string, testCommands: string[]): codebuild.PipelineProject {
+function makeTestProject(scope: constructs.Construct, env: string, tag: string, name: string, testCommands: string[], javaVersion: "corretto11" | "corretto21"): codebuild.PipelineProject {
   return new codebuild.PipelineProject(
     scope,
     `${name}${capitalize(env)}Project`,
@@ -250,7 +255,7 @@ function makeTestProject(scope: constructs.Construct, env: string, tag: string, 
         phases: {
           install: {
             "runtime-versions": {
-              java: "corretto21",
+              java: javaVersion,
             },
           },
           pre_build: {
