@@ -42,6 +42,10 @@ class CdkApp extends cdk.App {
       ...stackProps,
       bastion: appStack.bastion,
     } );
+    new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
+      ...stackProps,
+      bastion: appStack.bastion,
+    });
   }
 }
 
@@ -438,6 +442,40 @@ class ApplicationStack extends cdk.Stack {
         { parameterName: `/kayttooikeus/${name}` },
       ),
     );
+  }
+}
+
+type CasOppijaApplicationStackProps = cdk.StackProps & {
+  bastion: ec2.BastionHostLinux
+}
+
+class CasOppijaApplicationStack extends cdk.Stack {
+  constructor(scope: constructs.Construct, id: string, props: CasOppijaApplicationStackProps) {
+    super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {vpcName: VPC_NAME});
+
+    const database = new rds.DatabaseCluster(this, "Database", {
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      defaultDatabaseName: "casoppija",
+      engine: rds.DatabaseClusterEngine.auroraPostgres({
+        version: rds.AuroraPostgresEngineVersion.VER_12_17,
+      }),
+      credentials: rds.Credentials.fromGeneratedSecret("casoppija", {
+        secretName: prefix("CasOppijaDatabaseSecret"),
+      }),
+      storageType: rds.DBClusterStorageType.AURORA,
+      writer: rds.ClusterInstance.provisioned("writer", {
+        enablePerformanceInsights: true,
+        instanceType: ec2.InstanceType.of(
+          ec2.InstanceClass.T4G,
+          ec2.InstanceSize.LARGE,
+        ),
+      }),
+      readers: [],
+    });
+    database.connections.allowDefaultPortFrom(props.bastion.connections)
   }
 }
 
