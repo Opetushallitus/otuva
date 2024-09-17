@@ -119,7 +119,7 @@ public class EmailServiceImpl implements EmailService {
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_VASTAANOTTAJA, mapper.map(henkiloDto, SahkopostiHenkiloDto.class)));
             AnomusKasiteltyRecipientDto kasiteltyAnomus = createAnomusKasiteltyDto(anomus, updateHaettuKayttooikeusryhmaDto, languageCode, kayttooikeusryhmaId);
             replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_ROOLI, kasiteltyAnomus));
-            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI, urlProperties.url("cas.login")));
+            replacements.add(new ReportedRecipientReplacementDTO(ANOMUS_KASITELTY_EMAIL_REPLACEMENT_LINKKI, urlProperties.url("email-service.anomus.linkki")));
             recipient.setRecipientReplacements(replacements);
             EmailMessage message = this.generateEmailMessage(ANOMUS_KASITELTY_EMAIL_TEMPLATE_NAME, languageCode);
             this.ryhmasahkopostiClient.sendRyhmasahkoposti(new EmailData(Lists.newArrayList(recipient), message));

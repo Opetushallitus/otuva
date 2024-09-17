@@ -230,6 +230,12 @@ public class EmailServiceTest extends AbstractServiceTest {
         assertThat(emailData.getEmail().getLanguageCode()).isEqualTo("sv");
         assertThat(emailData.getEmail().getFrom()).isNull();
         assertThat(emailData.getEmail().getCallingProcess()).isEqualTo("kayttooikeus");
+
+        assertThat(emailData.getRecipient().get(0).getRecipientReplacements().stream().map((replacement) -> {
+                return new Object[]{ replacement.getName(), replacement.getValue() };
+        })).contains(
+                new Object[]{ "linkki", "http://testilinkki.fi" }
+        );
     }
 
     @Test
