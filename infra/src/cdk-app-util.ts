@@ -105,7 +105,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       testStage.addAction(new codepipeline_actions.CodeBuildAction({
         actionName: "TestKayttooikeus",
         input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests.sh"], "corretto21"),
+        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests-kayttooikeus.sh"], "corretto21"),
       }));
       testStage.addAction(new codepipeline_actions.CodeBuildAction({
         actionName: "TestCasVirkailija",
