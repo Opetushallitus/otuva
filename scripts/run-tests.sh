@@ -6,7 +6,7 @@ function main {
   cd "$repo"
 
   use_jvm_version "21"
-  ./scripts/ci/run-tests.sh
+  ./scripts/ci/run-tests-kayttooikeus.sh
   ./scripts/ci/run-tests-cas-virkailija.sh
 
   use_jvm_version "11"
