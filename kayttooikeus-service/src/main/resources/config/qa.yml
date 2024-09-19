@@ -40,5 +40,3 @@ kayttooikeus.scheduling.enabled: true
 kayttooikeus.kutsu.allowlist-oids: ${ssm_kayttooikeus_kutsu_allowlist}
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
-
-feature.accesslog-to-stdout: true

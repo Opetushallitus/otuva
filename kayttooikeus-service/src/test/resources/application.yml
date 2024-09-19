@@ -53,8 +53,4 @@ kayttooikeus:
       lampi-role-arn: none
       lampi-external-id: none
 
-logback:
-  access: true
-
-feature.accesslog-to-stdout: true
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6,1.2.3.4.7
