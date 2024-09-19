@@ -1,6 +1,6 @@
 {
   "@class": "org.apereo.cas.services.CasRegisteredService",
-  "serviceId": "^https://kios\\.opintopolku\\.fi(/.*)?$",
+  "serviceId": "^https://kios\\.untuvaopintopolku\\.fi(/.*)?$",
   "name": "kios",
   "description": "Kielitutkintorekisteri",
   "id": 6,
