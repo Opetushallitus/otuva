@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.kayttooikeus.dto.KutsuCreateDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;

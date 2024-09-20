@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 @Table(name = "haettu_kayttooikeusryhma")
 public class HaettuKayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
 
-    private static final long serialVersionUID = 1L;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "anomus_id")
     private Anomus anomus;

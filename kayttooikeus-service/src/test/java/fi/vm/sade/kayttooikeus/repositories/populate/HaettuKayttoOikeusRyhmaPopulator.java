@@ -4,8 +4,6 @@ import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.*;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HaettuKayttoOikeusRyhmaPopulator implements Populator<HaettuKayttoOikeusRyhma> {
     private KayttoOikeudenTila tyyppi;
@@ -14,16 +12,16 @@ public class HaettuKayttoOikeusRyhmaPopulator implements Populator<HaettuKayttoO
     private HaettuKayttoOikeusRyhmaPopulator(KayttoOikeudenTila tyyppi) {
         this.tyyppi = tyyppi;
     }
-    
+
     public static HaettuKayttoOikeusRyhmaPopulator haettuKayttooikeusryhma(KayttoOikeudenTila tyyppi) {
         return new HaettuKayttoOikeusRyhmaPopulator(tyyppi);
     }
-    
+
     public HaettuKayttoOikeusRyhmaPopulator withRyhma(Populator<KayttoOikeusRyhma> oikeus) {
         this.kayttoOikeusRyhma = oikeus;
         return this;
     }
-    
+
     @Override
     public HaettuKayttoOikeusRyhma apply(EntityManager entityManager) {
         HaettuKayttoOikeusRyhma ryhma = new HaettuKayttoOikeusRyhma();

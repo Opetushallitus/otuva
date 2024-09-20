@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AccessLogConfiguration {
     @Bean
-    public WebServerFactoryCustomizer containerCustomizer() {
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> containerCustomizer() {
         return container -> {
             if (container instanceof TomcatServletWebServerFactory) {
                 ((TomcatServletWebServerFactory) container).addContextCustomizers(context -> {

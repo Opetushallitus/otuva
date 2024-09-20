@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -17,7 +16,6 @@ public class HenkiloAspect {
 
     private HenkiloHelper henkiloHelper;
 
-    @Autowired
     public HenkiloAspect(HenkiloHelper helper) {
         henkiloHelper = helper;
     }

@@ -28,7 +28,7 @@ public class ServletContainerConfiguration {
      */
     @Bean
     @ConditionalOnProperty("kayttooikeus.uses-ssl-proxy")
-    public WebServerFactoryCustomizer sslProxyCustomizer() {
+    public WebServerFactoryCustomizer<WebServerFactory> sslProxyCustomizer() {
         return (WebServerFactory container) -> {
             if (container instanceof ConfigurableServletWebServerFactory) {
                 TomcatServletWebServerFactory tomcat = (TomcatServletWebServerFactory) container;

@@ -6,9 +6,6 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -18,14 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/kayttooikeusryhma", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/kayttooikeusryhma", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(value = "/kayttooikeusryhma", description = "Käyttöoikeusryhmien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusRyhmaController {
     private KayttoOikeusService kayttoOikeusService;
 
-    private static final Logger logger = LoggerFactory.getLogger(KayttoOikeusRyhmaController.class);
-
-    @Autowired
     public KayttoOikeusRyhmaController(KayttoOikeusService kayttoOikeusService) {
         this.kayttoOikeusService = kayttoOikeusService;
     }
@@ -127,7 +121,7 @@ public class KayttoOikeusRyhmaController {
     }
 
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Luo uuden käyttöoikeusryhmän.",
             notes = "Tekee uuden käyttöoikeusryhmän annetun DTO:n pohjalta.")
@@ -137,7 +131,7 @@ public class KayttoOikeusRyhmaController {
     }
 
 
-    @PostMapping(value = "/kayttooikeus", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/kayttooikeus", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Luo uuden käyttöoikeuden.",
             notes = "Luo uuden käyttöoikeuden annetun käyttöoikeus modelin pohjalta.")
@@ -147,7 +141,7 @@ public class KayttoOikeusRyhmaController {
     }
 
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Päivittää käyttöoikeusryhmän.",
             notes = "Päivittää käyttöoikeusryhmän tiedot annetun DTO:n avulla.")
@@ -156,7 +150,7 @@ public class KayttoOikeusRyhmaController {
         return kayttoOikeusService.findKayttoOikeusRyhma(id, true);
     }
 
-    @PutMapping(value = "/{id}/passivoi", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{id}/passivoi", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Passivoi käyttöoikeusryhmän.",
             notes = "Passivoi käyttöoikeusryhmän. ")
@@ -164,7 +158,7 @@ public class KayttoOikeusRyhmaController {
         kayttoOikeusService.passivoiKayttooikeusryhma(id);
     }
 
-    @PutMapping(value = "/{id}/aktivoi", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{id}/aktivoi", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Aktivoi käyttöoikeusryhmän.",
             notes = "Aktivoi passivoidun käyttöoikeusryhmän.")
@@ -172,7 +166,7 @@ public class KayttoOikeusRyhmaController {
         this.kayttoOikeusService.aktivoiKayttooikeusryhma(id);
     }
 
-    @PostMapping(value = "/ryhmasByKayttooikeus", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/ryhmasByKayttooikeus", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation(value = "Listaa käyttöoikeusryhmät käyttooikeuksien mukaan.",

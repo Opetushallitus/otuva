@@ -50,7 +50,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void getByKayttajatunnus() throws Exception {
         given(this.henkiloService.getByKayttajatunnus(any())).willReturn(HenkiloReadDto.builder().oid("oid1").build());
-        this.mvc.perform(get("/henkilo/kayttajatunnus=user1").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/henkilo/kayttajatunnus=user1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().json("{\"oid\":\"oid1\"}"));
         verify(this.henkiloService).getByKayttajatunnus(eq("user1"));
     }
@@ -83,7 +83,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                         .build())
                 .build()
         ));
-        this.mvc.perform(get("/henkilo/1.2.3.4.5/organisaatio").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/henkilo/1.2.3.4.5/organisaatio").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content()
                 .json(jsonResource("classpath:henkilo/henkiloOrganisaatios.json")));
     }

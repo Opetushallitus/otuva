@@ -58,7 +58,7 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements Myonne
                 .and(myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid))
                 .and(myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.passivoitu.eq(false));
 
-        if (!StringUtils.isEmpty(organisaatioOid)) {
+        if (StringUtils.hasLength(organisaatioOid)) {
             booleanBuilder.and(organisaatioHenkilo.organisaatioOid.eq(organisaatioOid));
         }
 

@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +19,12 @@ import java.time.Period;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/kayttooikeus", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/kayttooikeus", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "Käyttöoikeuksien käsittelyyn liittyvät operaatiot.")
 public class KayttoOikeusController {
     private KayttoOikeusService kayttoOikeusService;
     private TaskExecutorService taskExecutorService;
 
-    @Autowired
     public KayttoOikeusController(KayttoOikeusService kayttoOikeusService, TaskExecutorService taskExecutorService) {
         this.kayttoOikeusService = kayttoOikeusService;
         this.taskExecutorService = taskExecutorService;
@@ -72,7 +70,7 @@ public class KayttoOikeusController {
             notes = "Tämä on alustavasti vain automaattisen sähköpostimuistutuksen testausta varten.",
             authorizations = @Authorization("ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA"),
             response = Integer.class)
-    @PostMapping(value = "/expirationReminders", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+    @PostMapping(value = "/expirationReminders", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.TEXT_PLAIN_VALUE)
     public String sendExpirationReminders(@ApiParam(value = "Vuosi", required = true) @RequestParam("year") int year,
                                        @ApiParam(value = "Kuukausi", required = true) @RequestParam("month") int month,

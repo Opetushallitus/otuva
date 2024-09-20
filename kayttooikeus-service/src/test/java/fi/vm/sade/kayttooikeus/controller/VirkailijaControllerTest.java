@@ -84,7 +84,7 @@ public class VirkailijaControllerTest extends AbstractControllerTest {
 
         ArgumentCaptor<VirkailijaCreateDto> captor = ArgumentCaptor.forClass(VirkailijaCreateDto.class);
         verify(virkailijaService).create(captor.capture());
-        assertThat(captor.getValue()).isEqualToComparingFieldByField(createDto);
+        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(createDto);
     }
 
 }

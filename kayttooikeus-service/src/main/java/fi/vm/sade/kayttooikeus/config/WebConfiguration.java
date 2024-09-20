@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -34,7 +35,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    public void extendMessageConverters(@NonNull List<HttpMessageConverter<?>> converters) {
         // Add this as primary converter. Spring tests which one to use in order of this list. This needs to be
         // before stringhttpmessageconverter or apis will return plain string as json content type string. (without
         // double quote marks)
@@ -42,9 +43,9 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+    public void configureContentNegotiation(@NonNull ContentNegotiationConfigurer configurer) {
         configurer.favorPathExtension(false)
-                .defaultContentType(MediaType.APPLICATION_JSON_UTF8);
+                .defaultContentType(MediaType.APPLICATION_JSON);
     }
 
 }

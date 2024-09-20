@@ -2,8 +2,6 @@ package fi.vm.sade.kayttooikeus.service.validators;
 
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 public abstract class KutsujaValidator {
@@ -19,7 +17,7 @@ public abstract class KutsujaValidator {
 
         public boolean isKutsujaYksiloity(String kutsujaOid) {
             HenkiloDto kutsuja = this.oppijanumerorekisteriClient.getHenkiloByOid(kutsujaOid);
-            return !StringUtils.isEmpty(kutsuja.getHetu()) && kutsuja.isYksiloityVTJ();
+            return StringUtils.hasLength(kutsuja.getHetu()) && kutsuja.isYksiloityVTJ();
         }
     }
 

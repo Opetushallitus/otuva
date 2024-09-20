@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-
-import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.dto.validate.ContainsLanguages;
 import lombok.*;
 

@@ -39,7 +39,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.hamcrest.Matchers.isOneOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -72,7 +73,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .put("EN", "Code management"))
                 .withOrganisaatiorajoite("TYYPPI")
                 .withOikeus(oikeus("KOODISTO", "CRUD")));
-        
+
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listAllKayttoOikeusRyhmas(false);
         assertEquals(2, ryhmas.size());
 
@@ -92,7 +93,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("Admin", results.get(0).getOikeusLangs().get("EN"));
         assertEquals("Lukuoikeus", results.get(1).getOikeusLangs().get("FI"));
     }
-    
+
     @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void listMyonnettyKayttoOikeusHistoriaForCurrentUser() {
@@ -108,7 +109,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                         .withOikeus(oikeus("KOODISTO", "CRUD")
                                 .kuvaus(text("FI", "Kirjoitusoikeus")))
         ));
-        
+
         List<KayttoOikeusHistoriaDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
         assertEquals(3, list.size());
         KayttoOikeusHistoriaDto kayttoOikeusHistoriaResult = list.stream().filter(kayttoOikeusHistoriaDto -> kayttoOikeusHistoriaDto.getOrganisaatioOid().equals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())).findFirst().orElseThrow(RuntimeException::new);
@@ -154,14 +155,14 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto koulutustoimija1 = new OrganisaatioPerustieto();
         koulutustoimija1.setOid("1.2.246.562.10.12345678910");
         koulutustoimija1.setChildren(asList(oppilaitos11, oppilaitos12));
-        given(this.organisaatioClient.listWithParentsAndChildren(argThat(isOneOf(
-                "1.2.246.562.10.12345678910", "1.2.246.562.10.12345678911", "1.2.246.562.10.12345678912")), any()))
+        given(this.organisaatioClient.listWithParentsAndChildren(argThat(is(oneOf(
+                "1.2.246.562.10.12345678910", "1.2.246.562.10.12345678911", "1.2.246.562.10.12345678912"))), any()))
                 .willReturn(asList(koulutustoimija1, oppilaitos11, oppilaitos12));
-        given(this.organisaatioClient.listWithParentsAndChildren(argThat(isOneOf(
-                "1.2.246.562.10.12345678911")), any()))
+        given(this.organisaatioClient.listWithParentsAndChildren(argThat(is(oneOf(
+                "1.2.246.562.10.12345678911"))), any()))
                 .willReturn(asList(koulutustoimija1, oppilaitos11));
-        given(this.organisaatioClient.listWithParentsAndChildren(argThat(isOneOf(
-                "1.2.246.562.10.12345678912")), any()))
+        given(this.organisaatioClient.listWithParentsAndChildren(argThat(is(oneOf(
+                "1.2.246.562.10.12345678912"))), any()))
                 .willReturn(asList(koulutustoimija1, oppilaitos12));
 
         OrganisaatioPerustieto toimipiste211 = OrganisaatioPerustieto.builder()
@@ -178,8 +179,8 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .organisaatiotyypit(singletonList("organisaatiotyyppi_01"))
                 .children(singletonList(oppilaitos21))
                 .build();
-        given(this.organisaatioClient.listWithParentsAndChildren(argThat(isOneOf(
-                "1.2.246.562.10.12345678920", "1.2.246.562.10.12345678921", "1.2.246.562.10.123456789211")), any()))
+        given(this.organisaatioClient.listWithParentsAndChildren(argThat(is(oneOf(
+                "1.2.246.562.10.12345678920", "1.2.246.562.10.12345678921", "1.2.246.562.10.123456789211"))), any()))
                 .willReturn(asList(koulutustoimija2, oppilaitos21, toimipiste211));
 
         populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIOLLE").withOrganisaatiorajoite("1.2.246.562.10.12345678901"));

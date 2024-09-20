@@ -33,14 +33,14 @@ import static org.junit.Assert.assertTrue;
 public class OppijanumerorekisteriClientTest extends AbstractClientTest {
     @Autowired
     private OppijanumerorekisteriClient client;
-    
+
     @Test
     public void getHenkilonPerustiedotTest() throws Exception {
         casAuthenticated("1.2.3.4.5");
         onRequest().havingMethod(is("POST"))
                 .havingPath(is("/oppijanumerorekisteri-service/henkilo/henkiloPerustietosByHenkiloOidList"))
                 .havingBodyEqualTo("[\"1.2.3.4.5\"]")
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:henkilo/henkilonPerustiedot.json"));
         List<HenkiloPerustietoDto> results = this.client.getHenkilonPerustiedot(singletonList("1.2.3.4.5"));
         assertEquals(1, results.size());
@@ -58,7 +58,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         onRequest().havingMethod(is("POST"))
                 .havingPath(is("/oppijanumerorekisteri-service/s2s/duplicateHenkilos"))
                 .havingBody(equalToIgnoringWhiteSpace("{\"henkiloOids\":[\"1.2.3\"]}"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody("[\n" +
                         "  {\n" +
                         "    \"masterOid\": \"1.2.3\",\n" +
@@ -80,7 +80,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         onRequest().havingMethod(is("POST"))
                 .havingPath(is("/oppijanumerorekisteri-service/s2s/duplicateHenkilos"))
                 .havingBody(equalToIgnoringWhiteSpace("{\"henkiloOids\":[\"1.2.3\"]}"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody("[]");
         Set<String> allOids = this.client.getAllOidsForSamePerson("1.2.3");
         assertEquals(1, allOids.size());
@@ -92,7 +92,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         casAuthenticated("test");
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:henkilo/henkiloDto.json"));
         HenkiloDto henkiloDto = this.client.getHenkiloByOid("1.2.3.4.5");
         assertEquals("1.2.3.4.5", henkiloDto.getOidHenkilo());
@@ -110,7 +110,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         casAuthenticated("test");
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:henkilo/henkiloDto.json"));
         assertThat(this.client.findHenkiloByOid("1.2.3.4.5")).map(HenkiloDto::getOidHenkilo).hasValue("1.2.3.4.5");
     }
@@ -120,7 +120,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         casAuthenticated("test");
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
-                .respond().withStatus(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(HttpStatus.NOT_FOUND.value()).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody("{}");
         assertThat(this.client.findHenkiloByOid("1.2.3.4.5")).isNotPresent();
     }
@@ -130,7 +130,7 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
         casAuthenticated("test");
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/oppijanumerorekisteri-service/henkilo/hetu=160198-943U"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:henkilo/henkiloDto.json"));
 
         Optional<HenkiloDto> henkiloByHetu = client.getHenkiloByHetu("160198-943U");

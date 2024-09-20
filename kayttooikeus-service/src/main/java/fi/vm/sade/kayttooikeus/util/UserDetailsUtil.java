@@ -4,15 +4,11 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 

@@ -9,7 +9,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
-import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 
@@ -55,7 +54,7 @@ public class IdentificationServiceImplTest {
     public void setup() {
         identificationServiceImpl = new IdentificationServiceImpl(identificationRepositoryMock,
                 henkiloDataRepositoryMock, kutsuRepositoryMock, tunnistusTokenDataRepositoryMock,
-                mapperMock, oppijanumerorekisteriClientMock, kayttajatiedotRepositoryMock);
+                oppijanumerorekisteriClientMock, kayttajatiedotRepositoryMock);
     }
 
     @Test

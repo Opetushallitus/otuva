@@ -8,11 +8,9 @@ import org.jasig.cas.client.session.SessionMappingStorage;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.jasig.cas.client.validation.TicketValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
@@ -32,15 +30,12 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
 
     private CasProperties casProperties;
     private OphProperties ophProperties;
-    private Environment environment;
     private SessionMappingStorage sessionMappingStorage;
 
-    @Autowired
-    public SecurityConfigDefault(CasProperties casProperties, OphProperties ophProperties, Environment environment,
+    public SecurityConfigDefault(CasProperties casProperties, OphProperties ophProperties,
                                  SessionMappingStorage sessionMappingStorage) {
         this.casProperties = casProperties;
         this.ophProperties = ophProperties;
-        this.environment = environment;
         this.sessionMappingStorage = sessionMappingStorage;
     }
 

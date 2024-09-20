@@ -12,7 +12,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +36,7 @@ public class ServiceToServiceControllerTest extends AbstractControllerTest {
                 "\"externalPermissionService\": \"HAKU_APP\"," +
                 "\"callingUserRoles\": [\"ROLE_APP_OPPIJANUMEROREKISTERI_REKISTERINPITAJA\"]}";
         given(this.permissionCheckerService.isAllowedToAccessPerson(any(PermissionCheckDto.class))).willReturn(true);
-        this.mvc.perform(post("/s2s/canUserAccessUser").content(postContent).contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(post("/s2s/canUserAccessUser").content(postContent).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().string("true"));
         ArgumentCaptor<PermissionCheckDto> captor = ArgumentCaptor.forClass(PermissionCheckDto.class);
         verify(permissionCheckerService).isAllowedToAccessPerson(captor.capture());

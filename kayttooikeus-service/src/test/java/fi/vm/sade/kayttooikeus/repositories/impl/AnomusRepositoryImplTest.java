@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.repositories.AbstractRepositoryTest;
 import fi.vm.sade.kayttooikeus.repositories.AnomusRepositoryCustom;
-import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

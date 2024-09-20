@@ -18,14 +18,14 @@ public class TextGroupRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired
     private TextGroupRepository textGroupRepository;
-    
+
     @Test
     public void findTextsTest() {
+        populate(text("FI", "Testi2")
+                    .put("EN", "Test2"));
         TextGroup g1 = populate(text("FI", "Testi1")
                     .put("EN", "Test1")
                     .put("SV", "Test1")),
-            g2 = populate(text("FI", "Testi2")
-                    .put("EN", "Test2")),
             g3 = populate(text("FI", "Testi3")
                 .put("EN", "Test3"));
 

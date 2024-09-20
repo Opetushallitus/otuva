@@ -14,7 +14,6 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import lombok.*;
 import org.apache.commons.lang.BooleanUtils;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -109,7 +108,6 @@ public class AnomusCriteria {
         };
     }
 
-    @Nullable
     private List<Predicate> getInChildOrganisationPredicate(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
         List<Predicate> predicates = null;
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {
@@ -121,7 +119,6 @@ public class AnomusCriteria {
         return predicates;
     }
 
-    @Nullable
     private List<Predicate> getInSameOrganisationPredicate(OrganisaatioClient organisaatioClient, QAnomus qAnomus) {
         List<Predicate> predicates = null;
         if(!CollectionUtils.isEmpty(this.organisaatioOids)) {

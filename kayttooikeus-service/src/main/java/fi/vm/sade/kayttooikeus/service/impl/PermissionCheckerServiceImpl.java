@@ -25,13 +25,13 @@ import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -104,7 +104,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
             return true;
         }
 
-        if (StringUtils.isBlank(personOidToAccess) || permissionCheckService == null) {
+        if (!StringUtils.hasLength(personOidToAccess) || permissionCheckService == null) {
             LOG.error("isAllowedToAccess() called with empty personOid or permissionCheckService");
             return false;
         }
@@ -428,7 +428,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     private static String oppilaitostyyppiWithoutVersion(OrganisaatioPerustieto childOrganisation) {
         String oppilaitostyyppi = childOrganisation.getOppilaitostyyppi();
-        if (!org.springframework.util.StringUtils.isEmpty(oppilaitostyyppi)) {
+        if (StringUtils.hasLength(oppilaitostyyppi)) {
             // Format: getOppilaitostyyppi() = "oppilaitostyyppi_11#1"
             return oppilaitostyyppi.split("#")[0];
         } else {

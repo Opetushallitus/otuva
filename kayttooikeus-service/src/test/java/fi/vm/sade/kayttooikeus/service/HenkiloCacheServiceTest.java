@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -74,7 +74,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
         assertThat(henkilo.getPassivoituCached()).isFalse();
         assertThat(henkilo.getDuplicateCached()).isFalse();
 
-        assertThat(henkiloCacheModified.get().getModified()).isNotEqualByComparingTo(timestamp);
+        assertThat(henkiloCacheModified.get().getModified()).isNotEqualTo(timestamp);
     }
 
 }

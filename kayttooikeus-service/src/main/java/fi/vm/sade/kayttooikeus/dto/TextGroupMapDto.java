@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
@@ -49,7 +48,7 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
     public Map<String, String> asMap() {
         return texts;
     }
-    
+
     @JsonIgnore
     public String get(String lang) {
         return texts.get(lang.toLowerCase());
@@ -73,9 +72,9 @@ public class TextGroupMapDto implements Serializable, Localizable, Comparable<Te
     public static TextGroupMapDto localizeAsMapLaterById(Long id) {
         return id == null ? null : new TextGroupMapDto(id, new HashMap<>());
     }
-    
+
     @Override
-    public int compareTo(@NotNull TextGroupMapDto o) {
+    public int compareTo(TextGroupMapDto o) {
         int result = Localizable.compareLangs(this, o, "fi");
         if (result != 0) {
             return result;

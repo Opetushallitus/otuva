@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -11,10 +10,8 @@ import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

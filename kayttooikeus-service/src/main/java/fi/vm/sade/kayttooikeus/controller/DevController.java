@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "Kehityksen apuna toimivat ja käsin käynnistettävät toiminnot")
 @RestController
-@RequestMapping(value = "/dev", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/dev", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class DevController {
 
     private final OrganisaatioService organisaatioService;
 
-    @PostMapping(value = "/organisaatioCache", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/organisaatioCache", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation("Päivittää organisaatiovälimuistin. (db + memory)")
     public synchronized void updateCache() {

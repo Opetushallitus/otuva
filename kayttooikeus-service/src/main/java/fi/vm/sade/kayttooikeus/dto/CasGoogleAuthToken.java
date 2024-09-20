@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Setter
 public class CasGoogleAuthToken {
     @NotNull
-    private List scratchCodes;
+    private List<Object> scratchCodes;
     @NotNull
     private Integer id;
     @NotNull

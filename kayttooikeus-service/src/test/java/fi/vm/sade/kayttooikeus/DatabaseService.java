@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus;
 import fi.vm.sade.kayttooikeus.repositories.populate.Populator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -32,7 +33,7 @@ public class DatabaseService {
     public void runInTransaction(Runnable runnable) {
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
+            protected void doInTransactionWithoutResult(@NonNull TransactionStatus status) {
                 runnable.run();
             }
         });

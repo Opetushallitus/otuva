@@ -7,7 +7,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.joda.time.LocalDate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +17,6 @@ public class KayttoOikeusAnomusAspect {
 
     private KayttoOikeusAnomusHelper kayttoOikeusAnomusHelper;
 
-    @Autowired
     public KayttoOikeusAnomusAspect(KayttoOikeusAnomusHelper helper) {
         kayttoOikeusAnomusHelper = helper;
     }

@@ -9,7 +9,6 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
-import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -37,7 +36,6 @@ public class KutsuHakuBuilder {
 
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final KutsuRepository kutsuRepository;
-    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
     private final OrikaBeanMapper mapper;
 

@@ -22,7 +22,6 @@ import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,6 @@ public class KutsuServiceImpl implements KutsuService {
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final OrganisaatioClient organisaatioClient;
 
-    private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
     private final IdentificationRepository identificationRepository;
     private final KutsujaValidator kutsujaValidator;
@@ -83,7 +81,6 @@ public class KutsuServiceImpl implements KutsuService {
                 this.commonProperties,
                 this.myonnettyKayttoOikeusRyhmaTapahtumaRepository,
                 this.kutsuRepository,
-                this.organisaatioHenkiloRepository,
                 this.mapper,
                 this.organisaatioClient,
                 kutsuCriteria)
@@ -277,7 +274,7 @@ public class KutsuServiceImpl implements KutsuService {
         Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
         Optional<HenkiloDto> henkiloByHetu = this.oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
-        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (!StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             // Validation
             this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
             this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi(),
@@ -305,7 +302,7 @@ public class KutsuServiceImpl implements KutsuService {
         final String kutsujaOid = kutsuByToken.getKutsuja();
         HenkiloPerustietoDto kutsuja = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(kutsujaOid)
                 .orElseThrow(() -> new DataInconsistencyException("Current user not found with oid " + kutsujaOid));
-        if (StringUtils.isEmpty(kutsuja.getHetu()) || !kutsuByToken.getHetu().equals(kutsuja.getHetu())) {
+        if (!StringUtils.hasLength(kutsuja.getHetu()) || !kutsuByToken.getHetu().equals(kutsuja.getHetu())) {
             this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
         }
 
@@ -387,12 +384,12 @@ public class KutsuServiceImpl implements KutsuService {
             Set<String> hakaIdentifiers = this.identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
             this.identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid, hakaIdentifiers);
-            if (!kayttajatiedot.isPresent() || StringUtils.isEmpty(kayttajatiedot.get().getUsername())) {
+            if (!kayttajatiedot.isPresent() || !StringUtils.hasLength(kayttajatiedot.get().getUsername())) {
                 this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
             }
         }
         this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi());
-        if (StringUtils.isEmpty(kutsuByToken.getHakaIdentifier())) {
+        if (!StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, henkiloCreateByKutsuDto.getPassword());
         }
 
@@ -421,7 +418,6 @@ public class KutsuServiceImpl implements KutsuService {
         henkiloCreateByKutsuDto.setKayttajanimi(username);
     }
 
-    @NotNull
     private HenkiloCreateDto getHenkiloCreateDto(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
         henkiloCreateDto.setHetu(kutsuByToken.getHetu());

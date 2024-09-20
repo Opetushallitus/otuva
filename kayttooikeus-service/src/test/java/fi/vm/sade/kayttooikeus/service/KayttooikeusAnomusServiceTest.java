@@ -143,7 +143,7 @@ public class KayttooikeusAnomusServiceTest {
         AnomusCriteria criteria = AnomusCriteria.builder().organisaatioOids(organisaatioOids).build();
         this.kayttooikeusAnomusService.listHaetutKayttoOikeusRyhmat(criteria, null, null, null);
 
-        assertThat(criteria.getOrganisaatioOids()).containsOnlyElementsOf(organisaatioOids);
+        assertThat(criteria.getOrganisaatioOids()).isSubsetOf(organisaatioOids);
     }
 
     @Test

@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.config;
 
 import fi.vm.sade.kayttooikeus.Application;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
@@ -20,7 +21,7 @@ import static fi.vm.sade.kayttooikeus.util.FreePortUtil.portNumberBySystemProper
 public @interface ApplicationTest {
     class SetEnvTestExecutionListener extends AbstractTestExecutionListener {
         @Override
-        public void beforeTestClass(TestContext testContext) throws Exception {
+        public void beforeTestClass(@NonNull TestContext testContext) throws Exception {
             int port = portNumberBySystemPropertyOrFree("test.port");
             System.setProperty("host-virkailija", "localhost:"+port);
             System.setProperty("host-oppija", "localhost:"+port);

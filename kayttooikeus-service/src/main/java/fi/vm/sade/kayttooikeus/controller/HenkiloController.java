@@ -27,7 +27,7 @@ import java.util.Set;
 import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 
 @RestController
-@RequestMapping(value = "/henkilo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/henkilo", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "Henkilöön liittyvät operaatiot")
 @RequiredArgsConstructor
 public class HenkiloController {
@@ -102,14 +102,14 @@ public class HenkiloController {
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#henkiloOid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, null)")
     @ApiOperation(value = "Päivittää henkilön käyttäjätiedot.")
-    @PutMapping(value = "/{oid}/kayttajatiedot", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{oid}/kayttajatiedot", consumes = MediaType.APPLICATION_JSON_VALUE)
     public KayttajatiedotReadDto updateKayttajatiedot(@PathVariable("oid") String henkiloOid,
                                                         @RequestBody @Validated KayttajatiedotUpdateDto kayttajatiedot) {
         return kayttajatiedotService.updateKayttajatiedot(henkiloOid, kayttajatiedot);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#henkiloOid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, null)")
-    @PostMapping(value = "/{henkiloOid}/password", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/{henkiloOid}/password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Asettaa henkilön salasanan.",
             notes = "Asettaa henkilölle uuden salasanan virkailijan "
                     + "toimesta, ei tee tarkistusta vanhalle salasanalle "
@@ -147,7 +147,7 @@ public class HenkiloController {
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
-    @PutMapping(value = "/{oid}/hakatunnus", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{oid}/hakatunnus", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Päivittää henkilön Haka-tunnisteet. ",
             notes = "Päivittää annetun henkilön Haka-tunnisteet.",
             authorizations = @Authorization("ROLE_APP_KAYTTOOIKEUS_CRUD, "
@@ -179,7 +179,7 @@ public class HenkiloController {
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
-    @PutMapping(value = "/{oid}/idp/{identityProvider}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{oid}/idp/{identityProvider}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(
             value = "Päivittää linkitetyt tunnisteet",
             notes = "Päivittää annetun henkilön linkitetyt tunnisteet.",
@@ -203,14 +203,14 @@ public class HenkiloController {
         return henkiloService.getKayttooikeudet(oid, criteria);
     }
 
-    @PostMapping(value = "/{oid}/kayttooikeudet", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/{oid}/kayttooikeudet", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @ApiOperation("Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
     public KayttooikeudetDto postKayttooikeudet(@PathVariable String oid, @RequestBody OrganisaatioHenkiloCriteria criteria) {
         return henkiloService.getKayttooikeudet(oid, criteria);
     }
 
-    @PostMapping(value = "/henkilohaku", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/henkilohaku", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta. EI tarkoitettu palveluiden käyttöön. Muutosaltis.",
             notes = "Palauttaa suppean setin henkilöiden tietoja annetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
@@ -223,7 +223,7 @@ public class HenkiloController {
         return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
     }
 
-    @PostMapping(value = "/henkilohakucount", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/henkilohakucount", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("isAuthenticated()")
     @ApiOperation(value = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta palauttaa henkilohaun tulosten lukumäärän ilman sivutusrajoitusta",
             notes = "Palauttaa annetuilla rajoitteilla löytyvän henkilöjoukon koon")
@@ -238,7 +238,7 @@ public class HenkiloController {
         return this.henkiloService.getOmatTiedot();
     }
 
-    @PutMapping(value = "/{oid}/anomusilmoitus", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{oid}/anomusilmoitus", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Anomusilmoitus asetuksen muuttaminen")
     @PreAuthorize("@permissionCheckerServiceImpl.isCurrentUserAdmin()")
     public void updateAnomusilmoitus(@PathVariable String oid,

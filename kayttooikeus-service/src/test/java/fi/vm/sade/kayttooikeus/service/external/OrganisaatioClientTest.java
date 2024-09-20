@@ -25,15 +25,15 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     public void getLakkautetutOidsTest() {
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
         this.client.refreshCache();
         Set<String> lakkautetutOids = this.client.getLakkautetutOids();
@@ -52,15 +52,15 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     public void getOrganisaatioPerustiedotCachedRoot() {
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
         client.refreshCache();
 
@@ -77,15 +77,15 @@ public class OrganisaatioClientTest extends AbstractClientTest {
     public void getOrganisaatioPerustiedotCachedNotRoot() {
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
         onRequest().havingMethod(is("GET"))
                 .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
         client.refreshCache();
 

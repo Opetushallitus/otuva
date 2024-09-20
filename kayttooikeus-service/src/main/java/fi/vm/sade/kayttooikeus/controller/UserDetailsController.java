@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/userDetails", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/userDetails", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserDetailsController {
 
@@ -34,7 +34,7 @@ public class UserDetailsController {
     }
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Rajapinta vain CAS:n käyttöön")
     public CasUserAttributes getByUsernameAndPassword(@Valid @RequestBody LoginDto dto) {
         Kayttajatiedot kayttajatiedot = kayttajatiedotService.getByUsernameAndPassword(dto.getUsername(), dto.getPassword());

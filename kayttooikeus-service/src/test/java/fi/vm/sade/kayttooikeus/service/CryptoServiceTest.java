@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.service.impl.CryptoServiceImpl;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -10,7 +9,6 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;

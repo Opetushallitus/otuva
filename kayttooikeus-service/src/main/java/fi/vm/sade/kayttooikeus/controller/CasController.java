@@ -40,7 +40,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/cas", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/cas", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "CAS:a varten olevat rajapinnat.")
 @RequiredArgsConstructor
 public class CasController {
@@ -165,7 +165,7 @@ public class CasController {
         return ophProperties.url("cas.oppija.logout", originalUrl);
     }
 
-    @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Virkailijan uudelleenrekisteröinti")
     public VahvaTunnistusResponseDto tunnistauduVahvasti(
             @RequestParam(value = "kielisyys") String kielisyys,
@@ -192,24 +192,24 @@ public class CasController {
             authorizations = @Authorization("login"),
             response = ResponseEntity.class)
     @PreAuthorize("isAuthenticated()")
-    @PostMapping(value = "/prequel", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/prequel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> requestPost() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Vaihtaa käyttäjän salasanan tilapäisen loginTokenin perusteella")
     public CasRedirectParametersResponse changePassword(@RequestBody @Validated ChangePasswordRequest changePassword) {
         return kayttajatiedotService.changePassword(changePassword);
     }
 
-    @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Palauttaa CAS-kirjautumiseen vaaditut parametrit")
     public CasLoginParametersResponse getChangePasswordLoginParams() {
         return new CasLoginParametersResponse(ophProperties.url("virkailijan-tyopoyta"));
     }
 
-    @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public CasRedirectParametersResponse emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
                                                           @PathVariable String loginToken) {

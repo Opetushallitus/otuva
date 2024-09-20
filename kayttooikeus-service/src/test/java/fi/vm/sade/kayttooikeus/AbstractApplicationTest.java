@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus;
 
 import fi.vm.sade.kayttooikeus.config.ApplicationTest;
-import org.intellij.lang.annotations.Language;
 import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,8 +22,7 @@ public abstract class AbstractApplicationTest {
      * @see #resource(String)
      * Version annotated to return JSON
      */
-    @Language("JSON")
-    protected String jsonResource(@Language("spring-resource-reference") String classpathResource) {
+    protected String jsonResource(String classpathResource) {
         return resource(classpathResource);
     }
 
@@ -33,7 +31,7 @@ public abstract class AbstractApplicationTest {
      * @param resource in Spring's resource form, e.g. classpath:/some-file
      * @return resource contents as a string
      */
-    protected String resource(@Language("spring-resource-reference") String resource) {
+    protected String resource(String resource) {
         try {
             return new String(applicationContext.getResource(resource).getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {

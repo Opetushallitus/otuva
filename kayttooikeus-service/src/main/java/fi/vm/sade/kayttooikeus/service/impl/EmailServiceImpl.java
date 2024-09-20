@@ -28,10 +28,8 @@ import fi.vm.sade.ryhmasahkoposti.api.dto.ReportedRecipientReplacementDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,7 +75,6 @@ public class EmailServiceImpl implements EmailService {
     private final OrikaBeanMapper mapper;
     private final OphProperties urlProperties;
 
-    @Autowired
     public EmailServiceImpl(OppijanumerorekisteriClient oppijanumerorekisteriClient,
                             RyhmasahkopostiClient ryhmasahkopostiClient,
                             OphProperties ophProperties,
@@ -347,7 +344,6 @@ public class EmailServiceImpl implements EmailService {
         return recipient;
     }
 
-    @NotNull
     private ReportedRecipientReplacementDTO replacement(String name, Object value) {
         ReportedRecipientReplacementDTO replacement = new ReportedRecipientReplacementDTO();
         replacement.setName(name);

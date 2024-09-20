@@ -40,7 +40,7 @@ public class KutsuControllerTest extends AbstractControllerTest {
                                 new KutsuReadDto.KutsuOrganisaatioReadDto(new TextGroupMapDto(3L).put("FI", "Oikeus"), "OID", null)
                         ))
                         .build()));
-        this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kutsu").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kutsu/simpleKutsuListaus.json")));
     }
@@ -58,7 +58,7 @@ public class KutsuControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void deleteTest() throws Exception {
-        this.mvc.perform(delete("/kutsu/1").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(delete("/kutsu/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 }

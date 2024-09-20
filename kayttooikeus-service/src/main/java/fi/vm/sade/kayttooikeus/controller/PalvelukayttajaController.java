@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/palvelukayttaja", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/palvelukayttaja", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class PalvelukayttajaController {
 
@@ -25,7 +25,7 @@ public class PalvelukayttajaController {
         return palvelukayttajaService.list(criteria);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     public PalvelukayttajaReadDto create(@RequestBody @Valid PalvelukayttajaCreateDto dto) {

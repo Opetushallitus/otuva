@@ -57,7 +57,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
         UpdateHaettuKayttooikeusryhmaDto haettuKayttooikeusryhmaDto = new UpdateHaettuKayttooikeusryhmaDto(1L,
                 KayttoOikeudenTila.MYONNETTY.toString(), LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate(), "hylkaysperusteteksti");
         this.mvc.perform(put("/kayttooikeusanomus")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(haettuKayttooikeusryhmaDto)))
                 .andExpect(status().isOk());
     }
@@ -68,7 +68,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
         GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = new GrantKayttooikeusryhmaDto(1L,
                 LocalDateTime.now().toLocalDate(), LocalDateTime.now().plusYears(1).toLocalDate());
         this.mvc.perform(put("/kayttooikeusanomus/1.2.3.4.5/1.2.0.0.1")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(Lists.newArrayList(grantKayttooikeusryhmaDto))))
                 .andExpect(status().isOk());
     }
@@ -81,7 +81,7 @@ public class AnomusControllerTest extends AbstractControllerTest {
         KayttooikeusAnomusDto kayttooikeusAnomusDto = new KayttooikeusAnomusDto("1.2.3.4.5",
                  "email@domain.com", oids, "perustelut");
         this.mvc.perform(post("/kayttooikeusanomus/1.2.3.4.5")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(this.objectMapper.writeValueAsString(kayttooikeusAnomusDto)))
                 .andExpect(status().isOk());
     }

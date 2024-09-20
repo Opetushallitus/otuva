@@ -1,11 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.CasUserAttributes;
-import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
-import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.LoginTokenNotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -42,7 +39,6 @@ public class IdentificationServiceImpl implements IdentificationService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final KutsuRepository kutsuRepository;
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
-    private final OrikaBeanMapper mapper;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final KayttajatiedotRepository kayttajatiedotRepository;

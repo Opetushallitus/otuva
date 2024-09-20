@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
 import fi.vm.sade.kayttooikeus.model.*;
 import lombok.*;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 

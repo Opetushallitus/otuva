@@ -4,9 +4,6 @@ import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -40,7 +37,6 @@ public class CryptoServiceImpl implements CryptoService {
 
     private Integer passwordMinLen;
 
-    @Autowired
     public CryptoServiceImpl(AuthProperties authProperties) {
         this.STATIC_SALT = authProperties.getCryptoService().getStaticSalt();
         this.passwordMinLen = authProperties.getPassword().getMinLen();

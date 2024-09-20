@@ -34,13 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    
+
     @Test
     public void findDistinctOrganisaatiosForHenkiloOidEmptyTest() {
         List<String> results = organisaatioHenkiloRepository.findDistinctOrganisaatiosForHenkiloOid("oid");
         assertThat(results).isEmpty();
     }
-    
+
     @Test
     public void findDistinctOrganisaatiosForHenkiloOidTest() {
         populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"));
@@ -95,7 +95,7 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
         MyonnettyKayttoOikeusRyhmaTapahtuma mkor2 = populate(MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma(oh2, kor2));
         oh2.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet(Arrays.asList(mkor2)));
 
-        OrganisaatioHenkilo oh3 = populate(organisaatioHenkilo(henkilo("henkilo"),"oh3" ));
+        populate(organisaatioHenkilo(henkilo("henkilo"),"oh3" ));
 
         List<OrganisaatioHenkiloWithOrganisaatioDto> results = organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("henkilo", PalveluRooliGroup.HENKILOHAKU);
         assertThat(results.size()).isEqualTo(1);

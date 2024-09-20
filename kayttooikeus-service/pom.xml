@@ -29,22 +29,8 @@
 
         <maven.compiler.release>21</maven.compiler.release>
 
-        <oppijanumerorekisteri.version>0.3.0-SNAPSHOT</oppijanumerorekisteri.version>
-        <organisaatio.version>2016-9-SNAPSHOT</organisaatio.version>
-        <ryhmasahkoposti.version>14.8-SNAPSHOT</ryhmasahkoposti.version>
-
-        <!-- Sade utils -->
-        <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
-
-        <springfox.version>3.0.0</springfox.version>
-
-        <!-- buildversion.txt generation plugin -->
-        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-
         <!-- QA -->
         <jadler.version>1.3.0</jadler.version>
-
-        <orika.version>1.5.4</orika.version>
         <lombok.version>1.18.34</lombok.version>
 
         <sonar.organization>opetushallitus</sonar.organization>
@@ -98,12 +84,12 @@
         <dependency>
             <groupId>fi.vm.sade.oppijanumerorekisteri</groupId>
             <artifactId>oppijanumerorekisteri-api</artifactId>
-            <version>${oppijanumerorekisteri.version}</version>
+            <version>0.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
-            <version>${organisaatio.version}</version>
+            <version>2016-9-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.wordnik</groupId>
@@ -119,7 +105,7 @@
         <dependency>
             <groupId>fi.vm.sade.viestintapalvelu</groupId>
             <artifactId>ryhmasahkoposti-api</artifactId>
-            <version>${ryhmasahkoposti.version}</version>
+            <version>16.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.wordnik</groupId>
@@ -232,13 +218,13 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
-            <version>${springfox.version}</version>
+            <version>3.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>ma.glasnost.orika</groupId>
             <artifactId>orika-core</artifactId>
-            <version>${orika.version}</version>
+            <version>1.5.4</version>
         </dependency>
 
         <dependency>
@@ -249,10 +235,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-cache</artifactId>
             <version>${httpclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.carrotsearch</groupId>
@@ -296,7 +278,7 @@
         <dependency>
             <groupId>fi.vm.sade</groupId>
             <artifactId>auditlogger</artifactId>
-            <version>${auditlog.api.version}</version>
+            <version>8.3.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -348,12 +330,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>13.0</version>
         </dependency>
 
         <dependency>

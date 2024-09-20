@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -17,7 +16,6 @@ public class MfaSecurityConfig extends WebSecurityConfigurerAdapter {
 
   private CasProperties casProperties;
 
-  @Autowired
   public MfaSecurityConfig(CasProperties casProperties) {
       this.casProperties = casProperties;
   }

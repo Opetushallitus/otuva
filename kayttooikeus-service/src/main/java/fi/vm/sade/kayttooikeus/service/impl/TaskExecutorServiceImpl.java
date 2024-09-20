@@ -6,7 +6,6 @@ import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,7 +22,6 @@ public class TaskExecutorServiceImpl implements TaskExecutorService {
     private final KayttoOikeusService kayttoOikeusService;
     private final EmailService emailService;
 
-    @Autowired
     public TaskExecutorServiceImpl(KayttoOikeusService kayttoOikeusService,
                                    EmailService emailService) {
         this.kayttoOikeusService = kayttoOikeusService;

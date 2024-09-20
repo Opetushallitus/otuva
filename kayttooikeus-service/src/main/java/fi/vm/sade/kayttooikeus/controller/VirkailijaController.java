@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/virkailija", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/virkailija", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class VirkailijaController {
 
     private final VirkailijaService virkailijaService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_APP_KAYTTOOIKEUS_VIRKAILIJANLUONTI')")
     @ApiOperation(value = "Virkailijan luonti",
             notes = "Tarkoitettu vain testikäyttöön, tuotannossa virkailijat luodaan kutsun kautta.")
@@ -30,7 +30,7 @@ public class VirkailijaController {
         return virkailijaService.create(dto);
     }
 
-    @PostMapping(value = "/haku", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/haku", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_READ'," +
             "'ROLE_APP_KAYTTOOIKEUS_CRUD'," +
             "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")

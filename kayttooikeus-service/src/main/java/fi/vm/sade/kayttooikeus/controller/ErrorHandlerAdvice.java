@@ -7,10 +7,8 @@ import fi.vm.sade.kayttooikeus.service.exception.*;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,16 +39,15 @@ import static java.util.stream.Collectors.toList;
 public class ErrorHandlerAdvice {
     public static final Locale FI = new Locale("fi", "FI");
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlerAdvice.class);
-    private static final Function<? super ConstraintViolation<?>, String> MESSAGES_TRANSFORMER = violation 
+    private static final Function<? super ConstraintViolation<?>, String> MESSAGES_TRANSFORMER = violation
             -> violation == null ? null : violation.getMessage() + ": " + violation.getInvalidValue();
     private static final Function<? super ConstraintViolation<?>, ViolationDto> VIOLATIONS_TRANSFORMER = violation
             -> violation == null ? null : new ViolationDto(violation.getPropertyPath().toString(),
                 Iterators.getLast(violation.getPropertyPath().iterator()).toString(), violation.getMessage(),
                     violation.getInvalidValue());
-    
+
     private MessageSource messageSource;
 
-    @Autowired
     public ErrorHandlerAdvice(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
@@ -72,7 +69,7 @@ public class ErrorHandlerAdvice {
         return handleException(req, exception, "error_NotFoundException",
                 messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
     }
-    
+
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED) // 401 Not authorized
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseBody
@@ -133,7 +130,7 @@ public class ErrorHandlerAdvice {
     public Map<String,Object> badRequest(HttpServletRequest req, ConstraintViolationException exception) {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());
     }
-    
+
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
@@ -142,12 +139,12 @@ public class ErrorHandlerAdvice {
         Collection<String> violationsMsgs = exception.getValidationMessages();
         Map<String,Object> result = handleException(req, exception, exception.getKey(),
                 exception.getKey() != null ? messageSource.getMessage(exception.getKey(), new Object[0], getLocale(req)) + (violations.isEmpty() ? "" : ": ") : ""
-                + StringHelper.join(", ", violationsMsgs.iterator()));
+                +  String.join(", ", violationsMsgs));
         result.put("errors", violationsMsgs);
         result.put("violations", violations);
         return result;
     }
-    
+
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad Request
     @ExceptionHandler({IllegalArgumentException.class, PasswordException.class, UsernameAlreadyExistsException.class})
     @ResponseBody
@@ -232,7 +229,7 @@ public class ErrorHandlerAdvice {
         Collection<ViolationDto> violations = Collections2.transform(exViolations, VIOLATIONS_TRANSFORMER::apply);
         Collection<String> violationsMsgs = Collections2.transform(exViolations, MESSAGES_TRANSFORMER::apply);
         Map<String,Object> result = handleException(req, exception, "bad_request_error",
-                StringHelper.join(", ", violationsMsgs.iterator()));
+                String.join(", ", violationsMsgs));
         result.put("errors", violationsMsgs);
         result.put("violations", violations);
         return result;
@@ -246,7 +243,7 @@ public class ErrorHandlerAdvice {
         Collection<String> violationsMsgs = exViolations.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(toList());
         Map<String,Object> result = handleException(req, exception, "bad_request_error",
-                StringHelper.join(", ", violationsMsgs.iterator()));
+                String.join(", ", violationsMsgs));
         result.put("errors", violationsMsgs);
         result.put("violations", violations);
         return result;
@@ -265,7 +262,7 @@ public class ErrorHandlerAdvice {
         result.put("parameters", req.getParameterMap());
         return result;
     }
-    
+
     @Getter @Setter
     public static class ViolationDto implements Serializable {
         private String field;

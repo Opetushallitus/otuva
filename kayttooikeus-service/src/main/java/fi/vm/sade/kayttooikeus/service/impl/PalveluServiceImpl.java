@@ -1,11 +1,9 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import fi.vm.sade.kayttooikeus.repositories.PalveluRepository;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
 import fi.vm.sade.kayttooikeus.service.PalveluService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ public class PalveluServiceImpl implements PalveluService {
     private PalveluRepository palveluRepository;
     private LocalizationService localizationService;
 
-    @Autowired
     public PalveluServiceImpl(PalveluRepository palveluRepository, LocalizationService localizationService) {
         this.palveluRepository = palveluRepository;
         this.localizationService = localizationService;

@@ -2,8 +2,6 @@ package fi.vm.sade.kayttooikeus.model;
 
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.*;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

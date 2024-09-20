@@ -32,7 +32,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
 
     @Test
     public void listKayttoOikeusRyhmaDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -52,14 +52,14 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                     .nimi(new TextGroupListDto(1L).put("FI", "Test"))
                     .build()));
 
-        this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
     }
 
     @Test
     public void listKayttoOikeusRyhmasByOrdOidDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/organisaatio/123").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/organisaatio/123").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -77,14 +77,14 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .rooliRajoite("Roolirajoite test")
                         .build()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/organisaatio/123").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/organisaatio/123").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaByOrganisaatio.json")));
     }
 
     @Test
     public void listKayttoOikeusRyhmasIncludingHenkilosDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/234/123").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/234/123").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -113,14 +113,14 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .voimassaPvm(LocalDate.of(2015, 1, 22))
                         .build()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/234/123").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/234/123").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhmas.json")));
     }
 
     @Test
     public void listKayttoOikeusRyhmaByHenkiloDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/henkilo/1.2.3.4.5").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/henkilo/1.2.3.4.5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -130,14 +130,14 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio("1.2.3.4.5", null))
                 .willReturn(singletonList(buildKayttoOikeusForHenkilo()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/henkilo/1.2.3.4.5").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/henkilo/1.2.3.4.5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma.json")));
     }
 
     @Test
     public void listKayttoOikeusRyhmaByCurrentHenkiloDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/henkilo/current").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/henkilo/current").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -147,7 +147,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.listMyonnettyKayttoOikeusRyhmasByHenkiloAndOrganisaatio("1.2.3.4.5", null))
                 .willReturn(singletonList(buildKayttoOikeusForHenkilo()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/henkilo/current").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/henkilo/current").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma.json")));
     }
@@ -156,7 +156,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void getKayttoOikeusRyhmaDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/44").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/44").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -166,14 +166,14 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.findKayttoOikeusRyhma(eq(44L), isNull()))
                 .willReturn(buildKayttoOikeusRyhma());
 
-        this.mvc.perform(get("/kayttooikeusryhma/44").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/44").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma2.json")));
     }
 
     @Test
     public void getSubRyhmasByKayttoOikeusRyhmaDeniedTest() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/44/sallitut").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/44/sallitut").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -183,7 +183,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.findSubRyhmasByMasterRyhma(44L))
                 .willReturn(singletonList(buildKayttoOikeusRyhma()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/44/sallitut").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/44/sallitut").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma2list.json")));
     }
@@ -203,7 +203,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void getKayttoOikeusByKayttoOikeusRyhmaTestDenied() throws Exception {
-        this.mvc.perform(get("/kayttooikeusryhma/46/kayttooikeus").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/46/kayttooikeus").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -218,7 +218,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .rooliTexts(new TextGroupListDto().put("FI", "rooli kuvaus"))
                     .build()));
 
-        this.mvc.perform(get("/kayttooikeusryhma/46/kayttooikeus").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/kayttooikeusryhma/46/kayttooikeus").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/palveluRooli.json")));
     }
@@ -226,9 +226,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = PALVELU_KAYTTOOIKEUS_PREFIX + "READ")
     public void createKayttoOikeusRyhmaDeniedTest() throws Exception {
-        this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeusRyhma.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -238,9 +238,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
         given(this.kayttoOikeusService.createKayttoOikeusRyhma(any(KayttoOikeusRyhmaModifyDto.class)))
                 .willReturn(234L);
 
-        this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(post("/kayttooikeusryhma").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeusRyhma.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(content().string("234"))
                 .andExpect(status().isOk());
     }
@@ -248,9 +248,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void createNewKayttoOikeusDeniedTest() throws Exception {
-        this.mvc.perform(post("/kayttooikeusryhma/kayttooikeus").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(post("/kayttooikeusryhma/kayttooikeus").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeus.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -295,9 +295,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                                 .build())
                         .build());
 
-        this.mvc.perform(post("/kayttooikeusryhma/kayttooikeus").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(post("/kayttooikeusryhma/kayttooikeus").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/createKayttoOikeus.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/newKayttoOikeus.json")));
     }
@@ -305,9 +305,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void updateKayttoOikeusRyhmaTestDenied() throws Exception {
-        this.mvc.perform(put("/kayttooikeusryhma/345").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(put("/kayttooikeusryhma/345").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/updateKayttoOikeusRyhma.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -326,9 +326,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                                 .build()))
                         .build());
 
-        this.mvc.perform(put("/kayttooikeusryhma/345").contentType(MediaType.APPLICATION_JSON_UTF8)
+        this.mvc.perform(put("/kayttooikeusryhma/345").contentType(MediaType.APPLICATION_JSON)
                 .content(jsonResource("classpath:kayttooikeusryhma/updateKayttoOikeusRyhma.json"))
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/updatedKayttoOikeusRyhma.json")));
     }
@@ -370,9 +370,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .build()));
 
         this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"KOODISTO\": \"CRUD\"}")
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
     }
@@ -380,9 +380,9 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     public void getKayttoOikeusRyhmasByKayttoOikeusTestDenied() throws Exception {
         this.mvc.perform(post("/kayttooikeusryhma/ryhmasByKayttooikeus")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("[345]")
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
     }
 }

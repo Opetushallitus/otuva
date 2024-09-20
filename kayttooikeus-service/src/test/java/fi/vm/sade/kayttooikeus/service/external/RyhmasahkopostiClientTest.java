@@ -23,7 +23,7 @@ public class RyhmasahkopostiClientTest extends AbstractClientTest {
                 .respond().withStatus(OK).withBody("TICKET");
         onRequest().havingMethod(is("POST"))
                 .havingPath(is("/ryhmasahkoposti-service/email"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON_UTF8.getType())
+                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
                 .withBody("12345");
         String response = this.client.sendRyhmasahkoposti(new EmailData());
         assertThat(response).isEqualTo("12345");

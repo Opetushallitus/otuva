@@ -8,7 +8,6 @@ import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import org.apache.http.entity.ContentType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +22,11 @@ import static java.util.function.Function.identity;
 
 @Component
 public class RyhmasahkopostiClientImpl implements RyhmasahkopostiClient {
-    
+
     private final ObjectMapper objectMapper;
     private final OphHttpClient httpClient;
     private final OphProperties urlProperties;
 
-    @Autowired
     public RyhmasahkopostiClientImpl(ObjectMapper objectMapper,
                                      @Qualifier(HTTP_CLIENT_VIESTINTA) OphHttpClient httpClient,
                                      OphProperties urlProperties) {
@@ -36,7 +34,7 @@ public class RyhmasahkopostiClientImpl implements RyhmasahkopostiClient {
         this.httpClient = httpClient;
         this.urlProperties = urlProperties;
     }
-    
+
     public String sendRyhmasahkoposti(EmailData emailData) {
         String url = urlProperties.url("ryhmasahkoposti-service.email");
 

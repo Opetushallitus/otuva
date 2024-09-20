@@ -22,24 +22,24 @@ public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     private OrganisaatioHenkiloService service;
     @MockBean
     private OrganisaatioClient organisaatioClient;
-    
+
     @Test
     public void listOrganisaatioPerustiedotForCurrentUserIsSecuredTest() throws Exception {
-        this.mvc.perform(get("/organisaatiohenkilo/current/organisaatio").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/organisaatiohenkilo/current/organisaatio").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection()); // redirect to CAS login
     }
-    
+
     @Test
     @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
     public void listPossibleHenkiloTypesByCurrentHenkiloTest() throws Exception {
         given(this.service.listPossibleHenkiloTypesAccessibleForCurrentUser()).willReturn(singletonList(VIRKAILIJA));
-        this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().json("['VIRKAILIJA']"));
     }
 
     @Test
     public void listPossibleHenkiloTypesByCurrentHenkiloIsSecuredTest() throws Exception {
-        this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(get("/organisaatiohenkilo/current/availablehenkilotype").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection()); // redirect to CAS login
     }
 
@@ -47,15 +47,15 @@ public class OrganisaatioHenkiloControllerTest extends AbstractControllerTest {
     @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
     public void findOrCreateOrganisaatioHenkilosTest() throws Exception {
         this.mvc.perform(post("/organisaatiohenkilo/henkiloOid/findOrCreate")
-                .content("[]").contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .content("[]").contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(roles = "APP_KAYTTOOIKEUS_CRUD")
     public void passivoiHenkiloOrganisationTest() throws Exception {
-        this.mvc.perform(delete("/organisaatiohenkilo/henkiloOid/organisaatioOid").accept(MediaType.APPLICATION_JSON_UTF8))
+        this.mvc.perform(delete("/organisaatiohenkilo/henkiloOid/organisaatioOid").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 }

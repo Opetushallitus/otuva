@@ -25,8 +25,8 @@ public class PalveluServiceTest extends AbstractServiceIntegrationTest {
     @Test
     public void listPalvelusTest() {
         Palvelu palvelu1 = populate(palvelu("HENKILOPALVELU").kuvaus(text("FI", "Henkilöpalvelu")
-                                .put("EN", "Person service"))),
-                palvelu2 = populate(palvelu("KOODISTO"));
+                                .put("EN", "Person service")));
+        populate(palvelu("KOODISTO"));
         List<PalveluDto> palvelus = palveluService.listPalvelus();
         assertEquals(2, palvelus.size());
         assertEquals(palvelu1.getId(), palvelus.get(0).getId());

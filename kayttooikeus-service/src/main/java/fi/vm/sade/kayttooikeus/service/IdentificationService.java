@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.CasUserAttributes;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;

@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 @Table(name = "kayttooikeusryhma_tapahtuma_historia")
 public class KayttoOikeusRyhmaTapahtumaHistoria extends IdentifiableAndVersionedEntity {
 
-    private static final long serialVersionUID = 6182609506916140406L;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kayttooikeusryhma_id", nullable = false)
     private KayttoOikeusRyhma kayttoOikeusRyhma;

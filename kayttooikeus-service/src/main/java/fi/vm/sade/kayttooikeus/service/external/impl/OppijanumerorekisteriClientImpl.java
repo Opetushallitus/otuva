@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +45,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     private final OphHttpClient httpClient;
     private final OphProperties urlProperties;
 
-    @Autowired
     public OppijanumerorekisteriClientImpl(ObjectMapper objectMapper,
                                            @Qualifier(HTTP_CLIENT_OPPIJANUMEROREKISTERI) OphHttpClient httpClient,
                                            OphProperties urlProperties) {

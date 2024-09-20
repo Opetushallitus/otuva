@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-
-import fi.vm.sade.kayttooikeus.model.TextGroup;
 import fi.vm.sade.kayttooikeus.repositories.dto.TextGroupTextDto;
 
 import java.util.Collection;

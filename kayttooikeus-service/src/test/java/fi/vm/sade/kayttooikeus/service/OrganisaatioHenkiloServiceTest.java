@@ -37,8 +37,7 @@ import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -127,12 +126,12 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                 .containsExactlyInAnyOrder("Devaaja", "Opettaja", "Testaaja");
         assertThat(result)
                 .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaAlkuPvm)
-                .allSatisfy(alkupvm -> assertThat(alkupvm).isLessThanOrEqualTo(LocalDate.now()));
+                .allSatisfy(alkupvm -> assertThat(alkupvm).isBeforeOrEqualTo(LocalDate.now()));
         assertThat(result)
                 .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaLoppuPvm)
                 .filteredOn(Objects::nonNull)
                 .hasSize(1)
-                .allSatisfy(loppupvm -> assertThat(loppupvm).isGreaterThanOrEqualTo(LocalDate.now()));
+                .allSatisfy(loppupvm -> assertThat(loppupvm).isAfterOrEqualTo(LocalDate.now()));
     }
 
     @Test
@@ -175,7 +174,7 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
     public void passivoiHenkiloOrganisation() {
         OrganisaatioHenkilo organisaatioHenkilo = populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "1.1.1.1.1"));
         KayttoOikeusRyhma kayttoOikeusRyhma = populate(kayttoOikeusRyhma("käyttöoikeusryhmä"));
-        MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(kayttooikeusTapahtuma(organisaatioHenkilo, kayttoOikeusRyhma));
+        populate(kayttooikeusTapahtuma(organisaatioHenkilo, kayttoOikeusRyhma));
 
         this.organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1");
         assertThat(organisaatioHenkilo.isPassivoitu()).isTrue();
