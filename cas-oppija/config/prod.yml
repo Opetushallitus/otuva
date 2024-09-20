@@ -1,0 +1,97 @@
+# CAS configuration
+# https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
+
+server.port: 8080
+
+logging.config: file:/root/oph-configuration/log4j2.xml
+
+cas.server.name: https://opintopolku.fi
+cas.server.prefix: https://opintopolku.fi/cas-oppija
+
+cas.server.tomcat.http-proxy:
+    enabled: true
+    secure: true
+    scheme: https
+    protocol: HTTP/1.1
+
+cas.tgc.secure: true
+
+cas.warning-cookie.secure: true
+
+cas.tgc.pin-to-session: true
+cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
+cas.tgc.crypto:
+    encryption.key: ${cas_oppija_tgc_encryption_key}
+    signing.key: ${cas_oppija_tgc_signing_key}
+cas.webflow.crypto:
+    encryption.key: ${cas_oppija_webflow_encryption_key}
+    signing.key: ${cas_oppija_webflow_signing_key}
+
+spring.datasource.url: jdbc:postgresql://${cas_oppija_postgres_host}:${cas_oppija_postgres_port}/${cas_oppija_postgres_db}
+spring.datasource.password: ${cas_oppija_postgres_password}
+
+cas.authn.pac4j.saml:
+  - client-name: suomi.fi
+    auto-redirect-type: CLIENT
+    keystore-path: /root/oph-configuration/cas-oppija/keystore.jks
+    keystore-password: ${cas_oppija_suomifi_keystore_password}
+    keystore-alias: opintopolku.fi
+    private-key-password: ${cas_oppija_suomifi_private_key_password}
+    service-provider-entity-id: https://opintopolku.fi/cas-oppija
+    service-provider-metadata-path: /root/oph-configuration/cas-oppija/sp-metadata.xml
+    identity-provider-metadata-path: /root/oph-configuration/cas-oppija/idp-metadata.xml
+    principal-attribute-id: nationalIdentificationNumber
+    requested-attributes:
+      - name: urn:oid:1.2.246.21
+        friendly-name: nationalIdentificationNumber
+        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
+      - name: urn:oid:2.5.4.3
+        friendly-name: cn
+        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+        required: true
+    mapped-attributes:
+      - personName->urn:oid:2.5.4.3
+
+
+management.endpoints.web.exposure.include: health,springWebflow
+management.endpoint.springWebflow.enabled: false
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
+cas.logout.follow-service-redirects: true
+cas.logout.redirect-parameter: service
+cas.logout.redirect-url: https://opintopolku.fi/
+
+cas.service-registry.json.location: file:///root/oph-configuration/cas-oppija
+
+cas.http-web-request.cors.allow-origins[0]: https://opintopolku.fi
+cas.http-web-request.cors.allow-origins[1]: https://studyinfo.fi
+cas.http-web-request.cors.allow-origins[2]: https://studieinfo.fi
+cas.http-web-request.cors.allow-origin-patterns: ['http://localhost:[*]', 'https://*opintopolku.fi', 'https://*studyinfo.fi', 'https://*studieinfo.fi', 'https://tunnistautuminen.suomi.fi']
+
+cas.slo.asynchronous: false
+
+# Spring Boot configuration
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+server.tomcat.accesslog:
+    enabled: true
+    directory: /root/logs
+    prefix: accesslog_cas_oppija
+    suffix: .txt
+    pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas-oppija\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}"
+    request-attributes-enabled: true
+    rotate: true
+    rename-on-rotate: true
+    max-days: 7
+
+# Oph properties overrides
+
+host.virkailija: https://virkailija.opintopolku.fi
+valtuudet.enabled: true
+valtuudet.required: true
+valtuudet.host: https://asiointivaltuustarkastus.suomi.fi
+valtuudet.client-id: ${cas_oppija_suomifi_valtuudet_client_id}
+valtuudet.api-key: ${cas_oppija_suomifi_valtuudet_api_key}
+valtuudet.oauth-password: ${cas_oppija_suomifi_valtuudet_oauth_password}
+service-user.username: ${cas_oppija_service_user_username}
+service-user.password: ${cas_oppija_service_user_password}
