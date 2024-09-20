@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Specify the refresh internal in seconds. -->
 <Configuration monitorInterval="60">
-    <Properties>
-        <Property name="cas-oppija.log.level">${env:CAS_OPPIJA_LOG_LEVEL:-info}</Property>
-    </Properties>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d %p [%c] - &lt;%m&gt;%n"/>
-            <ThresholdFilter level="debug" />
         </Console>
     </Appenders>
     <Loggers>
