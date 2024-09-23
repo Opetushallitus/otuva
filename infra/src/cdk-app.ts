@@ -605,13 +605,22 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     database.connections.allowDefaultPortFrom(props.bastion.connections)
 
     const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
-        this,
-        "LoadBalancer",
-        {
-          vpc,
-          internetFacing: true,
-        },
+      this,
+      "LoadBalancer",
+      {
+        vpc,
+        internetFacing: true,
+      },
     );
+
+    const sharedHostedZone = route53.HostedZone.fromLookup(
+      this,
+      "YleiskayttoisetHostedZone",
+      {
+        domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
+      },
+    );
+    const albHostname = `cas.${sharedHostedZone.zoneName}`;
 
     if ("hahtuva" == getEnvironment()) {
       const accelerator = new globalaccelerator.Accelerator(
@@ -628,23 +637,23 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           new globalaccelerator_endpoints.ApplicationLoadBalancerEndpoint(alb),
         ],
       });
-    }
 
-    const sharedHostedZone = route53.HostedZone.fromLookup(
-        this,
-        "YleiskayttoisetHostedZone",
-        {
-          domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-        },
-    );
-    const albHostname = `cas.${sharedHostedZone.zoneName}`;
-    const albRecord = new route53.ARecord(this, "ALBARecord", {
-      zone: sharedHostedZone,
-      recordName: albHostname,
-      target: route53.RecordTarget.fromAlias(
+      new route53.ARecord(this, "ALBARecord", {
+        zone: sharedHostedZone,
+        recordName: albHostname,
+        target: route53.RecordTarget.fromAlias(
+          new route53_targets.GlobalAcceleratorTarget(accelerator),
+        ),
+      });
+    } else {
+      new route53.ARecord(this, "ALBARecord", {
+        zone: sharedHostedZone,
+        recordName: albHostname,
+        target: route53.RecordTarget.fromAlias(
           new route53_targets.LoadBalancerTarget(alb),
-      ),
-    });
+        ),
+      });
+    }
 
     const albCertificate = new certificatemanager.Certificate(
         this,
