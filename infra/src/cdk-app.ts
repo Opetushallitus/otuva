@@ -622,38 +622,13 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     );
     const albHostname = `cas.${sharedHostedZone.zoneName}`;
 
-    if ("hahtuva" == getEnvironment()) {
-      const accelerator = new globalaccelerator.Accelerator(
-        this,
-        prefix("Accelerator"),
-      );
-
-      const acc_listener = accelerator.addListener(prefix("Listener"), {
-        portRanges: [{ fromPort: 443 }],
-      });
-
-      acc_listener.addEndpointGroup(prefix("EndpointGroup"), {
-        endpoints: [
-          new globalaccelerator_endpoints.ApplicationLoadBalancerEndpoint(alb),
-        ],
-      });
-
-      new route53.ARecord(this, "ALBARecord", {
-        zone: sharedHostedZone,
-        recordName: albHostname,
-        target: route53.RecordTarget.fromAlias(
-          new route53_targets.GlobalAcceleratorTarget(accelerator),
-        ),
-      });
-    } else {
-      new route53.ARecord(this, "ALBARecord", {
-        zone: sharedHostedZone,
-        recordName: albHostname,
-        target: route53.RecordTarget.fromAlias(
-          new route53_targets.LoadBalancerTarget(alb),
-        ),
-      });
-    }
+    new route53.ARecord(this, "ALBARecord", {
+      zone: sharedHostedZone,
+      recordName: albHostname,
+      target: route53.RecordTarget.fromAlias(
+        new route53_targets.LoadBalancerTarget(alb),
+      ),
+    });
 
     const albCertificate = new certificatemanager.Certificate(
         this,
