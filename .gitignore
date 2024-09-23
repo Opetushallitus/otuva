@@ -16,3 +16,4 @@ rebel.xml
 *.log
 
 cdk.out/
+infra/cdk.context.json

@@ -8,7 +8,8 @@ trap "docker compose down" EXIT
 function main {
   cd "$repo/kayttooikeus-service"
   docker compose up -d
-  mvn clean install
+  echo "$MVN_SETTINGSXML" > ./settings.xml
+  mvn clean install -s ./settings.xml
 }
 
 main "$@"

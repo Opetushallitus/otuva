@@ -151,6 +151,10 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
             value: `/env/${env}/slack-notifications-channel-webhook`,
           },
+          MVN_SETTINGSXML: {
+            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+            value: `/mvn/settingsxml`,
+          },
         },
         buildSpec: codebuild.BuildSpec.fromObject({
           version: "0.2",
