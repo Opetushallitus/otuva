@@ -18,8 +18,6 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
-import * as globalaccelerator from "aws-cdk-lib/aws-globalaccelerator";
-import * as globalaccelerator_endpoints from "aws-cdk-lib/aws-globalaccelerator-endpoints";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
