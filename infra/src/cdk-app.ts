@@ -18,6 +18,8 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
+import * as globalaccelerator from "aws-cdk-lib/aws-globalaccelerator";
+import * as globalaccelerator_endpoints from "aws-cdk-lib/aws-globalaccelerator-endpoints";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
@@ -610,6 +612,23 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           internetFacing: true,
         },
     );
+
+    if ("hahtuva" == getEnvironment()) {
+      const accelerator = new globalaccelerator.Accelerator(
+        this,
+        prefix("Accelerator"),
+      );
+
+      const acc_listener = accelerator.addListener(prefix("Listener"), {
+        portRanges: [{ fromPort: 443 }],
+      });
+
+      acc_listener.addEndpointGroup(prefix("EndpointGroup"), {
+        endpoints: [
+          new globalaccelerator_endpoints.ApplicationLoadBalancerEndpoint(alb),
+        ],
+      });
+    }
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
         this,
