@@ -1,11 +1,12 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import fi.vm.sade.kayttooikeus.model.email.EmailData;
 
 import static net.jadler.Jadler.onRequest;
 import static org.assertj.core.api.Assertions.assertThat;

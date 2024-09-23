@@ -17,6 +17,7 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import fi.vm.sade.kayttooikeus.service.MyontooikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
+import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -24,7 +25,6 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -241,7 +241,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                     .map(HaettuKayttooikeusryhmaDto::getAnomus).map(AnomusDto::getOrganisaatioOid).collect(Collectors.toList());
         }
         else {
-            throw new NotImplementedException("Unsupported input type.");
+            throw new InvalidKayttoOikeusException("Unsupported input type.");
         }
         return checkRoleForOrganisationFunc.apply(orgOidList);
     }

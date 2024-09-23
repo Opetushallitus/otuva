@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.ryhmasahkoposti.api.dto.EmailData;
+import fi.vm.sade.kayttooikeus.model.email.EmailData;
 
 public interface RyhmasahkopostiClient {
     /**

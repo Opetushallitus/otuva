@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.exception;
 
-import fi.vm.sade.generic.service.exception.SadeBusinessException;
-
 public class PasswordException extends SadeBusinessException{
     public PasswordException() {
 

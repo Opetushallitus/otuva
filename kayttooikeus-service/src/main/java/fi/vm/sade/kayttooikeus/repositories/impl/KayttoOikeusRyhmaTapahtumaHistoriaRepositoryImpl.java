@@ -5,8 +5,8 @@ import com.querydsl.core.types.Projections;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaTapahtumaHistoriaRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,7 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
                 .and(kor.passivoitu.eq(false))
                 .and(oh.henkilo.oidHenkilo.eq(henkiloOid));
 
-        if (StringUtils.isNotBlank(organisaatioOid)) {
+        if (StringUtils.hasLength(organisaatioOid)) {
             booleanBuilder.and(oh.organisaatioOid.eq(organisaatioOid));
         }
 
