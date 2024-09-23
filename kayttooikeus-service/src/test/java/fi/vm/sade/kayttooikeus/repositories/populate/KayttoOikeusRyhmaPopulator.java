@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioViite;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +24,11 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
         this.tunniste = tunniste;
         this.passivoitu = false;
     }
-    
+
     public static KayttoOikeusRyhmaPopulator kayttoOikeusRyhma(String tunniste) {
         return new KayttoOikeusRyhmaPopulator(tunniste);
     }
-    
+
     public KayttoOikeusRyhmaPopulator withOikeus(Populator<KayttoOikeus> oikeus) {
         this.oikeus.add(oikeus);
         return this;
@@ -38,7 +38,7 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
         this.sallittu = sallittu;
         return this;
     }
-    
+
     public KayttoOikeusRyhmaPopulator withNimi(Populator<TextGroup> nimi) {
         this.kuvaus = nimi;
         return this;
@@ -93,7 +93,7 @@ public class KayttoOikeusRyhmaPopulator implements Populator<KayttoOikeusRyhma> 
             entityManager.persist(organisaatioViite);
         });
         entityManager.merge(ryhma);
-        
+
         return ryhma;
     }
 }

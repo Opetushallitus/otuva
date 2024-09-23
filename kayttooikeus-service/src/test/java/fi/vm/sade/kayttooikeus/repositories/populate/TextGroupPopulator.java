@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 import fi.vm.sade.kayttooikeus.model.Text;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +20,12 @@ public class TextGroupPopulator implements Populator<TextGroup> {
     public TextGroupPopulator(String lang, String value) {
         this.texts.put(lang, value);
     }
-    
+
     public TextGroupPopulator put(String lang, String value) {
         this.texts.put(lang, value);
         return this;
     }
-    
+
     public static TextGroupPopulator text() {
         return new TextGroupPopulator();
     }

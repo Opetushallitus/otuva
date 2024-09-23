@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
+import fi.vm.sade.kayttooikeus.config.security.MfaSecurityConfig;
 import fi.vm.sade.kayttooikeus.dto.CasGoogleAuthToken;
 import fi.vm.sade.kayttooikeus.dto.MfaTriggerDto;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
@@ -28,9 +29,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
@@ -42,9 +43,7 @@ public class CasMfaController {
     private final CommonProperties commonProperties;
 
     @PostMapping(value = "/trigger", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole(" +
-            "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
-            "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
+    @PreAuthorize("hasAnyRole('" + MfaSecurityConfig.ROLE + "')")
     public void getMfaProvider(HttpServletResponse response, @Valid @RequestBody MfaTriggerDto dto) throws IOException {
         var mfaProvider = kayttajatiedotService
                 .getMfaProvider(dto.getPrincipalId())
@@ -103,9 +102,7 @@ public class CasMfaController {
     }
 
     @GetMapping(value = "/token", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole(" +
-            "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_READ', " +
-            "'ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD')")
+    @PreAuthorize("hasAnyRole('" + MfaSecurityConfig.ROLE + "')")
     public Object getGoogleAuthToken(HttpServletRequest request, HttpServletResponse response) {
         var username = request.getHeader("username");
         return kayttajatiedotService

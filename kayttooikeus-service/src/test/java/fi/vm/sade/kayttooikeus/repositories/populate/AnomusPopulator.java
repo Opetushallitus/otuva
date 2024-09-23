@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 
 public class AnomusPopulator implements Populator<Anomus> {

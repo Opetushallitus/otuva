@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.dto.LoginDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,8 +13,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
+@Hidden
 @RestController
 @RequestMapping(value = "/userDetails", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
@@ -35,7 +36,6 @@ public class UserDetailsController {
 
     // Palomuurilla rajoitettu pääsy vain verkon sisältä
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Rajapinta vain CAS:n käyttöön")
     public CasUserAttributes getByUsernameAndPassword(@Valid @RequestBody LoginDto dto) {
         Kayttajatiedot kayttajatiedot = kayttajatiedotService.getByUsernameAndPassword(dto.getUsername(), dto.getPassword());
         var roles = kayttajatiedotService.fetchKayttooikeudet(kayttajatiedot.getHenkilo().getOidHenkilo());

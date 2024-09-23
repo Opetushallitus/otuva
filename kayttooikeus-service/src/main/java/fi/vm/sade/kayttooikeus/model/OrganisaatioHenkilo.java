@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "organisaatio_oid", nullable = false)
     private String organisaatioOid;
 
-    @Column(name = "tyyppi") 
+    @Column(name = "tyyppi")
     @Enumerated(EnumType.STRING)
     private OrganisaatioHenkiloTyyppi organisaatioHenkiloTyyppi;
 
@@ -35,7 +35,7 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
 
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = CascadeType.ALL)
     private Set<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaHistorias = new HashSet<>();
-    
+
     @Column(name = "passivoitu", nullable = false)
     private boolean passivoitu;
 

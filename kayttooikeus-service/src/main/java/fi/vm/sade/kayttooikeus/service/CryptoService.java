@@ -1,7 +1,8 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 
 public interface CryptoService {
 
@@ -12,7 +13,6 @@ public interface CryptoService {
      * @param password
      * @param salt
      * @return
-     * @throws Exception
      */
     String getSaltedHash(String password, String salt);
 
@@ -24,7 +24,6 @@ public interface CryptoService {
      * @param storedHash
      * @param storedSalt
      * @return
-     * @throws Exception
      */
     boolean check(String password, String storedHash, String storedSalt);
 
@@ -32,11 +31,10 @@ public interface CryptoService {
      * Returns Base64 encoded salt string, 128 characters long
      *
      * @return
-     * @throws NoSuchAlgorithmException
      */
     String generateSalt();
 
     List<String> isStrongPassword(String password);
 
-    void throwIfNotStrongPassword(String password);
+    void throwIfNotStrongPassword(String password) throws PasswordException;
 }

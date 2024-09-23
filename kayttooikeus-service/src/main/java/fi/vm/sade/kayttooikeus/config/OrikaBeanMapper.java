@@ -97,11 +97,6 @@ public class OrikaBeanMapper extends ConfigurableMapper implements ApplicationCo
                 .register();
     }
 
-    /**
-     * Registers a {@link Converter} into the {@link ConverterFactory}.
-     *
-     * @param converter
-     */
     public void addConverter(Converter<?, ?> converter) {
         factory.getConverterFactory().registerConverter(converter);
     }

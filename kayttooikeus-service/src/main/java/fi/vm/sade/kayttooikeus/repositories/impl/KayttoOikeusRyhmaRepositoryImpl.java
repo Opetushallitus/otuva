@@ -5,18 +5,15 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.QBean;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepositoryCustom;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,18 +23,7 @@ import java.util.Optional;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public class KayttoOikeusRyhmaRepositoryImpl implements KayttoOikeusRyhmaRepositoryCustom {
-
-    private final EntityManager em;
-
-    public KayttoOikeusRyhmaRepositoryImpl(JpaContext context) {
-        this.em = context.getEntityManagerByManagedType(KayttoOikeusRyhma.class);
-    }
-
-    private JPAQueryFactory jpa() {
-        return new JPAQueryFactory(this.em);
-    }
-
+public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implements KayttoOikeusRyhmaRepositoryCustom {
     private QBean<KayttoOikeusRyhmaDto> KayttoOikeusRyhmaDtoBean() {
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
         return Projections.bean(KayttoOikeusRyhmaDto.class,

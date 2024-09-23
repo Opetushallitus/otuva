@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +21,7 @@ public class KayttoOikeus extends IdentifiableAndVersionedEntity {
 
     @Column(name = "rooli", nullable = false)
     private String rooli;
-    
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "textgroup_id", nullable = false)
     private TextGroup textGroup;

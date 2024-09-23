@@ -4,9 +4,9 @@ import fi.vm.sade.kayttooikeus.repositories.populate.Populator;
 import fi.vm.sade.kayttooikeus.service.AbstractServiceTest;
 import org.junit.BeforeClass;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Transactional
 public abstract class AbstractServiceIntegrationTest extends AbstractServiceTest {

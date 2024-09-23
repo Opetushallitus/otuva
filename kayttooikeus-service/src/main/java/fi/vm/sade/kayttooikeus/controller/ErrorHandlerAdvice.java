@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
@@ -124,7 +124,7 @@ public class ErrorHandlerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
-    @ExceptionHandler({ConstraintViolationException.class, javax.validation.ValidationException.class})
+    @ExceptionHandler({ConstraintViolationException.class, jakarta.validation.ValidationException.class})
     @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, ConstraintViolationException exception) {
         return handleConstraintViolations(req, exception, exception.getConstraintViolations());

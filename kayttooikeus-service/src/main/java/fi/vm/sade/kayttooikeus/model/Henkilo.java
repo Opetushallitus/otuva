@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;

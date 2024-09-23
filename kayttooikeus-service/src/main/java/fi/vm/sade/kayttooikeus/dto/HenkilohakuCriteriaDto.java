@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Set;
 
 @Getter

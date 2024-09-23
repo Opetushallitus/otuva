@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.2.10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,8 @@
 
         <maven.compiler.release>21</maven.compiler.release>
 
-        <!-- QA -->
+        <httpclient.version>4.5.14</httpclient.version>
+        <flyway.version>10.18.0</flyway.version>
         <jadler.version>1.3.0</jadler.version>
         <lombok.version>1.18.34</lombok.version>
 
@@ -99,7 +100,7 @@
         <dependency>
             <groupId>fi.vm.sade.oppijanumerorekisteri</groupId>
             <artifactId>oppijanumerorekisteri-api</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
+            <version>2021.01-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -109,17 +110,17 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-cas-servlet-filter</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-properties</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-http</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
 
@@ -128,7 +129,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -205,13 +205,19 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
+       <dependency>
+           <groupId>org.flywaydb</groupId>
+           <artifactId>flyway-database-postgresql</artifactId>
+           <version>${flyway.version}</version>
+       </dependency>
 
         <!-- Swagger -->
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
-            <version>3.0.0</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
         </dependency>
 
         <dependency>
@@ -223,6 +229,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -267,6 +274,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+            <version>2.17.0</version>
+        </dependency>
 
         <dependency>
             <groupId>fi.vm.sade</groupId>
@@ -303,7 +315,7 @@
 
         <dependency>
             <groupId>dev.samstevens.totp</groupId>
-            <artifactId>totp-spring-boot-starter</artifactId>
+            <artifactId>totp</artifactId>
             <version>1.7.1</version>
         </dependency>
 
@@ -325,39 +337,29 @@
             <artifactId>sts</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
+            <classifier>jakarta</classifier>
+            <version>${querydsl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <classifier>jakarta</classifier>
+            <version>${querydsl.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
             <version>${querydsl.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-java8</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
         <finalName>kayttooikeus</finalName>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <configuration>
-                        <doclint>none</doclint> <!-- TODO: korjaa javadoc-virheet -->
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -373,13 +375,13 @@
                         <path>
                             <groupId>com.querydsl</groupId>
                             <artifactId>querydsl-apt</artifactId>
-                            <version>5.0.0</version>
-                            <classifier>jpa</classifier>
+                            <version>5.1.0</version>
+                            <classifier>jakarta</classifier>
                         </path>
                         <path>
-                            <groupId>javax.persistence</groupId>
-                            <artifactId>javax.persistence-api</artifactId>
-                            <version>2.2</version>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>3.2.0</version>
                         </path>
                         <path>
                             <groupId>org.projectlombok</groupId>

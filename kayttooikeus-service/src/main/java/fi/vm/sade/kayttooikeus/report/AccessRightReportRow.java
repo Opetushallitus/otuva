@@ -2,19 +2,18 @@ package fi.vm.sade.kayttooikeus.report;
 
 import lombok.*;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 @Generated
 @Getter
 public class AccessRightReportRow {
 
-    private final BigInteger id;
+    private final Long id;
     private final String personName;
     private final String personOid;
     private final String organisationOid;
     private final String accessRightName;
-    private final BigInteger accessRightId;
+    private final Long accessRightId;
     private final Date startDate;
     private final Date endDate;
     private final Date modified;
@@ -23,13 +22,13 @@ public class AccessRightReportRow {
 
     @Builder(toBuilder = true, access = AccessLevel.PRIVATE)
     public AccessRightReportRow(
-            BigInteger id,
+            Long id,
             String personName,
             String personOid,
             String organisationName,
             String organisationOid,
             String accessRightName,
-            BigInteger accessRightId,
+            Long accessRightId,
             Date startDate,
             Date endDate,
             Date modified,

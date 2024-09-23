@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.model.*;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class HaettuKayttoOikeusRyhmaPopulator implements Populator<HaettuKayttoOikeusRyhma> {
     private KayttoOikeudenTila tyyppi;

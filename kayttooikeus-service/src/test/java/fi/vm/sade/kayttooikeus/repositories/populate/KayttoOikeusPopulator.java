@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 
@@ -22,7 +22,7 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
         this.palvelu = palvelu(palveluName);
         this.rooli = rooli;
     }
-    
+
     public static KayttoOikeusPopulator oikeus(Populator<Palvelu> palvelu, String rooli) {
         return new KayttoOikeusPopulator(palvelu, rooli);
     }
@@ -30,7 +30,7 @@ public class KayttoOikeusPopulator implements Populator<KayttoOikeus> {
     public static KayttoOikeusPopulator oikeus(String palveluName, String rooli) {
         return new KayttoOikeusPopulator(palveluName, rooli);
     }
-    
+
     public KayttoOikeusPopulator kuvaus(Populator<TextGroup> textGroup) {
         this.kuvaus = textGroup;
         return this;

@@ -1,11 +1,17 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.code.DefaultCodeGenerator;
+import dev.samstevens.totp.code.DefaultCodeVerifier;
+import dev.samstevens.totp.code.HashingAlgorithm;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import dev.samstevens.totp.qr.QrData;
 import dev.samstevens.totp.qr.QrDataFactory;
 import dev.samstevens.totp.qr.QrGenerator;
+import dev.samstevens.totp.qr.ZxingPngQrGenerator;
+import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
+import dev.samstevens.totp.time.SystemTimeProvider;
 import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.GoogleAuthSetupDto;
@@ -34,16 +40,21 @@ import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 @Transactional
 @RequiredArgsConstructor
 public class MfaServiceImpl implements MfaService {
-    private final SecretGenerator secretGenerator;
-    private final QrDataFactory qrDataFactory;
-    private final QrGenerator qrGenerator;
-    private final CodeVerifier verifier;
     private final PermissionCheckerService permissionCheckerService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final GoogleAuthTokenRepository googleAuthTokenRepository;
     private final CommonProperties commonProperties;
     private final HenkiloHelper henkiloHelper;
+
+    SecretGenerator secretGenerator = new DefaultSecretGenerator();
+    QrDataFactory qrDataFactory = new QrDataFactory(HashingAlgorithm.SHA1, 6, 30);;
+    QrGenerator qrGenerator = new ZxingPngQrGenerator();
+    CodeVerifier verifier = new DefaultCodeVerifier(new DefaultCodeGenerator(), new SystemTimeProvider());
+
+    void setCodeVerifier(CodeVerifier codeVerifier) {
+        verifier = codeVerifier;
+    }
 
     private String getNewGoogleAuthSecretKey(Henkilo henkilo) throws Exception {
         String secretKey = secretGenerator.generate();

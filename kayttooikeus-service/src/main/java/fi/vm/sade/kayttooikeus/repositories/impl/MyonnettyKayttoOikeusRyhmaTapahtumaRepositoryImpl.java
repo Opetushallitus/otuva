@@ -3,17 +3,14 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioPalveluRooliDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,18 +18,7 @@ import static fi.vm.sade.kayttooikeus.model.QMyonnettyKayttoOikeusRyhmaTapahtuma
 import static fi.vm.sade.kayttooikeus.model.QOrganisaatioHenkilo.organisaatioHenkilo;
 
 @Repository
-public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl implements MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom {
-
-    private final EntityManager entityManager;
-
-    public MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl(JpaContext jpaContext) {
-        this.entityManager = jpaContext.getEntityManagerByManagedType(MyonnettyKayttoOikeusRyhmaTapahtuma.class);
-    }
-
-    private JPAQueryFactory jpa() {
-        return new JPAQueryFactory(this.entityManager);
-    }
-
+public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractRepository implements MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryCustom {
     private BooleanBuilder getValidKayttoOikeusRyhmaCriteria(String oid) {
         LocalDate now = LocalDate.now();
         return new BooleanBuilder()

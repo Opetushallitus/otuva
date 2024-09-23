@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajaReadDto;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/virkailija", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,8 +24,8 @@ public class VirkailijaController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_APP_KAYTTOOIKEUS_VIRKAILIJANLUONTI')")
-    @ApiOperation(value = "Virkailijan luonti",
-            notes = "Tarkoitettu vain testikäyttöön, tuotannossa virkailijat luodaan kutsun kautta.")
+    @Operation(summary = "Virkailijan luonti",
+            description = "Tarkoitettu vain testikäyttöön, tuotannossa virkailijat luodaan kutsun kautta.")
     public String create(@Valid @RequestBody VirkailijaCreateDto dto) {
         return virkailijaService.create(dto);
     }
@@ -34,7 +34,7 @@ public class VirkailijaController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_READ'," +
             "'ROLE_APP_KAYTTOOIKEUS_CRUD'," +
             "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Virkailijoiden haku")
+    @Operation(summary = "Virkailijoiden haku")
     public Iterable<KayttajaReadDto> list(@RequestBody VirkailijaCriteriaDto criteria) {
         return virkailijaService.list(criteria);
     }

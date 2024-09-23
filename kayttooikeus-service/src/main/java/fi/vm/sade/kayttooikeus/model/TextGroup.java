@@ -2,10 +2,10 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.Getter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class TextGroup extends IdentifiableAndVersionedEntity {
     public void clearTexts() {
         texts.clear();
     }
-    
+
     public Optional<String> getOrAny(String lang) {
         Optional<String> opt = texts.stream().filter(t -> lang.equalsIgnoreCase(t.getLang()))
                 .map(Text::getText).findFirst();

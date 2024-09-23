@@ -1,15 +1,15 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
-import fi.vm.sade.javautils.http.HttpServletRequestUtils;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public final class AuditHelper {
 
@@ -28,9 +28,27 @@ public final class AuditHelper {
         }
     }
 
+    private static String getRemoteAddress(String xRealIp, String xForwardedFor, String remoteAddr, String requestURI) {
+        Predicate<String> isNotBlank = (String txt) -> txt != null && !txt.isEmpty();
+        if (isNotBlank.test(xRealIp)) {
+            return xRealIp;
+        }
+        if (isNotBlank.test(xForwardedFor)) {
+            return xForwardedFor;
+        }
+        return remoteAddr;
+    }
+
+    private static String getRemoteAddress(HttpServletRequest httpServletRequest) {
+        return getRemoteAddress(httpServletRequest.getHeader("X-Real-IP"),
+            httpServletRequest.getHeader("X-Forwarded-For"),
+            httpServletRequest.getRemoteAddr(),
+            httpServletRequest.getRequestURI());
+    }
+
     public static InetAddress getIp(HttpServletRequest request) {
         try {
-            return InetAddress.getByName(HttpServletRequestUtils.getRemoteAddress(request));
+            return InetAddress.getByName(getRemoteAddress(request));
         } catch (UnknownHostException e) {
             return getIp();
         }

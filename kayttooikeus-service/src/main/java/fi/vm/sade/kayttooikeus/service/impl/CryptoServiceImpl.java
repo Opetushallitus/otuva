@@ -16,6 +16,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -172,8 +173,11 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public void throwIfNotStrongPassword(String password) {
-        isStrongPassword(password)
-                .stream().findFirst().ifPresent((error) -> {throw new PasswordException(error);});
+    public void throwIfNotStrongPassword(String password) throws PasswordException {
+        Optional<String> error = isStrongPassword(password)
+                .stream().findFirst();
+        if (error.isPresent()) {
+            throw new PasswordException(error.get());
+        }
     }
 }

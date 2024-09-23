@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 import java.time.Duration;
 import java.util.*;
 
@@ -61,7 +61,6 @@ public class JdbcSessionMappingStorage implements OphSessionMappingStorage {
         jdbcTemplate.update(sql);
     }
 
-    @SuppressWarnings("deprecation")
     private static class HttpSessionAdapter implements HttpSession {
 
         private final SessionRepository<? extends Session> sessionRepository;
@@ -103,18 +102,8 @@ public class JdbcSessionMappingStorage implements OphSessionMappingStorage {
         }
 
         @Override
-        public javax.servlet.http.HttpSessionContext getSessionContext() {
-            return new EmptyHttpSessionContext();
-        }
-
-        @Override
         public Object getAttribute(String name) {
             return session.getAttribute(name);
-        }
-
-        @Override
-        public Object getValue(String name) {
-            return getAttribute(name);
         }
 
         @Override
@@ -123,29 +112,13 @@ public class JdbcSessionMappingStorage implements OphSessionMappingStorage {
         }
 
         @Override
-        public String[] getValueNames() {
-            Set<String> attributeNames = session.getAttributeNames();
-            return attributeNames.toArray(new String[attributeNames.size()]);
-        }
-
-        @Override
         public void setAttribute(String name, Object value) {
             session.setAttribute(name, value);
         }
 
         @Override
-        public void putValue(String name, Object value) {
-            setAttribute(name, value);
-        }
-
-        @Override
         public void removeAttribute(String name) {
             session.removeAttribute(name);
-        }
-
-        @Override
-        public void removeValue(String name) {
-            removeAttribute(name);
         }
 
         @Override
@@ -159,20 +132,4 @@ public class JdbcSessionMappingStorage implements OphSessionMappingStorage {
         }
 
     }
-
-    @SuppressWarnings("deprecation")
-    private static class EmptyHttpSessionContext implements javax.servlet.http.HttpSessionContext {
-
-        @Override
-        public HttpSession getSession(String sessionId) {
-            return null;
-        }
-
-        @Override
-        public Enumeration<String> getIds() {
-            return Collections.emptyEnumeration();
-        }
-
-    }
-
 }

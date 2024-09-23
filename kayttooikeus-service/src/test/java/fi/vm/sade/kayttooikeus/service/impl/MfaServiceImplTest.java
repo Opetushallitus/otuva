@@ -13,10 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import dev.samstevens.totp.code.CodeVerifier;
-import dev.samstevens.totp.code.HashingAlgorithm;
-import dev.samstevens.totp.qr.QrDataFactory;
-import dev.samstevens.totp.qr.QrGenerator;
-import dev.samstevens.totp.qr.ZxingPngQrGenerator;
 import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
 import fi.vm.sade.kayttooikeus.aspects.HenkiloHelper;
@@ -49,11 +45,6 @@ public class MfaServiceImplTest {
     private MfaServiceImpl mfaServiceImpl;
 
     private SecretGenerator secretGenerator = new DefaultSecretGenerator();
-    private QrDataFactory qrDataFactory = new QrDataFactory(HashingAlgorithm.SHA1, 6, 30);
-    private QrGenerator qrGenerator = new ZxingPngQrGenerator();
-
-    @Mock
-    private CodeVerifier codeVerifier;
 
     @Mock
     private PermissionCheckerService permissionCheckerService;
@@ -67,6 +58,8 @@ public class MfaServiceImplTest {
     private CommonProperties commonProperties;
     @Mock
     private HenkiloHelper henkiloHelper;
+    @Mock
+    private CodeVerifier codeVerifier;
 
     private String secretKey = secretGenerator.generate();
     private Kayttajatiedot kayttajatiedot = Kayttajatiedot.builder().build();
@@ -81,10 +74,6 @@ public class MfaServiceImplTest {
         secretKeyCipher = Crypto.encrypt("password", salt, secretKey, iv);
         token = new GoogleAuthToken(1, henkilo, secretKeyCipher, salt, Base64.getEncoder().encodeToString(iv), null);
         mfaServiceImpl = new MfaServiceImpl(
-                secretGenerator,
-                qrDataFactory,
-                qrGenerator,
-                codeVerifier,
                 permissionCheckerService,
                 henkiloDataRepository,
                 kayttajatiedotRepository,
@@ -127,7 +116,9 @@ public class MfaServiceImplTest {
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(token));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
+
         when(codeVerifier.isValidCode(any(), any())).thenReturn(true);
+        mfaServiceImpl.setCodeVerifier(codeVerifier);
 
         boolean result = mfaServiceImpl.enableGoogleAuth("12345");
 
@@ -143,7 +134,9 @@ public class MfaServiceImplTest {
         when(permissionCheckerService.getCurrentUserOid()).thenReturn("1.2.3.4.5");
         when(kayttajatiedotRepository.findGoogleAuthToken(any())).thenReturn(Optional.of(token));
         when(henkiloDataRepository.findByOidHenkilo(any())).thenReturn(Optional.of(henkilo));
+
         when(codeVerifier.isValidCode(any(), any())).thenReturn(false);
+        mfaServiceImpl.setCodeVerifier(codeVerifier);
 
         assertThrows(ValidationException.class, () -> mfaServiceImpl.enableGoogleAuth("123456"));
         verify(googleAuthTokenRepository, times(0)).save(any());

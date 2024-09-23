@@ -3,35 +3,26 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.HenkiloLinkitysDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkilo;
 import fi.vm.sade.kayttooikeus.model.QHenkiloVarmentaja;
 import fi.vm.sade.kayttooikeus.model.QKayttajatiedot;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepositoryCustom;
-import org.springframework.data.jpa.repository.JpaContext;
 
-import javax.persistence.EntityManager;
 import java.util.Optional;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.set;
 
-public class HenkiloDataRepositoryImpl implements HenkiloDataRepositoryCustom {
-
-    private final EntityManager entityManager;
-
-    public HenkiloDataRepositoryImpl(JpaContext jpaContext) {
-        this.entityManager = jpaContext.getEntityManagerByManagedType(Henkilo.class);
-    }
+public class HenkiloDataRepositoryImpl extends AbstractRepository implements HenkiloDataRepositoryCustom {
 
     @Override
     public Optional<Henkilo> findByKayttajatiedotUsername(String kayttajatunnus) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
-        Henkilo entity = new JPAQuery<>(entityManager)
+        Henkilo entity = jpa()
                 .from(qHenkilo)
                 .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
                 .where(qKayttajatiedot.username.equalsIgnoreCase(kayttajatunnus))
@@ -48,7 +39,7 @@ public class HenkiloDataRepositoryImpl implements HenkiloDataRepositoryCustom {
         QHenkiloVarmentaja varmennettava = new QHenkiloVarmentaja("varmennettavas");
         QHenkiloVarmentaja varmentaja = new QHenkiloVarmentaja("varmentajas");
 
-        JPAQuery<Tuple> query = new JPAQueryFactory(this.entityManager)
+        JPAQuery<Tuple> query = jpa()
                 .select(henkilo.oidHenkilo,
                         varmennettavaHenkilo.oidHenkilo,
                         varmentajaHenkilo.oidHenkilo)

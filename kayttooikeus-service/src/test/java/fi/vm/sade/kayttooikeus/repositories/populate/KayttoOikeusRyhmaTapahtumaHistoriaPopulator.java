@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 
 public class KayttoOikeusRyhmaTapahtumaHistoriaPopulator implements Populator<KayttoOikeusRyhmaTapahtumaHistoria> {

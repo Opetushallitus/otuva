@@ -5,21 +5,12 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByAnomus;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HaettuKayttooikeusRyhmaRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 @Repository
-public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeusRyhmaRepositoryCustom {
-
-    private final EntityManager entityManager;
-
-    public HaettuKayttooikeusRyhmaRepositoryImpl(JpaContext jpaContext) {
-        this.entityManager = jpaContext.getEntityManagerByManagedType(HaettuKayttoOikeusRyhma.class);
-    }
-
+public class HaettuKayttooikeusRyhmaRepositoryImpl extends AbstractRepository implements HaettuKayttooikeusRyhmaRepositoryCustom {
     public List<HaettuKayttoOikeusRyhma> findBy(AnomusCriteria.AnomusCriteriaFunction<QAnomus, QKayttoOikeusRyhma, QHaettuKayttoOikeusRyhma> criteriaFunction,
                                                 Long limit,
                                                 Long offset,
@@ -28,7 +19,7 @@ public class HaettuKayttooikeusRyhmaRepositoryImpl implements HaettuKayttooikeus
         QAnomus qAnomus = QAnomus.anomus;
         QKayttoOikeusRyhma qKayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
 
-        JPAQuery<HaettuKayttoOikeusRyhma> query = new JPAQuery<>(entityManager)
+        JPAQuery<HaettuKayttoOikeusRyhma> query = jpa()
                 .select(qHaettuKayttoOikeusRyhma)
                 .from(qHaettuKayttoOikeusRyhma)
                 .leftJoin(qHaettuKayttoOikeusRyhma.anomus, qAnomus)

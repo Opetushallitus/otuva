@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,10 +14,10 @@ import java.util.Set;
 @Table(name = "palvelu", uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
 @BatchSize(size = 50)
 public class Palvelu extends IdentifiableAndVersionedEntity {
-    
+
     @Column(name = "name", nullable = false, unique = true)
     private String name;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "palvelutyyppi")
     private PalveluTyyppi palveluTyyppi;

@@ -6,8 +6,9 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloUpdateDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/organisaatiohenkilo", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(value = "/organisaatiohenkilo", description = "Organisaatiohenkilön käsittelyyn liittyvät operaatiot.")
+@Tag(name = "/organisaatiohenkilo", description = "Organisaatiohenkilön käsittelyyn liittyvät operaatiot.")
 public class OrganisaatioHenkiloController {
     private OrganisaatioHenkiloService organisaatioHenkiloService;
 
@@ -29,8 +30,8 @@ public class OrganisaatioHenkiloController {
             + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @RequestMapping(value = "/current/availablehenkilotype", method = RequestMethod.GET)
-    @ApiOperation(value = "Listaa sallitut organisaatiohenkilötyypit henkilöiden luontiin liittyen.",
-            notes = "Listaa ne organisaatiohenkilötyypit joita kirjautunt käyttäjä saa luoda henkilöhallintaan.")
+    @Operation(summary = "Listaa sallitut organisaatiohenkilötyypit henkilöiden luontiin liittyen.",
+            description = "Listaa ne organisaatiohenkilötyypit joita kirjautunt käyttäjä saa luoda henkilöhallintaan.")
     public List<KayttajaTyyppi> listPossibleHenkiloTypesByCurrentHenkilo() {
         return organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
     }
@@ -39,7 +40,7 @@ public class OrganisaatioHenkiloController {
             "'ROLE_APP_KAYTTOOIKEUS_CRUD'," +
             "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @GetMapping("/organisaatioOid")
-    @ApiOperation("Listaa henkilöiden organisaatio OID:t annettujen hakukriteerien mukaisesti")
+    @Operation(summary = "Listaa henkilöiden organisaatio OID:t annettujen hakukriteerien mukaisesti")
     public Collection<String> listOrganisaatioOidBy(OrganisaatioHenkiloCriteria criteria) {
         return organisaatioHenkiloService.listOrganisaatioOidBy(criteria);
     }
@@ -58,7 +59,7 @@ public class OrganisaatioHenkiloController {
         return this.organisaatioHenkiloService.createOrUpdateOrganisaatioHenkilos(oidHenkilo, organisaatioHenkiloList);
     }
 
-    @ApiOperation(value = "Passsivoi henkilön organisaation ja kaikki tähän liittyvät käyttöoikeudet.")
+    @Operation(summary = "Passsivoi henkilön organisaation ja kaikki tähän liittyvät käyttöoikeudet.")
     @PreAuthorize("@permissionCheckerServiceImpl.checkRoleForOrganisation({#henkiloOrganisationOid}, {'KAYTTOOIKEUS': {'CRUD'}})")
     @RequestMapping(value = "/{oid}/{henkiloOrganisationOid}", method = RequestMethod.DELETE)
     public void passivoiHenkiloOrganisation(@PathVariable("oid") String oidHenkilo,

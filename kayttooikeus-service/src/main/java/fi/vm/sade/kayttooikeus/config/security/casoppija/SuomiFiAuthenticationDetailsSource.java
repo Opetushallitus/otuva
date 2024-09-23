@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.config.security.casoppija;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Collections;
 

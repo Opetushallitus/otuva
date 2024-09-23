@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,11 +15,11 @@ public class KutsuOrganisaatioPopulator implements Populator<KutsuOrganisaatio> 
     public KutsuOrganisaatioPopulator(String organisaatioOid) {
         this.organisaatioOid = organisaatioOid;
     }
-    
+
     public static KutsuOrganisaatioPopulator kutsuOrganisaatio(String organisaatioOid) {
         return new KutsuOrganisaatioPopulator(organisaatioOid);
     }
-    
+
     public KutsuOrganisaatioPopulator ryhma(Populator<KayttoOikeusRyhma> ryhmaPopulator) {
         this.kayttoOikeusRyhmat.add(ryhmaPopulator);
         return this;

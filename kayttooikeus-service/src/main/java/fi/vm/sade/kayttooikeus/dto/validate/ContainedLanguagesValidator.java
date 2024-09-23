@@ -2,8 +2,8 @@ package fi.vm.sade.kayttooikeus.dto.validate;
 
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.stream.Stream;
 
 /**

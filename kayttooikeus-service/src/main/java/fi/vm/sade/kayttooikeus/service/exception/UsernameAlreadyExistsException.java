@@ -20,6 +20,6 @@ public class UsernameAlreadyExistsException extends SadeBusinessException {
 
     @Override
     public String getErrorKey() {
-        return PasswordException.class.getCanonicalName();
+        return UsernameAlreadyExistsException.class.getCanonicalName();
     }
 }

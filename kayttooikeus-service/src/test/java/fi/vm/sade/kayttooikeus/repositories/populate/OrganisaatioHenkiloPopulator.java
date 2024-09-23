@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import java.time.LocalDate;
 
@@ -32,11 +32,11 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
     public static OrganisaatioHenkiloPopulator organisaatioHenkilo(String henkiloOid, String organisaatioOid) {
         return new OrganisaatioHenkiloPopulator(henkiloOid, organisaatioOid);
     }
-    
+
     public static OrganisaatioHenkiloPopulator organisaatioHenkilo(Populator<Henkilo> henkilo, String organisaatioOid) {
         return new OrganisaatioHenkiloPopulator(henkilo, organisaatioOid);
     }
-    
+
     public OrganisaatioHenkiloPopulator voimassaAlkaen(LocalDate alkaen) {
         this.voimassaAlku = alkaen;
         return this;
@@ -51,7 +51,7 @@ public class OrganisaatioHenkiloPopulator implements Populator<OrganisaatioHenki
         this.tehtavanimike = tehtavanimike;
         return this;
     }
-    
+
     public OrganisaatioHenkiloPopulator passivoitu() {
         this.passivoitu = true;
         return this;

@@ -17,10 +17,6 @@ package fi.vm.sade.kayttooikeus.dto.organisaatio;
  import java.util.Date;
  import java.util.Map;
 
- /**
-  *
-  * @author simok
-  */
  public class OrganisaatioNimiRDTO {
      private String oid;
      private Map<String, String> nimi;

@@ -8,27 +8,18 @@ import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepositoryCustom;
-import org.springframework.data.jpa.repository.JpaContext;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
-public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCustom {
-
-    private final EntityManager em;
-
-    public KayttajatiedotRepositoryImpl(JpaContext jpaContext) {
-        this.em = jpaContext.getEntityManagerByManagedType(Kayttajatiedot.class);
-    }
-
+public class KayttajatiedotRepositoryImpl extends AbstractRepository implements KayttajatiedotRepositoryCustom {
     @Override
     public Optional<KayttajatiedotReadDto> findByHenkiloOid(String henkiloOid) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QHenkilo qHenkilo = QHenkilo.henkilo;
 
-        KayttajatiedotReadDto dto = new JPAQuery<>(em)
+        KayttajatiedotReadDto dto = jpa()
                 .from(qKayttajatiedot).join(qKayttajatiedot.henkilo, qHenkilo)
                 .where(qHenkilo.oidHenkilo.eq(henkiloOid))
                 .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.username, qKayttajatiedot.mfaProvider, qHenkilo.kayttajaTyyppi))
@@ -40,7 +31,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
     public Optional<Kayttajatiedot> findByUsername(String username) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
-        Kayttajatiedot entity = new JPAQuery<>(em)
+        Kayttajatiedot entity = jpa()
                 .from(qKayttajatiedot)
                 .where(qKayttajatiedot.username.equalsIgnoreCase(username))
                 .select(qKayttajatiedot)
@@ -53,7 +44,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QHenkilo qHenkilo = QHenkilo.henkilo;
 
-        String oid = new JPAQuery<>(em)
+        String oid = jpa()
                 .from(qKayttajatiedot)
                 .join(qKayttajatiedot.henkilo, qHenkilo)
                 .where(qKayttajatiedot.username.equalsIgnoreCase(username))
@@ -66,7 +57,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
     public Optional<String> findMfaProviderByUsername(String username) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
 
-        MfaProvider mfaProvider = new JPAQuery<>(em)
+        MfaProvider mfaProvider = jpa()
                 .from(qKayttajatiedot)
                 .where(qKayttajatiedot.username.equalsIgnoreCase(username))
                 .select(qKayttajatiedot.mfaProvider)
@@ -80,7 +71,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
         QHenkilo qHenkilo = QHenkilo.henkilo;
 
-        GoogleAuthToken mfaToken = new JPAQuery<>(em)
+        GoogleAuthToken mfaToken = jpa()
                 .from(qGoogleAuthToken)
                 .join(qGoogleAuthToken.henkilo, qHenkilo)
                 .join(qHenkilo.kayttajatiedot, qKayttajatiedot)
@@ -94,7 +85,7 @@ public class KayttajatiedotRepositoryImpl implements KayttajatiedotRepositoryCus
     @Override
     public Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
-        return new JPAQuery<Henkilo>(em)
+        return jpa()
                 .select(qKayttajatiedot.henkilo)
                 .from(qKayttajatiedot)
                 .leftJoin(qKayttajatiedot.loginCounter, QLoginCounter.loginCounter)

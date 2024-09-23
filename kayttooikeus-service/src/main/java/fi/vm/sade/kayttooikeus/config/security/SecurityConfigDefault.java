@@ -1,36 +1,39 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
-
 import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import fi.vm.sade.properties.OphProperties;
-import org.jasig.cas.client.session.SessionMappingStorage;
-import org.jasig.cas.client.session.SingleSignOutFilter;
-import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
-import org.jasig.cas.client.validation.TicketValidator;
+
+import org.apereo.cas.client.session.SessionMappingStorage;
+import org.apereo.cas.client.session.SingleSignOutFilter;
+import org.apereo.cas.client.validation.Cas30ProxyTicketValidator;
+import org.apereo.cas.client.validation.TicketValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 @Configuration
-@Order(3)
-@EnableGlobalMethodSecurity(jsr250Enabled = false, prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(jsr250Enabled = false, prePostEnabled = true, securedEnabled = true)
 @EnableWebSecurity
-public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
-
+public class SecurityConfigDefault {
     private CasProperties casProperties;
     private OphProperties ophProperties;
     private SessionMappingStorage sessionMappingStorage;
+
+    public static final String SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check";
 
     public SecurityConfigDefault(CasProperties casProperties, OphProperties ophProperties,
                                  SessionMappingStorage sessionMappingStorage) {
@@ -40,9 +43,9 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public ServiceProperties serviceProperties() {
+    ServiceProperties serviceProperties() {
         ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService(casProperties.getService() + "/j_spring_cas_security_check");
+        serviceProperties.setService(casProperties.getService() + SPRING_CAS_SECURITY_CHECK_PATH);
         serviceProperties.setSendRenew(casProperties.getSendRenew());
         serviceProperties.setAuthenticateAllArtifacts(true);
         return serviceProperties;
@@ -53,7 +56,7 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     //
 
     @Bean
-    public CasAuthenticationProvider casAuthenticationProvider() {
+    CasAuthenticationProvider casAuthenticationProvider() {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
         casAuthenticationProvider.setAuthenticationUserDetailsService(new OpintopolkuUserDetailsService());
         casAuthenticationProvider.setServiceProperties(serviceProperties());
@@ -63,10 +66,15 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public TicketValidator ticketValidator() {
-        Cas20ProxyTicketValidator ticketValidator = new Cas20ProxyTicketValidator(ophProperties.url("cas.url"));
-        ticketValidator.setAcceptAnyProxy(true);
-        return ticketValidator;
+    TicketValidator ticketValidator() {
+        var validator = new Cas30ProxyTicketValidator(ophProperties.url("cas.url"));
+        validator.setAcceptAnyProxy(true);
+        return validator;
+    }
+
+    @Bean
+    HttpSessionSecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
     }
 
     //
@@ -74,10 +82,14 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     //
 
     @Bean
-    public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-        OpintopolkuCasAuthenticationFilter casAuthenticationFilter = new OpintopolkuCasAuthenticationFilter(serviceProperties());
-        casAuthenticationFilter.setAuthenticationManager(authenticationManager());
-        casAuthenticationFilter.setFilterProcessesUrl("/j_spring_cas_security_check");
+    CasAuthenticationFilter casAuthenticationFilter(
+            ServiceProperties serviceProperties,
+            SecurityContextRepository securityContextRepository) throws Exception {
+        CasAuthenticationFilter casAuthenticationFilter = new OpintopolkuCasAuthenticationFilter(serviceProperties);
+        casAuthenticationFilter.setAuthenticationManager(new ProviderManager(casAuthenticationProvider()));
+        casAuthenticationFilter.setServiceProperties(serviceProperties);
+        casAuthenticationFilter.setFilterProcessesUrl(SPRING_CAS_SECURITY_CHECK_PATH);
+        casAuthenticationFilter.setSecurityContextRepository(securityContextRepository);
         return casAuthenticationFilter;
     }
 
@@ -87,10 +99,10 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     // logout button) when CAS calls this filter if user has ticket to this service.
     //
     @Bean
-    public SingleSignOutFilter singleSignOutFilter() {
+    SingleSignOutFilter singleSignOutFilter() {
+        SingleSignOutFilter.setSessionMappingStorage(sessionMappingStorage);
         SingleSignOutFilter singleSignOutFilter = new SingleSignOutFilter();
         singleSignOutFilter.setIgnoreInitConfiguration(true);
-        singleSignOutFilter.setSessionMappingStorage(sessionMappingStorage);
         return singleSignOutFilter;
     }
 
@@ -99,45 +111,48 @@ public class SecurityConfigDefault extends WebSecurityConfigurerAdapter {
     //
 
     @Bean
-    public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
+    CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
         CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
         casAuthenticationEntryPoint.setLoginUrl(ophProperties.url("cas.login"));
         casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
         return casAuthenticationEntryPoint;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    @Order(3)
+    SecurityFilterChain restApiFilterChain(HttpSecurity http, CasAuthenticationFilter casAuthenticationFilter,
+            AuthenticationEntryPoint authenticationEntryPoint, SecurityContextRepository securityContextRepository) throws Exception {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
         http
-                .headers().disable()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/buildversion.txt").permitAll()
-                .antMatchers("/actuator/health").permitAll()
-                .antMatchers("/kutsu/token/*").permitAll()
-                .antMatchers("/cas/uudelleenrekisterointi").permitAll()
-                .antMatchers("/cas/henkilo/loginToken/*").permitAll()
-                .antMatchers("/cas/emailverification/*").permitAll()
-                .antMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
-                .antMatchers("/cas/emailverification/redirectByLoginToken/*").permitAll()
-                .antMatchers("/cas/salasananvaihto").permitAll()
-                .antMatchers("/cas/loginparams").permitAll()
-                .antMatchers("/userDetails", "/userDetails/*").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/v2/api-docs").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilterAfter(casAuthenticationFilter(), BasicAuthenticationFilter.class)
-                .exceptionHandling().authenticationEntryPoint(casAuthenticationEntryPoint())
-                .and()
-                .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .authenticationProvider(casAuthenticationProvider());
+            .headers(headers -> headers.disable())
+            .csrf(csrf -> csrf.disable())
+            .securityMatcher("/**")
+            .authorizeHttpRequests(authz -> authz
+                    .requestMatchers("/buildversion.txt").permitAll()
+                    .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/kutsu/token/*").permitAll()
+                    .requestMatchers("/cas/uudelleenrekisterointi").permitAll()
+                    .requestMatchers("/cas/henkilo/loginToken/*").permitAll()
+                    .requestMatchers("/cas/emailverification/*").permitAll()
+                    .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
+                    .requestMatchers("/cas/emailverification/redirectByLoginToken/*").permitAll()
+                    .requestMatchers("/cas/salasananvaihto").permitAll()
+                    .requestMatchers("/cas/loginparams").permitAll()
+                    .requestMatchers("/cas/tunnistus").permitAll()
+                    .requestMatchers("/userDetails", "/userDetails/*").permitAll()
+                    .requestMatchers("/swagger-ui.html").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/swagger-resources/**").permitAll()
+                    .requestMatchers("/v2/api-docs").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterAt(casAuthenticationFilter, CasAuthenticationFilter.class)
+            .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class)
+            .securityContext(securityContext -> securityContext
+                .requireExplicitSave(true)
+                .securityContextRepository(securityContextRepository))
+            .requestCache(cache -> cache.requestCache(requestCache))
+            .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint));
+        return http.build();
     }
 }

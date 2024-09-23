@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,12 +24,12 @@ public class OrganisaatioHenkiloKayttoOikeusPopulator implements Populator<Myonn
     public static OrganisaatioHenkiloKayttoOikeusPopulator myonnettyKayttoOikeus(Populator<OrganisaatioHenkilo> henkilo, Populator<KayttoOikeusRyhma> kayttoOikeusRyhma) {
         return new OrganisaatioHenkiloKayttoOikeusPopulator(henkilo, kayttoOikeusRyhma);
     }
-    
+
     public OrganisaatioHenkiloKayttoOikeusPopulator voimassaAlkaen(LocalDate alkaen) {
         this.voimassaAlkaen = alkaen;
         return this;
     }
-    
+
     public OrganisaatioHenkiloKayttoOikeusPopulator voimassaPaattyen(LocalDate voimassaPaattyen) {
         this.voimassaPaattyen = voimassaPaattyen;
         return this;

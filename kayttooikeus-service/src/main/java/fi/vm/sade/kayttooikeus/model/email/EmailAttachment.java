@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.model.email;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 
 public class EmailAttachment {
    private byte[] data;

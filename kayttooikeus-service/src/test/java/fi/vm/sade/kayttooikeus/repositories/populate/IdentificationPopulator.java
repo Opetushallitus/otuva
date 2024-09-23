@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 
 public class IdentificationPopulator implements Populator<Identification> {

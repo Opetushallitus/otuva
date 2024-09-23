@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class KayttajatiedotPopulator implements Populator<Kayttajatiedot> {
 

@@ -14,9 +14,8 @@ import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import fi.vm.sade.properties.OphProperties;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,9 +30,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
@@ -41,7 +40,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "/cas", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags = "CAS:a varten olevat rajapinnat.")
+@Tag(name = "CAS:a varten olevat rajapinnat.")
 @RequiredArgsConstructor
 public class CasController {
 
@@ -52,8 +51,8 @@ public class CasController {
     private final KayttajatiedotService kayttajatiedotService;
     private final OphProperties ophProperties;
 
-    @ApiOperation(value = "Generoi autentikointitokenin henkilölle.",
-            notes = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
+    @Operation(summary = "Generoi autentikointitokenin henkilölle.",
+            description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @RequestMapping(value = "/auth/oid/{oid}", method = RequestMethod.GET)
     public String generateAuthTokenForHenkilo(@PathVariable("oid") String oid,
@@ -63,8 +62,8 @@ public class CasController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation(value = "Hakee henkilön OID:n autentikaation perusteella.",
-            notes = "Hakee henkilön OID:n annettujen IdP tunnisteiden perusteella.")
+    @Operation(summary = "Hakee henkilön OID:n autentikaation perusteella.",
+            description = "Hakee henkilön OID:n annettujen IdP tunnisteiden perusteella.")
     @RequestMapping(value = "/auth/idp/{idpkey}", method = RequestMethod.GET)
     public String getHenkiloOidByIdPAndIdentifier(@PathVariable("idpkey") String idpKey,
                                                   @RequestParam("idpid") String idpIdentifier) {
@@ -72,43 +71,43 @@ public class CasController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @Operation(summary = "Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/vahvastiTunnistettu", method = RequestMethod.GET)
     public boolean isVahvastiTunnistettu(@PathVariable String oidHenkilo) {
         return this.henkiloService.isVahvastiTunnistettu(oidHenkilo);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
+    @Operation(summary = "Palauttaa tiedon henkilön aiemmasta vahvasta tunnistautumisesta")
     @RequestMapping(value = "/auth/henkilo/username/{username}/vahvastiTunnistettu", method = RequestMethod.GET)
     public boolean isVahvastiTunnistettuByUsername(@PathVariable String username) {
         return this.henkiloService.isVahvastiTunnistettuByUsername(username);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
+    @Operation(summary = "Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/logInRedirect", method = RequestMethod.GET)
     public LogInRedirectType logInRedirectByOidHenkilo(@PathVariable("oidHenkilo") String oidHenkilo) {
         return this.henkiloService.logInRedirectByOidhenkilo(oidHenkilo);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
+    @Operation(summary = "Palauttaa uri:n johon käyttäjä tulee ohjata kirjautumisen yhteydessä, tai null jos uudelleenohjausta ei tarvita")
     @RequestMapping(value = "/auth/henkilo/username/{username}/logInRedirect", method = RequestMethod.GET)
     public LogInRedirectType logInRedirectByUsername(@PathVariable("username") String username) {
         return this.henkiloService.logInRedirectByUsername(username);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation("Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
+    @Operation(summary = "Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
     public String createLoginToken(@PathVariable String oidHenkilo, @RequestParam(required = false) Boolean salasananVaihto) {
         return this.identificationService.createLoginToken(oidHenkilo, salasananVaihto, null);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @ApiOperation(value = "Hakee henkilön identiteetitiedot.",
-            notes = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
+    @Operation(summary = "Hakee henkilön identiteetitiedot.",
+            description = "Hakee henkilön identieettitiedot annetun autentikointitokenin avulla ja invalidoi autentikointitokenin.")
     @RequestMapping(value = "/auth/token/{token}", method = RequestMethod.GET)
     public CasUserAttributes getIdentityByAuthToken(@PathVariable("token") String authToken) {
         var identification = identificationService.findByTokenAndInvalidateToken(authToken);
@@ -116,7 +115,7 @@ public class CasController {
         return CasUserAttributes.fromIdentification(identification, roles);
     }
 
-    @ApiOperation(value = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
+    @Operation(summary = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
     public void requestGet(HttpServletRequest request, HttpServletResponse response,
@@ -166,7 +165,7 @@ public class CasController {
     }
 
     @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Virkailijan uudelleenrekisteröinti")
+    @Operation(summary = "Virkailijan uudelleenrekisteröinti")
     public VahvaTunnistusResponseDto tunnistauduVahvasti(
             @RequestParam(value = "kielisyys") String kielisyys,
             @RequestParam(value = "loginToken") String loginToken,
@@ -175,22 +174,16 @@ public class CasController {
         return vahvaTunnistusService.tunnistaudu(loginToken, dto);
     }
 
-    @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
-            notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +
-                    "täytyy tätä kutsua ensin.",
-            authorizations = @Authorization("login"),
-            response = ResponseEntity.class)
+    @Operation(summary = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
+            description = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, täytyy tätä kutsua ensin.")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/prequel", method = RequestMethod.GET)
     public ResponseEntity<String> requestGet() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
-            notes = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, " +
-                    "täytyy tätä kutsua ensin.",
-            authorizations = @Authorization("login"),
-            response = ResponseEntity.class)
+    @Operation(summary = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
+            description = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, täytyy tätä kutsua ensin.")
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/prequel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> requestPost() {
@@ -198,58 +191,53 @@ public class CasController {
     }
 
     @PostMapping(value = "/salasananvaihto", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Vaihtaa käyttäjän salasanan tilapäisen loginTokenin perusteella")
+    @Operation(summary = "Vaihtaa käyttäjän salasanan tilapäisen loginTokenin perusteella")
     public CasRedirectParametersResponse changePassword(@RequestBody @Validated ChangePasswordRequest changePassword) {
         return kayttajatiedotService.changePassword(changePassword);
     }
 
     @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Palauttaa CAS-kirjautumiseen vaaditut parametrit")
+    @Operation(summary = "Palauttaa CAS-kirjautumiseen vaaditut parametrit")
     public CasLoginParametersResponse getChangePasswordLoginParams() {
         return new CasLoginParametersResponse(ophProperties.url("virkailijan-tyopoyta"));
     }
 
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
+    @Operation(summary = "Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public CasRedirectParametersResponse emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
                                                           @PathVariable String loginToken) {
         return this.emailVerificationService.emailVerification(henkiloUpdate, loginToken);
     }
 
     @GetMapping(value = "/emailverification/loginTokenValidation/{loginToken}")
-    @ApiOperation(value = "Palauttaa validatointikoodin loginTokenille",
-            notes = "Validointikoodista käyttöliittymässä tiedetään täytyykö käyttäjälle näyttää virhesivu")
+    @Operation(summary = "Palauttaa validatointikoodin loginTokenille",
+            description = "Validointikoodista käyttöliittymässä tiedetään täytyykö käyttäjälle näyttää virhesivu")
     public LoginTokenValidationCode getLoginTokenValidationCode(@PathVariable String loginToken) {
         return this.emailVerificationService.getLoginTokenValidationCode(loginToken);
     }
 
     @GetMapping(value = "/emailverification/redirectByLoginToken/{loginToken}")
-    @ApiOperation("Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
+    @Operation(summary = "Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
     public CasRedirectParametersResponse getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
         return this.emailVerificationService.redirectUrlByLoginToken(loginToken);
     }
 
     @GetMapping(value = "/henkilo/loginToken/{loginToken}")
-    @ApiOperation("Hakee käyttäjän tiedot loginTokenin perusteella")
+    @Operation(summary = "Hakee käyttäjän tiedot loginTokenin perusteella")
     public HenkiloDto getUserByLoginToken(@PathVariable("loginToken") String loginToken) {
         return this.emailVerificationService.getHenkiloByLoginToken(loginToken);
     }
 
-    @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",
-            notes = "Deprekoitu. Käytä /henkilo/current/omattiedot ja oppijanumerorekisterin /henkilo/current/omattiedot" +
-                    "rajapintoja.",
-            authorizations = @Authorization("login"),
-            response = ResponseEntity.class)
+    @Operation(summary = "Deprekoitu CAS palvelusta siirretty rajapinta",
+            description = "Deprekoitu. Käytä /henkilo/current/omattiedot ja oppijanumerorekisterin /henkilo/current/omattiedot rajapintoja.")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public MeDto getMe() throws JsonProcessingException {
         return this.henkiloService.getMe();
     }
 
-    @ApiOperation(value = "Deprekoitu CAS palvelusta siirretty rajapinta",
-            notes = "Deprekoitu. Käytä /henkilo/current/omattiedot rajapintaa.",
-            authorizations = @Authorization("login"),
-            response = ResponseEntity.class)
+    @Operation(summary = "Deprekoitu CAS palvelusta siirretty rajapinta",
+            description = "Deprekoitu. Käytä /henkilo/current/omattiedot rajapintaa.")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/myroles", method = RequestMethod.GET)
     public List<String> getMyroles() {

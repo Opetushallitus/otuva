@@ -7,12 +7,10 @@ import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Collection;
@@ -20,14 +18,7 @@ import java.util.List;
 
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
-
-    private final EntityManager em;
-
-    public KutsuRepositoryImpl(JpaContext context) {
-        this.em = context.getEntityManagerByManagedType(Kutsu.class);
-    }
-
+public class KutsuRepositoryImpl extends AbstractRepository implements KutsuRepositoryCustom {
     @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria,
                                          List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
@@ -38,7 +29,7 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
         QKayttoOikeusRyhma kutsujaKayttooikeusryhma = new QKayttoOikeusRyhma("kutsujaKayttooikeusryhma");
         QHenkilo henkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo organisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
-        JPAQuery<Kutsu> query = new JPAQueryFactory(this.em)
+        JPAQuery<Kutsu> query = jpa()
                 .from(kutsuOrganisaatio, henkilo)
                 .rightJoin(kutsuOrganisaatio.kutsu, kutsu)
                 .leftJoin(kutsuOrganisaatio.ryhmat, kutsuKayttoOikeusryhma)
@@ -61,7 +52,7 @@ public class KutsuRepositoryImpl implements KutsuRepositoryCustom {
     @Override
     public Collection<Kutsu> findExpired(Period threshold) {
         QKutsu kutsu = QKutsu.kutsu;
-        return new JPAQueryFactory(this.em)
+        return jpa()
                 .from(kutsu)
                 .select(kutsu)
                 .where(

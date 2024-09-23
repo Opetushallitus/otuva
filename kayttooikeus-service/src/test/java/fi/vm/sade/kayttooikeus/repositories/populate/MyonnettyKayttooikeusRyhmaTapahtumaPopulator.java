@@ -6,7 +6,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class MyonnettyKayttooikeusRyhmaTapahtumaPopulator implements Populator<M
         this.aikaleima = Optional.empty();
         this.voimassaAlkuPvm = Optional.empty();
     }
-    
+
     public static MyonnettyKayttooikeusRyhmaTapahtumaPopulator kayttooikeusTapahtuma(OrganisaatioHenkilo organisaatioHenkilo,
                                                                                      KayttoOikeusRyhma kayttoOikeusRyhma) {
         return new MyonnettyKayttooikeusRyhmaTapahtumaPopulator(organisaatioHenkilo, kayttoOikeusRyhma);

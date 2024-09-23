@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 

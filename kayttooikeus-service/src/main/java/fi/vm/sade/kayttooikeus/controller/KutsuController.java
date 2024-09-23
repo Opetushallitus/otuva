@@ -10,9 +10,9 @@ import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -29,30 +29,30 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 @RestController
 @RequestMapping(value = "/kutsu", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-@Api(tags = "Virkailijan kutsumiseen liittyvät toiminnot")
+@Tag(name = "Virkailijan kutsumiseen liittyvät toiminnot")
 public class KutsuController {
     private final KutsuService kutsuService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final IdentificationService identificationService;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    @ApiOperation(value = "Hakee kutsut annettujen hakuehtojen perusteella",
-            notes = "Haun tulos riippuu käyttäjän oikeuksista (rekisterinpitäjä, Oph-virkailija, normaali käyttäjä)")
+    @Operation(summary = "Hakee kutsut annettujen hakuehtojen perusteella",
+            description = "Haun tulos riippuu käyttäjän oikeuksista (rekisterinpitäjä, Oph-virkailija, normaali käyttäjä)")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     public List<KutsuReadDto> listKutsus(
             KutsuCriteria kutsuCriteria,
-            @ApiParam("Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
-            @ApiParam("Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
+            @Parameter(description = "Järjestysperuste") @RequestParam(required = false, defaultValue = "AIKALEIMA") KutsuOrganisaatioOrder sortBy,
+            @Parameter(description = "Järjestyksen suunta") @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
             @RequestParam(required = false) Long offset,
             @RequestParam(required = false, defaultValue = "20") Long amount) {
         return this.kutsuService.listKutsus(sortBy, direction, kutsuCriteria, offset, amount);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Uuden kutsun luominen. Vaatii samat oikeudet kuin uuden käyttöoikeuden myöntäminen.")
+    @Operation(summary = "Uuden kutsun luominen. Vaatii samat oikeudet kuin uuden käyttöoikeuden myöntäminen.")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
@@ -79,7 +79,7 @@ public class KutsuController {
     }
 
     @PutMapping(value = "/{id}/renew", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Kutsun uusiminen muuttamatta kutsun sisältöä eikä uusimisesta jää tietoa")
+    @Operation(summary = "Kutsun uusiminen muuttamatta kutsun sisältöä eikä uusimisesta jää tietoa")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD',"
             + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
@@ -88,7 +88,7 @@ public class KutsuController {
     }
 
     @PutMapping(value = "/{temporaryToken}/token/identifier", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Kutsun päivittäminen väliaikaisella tokenilla. Sallii osittaisen päivittämisen.")
+    @Operation(summary = "Kutsun päivittäminen väliaikaisella tokenilla. Sallii osittaisen päivittämisen.")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     public void updateIdentifierByToken(@PathVariable String temporaryToken,
                                         @RequestBody KutsuUpdateDto kutsuUpdateDto) {
@@ -101,14 +101,14 @@ public class KutsuController {
      */
 
     // Uses temporary tokens so not authenticated
-    @ApiOperation("Get kutsu by temporary token")
+    @Operation(summary = "Get kutsu by temporary token")
     @RequestMapping(value = "/token/{temporaryToken}", method = RequestMethod.GET)
     public KutsuReadDto getByToken(@PathVariable String temporaryToken) {
         return this.kutsuService.getByTemporaryToken(temporaryToken);
     }
 
     // Consumes single use temporary tokens so not authenticated
-    @ApiOperation("Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
+    @Operation(summary = "Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
     @PostMapping(value = "/token/{temporaryToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public String createByToken(@PathVariable String temporaryToken,
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {

@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.repositories.populate;
 
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaMyontoViite;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 public class KayttoOikeusRyhmaMyontoViitePopulator implements Populator<KayttoOikeusRyhmaMyontoViite> {
     private final Long masterId;
     private final Long slaveId;

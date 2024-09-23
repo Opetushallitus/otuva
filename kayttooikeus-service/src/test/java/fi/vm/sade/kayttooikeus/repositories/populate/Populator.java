@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.populate;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -13,7 +13,7 @@ public interface Populator<T> extends Function<EntityManager, T> {
     static<T> Populator<T> constant(T entity) {
         return em -> entity;
     }
-    
+
     static <T> T first(Query q) {
         @SuppressWarnings("unchecked")
         List<T> l = (List<T>)q.setMaxResults(1).getResultList();
@@ -22,7 +22,7 @@ public interface Populator<T> extends Function<EntityManager, T> {
         }
         return l.get(0);
     }
-    
+
     static <T> Optional<T> firstOptional(Query q) {
         return ofNullable(first(q));
     }

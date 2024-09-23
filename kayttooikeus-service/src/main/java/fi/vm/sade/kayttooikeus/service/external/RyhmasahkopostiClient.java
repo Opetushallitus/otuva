@@ -6,7 +6,6 @@ public interface RyhmasahkopostiClient {
     /**
      * @param emailData to send
      * @return response from ryhmasahkoposti-service
-     * @throws Exception on failure
      */
     String sendRyhmasahkoposti(EmailData emailData);
 }

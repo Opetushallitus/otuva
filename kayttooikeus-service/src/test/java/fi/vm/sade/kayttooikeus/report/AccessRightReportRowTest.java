@@ -15,13 +15,13 @@ class AccessRightReportRowTest {
     @Test
     void withOrganisation() {
         AccessRightReportRow original = new AccessRightReportRow(
-                BigInteger.ONE,
+                1l,
                 "prsonName",
                 "personOdi",
                 EMPTY,
                 "organisationOid",
                 "accessRightsName",
-                BigInteger.TEN,
+                10l,
                 new Date(),
                 new Date(),
                 new Date(),

@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.Populator.first;
 
@@ -17,11 +17,11 @@ public class PalveluPopulator implements Populator<Palvelu> {
     public PalveluPopulator(String name) {
         this.name = name;
     }
-    
+
     public static PalveluPopulator palvelu(String name) {
         return new PalveluPopulator(name);
     }
-    
+
     public PalveluPopulator kuvaus(Populator<TextGroup> kuvaus) {
         this.kuvaus = kuvaus;
         return this;
@@ -39,13 +39,13 @@ public class PalveluPopulator implements Populator<Palvelu> {
         if (existing != null) {
             return existing;
         }
-        
+
         Palvelu palvelu = new Palvelu();
         palvelu.setName(name);
         palvelu.setDescription(this.kuvaus.apply(entityManager));
         palvelu.setPalveluTyyppi(PalveluTyyppi.YKSITTAINEN);
         entityManager.persist(palvelu);
-        
+
         return palvelu;
     }
 }

@@ -6,7 +6,6 @@ import com.querydsl.core.types.QBean;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloDto;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloWithOrganisaatioDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluRooliGroup;
@@ -14,10 +13,8 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloCustomRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
@@ -28,18 +25,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toSet;
 
 @Repository
-public class OrganisaatioHenkiloRepositoryImpl implements OrganisaatioHenkiloCustomRepository {
-
-    private final EntityManager em;
-
-    public OrganisaatioHenkiloRepositoryImpl(JpaContext context) {
-        this.em = context.getEntityManagerByManagedType(OrganisaatioHenkilo.class);
-    }
-
-    private JPAQueryFactory jpa() {
-        return new JPAQueryFactory(this.em);
-    }
-
+public class OrganisaatioHenkiloRepositoryImpl extends AbstractRepository implements OrganisaatioHenkiloCustomRepository {
     public static BooleanExpression voimassa(QOrganisaatioHenkilo oh, LocalDate at) {
         return oh.passivoitu.eq(false)
                 .and(oh.voimassaAlkuPvm.isNull().or(oh.voimassaAlkuPvm.loe(at)))

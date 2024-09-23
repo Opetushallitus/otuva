@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.config.security.casoppija;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedGrantedAuthoritiesWebAuthenticationDetails;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 public class SuomiFiAuthenticationDetails extends PreAuthenticatedGrantedAuthoritiesWebAuthenticationDetails {

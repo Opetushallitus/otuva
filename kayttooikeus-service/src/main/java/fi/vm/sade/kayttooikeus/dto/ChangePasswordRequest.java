@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.dto;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

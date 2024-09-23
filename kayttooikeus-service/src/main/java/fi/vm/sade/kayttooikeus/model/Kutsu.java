@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.model;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,39 +16,39 @@ import java.util.Set;
 @Builder
 @Table(name = "kutsu", schema = "public")
 public class Kutsu extends IdentifiableAndVersionedEntity {
-    
+
     @Column(name = "aikaleima", nullable = false)
     private LocalDateTime aikaleima = LocalDateTime.now();
-    
+
     @Column(name = "kutsuja_oid", nullable = false)
     private String kutsuja;
-    
+
     @Column(name = "kieli_koodi", nullable = false)
     private String kieliKoodi;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tila", nullable = false)
     private KutsunTila tila = KutsunTila.AVOIN;
-    
+
     @Column(name = "etunimi", nullable = false)
     private String etunimi;
 
     @Column(name = "sukunimi", nullable = false)
     private String sukunimi;
-    
-    @Column(name = "sahkoposti", nullable = false) 
+
+    @Column(name = "sahkoposti", nullable = false)
     private String sahkoposti;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "kutsu")
     private Set<KutsuOrganisaatio> organisaatiot = new HashSet<>(0);
-    
-    @Column(name = "salaisuus") 
+
+    @Column(name = "salaisuus")
     private String salaisuus; // verification hash
-    
+
     private LocalDateTime kaytetty;
-    
+
     private LocalDateTime poistettu;
-    
+
     @Column(name = "poistaja_oid")
     private String poistaja;
 

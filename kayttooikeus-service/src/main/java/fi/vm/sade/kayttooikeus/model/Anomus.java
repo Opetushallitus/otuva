@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.model;
 import fi.vm.sade.kayttooikeus.dto.types.AnomusTyyppi;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;

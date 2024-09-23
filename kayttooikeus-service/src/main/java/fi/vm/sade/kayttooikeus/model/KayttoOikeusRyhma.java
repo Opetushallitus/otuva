@@ -4,7 +4,7 @@ import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,11 +30,11 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
                 referencedColumnName = "id"))
     @BatchSize(size = 50)
     private Set<KayttoOikeus> kayttoOikeus = new HashSet<>();
-    
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "textgroup_id")
     private TextGroup nimi;
-    
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "kuvaus_id", foreignKey = @ForeignKey(name = "fk_kayttooikeusryhma_textgroup_kuvaus"))
     private TextGroup kuvaus;
@@ -42,7 +42,7 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
     @OneToMany(mappedBy = "kayttoOikeusRyhma", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH }, fetch = FetchType.LAZY)
     private Set<OrganisaatioViite> organisaatioViite = new HashSet<>();
-    
+
     @Column(name = "hidden", nullable = false)
     private boolean passivoitu;
 
@@ -69,11 +69,11 @@ public class KayttoOikeusRyhma extends IdentifiableAndVersionedEntity {
         organisaatioViite.setKayttoOikeusRyhma(this);
         this.organisaatioViite.add(organisaatioViite);
     }
-    
+
     public void removeOrganisaatioViite(OrganisaatioViite organisaatioViite) {
         this.organisaatioViite.remove(organisaatioViite);
     }
-    
+
     public void removeAllOrganisaatioViites() {
         this.organisaatioViite.clear();
     }
