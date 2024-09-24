@@ -3,7 +3,7 @@
 
 server.port: 8080
 
-logging.config: file:/root/oph-configuration/log4j2.xml
+logging.config: file:/app/config/log4j2.xml
 
 cas.server.name: https://testiopintopolku.fi
 cas.server.prefix: https://testiopintopolku.fi/cas-oppija
