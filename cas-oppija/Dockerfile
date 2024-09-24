@@ -16,6 +16,7 @@ FROM amazoncorretto:11
 WORKDIR /app
 COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
+ADD https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml /app/config/
 
 CMD [ "java", \
       "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", \
