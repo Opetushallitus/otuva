@@ -45,6 +45,7 @@ class CdkApp extends cdk.App {
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
       ...stackProps,
       bastion: appStack.bastion,
+      ecsCluster: ecsStack.cluster,
     });
   }
 }
@@ -447,8 +448,9 @@ class ApplicationStack extends cdk.Stack {
 }
 
 type CasOppijaApplicationStackProps = cdk.StackProps & {
-  bastion: ec2.BastionHostLinux
-}
+  bastion: ec2.BastionHostLinux;
+  ecsCluster: ecs.Cluster;
+};
 
 class CasOppijaApplicationStack extends cdk.Stack {
   constructor(scope: constructs.Construct, id: string, props: CasOppijaApplicationStackProps) {
@@ -476,7 +478,173 @@ class CasOppijaApplicationStack extends cdk.Stack {
       }),
       readers: [],
     });
-    database.connections.allowDefaultPortFrom(props.bastion.connections)
+
+    const logGroup = new logs.LogGroup(this, "AppLogGroup", {
+      logGroupName: prefix("/cas-oppija"),
+      retention: logs.RetentionDays.INFINITE,
+    });
+
+    const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
+      directory: path.join(__dirname, "../../cas-oppija"),
+      file: "Dockerfile",
+      platform: ecr_assets.Platform.LINUX_ARM64,
+    });
+
+    const taskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      "TaskDefinition",
+      {
+        cpu: 2048,
+        memoryLimitMiB: 5120,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        },
+      },
+    );
+
+    const appPort = 8080;
+    taskDefinition.addContainer("AppContainer", {
+      image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
+      logging: new ecs.AwsLogDriver({ logGroup, streamPrefix: "app" }),
+      environment: {
+        ENV: getEnvironment(),
+        cas_oppija_postgres_host: database.clusterEndpoint.hostname,
+        cas_oppija_postgres_port: database.clusterEndpoint.port.toString(),
+        cas_oppija_postgres_database: "casoppija",
+      },
+      secrets: {
+        cas_oppija_postgres_username: ecs.Secret.fromSecretsManager(
+          database.secret!,
+          "username",
+        ),
+        cas_oppija_postgres_password: ecs.Secret.fromSecretsManager(
+          database.secret!,
+          "password",
+        ),
+        cas_oppija_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
+        cas_oppija_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
+        cas_oppija_webflow_encryption_key: this.ssmSecret(
+          "WebflowEncryptionKey",
+        ),
+        cas_oppija_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
+        cas_oppija_suomifi_keystore_password: this.ssmSecret(
+          "SuomifiKeystorePassword",
+        ),
+        cas_oppija_suomifi_private_key_password: this.ssmSecret(
+          "SuomifiPrivateKeyPassword",
+        ),
+        cas_oppija_suomifi_valtuudet_client_id: this.ssmSecret(
+          "SuomifiValtuudetClientId",
+        ),
+        cas_oppija_suomifi_valtuudet_api_key: this.ssmSecret(
+          "SuomifiValtuudetApiKey",
+        ),
+        cas_oppija_suomifi_valtuudet_oauth_password: this.ssmSecret(
+          "SuomifiValtuudetOauthPassword",
+        ),
+        cas_oppija_service_user_username: this.ssmSecret("ServiceUserUsername"),
+        cas_oppija_service_user_password: this.ssmSecret("ServiceUserPassword"),
+      },
+      portMappings: [
+        {
+          name: "cas-oppija",
+          containerPort: appPort,
+          appProtocol: ecs.AppProtocol.http,
+        },
+      ],
+    });
+
+    const config = getConfig();
+    const service = new ecs.FargateService(this, "Service", {
+      cluster: props.ecsCluster,
+      taskDefinition,
+      desiredCount: config.minCapacity,
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      healthCheckGracePeriod: cdk.Duration.minutes(5),
+    });
+    const scaling = service.autoScaleTaskCount({
+      minCapacity: config.minCapacity,
+      maxCapacity: config.maxCapacity,
+    });
+
+    scaling.scaleOnMetric("ServiceScaling", {
+      metric: service.metricCpuUtilization(),
+      scalingSteps: [
+        { upper: 15, change: -1 },
+        { lower: 50, change: +1 },
+        { lower: 65, change: +2 },
+        { lower: 80, change: +3 },
+      ],
+    });
+
+    database.connections.allowDefaultPortFrom(service);
+    database.connections.allowDefaultPortFrom(props.bastion.connections);
+
+    const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
+      this,
+      "LoadBalancer",
+      {
+        vpc,
+        internetFacing: true,
+      },
+    );
+
+    const sharedHostedZone = route53.HostedZone.fromLookup(
+      this,
+      "YleiskayttoisetHostedZone",
+      {
+        domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
+      },
+    );
+    const albHostname = `cas-oppija.${sharedHostedZone.zoneName}`;
+
+    new route53.ARecord(this, "ALBARecord", {
+      zone: sharedHostedZone,
+      recordName: albHostname,
+      target: route53.RecordTarget.fromAlias(
+        new route53_targets.LoadBalancerTarget(alb),
+      ),
+    });
+
+    const albCertificate = new certificatemanager.Certificate(
+      this,
+      "AlbCertificate",
+      {
+        domainName: albHostname,
+        validation:
+          certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
+      },
+    );
+
+    const listener = alb.addListener("Listener", {
+      protocol: elasticloadbalancingv2.ApplicationProtocol.HTTPS,
+      port: 443,
+      open: true,
+      certificates: [albCertificate],
+    });
+
+    listener.addTargets("ServiceTarget", {
+      port: appPort,
+      targets: [service],
+      healthCheck: {
+        enabled: true,
+        interval: cdk.Duration.seconds(10),
+        path: "/cas-oppija/actuator/health",
+        port: appPort.toString(),
+      },
+    });
+  }
+  ssmSecret(name: string, prefix: string = "cas-oppija"): ecs.Secret {
+    return ecs.Secret.fromSsmParameter(
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        `Param${name}`,
+        { parameterName: `/${prefix}/${name}` },
+      ),
+    );
   }
 }
 
