@@ -17,9 +17,9 @@ WORKDIR /app
 COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
 
-CMD [ "java", 
-      "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml",
-      "-Dlog4j.configurationFile=file:///app/config/log4j2.xml",
-      "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health",
+CMD [ "java", \
+      "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", \
+      "-Dlog4j.configurationFile=file:///app/config/log4j2.xml", \
+      "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health", \
       "cas.war" ]
 
