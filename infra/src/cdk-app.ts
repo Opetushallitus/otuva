@@ -511,7 +511,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
         ENV: getEnvironment(),
         cas_oppija_postgres_host: database.clusterEndpoint.hostname,
         cas_oppija_postgres_port: database.clusterEndpoint.port.toString(),
-        cas_oppija_postgres_database: "casoppija",
+        cas_oppija_postgres_db: "casoppija",
       },
       secrets: {
         cas_oppija_postgres_username: ecs.Secret.fromSecretsManager(
