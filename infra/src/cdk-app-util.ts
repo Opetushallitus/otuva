@@ -79,7 +79,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     );
     const tag = {
       hahtuva: repository.branch,
-      dev: "green-hahtuva",
+      dev: repository.branch,
       qa: "green-dev",
       prod: "green-qa",
     }[env];
@@ -94,7 +94,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         repo: repository.name,
         branch: repository.branch,
         output: sourceOutput,
-        triggerOnPush: false,
+        triggerOnPush: env == "dev",
       });
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
