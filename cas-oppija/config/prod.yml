@@ -28,6 +28,7 @@ cas.webflow.crypto:
     signing.key: ${cas_oppija_webflow_signing_key}
 
 spring.datasource.url: jdbc:postgresql://${cas_oppija_postgres_host}:${cas_oppija_postgres_port}/${cas_oppija_postgres_db}
+spring.datasource.username: ${cas_oppija_postgres_username}
 spring.datasource.password: ${cas_oppija_postgres_password}
 
 cas.authn.pac4j.saml:
