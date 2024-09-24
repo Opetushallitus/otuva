@@ -18,7 +18,8 @@ COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
 ADD https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml /app/config/
 
-CMD [ "java", \
+CMD [ "echo -n ${keystore_base64} | base64 --decode > /app/config/keystore.jks &&" \
+      "java", \
       "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", \
       "-Dlog4j.configurationFile=file:///app/config/log4j2.xml", \
       "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health", \
