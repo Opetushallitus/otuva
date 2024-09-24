@@ -33,13 +33,13 @@ spring.datasource.password: ${cas_oppija_postgres_password}
 cas.authn.pac4j.saml:
   - client-name: suomi.fi
     auto-redirect-type: CLIENT
-    keystore-path: /root/oph-configuration/cas-oppija/keystore.jks
+    keystore-path: /app/config/keystore.jks
     keystore-password: ${cas_oppija_suomifi_keystore_password}
     keystore-alias: untuvaopintopolku.fi
     private-key-password: ${cas_oppija_suomifi_private_key_password}
     service-provider-entity-id: https://untuvaopintopolku.fi/cas-oppija
-    service-provider-metadata-path: /root/oph-configuration/cas-oppija/sp-metadata.xml
-    identity-provider-metadata-path: /root/oph-configuration/cas-oppija/idp-metadata.xml
+    service-provider-metadata-path: /app/config/sp-metadata.xml
+    identity-provider-metadata-path: /app/config/idp-metadata.xml
     principal-attribute-id: nationalIdentificationNumber
     requested-attributes:
       - name: urn:oid:1.2.246.21
@@ -60,7 +60,7 @@ cas.logout.follow-service-redirects: true
 cas.logout.redirect-parameter: service
 cas.logout.redirect-url: https://untuvaopintopolku.fi/
 
-cas.service-registry.json.location: file:///root/oph-configuration/cas-oppija
+cas.service-registry.json.location: file:///app/config/
 
 cas.http-web-request.cors.allow-origins[0]: https://untuvaopintopolku.fi
 cas.http-web-request.cors.allow-origins[1]: https://untuvastudyinfo.fi
