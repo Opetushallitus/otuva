@@ -194,7 +194,7 @@ class ApplicationStack extends cdk.Stack {
         ssm_auth_cryptoservice_static_salt: this.ssmSecret(
           "CryptoserviceStaticSalt",
         ),
-        ssm_mvn_settingsxml: this.ssmString("MvnSettingsXml"),
+        MVN_SETTINGSXML: this.ssmString("MvnSettingsXml"),
       },
       portMappings: [
         {
