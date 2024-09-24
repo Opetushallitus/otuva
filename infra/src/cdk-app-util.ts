@@ -172,7 +172,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
                 "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
                 "sudo yum install -y perl-Digest-SHA", // for shasum command
                 `git checkout ${tag}`,
-                "echo $MVN_SETTINGSXML > ./settings.xml"
+                "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml"
               ],
             },
             build: {
@@ -272,7 +272,7 @@ function makeTestProject(scope: constructs.Construct, env: string, tag: string, 
               "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
               "sudo yum install -y perl-Digest-SHA", // for shasum command
               `git checkout ${tag}`,
-              "echo $MVN_SETTINGSXML > ./settings.xml"
+              "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml"
             ],
           },
           build: {
