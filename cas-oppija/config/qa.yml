@@ -53,30 +53,6 @@ cas.authn.pac4j.saml:
     mapped-attributes:
       - personName->urn:oid:2.5.4.3
 
-  - client-name: fakesuomi.fi
-    auto-redirect-type: CLIENT
-    keystore-path: /root/oph-configuration/cas-oppija/fakesuomifi-keystore.jks
-    keystore-password: ${cas_oppija_suomifi_keystore_password}
-    keystore-alias: testiopintopolku.fi
-    private-key-password: ${cas_oppija_suomifi_private_key_password}
-    service-provider-entity-id: https://testiopintopolku.fi/cas-oppija/fake-suomi-fi
-    service-provider-metadata-path: /root/oph-configuration/cas-oppija/sp-metadata-for-fakesuomifi.xml
-    identity-provider-metadata-path: /root/oph-configuration/cas-oppija/idp-fakesuomifi-metadata.xml
-    wants-assertions-signed: false
-    principal-attribute-id: nationalIdentificationNumber
-    requested-attributes:
-      - name: urn:oid:1.2.246.21
-        friendly-name: nationalIdentificationNumber
-        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
-        required: true
-      - name: urn:oid:2.5.4.3
-        friendly-name: cn
-        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
-        required: true
-    mapped-attributes:
-      - personName->urn:oid:2.5.4.3
-
-
 management.endpoints.web.exposure.include: health,springWebflow
 management.endpoint.springWebflow.enabled: True
 cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT

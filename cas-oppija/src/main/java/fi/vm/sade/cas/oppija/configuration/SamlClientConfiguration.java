@@ -143,7 +143,7 @@ public class SamlClientConfiguration {
                 Collection<IndirectClient> clients = buildSaml2IdentityProviders(casProperties);
                 Map<String, String> customProperties = casProperties.getCustom().getProperties();
                 for (IndirectClient client : clients) {
-                    if (client instanceof SAML2Client && (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()) || Objects.equals(customProperties.get("fakeSuomiFiClientName"), client.getName()))) {
+                    if (client instanceof SAML2Client && (Objects.equals(customProperties.get("suomiFiClientName"), client.getName()))) {
                         SAML2Client saml2Client = (SAML2Client) client;
                         SAML2Configuration configuration = saml2Client.getConfiguration();
                         configuration.setSpLogoutRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
