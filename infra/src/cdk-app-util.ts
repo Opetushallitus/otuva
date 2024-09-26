@@ -80,8 +80,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const tag = {
       hahtuva: repository.branch,
       dev: repository.branch,
-      qa: "green-dev",
-      prod: "green-qa",
+      qa: repository.branch,
+      prod: "green-dev",
     }[env];
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction =
