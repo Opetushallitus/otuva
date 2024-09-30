@@ -546,6 +546,8 @@ class CasOppijaApplicationStack extends cdk.Stack {
         cas_oppija_service_user_username: this.ssmSecret("ServiceUserUsername"),
         cas_oppija_service_user_password: this.ssmSecret("ServiceUserPassword"),
         keystore_base64: this.ssmSecret("keystore"),
+        registered_service_1: this.ssmSecret("RegisteredService1"),
+        registered_service_2: this.ssmSecret("RegisteredService2"),
       },
       portMappings: [
         {

@@ -23,6 +23,10 @@ COPY --chmod=755 <<"EOF" /app/entrypoint.sh
 set -o errexit -o nounset -o pipefail
 
 echo -n ${keystore_base64} | base64 --decode > /app/config/keystore.jks
+
+echo -n ${registered_service_1} > /app/config/service-1.json
+echo -n ${registered_service_2} > /app/config/service-2.json
+
 exec java \
   -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
   -Dlog4j.configurationFile=file:///app/config/log4j2.xml \
