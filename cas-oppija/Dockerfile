@@ -18,10 +18,17 @@ COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
 ADD https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml /app/config/
 
-CMD echo -n ${keystore_base64} | base64 --decode > /app/config/keystore.jks && \
-    java \
-    -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
-    -Dlog4j.configurationFile=file:///app/config/log4j2.xml \
-    -Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health \
-    -jar \
-    cas.war
+COPY --chmod=755 <<"EOF" /app/entrypoint.sh
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+echo -n ${keystore_base64} | base64 --decode > /app/config/keystore.jks
+exec java \
+  -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
+  -Dlog4j.configurationFile=file:///app/config/log4j2.xml \
+  -Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health \
+  -jar \
+  cas.war
+EOF
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
