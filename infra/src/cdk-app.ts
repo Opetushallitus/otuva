@@ -18,6 +18,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
@@ -548,6 +549,13 @@ class CasOppijaApplicationStack extends cdk.Stack {
         keystore_base64: this.ssmSecret("keystore"),
         registered_service_1: this.ssmSecret("RegisteredService1"),
         registered_service_2: this.ssmSecret("RegisteredService2"),
+        sp_metadata: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "SpMetadata",
+            "/cas-oppija/SpMetadata",
+          ),
+        ),
       },
       portMappings: [
         {
