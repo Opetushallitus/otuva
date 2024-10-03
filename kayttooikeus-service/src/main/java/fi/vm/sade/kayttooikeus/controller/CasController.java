@@ -54,7 +54,7 @@ public class CasController {
     @Operation(summary = "Generoi autentikointitokenin henkilölle.",
             description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    @RequestMapping(value = "/auth/oid/{oid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/auth/oid/{oid}", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateAuthTokenForHenkilo(@PathVariable("oid") String oid,
                                               @RequestParam("idpkey") String idpKey,
                                               @RequestParam("idpid") String idpIdentifier) {
@@ -64,7 +64,7 @@ public class CasController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @Operation(summary = "Hakee henkilön OID:n autentikaation perusteella.",
             description = "Hakee henkilön OID:n annettujen IdP tunnisteiden perusteella.")
-    @RequestMapping(value = "/auth/idp/{idpkey}", method = RequestMethod.GET)
+    @RequestMapping(value = "/auth/idp/{idpkey}", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
     public String getHenkiloOidByIdPAndIdentifier(@PathVariable("idpkey") String idpKey,
                                                   @RequestParam("idpid") String idpIdentifier) {
         return identificationService.getHenkiloOidByIdpAndIdentifier(idpKey, idpIdentifier);
@@ -100,7 +100,7 @@ public class CasController {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @Operation(summary = "Luo tilapäisen tokenin henkilön vahvan tunnistaumisen ajaksi")
-    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
+    @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
     public String createLoginToken(@PathVariable String oidHenkilo, @RequestParam(required = false) Boolean salasananVaihto) {
         return this.identificationService.createLoginToken(oidHenkilo, salasananVaihto, null);
     }

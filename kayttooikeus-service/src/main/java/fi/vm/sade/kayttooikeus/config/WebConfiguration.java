@@ -49,10 +49,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void extendMessageConverters(@NonNull List<HttpMessageConverter<?>> converters) {
-        // Add this as primary converter. Spring tests which one to use in order of this list. This needs to be
-        // before stringhttpmessageconverter or apis will return plain string as json content type string. (without
-        // double quote marks)
-        converters.add(0, mappingJackson2HttpMessageConverter());
+        converters.add(mappingJackson2HttpMessageConverter());
     }
 
     @Override

@@ -109,7 +109,7 @@ public class KutsuController {
 
     // Consumes single use temporary tokens so not authenticated
     @Operation(summary = "Luo henkilön väliaikaisella tokenilla. Palauttaa authTokenin kirjautumista varten.")
-    @PostMapping(value = "/token/{temporaryToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/token/{temporaryToken}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public String createByToken(@PathVariable String temporaryToken,
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         // This needs to be done like this since otherwice KO locks the table row for this henkilo and ONR can't update

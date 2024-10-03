@@ -22,7 +22,7 @@ public class VirkailijaController {
 
     private final VirkailijaService virkailijaService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @PreAuthorize("hasRole('ROLE_APP_KAYTTOOIKEUS_VIRKAILIJANLUONTI')")
     @Operation(summary = "Virkailijan luonti",
             description = "Tarkoitettu vain testikäyttöön, tuotannossa virkailijat luodaan kutsun kautta.")
