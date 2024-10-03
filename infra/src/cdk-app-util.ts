@@ -79,9 +79,9 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     );
     const tag = {
       hahtuva: repository.branch,
-      dev: repository.branch,
-      qa: repository.branch,
-      prod: "green-dev",
+      dev: "green-hahtuva",
+      qa: "green-dev",
+      prod: "green-qa",
     }[env];
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction =
@@ -94,12 +94,12 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         repo: repository.name,
         branch: repository.branch,
         output: sourceOutput,
-        triggerOnPush: env == "dev",
+        triggerOnPush: env == "hahtuva",
       });
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva" || env === "dev"
+    const runTests = env === "hahtuva"
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
       testStage.addAction(new codepipeline_actions.CodeBuildAction({
