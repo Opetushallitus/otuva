@@ -92,3 +92,6 @@ kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 auth:
   crypto-service:
     static-salt: mock
+
+springdoc.packagesToScan: fi.vm.sade.kayttooikeus.controller
+springdoc.pathsToMatch: /**
