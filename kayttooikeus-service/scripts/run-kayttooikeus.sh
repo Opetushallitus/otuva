@@ -9,7 +9,8 @@ function main {
   use_correct_jvm_version
 
   mvn clean install -Dmaven.test.skip=true
-  mvn spring-boot:run -Dspring-boot.run.jvmArguments="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -Dserver.port=8101"
+  mvn spring-boot:run \
+    -Dspring-boot.run.jvmArguments="-Dspring.config.additional-location=classpath:/config/local.yml --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
 }
 
 function wait_for_postgres {

@@ -38,5 +38,6 @@ kayttooikeus.uses-ssl-proxy: true
 kayttooikeus.disable-same-site-cookie: true
 kayttooikeus.scheduling.enabled: true
 kayttooikeus.kutsu.allowlist-oids: ${ssm_kayttooikeus_kutsu_allowlist}
+kayttooikeus.oauth2.enabled: true
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
