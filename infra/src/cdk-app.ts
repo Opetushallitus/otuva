@@ -555,6 +555,13 @@ class CasOppijaApplicationStack extends cdk.Stack {
             "/cas-oppija/SpMetadata",
           ),
         ),
+        idp_metadata: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "IdpMetadata",
+            "/cas-oppija/IdpMetadata",
+          ),
+        ),
       },
       portMappings: [
         {

@@ -16,7 +16,6 @@ FROM amazoncorretto:11
 WORKDIR /app
 COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
-ADD https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml /app/config/
 
 COPY --chmod=755 <<"EOF" /app/entrypoint.sh
 #!/usr/bin/env bash
@@ -24,6 +23,7 @@ set -o errexit -o nounset -o pipefail
 
 echo -n ${keystore_base64} | base64 --decode > /app/config/keystore.jks
 echo -n ${sp_metadata} > /app/config/sp-metadata.xml
+echo -n ${idp_metadata} > /app/config/idp-metadata.xml
 
 echo -n ${registered_service_1} > /app/config/service-1.json
 echo -n ${registered_service_2} > /app/config/service-2.json
