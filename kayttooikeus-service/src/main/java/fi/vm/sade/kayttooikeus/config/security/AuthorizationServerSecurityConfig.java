@@ -4,7 +4,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -127,9 +127,9 @@ public class AuthorizationServerSecurityConfig {
         return context -> {
             if (context.getTokenType() == OAuth2TokenType.ACCESS_TOKEN) {
                 String username = context.getPrincipal().getName();
-                Set<String> roles = kayttajatiedotRepository.findOidByUsername(username)
-                    .map(oid -> kayttajarooliProvider.getByKayttajaOid(oid))
-                    .orElse(Set.of());
+                var roles = kayttajatiedotRepository.findOidByUsername(username)
+                    .map(oid -> kayttajarooliProvider.getRolesByOrganisation(oid))
+                    .orElse(Map.of());
                 context.getClaims().claim("roles", roles);
             }
         };

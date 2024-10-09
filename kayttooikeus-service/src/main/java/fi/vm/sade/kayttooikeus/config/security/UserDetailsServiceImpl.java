@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -51,6 +53,23 @@ public class UserDetailsServiceImpl implements UserDetailsService, Kayttajarooli
                 .stream()
                 .flatMap(UserDetailsServiceImpl::getRoolit)
                 .map(String::toUpperCase);
+    }
+
+    @Override
+    public Map<String, Set<String>> getRolesByOrganisation(String kayttajaOid) {
+        var roles = new HashMap<String, Set<String>>();
+        myonnettyKayttoOikeusRyhmaTapahtumaRepository.findOrganisaatioPalveluRooliByOid(kayttajaOid)
+            .stream()
+            .forEach(dto -> {
+                var role = dto.getPalvelu() + "_" + dto.getRooli();
+                var cur = roles.get(dto.getOrganisaatioOid());
+                if (cur == null) {
+                    cur = new HashSet<String>();
+                }
+                cur.add(role);
+                roles.put(dto.getOrganisaatioOid(), cur);
+            });
+        return roles;
     }
 
     private static Stream<String> getRoolit(OrganisaatioPalveluRooliDto dto) {
