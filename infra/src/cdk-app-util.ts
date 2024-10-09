@@ -17,9 +17,13 @@ class CdkAppUtil extends cdk.App {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: process.env.CDK_DEFAULT_REGION,
     };
-    new ContinousDeploymentStack(this, legacyPrefix("ContinuousDeploymentStack"), {
-      env,
-    });
+    new ContinousDeploymentStack(
+      this,
+      legacyPrefix("ContinuousDeploymentStack"),
+      {
+        env,
+      }
+    );
   }
 }
 
@@ -32,7 +36,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       {
         connectionName: "GithubConnection",
         providerType: "GitHub",
-      },
+      }
     );
 
     (["hahtuva", "dev", "qa", "prod"] as const).forEach(
@@ -43,8 +47,8 @@ class ContinousDeploymentStack extends cdk.Stack {
           connection,
           env,
           { owner: "Opetushallitus", name: "otuva", branch: "master" },
-          props,
-        ),
+          props
+        )
     );
   }
 }
@@ -64,7 +68,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     connection: codestarconnections.CfnConnection,
     env: EnvironmentName,
     repository: Repository,
-    props: cdk.StackProps,
+    props: cdk.StackProps
   ) {
     super(scope, id, props);
     const capitalizedEnv = capitalize(env);
@@ -75,7 +79,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       {
         pipelineName: legacyPrefix(`Deploy${capitalizedEnv}`),
         pipelineType: PipelineType.V1,
-      },
+      }
     );
     const tag = {
       hahtuva: repository.branch,
@@ -99,24 +103,51 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva"
+    const runTests = env === "hahtuva";
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
-      testStage.addAction(new codepipeline_actions.CodeBuildAction({
-        actionName: "TestKayttooikeus",
-        input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestKayttooikeus", ["scripts/ci/run-tests-kayttooikeus.sh"], "corretto21"),
-      }));
-      testStage.addAction(new codepipeline_actions.CodeBuildAction({
-        actionName: "TestCasVirkailija",
-        input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestCasVirkailija", ["scripts/ci/run-tests-cas-virkailija.sh"], "corretto21"),
-      }));
-      testStage.addAction(new codepipeline_actions.CodeBuildAction({
-        actionName: "TestCasOppija",
-        input: sourceOutput,
-        project: makeTestProject(this, env, tag, "TestCasOppija", ["scripts/ci/run-tests-cas-oppija.sh"], "corretto11"),
-      }));
+      testStage.addAction(
+        new codepipeline_actions.CodeBuildAction({
+          actionName: "TestKayttooikeus",
+          input: sourceOutput,
+          project: makeTestProject(
+            this,
+            env,
+            tag,
+            "TestKayttooikeus",
+            ["scripts/ci/run-tests-kayttooikeus.sh"],
+            "corretto21"
+          ),
+        })
+      );
+      testStage.addAction(
+        new codepipeline_actions.CodeBuildAction({
+          actionName: "TestCasVirkailija",
+          input: sourceOutput,
+          project: makeTestProject(
+            this,
+            env,
+            tag,
+            "TestCasVirkailija",
+            ["scripts/ci/run-tests-cas-virkailija.sh"],
+            "corretto21"
+          ),
+        })
+      );
+      testStage.addAction(
+        new codepipeline_actions.CodeBuildAction({
+          actionName: "TestCasOppija",
+          input: sourceOutput,
+          project: makeTestProject(
+            this,
+            env,
+            tag,
+            "TestCasOppija",
+            ["scripts/ci/run-tests-cas-oppija.sh"],
+            "corretto11"
+          ),
+        })
+      );
     }
 
     const deployProject = new codebuild.PipelineProject(
@@ -172,28 +203,26 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
                 "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
                 "sudo yum install -y perl-Digest-SHA", // for shasum command
                 `git checkout ${tag}`,
-                "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml"
+                "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
               ],
             },
             build: {
               commands: [
-                `./deploy-${env}.sh`,
-                `./scripts/tag-green-build-${env}.sh`,
-                `./scripts/ci/publish-release-notes-${env}.sh || true`,
+                `./deploy-${env}.sh && ./scripts/tag-green-build-${env}.sh && ./scripts/ci/publish-release-notes-${env}.sh || true`,
               ],
             },
           },
         }),
-      },
+      }
     );
 
     const deploymentTargetAccount = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/${env}/account_id`,
+      `/env/${env}/account_id`
     );
     const deploymentTargetRegion = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/${env}/region`,
+      `/env/${env}/region`
     );
 
     deployProject.role?.attachInlinePolicy(
@@ -210,7 +239,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             ],
           }),
         ],
-      }),
+      })
     );
     const deployAction = new codepipeline_actions.CodeBuildAction({
       actionName: "Deploy",
@@ -222,7 +251,14 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
   }
 }
 
-function makeTestProject(scope: constructs.Construct, env: string, tag: string, name: string, testCommands: string[], javaVersion: "corretto11" | "corretto21"): codebuild.PipelineProject {
+function makeTestProject(
+  scope: constructs.Construct,
+  env: string,
+  tag: string,
+  name: string,
+  testCommands: string[],
+  javaVersion: "corretto11" | "corretto21"
+): codebuild.PipelineProject {
   return new codebuild.PipelineProject(
     scope,
     `${name}${capitalize(env)}Project`,
@@ -272,16 +308,16 @@ function makeTestProject(scope: constructs.Construct, env: string, tag: string, 
               "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
               "sudo yum install -y perl-Digest-SHA", // for shasum command
               `git checkout ${tag}`,
-              "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml"
+              "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
             ],
           },
           build: {
-            commands: testCommands
+            commands: testCommands,
           },
         },
       }),
     }
-  )
+  );
 }
 
 function capitalize(s: string) {
