@@ -4,10 +4,8 @@ import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import fi.vm.sade.properties.OphProperties;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apereo.cas.client.session.SessionMappingStorage;
