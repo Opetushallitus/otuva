@@ -22,7 +22,13 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { AuditLogExport } from "./AuditLogExport";
 import { DatabaseBackupToS3 } from "./DatabaseBackupToS3";
 
-import {prefix, legacyPrefix, CDK_QUALIFIER, VPC_NAME, ALARM_TOPIC_ARN} from "./shared-account";
+import {
+  prefix,
+  legacyPrefix,
+  CDK_QUALIFIER,
+  VPC_NAME,
+  ALARM_TOPIC_ARN,
+} from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 
 class CdkApp extends cdk.App {
@@ -37,12 +43,20 @@ class CdkApp extends cdk.App {
 
     new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
     const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
-    const appStack = new ApplicationStack(this, legacyPrefix("ApplicationStack"), stackProps);
-    new CasVirkailijaApplicationStack(this, prefix("CasVirkailijaApplicationStack"), {
-      ecsCluster: ecsStack.cluster,
-      ...stackProps,
-      bastion: appStack.bastion,
-    } );
+    const appStack = new ApplicationStack(
+      this,
+      legacyPrefix("ApplicationStack"),
+      stackProps
+    );
+    new CasVirkailijaApplicationStack(
+      this,
+      prefix("CasVirkailijaApplicationStack"),
+      {
+        ecsCluster: ecsStack.cluster,
+        ...stackProps,
+        bastion: appStack.bastion,
+      }
+    );
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
       ...stackProps,
       bastion: appStack.bastion,
@@ -75,7 +89,7 @@ class ECSStack extends cdk.Stack {
 }
 
 class ApplicationStack extends cdk.Stack {
-  readonly bastion: ec2.BastionHostLinux
+  readonly bastion: ec2.BastionHostLinux;
 
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
@@ -86,7 +100,7 @@ class ApplicationStack extends cdk.Stack {
     const dbSecurityGroup = new ec2.SecurityGroup(
       this,
       "DatabaseSecurityGroup",
-      { vpc },
+      { vpc }
     );
 
     const exportBucket = new s3.Bucket(this, "ExportBucket", {});
@@ -107,7 +121,7 @@ class ApplicationStack extends cdk.Stack {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
-          ec2.InstanceSize.LARGE,
+          ec2.InstanceSize.LARGE
         ),
       }),
       readers: [],
@@ -121,7 +135,7 @@ class ApplicationStack extends cdk.Stack {
 
     this.bastion = new ec2.BastionHostLinux(this, "BastionHost", {
       vpc,
-      instanceName: prefix("Bastion")
+      instanceName: prefix("Bastion"),
     });
     database.connections.allowDefaultPortFrom(this.bastion.connections);
 
@@ -132,7 +146,7 @@ class ApplicationStack extends cdk.Stack {
     });
     dbSecurityGroup.addIngressRule(
       backup.securityGroup,
-      ec2.Port.tcp(database.clusterEndpoint.port),
+      ec2.Port.tcp(database.clusterEndpoint.port)
     );
 
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
@@ -159,7 +173,7 @@ class ApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      },
+      }
     );
     exportBucket.grantReadWrite(taskDefinition.taskRole);
 
@@ -177,11 +191,11 @@ class ApplicationStack extends cdk.Stack {
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "username",
+          "username"
         ),
         postgres_password: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "password",
+          "password"
         ),
         ssm_lampi_role_arn: this.ssmString("LampiRoleArn2"),
         ssm_lampi_external_id: this.ssmSecret("LampiExternalId"),
@@ -193,8 +207,10 @@ class ApplicationStack extends cdk.Stack {
         ssm_kayttooikeus_password: this.ssmSecret("PalvelukayttajaPassword"),
         ssm_kayttooikeus_crypto_password: this.ssmSecret("CryptoPassword"),
         ssm_kayttooikeus_kutsu_allowlist: this.ssmSecret("KutsuAllowlist"),
+        ssm_kayttooikeus_oauth2_publickey: this.ssmSecret("Oauth2PublicKey"),
+        ssm_kayttooikeus_oauth2_privatekey: this.ssmSecret("Oauth2PrivateKey"),
         ssm_auth_cryptoservice_static_salt: this.ssmSecret(
-          "CryptoserviceStaticSalt",
+          "CryptoserviceStaticSalt"
         ),
       },
       portMappings: [
@@ -213,10 +229,10 @@ class ApplicationStack extends cdk.Stack {
         resources: [
           ssm.StringParameter.valueFromLookup(
             this,
-            "/kayttooikeus/LampiRoleArn2",
+            "/kayttooikeus/LampiRoleArn2"
           ),
         ],
-      }),
+      })
     );
 
     const appSecurityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
@@ -250,7 +266,7 @@ class ApplicationStack extends cdk.Stack {
 
     dbSecurityGroup.addIngressRule(
       appSecurityGroup,
-      ec2.Port.tcp(database.clusterEndpoint.port),
+      ec2.Port.tcp(database.clusterEndpoint.port)
     );
 
     const albSecurityGroup = new ec2.SecurityGroup(this, "AlbSecurityGroup", {
@@ -263,7 +279,7 @@ class ApplicationStack extends cdk.Stack {
         vpc,
         internetFacing: true,
         securityGroup: albSecurityGroup,
-      },
+      }
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -271,14 +287,14 @@ class ApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      },
+      }
     );
     const albHostname = `kayttooikeus.${sharedHostedZone.zoneName}`;
     const albRecord = new route53.ARecord(this, "ALBARecord", {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb),
+        new route53_targets.LoadBalancerTarget(alb)
       ),
     });
 
@@ -289,7 +305,7 @@ class ApplicationStack extends cdk.Stack {
         domainName: albHostname,
         validation:
           certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-      },
+      }
     );
 
     const listener = alb.addListener("Listener", {
@@ -314,24 +330,34 @@ class ApplicationStack extends cdk.Stack {
   }
 
   exportFailureAlarm(logGroup: logs.LogGroup) {
-    const alarmTopic = sns.Topic.fromTopicArn(this, "AlarmTopic", ALARM_TOPIC_ARN)
-    const metricFilter = logGroup.addMetricFilter("ExportTaskSuccessMetricFilter", {
-      filterPattern: logs.FilterPattern.literal("\"Kayttooikeus export task completed\""),
-      metricName: prefix("KayttooikeusExportTaskSuccess"),
-      metricNamespace: "Otuva",
-      metricValue: "1",
-    })
+    const alarmTopic = sns.Topic.fromTopicArn(
+      this,
+      "AlarmTopic",
+      ALARM_TOPIC_ARN
+    );
+    const metricFilter = logGroup.addMetricFilter(
+      "ExportTaskSuccessMetricFilter",
+      {
+        filterPattern: logs.FilterPattern.literal(
+          '"Kayttooikeus export task completed"'
+        ),
+        metricName: prefix("KayttooikeusExportTaskSuccess"),
+        metricNamespace: "Otuva",
+        metricValue: "1",
+      }
+    );
     const alarm = new cloudwatch.Alarm(this, "ExportFailingAlarm", {
       alarmName: prefix("KayttooikeusExportFailing"),
       metric: metricFilter.metric({
         statistic: "Sum",
-        period: cdk.Duration.hours(1)
+        period: cdk.Duration.hours(1),
       }),
-      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
       threshold: 0,
       evaluationPeriods: 8,
       treatMissingData: cloudwatch.TreatMissingData.BREACHING,
-    })
+    });
     alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
     alarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
   }
@@ -339,7 +365,7 @@ class ApplicationStack extends cdk.Stack {
   getIpAddresses(name: string): string[] {
     const parameterValue = ssm.StringParameter.valueFromLookup(
       this,
-      `/ip-addresses/${name}`,
+      `/ip-addresses/${name}`
     );
     return parameterValue.split(",");
   }
@@ -367,7 +393,7 @@ class ApplicationStack extends cdk.Stack {
           "/kayttooikeus-service/userDetails",
           "/kayttooikeus-service/userDetails/.*",
         ],
-      },
+      }
     );
 
     const denyAccessRule: wafv2.CfnWebACL.RuleProperty = {
@@ -431,8 +457,8 @@ class ApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromStringParameterName(
         this,
         `Param${name}`,
-        `/kayttooikeus/${name}`,
-      ),
+        `/kayttooikeus/${name}`
+      )
     );
   }
 
@@ -441,8 +467,8 @@ class ApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/kayttooikeus/${name}` },
-      ),
+        { parameterName: `/kayttooikeus/${name}` }
+      )
     );
   }
 }
@@ -453,10 +479,14 @@ type CasOppijaApplicationStackProps = cdk.StackProps & {
 };
 
 class CasOppijaApplicationStack extends cdk.Stack {
-  constructor(scope: constructs.Construct, id: string, props: CasOppijaApplicationStackProps) {
+  constructor(
+    scope: constructs.Construct,
+    id: string,
+    props: CasOppijaApplicationStackProps
+  ) {
     super(scope, id, props);
 
-    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {vpcName: VPC_NAME});
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
     const database = new rds.DatabaseCluster(this, "Database", {
       vpc,
@@ -473,7 +503,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
-          ec2.InstanceSize.LARGE,
+          ec2.InstanceSize.LARGE
         ),
       }),
       readers: [],
@@ -500,7 +530,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      },
+      }
     );
 
     const appPort = 8080;
@@ -516,32 +546,32 @@ class CasOppijaApplicationStack extends cdk.Stack {
       secrets: {
         cas_oppija_postgres_username: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "username",
+          "username"
         ),
         cas_oppija_postgres_password: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "password",
+          "password"
         ),
         cas_oppija_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
         cas_oppija_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_oppija_webflow_encryption_key: this.ssmSecret(
-          "WebflowEncryptionKey",
+          "WebflowEncryptionKey"
         ),
         cas_oppija_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
         cas_oppija_suomifi_keystore_password: this.ssmSecret(
-          "SuomifiKeystorePassword",
+          "SuomifiKeystorePassword"
         ),
         cas_oppija_suomifi_private_key_password: this.ssmSecret(
-          "SuomifiPrivateKeyPassword",
+          "SuomifiPrivateKeyPassword"
         ),
         cas_oppija_suomifi_valtuudet_client_id: this.ssmSecret(
-          "SuomifiValtuudetClientId",
+          "SuomifiValtuudetClientId"
         ),
         cas_oppija_suomifi_valtuudet_api_key: this.ssmSecret(
-          "SuomifiValtuudetApiKey",
+          "SuomifiValtuudetApiKey"
         ),
         cas_oppija_suomifi_valtuudet_oauth_password: this.ssmSecret(
-          "SuomifiValtuudetOauthPassword",
+          "SuomifiValtuudetOauthPassword"
         ),
         cas_oppija_service_user_username: this.ssmSecret("ServiceUserUsername"),
         cas_oppija_service_user_password: this.ssmSecret("ServiceUserPassword"),
@@ -552,15 +582,15 @@ class CasOppijaApplicationStack extends cdk.Stack {
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "SpMetadata",
-            "/cas-oppija/SpMetadata",
-          ),
+            "/cas-oppija/SpMetadata"
+          )
         ),
         idp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "IdpMetadata",
-            "/cas-oppija/IdpMetadata",
-          ),
+            "/cas-oppija/IdpMetadata"
+          )
         ),
       },
       portMappings: [
@@ -606,7 +636,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       {
         vpc,
         internetFacing: true,
-      },
+      }
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -614,7 +644,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      },
+      }
     );
     const albHostname = `cas-oppija.${sharedHostedZone.zoneName}`;
 
@@ -622,7 +652,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb),
+        new route53_targets.LoadBalancerTarget(alb)
       ),
     });
 
@@ -633,7 +663,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
         domainName: albHostname,
         validation:
           certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-      },
+      }
     );
 
     const listener = alb.addListener("Listener", {
@@ -659,22 +689,26 @@ class CasOppijaApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/${prefix}/${name}` },
-      ),
+        { parameterName: `/${prefix}/${name}` }
+      )
     );
   }
 }
 
 type CasVirkailijaApplicationStackProps = cdk.StackProps & {
-  ecsCluster: ecs.Cluster
-  bastion: ec2.BastionHostLinux
-}
+  ecsCluster: ecs.Cluster;
+  bastion: ec2.BastionHostLinux;
+};
 
 class CasVirkailijaApplicationStack extends cdk.Stack {
-  constructor(scope: constructs.Construct, id: string, props: CasVirkailijaApplicationStackProps) {
+  constructor(
+    scope: constructs.Construct,
+    id: string,
+    props: CasVirkailijaApplicationStackProps
+  ) {
     super(scope, id, props);
 
-    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {vpcName: VPC_NAME});
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
     const database = new rds.DatabaseCluster(this, "Database", {
       vpc,
@@ -690,8 +724,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       writer: rds.ClusterInstance.provisioned("writer", {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
-            ec2.InstanceClass.T4G,
-            ec2.InstanceSize.LARGE,
+          ec2.InstanceClass.T4G,
+          ec2.InstanceSize.LARGE
         ),
       }),
       readers: [],
@@ -709,16 +743,16 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     });
 
     const taskDefinition = new ecs.FargateTaskDefinition(
-        this,
-        "TaskDefinition",
-        {
-          cpu: 2048,
-          memoryLimitMiB: 8192,
-          runtimePlatform: {
-            operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
-            cpuArchitecture: ecs.CpuArchitecture.ARM64,
-          },
+      this,
+      "TaskDefinition",
+      {
+        cpu: 2048,
+        memoryLimitMiB: 8192,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
+      }
     );
 
     const appPort = 8080;
@@ -733,12 +767,12 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       },
       secrets: {
         cas_postgres_username: ecs.Secret.fromSecretsManager(
-            database.secret!,
-            "username",
+          database.secret!,
+          "username"
         ),
         cas_postgres_password: ecs.Secret.fromSecretsManager(
-            database.secret!,
-            "password",
+          database.secret!,
+          "password"
         ),
         cas_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
         cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
@@ -746,10 +780,22 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         cas_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
         cas_mfa_username: this.ssmSecret("CasMfaUsername", "kayttooikeus"),
         cas_mfa_password: this.ssmSecret("CasMfaPassword", "kayttooikeus"),
-        cas_gauth_encryption_key: this.ssmSecret("CasGauthEncryptionKey", "kayttooikeus"),
-        cas_gauth_signing_key: this.ssmSecret("CasGauthSigningKey", "kayttooikeus"),
-        serviceprovider_app_username_to_usermanagement: this.ssmSecret("AppUsernameToUserManagement", "service-provider"),
-        serviceprovider_app_password_to_usermanagement: this.ssmSecret("AppPasswordToUserManagement", "service-provider"),
+        cas_gauth_encryption_key: this.ssmSecret(
+          "CasGauthEncryptionKey",
+          "kayttooikeus"
+        ),
+        cas_gauth_signing_key: this.ssmSecret(
+          "CasGauthSigningKey",
+          "kayttooikeus"
+        ),
+        serviceprovider_app_username_to_usermanagement: this.ssmSecret(
+          "AppUsernameToUserManagement",
+          "service-provider"
+        ),
+        serviceprovider_app_password_to_usermanagement: this.ssmSecret(
+          "AppPasswordToUserManagement",
+          "service-provider"
+        ),
       },
       portMappings: [
         {
@@ -785,8 +831,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       ],
     });
 
-    database.connections.allowDefaultPortFrom(service)
-    database.connections.allowDefaultPortFrom(props.bastion.connections)
+    database.connections.allowDefaultPortFrom(service);
+    database.connections.allowDefaultPortFrom(props.bastion.connections);
 
     const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
       this,
@@ -794,7 +840,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       {
         vpc,
         internetFacing: true,
-      },
+      }
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -802,7 +848,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      },
+      }
     );
     const albHostname = `cas.${sharedHostedZone.zoneName}`;
 
@@ -810,18 +856,18 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb),
+        new route53_targets.LoadBalancerTarget(alb)
       ),
     });
 
     const albCertificate = new certificatemanager.Certificate(
-        this,
-        "AlbCertificate",
-        {
-          domainName: albHostname,
-          validation:
-              certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-        },
+      this,
+      "AlbCertificate",
+      {
+        domainName: albHostname,
+        validation:
+          certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
+      }
     );
 
     const listener = alb.addListener("Listener", {
@@ -844,11 +890,11 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
   }
   ssmSecret(name: string, prefix: string = "cas"): ecs.Secret {
     return ecs.Secret.fromSsmParameter(
-        ssm.StringParameter.fromSecureStringParameterAttributes(
-            this,
-            `Param${name}`,
-            { parameterName: `/${prefix}/${name}` },
-        ),
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        `Param${name}`,
+        { parameterName: `/${prefix}/${name}` }
+      )
     );
   }
 }

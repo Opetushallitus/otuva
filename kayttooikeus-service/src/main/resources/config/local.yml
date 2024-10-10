@@ -1,3 +1,5 @@
 server.port: 8101
 
 kayttooikeus.oauth2.enabled: true
+kayttooikeus.oauth2.publickey: classpath:public_key.pem
+kayttooikeus.oauth2.privatekey: classpath:private_key.pem

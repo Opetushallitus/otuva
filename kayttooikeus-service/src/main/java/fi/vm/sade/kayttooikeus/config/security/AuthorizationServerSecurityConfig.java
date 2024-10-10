@@ -1,12 +1,12 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,6 +45,12 @@ public class AuthorizationServerSecurityConfig {
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final KayttajarooliProvider kayttajarooliProvider;
     private final Oauth2ClientRepository oauth2ClientRepository;
+
+    @Value("${kayttooikeus.oauth2.publickey}")
+    RSAPublicKey publicKey;
+
+    @Value("${kayttooikeus.oauth2.privatekey}")
+    RSAPrivateKey privateKey;
 
     @Bean
     @Order(3)
@@ -89,27 +95,15 @@ public class AuthorizationServerSecurityConfig {
 
     @Bean
     JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = generateRsaKey();
+        KeyPair keyPair = new KeyPair(publicKey, privateKey);
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
+                .keyID("022a9cf4-556d-45e7-90b4-8330d4f33f8c")
                 .build();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
-    }
-
-    private static KeyPair generateRsaKey() {
-        KeyPair keyPair;
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            keyPair = keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-        return keyPair;
     }
 
     @Bean
