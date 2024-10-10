@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
-import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
@@ -101,9 +100,6 @@ public class AuthorizationServerSecurityConfig {
 
     @Bean
     JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = new KeyPair(publicKey, privateKey);
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
                 .keyID("022a9cf4-556d-45e7-90b4-8330d4f33f8c")
