@@ -2,6 +2,8 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.*;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -18,4 +20,6 @@ public class Oauth2Client {
     @Column(nullable = false)
     private String secret;
 
+    @Column(nullable = false)
+    private UUID uuid;
 }

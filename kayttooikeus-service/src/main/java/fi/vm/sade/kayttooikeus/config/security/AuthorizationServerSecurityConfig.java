@@ -32,6 +32,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
+import fi.vm.sade.kayttooikeus.model.Oauth2Client;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
@@ -67,22 +68,27 @@ public class AuthorizationServerSecurityConfig {
                 return;
             }
 
+            private RegisteredClient toRegisteredClient(Oauth2Client client) {
+                return RegisteredClient.withId(client.getUuid().toString())
+                    .clientId(client.getId())
+                    .clientSecret(client.getSecret())
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                    .scope("oauth2")
+                    .build();
+            }
+
             @Override
             public RegisteredClient findById(String id) {
-                return null;
+                return oauth2ClientRepository.findByUuid(UUID.fromString(id))
+                    .map(this::toRegisteredClient)
+                    .orElse(null);
             }
 
             @Override
             public RegisteredClient findByClientId(String clientId) {
                 return oauth2ClientRepository.findById(clientId)
-                    .map(c -> RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId(c.getId())
-                        .clientSecret(c.getSecret())
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope("oauth2")
-                        .build()
-                    )
+                    .map(this::toRegisteredClient)
                     .orElse(null);
             }
         };
