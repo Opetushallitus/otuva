@@ -42,3 +42,6 @@ kayttooikeus.oauth2.publickey: ${ssm_kayttooikeus_oauth2_publickey}
 kayttooikeus.oauth2.privatekey: ${ssm_kayttooikeus_oauth2_privatekey}
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
+
+viestinvalitys.baseurl: https://viestinvalitys.opintopolku.fi/lahetys
+viestinvalitys.uiurl: https://viestinvalitys.opintopolku.fi/raportointi

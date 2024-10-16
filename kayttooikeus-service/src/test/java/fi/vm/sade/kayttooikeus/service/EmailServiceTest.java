@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -42,6 +43,10 @@ import static org.mockito.Mockito.*;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "kayttooikeus.viestinvalityspalvelu.enabled=false"
+    })
 public class EmailServiceTest extends AbstractServiceTest {
 
     private static final String HENKILO_OID = "1.2.3.4.5";
@@ -65,7 +70,7 @@ public class EmailServiceTest extends AbstractServiceTest {
     private OrganisaatioClient organisaatioClient;
 
     @Autowired
-    private EmailService emailService;
+    private EmailServiceImpl emailService;
 
     @Test
     @WithMockUser(username = "user1")

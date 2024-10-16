@@ -21,7 +21,6 @@ import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
-import fi.vm.sade.kayttooikeus.service.external.RyhmasahkopostiClient;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.junit.Before;
@@ -86,9 +85,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockBean
     private OrganisaatioClient organisaatioClient;
-
-    @MockBean
-    private RyhmasahkopostiClient ryhmasahkopostiClient;
 
     @MockBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
@@ -335,7 +331,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void createKutsuAsAdmin() {
-        given(ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
         doReturn(HenkiloDto.builder()
                 .kutsumanimi("kutsun")
                 .sukunimi("kutsuja")
@@ -372,7 +367,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
         long id = kutsuService.createKutsu(kutsu);
         KutsuReadDto tallennettu = kutsuService.getKutsu(id);
-
         assertThat(tallennettu.getAsiointikieli()).isEqualByComparingTo(Asiointikieli.fi);
         assertThat(tallennettu.getOrganisaatiot())
                 .hasSize(1)
@@ -390,7 +384,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.3.4.5"})
     public void createKutsuAsNormalUser() {
-        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
         doReturn(HenkiloDto.builder()
                 .kutsumanimi("kutsun")
                 .sukunimi("kutsuja")
@@ -460,7 +453,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD", "ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD_1.2.3.4.5"})
     public void createKutsuAsNormalUserWithKutsuCrud() {
-        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
         doReturn(HenkiloDto.builder()
                 .kutsumanimi("kutsun")
                 .sukunimi("kutsuja")
@@ -533,7 +525,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3", authorities = {"ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD", "ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD_1.2.3.4.5"})
     public void createKutsuAsPalvelukayttaja() {
         final String kutsujaForEmail = "makkara";
-        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
         doReturn(HenkiloDto.builder()
                 .kutsumanimi("kutsun")
                 .sukunimi("kutsuja")
@@ -616,7 +607,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(username = "1.2.3.4.6", authorities = {"ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD", "ROLE_APP_KAYTTOOIKEUS_KUTSU_CRUD_1.2.3.4.6"})
     public void createKutsuAsPalvelukayttajaOnAllowlist() {
         final String kutsujaForEmail = "makkara";
-        given(this.ryhmasahkopostiClient.sendRyhmasahkoposti(any())).willReturn("12345");
 
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(palvelukayttaja("1.2.3.4.6"), "1.2.3.4.5"),

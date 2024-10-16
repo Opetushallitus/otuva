@@ -41,5 +41,9 @@ kayttooikeus.kutsu.allowlist-oids: ${ssm_kayttooikeus_kutsu_allowlist}
 kayttooikeus.oauth2.enabled: true
 kayttooikeus.oauth2.publickey: ${ssm_kayttooikeus_oauth2_publickey}
 kayttooikeus.oauth2.privatekey: ${ssm_kayttooikeus_oauth2_privatekey}
+kayttooikeus.viestinvalityspalvelu.enabled: true
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
+
+viestinvalitys.baseurl: https://viestinvalitys.testiopintopolku.fi/lahetys
+viestinvalitys.uiurl: https://viestinvalitys.testiopintopolku.fi/raportointi

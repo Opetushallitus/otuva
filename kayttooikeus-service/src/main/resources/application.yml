@@ -8,6 +8,7 @@ spring.datasource.password: oph
 spring.datasource.hikari.maximum-pool-size: 2
 spring.datasource.hikari.connection-timeout: 10000
 spring.datasource.hikari.max-lifetime: 900000
+spring.freemarker.template-loader-path: /templates/
 spring.jpa.generate-ddl: false
 spring.jpa.hibernate.ddl-auto: validate
 spring.jpa.hibernate.naming.implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
@@ -89,6 +90,7 @@ kayttooikeus:
       lampi-role-arn: none
       lampi-external-id: none
 kayttooikeus.oauth2.enabled: false
+kayttooikeus.viestinvalityspalvelu.enabled: false
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 
 auth:
@@ -98,3 +100,6 @@ auth:
 springdoc.packagesToScan: fi.vm.sade.kayttooikeus.controller
 springdoc.pathsToMatch: /**
 springdoc.swagger-ui.url: /v3/api-docs.yaml
+
+viestinvalitys.baseurl: https://viestinvalitys.hahtuvaopintopolku.fi/lahetys
+viestinvalitys.uiurl: https://viestinvalitys.hahtuvaopintopolku.fi/raportointi

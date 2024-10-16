@@ -341,6 +341,11 @@
             <artifactId>sts</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.33</version>
+        </dependency>
 
         <dependency>
             <groupId>com.querydsl</groupId>

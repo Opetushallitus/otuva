@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 
 @Service
+@ConditionalOnExpression("not ${kayttooikeus.viestinvalityspalvelu.enabled:false}")
 public class EmailServiceImpl implements EmailService {
     public static final String DISCARDED_INVITATION_EMAIL_TEMPLATE = "kayttooikeus_kutsu_poistoilmoitus";
     public static final String DISCARDED_APPLICATION_EMAIL_TEMPLATE = "kayttooikeus_anomus_poistoilmoitus";
