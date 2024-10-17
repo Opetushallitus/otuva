@@ -311,7 +311,7 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
                         .organisaatioOid("1.2.3.4.1")
                         .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().nimi(new TextGroup()).build()))
                         .build()))
-                .aikaleima(LocalDateTime.now())
+                .aikaleima(LocalDateTime.of(2024, 10, 16, 0, 0))
                 .build();
 
         emailService.sendInvitationEmail(kutsu);
@@ -378,7 +378,7 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
                         .organisaatioOid("1.2.3.4.1")
                         .ryhmat(Sets.newHashSet(KayttoOikeusRyhma.builder().nimi(new TextGroup()).build()))
                         .build()))
-                .aikaleima(LocalDateTime.now())
+                .aikaleima(LocalDateTime.of(2024, 10, 16, 0, 0))
                 .build();
 
         emailService.sendInvitationEmail(kutsu);
