@@ -41,8 +41,8 @@ public class QueueingEmailService {
         var emailId = UUID.randomUUID().toString();
         log.info("Queueing email with subject and id: {}, {}", email.getSubject(), emailId);
         var sql = """
-                INSERT INTO queuedemail (id, queuedemailstatus_id, recipients, copy, replyto, subject, body, attachment_ids, idempotency_key)
-                VALUES (?::uuid, ?, ?, ?, ?, ?, ?, ?, ?::uuid)
+                INSERT INTO queuedemail (id, queuedemailstatus_id, recipients, copy, replyto, subject, body, idempotency_key)
+                VALUES (?::uuid, ?, ?, ?, ?, ?, ?, ?::uuid)
                 """;
 
         jdbcTemplate.update(con -> {
@@ -63,7 +63,6 @@ public class QueueingEmailService {
     }
 
     public void attemptSendingEmail(String emailId) {
-        return;/*
         try {
             String lahetystunniste = transactionTemplate.execute(status -> sendLahetys(emailId));
             boolean allSent = false;
@@ -77,7 +76,7 @@ public class QueueingEmailService {
         } catch (Exception e) {
             log.warn("Failed to send email " + emailId, e);
             updateLastAttempt(emailId);
-        } */
+        }
     }
 
     private String sendLahetys(String emailId) {
@@ -89,7 +88,6 @@ public class QueueingEmailService {
         var lahetys = Lahetys.builder()
                 .lahettaja(OPH_LAHETTAJA)
                 .replyTo(email.getReplyTo())
-                .lahettavanVirkailijanOid(email.getVirkailijaOid())
                 .otsikko(email.getSubject())
                 .lahettavaPalvelu("otuva")
                 .prioriteetti(Prioriteetti.normaali)
@@ -139,7 +137,7 @@ public class QueueingEmailService {
 
     public List<QueuedEmail> getQueuedEmailsToRetry() {
         var sql = """
-                SELECT queuedemail.id, lahetystunniste, queuedemailstatus_id, copy, recipients, replyto, subject, body, last_attempt, sent_at, created, modified, virkailija_oid, attachment_ids, batch_sent, idempotency_key
+                SELECT queuedemail.id, lahetystunniste, queuedemailstatus_id, copy, recipients, replyto, subject, body, last_attempt, sent_at, created, modified, batch_sent, idempotency_key
                 FROM queuedemail
                 WHERE queuedemailstatus_id = 'QUEUED'
                 AND last_attempt < current_timestamp - INTERVAL '10 minutes'
@@ -150,7 +148,7 @@ public class QueueingEmailService {
 
     private List<QueuedEmail> queryEmails(String where, String emailId) {
         var select = """
-                SELECT queuedemail.id, lahetystunniste, queuedemailstatus_id, copy, recipients, replyto, subject, body, last_attempt, sent_at, created, modified, virkailija_oid, attachment_ids, batch_sent, idempotency_key
+                SELECT queuedemail.id, lahetystunniste, queuedemailstatus_id, copy, recipients, replyto, subject, body, last_attempt, sent_at, created, modified, batch_sent, idempotency_key
                 FROM queuedemail
                 """;
         var sql = String.join("\n", List.of(select, where));
@@ -166,7 +164,6 @@ public class QueueingEmailService {
             .replyTo(rs.getString("replyto"))
             .subject(rs.getString("subject"))
             .body(rs.getString("body"))
-            .virkailijaOid(rs.getString("virkailija_oid"))
             .lastAttempt(rs.getTimestamp("last_attempt"))
             .sentAt(rs.getTimestamp("sent_at"))
             .created(rs.getTimestamp("created"))
@@ -242,7 +239,6 @@ public class QueueingEmailService {
         private String subject;
         private String body;
         private String lahetysTunniste;
-        private String virkailijaOid;
         private Timestamp sentAt;
         private Timestamp lastAttempt;
         private Timestamp created;
