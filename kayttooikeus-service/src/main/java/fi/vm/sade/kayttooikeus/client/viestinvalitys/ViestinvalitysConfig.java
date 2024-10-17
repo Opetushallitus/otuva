@@ -16,9 +16,9 @@ import java.time.Duration;
 public class ViestinvalitysConfig {
     @Value("${viestinvalitys.baseurl}")
     private String viestinvalitysUrl;
-    @Value("palvelukayttaja.username")
+    @Value("${palvelukayttaja.username}")
     private String username;
-    @Value("palvelukayttaja.password")
+    @Value("${palvelukayttaja.password}")
     private String password;
 
     @Bean
