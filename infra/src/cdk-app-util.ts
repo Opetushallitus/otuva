@@ -208,7 +208,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             },
             build: {
               commands: [
-                `./deploy-${env}.sh && ./scripts/tag-green-build-${env}.sh && ./scripts/ci/publish-release-notes-${env}.sh || true`,
+                `./deploy-${env}.sh && ./scripts/tag-green-build-${env}.sh && ./scripts/ci/publish-release-notes-${env}.sh`,
               ],
             },
           },
