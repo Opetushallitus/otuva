@@ -60,4 +60,3 @@ kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6,1.2.3.4.7
 kayttooikeus.viestinvalityspalvelu.enabled: true
 
 viestinvalitys.baseurl: http://localhost:8383/organisaatio-service/mock/viestinvalitys
-viestinvalitys.uiurl: https://viestinvalitys.hahtuvaopintopolku.fi/raportointi

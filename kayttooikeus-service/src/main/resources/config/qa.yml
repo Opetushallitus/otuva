@@ -46,4 +46,3 @@ kayttooikeus.viestinvalityspalvelu.enabled: true
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
 
 viestinvalitys.baseurl: https://viestinvalitys.testiopintopolku.fi/lahetys
-viestinvalitys.uiurl: https://viestinvalitys.testiopintopolku.fi/raportointi
