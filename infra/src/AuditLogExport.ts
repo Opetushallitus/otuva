@@ -16,7 +16,7 @@ export class AuditLogExport extends constructs.Construct {
   constructor(
     scope: constructs.Construct,
     id: string,
-    props: AuditLogExportProps,
+    props: AuditLogExportProps
   ) {
     super(scope, id);
     const auditBucket = new s3.Bucket(this, "AuditLogBucket", {});
@@ -28,21 +28,21 @@ export class AuditLogExport extends constructs.Construct {
       {
         dataOutputPrefix: keyPrefix,
         errorOutputPrefix: keyPrefix + "!{firehose:error-output-type}.",
-      },
+      }
     );
     const deliveryStream = new kinesisfirehose_alpha.DeliveryStream(
       this,
       "AuditDeliveryStream",
       {
         deliveryStreamName: legacyPrefix("Audit"),
-        destinations: [destination],
-      },
+        destination: destination,
+      }
     );
     const cfnDeliveryStream = deliveryStream.node
       .defaultChild as kinesisfirehose.CfnDeliveryStream;
     cfnDeliveryStream.addPropertyOverride(
       "ExtendedS3DestinationConfiguration.FileExtension",
-      ".log",
+      ".log"
     );
     cfnDeliveryStream.addPropertyOverride(
       "ExtendedS3DestinationConfiguration.ProcessingConfiguration",
@@ -52,7 +52,7 @@ export class AuditLogExport extends constructs.Construct {
           this.decompressionProcessor(),
           this.cloudwatchLogProcessingProcessor(),
         ],
-      },
+      }
     );
 
     new logs.SubscriptionFilter(this, "KinesisDeliveryFilter", {
@@ -92,12 +92,12 @@ class KinesisDeliveryStreamDestination
   implements logs.ILogSubscriptionDestination
 {
   constructor(
-    private readonly deliveryStream: kinesisfirehose_alpha.DeliveryStream,
+    private readonly deliveryStream: kinesisfirehose_alpha.DeliveryStream
   ) {}
 
   bind(
     scope: constructs.Construct,
-    sourceLogGroup: cdk.aws_logs.ILogGroup,
+    sourceLogGroup: cdk.aws_logs.ILogGroup
   ): cdk.aws_logs.LogSubscriptionDestinationConfig {
     const role = new iam.Role(scope, "LogsDeliveryRole", {
       assumedBy: new iam.ServicePrincipal("logs.amazonaws.com"),
