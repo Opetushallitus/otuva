@@ -493,7 +493,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       defaultDatabaseName: "casoppija",
       engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_12_17,
+        version: rds.AuroraPostgresEngineVersion.VER_16_4,
       }),
       credentials: rds.Credentials.fromGeneratedSecret("casoppija", {
         secretName: prefix("CasOppijaDatabaseSecret"),
