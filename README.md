@@ -6,4 +6,3 @@ OTUVA koostuu useasta sovelluksesta, jotka yhdessä muodostavat Opetushallitukse
 - cas-virkailija ([Palvelukortti](https://wiki.eduuni.fi/display/OPHPALV/Autentikaatiopalvelu+CAS), [lähdekoodi](cas-virkailija))
 - cas-oppija ([Palvelukortti](https://wiki.eduuni.fi/display/ophpolku/CAS-oppija), [lähdekoodi](cas-oppija))
 - service-provider ([lähdekoodi](https://github.com/Opetushallitus/service-provider))
-- login-notifications ([lähdekoodi](https://github.com/Opetushallitus/login-notifications))
