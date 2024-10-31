@@ -148,6 +148,20 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           ),
         })
       );
+      testStage.addAction(
+        new codepipeline_actions.CodeBuildAction({
+          actionName: "TestServiceProvider",
+          input: sourceOutput,
+          project: makeTestProject(
+            this,
+            env,
+            tag,
+            "TestServiceProvider",
+            ["scripts/ci/run-tests-service-provider.sh"],
+            "corretto21"
+          ),
+        })
+      );
     }
 
     const deployProject = new codebuild.PipelineProject(
