@@ -1,6 +1,6 @@
 #
 # TÄHÄN TIEDOSTOON EI SAA TALLENTAA YMPÄRISTÖKOHTAISIA ARVOJA MUUTOIN KUIN MUUTTUJINA!!!
-# 
+#
 # Tämä tiedosto toimii pohjana oph-configuration/common.properties tiedostolle,
 # joka asettaa tomcatin ympäristökohtaiset arvot.
 #
@@ -34,3 +34,13 @@ authentication.logout.redirect=https\://${host.cas}/cas/logout?service\=https%3A
 hakasp.metadatafile=file\://${user.home.conf}/hakasp.xml
 keystore.url={{ keystore_url | default("file:///home/tomcat/haka/keystore.jks") }}
 user.home.conf=${user.home}/oph-configuration
+
+# To all users
+haka.email-verification-enabled={{haka_email_verification_enabled | default(false)}}
+# To specified users even if haka.email-verification-enabled is false
+haka.email-verification-enabled.oidlist={{haka_email_verification_enabled_oidlist | default("") }}
+
+# To all users
+haka.require-strong-identification={{haka_require_strong_identification | default(false)}}
+# To specified users even if haka.require-strong-identification is false
+haka.require-strong-identification.oidlist={{haka_require_strong_identification_oidlist | default("") }}
