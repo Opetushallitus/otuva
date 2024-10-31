@@ -195,7 +195,7 @@
                                 <value type="int">5000</value>
                             </constructor-arg>
                             <constructor-arg>
-                                <value type="java.lang.String">${user.home.conf}/mpassid_metadata.xml</value>
+                                <value type="java.lang.String">${user.home}/mpassid_metadata.xml</value>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool" />
                             <property name="minRefreshDelay" value="600000" />
@@ -254,7 +254,7 @@
                                 <value type="int">5000</value>
                             </constructor-arg>
                             <constructor-arg>
-                                <value type="java.lang.String">${user.home.conf}/haka_metadata.xml</value>
+                                <value type="java.lang.String">${user.home}/haka_metadata.xml</value>
                             </constructor-arg>
                             <property name="parserPool" ref="parserPool" />
                             <!-- min refresh delay 4h -->

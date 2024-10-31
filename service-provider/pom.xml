@@ -18,30 +18,6 @@
                 <version>3.4.0</version>
             </plugin>
             <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.53.v20231009</version>
-                <configuration>
-                    <scanIntervalSeconds>0</scanIntervalSeconds>
-                    <connectors>
-                        <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
-                            <port>8443</port>
-                            <maxIdleTime>60000</maxIdleTime>
-                            <keystore>cert/keystore</keystore>
-                            <password>tosikiva</password>
-                            <keyPassword>tosikiva</keyPassword>
-                        </connector>
-                    </connectors>
-                    <stopKey>stop</stopKey>
-                    <!-- <stopPort>18443</stopPort> -->
-                    <stopPort>1${webapp.port}</stopPort>
-                    <webAppConfig>
-                        <jettyEnvXml>src/main/webapp/META-INF/jetty-env.xml</jettyEnvXml>
-                        <contextPath>/${project.artifactId}</contextPath>
-                    </webAppConfig>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>
