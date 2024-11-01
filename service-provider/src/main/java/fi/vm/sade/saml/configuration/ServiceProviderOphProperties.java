@@ -7,8 +7,7 @@ public class ServiceProviderOphProperties extends OphProperties {
 
     public ServiceProviderOphProperties() {
         addFiles("/service-provider-oph.properties");
-        addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
-        addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/service-provider-app.properties").toString());
+        addOptionalFiles(Paths.get("/app/config/service-provider.properties").toString());
     }
 
 }
