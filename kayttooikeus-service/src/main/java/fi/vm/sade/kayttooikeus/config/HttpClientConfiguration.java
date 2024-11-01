@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Primary;
 public class HttpClientConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientConfiguration.class);
-    private static final String CALLER_ID = "1.2.246.562.10.00000000001.kayttooikeus-service.backend";
+    public static final String CALLER_ID = "1.2.246.562.10.00000000001.kayttooikeus-service.backend";
 
     public static final String DEFAULT_TIMEOUT = String.valueOf(10000);
     public static final String HTTP_CLIENT_OPPIJANUMEROREKISTERI = "httpClientOppijanumerorekisteri";
