@@ -62,6 +62,15 @@ class CdkApp extends cdk.App {
       bastion: appStack.bastion,
       ecsCluster: ecsStack.cluster,
     });
+    new ServiceProviderApplicationStack(
+      this,
+      prefix("ServiceProviderApplicationStack"),
+      {
+        ...stackProps,
+        bastion: appStack.bastion,
+        ecsCluster: ecsStack.cluster,
+      }
+    );
   }
 }
 
@@ -889,6 +898,173 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     });
   }
   ssmSecret(name: string, prefix: string = "cas"): ecs.Secret {
+    return ecs.Secret.fromSsmParameter(
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        `Param${name}`,
+        { parameterName: `/${prefix}/${name}` }
+      )
+    );
+  }
+}
+
+type ServiceProviderApplicationStackProps = cdk.StackProps & {
+  bastion: ec2.BastionHostLinux;
+  ecsCluster: ecs.Cluster;
+};
+
+class ServiceProviderApplicationStack extends cdk.Stack {
+  constructor(
+    scope: constructs.Construct,
+    id: string,
+    props: ServiceProviderApplicationStackProps
+  ) {
+    super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
+    const logGroup = new logs.LogGroup(this, "AppLogGroup", {
+      logGroupName: prefix("/service-provider"),
+      retention: logs.RetentionDays.INFINITE,
+    });
+
+    const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
+      directory: path.join(__dirname, "../../service-provider"),
+      file: "Dockerfile",
+      platform: ecr_assets.Platform.LINUX_ARM64,
+    });
+
+    const taskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      "TaskDefinition",
+      {
+        cpu: 2048,
+        memoryLimitMiB: 5120,
+        runtimePlatform: {
+          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        },
+      }
+    );
+
+    const appPort = 8080;
+    taskDefinition.addContainer("AppContainer", {
+      image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
+      logging: new ecs.AwsLogDriver({ logGroup, streamPrefix: "app" }),
+      environment: {
+        ENV: getEnvironment(),
+      },
+      secrets: {
+        ssm_keystore_password: this.ssmSecret("KeystorePassword"),
+        ssm_app_username_to_usermanagement: this.ssmSecret("AppUsernameToUserManagement"),
+        ssm_app_password_to_usermanagement: this.ssmSecret("AppPasswordToUserManagement"),
+        ssm_sp_keyalias: this.ssmSecret("SpKeyAlias"),
+        ssm_sp_keyalias_secondary: this.ssmSecret("SpKeyAliasSecondary"),
+        ssm_sp_keypassword: this.ssmSecret("SpKeyPassword"),
+        ssm_mpassid_keyalias: this.ssmSecret("AppPasswordToUserManagement"),
+        keystore: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "Keystore",
+            "/service-provider/Keystore"
+          )
+        ),
+        hakasp: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "HakaSpMetadata",
+            "/service-provider/HakaSpMetadata"
+          )
+        ),
+      },
+      portMappings: [
+        {
+          name: "service-provider",
+          containerPort: appPort,
+          appProtocol: ecs.AppProtocol.http,
+        },
+      ],
+    });
+
+    const config = getConfig();
+    const service = new ecs.FargateService(this, "Service", {
+      cluster: props.ecsCluster,
+      taskDefinition,
+      desiredCount: config.minCapacity,
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      healthCheckGracePeriod: cdk.Duration.minutes(5),
+    });
+    const scaling = service.autoScaleTaskCount({
+      minCapacity: config.minCapacity,
+      maxCapacity: config.maxCapacity,
+    });
+
+    scaling.scaleOnMetric("ServiceScaling", {
+      metric: service.metricCpuUtilization(),
+      scalingSteps: [
+        { upper: 15, change: -1 },
+        { lower: 50, change: +1 },
+        { lower: 65, change: +2 },
+        { lower: 80, change: +3 },
+      ],
+    });
+
+    const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
+      this,
+      "LoadBalancer",
+      {
+        vpc,
+        internetFacing: true,
+      }
+    );
+
+    const sharedHostedZone = route53.HostedZone.fromLookup(
+      this,
+      "YleiskayttoisetHostedZone",
+      {
+        domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
+      }
+    );
+    const albHostname = `service-provider.${sharedHostedZone.zoneName}`;
+
+    new route53.ARecord(this, "ALBARecord", {
+      zone: sharedHostedZone,
+      recordName: albHostname,
+      target: route53.RecordTarget.fromAlias(
+        new route53_targets.LoadBalancerTarget(alb)
+      ),
+    });
+
+    const albCertificate = new certificatemanager.Certificate(
+      this,
+      "AlbCertificate",
+      {
+        domainName: albHostname,
+        validation:
+          certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
+      }
+    );
+
+    const listener = alb.addListener("Listener", {
+      protocol: elasticloadbalancingv2.ApplicationProtocol.HTTPS,
+      port: 443,
+      open: true,
+      certificates: [albCertificate],
+    });
+
+    listener.addTargets("ServiceTarget", {
+      port: appPort,
+      targets: [service],
+      healthCheck: {
+        enabled: true,
+        interval: cdk.Duration.seconds(10),
+        path: "/service-provider-app/buildversion.txt",
+        port: appPort.toString(),
+      },
+    });
+  }
+  ssmSecret(name: string, prefix: string = "service-provider"): ecs.Secret {
     return ecs.Secret.fromSsmParameter(
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
