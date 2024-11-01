@@ -960,7 +960,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
         ssm_sp_keyalias: this.ssmSecret("SpKeyAlias"),
         ssm_sp_keyalias_secondary: this.ssmSecret("SpKeyAliasSecondary"),
         ssm_sp_keypassword: this.ssmSecret("SpKeyPassword"),
-        ssm_mpassid_keyalias: this.ssmSecret("AppPasswordToUserManagement"),
+        ssm_mpassid_keyalias: this.ssmSecret("MpassidKeyAlias"),
         keystore: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
