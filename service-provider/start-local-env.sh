@@ -4,15 +4,10 @@ readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function main {
   cd "$repo"
-  use_correct_jvm_version
-  ./mvnw clean verify org.codehaus.cargo:cargo-maven3-plugin:run \
-    -Dcargo.maven.containerId=tomcat9x \
-    -Dcargo.maven.containerUrl=https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat/9.0.96/tomcat-9.0.96.zip
-}
-
-function use_correct_jvm_version {
-  JAVA_HOME="$( /usr/libexec/java_home -v "21" )"
-  export JAVA_HOME
+  docker build -t service-provider .
+  sp=$(cat $repo/metadata/hakasp.xml)
+  keystore=$(base64 -i $repo/keystore/keystore.jks)
+  docker run -it -p 8080:8080 -e ENV=local -e hakasp="$sp" -e keystore="$keystore" --name service-provider-container service-provider
 }
 
 main "$@"
