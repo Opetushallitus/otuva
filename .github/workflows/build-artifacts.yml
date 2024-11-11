@@ -44,11 +44,7 @@ jobs:
       - name: Build
         working-directory: ./cas-virkailija
         run: ./gradlew clean build -Dbranch=$GITHUB_REF_NAME -Drevision=$GITHUB_SHA -DbuildNumber=$GITHUB_RUN_NUMBER/$GITHUB_RUN_ATTEMPT
-      - name: Upload cas-war
-        uses: actions/upload-artifact@v4
-        with:
-          name: cas-war
-          path: cas-virkailija/build/libs/cas.war
+
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
