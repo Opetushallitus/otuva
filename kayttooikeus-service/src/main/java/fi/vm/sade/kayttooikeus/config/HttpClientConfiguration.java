@@ -61,16 +61,4 @@ public class HttpClientConfiguration {
                 .authenticator(authenticator)
                 .build();
     }
-
-    @Bean(HTTP_CLIENT_VIESTINTA)
-    public fi.vm.sade.javautils.http.OphHttpClient httpClientViestinta(UrlConfiguration properties) {
-        CasAuthenticator authenticator = new CasAuthenticator.Builder()
-                .username(username)
-                .password(password)
-                .webCasUrl(properties.url("cas.url"))
-                .casServiceUrl(properties.url("ryhmasahkoposti-service.security-check"))
-                .build();
-        return new fi.vm.sade.javautils.http.OphHttpClient.Builder(CALLER_ID).authenticator(authenticator).build();
-    }
-
 }

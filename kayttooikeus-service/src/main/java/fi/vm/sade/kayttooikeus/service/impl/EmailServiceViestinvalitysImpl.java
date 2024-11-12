@@ -25,7 +25,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,6 @@ import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processT
 
 @Slf4j
 @Service
-@ConditionalOnExpression("${kayttooikeus.viestinvalityspalvelu.enabled:false}")
 @RequiredArgsConstructor
 public class EmailServiceViestinvalitysImpl implements EmailService {
     private static final String DEFAULT_LANGUAGE_CODE = "fi";
