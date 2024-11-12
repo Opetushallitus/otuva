@@ -131,6 +131,16 @@ public class QueueingEmailService {
             .build();
     }
 
+    public void emailRetryTask() {
+        getQueuedEmailsToRetry().forEach(email -> {
+            try {
+                attemptSendingEmail(email.getId());
+            } catch (Exception e) {
+                log.warn("Failed to send email " + email.getId(), e);
+            }
+        });
+    }
+
     public Optional<QueuedEmail> getEmail(String emailId) {
         return queryEmails("WHERE queuedemail.id = ?::uuid", emailId).stream().findFirst();
     }

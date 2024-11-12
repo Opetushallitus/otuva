@@ -18,6 +18,7 @@ import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.QueueingEmailService;
 import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ public class SchedulingClusterConfiguration {
     private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
     private final HenkiloDataRepository henkiloDataRepository;
     private final OrganisaatioHenkiloService organisaatioHenkiloService;
+    private final QueueingEmailService queueingEmailService;
     private final TaskExecutorService taskExecutorService;
     private final OphSessionMappingStorage sessionMappingStorage;
     private final KayttajatiedotRepository kayttajatiedotRepository;
@@ -154,5 +156,12 @@ public class SchedulingClusterConfiguration {
         return Tasks
                 .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofHours(1)))
                 .execute((instance, ctx) -> exportTask.execute());
+    }
+
+    @Bean
+    Task<Void> emailRetryTask() {
+        return Tasks
+                .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofMinutes(5)))
+                .execute((instance, ctx) -> queueingEmailService.emailRetryTask());
     }
 }
