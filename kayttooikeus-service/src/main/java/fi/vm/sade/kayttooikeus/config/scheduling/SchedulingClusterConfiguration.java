@@ -161,7 +161,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> emailRetryTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofMinutes(5)))
+                .recurring(new TaskWithoutDataDescriptor("EmailRetryTask"), FixedDelay.of(Duration.ofMinutes(5)))
                 .execute((instance, ctx) -> queueingEmailService.emailRetryTask());
     }
 }
