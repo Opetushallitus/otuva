@@ -4,6 +4,8 @@ type EnvironmentName = (typeof environments)[number];
 const defaultConfig = {
   minCapacity: 0,
   maxCapacity: 0,
+  // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
+  serviceProviderCapacity: 1,
 };
 
 export type Config = typeof defaultConfig;

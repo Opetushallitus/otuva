@@ -989,25 +989,11 @@ class ServiceProviderApplicationStack extends cdk.Stack {
     const service = new ecs.FargateService(this, "Service", {
       cluster: props.ecsCluster,
       taskDefinition,
-      desiredCount: config.minCapacity,
+      desiredCount: config.serviceProviderCapacity,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       healthCheckGracePeriod: cdk.Duration.minutes(5),
-    });
-    const scaling = service.autoScaleTaskCount({
-      minCapacity: config.minCapacity,
-      maxCapacity: config.maxCapacity,
-    });
-
-    scaling.scaleOnMetric("ServiceScaling", {
-      metric: service.metricCpuUtilization(),
-      scalingSteps: [
-        { upper: 15, change: -1 },
-        { lower: 50, change: +1 },
-        { lower: 65, change: +2 },
-        { lower: 80, change: +3 },
-      ],
     });
 
     const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
