@@ -12,16 +12,28 @@
     <script type="text/javascript" src="/cas/js/piwik.js"></script>
     <script type="text/javascript">
         function jqueryReady() {
-            var text_fi =
-                "Haka- ja MPASSid-tunnistautumisessa on käyttökatko testiympäristössä maanantaina 4.11.2024 klo 11–14 ja tuotantoympäristössä maanantaina 11.11.2024 klo 11–14. Käyttökatkojen aikana Haka- ja MPASSid-tunnistautuminen on pois käytöstä kaikissa palveluissa. Pahoittelemme katkojen aiheuttamaa haittaa.";
-            var text_sv =
-                "På grund av underhållsförfaranden är Haka- och MPASSid-inloggningen i alla tjänsterna ur bruk i testmiljön på måndagen den 4.11.2024 kl. 11–14 och i produktionmiljön på måndagen den 11.11.2024 kl 11–14. Vi ber om ursäkt för eventuella olägenheter som avbrotten orsakar.";
+            var text_fi = [
+                "Käyttökatko Opintopolun ja Oma Opintopolun tuotantoympäristössä perjantaina 29.11.2024 klo 09.00–16.00.",
+                "Käyttökatko Opintopolun ja Oma Opintopolun testiympäristössä maanantaina 25.11.2024 klo 09.00–16.00.",
+                "Käyttökatkojen aikana kaikki virkailijan ja Oma Opintopolun -palvelut ovat poissa käytöstä. Pahoittelemme katkojen aiheuttamaa haittaa."
+            ];
+            var text_sv = [
+                "Avbrott i Studieinfo och Min Studieinfo fredagen den 29 november 2024 från 09:00 till 16:00.",
+                "Avbrott i Studieinfo och Min Studieinfo testmiljö måndagen den 25 november 2024 från 09:00 till 16:00.",
+                "Under avbrott är alla Studieinfo och Min Studieinfo otillgängliga. Vi ber om ursäkt för besväret som orsakat av avbrotten."
+            ];
             var language = $("body").attr("data-language") || "fi";
 
-            $("<div></div>", {
+            var text = language === "sv" ? text_sv : text_fi;
+            var textNodes = text.map(toDiv)
+            var container = $("<div></div>", {
                 class: "row justify-content-center ilmoitus",
-                text: language === "sv" ? text_sv : text_fi,
-            }).prependTo("main");
+            }).append(textNodes);
+            container.prependTo("main");
+        }
+
+        function toDiv(s) {
+            return $("<div></div>").text(s);
         }
     </script>
 </body>
