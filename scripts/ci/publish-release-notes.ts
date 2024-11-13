@@ -115,7 +115,7 @@ function getLastNTags(n: number): string[] {
 
 function getCommitsBetweenTags(tag1: string, tag2: string): string[] {
   const command = `git log ${tag1}..${tag2} --oneline`;
-  return runGitCommand(command).split('\n');
+  return runGitCommand(command).split("\n").filter(Boolean);
 }
 
 function runGitCommand(command: string): string {
