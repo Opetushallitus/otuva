@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -37,9 +36,7 @@ import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import lombok.RequiredArgsConstructor;
 
-
 @Configuration
-@ConditionalOnProperty("kayttooikeus.oauth2.enabled")
 @RequiredArgsConstructor
 public class AuthorizationServerSecurityConfig {
     private final KayttajatiedotRepository kayttajatiedotRepository;
