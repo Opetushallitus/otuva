@@ -55,6 +55,8 @@ kayttooikeus:
       lampi-bucket-name: none
       lampi-role-arn: none
       lampi-external-id: none
+kayttooikeus.oauth2.publickey: classpath:public_key.pem
+kayttooikeus.oauth2.privatekey: classpath:private_key.pem
 
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6,1.2.3.4.7
 
