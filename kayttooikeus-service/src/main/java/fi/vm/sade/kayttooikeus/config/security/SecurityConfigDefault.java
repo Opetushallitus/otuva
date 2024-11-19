@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.config.security;
 import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
 import fi.vm.sade.properties.OphProperties;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,6 @@ import org.apereo.cas.client.session.SessionMappingStorage;
 import org.apereo.cas.client.session.SingleSignOutFilter;
 import org.apereo.cas.client.validation.Cas30ProxyTicketValidator;
 import org.apereo.cas.client.validation.TicketValidator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -26,6 +26,7 @@ import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -36,6 +37,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableMethodSecurity(jsr250Enabled = false, prePostEnabled = true, securedEnabled = true)
@@ -46,9 +48,6 @@ public class SecurityConfigDefault {
     private SessionMappingStorage sessionMappingStorage;
 
     public static final String SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check";
-
-    @Value("${kayttooikeus.oauth2.enabled:false}")
-    private boolean oauth2Enabled;
 
     public SecurityConfigDefault(CasProperties casProperties, OphProperties ophProperties,
                                  SessionMappingStorage sessionMappingStorage) {
@@ -169,16 +168,23 @@ public class SecurityConfigDefault {
         };
     }
 
+    private boolean isOauth2Request(HttpServletRequest request) {
+        return request.getHeader("Authorization") != null
+            && request.getHeader("Authorization").startsWith("Bearer ");
+    }
+
     @Bean
     @Order(4)
-    SecurityFilterChain restApiFilterChain(HttpSecurity http, CasAuthenticationFilter casAuthenticationFilter,
-            AuthenticationEntryPoint authenticationEntryPoint, SecurityContextRepository securityContextRepository) throws Exception {
-        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-        requestCache.setMatchingRequestParameterName(null);
-        http
+    SecurityFilterChain oauth2RestApiFilterChain(HttpSecurity http) throws Exception {
+        return http
             .headers(headers -> headers.disable())
             .csrf(csrf -> csrf.disable())
-            .securityMatcher("/**")
+            .securityMatcher(new RequestMatcher() {
+                @Override
+                public boolean matches(HttpServletRequest request) {
+                    return isOauth2Request(request);
+                }
+            })
             .authorizeHttpRequests(authz -> authz
                     .requestMatchers("/buildversion.txt").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
@@ -192,8 +198,45 @@ public class SecurityConfigDefault {
                     .requestMatchers("/cas/loginparams").permitAll()
                     .requestMatchers("/cas/tunnistus").permitAll()
                     .requestMatchers("/userDetails", "/userDetails/*").permitAll()
-                    .requestMatchers("/swagger-ui.html", "/swagger-ui/", "/swagger-ui/**", "/swagger-resources/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
+                    .requestMatchers("/.well-known/**").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .anyRequest().authenticated())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(oauth2JwtConverter())))
+            .build();
+    }
+
+    @Bean
+    @Order(5)
+    SecurityFilterChain casRestApiFilterChain(HttpSecurity http, CasAuthenticationFilter casAuthenticationFilter,
+            AuthenticationEntryPoint authenticationEntryPoint, SecurityContextRepository securityContextRepository) throws Exception {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+        http
+            .headers(headers -> headers.disable())
+            .csrf(csrf -> csrf.disable())
+            .securityMatcher(new RequestMatcher() {
+                @Override
+                public boolean matches(HttpServletRequest request) {
+                    return !isOauth2Request(request);
+                }
+            })
+            .authorizeHttpRequests(authz -> authz
+                    .requestMatchers("/buildversion.txt").permitAll()
+                    .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/kutsu/token/*").permitAll()
+                    .requestMatchers("/cas/uudelleenrekisterointi").permitAll()
+                    .requestMatchers("/cas/henkilo/loginToken/*").permitAll()
+                    .requestMatchers("/cas/emailverification/*").permitAll()
+                    .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
+                    .requestMatchers("/cas/emailverification/redirectByLoginToken/*").permitAll()
+                    .requestMatchers("/cas/salasananvaihto").permitAll()
+                    .requestMatchers("/cas/loginparams").permitAll()
+                    .requestMatchers("/cas/tunnistus").permitAll()
+                    .requestMatchers("/userDetails", "/userDetails/*").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
                     .requestMatchers("/.well-known/**").permitAll()
                     .requestMatchers("/error").permitAll()
@@ -205,11 +248,6 @@ public class SecurityConfigDefault {
                     .securityContextRepository(securityContextRepository))
             .requestCache(cache -> cache.requestCache(requestCache))
             .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint));
-
-        if (oauth2Enabled) {
-            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(oauth2JwtConverter())));
-        }
-
         return http.build();
     }
 }

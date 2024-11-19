@@ -89,7 +89,6 @@ kayttooikeus:
       lampi-bucket-name: none
       lampi-role-arn: none
       lampi-external-id: none
-kayttooikeus.oauth2.enabled: false
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 
 auth:
