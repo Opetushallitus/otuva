@@ -3,6 +3,8 @@ package fi.vm.sade.kayttooikeus.aspects;
 import fi.vm.sade.auditlog.*;
 import lombok.RequiredArgsConstructor;
 import org.ietf.jgss.Oid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -21,11 +23,7 @@ public class AuditLogger {
     private final Audit audit;
 
     public void log(Operation operation, Target target, Changes changes) {
-        log(getUser(), operation, target, changes);
-    }
-
-    public void log(User user, Operation operation, Target target, Changes changes) {
-        audit.log(user, operation, target, changes);
+        audit.log(getUser(), operation, target, changes);
     }
 
     public static User getUser() {
@@ -37,10 +35,16 @@ public class AuditLogger {
     }
 
     public static User getUser(HttpServletRequest request) {
-        Optional<Oid> oid = getOid(request);
         InetAddress ip = getIp(request);
-        String session = getSession(request).orElse(null);
         String userAgent = getUserAgent(request).orElse(null);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (isOauth2User(authentication)) {
+            return new Oauth2User(authentication.getName(), ip, userAgent);
+        }
+
+        Optional<Oid> oid = getOid(request);
+        String session = getSession(request).orElse(null);
 
         if (oid.isPresent()) {
             return new User(oid.get(), ip, session, userAgent);
@@ -49,4 +53,7 @@ public class AuditLogger {
         }
     }
 
+    private static boolean isOauth2User(Authentication auth) {
+        return auth != null && auth.getName() != null && !auth.getName().startsWith("1.");
+    }
 }
