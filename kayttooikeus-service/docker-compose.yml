@@ -1,7 +1,7 @@
 services:
   database:
     container_name: kayttooikeus-db
-    image: postgres:13.4
+    image: postgres:16.4
     environment:
       - POSTGRES_DB=kayttooikeus
       - POSTGRES_USER=oph
@@ -10,7 +10,7 @@ services:
       - 5436:5432
   test-database:
     container_name: kayttooikeus-test-db
-    image: postgres:13.4
+    image: postgres:16.4
     environment:
       - POSTGRES_DB=kayttooikeus
       - POSTGRES_USER=app
