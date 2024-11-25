@@ -158,11 +158,17 @@ class ApplicationStack extends cdk.Stack {
       ec2.Port.tcp(database.clusterEndpoint.port)
     );
 
+    const alarmTopic = sns.Topic.fromTopicArn(
+      this,
+      "AlarmTopic",
+      config.alarmTopicArn
+    );
+
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
     });
-    this.exportFailureAlarm(logGroup);
+    this.exportFailureAlarm(logGroup, alarmTopic);
 
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
@@ -338,12 +344,7 @@ class ApplicationStack extends cdk.Stack {
     this.ipRestrictions(alb);
   }
 
-  exportFailureAlarm(logGroup: logs.LogGroup) {
-    const alarmTopic = sns.Topic.fromTopicArn(
-      this,
-      "AlarmTopic",
-      ALARM_TOPIC_ARN
-    );
+  exportFailureAlarm(logGroup: logs.LogGroup, alarmTopic: sns.ITopic) {
     const metricFilter = logGroup.addMetricFilter(
       "ExportTaskSuccessMetricFilter",
       {
