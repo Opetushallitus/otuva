@@ -12,14 +12,16 @@
     <script type="text/javascript" src="/cas/js/piwik.js"></script>
     <script type="text/javascript">
         function jqueryReady() {
-            var text_fi = [
-                "Opintopolussa ja Oma Opintopolussa on käyttökatko perjantaina 29.11.2024. Aiemmasta ilmoituksesta poiketen käyttökatko jatkuu iltaan.",
-                "Käyttökatkojen aikana kaikki virkailijan ja Oma Opintopolun -palvelut ovat poissa käytöstä. Pahoittelemme katkojen aiheuttamaa haittaa."
-            ];
-            var text_sv = [
-                "Studieinfo och Min Studieinfo har avbrott fredagen den 29 november 2024. Med avvikelse från vad som tidigare meddelats fortsätter avbrottet under kvällen.",
-                "Under avbrottet är alla Studieinfo och Min Studieinfo otillgängliga. Vi ber om ursäkt för besväret som orsakat av avbrotten.",
-            ];
+            var text_fi = []
+            var text_sv = []
+            if (window.location.hostname === "virkailija.testiopintopolku.fi") {
+                text_fi = ["Virkailijan Opintopolun testiympäristössä on käyttökatko 9.12.2024 kello 11–14. Katkon aikana palvelut ovat poissa käytöstä. Pahoittelemme katkon aiheuttamaa haittaa."]
+                text_sv = ["På grund av underhållsförfaranden är tjänsterna i testmiljön i Studieinfo för administratörer ur bruk på måndagen 9.12.2024 klockan 11:00-14:00. Vi ber om ursäkt för eventuella olägenheter som avbrotten förorsakar."]
+            }
+            if (window.location.hostname === "virkailija.opintopolku.fi") {
+                text_fi = ["Virkailijan Opintopolun palveluissa on käyttökatko 13.12.2024 kello 11–14. Katkon aikana palvelut ovat poissa käytöstä. Pahoittelemme katkon aiheuttamaa haittaa."]
+                text_sv = ["På grund av underhållsförfaranden är tjänsterna i Studieinfo för administratörer ur bruk på fredagen 13.12.2024 klockan 11:00-14:00. Vi ber om ursäkt för eventuella olägenheter som avbrotten förorsakar."]
+            }
             var language = $("body").attr("data-language") || "fi";
 
             var text = language === "sv" ? text_sv : text_fi;
