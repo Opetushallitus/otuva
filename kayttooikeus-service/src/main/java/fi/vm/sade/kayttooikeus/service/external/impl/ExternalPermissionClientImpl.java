@@ -32,7 +32,6 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
         SERVICE_URIS.put(ExternalPermissionService.ATARU, properties.url("ataru-editori.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.KOSKI, properties.url("koski.external-permission-check"));
         SERVICE_URIS.put(ExternalPermissionService.VARDA, properties.url("varda.external-permission-check"));
-        SERVICE_URIS.put(ExternalPermissionService.YKI, properties.url("yki.external-permission-check"));
     }
 
     @Override
