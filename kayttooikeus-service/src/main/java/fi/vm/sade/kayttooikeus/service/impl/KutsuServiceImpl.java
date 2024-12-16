@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
@@ -18,15 +19,18 @@ import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsujaValidator;
-import fi.vm.sade.kayttooikeus.util.KutsuHakuBuilder;
+import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -76,18 +80,52 @@ public class KutsuServiceImpl implements KutsuService {
                                          KutsuCriteria kutsuCriteria,
                                          Long offset,
                                          Long amount) {
-        return new KutsuHakuBuilder(this.permissionCheckerService,
-                this.localizationService,
-                this.commonProperties,
-                this.myonnettyKayttoOikeusRyhmaTapahtumaRepository,
-                this.kutsuRepository,
-                this.mapper,
-                this.organisaatioClient,
-                kutsuCriteria)
-                .prepareByAuthority()
-                .doSearch(sortBy, direction, offset, amount)
-                .localise()
-                .build();
+        setCriteriaByView(kutsuCriteria);
+        setCriteriaByUser(kutsuCriteria);
+        List<Kutsu> kutsut = kutsuRepository.listKutsuListDtos(kutsuCriteria, sortBy.getSortWithDirection(direction), offset, amount);
+        List<KutsuReadDto> result = mapper.mapAsList(kutsut, KutsuReadDto.class);
+        result.forEach(kutsuReadDto -> localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot()));
+        return result;
+    }
+
+    private void setCriteriaByView(KutsuCriteria kutsuCriteria) {
+        if (KutsuView.OPH.equals(kutsuCriteria.getView())) {
+            kutsuCriteria.setKutsujaOrganisaatioOid(commonProperties.getRootOrganizationOid());
+            kutsuCriteria.setSubOrganisations(false);
+        } else if (KutsuView.ONLY_OWN_KUTSUS.equals(kutsuCriteria.getView())) {
+            kutsuCriteria.setKutsujaOid(permissionCheckerService.getCurrentUserOid());
+        } else if (KutsuView.KAYTTOOIKEUSRYHMA.equals(kutsuCriteria.getView())) {
+            kutsuCriteria.setKutsujaKayttooikeusryhmaIds(myonnettyKayttoOikeusRyhmaTapahtumaRepository
+                    .findValidMyonnettyKayttooikeus(permissionCheckerService.getCurrentUserOid()).stream()
+                    .map(MyonnettyKayttoOikeusRyhmaTapahtuma::getKayttoOikeusRyhma)
+                    .map(KayttoOikeusRyhma::getId)
+                    .collect(Collectors.toSet()));
+        }
+    }
+
+    private void setCriteriaByUser(KutsuCriteria kutsuCriteria) {
+        if (permissionCheckerService.isCurrentUserAdmin()) {
+            return;
+        } else if (permissionCheckerService.isCurrentUserMiniAdmin(PALVELU_KAYTTOOIKEUS, ROLE_CRUD, ROLE_KUTSU_CRUD)) {
+            kutsuCriteria.setKutsujaOrganisaatioOid(commonProperties.getRootOrganizationOid());
+        } else {
+            Set<String> organisaatioOidLimit;
+            Map<String, List<String>> palveluRoolit = new HashMap<>();
+            palveluRoolit.put(PALVELU_KAYTTOOIKEUS, asList(ROLE_CRUD, ROLE_KUTSU_CRUD));
+            if (!CollectionUtils.isEmpty(kutsuCriteria.getOrganisaatioOids())) {
+                organisaatioOidLimit = permissionCheckerService
+                        .hasOrganisaatioInHierarchy(kutsuCriteria.getOrganisaatioOids(), palveluRoolit);
+            } else {
+                organisaatioOidLimit = permissionCheckerService.getCurrentUserOrgnisationsWithPalveluRole(palveluRoolit);
+            }
+            if (BooleanUtils.isTrue(kutsuCriteria.getSubOrganisations())) {
+                organisaatioOidLimit = organisaatioOidLimit.stream()
+                        .flatMap(organisaatioOid -> organisaatioClient.listWithChildOids(organisaatioOid,
+                                new OrganisaatioMyontoPredicate(false)).stream())
+                        .collect(Collectors.toSet());
+            }
+            kutsuCriteria.setOrganisaatioOids(organisaatioOidLimit);
+        }
     }
 
     private String validateAndGetKutsujaOid(KutsuCreateDto kutsuCreateDto, String kayttajaOid) {
