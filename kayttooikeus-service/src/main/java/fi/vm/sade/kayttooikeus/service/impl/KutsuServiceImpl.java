@@ -24,7 +24,6 @@ import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import lombok.RequiredArgsConstructor;
 
-import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -118,7 +117,7 @@ public class KutsuServiceImpl implements KutsuService {
             } else {
                 organisaatioOidLimit = permissionCheckerService.getCurrentUserOrgnisationsWithPalveluRole(palveluRoolit);
             }
-            if (BooleanUtils.isTrue(kutsuCriteria.getSubOrganisations())) {
+            if (Boolean.TRUE.equals(kutsuCriteria.getSubOrganisations())) {
                 organisaatioOidLimit = organisaatioOidLimit.stream()
                         .flatMap(organisaatioOid -> organisaatioClient.listWithChildOids(organisaatioOid,
                                 new OrganisaatioMyontoPredicate(false)).stream())

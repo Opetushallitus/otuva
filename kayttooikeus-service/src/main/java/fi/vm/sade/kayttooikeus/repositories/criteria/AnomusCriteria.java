@@ -13,7 +13,6 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import lombok.*;
-import org.apache.commons.lang.BooleanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -68,7 +67,7 @@ public class AnomusCriteria {
 
             builder = this.condition(qAnomus, builder, this.getInSameOrganisationPredicate(organisaatioClient, qAnomus));
 
-            if (BooleanUtils.isTrue(this.adminView)) {
+            if (Boolean.TRUE.equals(this.adminView)) {
                 QKayttoOikeusRyhma qAdminViewKor = new QKayttoOikeusRyhma("adminViewKor");
                 QKayttoOikeus qAdminViewKo = new QKayttoOikeus("adminViewKo");
                 JPQLQuery<KayttoOikeusRyhma> adminViewSubquery = JPAExpressions.select(qAdminViewKor)
@@ -78,7 +77,7 @@ public class AnomusCriteria {
                 builder.and(qKayttoOikeusRyhma.in(adminViewSubquery));
             }
 
-            if (BooleanUtils.isTrue(this.onlyActive)) {
+            if (Boolean.TRUE.equals(this.onlyActive)) {
                 builder.and(qHaettuKayttoOikeusRyhma.tyyppi.eq(KayttoOikeudenTila.ANOTTU)
                         .or(qHaettuKayttoOikeusRyhma.tyyppi.isNull()));
             }
