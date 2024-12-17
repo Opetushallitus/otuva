@@ -1,3 +1,7 @@
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 buildscript {
     repositories {
         if (project.privateRepoUrl) {
