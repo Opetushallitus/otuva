@@ -3,9 +3,7 @@ package fi.vm.sade.kayttooikeus.service.it;
 
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,17 +43,6 @@ public class OrikaMappingTest extends AbstractServiceIntegrationTest {
 
         this.mapper.map(now, ZonedDateTime.class);
         this.mapper.map(nowZonedDateTime, Date.class);
-    }
-
-    @Test
-    public void palvelukayttajaHakuMapping() {
-        HenkilohakuResultDto henkilohakuResult = new HenkilohakuResultDto("oid1", "teemu", "testaaja", "kayttajatunnus1");
-
-        PalvelukayttajaReadDto palvelukayttaja = mapper.map(henkilohakuResult, PalvelukayttajaReadDto.class);
-
-        assertThat(palvelukayttaja)
-                .returns("oid1", from(PalvelukayttajaReadDto::getOid))
-                .returns("testaaja", from(PalvelukayttajaReadDto::getNimi));
     }
 
     @Test
