@@ -149,11 +149,9 @@ public class HenkilohakuBuilder {
                         .collect(toSet());
                 criteriaOrganisaatioOids.retainAll(kayttajaOrganisaatioOids);
             }
-        } else {
-            if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && juuriorganisaatioHaku) {
-                // oph-virkailija hakee kaikista organisaatioista
-                criteriaOrganisaatioOids = null;
-            }
+        } else if (Boolean.TRUE.equals(henkilohakuCriteriaDto.getSubOrganisation()) && juuriorganisaatioHaku) {
+            // oph-virkailija hakee kaikista organisaatioista
+            criteriaOrganisaatioOids = null;
         }
         henkilohakuCriteriaDto.setOrganisaatioOids(criteriaOrganisaatioOids);
         return this;

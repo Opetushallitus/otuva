@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
@@ -9,52 +7,55 @@ import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
+import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import fi.vm.sade.kayttooikeus.service.HenkilohakuBuilderService;
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
-
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-    private final HenkiloDataRepository henkiloRepository;
-    private final HenkilohakuBuilderService henkilohakuBuilderService;
-    private final OrikaBeanMapper mapper;
+    private final HenkiloDataRepository henkiloDataRepository;
+    private final HenkiloHibernateRepository henkiloHibernateRepository;
+    private final OrganisaatioClient organisaatioClient;
 
     @Override
     @Transactional(readOnly = true)
-    public Iterable<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto palvelukayttajaCriteriaDto) {
-        HenkilohakuCriteriaDto henkilohakuCriteriaDto = mapper.map(palvelukayttajaCriteriaDto, HenkilohakuCriteriaDto.class);
-        henkilohakuCriteriaDto.setNameQuery(null);
-        henkilohakuCriteriaDto.setSukunimi(palvelukayttajaCriteriaDto.getNameQuery());
-        henkilohakuCriteriaDto.setKayttajatunnus(palvelukayttajaCriteriaDto.getNameQuery());
-        henkilohakuCriteriaDto.setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
-        henkilohakuCriteriaDto.setSubOrganisation(palvelukayttajaCriteriaDto.getSubOrganisation());
-        henkilohakuCriteriaDto.setPassivoitu(true);
-        henkilohakuCriteriaDto.setNoOrganisation(true);
+    public List<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto palvelukayttajaCriteriaDto) {
+        Set<String> organisaatioOids = palvelukayttajaCriteriaDto.getOrganisaatioOid() != null
+            ? new HashSet<>(Arrays.asList(palvelukayttajaCriteriaDto.getOrganisaatioOid()))
+            : null;
+        if (organisaatioOids != null && Boolean.TRUE.equals(palvelukayttajaCriteriaDto.getSubOrganisation())) {
+            organisaatioOids.addAll(organisaatioClient.getChildOids(palvelukayttajaCriteriaDto.getOrganisaatioOid()));
+        }
 
-        OrderByHenkilohaku orderBy = OrderByHenkilohaku.HENKILO_NIMI_ASC;
-        Collection<HenkilohakuResultDto> palvelukayttajat = henkilohakuBuilderService.getBuilder(henkilohakuCriteriaDto)
-                .exclusion()
-                .search(0L, null, orderBy)
+        HenkiloCriteria criteria = HenkiloCriteria.builder()
+                .sukunimi(palvelukayttajaCriteriaDto.getNameQuery())
+                .kayttajatunnus(palvelukayttajaCriteriaDto.getNameQuery())
+                .noOrganisation(palvelukayttajaCriteriaDto.getOrganisaatioOid() == null)
+                .organisaatioOids(organisaatioOids)
+                .kayttajaTyyppi(KayttajaTyyppi.PALVELU)
+                .passivoitu(true)
                 .build();
-        return palvelukayttajat.stream().map(henkilohakuResult -> {
-            PalvelukayttajaReadDto palvelukayttaja = new PalvelukayttajaReadDto();
-            palvelukayttaja.setOid(henkilohakuResult.getOidHenkilo());
-            palvelukayttaja.setNimi(henkilohakuResult.getSukunimi());
-            palvelukayttaja.setKayttajatunnus(henkilohakuResult.getKayttajatunnus());
-            return palvelukayttaja;
-        }).collect(toList());
+
+        return henkiloHibernateRepository.findByCriteria(criteria, 0l, null, OrderByHenkilohaku.HENKILO_NIMI_ASC.getValue())
+                .stream()
+                .map(h -> new PalvelukayttajaReadDto(h.getOidHenkilo(), h.getSukunimi(), h.getKayttajatunnus()))
+                .toList();
     }
 
     @Override
@@ -67,15 +68,12 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
 
         String oid = oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
 
-        Henkilo henkilo = henkiloRepository.findByOidHenkilo(oid).orElseGet(Henkilo::new);
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseGet(Henkilo::new);
         henkilo.setOidHenkilo(oid);
         henkilo.setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
-        henkiloRepository.save(henkilo);
+        henkiloDataRepository.save(henkilo);
 
-        PalvelukayttajaReadDto readDto = new PalvelukayttajaReadDto();
-        readDto.setOid(oid);
-        readDto.setNimi(createDto.getNimi()); // luotetaan että tämä tallentui
-        return readDto;
+        return new PalvelukayttajaReadDto(oid, createDto.getNimi(), null);
     }
 
 }

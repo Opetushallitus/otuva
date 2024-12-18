@@ -1,5 +1,7 @@
 package fi.vm.sade.kayttooikeus.service;
 
+import java.util.List;
+
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
@@ -17,7 +19,7 @@ public interface PalvelukayttajaService {
      * @param criteria hakukriteerit
      * @return palvelukäyttäjät
      */
-    Iterable<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria);
+    List<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria);
 
     /**
      * Luo palvelukäyttäjän.
