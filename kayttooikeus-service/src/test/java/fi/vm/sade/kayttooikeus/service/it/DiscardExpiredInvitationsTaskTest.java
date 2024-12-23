@@ -75,6 +75,7 @@ public class DiscardExpiredInvitationsTaskTest {
         response.setLahetysTunniste(lahetysTunniste);
         Mockito.when(viestinvalitysClient.luoLahetys(Mockito.any(Lahetys.class))).thenReturn(response);
 
+        ensureQueuedEmailStatusDataExists();
         deleteKutsut();
         deleteQueuedEmails();
     }
@@ -171,4 +172,14 @@ public class DiscardExpiredInvitationsTaskTest {
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
+    private void ensureQueuedEmailStatusDataExists() {
+        var sql = """
+                INSERT INTO queuedemailstatus (id, description) VALUES
+                ('QUEUED', 'Sähköposti odottaa lähettämistä'),
+                ('SENT', 'Sähköposti on lähetetty viestinvälityspalveluun'),
+                ('ERROR', 'Sähköposti on virheellinen')
+                ON CONFLICT DO NOTHING
+                """;
+        jdbcTemplate.execute(sql);
+    }
 }
