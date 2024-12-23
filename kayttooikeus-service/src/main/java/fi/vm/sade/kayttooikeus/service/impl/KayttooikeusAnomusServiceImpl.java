@@ -528,11 +528,13 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void discard(Anomus anomus) {
         anomus.setAnomuksenTila(AnomuksenTila.HYLATTY);
         anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
         anomus.setKasittelija(resolveAdminUser());
+        anomusRepository.save(anomus);
+        emailService.sendDiscardNotification(anomus);
     }
 
     private Henkilo resolveAdminUser() {

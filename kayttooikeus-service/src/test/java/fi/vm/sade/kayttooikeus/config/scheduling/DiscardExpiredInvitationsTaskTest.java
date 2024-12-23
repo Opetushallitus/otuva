@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
-import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,14 +21,11 @@ public class DiscardExpiredInvitationsTaskTest {
 
     private KutsuService service;
 
-    private EmailService emailService;
-
     @Before
     public void setUp() {
         kayttooikeusProperties = mock(KayttooikeusProperties.class, Answers.RETURNS_DEEP_STUBS);
         service = mock(KutsuService.class, Answers.RETURNS_DEEP_STUBS);
-        emailService = mock(EmailService.class, Answers.RETURNS_DEEP_STUBS);
-        discardExpiredInvitationsTask = new DiscardExpiredInvitationsTask(emailService);
+        discardExpiredInvitationsTask = new DiscardExpiredInvitationsTask();
     }
 
     @Test
@@ -45,16 +41,13 @@ public class DiscardExpiredInvitationsTaskTest {
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(invitation));
         discardExpiredInvitationsTask.expire("invitations", service,  Period.ofMonths(2));
         verify(service, times(1)).discard(invitation);
-        verify(emailService, times(1)).sendDiscardNotification(invitation);
     }
 
     @Test
     public void executeFailure() {
         Kutsu invitation = mock(Kutsu.class, Answers.RETURNS_DEEP_STUBS);
         when(service.findExpired(any(Period.class))).thenReturn(Collections.singletonList(invitation));
-        doThrow(new RuntimeException()).when(emailService).sendDiscardNotification(invitation);
         discardExpiredInvitationsTask.expire("invitations", service,  Period.ofMonths(2));
         verify(service, times(1)).discard(invitation);
-        verify(emailService, times(1)).sendDiscardNotification(invitation);
     }
 }

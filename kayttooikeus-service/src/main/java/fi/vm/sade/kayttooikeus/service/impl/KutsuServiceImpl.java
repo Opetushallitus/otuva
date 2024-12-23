@@ -488,8 +488,10 @@ public class KutsuServiceImpl implements KutsuService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void discard(Kutsu invitation) {
         invitation.poista(commonProperties.getAdminOid());
+        kutsuRepository.save(invitation);
+        emailService.sendDiscardNotification(invitation);
     }
 }

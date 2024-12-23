@@ -8,13 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class DiscardExpiredApplicationsTask extends AbstractExpiringEntitiesTask<Anomus> {
-    private final EmailService emailService;
-
-    @Override
-    public void sendNotification(Anomus application) {
-        emailService.sendDiscardNotification(application);
-    }
-}
+public class DiscardExpiredApplicationsTask extends AbstractExpiringEntitiesTask<Anomus> {}
 
 

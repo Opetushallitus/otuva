@@ -7,11 +7,4 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
-public class DiscardExpiredInvitationsTask extends AbstractExpiringEntitiesTask<Kutsu> {
-    private final EmailService emailService;
-
-    @Override
-    public void sendNotification(Kutsu invitation) {
-        emailService.sendDiscardNotification(invitation);
-    }
-}
+public class DiscardExpiredInvitationsTask extends AbstractExpiringEntitiesTask<Kutsu> {}
