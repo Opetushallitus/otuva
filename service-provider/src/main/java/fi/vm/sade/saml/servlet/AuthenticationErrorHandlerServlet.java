@@ -78,7 +78,8 @@ public class AuthenticationErrorHandlerServlet extends HttpServlet {
         }
 
         if (error.get(ERROR_TITLE) == null) {
-            putError(error, "Odottamaton virhe tunnistautumisessa", "Oväntat fel vid identifiering", "Tunnistautumisessa tapahtui odottamaton virhe: </p><p>" + exception.getMessage(), "Ett oväntat fel inträffade vid identifiering: </p><p>" + exception.getMessage());
+            logger.warn("Unexpected error: {}", exception.getMessage());
+            putError(error, "Odottamaton virhe tunnistautumisessa", "Oväntat fel vid identifiering", "Tunnistautumisessa tapahtui odottamaton virhe.", "Ett oväntat fel inträffade vid identifiering.");
         }
 
         return error;
