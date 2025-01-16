@@ -39,16 +39,37 @@ class ContinousDeploymentStack extends cdk.Stack {
       }
     );
 
-    (["hahtuva", "dev", "qa", "prod"] as const).forEach(
-      (env) =>
-        new ContinousDeploymentPipelineStack(
-          this,
-          legacyPrefix(`${capitalize(env)}ContinuousDeploymentPipeline`),
-          connection,
-          env,
-          { owner: "Opetushallitus", name: "otuva", branch: "master" },
-          props
-        )
+    new ContinousDeploymentPipelineStack(
+      this,
+      legacyPrefix("HahtuvaContinuousDeploymentPipeline"),
+      connection,
+      "hahtuva",
+      { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      props
+    );
+    new ContinousDeploymentPipelineStack(
+      this,
+      legacyPrefix("DevContinuousDeploymentPipeline"),
+      connection,
+      "dev",
+      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
+      props
+    );
+    new ContinousDeploymentPipelineStack(
+      this,
+      legacyPrefix("QaContinuousDeploymentPipeline"),
+      connection,
+      "qa",
+      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      props
+    );
+    new ContinousDeploymentPipelineStack(
+      this,
+      legacyPrefix("ProdContinuousDeploymentPipeline"),
+      connection,
+      "prod",
+      { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
+      props
     );
   }
 }
@@ -81,12 +102,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         pipelineType: PipelineType.V1,
       }
     );
-    const tag = {
-      hahtuva: repository.branch,
-      dev: "green-hahtuva",
-      qa: "green-dev",
-      prod: "green-qa",
-    }[env];
     const sourceOutput = new codepipeline.Artifact();
     const sourceAction =
       new codepipeline_actions.CodeStarConnectionsSourceAction({
@@ -113,7 +128,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           project: makeTestProject(
             this,
             env,
-            tag,
             "TestKayttooikeus",
             ["scripts/ci/run-tests-kayttooikeus.sh"],
             "corretto21"
@@ -127,7 +141,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           project: makeTestProject(
             this,
             env,
-            tag,
             "TestCasVirkailija",
             ["scripts/ci/run-tests-cas-virkailija.sh"],
             "corretto21"
@@ -141,7 +154,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           project: makeTestProject(
             this,
             env,
-            tag,
             "TestCasOppija",
             ["scripts/ci/run-tests-cas-oppija.sh"],
             "corretto11"
@@ -155,7 +167,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           project: makeTestProject(
             this,
             env,
-            tag,
             "TestServiceProvider",
             ["scripts/ci/run-tests-service-provider.sh"],
             "corretto21"
@@ -216,7 +227,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
               commands: [
                 "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
                 "sudo yum install -y perl-Digest-SHA", // for shasum command
-                `git checkout ${tag}`,
                 "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
               ],
             },
@@ -268,7 +278,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
 function makeTestProject(
   scope: constructs.Construct,
   env: string,
-  tag: string,
   name: string,
   testCommands: string[],
   javaVersion: "corretto11" | "corretto21"
@@ -321,7 +330,6 @@ function makeTestProject(
             commands: [
               "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
               "sudo yum install -y perl-Digest-SHA", // for shasum command
-              `git checkout ${tag}`,
               "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
             ],
           },
