@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('AMKPAL', 'ARVO-OPH-REKISTERINPITAJA', 'Arvo-OPH-rekisterinpitäjä');
