@@ -10,12 +10,14 @@ import * as ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as elasticloadbalancingv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53_targets from "aws-cdk-lib/aws-route53-targets";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sns from "aws-cdk-lib/aws-sns";
+import * as sns_subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as wafv2 from "aws-cdk-lib/aws-wafv2";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
@@ -27,9 +29,9 @@ import {
   legacyPrefix,
   CDK_QUALIFIER,
   VPC_NAME,
-  ALARM_TOPIC_ARN,
 } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
+import {createHealthCheckStacks} from "./health-check";
 
 class CdkApp extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -41,7 +43,10 @@ class CdkApp extends cdk.App {
       },
     };
 
+    const config = getConfig();
+
     new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
+    const { alarmsToSlackLambda, alarmTopic } = new AlarmStack(this, prefix("AlarmStack"), stackProps);
     const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
     const appStack = new ApplicationStack(
       this,
@@ -55,6 +60,7 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
         ...stackProps,
         bastion: appStack.bastion,
+        alarmTopic,
       }
     );
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
@@ -71,6 +77,59 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
       }
     );
+
+    createHealthCheckStacks(this, alarmsToSlackLambda, [
+      { name: "Kayttooikeus", url: new URL(`https://virkailija.${config.opintopolkuHost}/kayttooikeus-service/actuator/health`) },
+      { name: "CasVirkailija", url: new URL(`https://virkailija.${config.opintopolkuHost}/cas/actuator/health`) },
+      { name: "CasOppija", url: new URL(`https://${config.opintopolkuHost}/cas-oppija/actuator/health`) },
+      { name: "ServiceProvider", url: new URL(`https://virkailija.${config.opintopolkuHost}/service-provider-app/buildversion.txt`) },
+    ])
+  }
+}
+
+class AlarmStack extends cdk.Stack {
+  readonly alarmTopic: sns.ITopic;
+  readonly alarmsToSlackLambda: lambda.IFunction;
+  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+    super(scope, id, props);
+
+    this.alarmsToSlackLambda = this.createAlarmsToSlackLambda();
+    this.alarmTopic = this.createAlarmTopic();
+
+    this.alarmTopic.addSubscription(
+      new sns_subscriptions.LambdaSubscription(this.alarmsToSlackLambda),
+    );
+  }
+
+  createAlarmTopic() {
+    return new sns.Topic(this, "AlarmTopic", {});
+  }
+
+  createAlarmsToSlackLambda() {
+    const alarmsToSlack = new lambda.Function(this, "AlarmsToSlack", {
+      code: lambda.Code.fromAsset("../alarms-to-slack"),
+      handler: "alarms-to-slack.handler",
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.ARM_64,
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_lambda.html
+    const parametersAndSecretsExtension =
+      lambda.LayerVersion.fromLayerVersionArn(
+        this,
+        "ParametersAndSecretsLambdaExtension",
+        "arn:aws:lambda:eu-west-1:015030872274:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:11",
+      );
+
+    alarmsToSlack.addLayers(parametersAndSecretsExtension);
+    secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "slack-webhook",
+      "slack-webhook",
+    ).grantRead(alarmsToSlack);
+
+    return alarmsToSlack;
   }
 }
 
@@ -158,17 +217,11 @@ class ApplicationStack extends cdk.Stack {
       ec2.Port.tcp(database.clusterEndpoint.port)
     );
 
-    const alarmTopic = sns.Topic.fromTopicArn(
-      this,
-      "AlarmTopic",
-      config.alarmTopicArn
-    );
-
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
     });
-    this.exportFailureAlarm(logGroup, alarmTopic);
+    this.exportFailureAlarm(logGroup, props.alarmTopic);
 
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
@@ -708,6 +761,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
 type CasVirkailijaApplicationStackProps = cdk.StackProps & {
   ecsCluster: ecs.Cluster;
   bastion: ec2.BastionHostLinux;
+  alarmTopic: sns.ITopic;
 };
 
 class CasVirkailijaApplicationStack extends cdk.Stack {
