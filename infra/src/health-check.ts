@@ -41,7 +41,9 @@ class GlobalHealthCheckStack extends cdk.Stack {
   constructor(scope: constructs.Construct, id: string, healthChecks: HealthCheck[], props: cdk.StackProps) {
     super(scope, id, props);
 
-    this.globalAlarmTopic = new sns.Topic(this, "GlobalAlarmTopic", {});
+    this.globalAlarmTopic = new sns.Topic(this, "GlobalAlarmTopic", {
+      topicName: "OtuvaGlobalAlarmTopic",
+    });
 
     for (const healthCheck of healthChecks) {
       const check = new route53.CfnHealthCheck(this, `${healthCheck.name}HealthCheck`, {
