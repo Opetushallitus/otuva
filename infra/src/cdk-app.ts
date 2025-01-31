@@ -51,7 +51,10 @@ class CdkApp extends cdk.App {
     const appStack = new ApplicationStack(
       this,
       legacyPrefix("ApplicationStack"),
-      stackProps
+      {
+        ...stackProps,
+        alarmTopic,
+      }
     );
     new CasVirkailijaApplicationStack(
       this,
@@ -60,7 +63,6 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
         ...stackProps,
         bastion: appStack.bastion,
-        alarmTopic,
       }
     );
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
@@ -159,7 +161,13 @@ class ECSStack extends cdk.Stack {
 class ApplicationStack extends cdk.Stack {
   readonly bastion: ec2.BastionHostLinux;
 
-  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+  constructor(
+    scope: constructs.Construct,
+    id: string,
+    props: cdk.StackProps & {
+      alarmTopic: sns.ITopic;
+    }
+  ) {
     super(scope, id, props);
     const config = getConfig();
 
@@ -761,7 +769,6 @@ class CasOppijaApplicationStack extends cdk.Stack {
 type CasVirkailijaApplicationStackProps = cdk.StackProps & {
   ecsCluster: ecs.Cluster;
   bastion: ec2.BastionHostLinux;
-  alarmTopic: sns.ITopic;
 };
 
 class CasVirkailijaApplicationStack extends cdk.Stack {
