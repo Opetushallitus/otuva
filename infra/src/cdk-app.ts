@@ -229,7 +229,9 @@ class ApplicationStack extends cdk.Stack {
       logGroupName: "kayttooikeus",
       retention: logs.RetentionDays.INFINITE,
     });
-    this.exportFailureAlarm(logGroup, props.alarmTopic);
+    if (config.lampiExport) {
+      this.exportFailureAlarm(logGroup, props.alarmTopic);
+    }
 
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
@@ -253,6 +255,29 @@ class ApplicationStack extends cdk.Stack {
     );
     exportBucket.grantReadWrite(taskDefinition.taskRole);
 
+    const lampiProperties: ecs.ContainerDefinitionProps["environment"] =
+      config.lampiExport
+        ? {
+            "kayttooikeus.tasks.export.enabled":
+              config.lampiExport.enabled.toString(),
+            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+            "kayttooikeus.tasks.export.lampi-bucket-name":
+              config.lampiExport.bucketName,
+            "kayttooikeus.tasks.export.copy-to-lampi": "true",
+          }
+        : {
+          "kayttooikeus.tasks.export.enabled": "false",
+          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+          };
+
+    const lampiSecrets: ecs.ContainerDefinitionProps["secrets"] = config.lampiExport
+      ? {
+          "kayttooikeus.tasks.export.lampi-role-arn":
+            this.ssmString("LampiRoleArn2"),
+          "kayttooikeus.tasks.export.lampi-external-id":
+            this.ssmSecret("LampiExternalId"),
+        } : {};
+
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
@@ -263,6 +288,7 @@ class ApplicationStack extends cdk.Stack {
         postgres_port: database.clusterEndpoint.port.toString(),
         postgres_database: "kayttooikeus",
         export_bucket_name: exportBucket.bucketName,
+        ...lampiProperties,
       },
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
@@ -273,8 +299,6 @@ class ApplicationStack extends cdk.Stack {
           database.secret!,
           "password"
         ),
-        ssm_lampi_role_arn: this.ssmString("LampiRoleArn2"),
-        ssm_lampi_external_id: this.ssmSecret("LampiExternalId"),
         ssm_cas_mfa_username: this.ssmSecret("CasMfaUsername"),
         ssm_cas_mfa_password: this.ssmSecret("CasMfaPassword"),
         ssm_cas_gauth_encryption_key: this.ssmSecret("CasGauthEncryptionKey"),
@@ -288,6 +312,7 @@ class ApplicationStack extends cdk.Stack {
         ssm_auth_cryptoservice_static_salt: this.ssmSecret(
           "CryptoserviceStaticSalt"
         ),
+        ...lampiSecrets,
       },
       portMappings: [
         {
@@ -299,17 +324,19 @@ class ApplicationStack extends cdk.Stack {
       ],
     });
 
-    taskDefinition.addToTaskRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["sts:AssumeRole"],
-        resources: [
-          ssm.StringParameter.valueFromLookup(
-            this,
-            "/kayttooikeus/LampiRoleArn2"
-          ),
-        ],
-      })
-    );
+    if (config.lampiExport) {
+      taskDefinition.addToTaskRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["sts:AssumeRole"],
+          resources: [
+            ssm.StringParameter.valueFromLookup(
+              this,
+              "/kayttooikeus/LampiRoleArn2"
+            ),
+          ],
+        })
+      );
+    }
 
     const appSecurityGroup = new ec2.SecurityGroup(this, "AppSecurityGroup", {
       vpc,

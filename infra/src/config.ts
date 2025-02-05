@@ -6,6 +6,10 @@ export type Config = {
   minCapacity: number;
   maxCapacity: number;
   serviceProviderCapacity: number;
+  lampiExport?: {
+    enabled: boolean;
+    bucketName: string;
+  }
 }
 const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
@@ -44,6 +48,10 @@ export const dev: Config = {
   opintopolkuHost: "untuvaopintopolku.fi",
   minCapacity: 1,
   maxCapacity: 2,
+  lampiExport: {
+    enabled: true,
+    bucketName: "oph-lampi-dev",
+  },
 };
 
 export const qa: Config = {
@@ -51,6 +59,10 @@ export const qa: Config = {
   opintopolkuHost: "testiopintopolku.fi",
   minCapacity: 1,
   maxCapacity: 2,
+  lampiExport: {
+    enabled: true,
+    bucketName: "oph-lampi-qa",
+  },
 };
 
 export const prod: Config = {
@@ -58,4 +70,8 @@ export const prod: Config = {
   opintopolkuHost: "opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
+  lampiExport: {
+    enabled: true,
+    bucketName: "oph-lampi-prod",
+  },
 };
