@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.export;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,13 +16,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql("/truncate_tables.sql")
 @Sql("/test-data.sql")
-@SpringBootTest(properties = {
-    "kayttooikeus.tasks.export.upload-to-s3=false",
-})
+@SpringBootTest
 class ExportServiceTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired ExportService exportService;
     @Autowired JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    public void before() {
+        exportService.disableUploadToS3ForTests();
+    }
 
     @Test
     void exportSchemaIsCreated() {

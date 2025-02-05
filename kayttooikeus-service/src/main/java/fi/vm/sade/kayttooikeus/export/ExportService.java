@@ -43,8 +43,12 @@ public class ExportService {
     private String bucketName;
     @Value("${kayttooikeus.tasks.export.lampi-bucket-name}")
     private String lampiBucketName;
-    @Value("${kayttooikeus.tasks.export.upload-to-s3:true}")
-    private boolean uploadToS3;
+
+    private boolean uploadToS3 = true;
+    void disableUploadToS3ForTests() {
+        uploadToS3 = false;
+    }
+
 
     @Transactional
     public void createSchema() {
