@@ -1,15 +1,16 @@
 const environments = ["hahtuva", "dev", "qa", "prod"] as const;
 type EnvironmentName = (typeof environments)[number];
 
+export type Config = {
+  opintopolkuHost: string;
+  minCapacity: number;
+  maxCapacity: number;
+  serviceProviderCapacity: number;
+}
 const defaultConfig = {
-  opintopolkuHost: "",
-  minCapacity: 0,
-  maxCapacity: 0,
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
 };
-
-export type Config = typeof defaultConfig;
 
 export function getEnvironment(): EnvironmentName {
   const env = process.env.ENV;
