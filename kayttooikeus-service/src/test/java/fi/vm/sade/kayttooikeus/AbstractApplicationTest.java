@@ -4,11 +4,13 @@ import fi.vm.sade.kayttooikeus.config.ApplicationTest;
 import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @ApplicationTest
+@EnableWireMock
 public abstract class AbstractApplicationTest {
     @Autowired
     private ApplicationContext applicationContext;

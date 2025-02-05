@@ -1,37 +1,62 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.kayttooikeus.service.AbstractServiceTest;
-import net.jadler.junit.rule.JadlerRule;
-import net.jadler.stubbing.server.jdk.JdkStubHttpServer;
-import org.apache.http.HttpStatus;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.http.Fault;
+import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
+import fi.vm.sade.properties.OphProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.client.authentication.AttributePrincipal;
 import org.apereo.cas.client.validation.AssertionImpl;
 import org.junit.After;
-import org.junit.Rule;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fi.vm.sade.kayttooikeus.util.FreePortUtil.portNumberBySystemPropertyOrFree;
-import static net.jadler.Jadler.onRequest;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@Slf4j
+public abstract class AbstractClientTest {
+    protected final static String WIREMOCK_HOST = "http://localhost:18080";
 
-public abstract class AbstractClientTest extends AbstractServiceTest {
-    protected static final int OK = HttpStatus.SC_OK;
-    protected static int MOCK_SERVER_PORT = portNumberBySystemPropertyOrFree("test.port");
-    protected final JdkStubHttpServer stubHttpServer = new JdkStubHttpServer(MOCK_SERVER_PORT);
-    @Rule
-    public final JadlerRule jadler = new JadlerRule(stubHttpServer);
+    @Autowired private UrlConfiguration urlConfiguration;
+    @Autowired private OphProperties properties;
+
+    protected WireMockServer wm;
+
+    @Before
+    public void before() {
+        log.info("Setting WireMock host to config: {}", WIREMOCK_HOST);
+        urlConfiguration.addOverride("url-virkailija", WIREMOCK_HOST);
+        properties.addOverride("url-virkailija", WIREMOCK_HOST);
+
+        var uri = URI.create(WIREMOCK_HOST);
+
+        configureFor(uri.getHost(), uri.getPort());
+        wm = new WireMockServer(uri.getPort());
+        wm.start();
+
+        // Default to connection reset by peer if not matching any stub. Some tests just check the response is 404 which
+        // is the default behaviour but we want to make sure the tests hit actual stub we have setup.
+        stubFor(any(anyUrl()).atPriority(Integer.MAX_VALUE).willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+    }
 
     @After
-    public void tearDown() throws Exception {
-        stubHttpServer.stop();
-        Thread.sleep(20L);
+    public void after() {
+        wm.stop();
     }
 
     protected void casAuthenticated(String henkiloOid) {
@@ -53,9 +78,22 @@ public abstract class AbstractClientTest extends AbstractServiceTest {
             }
         })));
 
-        onRequest().havingMethod(is("POST")).havingPath(is("/cas/v1/tickets"))
-                .respond().withStatus(201).withHeader("Location", "/TICKET");
-        onRequest().havingMethod(is("POST")).havingPath(startsWith("/cas/v1/tickets/"))
-                .respond().withStatus(OK).withBody("TICKET");
+        stubFor(post(urlEqualTo("/cas/v1/tickets"))
+                .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Location", "/TICKET")));
+        stubFor(post(urlMatching("/cas/v1/tickets/.*"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("TICKET")));
     }
+
+    protected String jsonResource(String classpathResource) {
+        try {
+            return new String(getClass().getResourceAsStream(classpathResource).readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not load resource: " + classpathResource + ", cause: " + e.getMessage(), e);
+        }
+    }
+
 }

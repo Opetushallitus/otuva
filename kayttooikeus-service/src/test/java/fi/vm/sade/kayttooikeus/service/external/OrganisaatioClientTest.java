@@ -1,40 +1,39 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;
-import static net.jadler.Jadler.onRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringRunner.class)
 public class OrganisaatioClientTest extends AbstractClientTest {
     @Autowired
     private OrganisaatioClient client;
 
     @Test
     public void getLakkautetutOidsTest() {
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceHaeResponse.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceRootOrganisation.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v2/ryhmat?lakkautetut=true&aktiiviset=true"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/ryhmat.json"))));
         this.client.refreshCache();
         Set<String> lakkautetutOids = this.client.getLakkautetutOids();
 
@@ -50,18 +49,18 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
     @Test
     public void getOrganisaatioPerustiedotCachedRoot() {
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceHaeResponse.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceRootOrganisation.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v2/ryhmat?lakkautetut=true&aktiiviset=true"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/ryhmat.json"))));
         client.refreshCache();
 
         Optional<OrganisaatioPerustieto> organisaatio = client.getOrganisaatioPerustiedotCached("1.2.246.562.10.00000000001");
@@ -75,18 +74,18 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
     @Test
     public void getOrganisaatioPerustiedotCachedNotRoot() {
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceHaeResponse.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/organisaatioServiceRootOrganisation.json"));
-        onRequest().havingMethod(is("GET"))
-                .havingPath(is("/organisaatio-service/rest/organisaatio/v2/ryhmat"))
-                .respond().withStatus(OK).withContentType(MediaType.APPLICATION_JSON.getType())
-                .withBody(jsonResource("classpath:organisaatio/ryhmat.json"));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001/jalkelaiset"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceHaeResponse.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v4/1.2.246.562.10.00000000001"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/organisaatioServiceRootOrganisation.json"))));
+        stubFor(get(urlEqualTo("/organisaatio-service/rest/organisaatio/v2/ryhmat?lakkautetut=true&aktiiviset=true"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody(jsonResource("/organisaatio/ryhmat.json"))));
         client.refreshCache();
 
         Optional<OrganisaatioPerustieto> organisaatio = client.getOrganisaatioPerustiedotCached("1.2.246.562.10.14175756379");

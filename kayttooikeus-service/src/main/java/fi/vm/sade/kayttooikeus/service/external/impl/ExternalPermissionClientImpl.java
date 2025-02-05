@@ -21,7 +21,7 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
 
     private final OphHttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
+    public final Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
 
     public ExternalPermissionClientImpl(OphHttpClient httpClient, OphProperties properties, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
