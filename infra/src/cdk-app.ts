@@ -101,6 +101,7 @@ class AlarmStack extends cdk.Stack {
     this.alarmTopic.addSubscription(
       new sns_subscriptions.LambdaSubscription(this.alarmsToSlackLambda),
     );
+    this.exportValue(this.alarmTopic.topicArn);
   }
 
   createAlarmTopic() {
