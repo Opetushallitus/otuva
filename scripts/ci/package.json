@@ -1,4 +1,5 @@
 {
+  "name": "otuva",
   "devDependencies": {
     "@types/node": "20.15.0"
   }
