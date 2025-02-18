@@ -13,13 +13,17 @@ import java.io.IOException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class RequestIdFilter implements Filter {
+    public static final String REQUEST_ID_ATTRIBUTE = RequestIdFilter.class.getName() + ".requestId";
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
-            MDC.put("requestId", generateRequestId());
+            var requestId = generateRequestId();
+            MDC.put(REQUEST_ID_ATTRIBUTE, requestId);
+            request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId);
             chain.doFilter(request, response);
         } finally {
-            MDC.remove("requestId");
+            MDC.remove(REQUEST_ID_ATTRIBUTE);
         }
     }
 
