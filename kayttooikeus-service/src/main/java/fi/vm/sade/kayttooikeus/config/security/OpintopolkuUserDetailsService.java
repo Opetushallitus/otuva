@@ -1,11 +1,13 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
+import lombok.Getter;
 import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +20,10 @@ public class OpintopolkuUserDetailsService implements AuthenticationUserDetailsS
     }
 
     public static final class OpintopolkuUserDetailsl implements UserDetails {
+        @Serial
+        private static final long serialVersionUID = 6921718120094670912L;
+
+        @Getter
         private final String oidHenkilo;
         private final List<SimpleGrantedAuthority> authorities;
 

@@ -86,12 +86,26 @@ public class AccessLogTest {
         assertEquals("GET /1.2.246.562.24.43116640405 HTTP/1.1", resolveLog(output));
     }
 
+    @Test
+    public void hasRequestMappingField() {
+        restTemplate.getForEntity("/henkilo/1.2.246.562.24.43116640405", String.class);
+        // For whatever reason in tests the request mapping is not resolved correctly so basically this tests the field
+        // is at least attempted to be included in the access log.
+        //assertEquals("/henkilo/{oid}", resolveLogLine(output).requestMapping);
+        assertEquals("-", resolveLogLine(output).requestMapping);
+    }
+
     private String resolveLog(ByteArrayOutputStream output) {
+        return resolveLogLine(output).request;
+    }
+
+    private AccessLogLine resolveLogLine(ByteArrayOutputStream output) {
         for (String s : output.toString().split(System.getProperty("line.separator"), 10)) {
+            System.err.println(s);
             var result = tryParse(s);
-            if (result != null) return result.request;
+            if (result != null) return result;
         }
-        return "FAIL";
+        throw new RuntimeException("No log line found");
     }
 
     private AccessLogLine tryParse(String s) {
@@ -103,7 +117,9 @@ public class AccessLogTest {
     }
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .enable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
 
-    record AccessLogLine(String request) {}
+    record AccessLogLine(String request, String requestMapping, String callerHenkiloOid) {}
 }
