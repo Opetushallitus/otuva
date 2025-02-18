@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <appender name="STDOUT-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} %X{requestId:--} %-5p {%X{user}} [%t] %-5p %c: %m%n</pattern>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} %X{requestId:--} %X{fi.vm.sade.kayttooikeus.RequestCallerFilter.callerHenkiloOid:--} %-5p {%X{user}} [%t] %-5p %c: %m%n</pattern>
         </encoder>
     </appender>
 

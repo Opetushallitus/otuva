@@ -24,10 +24,15 @@ public class RequestCallerFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        getUserDetails(servletRequest).ifPresent(userDetails -> {
-            servletRequest.setAttribute(CALLER_HENKILO_OID_ATTRIBUTE, userDetails.getOidHenkilo());
-        });
-        filterChain.doFilter(servletRequest, servletResponse);
+        try {
+            getUserDetails(servletRequest).ifPresent(userDetails -> {
+                MDC.put(CALLER_HENKILO_OID_ATTRIBUTE, userDetails.getOidHenkilo());
+                servletRequest.setAttribute(CALLER_HENKILO_OID_ATTRIBUTE, userDetails.getOidHenkilo());
+            });
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            MDC.remove(CALLER_HENKILO_OID_ATTRIBUTE);
+        }
     }
 
     private Optional<OpintopolkuUserDetailsService.OpintopolkuUserDetailsl> getUserDetails(ServletRequest servletRequest) {
