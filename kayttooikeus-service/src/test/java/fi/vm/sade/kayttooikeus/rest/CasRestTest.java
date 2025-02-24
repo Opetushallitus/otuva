@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.UnsupportedEncodingException;
@@ -54,10 +54,10 @@ public class CasRestTest {
     @Autowired
     private DatabaseService databaseService;
 
-    @MockBean
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @MockBean(name = TunnistusSecurityConfig.OPPIJA_TICKET_VALIDATOR_QUALIFIER)
+    @MockitoBean(name = TunnistusSecurityConfig.OPPIJA_TICKET_VALIDATOR_QUALIFIER)
     private TicketValidator oppijaTicketValidator;
 
     @BeforeEach

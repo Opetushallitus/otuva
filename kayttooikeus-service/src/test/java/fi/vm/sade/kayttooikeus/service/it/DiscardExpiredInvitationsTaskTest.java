@@ -19,10 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Description;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Period;
@@ -39,13 +39,13 @@ public class DiscardExpiredInvitationsTaskTest {
     @Autowired
     private KutsuService kutsuService;
 
-    @MockBean
+    @MockitoBean
     private HenkiloDataRepository henkiloDataRepository;
 
-    @MockBean
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @MockBean
+    @MockitoBean
     private ViestinvalitysClient viestinvalitysClient;
 
     @Autowired

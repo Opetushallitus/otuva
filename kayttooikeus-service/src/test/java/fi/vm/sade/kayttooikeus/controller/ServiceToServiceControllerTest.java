@@ -6,9 +6,9 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 public class ServiceToServiceControllerTest extends AbstractControllerTest {
-    @MockBean
+    @MockitoBean
     private PermissionCheckerService permissionCheckerService;
 
     @Test

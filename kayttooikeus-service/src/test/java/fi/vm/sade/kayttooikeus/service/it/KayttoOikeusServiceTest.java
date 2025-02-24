@@ -13,9 +13,9 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -53,13 +53,13 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private KayttoOikeusService kayttoOikeusService;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
-    @SpyBean
+    @MockitoSpyBean
     private TimeService timeService;
 
-    @SpyBean
+    @MockitoSpyBean
     private CommonProperties commonProperties;
 
     @Test

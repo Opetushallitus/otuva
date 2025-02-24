@@ -30,11 +30,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -80,22 +80,22 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
 
-    @SpyBean
+    @MockitoSpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
-    @MockBean
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @MockBean
+    @MockitoBean
     private HenkiloHelper henkiloHelper;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioService organisaatioService;
 
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
 
     @Captor
