@@ -11,11 +11,11 @@ import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaR
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class MyonnettyKayttoOikeusServiceImplTest {
     @InjectMocks
     private MyonnettyKayttoOikeusServiceImpl myonnettyKayttoOikeusService;

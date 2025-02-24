@@ -5,23 +5,21 @@ import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class UserDetailsUtilTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
-    @Before
+    @BeforeEach
     public void setup() {
 
     }
@@ -38,15 +36,16 @@ public class UserDetailsUtilTest {
 
     @Test
     public void getCurrentUserOidNotFound() {
-        this.expectedException.expect(NullPointerException.class);
-        this.expectedException.expectMessage("No user name available from SecurityContext!");
+        Throwable exception = assertThrows(NullPointerException.class, () -> {
 
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
+            Authentication authentication = mock(Authentication.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            SecurityContextHolder.setContext(securityContext);
 
-        UserDetailsUtil.getCurrentUserOid();
+            UserDetailsUtil.getCurrentUserOid();
+        });
+        assertTrue(exception.getMessage().contains("No user name available from SecurityContext!"));
     }
 
     @Test

@@ -5,17 +5,17 @@ import fi.vm.sade.kayttooikeus.dto.LocalizableDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.model.TextGroup;
 import fi.vm.sade.kayttooikeus.service.LocalizationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.stream.Stream;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class LocalizationServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private LocalizationService localizationService;

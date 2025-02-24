@@ -15,12 +15,12 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired

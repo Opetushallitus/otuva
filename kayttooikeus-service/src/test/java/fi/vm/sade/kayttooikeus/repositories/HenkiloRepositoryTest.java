@@ -11,18 +11,17 @@ import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class HenkiloRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private HenkiloHibernateRepository henkiloHibernateRepository;

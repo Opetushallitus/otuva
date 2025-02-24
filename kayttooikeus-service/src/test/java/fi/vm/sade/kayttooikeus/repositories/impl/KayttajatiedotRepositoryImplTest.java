@@ -6,11 +6,11 @@ import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.*;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttajatiedotRepositoryImplTest extends AbstractServiceIntegrationTest {
 
     @MockBean

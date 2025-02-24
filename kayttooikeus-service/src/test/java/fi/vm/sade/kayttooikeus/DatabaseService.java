@@ -27,7 +27,7 @@ public class DatabaseService {
 
     public void truncate() {
         var tables = jdbcTemplate.query("select tablename from pg_tables where schemaname = 'public' and tablename != 'schema_table_ko2'", (ResultSet rs, int rowNum) -> rs.getString("tablename"));
-        tables.forEach(tableName -> jdbcTemplate.execute(String.format("truncate table %s cascade", tableName)));
+        tables.forEach(tableName -> jdbcTemplate.execute("truncate table %s cascade".formatted(tableName)));
     }
 
     public void runInTransaction(Runnable runnable) {

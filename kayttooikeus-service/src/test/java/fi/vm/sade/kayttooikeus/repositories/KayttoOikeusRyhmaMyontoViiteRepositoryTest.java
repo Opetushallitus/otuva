@@ -1,11 +1,11 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaMyontoViite;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,10 +15,10 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaMyontoViitePopulator.kayttoOikeusRyhmaMyontoViite;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Sql("/truncate_tables.sql")
 public class KayttoOikeusRyhmaMyontoViiteRepositoryTest extends AbstractRepositoryTest {
 

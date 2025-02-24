@@ -1,11 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
 import java.util.Optional;
 import java.util.Set;
@@ -13,8 +10,8 @@ import java.util.Set;
 import static java.util.Collections.singletonList;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrganisaatioClientTest extends AbstractClientTest {
     @Autowired
@@ -65,11 +62,10 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
         Optional<OrganisaatioPerustieto> organisaatio = client.getOrganisaatioPerustiedotCached("1.2.246.562.10.00000000001");
 
-        assertThat(organisaatio).hasValueSatisfying(org -> {
+        assertThat(organisaatio).hasValueSatisfying(org ->
             assertThat(org)
                     .returns(singletonList("MUU_ORGANISAATIO"), OrganisaatioPerustieto::getOrganisaatiotyypit)
-                    .returns(singletonList("MUU_ORGANISAATIO"), OrganisaatioPerustieto::getTyypit);
-        });
+                    .returns(singletonList("MUU_ORGANISAATIO"), OrganisaatioPerustieto::getTyypit));
     }
 
     @Test
@@ -90,11 +86,10 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
         Optional<OrganisaatioPerustieto> organisaatio = client.getOrganisaatioPerustiedotCached("1.2.246.562.10.14175756379");
 
-        assertThat(organisaatio).hasValueSatisfying(org -> {
+        assertThat(organisaatio).hasValueSatisfying(org ->
             assertThat(org)
                     .returns(singletonList("KOULUTUSTOIMIJA"), OrganisaatioPerustieto::getOrganisaatiotyypit)
-                    .returns(singletonList("KOULUTUSTOIMIJA"), OrganisaatioPerustieto::getTyypit);
-        });
+                    .returns(singletonList("KOULUTUSTOIMIJA"), OrganisaatioPerustieto::getTyypit));
     }
 
 }

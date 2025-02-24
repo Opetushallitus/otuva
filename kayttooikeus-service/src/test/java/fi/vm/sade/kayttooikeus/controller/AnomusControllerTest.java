@@ -9,13 +9,13 @@ import fi.vm.sade.kayttooikeus.dto.UpdateHaettuKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class AnomusControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;

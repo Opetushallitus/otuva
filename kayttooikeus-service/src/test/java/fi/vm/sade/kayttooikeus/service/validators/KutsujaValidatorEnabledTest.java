@@ -3,22 +3,19 @@ package fi.vm.sade.kayttooikeus.service.validators;
 import fi.vm.sade.kayttooikeus.config.KutsujaValidatorConfiguration;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles("yksilointiNotDisabled")
-@ContextConfiguration(classes = {KutsujaValidatorConfiguration.class})
+@SpringJUnitConfig(classes = {KutsujaValidatorConfiguration.class})
 public class KutsujaValidatorEnabledTest {
 
     @MockBean

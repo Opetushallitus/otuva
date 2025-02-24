@@ -2,10 +2,10 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.palvelukayttaja;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class DisableInactiveServiceUsersTaskTest extends AbstractServiceIntegrationTest {
 
     @Autowired

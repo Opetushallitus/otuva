@@ -11,11 +11,11 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +23,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Description;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Period;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ApplicationTest
 public class DiscardExpiredInvitationsTaskTest {
     @Autowired
@@ -54,7 +54,7 @@ public class DiscardExpiredInvitationsTaskTest {
     private final String INVALID_EMAIL = "invalid@email";
     private final Period period = Period.ZERO;
 
-    @Before
+    @BeforeEach
     public void before() {
         String kutsujaHenkiloOid = "1.2.3.4.5";
         var henkilo = Henkilo.builder()
@@ -80,7 +80,7 @@ public class DiscardExpiredInvitationsTaskTest {
         deleteQueuedEmails();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         deleteKutsut();
         deleteQueuedEmails();

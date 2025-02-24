@@ -12,13 +12,13 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
 import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -38,12 +38,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Sql("/truncate_tables.sql")
 public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
@@ -163,10 +164,11 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
         assertThat(organisaatioHenkilo).returns("5.6.7.8.9", OrganisaatioHenkiloDto::getOrganisaatioOid);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void findOrganisaatioHenkiloByHenkiloAndOrganisaatioErrorTest() {
-        organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio("1.2.3.4.5", "1.1.1.1.1");
+        assertThrows(NotFoundException.class, () ->
+            organisaatioHenkiloService.findOrganisaatioHenkiloByHenkiloAndOrganisaatio("1.2.3.4.5", "1.1.1.1.1"));
     }
 
     @Test
@@ -182,10 +184,11 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
         assertThat(organisaatioHenkilo.getKayttoOikeusRyhmaHistorias()).extracting("tila").containsExactly(SULJETTU);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     @WithMockUser(username = "1.2.3.4.5")
     public void passivoiHenkiloOrganisationNotFound() {
-        organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1");
+        assertThrows(NotFoundException.class, () ->
+            organisaatioHenkiloService.passivoiHenkiloOrganisation("1.2.3.4.5", "1.1.1.1.1"));
     }
 
     @Test

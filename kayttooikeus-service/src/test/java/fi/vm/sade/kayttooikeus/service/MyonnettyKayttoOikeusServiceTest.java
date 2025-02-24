@@ -7,12 +7,10 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 
@@ -23,7 +21,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class MyonnettyKayttoOikeusServiceTest {
 
@@ -39,7 +36,7 @@ public class MyonnettyKayttoOikeusServiceTest {
     @Autowired
     private DatabaseService databaseService;
 
-    @After
+    @AfterEach
     public void cleanup() {
         databaseService.truncate();
     }

@@ -4,10 +4,10 @@ package fi.vm.sade.kayttooikeus.service.it;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.from;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class OrikaMappingTest extends AbstractServiceIntegrationTest {
 
     @Autowired

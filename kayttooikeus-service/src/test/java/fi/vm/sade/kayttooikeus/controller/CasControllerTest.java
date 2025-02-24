@@ -6,18 +6,18 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class CasControllerTest extends AbstractControllerTest {
 
     @MockBean

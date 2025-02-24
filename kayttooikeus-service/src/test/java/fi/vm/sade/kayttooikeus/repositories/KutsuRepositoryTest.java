@@ -8,13 +8,13 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
-import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -30,15 +30,13 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.PALVELU_KAYTTOOIKEUS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@Sql("/truncate_tables.sql")
 public class KutsuRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private KutsuRepositoryCustom kutsuRepository;
-
-    @MockBean
-    private PermissionCheckerService permissionCheckerService;
 
     @Test
     public void listKutsuListDtosTest() {
@@ -70,14 +68,14 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
     }
 
     @Test
-    public void listKutsuWithAdminView() {
+    public void listKutsuWithAdminView() throws Exception {
         populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
-                kayttoOikeusRyhma("RYHMA1")));
+                kayttoOikeusRyhma("RYHMA")));
         populate(kutsu("Aapo", "Esimerkki", "a@example.com")
                 .kutsuja("1.2.3")
                 .aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
-                        .ryhma(kayttoOikeusRyhma("RYHMA")
+                        .ryhma(kayttoOikeusRyhma("RYHMA1")
                                 .withNimi(text("FI", "Kuvaus"))
                                 .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, "VASTUUKAYTTAJAT")))
                 )
@@ -91,7 +89,7 @@ public class KutsuRepositoryTest extends AbstractRepositoryTest {
                                 .withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, "READ")))
                 )
         );
-        List<Kutsu> kutsuList = this.kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().view(KutsuView.ADMIN).build(),
+        List<Kutsu> kutsuList = kutsuRepository.listKutsuListDtos(KutsuCriteria.builder().view(KutsuView.ADMIN).build(),
                 KutsuOrganisaatioOrder.AIKALEIMA.getSortWithDirection(),
                 null, null);
         assertThat(kutsuList).flatExtracting(Kutsu::getSahkoposti).containsExactly("a@example.com");

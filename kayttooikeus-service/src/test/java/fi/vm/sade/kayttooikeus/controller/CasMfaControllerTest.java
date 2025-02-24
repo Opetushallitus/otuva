@@ -7,12 +7,12 @@ import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.util.Crypto;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -30,7 +30,7 @@ import java.time.Month;
 import java.util.Base64;
 import java.util.Optional;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class CasMfaControllerTest extends AbstractControllerTest {
     @MockBean
     private KayttajatiedotService kayttajatiedotService;
@@ -48,7 +48,7 @@ public class CasMfaControllerTest extends AbstractControllerTest {
     private String secretKeyCipher;
     private GoogleAuthToken token;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         secretKeyCipher = Crypto.encrypt("password", salt, secretKey, iv);
         token = new GoogleAuthToken(1, henkilo, secretKeyCipher, salt, Base64.getEncoder().encodeToString(iv),

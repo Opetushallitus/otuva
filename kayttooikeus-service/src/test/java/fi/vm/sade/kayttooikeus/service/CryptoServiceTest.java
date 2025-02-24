@@ -3,9 +3,9 @@ package fi.vm.sade.kayttooikeus.service;
 import fi.vm.sade.kayttooikeus.config.properties.AuthProperties;
 import fi.vm.sade.kayttooikeus.service.impl.CryptoServiceImpl;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class CryptoServiceTest {
 
     private CryptoService cryptoService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         AuthProperties authProperties = new AuthProperties();
         authProperties.getCryptoService().setStaticSalt("a4hgs4c4CSy54CS59hyjhs48gfsdFAA42V43a3Daefs2f84hdaESFayh3a3gc2aW");
@@ -82,7 +82,7 @@ public class CryptoServiceTest {
     /**
      * Use this to measure actual execution time for encryption if you change algorithm, ignored for now, takes too long on bamboo
      */
-    @Ignore
+    @Disabled
     @Test
     public void testExecutionTime() {
         long rounds = 10000;
@@ -128,9 +128,8 @@ public class CryptoServiceTest {
                 "Testi12345!#€%",
                 "test Test 1234 #"
         };
-        Arrays.asList(fixtures).forEach(candidate -> {
-            assertThat(cryptoService.isStrongPassword(candidate)).isNotEmpty();
-        });
+        Arrays.asList(fixtures).forEach(candidate ->
+            assertThat(cryptoService.isStrongPassword(candidate)).isNotEmpty());
     }
 
     @Test
@@ -141,9 +140,8 @@ public class CryptoServiceTest {
                 "____________________a!1",
                 "____________________aA!"
         };
-        Arrays.asList(fixtures).forEach(candidate -> {
-            assertThat(cryptoService.isStrongPassword(candidate)).isEmpty();
-        });
+        Arrays.asList(fixtures).forEach(candidate ->
+            assertThat(cryptoService.isStrongPassword(candidate)).isEmpty());
     }
 
     @Test
@@ -158,8 +156,7 @@ public class CryptoServiceTest {
                 {"aaaaaaaaaaaaaaaaaaaa1", Arrays.asList("validPassword.uppercase", "validPassword.nospecial")},
                 {"AAAAAAAAAAAAAAAAAAAAa", Arrays.asList("validPassword.nospecial", "validPassword.numbers")},
         };
-        Arrays.asList(fixtures).forEach(testCase -> {
-            assertThat(cryptoService.isStrongPassword((String)testCase[0])).isEqualTo(testCase[1]);
-        });
+        Arrays.asList(fixtures).forEach(testCase ->
+            assertThat(cryptoService.isStrongPassword((String)testCase[0])).isEqualTo(testCase[1]));
     }
 }

@@ -5,18 +5,15 @@ import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.LocalDateTime;
 
 import static fi.vm.sade.kayttooikeus.util.CreateUtil.createHenkilo;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = OrikaBeanMapper.class)
+@SpringJUnitConfig(classes = OrikaBeanMapper.class)
 public class HenkiloUtilsTest {
 
     @Test

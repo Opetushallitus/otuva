@@ -14,13 +14,11 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,11 +34,10 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopula
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
@@ -55,14 +52,11 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     KayttajatiedotRepository kayttajatiedotRepository;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
     public void generateAuthTokenForHenkiloNotFoundTest() {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("no henkilo found with oid:[1.1.1.1.1]");
-        identificationService.generateAuthTokenForHenkilo("1.1.1.1.1", "key", "identifier");
+        Throwable exception = assertThrows(NotFoundException.class, () ->
+            identificationService.generateAuthTokenForHenkilo("1.1.1.1.1", "key", "identifier"));
+        assertTrue(exception.getMessage().contains("no henkilo found with oid:[1.1.1.1.1]"));
     }
 
     @Test
@@ -89,9 +83,10 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("1.2.3.4.6", identification.get().getHenkilo().getOidHenkilo());
     }
 
-    @Test(expected = NotFoundException.class)
-    public void getHenkiloOidByIdpAndIdentifierNotFoundTest() throws Exception {
-        identificationService.getHenkiloOidByIdpAndIdentifier("haka", "identifier");
+    @Test
+    public void getHenkiloOidByIdpAndIdentifierNotFoundTest() {
+        assertThrows(NotFoundException.class, () ->
+            identificationService.getHenkiloOidByIdpAndIdentifier("haka", "identifier"));
     }
 
     @Test
@@ -118,41 +113,44 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
         assertEquals("haka", dto.getIdpEntityId());
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void validateAuthTokenNotFoundTest() {
-        identificationService.findByTokenAndInvalidateToken("12345");
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void validateAuthTokenUsedTest() {
-        YhteystietoDto yhteystieto = YhteystietoDto.builder()
-                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                .yhteystietoArvo("test@test.com")
-                .build();
-        YhteystiedotRyhmaDto yhteystietoRyhma = YhteystiedotRyhmaDto.builder()
-                .yhteystieto(yhteystieto)
-                .build();
-        given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5"))
-                .willReturn(HenkiloDto.builder()
-                        .etunimet("Teemu")
-                        .kutsumanimi("Teemu")
-                        .sukunimi("Testi")
-                        .hetu("11111-1111")
-                        .sukupuoli("1")
-                        .passivoitu(false)
-                        .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
-                        .build());
-
-        populate(identification("haka", "identifier", henkilo("1.2.3.4.5")).withAuthToken("12345"));
-        identificationService.findByTokenAndInvalidateToken("12345");
-        identificationService.findByTokenAndInvalidateToken("12345");
+        assertThrows(NotFoundException.class, () ->
+            identificationService.findByTokenAndInvalidateToken("12345"));
     }
 
     @Test
-    public void updateIdentificationAndGenerateTokenForHenkiloByHetuNotFoundTest() throws Exception {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Henkilo not found with oid 1.2.3");
-        identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid("1.2.3");
+    public void validateAuthTokenUsedTest() {
+        assertThrows(NotFoundException.class, () -> {
+            YhteystietoDto yhteystieto = YhteystietoDto.builder()
+                    .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                    .yhteystietoArvo("test@test.com")
+                    .build();
+            YhteystiedotRyhmaDto yhteystietoRyhma = YhteystiedotRyhmaDto.builder()
+                    .yhteystieto(yhteystieto)
+                    .build();
+            given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5"))
+                    .willReturn(HenkiloDto.builder()
+                            .etunimet("Teemu")
+                            .kutsumanimi("Teemu")
+                            .sukunimi("Testi")
+                            .hetu("11111-1111")
+                            .sukupuoli("1")
+                            .passivoitu(false)
+                            .yhteystiedotRyhma(Stream.of(yhteystietoRyhma).collect(toSet()))
+                            .build());
+
+            populate(identification("haka", "identifier", henkilo("1.2.3.4.5")).withAuthToken("12345"));
+            identificationService.findByTokenAndInvalidateToken("12345");
+            identificationService.findByTokenAndInvalidateToken("12345");
+        });
+    }
+
+    @Test
+    public void updateIdentificationAndGenerateTokenForHenkiloByHetuNotFoundTest() {
+        Throwable exception = assertThrows(NotFoundException.class, () ->
+            identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid("1.2.3"));
+        assertTrue(exception.getMessage().contains("Henkilo not found with oid 1.2.3"));
     }
 
     @Test
@@ -242,29 +240,31 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                 .isEqualTo(oppijanumeroOid);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void doesntAllowMpassidLoginWithoutKayttajatiedot() {
-        String oppijanumeroOid = "1.2.3.4.5";
-        String duplikaattiOid = "1.2.3.4.6";
-        populate(henkilo(oppijanumeroOid));
-        populate(henkilo(duplikaattiOid).withDuplikate(true));
+        assertThrows(NotFoundException.class, () -> {
+            String oppijanumeroOid = "1.2.3.4.5";
+            String duplikaattiOid = "1.2.3.4.6";
+            populate(henkilo(oppijanumeroOid));
+            populate(henkilo(duplikaattiOid).withDuplikate(true));
 
-        HenkiloDto masterHenkilo = HenkiloDto.builder()
-                .oidHenkilo(oppijanumeroOid)
-                .oppijanumero(oppijanumeroOid)
-                .etunimet("Teemu")
-                .kutsumanimi("Teemu")
-                .sukunimi("Testi")
-                .hetu("11111-1111")
-                .sukupuoli("1")
-                .passivoitu(false)
-                .yhteystiedotRyhma(Set.of())
-                .build();
-        given(oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(duplikaattiOid)))
-                .willReturn(Map.of(duplikaattiOid, masterHenkilo));
-        given(kayttajatiedotRepository.findByHenkiloOidHenkilo(oppijanumeroOid)).willReturn(Optional.empty());
+            HenkiloDto masterHenkilo = HenkiloDto.builder()
+                    .oidHenkilo(oppijanumeroOid)
+                    .oppijanumero(oppijanumeroOid)
+                    .etunimet("Teemu")
+                    .kutsumanimi("Teemu")
+                    .sukunimi("Testi")
+                    .hetu("11111-1111")
+                    .sukupuoli("1")
+                    .passivoitu(false)
+                    .yhteystiedotRyhma(Set.of())
+                    .build();
+            given(oppijanumerorekisteriClient.getMasterHenkilosByOidList(List.of(duplikaattiOid)))
+                    .willReturn(Map.of(duplikaattiOid, masterHenkilo));
+            given(kayttajatiedotRepository.findByHenkiloOidHenkilo(oppijanumeroOid)).willReturn(Optional.empty());
 
-        identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid);
+            identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid);
+        });
     }
 
     @Test

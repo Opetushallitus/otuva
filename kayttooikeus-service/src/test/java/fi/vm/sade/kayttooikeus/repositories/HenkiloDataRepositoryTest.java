@@ -6,13 +6,11 @@ import fi.vm.sade.kayttooikeus.model.HenkiloVarmentaja;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
@@ -24,7 +22,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @Transactional(readOnly = false)
 @SpringBootTest
 @Sql("/truncate_tables.sql")

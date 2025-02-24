@@ -3,11 +3,11 @@ package fi.vm.sade.kayttooikeus.repositories;
 import com.querydsl.core.Tuple;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeusRyhmaDto;
 import fi.vm.sade.kayttooikeus.model.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -22,10 +22,10 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/truncate_tables.sql")
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired

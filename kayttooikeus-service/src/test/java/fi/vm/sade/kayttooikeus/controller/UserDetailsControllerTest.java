@@ -3,12 +3,12 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class UserDetailsControllerTest extends AbstractControllerTest {
 
     @MockBean

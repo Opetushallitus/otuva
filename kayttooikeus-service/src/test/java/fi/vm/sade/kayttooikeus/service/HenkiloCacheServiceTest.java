@@ -8,13 +8,13 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.ScheduleTimestampsDataRepository;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class HenkiloCacheServiceTest extends AbstractServiceTest {
 
     @MockBean
@@ -41,7 +41,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
 
     private UpdateHenkiloNimiCacheTask scheduledTasks;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.scheduledTasks = new UpdateHenkiloNimiCacheTask(
                 this.henkiloDataRepository,

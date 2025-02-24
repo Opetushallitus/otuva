@@ -19,11 +19,8 @@ import fi.vm.sade.kayttooikeus.service.impl.KayttooikeusAnomusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.impl.MyonnettyKayttoOikeusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.impl.MyontooikeusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidator;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -32,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,17 +47,15 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.util.Maps.newHashMap;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class, CommonProperties.class, MyontooikeusServiceImpl.class, MyonnettyKayttoOikeusServiceImpl.class})
 public class KayttooikeusAnomusServiceTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     @Autowired
     private OrikaBeanMapper orikaBeanMapper;
     @MockBean
@@ -102,7 +96,7 @@ public class KayttooikeusAnomusServiceTest {
     @Autowired
     private CommonProperties commonProperties;
 
-    @Before
+    @BeforeEach
     public void setup() {
         doAnswer(returnsFirstArg()).when(this.localizationService).localize(any(LocalizableDto.class));
         this.commonProperties.setRootOrganizationOid("rootOid");
@@ -424,28 +418,29 @@ public class KayttooikeusAnomusServiceTest {
     @Test
     @WithMockUser("1.2.3.4.1")
     public void grantKayttooikeusryhmaWithoutActiveOrganisations() {
-        this.expectedException.expect(ForbiddenException.class);
-        this.expectedException.expectMessage("Target organization has invalid organization type");
+        Throwable exception = assertThrows(ForbiddenException.class, () -> {
 
-        given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
-        given(this.permissionCheckerService.checkRoleForOrganisation(any(), anyMap())).willReturn(true);
-        given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhmaWithViite(2001L)));
-        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
-        given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
-        given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
-                .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").passivoitu(true).build()));
-        given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck("1.2.0.0.1", 2001L)).willReturn(true);
-        given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
-                "1.2.0.0.1", "1.2.3.4.5"))
-                .willReturn(Optional.empty());
-        // Passivoitu organisation
-        given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1"))
-                .willReturn(Optional.of(createHenkiloWithOrganisaatio("1.2.3.4.5", "1.2.0.0.1", true)));
+            given(this.permissionCheckerService.notOwnData(anyString())).willReturn(true);
+            given(this.permissionCheckerService.checkRoleForOrganisation(any(), anyMap())).willReturn(true);
+            given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(createKayttoOikeusRyhmaWithViite(2001L)));
+            given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.5")).willReturn(Optional.of(createHenkilo("1.2.3.4.5")));
+            given(this.permissionCheckerService.getCurrentUserOid()).willReturn("1.2.3.4.1");
+            given(this.organisaatioHenkiloRepository.findByHenkiloOidHenkilo("1.2.3.4.1"))
+                    .willReturn(Lists.newArrayList(OrganisaatioHenkilo.builder().organisaatioOid("1.2.0.0.1").passivoitu(true).build()));
+            given(this.permissionCheckerService.kayttooikeusMyontoviiteLimitationCheck("1.2.0.0.1", 2001L)).willReturn(true);
+            given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findMyonnettyTapahtuma(2001L,
+                    "1.2.0.0.1", "1.2.3.4.5"))
+                    .willReturn(Optional.empty());
+            // Passivoitu organisation
+            given(this.henkiloDataRepository.findByOidHenkilo("1.2.3.4.1"))
+                    .willReturn(Optional.of(createHenkiloWithOrganisaatio("1.2.3.4.5", "1.2.0.0.1", true)));
 
-        GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
-                LocalDate.now().plusYears(1));
-        this.kayttooikeusAnomusService.grantKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1",
-                Lists.newArrayList(grantKayttooikeusryhmaDto));
+            GrantKayttooikeusryhmaDto grantKayttooikeusryhmaDto = createGrantKayttooikeusryhmaDto(2001L,
+                    LocalDate.now().plusYears(1));
+            this.kayttooikeusAnomusService.grantKayttooikeusryhma("1.2.3.4.5", "1.2.0.0.1",
+                    Lists.newArrayList(grantKayttooikeusryhmaDto));
+        });
+        assertTrue(exception.getMessage().contains("Target organization has invalid organization type"));
     }
 
     // MyonnettyKayttooikeusryhmaTapahtuma already exists

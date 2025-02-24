@@ -10,15 +10,13 @@ import org.apereo.cas.client.authentication.AttributePrincipal;
 import org.apereo.cas.client.validation.Assertion;
 import org.apereo.cas.client.validation.TicketValidationException;
 import org.apereo.cas.client.validation.TicketValidator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.UnsupportedEncodingException;
@@ -46,7 +44,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class CasRestTest {
@@ -63,7 +60,7 @@ public class CasRestTest {
     @MockBean(name = TunnistusSecurityConfig.OPPIJA_TICKET_VALIDATOR_QUALIFIER)
     private TicketValidator oppijaTicketValidator;
 
-    @Before
+    @BeforeEach
     public void setup() throws TicketValidationException {
         Assertion assertion = mock(Assertion.class);
         AttributePrincipal principal = mock(AttributePrincipal.class);
@@ -78,7 +75,7 @@ public class CasRestTest {
         when(principal.getAttributes()).thenReturn(attributes);
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         databaseService.truncate();
     }

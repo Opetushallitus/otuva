@@ -23,14 +23,14 @@ import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.properties.OphProperties;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WithMockUser
 public class PermissionCheckerTest {
 
@@ -72,7 +72,7 @@ public class PermissionCheckerTest {
     private static final String ORG2 = "org2";
     private static final String ROOT_ORG = "1.2.246.562.10.00000000001";
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         this.henkiloDataRepositoryMock = Mockito.mock(HenkiloDataRepository.class);

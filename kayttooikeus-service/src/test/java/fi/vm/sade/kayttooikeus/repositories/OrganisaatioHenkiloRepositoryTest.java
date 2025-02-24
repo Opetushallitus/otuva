@@ -10,10 +10,10 @@ import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator;
 import fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator;
 import org.assertj.core.util.Sets;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;

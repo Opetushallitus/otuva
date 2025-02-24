@@ -4,16 +4,16 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioTyyppi;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static java.util.Collections.singleton;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class OrganisaatioControllerTest extends AbstractControllerTest {
 
     @MockBean
@@ -99,6 +99,6 @@ public class OrganisaatioControllerTest extends AbstractControllerTest {
     }
 
     private String getFixture(String fileName) throws Exception {
-        return Files.readString(Paths.get(getClass().getResource(fileName).toURI()), StandardCharsets.UTF_8);
+        return Files.readString(Path.of(getClass().getResource(fileName).toURI()), StandardCharsets.UTF_8);
     }
 }

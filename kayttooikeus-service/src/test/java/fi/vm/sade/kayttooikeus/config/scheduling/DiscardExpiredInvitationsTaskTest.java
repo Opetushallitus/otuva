@@ -3,8 +3,8 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 import fi.vm.sade.kayttooikeus.config.properties.KayttooikeusProperties;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 
 import java.time.Period;
@@ -21,7 +21,7 @@ public class DiscardExpiredInvitationsTaskTest {
 
     private KutsuService service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         kayttooikeusProperties = mock(KayttooikeusProperties.class, Answers.RETURNS_DEEP_STUBS);
         service = mock(KutsuService.class, Answers.RETURNS_DEEP_STUBS);

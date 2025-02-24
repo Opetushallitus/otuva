@@ -3,10 +3,11 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.repositories.AbstractRepositoryTest;
 import fi.vm.sade.kayttooikeus.repositories.AnomusRepositoryCustom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -14,7 +15,7 @@ import java.time.Period;
 import static fi.vm.sade.kayttooikeus.repositories.populate.AnomusPopulator.anomus;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class AnomusRepositoryImplTest extends AbstractRepositoryTest {
 
     @Autowired

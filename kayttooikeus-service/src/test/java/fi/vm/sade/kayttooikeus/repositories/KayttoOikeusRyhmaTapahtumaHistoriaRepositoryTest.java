@@ -2,10 +2,10 @@ package fi.vm.sade.kayttooikeus.repositories;
 
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;
 import fi.vm.sade.kayttooikeus.dto.MyonnettyKayttoOikeusDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
@@ -13,9 +13,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.hen
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaTapahtumaHistoriaPopulator.historia;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired

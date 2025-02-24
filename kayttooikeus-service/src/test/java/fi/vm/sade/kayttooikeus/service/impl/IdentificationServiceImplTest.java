@@ -12,12 +12,12 @@ import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IdentificationServiceImplTest {
 
     private IdentificationServiceImpl identificationServiceImpl;
@@ -50,7 +50,7 @@ public class IdentificationServiceImplTest {
     @Mock
     private KayttajatiedotRepository kayttajatiedotRepositoryMock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         identificationServiceImpl = new IdentificationServiceImpl(identificationRepositoryMock,
                 henkiloDataRepositoryMock, kutsuRepositoryMock, tunnistusTokenDataRepositoryMock,

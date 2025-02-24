@@ -8,10 +8,10 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -26,9 +26,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired

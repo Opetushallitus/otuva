@@ -3,11 +3,11 @@ package fi.vm.sade.kayttooikeus.repositories;
 import fi.vm.sade.kayttooikeus.dto.PalveluDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluTyyppi;
 import fi.vm.sade.kayttooikeus.model.Palvelu;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,9 +17,9 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.pal
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Sql("/truncate_tables.sql")
 public class PalveluRepositoryTest extends AbstractRepositoryTest {
     @Autowired

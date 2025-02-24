@@ -2,22 +2,19 @@ package fi.vm.sade.kayttooikeus;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AccessLogTest {
 
@@ -26,13 +23,13 @@ public class AccessLogTest {
     private TestRestTemplate restTemplate;
     private ByteArrayOutputStream output;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         output = new ByteArrayOutputStream();
         System.setOut(new PrintStream(output));
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         System.setOut(restore);
         output.close();

@@ -23,9 +23,9 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -35,7 +35,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -60,11 +60,11 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WithMockUser
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class KutsuServiceTest extends AbstractServiceIntegrationTest {
@@ -101,7 +101,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     @Captor
     private ArgumentCaptor<Collection<KayttoOikeusRyhma>> kayttooikeusRyhmaCollectionCaptor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         doNothing().when(this.oppijanumerorekisteriClient).updateHenkilo(any(HenkiloUpdateDto.class));
     }
@@ -663,17 +663,19 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         verify(emailService, times(1)).sendInvitationEmail(any(), eq(Optional.of(kutsujaForEmail)));
     }
 
-    @Test(expected = ForbiddenException.class)
+    @Test
     @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void createKutsuAsAdminWithNoHetuOrVtjYksiloity() {
-        doReturn(HenkiloDto.builder()
-                .kutsumanimi("kutsun")
-                .sukunimi("kutsuja")
-                .build())
-                .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
-        populate(virkailija("1.2.4"));
-        // This kind of kutsu is not actually allowed on api.
-        this.kutsuService.createKutsu(KutsuCreateDto.builder().organisaatiot(new HashSet<>()).build());
+        assertThrows(ForbiddenException.class, () -> {
+            doReturn(HenkiloDto.builder()
+                    .kutsumanimi("kutsun")
+                    .sukunimi("kutsuja")
+                    .build())
+                    .when(this.oppijanumerorekisteriClient).getHenkiloByOid(anyString());
+            populate(virkailija("1.2.4"));
+            // This kind of kutsu is not actually allowed on api.
+            this.kutsuService.createKutsu(KutsuCreateDto.builder().organisaatiot(new HashSet<>()).build());
+        });
     }
 
     // Assert that existing yhteystiedot won't be overrun
@@ -763,15 +765,17 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertNotNull(kutsu.getPoistettu());
     }
 
-    @Test(expected = ForbiddenException.class)
+    @Test
     @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void deleteKutsuOtherKutsujaWithoutProperAuthorityFails() {
-        Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
-                .kutsuja("1.2.5")
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
-                        .ryhma(kayttoOikeusRyhma("RYHMA2")))
-        );
-        this.kutsuService.deleteKutsu(kutsu.getId());
+        assertThrows(ForbiddenException.class, () -> {
+            Kutsu kutsu = populate(kutsu("Matti", "Mehiläinen", "b@eaxmple.com")
+                    .kutsuja("1.2.5")
+                    .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                            .ryhma(kayttoOikeusRyhma("RYHMA2")))
+            );
+            this.kutsuService.deleteKutsu(kutsu.getId());
+        });
     }
 
     @Test

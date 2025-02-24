@@ -10,14 +10,14 @@ import fi.vm.sade.kayttooikeus.service.TimeService;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.assertj.core.groups.Tuple;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -41,13 +41,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Sql("/truncate_tables.sql")
 public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
@@ -223,7 +223,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     private static OrganisaatioPerustieto oppilaitos(String oid, String oppilaitostyyppi) {
         OrganisaatioPerustieto organisaatio = new OrganisaatioPerustieto();
         organisaatio.setOid(oid);
-        organisaatio.setOppilaitostyyppi(String.format("%s#1", oppilaitostyyppi));
+        organisaatio.setOppilaitostyyppi("%s#1".formatted(oppilaitostyyppi));
         return organisaatio;
     }
 

@@ -3,7 +3,7 @@ package fi.vm.sade.kayttooikeus.util;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class YhteystietoUtilTest {
 

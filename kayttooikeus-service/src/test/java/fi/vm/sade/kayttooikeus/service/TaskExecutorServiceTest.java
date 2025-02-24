@@ -2,19 +2,20 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.TextGroupDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.Period;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
-@RunWith(SpringRunner.class)
+
+@ExtendWith(SpringExtension.class)
 public class TaskExecutorServiceTest extends AbstractServiceTest {
 
     @Autowired

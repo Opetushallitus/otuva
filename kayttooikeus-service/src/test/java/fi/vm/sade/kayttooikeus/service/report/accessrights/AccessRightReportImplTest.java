@@ -4,13 +4,11 @@ import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.report.AccessRightReportRow;
 import fi.vm.sade.kayttooikeus.repositories.AbstractRepositoryTest;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class AccessRightReportImplTest extends AbstractRepositoryTest {
 

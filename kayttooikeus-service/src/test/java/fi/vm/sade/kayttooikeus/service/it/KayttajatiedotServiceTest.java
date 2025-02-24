@@ -17,11 +17,11 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.PasswordException;
 import fi.vm.sade.kayttooikeus.service.exception.UnauthorizedException;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -32,7 +32,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.TunnistusTokenPopula
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
 
     private static final String TEST_PASSWORD = "This_is_example_of_strong_password";

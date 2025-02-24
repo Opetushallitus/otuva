@@ -5,8 +5,8 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import org.assertj.core.data.MapEntry;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +28,7 @@ public class MyontooikeusServiceImplTest {
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepositoryMock;
     private OrganisaatioClient organisaatioClientMock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         kayttoOikeusRyhmaMyontoViiteRepositoryMock = mock(KayttoOikeusRyhmaMyontoViiteRepository.class);
         organisaatioClientMock = mock(OrganisaatioClient.class);

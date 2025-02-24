@@ -3,13 +3,13 @@ package fi.vm.sade.kayttooikeus.controller;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckDto;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
 
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class ServiceToServiceControllerTest extends AbstractControllerTest {
     @MockBean
     private PermissionCheckerService permissionCheckerService;

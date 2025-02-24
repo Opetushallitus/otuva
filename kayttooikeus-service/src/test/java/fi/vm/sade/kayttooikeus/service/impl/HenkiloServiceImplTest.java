@@ -12,14 +12,12 @@ import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.stream.Stream;
 
@@ -31,8 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = OrikaBeanMapper.class)
+@SpringJUnitConfig(classes = OrikaBeanMapper.class)
 public class HenkiloServiceImplTest {
 
     private HenkiloServiceImpl henkiloServiceImpl;
@@ -66,7 +63,7 @@ public class HenkiloServiceImplTest {
     @Mock
     private IdentificationService identificationService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         henkiloServiceImpl = new HenkiloServiceImpl(
                 henkiloHibernateRepositoryMock,

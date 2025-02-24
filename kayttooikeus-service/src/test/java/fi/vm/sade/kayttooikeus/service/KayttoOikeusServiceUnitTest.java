@@ -13,11 +13,11 @@ import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaR
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +29,7 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KayttoOikeusServiceUnitTest extends AbstractServiceIntegrationTest {
     @Autowired
     private KayttoOikeusService kayttoOikeusService;

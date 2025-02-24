@@ -6,12 +6,9 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.service.external.impl.ExternalPermissionClientImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
 import java.util.Arrays;
 
@@ -59,9 +56,8 @@ public class ExternalPermissionClientTest extends AbstractClientTest {
 
     void patchWireMockHostToClientConfig() {
         if (client instanceof ExternalPermissionClientImpl c) {
-            c.SERVICE_URIS.forEach((service, uri) -> {
-                c.SERVICE_URIS.put(service, uri.replaceFirst("https://localhost", WIREMOCK_HOST));
-            });
+            c.SERVICE_URIS.forEach((service, uri) ->
+                c.SERVICE_URIS.put(service, uri.replaceFirst("https://localhost", WIREMOCK_HOST)));
         }
     }
 

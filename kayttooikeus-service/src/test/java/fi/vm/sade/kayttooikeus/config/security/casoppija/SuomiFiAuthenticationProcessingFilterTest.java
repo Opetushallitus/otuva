@@ -4,8 +4,7 @@ import org.apereo.cas.client.authentication.AttributePrincipal;
 import org.apereo.cas.client.validation.Assertion;
 import org.apereo.cas.client.validation.TicketValidationException;
 import org.apereo.cas.client.validation.TicketValidator;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,8 +18,8 @@ import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthentic
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.HETU_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.SUKUNIMI_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.OPPIJA_TICKET_PARAM_NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

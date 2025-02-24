@@ -12,13 +12,13 @@ import fi.vm.sade.kayttooikeus.service.impl.EmailServiceViestinvalitysImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
 
     private static final String HENKILO_OID = "1.2.3.4.5";

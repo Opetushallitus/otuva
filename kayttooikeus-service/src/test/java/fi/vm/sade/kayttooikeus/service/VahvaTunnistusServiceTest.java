@@ -18,13 +18,13 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
 
     private static final String TEST_PASWORD = "This_is_example_of_strong_password";
@@ -57,7 +57,7 @@ public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
     @MockBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(oppijanumerorekisteriClient.getHenkiloByOid(any()))
                 .thenAnswer(invocation -> newHenkiloDto(invocation.getArgument(0)));

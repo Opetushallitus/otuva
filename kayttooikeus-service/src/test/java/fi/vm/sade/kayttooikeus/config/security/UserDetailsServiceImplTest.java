@@ -6,18 +6,18 @@ import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.PalveluRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class UserDetailsServiceImplTest extends AbstractServiceIntegrationTest {
 
     @Autowired

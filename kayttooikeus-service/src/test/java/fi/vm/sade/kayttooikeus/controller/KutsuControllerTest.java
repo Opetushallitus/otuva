@@ -5,13 +5,13 @@ import fi.vm.sade.kayttooikeus.dto.KutsuReadDto;
 import fi.vm.sade.kayttooikeus.dto.TextGroupMapDto;
 import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class KutsuControllerTest extends AbstractControllerTest {
     @MockBean
     private KutsuService kutsuService;

@@ -7,12 +7,12 @@ import fi.vm.sade.kayttooikeus.model.AnomuksenTila;
 import fi.vm.sade.kayttooikeus.model.HaettuKayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractRepositoryTest {
     @Autowired
     private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
@@ -30,7 +30,7 @@ public class HaettuKayttooikeusRyhmaRepositoryCustomTest extends AbstractReposit
     @MockBean
     private OrganisaatioClient organisaatioClient;
 
-    @Before
+    @BeforeEach
     public void setup() {
         populate(anomus("arpa@kuutio.fi").tila(AnomuksenTila.ANOTTU)
                 .withHaettuRyhma(haettuKayttooikeusryhma(null)
