@@ -5,7 +5,7 @@ import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
@@ -21,10 +21,10 @@ public class TaskExecutorServiceTest extends AbstractServiceTest {
     @Autowired
     private TaskExecutorService taskExecutorService;
 
-    @MockitoBean
+    @MockBean
     private KayttoOikeusService kayttoOikeusService;
 
-    @MockitoBean
+    @MockBean
     private EmailService emailService;
 
     @Test

@@ -10,8 +10,8 @@ import fi.vm.sade.kayttooikeus.util.Crypto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.Matchers.empty;
@@ -32,9 +32,9 @@ import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 public class CasMfaControllerTest extends AbstractControllerTest {
-    @MockitoBean
+    @MockBean
     private KayttajatiedotService kayttajatiedotService;
-    @MockitoBean
+    @MockBean
     private CommonProperties commonProperties;
 
     private String username = "cas";

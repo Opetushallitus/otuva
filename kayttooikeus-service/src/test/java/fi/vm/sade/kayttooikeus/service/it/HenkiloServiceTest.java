@@ -18,8 +18,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,13 +56,13 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
-    @MockitoBean
+    @MockBean
     private IdentificationService identificationService;
 
     @Autowired
     private CommonProperties commonProperties;
 
-    @MockitoBean
+    @MockBean
     private OrganisaatioClient organisaatioClient;
 
     @Test

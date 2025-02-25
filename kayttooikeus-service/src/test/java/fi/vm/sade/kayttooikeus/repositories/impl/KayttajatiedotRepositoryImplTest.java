@@ -9,7 +9,7 @@ import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -22,9 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 public class KayttajatiedotRepositoryImplTest extends AbstractServiceIntegrationTest {
 
-    @MockitoBean
+    @MockBean
     PermissionCheckerService permissionCheckerService;
-    @MockitoBean
+    @MockBean
     OrganisaatioClient organisaatioClient;
     @Autowired
     private KayttajatiedotRepository repository;

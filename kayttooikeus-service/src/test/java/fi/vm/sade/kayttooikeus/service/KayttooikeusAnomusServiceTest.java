@@ -26,9 +26,9 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,39 +58,39 @@ import static org.mockito.Mockito.*;
 public class KayttooikeusAnomusServiceTest {
     @Autowired
     private OrikaBeanMapper orikaBeanMapper;
-    @MockitoBean
+    @MockBean
     private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
-    @MockitoBean
+    @MockBean
     private LocalizationService localizationService;
-    @MockitoBean
+    @MockBean
     private HenkiloDataRepository henkiloDataRepository;
-    @MockitoBean
+    @MockBean
     private HenkiloHibernateRepository henkiloHibernateRepository;
-    @MockitoBean
+    @MockBean
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    @MockitoBean
+    @MockBean
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
-    @MockitoBean
+    @MockBean
     private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    @MockitoBean
+    @MockBean
     private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
-    @MockitoBean
+    @MockBean
     private PermissionCheckerService permissionCheckerService;
-    @MockitoBean
+    @MockBean
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
-    @MockitoBean
+    @MockBean
     private OrganisaatioClient organisaatioClient;
-    @MockitoBean
+    @MockBean
     private AnomusRepository anomusRepository;
-    @MockitoBean
+    @MockBean
     private EmailService emailService;
-    @MockitoBean
+    @MockBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    @MockitoBean
+    @MockBean
     private OrganisaatioService organisaatioService;
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
-    @MockitoSpyBean
+    @SpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Autowired

@@ -16,7 +16,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
@@ -34,19 +34,19 @@ public class KayttoOikeusServiceUnitTest extends AbstractServiceIntegrationTest 
     @Autowired
     private KayttoOikeusService kayttoOikeusService;
 
-    @MockitoBean
+    @MockBean
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepositoryMock;
 
-    @MockitoBean
+    @MockBean
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
 
-    @MockitoBean
+    @MockBean
     private KayttoOikeusRyhmaTapahtumaHistoriaRepository kayttoOikeusRyhmaTapahtumaHistoriaRepository;
 
-    @MockitoBean
+    @MockBean
     private LocalizationService localizationService;
 
-    @MockitoBean
+    @MockBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Test
