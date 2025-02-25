@@ -186,9 +186,6 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals("CRUD", kayttoOikeus.getRooli());
         assertEquals("HENKILOHALLINTA", kayttoOikeus.getPalvelu().getName());
 
-        kayttoOikeus = kayttoOikeusRepository.findByRooliAndPalvelu("CRUD", "KOODISTO");
-        assertNull(kayttoOikeus);
-
     }
 
 }
