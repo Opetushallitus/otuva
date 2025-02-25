@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
+
 @Entity
 @Getter
 @Setter
@@ -17,6 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "myonnetty_kayttooikeusryhma_tapahtuma")
+@Audited
 @NamedNativeQuery(
         name = "AccessRightReport",
         resultSetMapping = "AccessRightReportMapping",
@@ -73,10 +77,12 @@ import java.util.Set;
 public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kayttooikeusryhma_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private KayttoOikeusRyhma kayttoOikeusRyhma;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisaatiohenkilo_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private OrganisaatioHenkilo organisaatioHenkilo;
 
     @Column(name = "syy")
@@ -88,9 +94,11 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "kasittelija_henkilo_id")
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Henkilo kasittelija;
 
     @Column(name = "aikaleima", nullable = false)
+    @Builder.Default
     private LocalDateTime aikaleima = LocalDateTime.now();
 
     @Column(name = "voimassaalkupvm", nullable = false)
@@ -100,6 +108,8 @@ public class MyonnettyKayttoOikeusRyhmaTapahtuma extends IdentifiableAndVersione
     private LocalDate voimassaLoppuPvm;
 
     @ManyToMany(mappedBy = "myonnettyKayttooikeusRyhmas", fetch = FetchType.LAZY)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    @Builder.Default
     private Set<Anomus> anomus = new HashSet<>();
 
     public KayttoOikeusRyhmaTapahtumaHistoria toHistoria(LocalDateTime aikaleima, String syy) {

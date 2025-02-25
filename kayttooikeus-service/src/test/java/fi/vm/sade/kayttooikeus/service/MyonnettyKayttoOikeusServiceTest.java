@@ -7,12 +7,17 @@ import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhmaTapahtumaHistoria;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
@@ -36,13 +41,16 @@ public class MyonnettyKayttoOikeusServiceTest {
     @Autowired
     private DatabaseService databaseService;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @AfterEach
     public void cleanup() {
         databaseService.truncate();
     }
 
     @Test
-    public void poistaVanhentuneet() {
+    public void poistaVanhentuneet() throws Exception {
         databaseService.populate(henkilo("kayttaja"));
         databaseService.populate(myonnettyKayttoOikeus(organisaatioHenkilo("henkilo1", "organisaatio1"),
                 kayttoOikeusRyhma("ryhmä1")).voimassaPaattyen(LocalDate.now().minusDays(1)));
@@ -133,4 +141,64 @@ public class MyonnettyKayttoOikeusServiceTest {
         });
     }
 
+    private List<MyonnettyKayttooikeusAuditRow> getAuditTrail() {
+        RowMapper<MyonnettyKayttooikeusAuditRow> auditRowMapper = (rs, rowNum) -> new MyonnettyKayttooikeusAuditRow(
+            rs.getLong("id"),
+            rs.getLong("revtype"),
+            rs.getLong("kasittelija_henkilo_id"),
+            rs.getLong("organisaatiohenkilo_id"),
+            rs.getLong("kayttooikeusryhma_id"),
+            rs.getDate("voimassaalkupvm"),
+            rs.getDate("voimassaloppupvm"),
+            rs.getString("tila"),
+            rs.getString("syy")
+        );
+        return jdbcTemplate.query(auditSql, auditRowMapper);
+    }
+
+    private String auditSql = "select * from myonnetty_kayttooikeusryhma_tapahtuma_aud";
+
+    @Test
+    public void poistaVanhentuneetLeavesEnversAuditTrail() throws Exception {
+        databaseService.populate(henkilo("kayttaja"));
+        databaseService.populate(myonnettyKayttoOikeus(organisaatioHenkilo("henkilo1", "organisaatio1"),
+                kayttoOikeusRyhma("ryhmä1")).voimassaPaattyen(LocalDate.now().minusDays(1)));
+        databaseService.populate(myonnettyKayttoOikeus(organisaatioHenkilo("henkilo1", "organisaatio1"),
+                kayttoOikeusRyhma("ryhmä2")).voimassaPaattyen(LocalDate.now().minusDays(1)));
+
+        databaseService.runInTransaction(() -> {
+                OrganisaatioHenkilo henkilo1organisaatio = organisaatioHenkiloRepository
+                        .findByHenkiloOidHenkiloAndOrganisaatioOid("henkilo1", "organisaatio1").get();
+
+                List<MyonnettyKayttooikeusAuditRow> audit = getAuditTrail();
+                assertThat(audit.size()).isEqualTo(2);
+                assertThat(audit.stream().filter(a -> a.revtype() == 0).toList().size()).isEqualTo(2);
+                assertThat(audit).allMatch(a -> a.organisaatioHenkiloId().equals(henkilo1organisaatio.getId()));
+                assertThat(audit).allMatch(a -> a.voimassaalkupvm().toString().equals(LocalDate.now().toString()));
+                assertThat(audit).allMatch(a -> a.voimassaloppupvm().toString().equals(LocalDate.now().minusDays(1).toString()));
+                assertThat(audit).allMatch(a -> "MYONNETTY".equals(a.tila()));
+        });
+
+        Henkilo kayttaja = henkiloDataRepository.findByOidHenkilo("kayttaja").get();
+        myonnettyKayttoOikeusService.poistaVanhentuneet(new MyonnettyKayttoOikeusService.DeleteDetails(
+                kayttaja, KayttoOikeudenTila.SULJETTU, "suljettu testissä"));
+
+        List<MyonnettyKayttooikeusAuditRow> auditAfterPoista = getAuditTrail();
+        assertThat(auditAfterPoista.size()).isEqualTo(4);
+        assertThat(auditAfterPoista.stream().filter(a -> a.revtype() == 2).toList().size()).isEqualTo(2);
+    }
+
+
 }
+
+record MyonnettyKayttooikeusAuditRow(
+        Long id,
+        Long revtype,
+        Long kasittelijaHenkiloId,
+        Long organisaatioHenkiloId,
+        Long kayttooikeusryhmaId,
+        Date voimassaalkupvm,
+        Date voimassaloppupvm,
+        String tila,
+        String syy
+) {}
