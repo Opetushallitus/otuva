@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.2.12</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -205,10 +205,6 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
-       <dependency>
-           <groupId>org.flywaydb</groupId>
-           <artifactId>flyway-database-postgresql</artifactId>
-       </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -257,9 +253,8 @@
             <version>33.3.0-jre</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>logback-access-tomcat</artifactId>
-            <version>2.0.6</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.kagkarlsson</groupId>
