@@ -3,7 +3,7 @@
   "serviceId": "^https://viestinvalitys\\.hahtuva.viestinvalitys.opintopolku\\.fi(/.*)?$",
   "name": "viestinvalitys2",
   "description": "Viestinvälityspalvelu2",
-  "id": 3,
+  "id": 4,
   "evaluationOrder": 0,
   "attributeReleasePolicy": {
     "@class": "org.apereo.cas.services.ReturnAllAttributeReleasePolicy",
