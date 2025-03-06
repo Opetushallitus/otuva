@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('KOSKI', 'KIELITUTKINTOREKISTERI', 'Kielitutkintorekisteri (kielitutkintojen lukeminen ja kirjoitus)');
