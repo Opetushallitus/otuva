@@ -87,8 +87,6 @@ cas.locale.default-value: fi
 cas.view.default-redirect-url: http://localhost:8080
 cas.sso.services.allow-missing-service-parameter: false
 
-cas.custom.properties.hakaUrl: http://localhost:8080/service-provider-app/saml/login/alias/hakasp
-cas.custom.properties.mpassidUrl: http://localhost:8080/service-provider-app/saml/login/alias/mpassidtestsp?idp=https://mpass-proxy-test.csc.fi/idp/shibboleth
 cas.custom.properties.suomifiUrl: http://untuvaopintopolku.fi/cas-oppija/login
 cas.custom.properties.suomifiUrlTarget: http://localhost:8101/kayttooikeus-service/cas/tunnistus?locale=
 cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
@@ -110,6 +108,26 @@ cas.authn.mfa.gauth.rest.url: http://localhost:8101/kayttooikeus-service/mfa/tok
 cas.authn.mfa.gauth.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}
 cas.authn.mfa.gauth.rest.basic-auth-username: cas
 cas.authn.mfa.gauth.rest.basic-auth-password: mfa
+
+cas.authn.pac4j.saml[0].keystore-password: dummy
+cas.authn.pac4j.saml[0].private-key-password: dummy
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://localhost:8080/cas/login?client_name=mpassid
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/mpassidsp.xml
+cas.authn.pac4j.saml[0].keystore-path: /app/etc/mpassidKeystore.jks
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://mpass-proxy-test.csc.fi/idp/shibboleth
+cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+cas.authn.pac4j.saml[0].client-name: mpassid
+cas.authn.pac4j.saml[0].wants-assertions-signed: true
+
+cas.authn.pac4j.saml[1].keystore-password: dummy
+cas.authn.pac4j.saml[1].private-key-password: dummy
+cas.authn.pac4j.saml[1].service-provider-entity-id: https://localhost:8080/cas/login?client_name=haka
+cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
+cas.authn.pac4j.saml[1].keystore-path: /app/etc/hakakeystore.jks
+cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
+cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+cas.authn.pac4j.saml[1].client-name: haka
+cas.authn.pac4j.saml[1].wants-assertions-signed: true
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
