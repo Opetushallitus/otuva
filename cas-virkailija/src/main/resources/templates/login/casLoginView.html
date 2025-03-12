@@ -15,38 +15,54 @@
     <main layout:fragment="content" role="main" class="container-fluid">
         <div class="row text-center">
             <h2 class="page-header w-100 mt-4" th:text="#{app.subtitle}">Yhdellä tunnuksella kirjaudut kaikkiin opetushallinnon palveluihin</h2>
-            <ul th:replace="fragments/palvelut :: linkit" />
+            <ul th:replace="~{fragments/palvelut :: linkit}" />
             <div class="card mx-auto login-kortti">
                 <div class="card-body">
                 <div id="loginform">
-                    <div th:replace="fragments/loginform :: loginform">
+                    <div th:replace="~{fragments/loginform :: loginform}">
                         <a href="../fragments/loginform.html">Login Form goes here</a>
                     </div>
                 </div>
-                <div th:replace="fragments/palvelut :: palveluinfot" />
+                <div th:replace="~{fragments/palvelut :: palveluinfot}" />
                 <div id="muut-kirjautumistavat" class="container w-100 mx-0 p-0">
                     <div class="row">
                         <span class="title-backline"><span th:text="#{login.muutKirjautumistavat}"></span></span>
                     </div>
                     <div class="row">
                         <div class="kirjautumistapa kirjautumistapa-haka col-md-4">
-                            <a th:with="parameters=${service != null} ? '?redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
-                               th:href="${cas.custom.properties['hakaUrl']} + ${parameters}">
-                                <img src="/cas/images/haka_landscape_medium.gif" />
-                            </a>
+                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[1].name}" th:action="@{/login}">
+                                <input name="submitButton"
+                                        id="submitButton"
+                                        type="image"
+                                        src="/cas/images/haka_landscape_medium.gif"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
+                                        th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
+                                        th:id="${delegatedAuthenticationProviderConfigurations[1].name}"
+                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
+                                        accesskey="s"
+                                />
+                                <input type="hidden" name="client_name" th:value="haka" />
+                                <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
+                                <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
+                            </form>
                         </div>
                         <div class="kirjautumistapa kirjautumistapa-mpassid col-md-4">
-                            <div style="margin-top: 8px">
-                                <!--
-                                Note that mpassidUrl has idp query parameter in it so the redirect param has to be
-                                prefixed with & instead of ? unlike in Haka login URL :)
-                                -->
-                                <a id="mpassid-button"
-                                   th:with="parameters=${service != null} ? '&redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
-                                   th:href="${cas.custom.properties['mpassidUrl']} + ${parameters}">
-                                    <img height="20px" src="/cas/images/mpassid-teksti.svg" />
-                                </a>
-                            </div>
+                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[0].name}" th:action="@{/login}">
+                                <input name="submitButton"
+                                        id="mpassid-button"
+                                        type="image"
+                                        src="/cas/images/mpassid-teksti.svg"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[0].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[0].redirectUrl}}"
+                                        th:title="${delegatedAuthenticationProviderConfigurations[0].name + ' ' + delegatedAuthenticationProviderConfigurations[0].type}"
+                                        th:id="${delegatedAuthenticationProviderConfigurations[0].name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[0].type} + ${delegatedAuthenticationProviderConfigurations[0].cssClass}"
+                                        accesskey="s"
+                                        height="38px"
+                                />
+                                <input type="hidden" name="client_name" th:value="mpassid" />
+                                <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
+                                <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
+                            </form>
                         </div>
                         <div class="kirjautumistapa kirjautumistapa-suomifi col-md-4">
                             <a th:href="${cas.custom.properties['suomifiUrl']} + '?locale=' + ${#locale.getLanguage().toLowerCase()} + '&service=' + ${cas.custom.properties['suomifiUrlTarget']} + ${#locale.getLanguage().toLowerCase()}">
@@ -56,11 +72,6 @@
                     </div>
                 </div>
                 </div>
-            </div>
-        </div>
-        <div id="providers" class="w-100">
-            <div th:replace="fragments/loginProviders :: loginProviders">
-                <a href="fragments/loginProviders.html">loginProviders</a>
             </div>
         </div>
     </main>
