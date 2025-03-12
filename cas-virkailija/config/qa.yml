@@ -32,8 +32,6 @@ cas.authn.mfa.gauth.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
-cas.custom.properties.hakaUrl: https://virkailija.testiopintopolku.fi/service-provider-app/saml/login/alias/hakasp
-cas.custom.properties.mpassidUrl: https://virkailija.testiopintopolku.fi/service-provider-app/saml/login/alias/mpassidsp?idp=https://mpass-proxy.csc.fi/idp/shibboleth
 cas.custom.properties.suomifiUrl: https://testiopintopolku.fi/cas-oppija/login
 cas.custom.properties.suomifiUrlTarget: https://virkailija.testiopintopolku.fi/kayttooikeus-service/cas/tunnistus?locale=
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet
@@ -51,6 +49,17 @@ cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
 cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
+
+cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
+cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
+cas.authn.pac4j.saml[0].keystore-password: ${cas_mpassid_keystore_password}
+cas.authn.pac4j.saml[0].private-key-password: ${cas_mpassid_keystore_password}
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login?client_name=mpassid
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://mpass-proxy.csc.fi/idp/shibboleth
+cas.authn.pac4j.saml[1].keystore-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[1].private-key-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[1].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login?client_name=haka
+cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
 
 management.endpoint.auditevents.enabled: false
 management.endpoint.springWebflow.enabled: false

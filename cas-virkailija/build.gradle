@@ -316,6 +316,7 @@ dependencies {
     implementation "org.apereo.cas:cas-server-core-util-api"
     implementation "org.apereo.cas:cas-server-core-web-api"
     implementation "org.apereo.cas:cas-server-core-webflow-api"
+    implementation "org.apereo.cas:cas-server-support-pac4j-webflow"
     implementation "org.apereo.cas:cas-server-support-gauth"
     implementation "org.apereo.cas:cas-server-support-interrupt-api"
     implementation "org.apereo.cas:cas-server-support-interrupt-core"
