@@ -873,6 +873,10 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           database.secret!,
           "password"
         ),
+        cas_pac4j_encryption_key: this.ssmSecret("CasPac4jEncryptionKey"),
+        cas_pac4j_signing_key: this.ssmSecret("CasPac4jSigningKey"),
+        cas_mpassid_keystore_password: this.ssmSecret("CasMpassidKeystorePassword"),
+        cas_haka_keystore_password: this.ssmSecret("CasHakaKeystorePassword"),
         cas_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
         cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_webflow_encryption_key: this.ssmSecret("WebflowEncryptionKey"),
