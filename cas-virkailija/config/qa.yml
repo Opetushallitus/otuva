@@ -57,6 +57,7 @@ cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy.csc.fi/.well-
 cas.authn.pac4j.oidc[0].generic.id: ${cas_mpassid_oidc_id}
 cas.authn.pac4j.oidc[0].generic.secret: ${cas_mpassid_oidc_secret}
 cas.authn.pac4j.oidc[0].generic.client-name: mpassid
+cas.authn.pac4j.oidc[0].generic.principal-id-attribute: urn:oid:1.3.6.1.4.1.16161.1.1.27
 cas.authn.pac4j.saml[0].keystore-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].private-key-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login?client_name=haka

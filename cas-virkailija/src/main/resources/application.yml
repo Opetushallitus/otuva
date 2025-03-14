@@ -115,8 +115,7 @@ cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy-test.csc.fi/.
 cas.authn.pac4j.oidc[0].generic.id: dummy
 cas.authn.pac4j.oidc[0].generic.secret: dummy
 cas.authn.pac4j.oidc[0].generic.client-name: mpassid
-
-
+cas.authn.pac4j.oidc[0].generic.principal-id-attribute: urn:oid:1.3.6.1.4.1.16161.1.1.27
 cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8080/cas/login?client_name=haka
