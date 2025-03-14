@@ -1,5 +1,6 @@
 kayttooikeus.baseurl: https://kayttooikeus.prod.yleiskayttoiset.opintopolku.fi
-
+cas.server.name: https://virkailija.opintopolku.fi
+cas.server.prefix: ${cas.server.name}/cas
 cas.server.tomcat.http-proxy.enabled: true
 cas.server.tomcat.http-proxy.secure: true
 cas.server.tomcat.http-proxy.scheme: https
@@ -51,24 +52,19 @@ cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
 cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
 cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
-cas.authn.pac4j.saml[0].keystore-password: ${cas_mpassid_keystore_password}
-cas.authn.pac4j.saml[0].private-key-password: ${cas_mpassid_keystore_password}
-cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.opintopolku.fi/cas/login?client_name=mpassid
-cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://mpass-proxy.csc.fi/idp/shibboleth
-cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/mpassidsp.xml
-cas.authn.pac4j.saml[0].keystore-path: /app/etc/mpassidKeystore.jks
+cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy.csc.fi/.well-known/openid-configuration
+cas.authn.pac4j.oidc[0].generic.id: ${cas_mpassid_oidc_id}
+cas.authn.pac4j.oidc[0].generic.secret: ${cas_mpassid_oidc_secret}
+cas.authn.pac4j.oidc[0].generic.client-name: mpassid
+cas.authn.pac4j.saml[0].keystore-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[0].private-key-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.opintopolku.fi/cas/login?client_name=haka
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
+cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
-cas.authn.pac4j.saml[0].client-name: mpassid
+cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
-cas.authn.pac4j.saml[1].keystore-password: ${cas_haka_keystore_password}
-cas.authn.pac4j.saml[1].private-key-password: ${cas_haka_keystore_password}
-cas.authn.pac4j.saml[1].service-provider-entity-id: https://virkailija.opintopolku.fi/cas/login?client_name=haka
-cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
-cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
-cas.authn.pac4j.saml[1].keystore-path: /app/etc/hakakeystore.jks
-cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
-cas.authn.pac4j.saml[1].client-name: haka
-cas.authn.pac4j.saml[1].wants-assertions-signed: true
 
 
 management.endpoint.auditevents.enabled: false
