@@ -25,6 +25,8 @@ server.tomcat.accesslog.file-date-format:
 server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}"
 server.tomcat.accesslog.request-attributes-enabled: true
 
+logging.config: file:/etc/cas/config/log4j2.xml
+
 management:
   endpoint:
     health:
@@ -109,25 +111,21 @@ cas.authn.mfa.gauth.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.basic-auth-username: cas
 cas.authn.mfa.gauth.rest.basic-auth-password: mfa
 
+cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy-test.csc.fi/.well-known/openid-configuration
+cas.authn.pac4j.oidc[0].generic.id: dummy
+cas.authn.pac4j.oidc[0].generic.secret: dummy
+cas.authn.pac4j.oidc[0].generic.client-name: mpassid
+
+
 cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
-cas.authn.pac4j.saml[0].service-provider-entity-id: https://localhost:8080/cas/login?client_name=mpassid
-cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/mpassidsp.xml
-cas.authn.pac4j.saml[0].keystore-path: /app/etc/mpassidKeystore.jks
-cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://mpass-proxy-test.csc.fi/idp/shibboleth
+cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8080/cas/login?client_name=haka
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
+cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
-cas.authn.pac4j.saml[0].client-name: mpassid
+cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
-
-cas.authn.pac4j.saml[1].keystore-password: dummy
-cas.authn.pac4j.saml[1].private-key-password: dummy
-cas.authn.pac4j.saml[1].service-provider-entity-id: https://localhost:8080/cas/login?client_name=haka
-cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
-cas.authn.pac4j.saml[1].keystore-path: /app/etc/hakakeystore.jks
-cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
-cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
-cas.authn.pac4j.saml[1].client-name: haka
-cas.authn.pac4j.saml[1].wants-assertions-signed: true
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
