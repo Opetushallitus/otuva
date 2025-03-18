@@ -115,6 +115,15 @@ public class CasController {
         return CasUserAttributes.fromIdentification(identification, roles);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @Operation(summary = "Hakee henkilön CAS-attribuutit")
+    @GetMapping(value = "/auth/henkilo/{oid}")
+    public CasUserAttributes getIdentityByOid(String oid) {
+        var kayttaja = kayttajatiedotService.getByHenkiloOid(oid);
+        var roles = kayttajatiedotService.fetchKayttooikeudet(oid);
+        return CasUserAttributes.fromKayttajatiedotReadDto(oid, kayttaja, roles);
+    }
+
     @Operation(summary = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
             "mahdollinen kirjautuminen suomi.fi:n kautta.)")
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
