@@ -3,7 +3,6 @@ package fi.vm.sade.auth.clients;
 import com.google.gson.Gson;
 import fi.vm.sade.auth.Json;
 import fi.vm.sade.auth.cas.CasUserAttributes;
-import fi.vm.sade.auth.dto.HenkiloDto;
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
@@ -23,6 +22,8 @@ public class KayttooikeusRestClient {
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
     private final Gson gson;
+
+    private record HenkiloDto(String oid) {}
 
     @Autowired
     public KayttooikeusRestClient(OphProperties ophProperties, Environment environment) {
@@ -56,7 +57,7 @@ public class KayttooikeusRestClient {
         String url = this.ophProperties.url("kayttooikeus-service.cas.get-oid", username);
         return httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
-                .mapWith(json -> gson.fromJson(json, HenkiloDto.class).getOid())
+                .mapWith(json -> gson.fromJson(json, HenkiloDto.class).oid())
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
