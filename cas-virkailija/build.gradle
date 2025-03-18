@@ -316,6 +316,8 @@ dependencies {
     implementation "org.apereo.cas:cas-server-core-util-api"
     implementation "org.apereo.cas:cas-server-core-web-api"
     implementation "org.apereo.cas:cas-server-core-webflow-api"
+    implementation "org.apereo.cas:cas-server-support-pac4j-api"
+    implementation "org.apereo.cas:cas-server-support-pac4j-core-clients"
     implementation "org.apereo.cas:cas-server-support-pac4j-webflow"
     implementation "org.apereo.cas:cas-server-support-gauth"
     implementation "org.apereo.cas:cas-server-support-interrupt-api"
@@ -327,7 +329,6 @@ dependencies {
     implementation "org.apereo.cas:cas-server-support-webconfig"
     implementation "org.apereo.cas:cas-server-webapp-init"
     implementation "org.springframework.security:spring-security-config"
-    implementation 'com.google.code.gson:gson:2.9.0'
     testImplementation "junit:junit"
     testImplementation "org.apereo.cas:cas-server-core-services-registry"
     testImplementation 'org.assertj:assertj-core'
