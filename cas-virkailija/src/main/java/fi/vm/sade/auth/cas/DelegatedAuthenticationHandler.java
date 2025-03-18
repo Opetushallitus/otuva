@@ -56,11 +56,18 @@ public class DelegatedAuthenticationHandler extends DelegatedClientAuthenticatio
             final Service service
     ) {
         try {
-            var userAttributes = kayttooikeusRestClient.getHenkiloByOid(credentials.getId());
+            var userAttributes = getUserAttributes(client, principal);
             var casPrincipal = CasPrincipal.of(principalFactory, userAttributes);
             return createHandlerResult(credentials, casPrincipal, new ArrayList<>(0));
         } catch (Exception e) {
             throw new PreventedException(e);
         }
+    }
+
+    public CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
+        if ("mpassid".equals(client.getName())) {
+            return kayttooikeusRestClient.getHenkiloByOid(principal.getId());
+        }
+        throw new PreventedException("invalid delegated authentication client (" + client.getName() + ") for principal " + principal.getId());
     }
 }
