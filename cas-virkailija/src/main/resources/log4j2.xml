@@ -9,7 +9,7 @@
     <Loggers>
         <AsyncLogger name="org.apereo.cas" level="info" />
         <AsyncLogger name="fi.vm" level="debug" />
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="console"/>
         </Root>
     </Loggers>
