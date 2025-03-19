@@ -87,7 +87,7 @@ public class KayttooikeusRestClient {
     }
 
     public CasUserAttributes getHenkiloByOid(String oid) {
-        String url = ophProperties.url("kayttooikeus-service.cas.henkiloByOid");
+        String url = ophProperties.url("kayttooikeus-service.cas.henkiloByOid", oid);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))
