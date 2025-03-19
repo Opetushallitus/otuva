@@ -1,6 +1,5 @@
 package fi.vm.sade.auth.cas;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import org.apereo.cas.authentication.Credential;
