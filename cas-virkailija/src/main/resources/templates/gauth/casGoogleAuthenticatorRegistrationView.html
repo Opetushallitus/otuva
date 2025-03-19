@@ -14,9 +14,9 @@
         <div class="row text-center taustakuva">
             <h1 class="w-100 mt-4" th:text="#{app.title}">Kirjaudu sisään</h1>
             <h2 class="w-100" th:text="#{app.subtitle}">Yhdellä tunnuksella kirjaudut kaikkiin opetushallinnon palveluihin</h2>
-            <ul th:replace="fragments/palvelut :: linkit" />
+            <ul th:replace="~{fragments/palvelut :: linkit}" />
             <div class="w-100">
-                <div th:replace="fragments/loginerror :: loginerror">
+                <div th:replace="~{fragments/loginerror :: loginerror}">
                     <a href="../fragments/loginerror.html">Login Error goes here</a>
                 </div>
             </div>
