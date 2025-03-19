@@ -8,7 +8,6 @@ import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.registry.TicketRegistryCleaner;
-import org.apereo.cas.util.lock.LockRepository;
 import org.jooq.lambda.Unchecked;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ import java.util.Optional;
 public class CustomTicketRegistryCleaner implements TicketRegistryCleaner {
     private static final long LOCK_ID = 702779869L;
 
-    private final LockRepository lockRepository;
     private final LogoutManager logoutManager;
     private final TicketRegistry ticketRegistry;
     private final JdbcTemplate jdbcTemplate;
