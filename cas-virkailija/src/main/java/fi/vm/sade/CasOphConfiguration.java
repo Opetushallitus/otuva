@@ -26,7 +26,7 @@ public class CasOphConfiguration {
     }
 
     @Bean
-    public DelegatedAuthenticationPreProcessor myProcessor() {
+    public DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor() {
         return new DelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient);
     }
 }
