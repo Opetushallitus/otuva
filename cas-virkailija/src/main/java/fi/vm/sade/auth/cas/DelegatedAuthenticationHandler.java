@@ -22,7 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 
 /**
- * Switches delegated authentication credentials with credentials from kayttooikeus-service
+ * Switches delegated authentication principal with CAS user attributes from kayttooikeus-service
  */
 @Monitorable
 @Slf4j
@@ -64,7 +64,7 @@ public class DelegatedAuthenticationHandler extends DelegatedClientAuthenticatio
         }
     }
 
-    public CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
+    CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
         if ("mpassid".equals(client.getName())) {
             return kayttooikeusRestClient.getHenkiloByOid(principal.getId());
         }
