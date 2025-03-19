@@ -2,7 +2,6 @@ package fi.vm.sade.servlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,6 @@ public class StuckServiceTicketRetrievalThreadDumper {
     private final int threadDumpIntervalSeconds;
     private final int threadDumpTimes;
 
-    @Autowired
     public StuckServiceTicketRetrievalThreadDumper(@Value("${stuck.service.ticket.retrieval.thread.dump.interval.seconds}") int threadDumpIntervalSeconds,
                                                    @Value("${stuck.service.ticket.retrieval.thread.dump.times}") int threadDumpTimes) {
         this.threadDumpIntervalSeconds = threadDumpIntervalSeconds;
