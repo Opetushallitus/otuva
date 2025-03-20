@@ -118,7 +118,7 @@ public class CasController {
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     @Operation(summary = "Hakee henkilön CAS-attribuutit")
     @GetMapping(value = "/auth/henkilo/{oid}")
-    public CasUserAttributes getIdentityByOid(String oid) {
+    public CasUserAttributes getIdentityByOid(@PathVariable String oid) {
         var kayttaja = kayttajatiedotService.getByHenkiloOid(oid);
         var roles = kayttajatiedotService.fetchKayttooikeudet(oid);
         return CasUserAttributes.fromKayttajatiedotReadDto(oid, kayttaja, roles);
