@@ -57,8 +57,8 @@ public class WebflowConfiguration extends AbstractCasWebflowConfigurer {
     private void configureDelegatedAuthenticationLoginFlow(Flow loginFlow) {
         TransitionableState delegatedAuthenticationState = getState(loginFlow, CasWebflowConstants.STATE_ID_DELEGATED_AUTHENTICATION);
 
-        // Delegated authentication (Haka/Mpassid) should go through mfa
-        createTransitionForState(delegatedAuthenticationState, CasWebflowConstants.TRANSITION_ID_SUCCESS, MFA_GAUTH_EVENT_ID, true);
+        // Delegated authentication (Haka/Mpassid) should go through normal interrupts
+        createTransitionForState(delegatedAuthenticationState, CasWebflowConstants.TRANSITION_ID_SUCCESS, CasWebflowConstants.STATE_ID_INQUIRE_INTERRUPT, true);
 
         // Redirect back to login form on error
         createTransitionForState(delegatedAuthenticationState, CasWebflowConstants.TRANSITION_ID_ERROR, CasWebflowConstants.STATE_ID_INIT_LOGIN_FORM, true);
