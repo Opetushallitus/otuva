@@ -106,7 +106,9 @@ main {
 
 #loginform { grid-area: loginform; }
 
-#cas-login-main {
+#cas-login-main,
+#cas-registration,
+#cas-confirm-registration {
     max-width: 100% !important;
     margin: 0 !important;
 }

@@ -1,12 +1,9 @@
 package fi.vm.sade.saml.action;
 
 import fi.vm.sade.auth.cas.CasPrincipal;
-import fi.vm.sade.auth.cas.CasUserAttributes;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
-import fi.vm.sade.auth.dto.IdentifiedHenkiloType;
 import org.apereo.cas.authentication.*;
 import org.apereo.cas.authentication.principal.DefaultPrincipalFactory;
-import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.slf4j.Logger;
@@ -14,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.FailedLoginException;
 import java.security.GeneralSecurityException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;

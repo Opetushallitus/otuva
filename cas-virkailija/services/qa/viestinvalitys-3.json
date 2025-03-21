@@ -9,8 +9,17 @@
     "@class": "org.apereo.cas.services.ReturnAllAttributeReleasePolicy",
     "authorizedToReleaseAuthenticationAttributes": false
   },
-  "proxyPolicy" : {
-    "@class" : "org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicy",
-    "pattern" : "^https?://.*"
+  "proxyPolicy": {
+    "@class": "org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicy",
+    "pattern": "^https?://.*"
+  },
+  "accessStrategy": {
+    "@class": "org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy",
+    "delegatedAuthenticationPolicy": {
+      "@class": "org.apereo.cas.services.DefaultRegisteredServiceDelegatedAuthenticationPolicy",
+      "allowedProviders": ["java.util.ArrayList", ["haka", "mpassid"]],
+      "permitUndefined": true,
+      "exclusive": false
+    }
   }
 }

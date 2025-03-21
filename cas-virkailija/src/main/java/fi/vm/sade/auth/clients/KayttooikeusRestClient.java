@@ -1,14 +1,8 @@
 package fi.vm.sade.auth.clients;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.gson.Gson;
 import fi.vm.sade.auth.Json;
 import fi.vm.sade.auth.cas.CasUserAttributes;
-import fi.vm.sade.auth.dto.HenkiloDto;
-import fi.vm.sade.auth.dto.IdentifiedHenkiloType;
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
@@ -28,6 +22,8 @@ public class KayttooikeusRestClient {
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
     private final Gson gson;
+
+    private record HenkiloDto(String oid) {}
 
     @Autowired
     public KayttooikeusRestClient(OphProperties ophProperties, Environment environment) {
@@ -61,7 +57,7 @@ public class KayttooikeusRestClient {
         String url = this.ophProperties.url("kayttooikeus-service.cas.get-oid", username);
         return httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
-                .mapWith(json -> gson.fromJson(json, HenkiloDto.class).getOid())
+                .mapWith(json -> gson.fromJson(json, HenkiloDto.class).oid())
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
@@ -84,6 +80,14 @@ public class KayttooikeusRestClient {
 
     public CasUserAttributes getHenkiloByAuthToken(String authToken) {
         String url = ophProperties.url("kayttooikeus-service.cas.henkiloByAuthToken", authToken);
+        return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
+                .expectedStatus(200)
+                .mapWith(json -> Json.parse(json, CasUserAttributes.class))
+                .orElseThrow(() -> noContentOrNotFoundException(url));
+    }
+
+    public CasUserAttributes getHenkiloByOid(String oid) {
+        String url = ophProperties.url("kayttooikeus-service.cas.henkiloByOid", oid);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))

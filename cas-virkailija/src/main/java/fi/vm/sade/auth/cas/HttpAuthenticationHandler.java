@@ -1,9 +1,5 @@
 package fi.vm.sade.auth.cas;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.gson.Gson;
 import fi.vm.sade.auth.Json;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
@@ -13,7 +9,6 @@ import org.apereo.cas.authentication.PreventedException;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.authentication.handler.support.AbstractUsernamePasswordAuthenticationHandler;
 import org.apereo.cas.authentication.principal.DefaultPrincipalFactory;
-import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.services.ServicesManager;
 
@@ -65,34 +60,7 @@ public class HttpAuthenticationHandler extends AbstractUsernamePasswordAuthentic
                 });
     }
 
-    private static class LoginDto {
-        private String username;
-        private String password;
-
-        public LoginDto() {
-        }
-
-        public LoginDto(String username, String password) {
-            this.username = username;
-            this.password = password;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-    }
+    private record LoginDto(String username, String password) {}
 
     @Data
     private static class KayttajatiedotReadDto {

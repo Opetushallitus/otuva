@@ -70,7 +70,12 @@ public class CasControllerTest extends AbstractControllerTest {
 
         this.mvc.perform(get("/cas/auth/token/mytoken"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(jsonResource("classpath:cas/identification.json")));
+                .andExpect(content().json("""
+                        {
+                                "username": "teemuuser",
+                                "oidHenkilo": "1.2.3.4.5",
+                                "kayttajaTyyppi": "VIRKAILIJA"
+                        }"""));
     }
 
 }
