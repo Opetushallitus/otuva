@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +26,12 @@ public class MfaSetupController {
     private final MfaService mfaService;
     private final IdentificationService identificationService;
 
+    @Value("${kayttooikeus.mfa.setup.require-suomifi:true}")
+    private String requireSuomiFi;
+
     private void validateSuomiFi() {
         String idpEntityId = identificationService.getIdpEntityIdForCurrentSession();
-        if (!idpEntityId.equals(STRONG_AUTHENTICATION_IDP)) {
+        if ("true".equals(requireSuomiFi) && !idpEntityId.equals(STRONG_AUTHENTICATION_IDP)) {
             throw new ForbiddenException("suomifi required");
         }
     }
