@@ -8,7 +8,6 @@
     </Appenders>
     <Loggers>
         <AsyncLogger name="org.apereo.cas" level="info" />
-        <AsyncLogger name="org.springframework.webflow" level="debug"/>
         <AsyncLogger name="fi.vm" level="debug" />
         <Root level="info">
             <AppenderRef ref="console"/>
