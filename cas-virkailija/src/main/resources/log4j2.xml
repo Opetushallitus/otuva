@@ -7,9 +7,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <AsyncLogger name="org.apereo.cas" level="info" />
-        <AsyncLogger name="org.apereo.cas.configuration.model.support.mfa" level="trace" />
-        <AsyncLogger name="org.apereo.cas.gauth" level="trace" />
+        <AsyncLogger name="org.apereo.cas" level="debug" />
         <AsyncLogger name="fi.vm" level="debug" />
         <Root level="info">
             <AppenderRef ref="console"/>
