@@ -19,4 +19,21 @@ COPY services ./services
 COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
 
-CMD [ "java", "-XX:InitialRAMPercentage=80.0", "-XX:MaxRAMPercentage=80.0", "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas/buildversion.txt,/cas/actuator/health", "-jar", "cas.war" ]
+COPY --chmod=755 <<"EOF" /app/entrypoint.sh
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+mkdir -p /app/etc
+echo -n ${haka_keystore_base64} | base64 --decode > /app/etc/hakakeystore.jks
+echo -n ${haka_sp_metadata} > /app/etc/hakasp.xml
+
+exec java \
+  -XX:InitialRAMPercentage=80.0 \
+  -XX:MaxRAMPercentage=80.0 \
+  -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
+  -Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas/actuator/health \
+  -jar \
+  cas.war
+EOF
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
