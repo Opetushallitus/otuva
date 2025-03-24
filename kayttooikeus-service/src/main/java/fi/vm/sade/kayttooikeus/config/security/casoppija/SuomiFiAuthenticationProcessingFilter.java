@@ -8,13 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Slf4j
 public class SuomiFiAuthenticationProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     public static final String HETU_ATTRIBUTE = "nationalIdentificationNumber";
@@ -68,7 +65,6 @@ public class SuomiFiAuthenticationProcessingFilter extends AbstractPreAuthentica
 
     SuomiFiUserDetails extractUserDetails(Assertion assertion) {
         Map<String, Object> attributes = assertion.getPrincipal().getAttributes();
-        log.info("attributes: [{}]", attributes);
         String hetu = (String) attributes.get(HETU_ATTRIBUTE);
         String sukunimi = (String) attributes.get(SUKUNIMI_ATTRIBUTE);
         // epäselvää, millä attribuutilla etunimet ovat - esimerkeissä ristiriitaista tietoa!
