@@ -124,7 +124,6 @@ cas.authn.pac4j.saml[0].keystore-path: /app/etc/localhakakeystore.jks
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 cas.authn.pac4j.saml[0].client-name: haka
-cas.authn.pac4j.saml[0].principal-id-attribute: urn:oid:1.3.6.1.4.1.5923.1.1.1.6
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
