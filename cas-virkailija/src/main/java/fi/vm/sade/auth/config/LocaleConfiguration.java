@@ -14,13 +14,13 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static fi.vm.sade.CasOphConstants.SUPPORTED_LANGUAGES;
-
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class LocaleConfiguration {
 
     private final CasConfigurationProperties casProperties;
+
+    public static final Set<String> SUPPORTED_LANGUAGES = Set.of("fi", "sv");
 
     public LocaleConfiguration(CasConfigurationProperties casProperties) {
         this.casProperties = casProperties;
@@ -31,7 +31,7 @@ public class LocaleConfiguration {
         CookieLocaleResolver localeResolver = new CookieLocaleResolverWithSupportedLanguages(SUPPORTED_LANGUAGES);
         String defaultValue = casProperties.getLocale().getDefaultValue();
         if (defaultValue != null && !defaultValue.isEmpty()) {
-            localeResolver.setDefaultLocale(new Locale(defaultValue));
+            localeResolver.setDefaultLocale(Locale.of(defaultValue));
         }
         return localeResolver;
     }
@@ -47,7 +47,7 @@ public class LocaleConfiguration {
         @Override
         public Locale resolveLocale(HttpServletRequest request) {
             Locale locale = super.resolveLocale(request);
-            if (supportedLanguages.stream().map(Locale::new).noneMatch(locale::equals)) {
+            if (supportedLanguages.stream().map(Locale::of).noneMatch(locale::equals)) {
                 locale = getDefaultLocale();
             }
             return locale;
@@ -56,7 +56,7 @@ public class LocaleConfiguration {
         @Override
         public LocaleContext resolveLocaleContext(HttpServletRequest request) {
             final LocaleContext context = super.resolveLocaleContext(request);
-            if (supportedLanguages.stream().map(Locale::new).noneMatch(locale -> locale.equals(context.getLocale()))) {
+            if (supportedLanguages.stream().map(Locale::of).noneMatch(locale -> locale.equals(context.getLocale()))) {
                 return new SimpleTimeZoneAwareLocaleContext(getDefaultLocale(),
                         (TimeZone) request.getAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME));
             }
