@@ -86,8 +86,16 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
-    public CasUserAttributes getHenkiloByOid(String oid) {
-        String url = ophProperties.url("kayttooikeus-service.cas.henkiloByOid", oid);
+    public CasUserAttributes getUserAttributesByOid(String oid) {
+        String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByOid", oid);
+        return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
+                .expectedStatus(200)
+                .mapWith(json -> Json.parse(json, CasUserAttributes.class))
+                .orElseThrow(() -> noContentOrNotFoundException(url));
+    }
+
+    public CasUserAttributes getUserAttributesByIdpIdentifier(String idp, String identifier) {
+        String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByIdpIdentifier", idp, identifier);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))
