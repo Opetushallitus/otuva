@@ -91,6 +91,7 @@ kayttooikeus:
       lampi-external-id: none
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 kayttooikeus.mfa.setup.require-suomifi: true
+kayttooikeus.registration.allow-test-suomifi: false
 
 auth:
   crypto-service:

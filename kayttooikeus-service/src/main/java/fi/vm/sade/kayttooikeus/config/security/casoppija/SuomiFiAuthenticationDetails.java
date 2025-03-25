@@ -20,4 +20,8 @@ public class SuomiFiAuthenticationDetails extends PreAuthenticatedGrantedAuthori
         this.sukunimi = details.sukunimi;
         this.etunimet = details.etunimet;
     }
+
+    public SuomiFiUserDetails getSuomiFiUserDetails() {
+        return new SuomiFiUserDetails(hetu, sukunimi, etunimet);
+    }
 }
