@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.CasUserAttributes;
 import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationDetails;
+import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiUserDetails;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
@@ -18,6 +19,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +53,9 @@ public class CasController {
     private final EmailVerificationService emailVerificationService;
     private final KayttajatiedotService kayttajatiedotService;
     private final OphProperties ophProperties;
+
+    @Value("${kayttooikeus.registration.allow-test-suomifi:false}")
+    private String allowTestSuomifi;
 
     @Operation(summary = "Generoi autentikointitokenin henkilölle.",
             description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -143,11 +149,7 @@ public class CasController {
                            @RequestParam(value="kutsuToken", required = false) String kutsuToken,
                            @RequestParam(value = "locale", required = false) String kielisyys)
             throws IOException {
-        assert(principal != null);
-        assert(principal instanceof PreAuthenticatedAuthenticationToken);
-        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) principal;
-        SuomiFiAuthenticationDetails details =
-                (SuomiFiAuthenticationDetails) token.getDetails();
+        SuomiFiUserDetails details = getSuomiFiAuthenticationDetails(principal);
         // kirjataan ulos, jotta virkailija-CAS ei hämmenny
         handleOppijaLogout(request, response);
         if (StringUtils.hasLength(kutsuToken)) {
@@ -166,6 +168,21 @@ public class CasController {
             response.sendRedirect(getRedirectViaLoginUrl(
                     vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(details.hetu, kielisyys)));
         }
+    }
+
+    private SuomiFiUserDetails getSuomiFiAuthenticationDetails(Principal principal) {
+        assert(principal != null);
+        assert(principal instanceof PreAuthenticatedAuthenticationToken);
+        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) principal;
+        SuomiFiAuthenticationDetails details = (SuomiFiAuthenticationDetails) token.getDetails();
+        if ("true".equals(allowTestSuomifi)) {
+            return new SuomiFiUserDetails(
+                details.hetu,
+                details.etunimet == null ? "Testi" : details.etunimet,
+                details.sukunimi == null ? "Testinen" : details.sukunimi
+            );
+        }
+        return details.getSuomiFiUserDetails();
     }
 
     private String getVahvaTunnistusRedirectUrl(String loginToken, String kielisyys, String hetu) {
