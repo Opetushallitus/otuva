@@ -1,10 +1,13 @@
 {
-  "extends": ["config:recommended"],
+  "extends": ["config:best-practices"],
   "schedule": ["at any time"],
   "automerge": false,
   "packageRules": [{
     "matchPackageNames": ["*"],
     "enabled": false
+  }, {
+    "matchFileNames": ["kayttooikeus-service/**"],
+    "automerge": true
   }],
   "vulnerabilityAlerts": {
     "enabled": true
