@@ -14,7 +14,7 @@
 <main id="cas-login-main" layout:fragment="content" role="main" class="container-fluid">
     <div class="row text-center">
         <h2 class="page-header w-100 mt-4" th:text="#{app.subtitle}">Yhdellä tunnuksella kirjaudut kaikkiin opetushallinnon palveluihin</h2>
-        <ul th:replace="fragments/palvelut :: linkit" />
+        <ul th:replace="~{fragments/palvelut :: linkit}" />
         <div id="mfa-view" class="w-100">
             <div class="card mx-auto mb-2">
                 <div class="card-body">
@@ -35,7 +35,7 @@
                                 <div class="gauth-description" th:text="#{gauth.login.description}">Syötä sovelluksen vahvistuskoodi</div>
                             </div>
                         </div>
-                            
+
                         <input type="hidden" name="_eventId_submit" value="Login"/>
                         <input type="hidden" name="execution" th:value="${flowExecutionKey}"/>
                         <input type="hidden" name="geolocation"/>
@@ -46,7 +46,7 @@
                                 <input class="gauth-token-input" name="usertoken" id="token" size="6" maxlength="6" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" autocorrect="off" spellcheck="false" required />
                             </div>
                         </div>
-                        
+
                         <script type="text/javascript" th:inline="javascript">
                             /*<![CDATA[*/
                             let accountId = /*[[${registeredDevice.id}]]*/;
@@ -57,8 +57,8 @@
                             let input = document.getElementById("token");
 
                             // stop focus moving after the last char
-                            input.addEventListener('keydown', stopCarret); 
-                            input.addEventListener('keyup', stopCarret); 
+                            input.addEventListener('keydown', stopCarret);
+                            input.addEventListener('keyup', stopCarret);
 
                             function stopCarret() {
                                 if (input.value.length > 5){

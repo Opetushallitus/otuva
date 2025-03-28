@@ -1,6 +1,5 @@
 package fi.vm.sade.auth.config;
 
-import fi.vm.sade.saml.action.SAMLActionConfigurer;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
@@ -32,7 +31,7 @@ public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPla
 
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
-        plan.registerWebflowConfigurer(new SAMLActionConfigurer(flowBuilderServices, loginFlowDefinitionRegistry,
+        plan.registerWebflowConfigurer(new WebflowConfiguration(flowBuilderServices, loginFlowDefinitionRegistry,
                 applicationContext, casProperties));
     }
 

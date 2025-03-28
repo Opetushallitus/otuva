@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.webflow.execution.RequestContext;
 
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,37 +39,38 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         this.loginRedirectAction = loginRedirectAction;
     }
 
-    @PostConstruct
-    public void log() {
-        LOGGER.info("Using configuration: requireStrongIdentification={}, requireStrongIdentificationUsernameList={} (size)," +
-                        " emailVerificationEnabled={}, emailVerificationUsernameList={} (size)",
-                requireStrongIdentification, requireStrongIdentificationUsernameList.size(),
-                emailVerificationEnabled, emailVerificationUsernameList.size());
-    }
-
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
         String username = authentication.getPrincipal().getId();
-        Optional<String> idpEntityId = getIdpEntityId(authentication);
+        if ("<<hakaRegistrationPrincipal>>".equals(username)) {
+            return getHakaRegistrationInterruptResponse(authentication);
+        }
+
+        Optional<String> idpEntityId = getPrincipalAttribute(authentication, "idpEntityId");
         return kayttooikeusRestClient.getRedirectCodeByUsername(username)
-                .flatMap(redirectCode -> getInterruptResponseByCode(redirectCode, username, idpEntityId))
+                .flatMap(redirectCode -> getRedirectUrl(redirectCode, username, idpEntityId))
+                .map(this::getInterruptResponseByUrl)
                 .orElseGet(InterruptResponse::none);
     }
 
-    private Optional<String> getIdpEntityId(Authentication authentication) {
+    private InterruptResponse getHakaRegistrationInterruptResponse(Authentication authentication) {
+        Optional<String> temporaryToken = getPrincipalAttribute(authentication, "temporaryToken");
+        Optional<String> identifier = getPrincipalAttribute(authentication, "identifier");
+        if (temporaryToken.isEmpty() || identifier.isEmpty()) {
+            throw new IllegalArgumentException("Missing required Haka registration attributes");
+        }
+        kayttooikeusRestClient.saveHakaIdentifier(temporaryToken.get(), identifier.get());
+        return getInterruptResponseByUrl(loginRedirectAction.createRegistrationUrl(temporaryToken.get()));
+    }
+
+    private Optional<String> getPrincipalAttribute(Authentication authentication, String attributeName) {
         if (authentication.getPrincipal().getAttributes() == null) {
             return Optional.empty();
         }
-        List<Object> idpEntityIdAttr = authentication.getPrincipal().getAttributes().get("idpEntityId");
-        if (idpEntityIdAttr != null && idpEntityIdAttr.size() > 0) {
-            return Optional.of((String) idpEntityIdAttr.get(0));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<InterruptResponse> getInterruptResponseByCode(String redirectCode, String username, Optional<String> idpEntityId) {
-        return getRedirectUrl(redirectCode, username, idpEntityId).map(this::getInterruptResponseByUrl);
+        List<Object> attribute = authentication.getPrincipal().getAttributes().get(attributeName);
+        return attribute != null && attribute.size() > 0
+            ? Optional.of((String) attribute.get(0))
+            : Optional.empty();
     }
 
     private Optional<String> getRedirectUrl(String redirectCode, String username, Optional<String> idpEntityId) {
@@ -110,17 +110,9 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         return interruptResponse;
     }
 
-    public boolean isRequireStrongIdentification() {
-        return requireStrongIdentification;
-    }
-
     @Value("${require-strong-identification}")
     public void setRequireStrongIdentification(boolean requireStrongIdentification) {
         this.requireStrongIdentification = requireStrongIdentification;
-    }
-
-    public List<String> getRequireStrongIdentificationUsernameList() {
-        return requireStrongIdentificationUsernameList;
     }
 
     @Value("#{'${require-strong-identification.usernamelist}'.split(',')}")
@@ -130,17 +122,9 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
                 .collect(toList());
     }
 
-    public boolean isEmailVerificationEnabled() {
-        return emailVerificationEnabled;
-    }
-
     @Value("${email-verification-enabled}")
     public void setEmailVerificationEnabled(boolean emailVerificationEnabled) {
         this.emailVerificationEnabled = emailVerificationEnabled;
-    }
-
-    public List<String> getEmailVerificationUsernameList() {
-        return emailVerificationUsernameList;
     }
 
     @Value("#{'${email-verification-enabled.usernamelist}'.split(',')}")

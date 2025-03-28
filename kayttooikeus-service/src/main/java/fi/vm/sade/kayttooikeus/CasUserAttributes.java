@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
@@ -13,9 +14,7 @@ public record CasUserAttributes(
         String username,
         MfaProvider mfaProvider,
         KayttajaTyyppi kayttajaTyyppi,
-        @Deprecated KayttajaTyyppi henkiloTyyppi, // for SAMLAuthenticationHandler, removed later when it reads kayttajaTyyppi field
         String idpEntityId,
-        @Deprecated KayttajatiedotForCas kayttajatiedot, // for SAMLAuthenticationHandler, removed later when it reads username from top level field
         List<String> roles
 ) {
     public static CasUserAttributes fromIdentification(Identification identification, List<String> roles) {
@@ -28,9 +27,7 @@ public record CasUserAttributes(
                 username,
                 mfaProvider,
                 h.getKayttajaTyyppi(),
-                h.getKayttajaTyyppi(),
                 identification.getIdpEntityId(),
-                new KayttajatiedotForCas(username),
                 roles
         );
     }
@@ -42,9 +39,18 @@ public record CasUserAttributes(
                 kt.getUsername(),
                 kt.getMfaProvider(),
                 h.getKayttajaTyyppi(),
-                h.getKayttajaTyyppi(),
                 null,
-                new KayttajatiedotForCas(kt.getUsername()),
+                roles
+        );
+    }
+
+    public static CasUserAttributes fromKayttajatiedotReadDto(String oid, KayttajatiedotReadDto kt, List<String> roles) {
+        return new CasUserAttributes(
+                oid,
+                kt.getUsername(),
+                kt.getMfaProvider(),
+                kt.getKayttajaTyyppi(),
+                null,
                 roles
         );
     }
