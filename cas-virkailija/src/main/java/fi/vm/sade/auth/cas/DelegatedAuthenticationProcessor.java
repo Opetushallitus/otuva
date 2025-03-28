@@ -24,6 +24,10 @@ public class DelegatedAuthenticationProcessor implements DelegatedAuthentication
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
             throws Throwable {
         try {
+            if (isHakaRegistration(client, service)) {
+                return CasPrincipal.hakaRegistrationPrincipalOf(principalFactory, principal, service);
+            }
+
             var userAttributes = getUserAttributes(client, principal);
             var casPrincipal = CasPrincipal.of(principalFactory, userAttributes);
             LOGGER.info("Delegated authentication processing principal [{}] returned [{}]", principal, casPrincipal);
@@ -31,6 +35,10 @@ public class DelegatedAuthenticationProcessor implements DelegatedAuthentication
         } catch (Exception e) {
             throw new PreventedException(e);
         }
+    }
+
+    private static boolean isHakaRegistration(BaseClient client, Service service) {
+        return "haka".equals(client.getName()) && service.getOriginalUrl().contains("hakaRegistrationTemporaryToken");
     }
 
     CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
