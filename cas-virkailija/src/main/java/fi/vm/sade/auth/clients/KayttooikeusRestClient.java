@@ -4,9 +4,12 @@ import com.google.gson.Gson;
 import fi.vm.sade.auth.Json;
 import fi.vm.sade.auth.cas.CasUserAttributes;
 import fi.vm.sade.javautils.http.OphHttpClient;
+import fi.vm.sade.javautils.http.OphHttpEntity;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.properties.OphProperties;
+
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -99,6 +102,21 @@ public class KayttooikeusRestClient {
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))
+                .orElseThrow(() -> noContentOrNotFoundException(url));
+    }
+
+    public void saveHakaIdentifier(String temporaryToken, String identifier) {
+        String url = ophProperties.url("kayttooikeus-service.cas.saveHakaIdentifier", temporaryToken);
+        OphHttpRequest request = OphHttpRequest.Builder
+                .put(url)
+                .setEntity(new OphHttpEntity.Builder()
+                        .content("{\"hakaIdentifier\": \"" + identifier + "\"}")
+                        .contentType(ContentType.APPLICATION_JSON)
+                        .build())
+                .build();
+        httpClient.<String>execute(request)
+                .expectedStatus(200)
+                .mapWith(json -> Json.parse(json, String.class))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 }
