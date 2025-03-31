@@ -25,7 +25,9 @@ public class DelegatedAuthenticationProcessor implements DelegatedAuthentication
             throws Throwable {
         try {
             if (isHakaRegistration(client, service)) {
-                return CasPrincipal.hakaRegistrationPrincipalOf(principalFactory, principal, service);
+                var hakaRegistrationPrincipal = CasPrincipal.hakaRegistrationPrincipalOf(principalFactory, principal, service);
+                LOGGER.info("Haka registration for principal [{}]", hakaRegistrationPrincipal);
+                return hakaRegistrationPrincipal;
             }
 
             var userAttributes = getUserAttributes(client, principal);
