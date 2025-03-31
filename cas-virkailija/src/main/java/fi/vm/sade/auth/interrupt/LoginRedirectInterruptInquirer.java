@@ -59,6 +59,7 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         if (temporaryToken.isEmpty() || identifier.isEmpty()) {
             throw new IllegalArgumentException("Missing required Haka registration attributes");
         }
+        LOGGER.info("Interrupting login for Haka registration for identifier [{}]", identifier.get());
         kayttooikeusRestClient.saveHakaIdentifier(temporaryToken.get(), identifier.get());
         return getInterruptResponseByUrl(loginRedirectAction.createRegistrationUrl(temporaryToken.get()));
     }
