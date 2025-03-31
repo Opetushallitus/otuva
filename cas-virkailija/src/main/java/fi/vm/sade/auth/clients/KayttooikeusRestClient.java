@@ -116,7 +116,7 @@ public class KayttooikeusRestClient {
                 .build();
         httpClient.<String>execute(request)
                 .expectedStatus(200)
-                .mapWith(json -> Json.parse(json, String.class))
+                .mapWith(json -> json)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 }
