@@ -185,24 +185,7 @@ public class SecurityConfigDefault {
                     return isOauth2Request(request);
                 }
             })
-            .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/buildversion.txt").permitAll()
-                    .requestMatchers("/actuator/health").permitAll()
-                    .requestMatchers("/kutsu/token/*").permitAll()
-                    .requestMatchers("/cas/uudelleenrekisterointi").permitAll()
-                    .requestMatchers("/cas/henkilo/loginToken/*").permitAll()
-                    .requestMatchers("/cas/emailverification/*").permitAll()
-                    .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
-                    .requestMatchers("/cas/emailverification/redirectByLoginToken/*").permitAll()
-                    .requestMatchers("/cas/salasananvaihto").permitAll()
-                    .requestMatchers("/cas/loginparams").permitAll()
-                    .requestMatchers("/cas/tunnistus").permitAll()
-                    .requestMatchers("/userDetails", "/userDetails/*").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
-                    .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
-                    .requestMatchers("/.well-known/**").permitAll()
-                    .requestMatchers("/error").permitAll()
-                    .anyRequest().authenticated())
+            .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(oauth2JwtConverter())))
             .build();
