@@ -194,8 +194,8 @@ public class CasController {
         if ("true".equals(allowTestSuomifi)) {
             return new SuomiFiUserDetails(
                 details.hetu,
-                details.etunimet == null ? "Testi" : details.etunimet,
-                details.sukunimi == null ? "Testinen" : details.sukunimi
+                details.sukunimi == null ? "Testinen" : details.sukunimi,
+                details.etunimet == null ? "Testi" : details.etunimet
             );
         }
         return details.getSuomiFiUserDetails();
