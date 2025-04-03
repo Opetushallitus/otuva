@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -307,18 +306,35 @@ public class KutsuServiceImpl implements KutsuService {
 
     @Override
     @Transactional
-    public HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
-        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+    public HenkiloUpdateDto createHenkiloWithHakaIdentifier(String temporaryToken, String hakaIdentifier) {
+        Kutsu kutsu = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
                 .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        Optional<HenkiloDto> henkiloByHetu = this.oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
-        if (!StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
-            // Validation
-            this.cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
-            this.kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi(),
-                    henkiloByHetu.map(HenkiloDto::getOidHenkilo));
-            this.kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
-        }
+        kutsu.setHakaIdentifier(hakaIdentifier);
+        Optional<HenkiloDto> henkiloByHetu = oppijanumerorekisteriClient.getHenkiloByHetu(kutsu.getHetu());
+        return createHenkilo(kutsu, getHakaHenkiloCreateByKutsuDto(kutsu, hakaIdentifier), henkiloByHetu);
+    }
 
+    private HenkiloCreateByKutsuDto getHakaHenkiloCreateByKutsuDto(Kutsu kutsu, String hakaIdentifier) {
+        String kutsumanimi = kutsu.getEtunimi().contains(" ") ? kutsu.getEtunimi().split(" ")[0] : kutsu.getEtunimi();
+        String parsedIdentifier = kutsu.getHakaIdentifier().replaceAll("[^A-Za-z0-9]", "");
+        String username = parsedIdentifier + (new Random().nextInt(900) + 100); // 100-999
+        KielisyysDto kielisyys = KielisyysDto.builder().kieliKoodi(kutsu.getKieliKoodi()).build();
+        return new HenkiloCreateByKutsuDto(kutsumanimi, kielisyys, username, null);
+    }
+
+    @Override
+    @Transactional
+    public HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
+        Kutsu kutsuByToken = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
+                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
+        Optional<HenkiloDto> henkiloByHetu = oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
+        cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
+        kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi(), henkiloByHetu.map(HenkiloDto::getOidHenkilo));
+        kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
+        return createHenkilo(kutsuByToken, henkiloCreateByKutsuDto, henkiloByHetu);
+    }
+
+    private HenkiloUpdateDto createHenkilo(Kutsu kutsuByToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Optional<HenkiloDto> henkiloByHetu) {
         // Search for existing henkilo by hetu and create new if not found
         boolean isNewHenkilo = !henkiloByHetu.isPresent();
         String henkiloOid;
@@ -399,9 +415,7 @@ public class KutsuServiceImpl implements KutsuService {
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
     }
 
-    // In case virkailija already exists
     private void createOrUpdateCredentialsAndPrivileges(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String henkiloOid) {
-        Optional<Kayttajatiedot> kayttajatiedot = this.kayttajatiedotService.getKayttajatiedotByOidHenkilo(henkiloOid);
         // Create username/password and haka identifier if provided
         if (StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
             // haka-tunniste tulee olla uniikki
@@ -421,9 +435,6 @@ public class KutsuServiceImpl implements KutsuService {
             Set<String> hakaIdentifiers = this.identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid);
             hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
             this.identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid, hakaIdentifiers);
-            if (!kayttajatiedot.isPresent() || !StringUtils.hasLength(kayttajatiedot.get().getUsername())) {
-                this.createHakaUsername(henkiloCreateByKutsuDto, kutsuByToken);
-            }
         }
         this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi());
         if (!StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
@@ -445,14 +456,6 @@ public class KutsuServiceImpl implements KutsuService {
                     kutsuByToken.getKutsuja());
         });
 
-    }
-
-    private void createHakaUsername(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
-        String parsedIdentifier = kutsuByToken.getHakaIdentifier().replaceAll("[^A-Za-z0-9]", "");
-        String username = parsedIdentifier + (new Random().nextInt(900) + 100); // 100-999
-        // This username that is not meant to be used for CAS authentication
-        // CAS does not accept empty password authentication so this is fine without password
-        henkiloCreateByKutsuDto.setKayttajanimi(username);
     }
 
     private HenkiloCreateDto getHenkiloCreateDto(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {

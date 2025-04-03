@@ -55,6 +55,8 @@ public interface KutsuService extends ExpiringEntitiesService<Kutsu> {
      */
     KutsuReadDto getByTemporaryToken(String temporaryToken);
 
+    HenkiloUpdateDto createHenkiloWithHakaIdentifier(String temporaryToken, String hakaIdentifier);
+
     /**
      * Henkilön luominen väliaikaisella kutsutokenilla
      *
