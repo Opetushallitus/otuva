@@ -4,8 +4,6 @@ import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 import fi.vm.sade.auth.clients.OppijanumerorekisteriRestClient;
 import fi.vm.sade.properties.OphProperties;
 
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,8 +27,9 @@ public class LoginRedirectAction {
         return this.ophProperties.url(urlProperty, asiointiKieli, loginToken);
     }
 
-    public String createRegistrationUrl(String temporaryToken) {
-        Map<String, String> queryParams = Map.of("temporaryKutsuToken", temporaryToken);
-        return ophProperties.url("henkilo-ui.register", queryParams);
+    public String createRegistrationUrl(String username) {
+        String oidHenkilo = this.kayttooikeusRestClient.getHenkiloOid(username);
+        String asiointiKieli = this.oppijanumerorekisteriRestClient.getAsiointikieli(oidHenkilo);
+        return ophProperties.url("henkilo-ui.register", asiointiKieli);
     }
 }
