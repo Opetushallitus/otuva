@@ -41,27 +41,17 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
-        String username = authentication.getPrincipal().getId();
-        if ("<<hakaRegistrationPrincipal>>".equals(username)) {
-            return getHakaRegistrationInterruptResponse(authentication);
+        Optional<String> hakaRegistrationToken = getPrincipalAttribute(authentication, "hakaRegistrationToken");
+        if (hakaRegistrationToken.isPresent()) {
+            return getInterruptResponseByUrl(loginRedirectAction.createRegistrationUrl(hakaRegistrationToken.get()));
         }
 
+        String username = authentication.getPrincipal().getId();
         Optional<String> idpEntityId = getPrincipalAttribute(authentication, "idpEntityId");
         return kayttooikeusRestClient.getRedirectCodeByUsername(username)
                 .flatMap(redirectCode -> getRedirectUrl(redirectCode, username, idpEntityId))
                 .map(this::getInterruptResponseByUrl)
                 .orElseGet(InterruptResponse::none);
-    }
-
-    private InterruptResponse getHakaRegistrationInterruptResponse(Authentication authentication) {
-        Optional<String> temporaryToken = getPrincipalAttribute(authentication, "temporaryToken");
-        Optional<String> identifier = getPrincipalAttribute(authentication, "identifier");
-        if (temporaryToken.isEmpty() || identifier.isEmpty()) {
-            throw new IllegalArgumentException("Missing required Haka registration attributes");
-        }
-        LOGGER.info("Interrupting login for Haka registration for identifier [{}]", identifier.get());
-        kayttooikeusRestClient.saveHakaIdentifier(temporaryToken.get(), identifier.get());
-        return getInterruptResponseByUrl(loginRedirectAction.createRegistrationUrl(temporaryToken.get()));
     }
 
     private Optional<String> getPrincipalAttribute(Authentication authentication, String attributeName) {

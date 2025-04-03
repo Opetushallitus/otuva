@@ -998,7 +998,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
-                .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
@@ -1008,12 +1007,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), null, null);
 
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
-        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        this.kutsuService.createHenkiloWithHakaIdentifier("123", "!haka%Identifier1/");
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
         assertThat(henkilo.getKayttajatiedot().getPassword()).isNull();
@@ -1046,7 +1043,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
-                .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
@@ -1059,12 +1055,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
                 .getHenkilo();
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), null, null);
 
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
-        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        this.kutsuService.createHenkiloWithHakaIdentifier("123", "!haka%Identifier1/");
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
         assertThat(henkilo.getKayttajatiedot().getPassword()).isNull();
@@ -1101,7 +1095,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         given(this.oppijanumerorekisteriClient.getHenkilonPerustiedot(eq("1.2.3.4.1")))
                 .willReturn(Optional.of(HenkiloPerustietoDto.builder().hetu("valid hetu").build()));
         Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi")
-                .hakaIdentifier("!haka%Identifier1/")
                 .temporaryToken("123")
                 .hetu("hetu")
                 .kutsuja("1.2.3.4.1")
@@ -1114,12 +1107,10 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         populate(HenkiloPopulator.henkilo("1.2.3.4.1"));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).createHenkilo(any(HenkiloCreateDto.class));
         doReturn("1.2.3.4.5").when(this.oppijanumerorekisteriClient).getOidByHetu("hetu");
-        HenkiloCreateByKutsuDto henkiloCreateByKutsuDto = new HenkiloCreateByKutsuDto("arpa",
-                new KielisyysDto("fi", null), null, null);
 
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
-        this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
+        this.kutsuService.createHenkiloWithHakaIdentifier("123", "!haka%Identifier1/");
         assertThat(henkilo.getOidHenkilo()).isEqualTo("1.2.3.4.5");
         assertThat(henkilo.getKayttajatiedot().getUsername()).matches("hakaIdentifier1[\\d]{3,3}");
         assertThat(henkilo.getKayttajatiedot().getPassword()).isNull();

@@ -183,20 +183,15 @@ public class LoginRedirectInterruptInquirerTest {
 
     @Test
     public void onHakaRegistrationSavesIdentifierAndRedirectsToRegistration() throws Throwable {
-        Map<String, List<Object>> hakaAttributes = Map.of(
-            "identifier", List.of("hakaid"),
-            "temporaryToken", List.of("token")
-        );
-        Authentication authentication = new DefaultAuthentication(ZonedDateTime.now(), principalFactory.createPrincipal("<<hakaRegistrationPrincipal>>", hakaAttributes), emptyList(), emptyList(), emptyMap(), emptyMap(), emptyMap());
+        Map<String, List<Object>> hakaAttributes = Map.of("hakaRegistrationToken", List.of("token"));
+        Authentication authentication = new DefaultAuthentication(ZonedDateTime.now(), principalFactory.createPrincipal("user1", hakaAttributes), emptyList(), emptyList(), emptyMap(), emptyMap(), emptyMap());
         Credential credential = new UsernamePasswordCredential("user1", "pass1");
 
         InterruptResponse response = inquirer.inquire(authentication, null, null, credential, null);
 
         assertThat(response)
             .returns(true, InterruptResponse::isInterrupt)
-            .returns("https://localhost:8082/henkilo-ui/kayttaja/rekisteroidy?temporaryKutsuToken=token", t -> String.join(",", t.getLinks().values()));
-        verify(kayttooikeusRestClientMock).saveHakaIdentifier(eq("token"), eq("hakaid"));
-        verifyNoMoreInteractions(kayttooikeusRestClientMock);
+            .returns("https://localhost:8082/henkilo-ui/kayttaja/rekisteroidy/valmis/fi", t -> String.join(",", t.getLinks().values()));
     }
 
 }
