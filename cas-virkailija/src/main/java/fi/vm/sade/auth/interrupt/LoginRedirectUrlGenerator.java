@@ -1,4 +1,4 @@
-package fi.vm.sade.auth.action;
+package fi.vm.sade.auth.interrupt;
 
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 import fi.vm.sade.auth.clients.OppijanumerorekisteriRestClient;
@@ -7,12 +7,12 @@ import fi.vm.sade.properties.OphProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoginRedirectAction {
+public class LoginRedirectUrlGenerator {
     private final KayttooikeusRestClient kayttooikeusRestClient;
     private final OppijanumerorekisteriRestClient oppijanumerorekisteriRestClient;
     private final OphProperties ophProperties;
 
-    public LoginRedirectAction(KayttooikeusRestClient kayttooikeusRestClient,
+    public LoginRedirectUrlGenerator(KayttooikeusRestClient kayttooikeusRestClient,
                                OppijanumerorekisteriRestClient oppijanumerorekisteriRestClient,
                                OphProperties ophProperties) {
         this.kayttooikeusRestClient = kayttooikeusRestClient;
