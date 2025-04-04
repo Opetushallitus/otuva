@@ -1,6 +1,5 @@
 package fi.vm.sade.auth.interrupt;
 
-import fi.vm.sade.auth.action.LoginRedirectAction;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.Credential;
@@ -28,22 +27,22 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginRedirectInterruptInquirer.class);
 
     private final KayttooikeusRestClient kayttooikeusRestClient;
-    private final LoginRedirectAction loginRedirectAction;
+    private final LoginRedirectUrlGenerator loginRedirectUrlGenerator;
     private boolean requireStrongIdentification;
     private List<String> requireStrongIdentificationUsernameList = new ArrayList<>();
     private boolean emailVerificationEnabled;
     private List<String> emailVerificationUsernameList = new ArrayList<>();
 
-    public LoginRedirectInterruptInquirer(KayttooikeusRestClient kayttooikeusRestClient, LoginRedirectAction loginRedirectAction) {
+    public LoginRedirectInterruptInquirer(KayttooikeusRestClient kayttooikeusRestClient, LoginRedirectUrlGenerator loginRedirectUrlGenerator) {
         this.kayttooikeusRestClient = kayttooikeusRestClient;
-        this.loginRedirectAction = loginRedirectAction;
+        this.loginRedirectUrlGenerator = loginRedirectUrlGenerator;
     }
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
         Optional<String> hakaRegistrationToken = getPrincipalAttribute(authentication, "hakaRegistrationToken");
         if (hakaRegistrationToken.isPresent()) {
-            return getInterruptResponseByUrl(loginRedirectAction.createRegistrationUrl(hakaRegistrationToken.get()));
+            return getInterruptResponseByUrl(loginRedirectUrlGenerator.createRegistrationUrl(hakaRegistrationToken.get()));
         }
 
         String username = authentication.getPrincipal().getId();
@@ -69,19 +68,19 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
             case "STRONG_IDENTIFICATION":
                 LOGGER.info("Strong identification interrupt received for {}", username);
                 if (requireStrongIdentification || requireStrongIdentificationUsernameList.contains(username)) {
-                    return Optional.of(loginRedirectAction.createRedirectUrl(username, "henkilo-ui.strong-identification"));
+                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.strong-identification"));
                 }
                 break;
             case "EMAIL_VERIFICATION":
                 LOGGER.info("Email verification interrupt received for {}", username);
                 if (emailVerificationEnabled || emailVerificationUsernameList.contains(username)) {
-                    return Optional.of(loginRedirectAction.createRedirectUrl(username, "henkilo-ui.email-verification"));
+                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.email-verification"));
                 }
                 break;
             case "PASSWORD_CHANGE":
                 LOGGER.info("Password change interrupt received for {}", username);
                 if (!idpEntityId.orElse("").equals("vetuma")) {
-                    return Optional.of(loginRedirectAction.createRedirectUrl(username, "henkilo-ui.password-change"));
+                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.password-change"));
                 } else {
                     LOGGER.info("Bypassing password change for {} due to Suomi.fi", username);
                 }
