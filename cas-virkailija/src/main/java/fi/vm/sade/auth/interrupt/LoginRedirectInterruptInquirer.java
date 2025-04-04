@@ -40,12 +40,12 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
+        String username = authentication.getPrincipal().getId();
         Optional<String> hakaRegistrationToken = getPrincipalAttribute(authentication, "hakaRegistrationToken");
         if (hakaRegistrationToken.isPresent()) {
-            return getInterruptResponseByUrl(loginRedirectUrlGenerator.createRegistrationUrl(hakaRegistrationToken.get()));
+            return getInterruptResponseByUrl(loginRedirectUrlGenerator.createRegistrationUrl(username));
         }
 
-        String username = authentication.getPrincipal().getId();
         Optional<String> idpEntityId = getPrincipalAttribute(authentication, "idpEntityId");
         return kayttooikeusRestClient.getRedirectCodeByUsername(username)
                 .flatMap(redirectCode -> getRedirectUrl(redirectCode, username, idpEntityId))
