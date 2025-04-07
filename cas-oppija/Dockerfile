@@ -29,6 +29,8 @@ echo -n ${registered_service_1} > /app/config/service-1.json
 echo -n ${registered_service_2} > /app/config/service-2.json
 
 exec java \
+  -XX:InitialRAMPercentage=80.0 \
+  -XX:MaxRAMPercentage=80.0 \
   -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
   -Dlog4j.configurationFile=file:///app/config/log4j2.xml \
   -Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas-oppija/actuator/health \

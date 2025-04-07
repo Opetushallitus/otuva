@@ -19,4 +19,4 @@ COPY services ./services
 COPY config ./config
 COPY --from=build /app/build/libs/cas.war .
 
-CMD [ "java", "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas/buildversion.txt,/cas/actuator/health", "-jar", "cas.war" ]
+CMD [ "java", "-XX:InitialRAMPercentage=80.0", "-XX:MaxRAMPercentage=80.0", "-Dcas.standalone.configurationFile=/app/config/${ENV}.yml", "-Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas/buildversion.txt,/cas/actuator/health", "-jar", "cas.war" ]
