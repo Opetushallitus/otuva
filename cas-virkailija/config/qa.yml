@@ -54,7 +54,7 @@ cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
 cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
 cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
-cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy.csc.fi/.well-known/openid-configuration
+cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy-test.csc.fi/.well-known/openid-configuration
 cas.authn.pac4j.oidc[0].generic.id: ${cas_mpassid_oidc_id}
 cas.authn.pac4j.oidc[0].generic.secret: ${cas_mpassid_oidc_secret}
 cas.authn.pac4j.oidc[0].generic.client-name: mpassid
