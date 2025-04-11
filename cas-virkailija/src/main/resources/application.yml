@@ -127,6 +127,7 @@ cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[0].discovery-service-url: https://testsp.funet.fi/DS
 
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
