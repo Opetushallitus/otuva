@@ -62,7 +62,7 @@ public class SamlDiscoveryReturnController {
                 .append(entityId)
                 .append("\" />\n");
         buffer.append("<input type='hidden' name=\"_eventId\" value=\"success\" />\n");
-        buffer.append("<input value='POST' type='submit' style='width: 0;' />\n");
+        buffer.append("<input value='POST' type='submit' style='display: none;' />\n");
         buffer.append("</form>\n");
         buffer.append("<script type='text/javascript'>document.forms['f'].submit();</script>\n");
         buffer.append("</body>\n");
