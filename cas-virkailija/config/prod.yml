@@ -65,6 +65,7 @@ cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc
 cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 cas.authn.pac4j.saml[0].client-name: haka
+cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
