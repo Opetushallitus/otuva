@@ -11,6 +11,7 @@ import org.apereo.cas.client.validation.AssertionImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -41,6 +42,12 @@ public abstract class AbstractClientTest {
         // Default to connection reset by peer if not matching any stub. Some tests just check the response is 404 which
         // is the default behaviour but we want to make sure the tests hit actual stub we have setup.
         stubFor(any(anyUrl()).atPriority(Integer.MAX_VALUE).willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        // Oauth2 bearer token for authenticated requests
+        stubFor(post(urlEqualTo("/oauth2/token"))
+                .willReturn(aResponse().withStatus(200)
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
+                        .withBody("{ \"access_token\": \"token\", \"expires_in\": 12346, \"token_type\": \"Bear\" }")));
     }
 
     protected void casAuthenticated(String henkiloOid) {

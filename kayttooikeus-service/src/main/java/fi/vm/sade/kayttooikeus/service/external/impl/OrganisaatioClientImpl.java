@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.vm.sade.javautils.http.OphHttpClient;
-import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
@@ -12,8 +10,9 @@ import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioHakutulos;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.service.external.OtuvaOauth2Client;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
 
 import static com.carrotsearch.sizeof.RamUsageEstimator.humanReadableUnits;
 import static com.carrotsearch.sizeof.RamUsageEstimator.sizeOf;
-import static fi.vm.sade.kayttooikeus.config.HttpClientConfiguration.HTTP_CLIENT_ORGANISAATIO;
 import static fi.vm.sade.kayttooikeus.service.external.ExternalServiceException.mapper;
 import static fi.vm.sade.kayttooikeus.service.external.impl.HttpClientUtil.noContentOrNotFoundException;
 import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.io;
@@ -31,35 +29,25 @@ import static fi.vm.sade.kayttooikeus.util.FunctionalUtils.retrying;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import java.net.URI;
+import java.net.http.HttpRequest;
+
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class OrganisaatioClientImpl implements OrganisaatioClient {
-
-    private final OphHttpClient httpClient;
+    private final OtuvaOauth2Client httpClient;
     private final UrlConfiguration urlConfiguration;
-    private final String rootOrganizationOid;
+    private final CommonProperties commonProperties;
     private final ObjectMapper objectMapper;
     private final OrikaBeanMapper orikaBeanMapper;
 
     private OrganisaatioCache cache;
 
-
-    public OrganisaatioClientImpl(@Qualifier(HTTP_CLIENT_ORGANISAATIO) OphHttpClient httpClient,
-                                  UrlConfiguration urlConfiguration,
-                                  ObjectMapper objectMapper,
-                                  CommonProperties commonProperties,
-                                  OrikaBeanMapper orikaBeanMapper) {
-        this.httpClient = httpClient;
-        this.urlConfiguration = urlConfiguration;
-        this.objectMapper = objectMapper;
-        this.rootOrganizationOid = commonProperties.getRootOrganizationOid();
-        this.orikaBeanMapper = orikaBeanMapper;
-    }
-
     @Override
     public synchronized long refreshCache() {
         String haeHierarchyUrl = this.urlConfiguration.url(
-                "organisaatio-service.organisaatio.v4.jalkelaiset", rootOrganizationOid);
+                "organisaatio-service.organisaatio.v4.jalkelaiset", commonProperties.getRootOrganizationOid());
         // Add organisations to cache (active, incoming and passive)
         List<OrganisaatioPerustieto> organisaatiosWithoutRootOrg =
                 retrying(io(() -> get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
@@ -79,7 +67,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
                             + ryhma.getParentOidPath().replaceAll("^\\||\\|$", "").replace("|", "/"));
                     return ryhma;
                 }).collect(Collectors.toSet()));
-        this.cache = new OrganisaatioCache(this.fetchPerustiedot(this.rootOrganizationOid), organisaatiosWithoutRootOrg);
+        this.cache = new OrganisaatioCache(fetchPerustiedot(commonProperties.getRootOrganizationOid()), organisaatiosWithoutRootOrg);
         log.info("Organisation client cache refreshed. Cache size " + humanReadableUnits(sizeOf(this.cache)));
         return cache.getCacheCount();
     }
@@ -91,10 +79,17 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     private <T> T get(String url, Class<T> type) {
-        return httpClient.<T>execute(OphHttpRequest.Builder.get(url).build())
-                .expectedStatus(200)
-                .mapWith(json -> io(() -> objectMapper.readValue(json, type)).get())
-                .orElseThrow(() -> noContentOrNotFoundException(url));
+        try {
+            var request = HttpRequest.newBuilder().uri(new URI(url)).GET();
+            var response = httpClient.executeRequest(request);
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), type);
+            } else {
+                throw noContentOrNotFoundException(url);
+            }
+        } catch  (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -134,7 +129,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     public List<OrganisaatioPerustieto> listWithParentsAndChildren(String organisaatioOid, Predicate<OrganisaatioPerustieto> filter) {
         return this.cache.flatWithParentsAndChildren(organisaatioOid)
                 // the resource never returns the root
-                .filter(org -> !rootOrganizationOid.equals(org.getOid()))
+                .filter(org -> !commonProperties.getRootOrganizationOid().equals(org.getOid()))
                 .filter(filter)
                 .collect(toList());
     }

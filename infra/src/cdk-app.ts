@@ -306,6 +306,8 @@ class ApplicationStack extends cdk.Stack {
         ssm_cas_gauth_signing_key: this.ssmSecret("CasGauthSigningKey"),
         ssm_kayttooikeus_username: this.ssmSecret("PalvelukayttajaUsername"),
         ssm_kayttooikeus_password: this.ssmSecret("PalvelukayttajaPassword"),
+        ssm_kayttooikeus_oauth2_client_id: this.ssmSecret("PalvelukayttajaClientId"),
+        ssm_kayttooikeus_oauth2_client_secret: this.ssmSecret("PalvelukayttajaClientSecret"),
         ssm_kayttooikeus_crypto_password: this.ssmSecret("CryptoPassword"),
         ssm_kayttooikeus_kutsu_allowlist: this.ssmSecret("KutsuAllowlist"),
         ssm_kayttooikeus_oauth2_publickey: this.ssmSecret("Oauth2PublicKey"),

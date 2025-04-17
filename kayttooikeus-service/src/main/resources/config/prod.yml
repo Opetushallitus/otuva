@@ -23,6 +23,9 @@ host.host-varda: "frontend.varda-db.csc.fi"
 
 palvelukayttaja.username: ${ssm_kayttooikeus_username}
 palvelukayttaja.password: ${ssm_kayttooikeus_password}
+kayttooikeus.palvelukayttaja.client-id: ${ssm_kayttooikeus_oauth2_client_id}
+kayttooikeus.palvelukayttaja.client-secret: ${ssm_kayttooikeus_oauth2_client_secret}
+kayttooikeus.jwt.issuer-uri: https://kayttooikeus.prod.yleiskayttoiset.opintopolku.fi/kayttooikeus-service
 
 common.admin-oid: "1.2.246.562.24.00000000001"
 common.crypto-password: ${ssm_kayttooikeus_crypto_password}
