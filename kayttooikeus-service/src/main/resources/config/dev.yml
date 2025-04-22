@@ -30,6 +30,7 @@ common.admin-oid: "1.2.246.562.24.00000000001"
 common.crypto-password: ${ssm_kayttooikeus_crypto_password}
 
 kayttooikeus.mfa.setup.require-suomifi: false
+kayttooikeus.registration.allow-test-suomifi: true
 kayttooikeus.uses-ssl-proxy: true
 kayttooikeus.disable-same-site-cookie: true
 kayttooikeus.scheduling.enabled: true
