@@ -33,6 +33,8 @@ cas.authn.mfa.gauth.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
+cas.custom.properties.uusHakaEnabled: true
+cas.custom.properties.hakaUrl: https://virkailija.hahtuvaopintopolku.fi/service-provider-app/saml/login/alias/hakasp
 cas.custom.properties.suomifiUrl: https://hahtuvaopintopolku.fi/cas-oppija/login
 cas.custom.properties.suomifiUrlTarget: https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service/cas/tunnistus?locale=
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet

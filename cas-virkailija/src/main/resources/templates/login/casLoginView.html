@@ -59,6 +59,24 @@
                             </a>
                         </div>
                     </div>
+                    <div th:if="${cas.custom.properties['uusHakaEnabled']}" style="margin: 20px 0 0 54px; display: flex;">
+                        <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[1].name}" th:action="@{/login}">
+                            <input name="submitButton"
+                                    id="submitButton"
+                                    type="image"
+                                    height="44px"
+                                    src="/cas/images/haka.png"
+                                    th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
+                                    th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
+                                    th:id="${delegatedAuthenticationProviderConfigurations[1].name}"
+                                    th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
+                                    accesskey="s"
+                            />
+                            <input type="hidden" name="client_name" th:value="haka" />
+                            <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
+                            <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
+                        </form>
+                    </div>
                 </div>
                 </div>
             </div>
