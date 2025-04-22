@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import fi.vm.sade.javautils.http.exceptions.UnhandledHttpStatusCodeException;
 import fi.vm.sade.kayttooikeus.service.impl.KayttoOikeusServiceImpl;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
@@ -10,11 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.wiremock.spring.ConfigureWireMock;
-import org.wiremock.spring.EnableWireMock;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,7 +28,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getHenkilonPerustiedotTest() throws Exception {
-        casAuthenticated("1.2.3.4.5");
         stubFor(post(urlEqualTo("/oppijanumerorekisteri-service/henkilo/henkiloPerustietosByHenkiloOidList"))
                 .withRequestBody(equalToJson("[\"1.2.3.4.5\"]"))
                 .willReturn(aResponse().withStatus(200)
@@ -52,7 +46,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getAllOidsForSamePersonTest() {
-        casAuthenticated("test");
         stubFor(post(urlEqualTo("/oppijanumerorekisteri-service/s2s/duplicateHenkilos"))
                 .withRequestBody(equalToJson("{\"henkiloOids\":[\"1.2.3\"]}"))
                 .willReturn(aResponse().withStatus(200)
@@ -65,7 +58,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getAllOidsForSamePersonNoDuplicatesTest() {
-        casAuthenticated("test");
         stubFor(post(urlEqualTo("/oppijanumerorekisteri-service/s2s/duplicateHenkilos"))
                 .withRequestBody(equalToJson("{\"henkiloOids\":[\"1.2.3\"]}"))
                 .willReturn(aResponse().withStatus(200)
@@ -78,7 +70,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getHenkiloByOid() {
-        casAuthenticated("test");
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
@@ -96,7 +87,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void findHenkiloByOid() {
-        casAuthenticated("test");
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
@@ -106,7 +96,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void findHenkiloByOidWithNotFound() {
-        casAuthenticated("test");
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/1.2.3.4.5"))
                 .willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
@@ -116,7 +105,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getHenkiloByHetuWithOkResponse() {
-        casAuthenticated("test");
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/hetu=160198-943U"))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
@@ -129,8 +117,6 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getHenkiloByHetuWithNotFoundResponse() {
-        casAuthenticated("test");
-
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/hetu=160198-943U"))
                 .willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
@@ -141,13 +127,12 @@ public class OppijanumerorekisteriClientTest extends AbstractClientTest {
 
     @Test
     public void getHenkiloByHetuWithUnexceptedResponse() {
-        casAuthenticated("test");
         stubFor(get(urlEqualTo("/oppijanumerorekisteri-service/henkilo/hetu=160198-943U"))
                 .willReturn(aResponse().withStatus(HttpStatus.BAD_GATEWAY.value())));
 
         Throwable henkiloByHetu = catchThrowable(() -> client.getHenkiloByHetu("160198-943U"));
 
-        assertThat(henkiloByHetu).isInstanceOf(UnhandledHttpStatusCodeException.class);
+        assertThat(henkiloByHetu).isInstanceOf(RuntimeException.class);
     }
 
     @Test

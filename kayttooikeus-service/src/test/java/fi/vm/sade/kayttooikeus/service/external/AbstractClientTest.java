@@ -6,23 +6,15 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.properties.OphProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.apereo.cas.client.authentication.AttributePrincipal;
-import org.apereo.cas.client.validation.AssertionImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.cas.authentication.CasAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @WireMockTest(httpPort = 18080)
 @SpringBootTest
@@ -48,35 +40,6 @@ public abstract class AbstractClientTest {
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.getType())
                         .withBody("{ \"access_token\": \"token\", \"expires_in\": 12346, \"token_type\": \"Bear\" }")));
-    }
-
-    protected void casAuthenticated(String henkiloOid) {
-        SecurityContextHolder.getContext().setAuthentication(new CasAuthenticationToken("KEY", henkiloOid, "CRED",
-                Collections.emptyList(), new User(henkiloOid, "", Collections.emptyList()), new AssertionImpl(new AttributePrincipal() {
-            @Override
-            public String getProxyTicketFor(String service) {
-                return "TICKET";
-            }
-
-            @Override
-            public Map<String, Object> getAttributes() {
-                return new HashMap<>();
-            }
-
-            @Override
-            public String getName() {
-                return henkiloOid;
-            }
-        })));
-
-        stubFor(post(urlEqualTo("/cas/v1/tickets"))
-                .willReturn(aResponse()
-                        .withStatus(201)
-                        .withHeader("Location", "/TICKET")));
-        stubFor(post(urlMatching("/cas/v1/tickets/.*"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withBody("TICKET")));
     }
 
     protected String jsonResource(String classpathResource) {
