@@ -49,7 +49,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
             return new ArrayList<>();
         }
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHenkiloOidList");
-        Supplier<List<HenkiloPerustietoDto>> action = () -> post(url, henkiloOid, HenkiloPerustietoDto[].class)
+        Supplier<List<HenkiloPerustietoDto>> action = () -> post(url, henkiloOid, HenkiloPerustietoDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
@@ -60,7 +60,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         String url = urlProperties.url("oppijanumerorekisteri-service.s2s.duplicateHenkilos");
         Map<String,Object> criteria = new HashMap<>();
         criteria.put("henkiloOids", singletonList(personOid));
-        Supplier<List<HenkiloViiteDto>> action = () -> post(url, criteria, HenkiloViiteDto[].class)
+        Supplier<List<HenkiloViiteDto>> action = () -> post(url, criteria, HenkiloViiteDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return Stream.concat(Stream.of(personOid), retrying(action, 2).get().orFail(mapper(url))
@@ -70,7 +70,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     @Override
     public String getOidByHetu(String hetu) {
         String url = urlProperties.url("oppijanumerorekisteri-service.s2s.oidByHetu", hetu);
-        Supplier<String> action = () -> get(url, String.class)
+        Supplier<String> action = () -> get(url)
                 .orElseThrow(() -> new NotFoundException("could not find oid with hetu: " + hetu));
         return retrying(action, 2).get().orFail(mapper(url));
     }
@@ -89,7 +89,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         data.put("henkiloOids", oidHenkiloList);
 
         String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
-        Supplier<List<HenkiloHakuPerustietoDto>> action = () -> post(url, data, HenkiloHakuPerustietoDto[].class)
+        Supplier<List<HenkiloHakuPerustietoDto>> action = () -> post(url, data, HenkiloHakuPerustietoDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
@@ -159,7 +159,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     @Override
     public Collection<HenkiloYhteystiedotDto> listYhteystiedot(HenkiloHakuCriteria criteria) {
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot");
-        Supplier<Collection<HenkiloYhteystiedotDto>> action = () -> post(url, criteria, HenkiloYhteystiedotDto[].class)
+        Supplier<Collection<HenkiloYhteystiedotDto>> action = () -> post(url, criteria, HenkiloYhteystiedotDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
@@ -168,7 +168,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     @Override
     public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
         String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
-        Supplier<String> action = () -> post(url, henkiloCreateDto, String.class, 201)
+        Supplier<String> action = () -> post(url, henkiloCreateDto, 201)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
     }
@@ -190,7 +190,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     @Override
     public void yhdistaHenkilot(String oid, Collection<String> duplicateOids) {
         String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.byOid.yhdistaHenkilot", oid);
-        Supplier<String> action = () -> post(url, duplicateOids, String.class).get();
+        Supplier<String> action = () -> post(url, duplicateOids, 200).get();
         retrying(action, 2).get().orFail(mapper(url));
     }
 
@@ -215,11 +215,21 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     }
 
     private <T> Optional<T> get(String url, Class<T> type) {
+        return get(url).map(str -> {
+            try {
+                return objectMapper.readValue(str, type);
+            } catch  (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private Optional<String> get(String url) {
         try {
             var request = HttpRequest.newBuilder().uri(new URI(url)).GET();
             var response = httpClient.executeRequest(request);
             if (response.statusCode() == 200) {
-                return Optional.of(objectMapper.readValue(response.body(), type));
+                return Optional.of(response.body());
             } else if (response.statusCode() == 404) {
                 return Optional.empty();
             } else {
@@ -230,11 +240,17 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         }
     }
 
-    private <T> Optional<T> post(String url, Object body, Class<T> type) {
-        return post(url, body, type, 200);
+    private <T> Optional<T> post(String url, Object body, Class<T> type, int expectedStatus) {
+        return post(url, body, expectedStatus).map(str -> {
+            try {
+                return objectMapper.readValue(str, type);
+            } catch  (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    private <T> Optional<T> post(String url, Object body, Class<T> type, int expectedStatus) {
+    private Optional<String> post(String url, Object body, int expectedStatus) {
         try {
             var request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -242,7 +258,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
                 .POST(BodyPublishers.ofString(objectMapper.writeValueAsString(body)));
             var response = httpClient.executeRequest(request);
             if (response.statusCode() == expectedStatus) {
-                return Optional.of(objectMapper.readValue(response.body(), type));
+                return Optional.of(response.body());
             } else if (response.statusCode() == 404) {
                 return Optional.empty();
             } else {
