@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -78,20 +77,16 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public List<HenkiloHakuPerustietoDto> getAllByOids(long page, long limit, List<String> oidHenkiloList) {
+        if (oidHenkiloList == null || oidHenkiloList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         Map<String, String> params = new HashMap<String, String>() {{
             put("offset", Long.toString(page));
             put("limit", Long.toString(limit));
         }};
-        String data;
-        try {
-            data = oidHenkiloList == null || oidHenkiloList.isEmpty()
-                    ? "{}"
-                    : this.objectMapper.writeValueAsString(new HashMap<String, List<String>>() {{
-                        put("henkiloOids", oidHenkiloList);
-                    }});
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Unexpected error during json processing");
-        }
+        Map<String, List<String>> data = new HashMap<>();
+        data.put("henkiloOids", oidHenkiloList);
 
         String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
         Supplier<List<HenkiloHakuPerustietoDto>> action = () -> post(url, data, HenkiloHakuPerustietoDto[].class)
