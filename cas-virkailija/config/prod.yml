@@ -71,6 +71,7 @@ cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[0].use-name-qualifier: false
 cas.authn.pac4j.saml[0].discovery-service-url: https://haka.funet.fi/DS
 
 management.endpoint.auditevents.enabled: false
