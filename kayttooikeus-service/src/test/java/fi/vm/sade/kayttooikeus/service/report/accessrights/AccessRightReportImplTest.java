@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +32,7 @@ public class AccessRightReportImplTest extends AbstractRepositoryTest {
     @Autowired
     private AccessRightReportImpl accessRightReport;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioService organisaatioService;
 
     @Test

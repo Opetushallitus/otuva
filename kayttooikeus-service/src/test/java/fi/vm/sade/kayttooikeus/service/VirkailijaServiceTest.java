@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +28,7 @@ public class VirkailijaServiceTest extends AbstractServiceIntegrationTest {
     private HenkiloDataRepository henkiloRepository;
     @Autowired
     private KayttajatiedotRepository kayttajatiedotRepository;
-    @MockBean
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Test

@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KutsuRepositoryCustom;

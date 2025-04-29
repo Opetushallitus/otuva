@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
@@ -137,7 +138,7 @@ public class SecurityConfigDefault {
             JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
 
             @Override
-            public AbstractAuthenticationToken convert(Jwt source) {
+            public AbstractAuthenticationToken convert(@NonNull Jwt source) {
                 var authorityList = extractRoles(source);
                 var delegateAuthorities = delegate.convert(source);
                 if (delegateAuthorities != null) {

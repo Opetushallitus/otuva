@@ -5,14 +5,9 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
 import java.util.Optional;

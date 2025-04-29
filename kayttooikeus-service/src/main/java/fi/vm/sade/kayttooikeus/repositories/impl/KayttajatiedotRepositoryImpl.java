@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQuery;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;

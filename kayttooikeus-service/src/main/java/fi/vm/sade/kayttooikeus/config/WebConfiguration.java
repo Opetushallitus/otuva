@@ -29,13 +29,13 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
+    public void addViewControllers(@NonNull ViewControllerRegistry registry) {
       registry.addViewController("/swagger-ui/")
           .setViewName("forward:/swagger-ui/index.html");
     }
 
     @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
+    public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
       configurer.setUseTrailingSlashMatch(true);
     }
 

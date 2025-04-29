@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
@@ -44,16 +44,16 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
     private static final String TEST_FIRST_NAME = "arpa";
     private static final String TEST_LAST_NAME = "kuutio";
 
-    @MockBean
+    @MockitoBean
     private QueueingEmailService queueingEmailService;
 
-    @MockBean
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
-    @MockBean
+    @MockitoBean
     private KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
     @Autowired

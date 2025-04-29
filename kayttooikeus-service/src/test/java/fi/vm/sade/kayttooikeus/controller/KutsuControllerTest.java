@@ -7,10 +7,10 @@ import fi.vm.sade.kayttooikeus.enumeration.KutsuOrganisaatioOrder;
 import fi.vm.sade.kayttooikeus.service.KutsuService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 public class KutsuControllerTest extends AbstractControllerTest {
-    @MockBean
+    @MockitoBean
     private KutsuService kutsuService;
 
     @Test

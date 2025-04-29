@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,7 +47,7 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
             log.info("Aloitetaan organisaatiocachen päivitystä");
             this.organisaatioClient.refreshCache();
             this.organisaatioRetryTask.cancel(false);
-        }, this.kayttooikeusProperties.getScheduling().getOrganisaatioRetryTime());
+        }, Duration.ofMillis(kayttooikeusProperties.getScheduling().getOrganisaatioRetryTime()));
     }
 
     @Bean(destroyMethod = "shutdown")

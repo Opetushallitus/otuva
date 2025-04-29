@@ -12,8 +12,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -29,13 +29,13 @@ import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
 public class OrganisaatioHenkiloTest extends AbstractServiceIntegrationTest {
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
-    @MockBean
+    @MockitoBean
     private PermissionCheckerService permissionCheckerService;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioService organisaatioService;
 
     @Autowired

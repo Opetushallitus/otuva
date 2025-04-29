@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toList;
 
 @ControllerAdvice(basePackageClasses = ErrorHandlerAdvice.class)
 public class ErrorHandlerAdvice {
-    public static final Locale FI = new Locale("fi", "FI");
+    public static final Locale FI = Locale.of("fi", "FI");
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlerAdvice.class);
     private static final Function<? super ConstraintViolation<?>, String> MESSAGES_TRANSFORMER = violation
             -> violation == null ? null : violation.getMessage() + ": " + violation.getInvalidValue();

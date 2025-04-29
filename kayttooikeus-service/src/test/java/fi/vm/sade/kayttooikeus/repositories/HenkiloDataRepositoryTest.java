@@ -9,7 +9,7 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +32,10 @@ public class HenkiloDataRepositoryTest {
     @Autowired
     private EntityManager entityManager;
 
-    @MockBean
+    @MockitoBean
     private PermissionCheckerService permissionCheckerService;
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
     @Test

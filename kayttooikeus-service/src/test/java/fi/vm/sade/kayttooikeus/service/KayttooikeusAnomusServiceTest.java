@@ -26,9 +26,9 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,47 +50,51 @@ import static org.assertj.core.util.Maps.newHashMap;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = {OrikaBeanMapper.class, LocalDateConverter.class, CachedDateTimeConverter.class, KayttooikeusAnomusServiceImpl.class, CommonProperties.class, MyontooikeusServiceImpl.class, MyonnettyKayttoOikeusServiceImpl.class})
 public class KayttooikeusAnomusServiceTest {
-    @Autowired
-    private OrikaBeanMapper orikaBeanMapper;
-    @MockBean
+    @MockitoBean
     private HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
-    @MockBean
+    @MockitoBean
     private LocalizationService localizationService;
-    @MockBean
+    @MockitoBean
     private HenkiloDataRepository henkiloDataRepository;
-    @MockBean
+    @MockitoBean
     private HenkiloHibernateRepository henkiloHibernateRepository;
-    @MockBean
+    @MockitoBean
     private MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    @MockBean
+    @MockitoBean
     private KayttoOikeusRyhmaMyontoViiteRepository kayttoOikeusRyhmaMyontoViiteRepository;
-    @MockBean
+    @MockitoBean
     private KayttoOikeusRyhmaTapahtumaHistoriaDataRepository kayttoOikeusRyhmaTapahtumaHistoriaDataRepository;
-    @MockBean
+    @MockitoBean
     private HaettuKayttooikeusryhmaValidator haettuKayttooikeusryhmaValidator;
-    @MockBean
+    @MockitoBean
     private PermissionCheckerService permissionCheckerService;
-    @MockBean
+    @MockitoBean
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
-    @MockBean
+    @MockitoBean
     private AnomusRepository anomusRepository;
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
-    @MockBean
+    @MockitoBean
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    @MockBean
+    @MockitoBean
     private OrganisaatioService organisaatioService;
     @Captor
     private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
-    @SpyBean
+    @MockitoSpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
     @Autowired

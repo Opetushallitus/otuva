@@ -1,11 +1,9 @@
 package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.AnomusRepository;
-import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -15,8 +13,8 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -47,14 +45,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @Sql("/truncate_tables.sql")
 public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTest {
-    @MockBean
+    @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-
-    @Autowired
-    private KayttoOikeusRepository kayttoOikeusRepository;
 
     @Autowired
     private AnomusRepository anomusRepository;

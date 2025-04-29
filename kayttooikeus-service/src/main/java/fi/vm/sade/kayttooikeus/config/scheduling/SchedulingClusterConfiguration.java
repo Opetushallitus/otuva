@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.config.scheduling;
 
 import com.github.kagkarlsson.scheduler.task.Task;
-import com.github.kagkarlsson.scheduler.task.TaskWithoutDataDescriptor;
+import com.github.kagkarlsson.scheduler.task.TaskDescriptor;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import com.github.kagkarlsson.scheduler.task.schedule.Daily;
 import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay;
@@ -58,7 +58,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> lahetaUusienAnomuksienIlmoituksetTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("laheta uusien anomuksien ilmoitukset task"),
+                .recurring(TaskDescriptor.of("laheta uusien anomuksien ilmoitukset task"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getKayttooikeusanomusilmoituksetHour(), 0)))
                 .execute((instance, ctx) -> kayttooikeusAnomusService.lahetaUusienAnomuksienIlmoitukset(LocalDate.now().minusDays(1)));
     }
@@ -66,7 +66,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> poistaVanhentuneetKayttooikeudetTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("poista vanhentuneet kayttooikeudet task"),
+                .recurring(TaskDescriptor.of("poista vanhentuneet kayttooikeudet task"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getVanhentuneetkayttooikeudetHour(), 10)))
                 .execute((instance, ctx) -> {
                         Optional<Henkilo> kasittelija = henkiloDataRepository.findByOidHenkilo(commonProperties.getAdminOid());
@@ -78,7 +78,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> kasitteleOrganisaatioLakkautusTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("passivoi organisaatiohenkilöt, joiden organisaatiot on passivoitu task"),
+                .recurring(TaskDescriptor.of("passivoi organisaatiohenkilöt, joiden organisaatiot on passivoitu task"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getLakkautetutOrganisaatiotHour(), 20)))
                 .execute((instance, ctx) -> organisaatioHenkiloService.kasitteleOrganisaatioidenLakkautus(this.commonProperties.getAdminOid()));
     }
@@ -86,7 +86,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> sendExpirationRemindersTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("send expiration reminders task"),
+                .recurring(TaskDescriptor.of("send expiration reminders task"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getKayttooikeusmuistutusHour(), 30)))
                 .execute((instance, ctx) -> taskExecutorService.sendExpirationReminders(Period.ofWeeks(4), Period.ofWeeks(1)));
     }
@@ -94,14 +94,14 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> casClientSessionCleanerTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("cas client session cleaner"), FixedDelay.of(Duration.ofHours(1)))
+                .recurring(TaskDescriptor.of("cas client session cleaner"), FixedDelay.of(Duration.ofHours(1)))
                 .execute((instance, ctx) -> sessionMappingStorage.clean());
     }
 
     @Bean
     Task<Void> updateHenkiloNimiCache() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("update henkilo nimi cache task"),
+                .recurring(TaskDescriptor.of("update henkilo nimi cache task"),
                         FixedDelay.of(Duration.ofMillis(kayttooikeusProperties.getScheduling().getConfiguration().getHenkiloNimiCache())))
                 .execute((instance, ctx) -> updateHenkiloNimiCacheTask.execute());
     }
@@ -109,7 +109,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> identificationCleanupTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("IdentificationCleanupTask"),
+                .recurring(TaskDescriptor.of("IdentificationCleanupTask"),
                         new Daily(LocalTime.of(
                                 kayttooikeusProperties.getScheduling().getConfiguration().getIdentificationCleanupHour(),
                                 kayttooikeusProperties.getScheduling().getConfiguration().getIdentificationCleanupMinute())))
@@ -123,7 +123,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> discardExpiredInvitations() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("expire-invitations-task"),
+                .recurring(TaskDescriptor.of("expire-invitations-task"),
                         new Daily(LocalTime.of(
                                 kayttooikeusProperties.getScheduling().getConfiguration().getDiscardExpiredInvitationsHour(),
                                 kayttooikeusProperties.getScheduling().getConfiguration().getDiscardExpiredInvitationsMinute())))
@@ -134,7 +134,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> discardExpiredApplications() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("expire-applications-task"),
+                .recurring(TaskDescriptor.of("expire-applications-task"),
                         new Daily(LocalTime.of(
                                 kayttooikeusProperties.getScheduling().getConfiguration().getDiscardExpiredInvitationsHour(),
                                 kayttooikeusProperties.getScheduling().getConfiguration().getDiscardExpiredInvitationsMinute())))
@@ -145,7 +145,7 @@ public class SchedulingClusterConfiguration {
     @Bean
     Task<Void> disableInactiveServiceUsers() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("Disable inactive service users"),
+                .recurring(TaskDescriptor.of("Disable inactive service users"),
                         new Daily(LocalTime.of(kayttooikeusProperties.getScheduling().getConfiguration().getDisableInactiveServiceUsersHour(), 0)))
                 .execute((instance, ctx) -> disableInactiveServiceUsersTask.execute());
     }
@@ -154,14 +154,14 @@ public class SchedulingClusterConfiguration {
     @ConditionalOnProperty(name = "kayttooikeus.tasks.export.enabled", matchIfMissing = true)
     Task<Void> exportTaskSchedule() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("ExportTask"), FixedDelay.of(Duration.ofHours(1)))
+                .recurring(TaskDescriptor.of("ExportTask"), FixedDelay.of(Duration.ofHours(1)))
                 .execute((instance, ctx) -> exportTask.execute());
     }
 
     @Bean
     Task<Void> emailRetryTask() {
         return Tasks
-                .recurring(new TaskWithoutDataDescriptor("EmailRetryTask"), FixedDelay.of(Duration.ofMinutes(5)))
+                .recurring(TaskDescriptor.of("EmailRetryTask"), FixedDelay.of(Duration.ofMinutes(5)))
                 .execute((instance, ctx) -> queueingEmailService.emailRetryTask());
     }
 }

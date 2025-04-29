@@ -7,8 +7,8 @@ import fi.vm.sade.kayttooikeus.service.OrganisaatioService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.charset.StandardCharsets;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 public class OrganisaatioControllerTest extends AbstractControllerTest {
 
-    @MockBean
+    @MockitoBean
     private OrganisaatioService organisaatioService;
 
     @Test
