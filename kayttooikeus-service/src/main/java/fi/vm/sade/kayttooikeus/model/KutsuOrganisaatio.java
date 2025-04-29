@@ -31,7 +31,6 @@ public class KutsuOrganisaatio extends IdentifiableAndVersionedEntity {
     @JoinTable(name = "kutsu_organisaatio_ryhma",
             joinColumns = @JoinColumn(name = "kutsu_organisaatio", nullable = false, insertable = false, updatable = false),
             inverseJoinColumns = @JoinColumn(name = "ryhma", nullable = false, insertable = false, updatable = false))
-    @Builder.Default
     private Set<KayttoOikeusRyhma> ryhmat = new HashSet<>();
 
     @Column(name = "voimassa_loppu_pvm")
