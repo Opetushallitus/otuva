@@ -261,6 +261,16 @@ public class KutsuServiceImpl implements KutsuService {
     }
 
     @Override
+    public Optional<Kutsu> getHakaKutsu(String temporaryToken) {
+        var kutsu = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken);
+        if (kutsu.isPresent() && kutsu.get().getHakaIdentifier() != null) {
+            return kutsu;
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     @Transactional
     public void renewKutsu(long id) {
         Kutsu kutsuToRenew = kutsuRepository.findById(id)

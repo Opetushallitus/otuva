@@ -114,9 +114,12 @@ public class KutsuController {
                                 @Validated @RequestBody HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
         // This needs to be done like this since otherwice KO locks the table row for this henkilo and ONR can't update
         // it until the transaction finishes when ONR request timeouts.
-        HenkiloUpdateDto henkiloUpdateDto = this.kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
-        this.oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
-        return this.identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloUpdateDto.getOidHenkilo());
+        var kutsu = kutsuService.getHakaKutsu(temporaryToken);
+        HenkiloUpdateDto henkiloUpdateDto = kutsu.isPresent()
+                ? kutsuService.createHenkiloWithHakaIdentifier(temporaryToken, kutsu.get().getHakaIdentifier())
+                : kutsuService.createHenkilo(temporaryToken, henkiloCreateByKutsuDto);
+        oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
+        return identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloUpdateDto.getOidHenkilo());
     }
 
 }

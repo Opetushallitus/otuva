@@ -11,6 +11,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface KutsuService extends ExpiringEntitiesService<Kutsu> {
     List<KutsuReadDto> listKutsus(KutsuOrganisaatioOrder sortBy, Sort.Direction direction, KutsuCriteria kutsuListCriteria, Long offset, Long amount);
@@ -54,6 +55,8 @@ public interface KutsuService extends ExpiringEntitiesService<Kutsu> {
      * @return tokenia vastaava kutsu
      */
     KutsuReadDto getByTemporaryToken(String temporaryToken);
+
+    Optional<Kutsu> getHakaKutsu(String temporaryToken);
 
     HenkiloUpdateDto createHenkiloWithHakaIdentifier(String temporaryToken, String hakaIdentifier);
 
