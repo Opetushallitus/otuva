@@ -261,6 +261,7 @@ public class KutsuServiceImpl implements KutsuService {
     }
 
     @Override
+    @Transactional
     public Optional<Kutsu> getHakaKutsu(String temporaryToken) {
         var kutsu = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken);
         if (kutsu.isPresent() && kutsu.get().getHakaIdentifier() != null) {
