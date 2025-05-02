@@ -141,6 +141,12 @@ configurations {
         exclude(group: "org.slf4j", module: "jcl-over-slf4j")
         exclude(group: "org.apache.logging.log4j", module: "log4j-to-slf4j")
     }
+
+    // <custom>
+    testRuntimeClasspath {
+        resolutionStrategy.deactivateDependencyLocking()
+    }
+    // </custom>
 }
 
 war {
