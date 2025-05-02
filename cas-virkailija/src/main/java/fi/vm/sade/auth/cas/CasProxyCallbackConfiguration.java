@@ -2,7 +2,7 @@ package fi.vm.sade.auth.cas;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
-import org.apereo.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler;
+import org.apereo.cas.authentication.handler.support.ProxyAuthenticationHandler;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
 import org.apereo.cas.services.ServicesManager;
@@ -10,7 +10,7 @@ import org.apereo.cas.ticket.UniqueTicketIdGenerator;
 import org.apereo.cas.ticket.proxy.support.Cas20ProxyHandler;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.util.http.HttpClientFactory;
-import org.apereo.cas.util.http.HttpMessage;
+import org.apereo.cas.web.HttpMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -60,10 +60,8 @@ public class CasProxyCallbackConfiguration {
         LOGGER.warn("CAS proxy callback is error-tolerant. This should NOT happen in production environment! (1)");
         OnErrorReturnTrueHttpClient onErrorReturnTrueHttpClient =
                 new OnErrorReturnTrueHttpClient(supportsTrustStoreSslSocketFactoryHttpClient.getIfAvailable());
-        HttpBasedServiceCredentialsAuthenticationHandler proxyAuthenticationHandler =
-                new HttpBasedServiceCredentialsAuthenticationHandler(
-                null, servicesManager.getIfAvailable(), proxyPrincipalFactory, Integer.MIN_VALUE,
-                        onErrorReturnTrueHttpClient);
+        ProxyAuthenticationHandler proxyAuthenticationHandler =
+                new ProxyAuthenticationHandler(null, servicesManager.getIfAvailable(), proxyPrincipalFactory, Integer.MIN_VALUE, onErrorReturnTrueHttpClient);
         return plan -> plan.registerAuthenticationHandlerWithPrincipalResolver(proxyAuthenticationHandler,
                 proxyPrincipalResolver);
     }

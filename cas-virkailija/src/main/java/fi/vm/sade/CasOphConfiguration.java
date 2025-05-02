@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.env.Environment;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 import org.springframework.webflow.execution.Action;
@@ -43,7 +44,17 @@ import fi.vm.sade.auth.discovery.SamlDiscoveryWebflowConstants;
 @RequiredArgsConstructor
 public class CasOphConfiguration {
     final PrincipalFactory principalFactory;
-    final KayttooikeusRestClient kayttooikeusRestClient;
+    final Environment environment;
+
+    @Bean
+    public CasOphProperties casOphProperties() {
+        return new CasOphProperties(environment);
+    }
+
+    @Bean
+    public KayttooikeusRestClient kayttooikeusRestClient() {
+        return new KayttooikeusRestClient(casOphProperties(), environment);
+    }
 
     @Bean
     public ObservationRegistry observationRegistry() {
@@ -54,7 +65,7 @@ public class CasOphConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor() {
-        return new DelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient);
+        return new DelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient());
     }
 
     @Bean
@@ -68,7 +79,7 @@ public class CasOphConfiguration {
     CasWebflowConfigurer samlDiscoveryWebflowConfigurer(
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
-            @Qualifier(CasWebflowConstants.BEAN_NAME_LOGIN_FLOW_DEFINITION_REGISTRY)
+            @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY)
             final FlowDefinitionRegistry loginFlowDefinitionRegistry,
             @Qualifier("delegatedClientRedirectFlowRegistry")
             final FlowDefinitionRegistry delegatedClientRedirectFlowRegistry,
