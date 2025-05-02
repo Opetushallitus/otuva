@@ -31,6 +31,7 @@ import org.springframework.webflow.execution.Action;
 
 import fi.vm.sade.auth.cas.DelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
+import fi.vm.sade.auth.clients.HttpClientUtil;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 import fi.vm.sade.auth.discovery.SamlClientAuthenticationRequestCustomizer;
 import fi.vm.sade.auth.discovery.SamlDiscoveryAction;
@@ -38,6 +39,8 @@ import fi.vm.sade.auth.discovery.SamlDiscoveryFinalizerAction;
 import fi.vm.sade.auth.discovery.SamlDiscoveryReturnController;
 import fi.vm.sade.auth.discovery.SamlDiscoveryWebflowConfigurer;
 import fi.vm.sade.auth.discovery.SamlDiscoveryWebflowConstants;
+import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 
 @Configuration
 @ComponentScan
@@ -49,6 +52,11 @@ public class CasOphConfiguration {
     @Bean
     public CasOphProperties casOphProperties() {
         return new CasOphProperties(environment);
+    }
+
+    @Bean
+    public OphHttpClient httpClient() {
+        return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, casOphProperties());
     }
 
     @Bean
