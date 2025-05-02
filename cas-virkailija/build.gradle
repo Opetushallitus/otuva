@@ -6,6 +6,12 @@ import java.lang.reflect.*
 import org.gradle.internal.logging.text.*
 import static org.gradle.internal.logging.text.StyledTextOutput.Style
 
+// <custom>
+dependencyLocking {
+    lockAllConfigurations()
+}
+// </custom>
+
 buildscript {
     repositories {
         if (project.privateRepoUrl) {
