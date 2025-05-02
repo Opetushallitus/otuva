@@ -208,14 +208,14 @@ main {
 }
 
 #muut-kirjautumistavat .title-backline:before {
-    /* Line itself */
+    // Line itself
     content:"";
         border-top: 1px solid var(--title-color-light);
         margin: 0 auto;
-    /* ...in the middle of the element */
+    // ...in the middle of the element
     position: absolute;
         top: 50%; left: 0; right: 0; bottom: 0;
-    /* ...and forced behind the text */
+    // ...and forced behind the text
     z-index: -1;
 }
 

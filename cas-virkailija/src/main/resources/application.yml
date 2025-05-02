@@ -1,9 +1,20 @@
-server.port: 8080
-server.ssl.enabled: false
-server.servlet.encoding.charset: UTF-8
-server.servlet.encoding.force: true
-server.servlet.encoding.enabled: true
-server.forward-headers-strategy: NONE
+# CAS configuration
+# https://apereo.github.io/cas/6.4.x/configuration/Configuration-Properties.html
+
+server:
+  port: 8080
+  ssl.enabled: false
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  forward-headers-strategy: NONE
+  tomcat:
+    remoteip:
+      port-header:
+      protocol-header:
+      remote-ip-header:
 
 server.tomcat.accesslog.enabled: true
 server.tomcat.accesslog.directory: /dev
@@ -11,44 +22,64 @@ server.tomcat.accesslog.prefix: stdout
 server.tomcat.accesslog.buffered: false
 server.tomcat.accesslog.suffix:
 server.tomcat.accesslog.file-date-format:
-server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\"}"
+server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}"
 server.tomcat.accesslog.request-attributes-enabled: true
 
-management.endpoints.web.exposure.include: health
-management.endpoint.health.access: READ_ONLY
-management.endpoint.health.status.order: WARN,DOWN,OUT_OF_SERVICE,UNKNOWN,UP
+logging.config: file:/etc/cas/config/log4j2.xml
 
-cas.http-web-request.header.xframe: false
-cas.http-web-request.header.xss: false
-cas.http-web-request.header.xcontent: false
-cas.http-web-request.header.hsts: false
+management:
+  endpoint:
+    health:
+      status:
+        order: WARN,DOWN,OUT_OF_SERVICE,UNKNOWN,UP
 
+
+cas:
+  http-web-request.header:
+    xframe: false
+    xss: false
+    xcontent: false
+    hsts: false
+  ticket:
+    tgt:
+      primary:
+        time-to-kill-in-seconds: 28800
+        max-time-to-live-in-seconds: 28800
+
+cas.ticket.registry.cleaner.schedule.enabled: true
+
+# postgres
 spring.datasource.url: jdbc:postgresql://localhost:5080/cas
 spring.datasource.driver-class-name: org.postgresql.Driver
 spring.datasource.username: cas
 spring.datasource.password: cas
 spring.flyway.enabled: true
-cas.ticket.registry.cleaner.schedule.enabled: true
-cas.ticket.registry.core.enable-locking: false
 cas.ticket.registry.jpa.ddl-auto: validate
 cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQLDialect
+cas.ticket.registry.core.enable-locking: false
 cas.ticket.registry.jpa.enabled: true
 cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
 cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
-cas.ticket.tgt.primary.time-to-kill-in-seconds: 28800
-cas.ticket.tgt.primary.max-time-to-live-in-seconds: 28800
 
 cas.slo.asynchronous: false
 cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
 
 cas.authn.accept.users:
 
-cas.tgc.secure: true
+management.endpoints.web.exposure.include: health,springWebflow,auditevents
+management.endpoint.health.enabled: true
+cas.monitor.endpoints.endpoint.health.access: PERMIT
+management.endpoint.springWebflow.enabled: true
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
+management.endpoint.auditevents.enabled: true
+cas.monitor.endpoints.endpoint.auditevents.access: PERMIT
+
+cas.tgc.secure: false
 cas.tgc.path: /cas
 
-cas.warning-cookie.secure: true
+cas.warning-cookie.secure: false
 cas.warning-cookie.path: /cas
 
 cas.logout.follow-service-redirects: true
@@ -100,6 +131,13 @@ cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].discovery-service-url: https://testsp.funet.fi/DS
 
+# Spring Boot configuration
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+
+# Custom configuration
+
+proxy.callback.ignore-errors: false
 host.cas: localhost:8080
 host.virkailija: localhost:8080
 # Käyttöoikeuspalvelun userDetails rajapintaa kutsutaan ALB:n hostnamella (host.alb) IP-rajauksen tms takia. Lokaalisti ajettaessa kutsutaan suoraan palvelua.

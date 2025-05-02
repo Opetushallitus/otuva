@@ -1,14 +1,8 @@
 spring.datasource.url: jdbc:postgresql://host.docker.internal:5080/cas
 
-management.endpoints.web.exposure.include: health,springWebflow,auditevents
-management.endpoint.auditevents.access: READ_ONLY
-management.endpoint.springWebflow.access: READ_ONLY
-
 cas.server.name: http://localhost:8080
 cas.server.prefix: ${cas.server.name}/cas
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
-cas.tgc.secure: false
-cas.warning-cookie.secure: false
 
 cas.custom.properties.uusHakaEnabled: true
 cas.service-registry.json.location: file:///app/services/local

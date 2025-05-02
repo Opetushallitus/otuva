@@ -10,6 +10,7 @@ import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.properties.OphProperties;
 
 import org.apache.http.entity.ContentType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ public class KayttooikeusRestClient {
 
     private record HenkiloDto(String oid) {}
 
+    @Autowired
     public KayttooikeusRestClient(OphProperties ophProperties, Environment environment) {
         this(newHttpClient(ophProperties, environment), ophProperties, new Gson());
     }

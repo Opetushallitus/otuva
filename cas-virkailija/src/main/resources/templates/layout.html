@@ -1,51 +1,35 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" th:lang="${#locale}">
-
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
-    <title layout:title-pattern="$LAYOUT_TITLE $CONTENT_TITLE"
-        th:text="#{app.documentTitle}">
-    </title>
+    <title layout:title-pattern="$LAYOUT_TITLE" th:text="#{app.documentTitle}">CAS &#8211; Central Authentication Service</title>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700">
     <link rel="stylesheet" href="/cas/css/bootstrap-v4.0.0.min.css" />
-
-    <span th:remove="tag" th:if="${'true' == #strings.defaultString(#themes.code('cas.css.core.enabled'), 'true')}">
-        <span th:replace="~{fragments/includes :: stylesheets}">
-            <a href="fragments/includes.html">Theme</a> stylesheet fragment will go here
-        </span>
-    </span>
-
-    <span th:remove="tag" th:each="file : ${#strings.arraySplit(#themes.code('cas.standard.css.file'), ',')}">
-        <link rel="stylesheet" type="text/css" href="../static/css/cas.css" th:href="@{${file}}" />
-    </span>
+    <link rel="stylesheet" type="text/css" href="../static/css/cas.css" th:href="@{${#themes.code('cas.standard.css.file')}} + '?random=' + ${#strings.randomAlphanumeric(32)}"/>
 
     <link rel="shortcut icon"
           th:href="@{${#strings.defaultString(#themes.code('cas.favicon.file'), '/favicon.ico')}}" />
     <script type="text/javascript" th:src="@{#{webjars.jquery.js}}"></script>
-
-    <span th:remove="tag" th:each="name : ${#strings.arraySplit(#themes.code('cas.standard.fragments.head'), ',')}">
-        <span th:replace="~{fragments/custom :: ${name}}" th:remove="tag" />
-    </span>
 </head>
 
-<body>
-    <script th:replace="~{fragments/scripts}"></script>
-    <script th:replace="~{fragments/customscripts}"></script>
+<body th:attr="data-language=${#locale.getLanguage().toLowerCase()}">
+<header th:replace="~{fragments/header :: header}">
+    <a href="fragments/header.html">Header</a> fragment will go here
+</header>
 
-    <div th:replace="~{fragments/header :: header}">
-        <a href="fragments/header.html">Header</a> fragment will go here
-    </div>
+<main layout:fragment="content" role="main" th:attr="class=${containerClass}?: 'container mt-3 mb-3'">
+    CAS content will go here
+</main>
 
-    <div layout:fragment="content" id="content">
-        CAS content will go here
-    </div>
+<footer th:replace="~{fragments/footer :: footer}">
+    <a href="fragments/footer.html">Footer</a> fragment will go here
+</footer>
 
-    <div th:replace="~{fragments/footer :: footer}">
-        <a href="fragments/footer.html">Footer</a> fragment will go here
-    </div>
+<script th:replace="~{fragments/scripts}"/>
+<script th:replace="~{fragments/customscripts}"/>
 </body>
 </html>

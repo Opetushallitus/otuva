@@ -8,9 +8,3 @@ services:
       POSTGRES_DB: cas
       POSTGRES_USER: cas
       POSTGRES_PASSWORD: cas
-    command: ["postgres", "-c", "log_statement=all"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cas -d cas"]
-      interval: 10s
-      timeout: 5s
-      retries: 5

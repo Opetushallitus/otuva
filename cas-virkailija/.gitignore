@@ -44,6 +44,5 @@ bin/
 tmp/
 ./apache-tomcat
 apache-tomcat.zip
+/out/**
 config-metadata.properties
-node-modules
-package-lock.json

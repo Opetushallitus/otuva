@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/xhtml"
-      layout:decorate="~{layout}" lang="">
+      layout:decorate="~{layout}" th:with="containerClass='container-fluid taustakuva'" lang="">
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -12,7 +12,7 @@
 </head>
 
 <body class="login">
-    <main layout:fragment="content" role="main" class="container-fluid taustakuva">
+    <main layout:fragment="content" role="main" class="container-fluid">
         <div class="row text-center">
             <h2 class="page-header w-100 mt-4" th:text="#{app.subtitle}">Yhdellä tunnuksella kirjaudut kaikkiin opetushallinnon palveluihin</h2>
             <ul th:replace="~{fragments/palvelut :: linkit}" />
@@ -36,15 +36,15 @@
                             </a>
                         </div>
                         <div class="kirjautumistapa kirjautumistapa-mpassid col-md-4">
-                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[1].name}" th:action="@{/login}">
+                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[0].name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="mpassid-button"
                                         type="image"
                                         src="/cas/images/mpassid-teksti.svg"
-                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
-                                        th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
-                                        th:id="${delegatedAuthenticationProviderConfigurations[1].name + '-button'}"
-                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[0].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[0].redirectUrl}}"
+                                        th:title="${delegatedAuthenticationProviderConfigurations[0].name + ' ' + delegatedAuthenticationProviderConfigurations[0].type}"
+                                        th:id="${delegatedAuthenticationProviderConfigurations[0].name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[0].type} + ${delegatedAuthenticationProviderConfigurations[0].cssClass}"
                                         accesskey="s"
                                         height="38px"
                                 />
@@ -60,16 +60,16 @@
                         </div>
                     </div>
                     <div th:if="${cas.custom.properties['uusHakaEnabled']}" style="margin: 20px 0 0 54px; display: flex;">
-                        <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[0].name}" th:action="@{/login}">
+                        <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[1].name}" th:action="@{/login}">
                             <input name="submitButton"
                                     id="submitButton"
                                     type="image"
                                     height="44px"
                                     src="/cas/images/haka.png"
-                                    th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[0].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[0].redirectUrl}}"
-                                    th:title="${delegatedAuthenticationProviderConfigurations[0].name + ' ' + delegatedAuthenticationProviderConfigurations[0].type}"
-                                    th:id="${delegatedAuthenticationProviderConfigurations[0].name}"
-                                    th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[0].type} + ${delegatedAuthenticationProviderConfigurations[0].cssClass}"
+                                    th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
+                                    th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
+                                    th:id="${delegatedAuthenticationProviderConfigurations[1].name}"
+                                    th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
                                     accesskey="s"
                             />
                             <input type="hidden" name="client_name" th:value="haka" />

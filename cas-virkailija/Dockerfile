@@ -8,6 +8,7 @@ COPY settings.gradle .
 COPY build.gradle .
 
 COPY lombok.config .
+COPY etc ./etc
 COPY src ./src
 RUN ./gradlew clean build -x test
 

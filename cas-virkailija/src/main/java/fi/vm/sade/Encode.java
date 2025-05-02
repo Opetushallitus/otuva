@@ -4,6 +4,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public class Encode {
     public static String uri(String httpUrl) {
-        return UriComponentsBuilder.fromUriString(httpUrl).build().toUriString();
+        return UriComponentsBuilder.fromHttpUrl(httpUrl).build().toUriString();
     }
 }

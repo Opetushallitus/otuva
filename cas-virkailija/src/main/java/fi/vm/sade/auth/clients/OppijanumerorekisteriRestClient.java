@@ -4,6 +4,7 @@ import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.properties.OphProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ public class OppijanumerorekisteriRestClient {
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
 
+    @Autowired
     public OppijanumerorekisteriRestClient(OphProperties ophProperties, Environment environment) {
         this(newHttpClient(ophProperties, environment), ophProperties);
     }

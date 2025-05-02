@@ -21,7 +21,7 @@ public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPla
     private final CasWebflowConfigurer samlDiscoveryWebflowConfigurer;
 
     public WebflowExecutionPlanConfiguration(FlowBuilderServices flowBuilderServices,
-                                             @Qualifier("flowDefinitionRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                             @Qualifier("loginFlowRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
                                              ConfigurableApplicationContext applicationContext,
                                              CasConfigurationProperties casProperties,
                                              @Qualifier("samlDiscoveryWebflowConfigurer") final CasWebflowConfigurer samlDiscoveryWebflowConfigurer) {

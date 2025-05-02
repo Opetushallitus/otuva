@@ -1,9 +1,1 @@
 fi.vm.sade.CasOphConfiguration
-fi.vm.sade.auth.cas.CasProxyCallbackConfiguration
-fi.vm.sade.auth.config.AuthenticationEventExecutionPlanConfiguration
-fi.vm.sade.auth.config.FilterConfiguration
-fi.vm.sade.auth.config.HttpClientConfiguration
-fi.vm.sade.auth.config.InterruptConfiguration
-fi.vm.sade.auth.config.InterruptInquiryExecutionPlanConfiguration
-fi.vm.sade.auth.config.LocaleConfiguration
-fi.vm.sade.auth.config.WebflowExecutionPlanConfiguration

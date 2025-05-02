@@ -11,7 +11,7 @@ sourceSets {
 configurations {
     bootRunConfig {
         extendsFrom compileClasspath
-        
+
         exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
         exclude(group: "ch.qos.logback", module: "logback-core")
         exclude(group: "ch.qos.logback", module: "logback-classic")
@@ -36,6 +36,7 @@ dependencies {
     bootRunConfig "org.apereo.cas:cas-server-support-thymeleaf"
     bootRunConfig "org.apereo.cas:cas-server-support-validation"
     bootRunConfig "org.apereo.cas:cas-server-support-person-directory"
+
     bootRunConfig "org.apereo.cas:cas-server-webapp-resources"
     bootRunConfig "org.apereo.cas:cas-server-webapp-init"
     bootRunConfig "org.apereo.cas:cas-server-webapp-tomcat"
@@ -79,9 +80,9 @@ bootRun {
 
 springBoot {
     mainClass = "org.apereo.cas.web.CasWebApplication"
-    
-}
 
+
+}
 
 bootWar {
     def executable = project.hasProperty("executable") && Boolean.valueOf(project.getProperty("executable"))
@@ -103,7 +104,6 @@ bootWar {
         archiveClasses = true
     */
 
-
     overlays {
         /*
             https://docs.freefair.io/gradle-plugins/current/reference/#_io_freefair_war_overlay
@@ -112,14 +112,15 @@ bootWar {
             of non-war dependencies. Those should be excluded via normal gradle dependency exclusions.
         */
         cas {
-            from "org.apereo.cas:cas-server-webapp${project.findProperty('appServer') ?: ''}:${project.'cas.version'}@war"
+            from "org.apereo.cas:cas-server-webapp${project.appServer}:${project.'cas.version'}@war"
+
 
 
             provided = false
 
             def excludeArtifacts = ["WEB-INF/lib/servlet-api-2*.jar"]
             if (project.hasProperty("tomcatVersion")) {
-                excludeArtifacts += "WEB-INF/lib/tomcat-*.jar"
+                excludes += ["WEB-INF/lib/tomcat-*.jar"]
             }
             excludes = excludeArtifacts
 

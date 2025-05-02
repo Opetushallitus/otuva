@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}"
+      th:with="containerClass='container-fluid taustakuva'">
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -10,7 +11,7 @@
 </head>
 
 <body>
-<main id="cas-login-main" layout:fragment="content" role="main" class="container-fluid taustakuva">
+<main id="cas-login-main" layout:fragment="content" role="main" class="container-fluid">
     <div class="row text-center">
         <h2 class="page-header w-100 mt-4" th:text="#{app.subtitle}">Yhdellä tunnuksella kirjaudut kaikkiin opetushallinnon palveluihin</h2>
         <ul th:replace="~{fragments/palvelut :: linkit}" />
