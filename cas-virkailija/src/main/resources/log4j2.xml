@@ -7,9 +7,10 @@
         </Console>
     </Appenders>
     <Loggers>
-        <AsyncLogger name="org.apereo.cas" level="info" />
+        <AsyncLogger name="org.apereo.cas" level="debug" />
         <AsyncLogger name="fi.vm" level="debug" />
-        <Root level="info">
+        <AsyncLogger name="org.pac4j" level="debug" />
+        <Root level="debug">
             <AppenderRef ref="console"/>
         </Root>
     </Loggers>
