@@ -62,11 +62,13 @@ cas.authn.pac4j.oidc[0].generic.client-name: mpassid
 cas.authn.pac4j.oidc[0].generic.principal-id-attribute: urn:oid:1.3.6.1.4.1.16161.1.1.27
 cas.authn.pac4j.saml[0].keystore-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].private-key-password: ${cas_haka_keystore_password}
-cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login?client_name=haka
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login/haka
+cas.authn.pac4j.saml[0].callback-url-type: PATH_PARAMETER
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
 cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
 cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
