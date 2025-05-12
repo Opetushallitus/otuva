@@ -354,6 +354,7 @@ class ApplicationStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [appSecurityGroup],
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+      circuitBreaker: { enable: true },
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,
@@ -712,6 +713,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       maxHealthyPercent: 200,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+      circuitBreaker: { enable: true },
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,
@@ -935,6 +937,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       maxHealthyPercent: 200,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+      circuitBreaker: { enable: true },
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,
@@ -1105,6 +1108,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       maxHealthyPercent: 200,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       healthCheckGracePeriod: cdk.Duration.minutes(5),
+      circuitBreaker: { enable: true },
     });
 
     const alb = new elasticloadbalancingv2.ApplicationLoadBalancer(
