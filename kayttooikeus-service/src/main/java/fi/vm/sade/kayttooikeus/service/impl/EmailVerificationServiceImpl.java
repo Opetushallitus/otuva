@@ -12,9 +12,10 @@ import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
-import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +29,11 @@ import static fi.vm.sade.kayttooikeus.model.Identification.CAS_AUTHENTICATION_ID
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
-    private final OphProperties ophProperties;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final IdentificationService identificationService;
+
+    @Value("${virkailijan-tyopoyta}")
+    private String virkailijanTyopoytaUrl;
 
     @Override
     @Transactional
@@ -50,7 +53,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
         return CasRedirectParametersResponse.builder()
                 .authToken(authToken)
-                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .service(virkailijanTyopoytaUrl)
                 .build();
     }
 
@@ -65,7 +68,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
         return CasRedirectParametersResponse.builder()
                 .authToken(authToken)
-                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .service(virkailijanTyopoytaUrl)
                 .build();
     }
 

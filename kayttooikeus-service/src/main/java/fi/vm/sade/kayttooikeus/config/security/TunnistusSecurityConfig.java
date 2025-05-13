@@ -2,11 +2,11 @@ package fi.vm.sade.kayttooikeus.config.security;
 
 import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationDetailsSource;
 import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter;
-import fi.vm.sade.properties.OphProperties;
 
 import org.apereo.cas.client.validation.Cas30ProxyTicketValidator;
 import org.apereo.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,11 +21,8 @@ public class TunnistusSecurityConfig {
     public static final String OPPIJA_TICKET_VALIDATOR_QUALIFIER = "oppijaTicketValidator";
     public static final String OPPIJA_CAS_TUNNISTUS_PATH = "/cas/tunnistus";
 
-    private final OphProperties ophProperties;
-
-    public TunnistusSecurityConfig(OphProperties ophProperties) {
-        this.ophProperties = ophProperties;
-    }
+    @Value("${cas.oppija.url}")
+    private String casOppijaUrl;
 
     @Bean
     SuomiFiAuthenticationDetailsSource suomiFiAuthenticationDetailsSource() {
@@ -34,7 +31,7 @@ public class TunnistusSecurityConfig {
 
     @Bean(name = OPPIJA_TICKET_VALIDATOR_QUALIFIER)
     TicketValidator oppijaTicketValidator() {
-        return new Cas30ProxyTicketValidator(ophProperties.url("cas.oppija.url"));
+        return new Cas30ProxyTicketValidator(casOppijaUrl);
     }
 
     @Bean

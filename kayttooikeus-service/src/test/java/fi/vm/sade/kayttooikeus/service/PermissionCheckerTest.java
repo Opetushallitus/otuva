@@ -22,7 +22,6 @@ import fi.vm.sade.kayttooikeus.service.impl.MyontooikeusServiceImpl;
 import fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.properties.OphProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,8 +82,6 @@ public class PermissionCheckerTest {
         CommonProperties commonProperties = new CommonProperties();
 
         this.organisaatioClient = Mockito.mock(OrganisaatioClient.class);
-        OphProperties ophPropertiesMock = Mockito.mock(OphProperties.class);
-        when(ophPropertiesMock.url(anyString())).thenReturn("fakeurl");
 
         this.permissionChecker = spy(new PermissionCheckerServiceImpl(
                 new MyontooikeusServiceImpl(kayttoOikeusRyhmaMyontoViiteRepository, organisaatioClient),

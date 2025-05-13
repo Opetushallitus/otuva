@@ -1,3 +1,4 @@
+server.port: 9090
 spring.datasource.url: jdbc:postgresql://localhost:5437/kayttooikeus
 spring.datasource.username: app
 spring.datasource.password: kayttooikeus
@@ -28,13 +29,6 @@ cas:
     encryption-key: LNLuxm3B5mQiIwggT9vPewkGM7JeDebZWCBjdXxCWQY
     signing-key: zMpvJwj7bEMW41YMJbAJzXHaSSH3A1JjzLfwXMSWth9yTFM3Ny3eHXmm9r5AEzU83rYNwGT__SicfrA-7ygRdA
 
-host:
-  host-virkailija: localhost
-  host-oppija: localhost
-  host-cas: localhost
-  host-shibboleth: localhost
-  host-varda: localhost
-
 palvelukayttaja.username: test
 palvelukayttaja.password: test
 kayttooikeus.palvelukayttaja.client-id: id
@@ -64,3 +58,18 @@ kayttooikeus.oauth2.privatekey: classpath:private_key.pem
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6,1.2.3.4.7
 
 viestinvalitys.baseurl: http://localhost:8383/organisaatio-service/mock/viestinvalitys
+
+host-virkailija: localhost:${server.port}
+host-oppija: localhost:${server.port}
+host-cas: localhost:8080
+host-varda: localhost:${server.port}
+url-virkailija: https://${host-virkailija}
+url-oppija: https://${host-oppija}
+url-cas: https://${host-cas}
+url-varda: https://${host-varda}
+cas.url: ${url-cas}/cas
+cas.login: ${url-cas}/cas/login
+cas.oppija.url: ${url-oppija}/cas-oppija
+cas.oppija.login: ${cas.oppija.url}/login
+cas.oppija.logout: ${cas.oppija.url}/logout
+virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta

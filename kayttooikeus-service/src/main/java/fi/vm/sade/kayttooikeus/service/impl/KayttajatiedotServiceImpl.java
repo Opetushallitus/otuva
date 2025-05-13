@@ -12,9 +12,10 @@ import fi.vm.sade.kayttooikeus.service.CryptoService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.exception.*;
-import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +37,10 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     private final OrikaBeanMapper mapper;
     private final CryptoService cryptoService;
     private final IdentificationService identificationService;
-    private final OphProperties ophProperties;
     private final JdbcTemplate jdbcTemplate;
+
+    @Value("${virkailijan-tyopoyta}")
+    private String virkailijanTyopoytaUrl;
 
     @Override
     @Transactional
@@ -146,7 +149,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         changePassword(henkilo.getOidHenkilo(), changePassword.newPassword);
 
         String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        return new CasRedirectParametersResponse(authToken, ophProperties.url("virkailijan-tyopoyta"));
+        return new CasRedirectParametersResponse(authToken, virkailijanTyopoytaUrl);
     }
 
     @Override

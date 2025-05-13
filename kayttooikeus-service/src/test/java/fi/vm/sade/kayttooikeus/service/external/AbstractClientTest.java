@@ -3,13 +3,12 @@ package fi.vm.sade.kayttooikeus.service.external;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
-import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
-import fi.vm.sade.properties.OphProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -18,18 +17,18 @@ import java.nio.charset.StandardCharsets;
 
 @WireMockTest(httpPort = 18080)
 @SpringBootTest
+@TestPropertySource(properties = {
+    "url-virkailija=" + AbstractClientTest.WIREMOCK_HOST,
+    "url-varda=" + AbstractClientTest.WIREMOCK_HOST
+})
+@ContextConfiguration
 @Slf4j
 public abstract class AbstractClientTest {
     protected final static String WIREMOCK_HOST = "http://localhost:18080";
 
-    @Autowired private UrlConfiguration urlConfiguration;
-    @Autowired private OphProperties properties;
-
     @BeforeEach
     public void before() {
         log.info("Setting WireMock host to config: {}", WIREMOCK_HOST);
-        urlConfiguration.addOverride("url-virkailija", WIREMOCK_HOST);
-        properties.addOverride("url-virkailija", WIREMOCK_HOST);
 
         // Default to connection reset by peer if not matching any stub. Some tests just check the response is 404 which
         // is the default behaviour but we want to make sure the tests hit actual stub we have setup.

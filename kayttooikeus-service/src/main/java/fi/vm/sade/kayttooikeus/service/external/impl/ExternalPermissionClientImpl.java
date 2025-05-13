@@ -6,7 +6,8 @@ import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
-import fi.vm.sade.properties.OphProperties;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -23,21 +24,27 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
     private final ObjectMapper objectMapper;
     public final Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
 
-    public ExternalPermissionClientImpl(OphHttpClient httpClient, OphProperties properties, ObjectMapper objectMapper) {
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
+    @Value("${url-varda}")
+    private String urlVarda;
+
+    public ExternalPermissionClientImpl(OphHttpClient httpClient, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
 
-        SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, properties.url("haku-app.external-permission-check"));
-        SERVICE_URIS.put(ExternalPermissionService.SURE, properties.url("suoritusrekisteri.external-permission-check"));
-        SERVICE_URIS.put(ExternalPermissionService.ATARU, properties.url("ataru-editori.external-permission-check"));
-        SERVICE_URIS.put(ExternalPermissionService.KOSKI, properties.url("koski.external-permission-check"));
-        SERVICE_URIS.put(ExternalPermissionService.VARDA, properties.url("varda.external-permission-check"));
+        SERVICE_URIS.put(ExternalPermissionService.HAKU_APP, "/haku-app/permission/checkpermission");
+        SERVICE_URIS.put(ExternalPermissionService.SURE, "/suoritusrekisteri/permission/checkpermission");
+        SERVICE_URIS.put(ExternalPermissionService.ATARU, "/lomake-editori/api/checkpermission");
+        SERVICE_URIS.put(ExternalPermissionService.KOSKI, "/koski/api/permission/checkpermission");
+        SERVICE_URIS.put(ExternalPermissionService.VARDA, "/varda/api/onr/external-permissions/");
     }
 
     @Override
     public PermissionCheckResponseDto getPermission(ExternalPermissionService service, PermissionCheckRequestDto requestDto) {
-        String url = requireNonNull(SERVICE_URIS.get(service), "service uri puuttuu: " + service);
-        return httpClient.post(url)
+        String path = requireNonNull(SERVICE_URIS.get(service), "service uri puuttuu: " + service);
+        String host = ExternalPermissionService.VARDA.equals(service) ? urlVarda : urlVirkailija;
+        return httpClient.post(host + path)
                 .dataWriter(JSON, UTF8, out -> out.write(objectMapper.writeValueAsString(requestDto)))
                 .execute(response -> objectMapper.readValue(response.asInputStream(), PermissionCheckResponseDto.class));
     }

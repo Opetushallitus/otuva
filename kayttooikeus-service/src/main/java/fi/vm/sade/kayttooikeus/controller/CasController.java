@@ -16,7 +16,6 @@ import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
-import fi.vm.sade.properties.OphProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +33,14 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 
@@ -54,12 +56,17 @@ public class CasController {
     private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
     private final KayttajatiedotService kayttajatiedotService;
-    private final OphProperties ophProperties;
     private final KutsuService kutsuService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Value("${kayttooikeus.registration.allow-test-suomifi:false}")
     private String allowTestSuomifi;
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
+    @Value("${cas.oppija.logout}")
+    private String casOppijaLogout;
+    @Value("${virkailijan-tyopoyta}")
+    private String virkailijanTyopoytaUrl;
 
     @Operation(summary = "Generoi autentikointitokenin henkilölle.",
             description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -206,14 +213,17 @@ public class CasController {
             return vahvaTunnistusService.kirjaaVahvaTunnistus(loginToken, kielisyys, hetu);
         } catch (Exception e) {
             log.error("User failed strong identification", e);
-            return ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, loginToken);
+            return urlVirkailija + "/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken;
         }
     }
 
     private String getRedirectViaLoginUrl(String originalUrl) {
         // kierrätetään CAS-oppijan logoutista, jotta CAS-virkailijaa ei hämmennetä
         // sen sessiolla, tiketeillä tms.
-        return ophProperties.url("cas.oppija.logout", originalUrl);
+        return UriComponentsBuilder.fromUriString(casOppijaLogout)
+                .queryParam("service", URLEncoder.encode(originalUrl, StandardCharsets.UTF_8))
+                .build()
+                .toUriString();
     }
 
     @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -251,7 +261,7 @@ public class CasController {
     @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Palauttaa CAS-kirjautumiseen vaaditut parametrit")
     public CasLoginParametersResponse getChangePasswordLoginParams() {
-        return new CasLoginParametersResponse(ophProperties.url("virkailijan-tyopoyta"));
+        return new CasLoginParametersResponse(virkailijanTyopoytaUrl);
     }
 
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_VALUE)

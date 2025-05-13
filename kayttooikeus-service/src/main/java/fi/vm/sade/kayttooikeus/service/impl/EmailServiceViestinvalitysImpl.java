@@ -17,7 +17,6 @@ import fi.vm.sade.kayttooikeus.util.LocalisationUtils;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.properties.OphProperties;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.Builder;
@@ -25,9 +24,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.time.ZoneId;
@@ -50,8 +53,12 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
     private final QueueingEmailService queueingEmailService;
     private final OrganisaatioClient organisaatioClient;
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
-    private final OphProperties urlProperties;
     private final Configuration freemarker;
+
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
+    @Value("${cas.oppija.login}")
+    private String casOppijaLogin;
 
     @Data
     @Builder
@@ -73,7 +80,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
             AnomusKasitelty anomusKasitelty = AnomusKasitelty.builder()
                 .henkiloDto(henkiloDto)
                 .rooli(createAnomusKasiteltyDto(anomus, updateHaettuKayttooikeusryhmaDto, language, kayttooikeusryhmaId))
-                .linkki(urlProperties.url("email-service.anomus.linkki"))
+                .linkki(urlVirkailija)
                 .subject(subject)
                 .build();
 
@@ -123,7 +130,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
             VanhenemisMuistutus vanhenemisMuistutus = VanhenemisMuistutus.builder()
                 .henkiloDto(henkiloDto)
                 .kayttooikeusryhmat(getExpirationsText(tapahtumas, language))
-                .linkki(urlProperties.url("henkilo-ui.omattiedot"))
+                .linkki(urlVirkailija + "/henkilo-ui/omattiedot")
                 .subject(subject)
                 .build();
 
@@ -177,7 +184,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
                     : "Virkailijan opintopolku: käyttöoikeusanomuksia saapunut";
                 HakemusIlmoitus hakemusIlmoitus = HakemusIlmoitus.builder()
                     .henkiloDto(henkiloDto)
-                    .linkki(urlProperties.url("henkilo-ui.anomukset"))
+                    .linkki(urlVirkailija + "/henkilo-ui/anomukset")
                     .subject(subject)
                     .build();
 
@@ -258,13 +265,16 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
 
     private String getKutsuLink(Kutsu kutsu) {
         String language = kutsu.getKieliKoodi().toLowerCase();
-        Map<String, String> targetUrlQueryParams = Map.of(
-            "kutsuToken", kutsu.getSalaisuus(),
-            "locale", language);
-        Map<String, String> urlQueryParams = Map.of(
-            "service", urlProperties.url("kayttooikeus-service.cas.tunnistus", targetUrlQueryParams),
-            "locale", language.toUpperCase());
-        return urlProperties.url("cas.oppija.identification", urlQueryParams);
+        String targetUri = UriComponentsBuilder.fromUriString(urlVirkailija + "/kayttooikeus-service/cas/tunnistus")
+                .queryParam("kutsuToken", kutsu.getSalaisuus())
+                .queryParam("locale", language)
+                .build()
+                .toUriString();
+        return UriComponentsBuilder.fromUriString(casOppijaLogin)
+                .queryParam("service", URLEncoder.encode(targetUri, StandardCharsets.UTF_8))
+                .queryParam("locale", language.toUpperCase())
+                .build()
+                .toUriString();
     }
 
     private TemplateOrganisation toTemplateOrganisation(KutsuOrganisaatio org, String language) {

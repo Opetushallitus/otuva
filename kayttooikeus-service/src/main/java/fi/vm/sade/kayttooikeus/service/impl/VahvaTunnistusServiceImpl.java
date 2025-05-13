@@ -12,31 +12,35 @@ import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.properties.OphProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
-import static java.util.Collections.singletonMap;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
-
     private final IdentificationService identificationService;
     private final KayttajatiedotService kayttajatiedotService;
-
     private final HenkiloDataRepository henkiloDataRepository;
-
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-    private final OphProperties ophProperties;
+
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
+    @Value("${virkailijan-tyopoyta}")
+    private String virkailijanTyopoytaUrl;
+    @Value("${cas.login}")
+    private String casLogin;
 
     @Override
     public VahvaTunnistusResponseDto tunnistaudu(String loginToken, VahvaTunnistusRequestDto lisatiedotDto) {
@@ -66,15 +70,15 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
 
         return VahvaTunnistusResponseDto.builder()
                 .authToken(authToken)
-                .service(ophProperties.url("virkailijan-tyopoyta"))
+                .service(virkailijanTyopoytaUrl)
                 .build();
     }
 
     @Override
     public String kasitteleKutsunTunnistus(String kutsuToken, String kielisyys, String hetu, String etunimet, String sukunimi) {
         return identificationService.updateKutsuAndGenerateTemporaryKutsuToken(kutsuToken, hetu, etunimet, sukunimi)
-                .map(temporaryKutsuToken -> ophProperties.url("henkilo-ui.rekisteroidy", singletonMap("temporaryKutsuToken", temporaryKutsuToken)))
-                .orElseGet(() -> ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanhakutsu"));
+                .map(temporaryKutsuToken -> urlVirkailija + "/henkilo-ui/kayttaja/rekisteroidy?temporaryKutsuToken=" + temporaryKutsuToken)
+                .orElseGet(() -> getVahvatunnistusVirheUrl(kielisyys, "vanhakutsu"));
     }
 
     @Override
@@ -82,25 +86,25 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
         // otetaan hetu talteen jotta se on vielä tiedossa seuraavassa vaiheessa
         return identificationService.updateLoginToken(loginToken, hetu)
                 .map(tunnistusToken -> kirjaaVahvaTunnistus(tunnistusToken, kielisyys, hetu))
-                .orElseGet(() -> ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vanha"));
+                .orElseGet(() -> getVahvatunnistusVirheUrl(kielisyys, "vanha"));
     }
 
     private String kirjaaVahvaTunnistus(TunnistusToken tunnistusToken, String kielisyys, String hetu) {
         HenkiloDto henkiloByLoginToken = oppijanumerorekisteriClient.getHenkiloByOid(tunnistusToken.getHenkilo().getOidHenkilo());
         if (tunnistusToken.getHenkilo().isPalvelu()) {
             log.error("Palvelukäyttäjänä kirjautuminen on estetty");
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "palvelukayttaja");
+            return getVahvatunnistusVirheUrl(kielisyys, "palvelukayttaja");
         }
 
         if (tunnistusToken.getHenkilo().getKayttajatiedot() == null) {
             log.warn("Käyttäjältä {} puuttuu käyttäjätunnus, uudelleenrekisteröinti estetty", tunnistusToken.getHenkilo().getOidHenkilo());
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "eivirkailija");
+            return getVahvatunnistusVirheUrl(kielisyys, "eivirkailija");
         }
 
         // tarkistetaan että virkailijalla on tämä hetu käytössä
         if (StringUtils.hasLength(henkiloByLoginToken.getHetu()) && !henkiloByLoginToken.getHetu().equals(hetu)) {
             log.error(String.format("Vahvan tunnistuksen henkilötunnus %s on eri kuin virkailijan henkilötunnus %s", hetu, henkiloByLoginToken.getHetu()));
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "vaara");
+            return getVahvatunnistusVirheUrl(kielisyys, "vaara");
         }
 
         return getRedirectUrl(tunnistusToken.getLoginToken(), kielisyys, tunnistusToken.getSalasananVaihto(), henkiloByLoginToken);
@@ -111,12 +115,16 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
         boolean salasananVaihtoBool = Boolean.TRUE.equals(salasananVaihto);
         // pyydetään käyttäjää täydentämään tietoja ("uudelleenrekisteröinti")
         if (sahkopostinAsetus || salasananVaihtoBool) {
-            return ophProperties.url("henkilo-ui.uudelleenrekisterointi", kielisyys, loginToken, sahkopostinAsetus, salasananVaihtoBool);
+            return urlVirkailija + "/henkilo-ui/kayttaja/uudelleenrekisterointi/" + kielisyys + "/" + loginToken + "/" + sahkopostinAsetus + "/" + salasananVaihtoBool;
         }
         // jos mitään tietoja ei tarvitse täyttää, suoritetaan tunnistautuminen ilman rekisteröintisivua
         VahvaTunnistusRequestDto vahvaTunnistusRequestDto = new VahvaTunnistusRequestDto();
         VahvaTunnistusResponseDto vahvaTunnistusResponseDto = this.tunnistaudu(loginToken, vahvaTunnistusRequestDto);
-        return ophProperties.url("cas.login", vahvaTunnistusResponseDto.asMap());
+        return UriComponentsBuilder.fromUriString(casLogin)
+                .queryParam("service", vahvaTunnistusResponseDto.getService())
+                .queryParam("authToken", vahvaTunnistusResponseDto.getAuthToken())
+                .build()
+                .toUriString();
     }
 
 
@@ -126,24 +134,24 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
         // Validointi
         if (!henkiloDto.isPresent()) {
             log.error(String.format("Henkilöä ei löytynyt hetulla %s", hetu));
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "eiloydy");
+            return getVahvatunnistusVirheUrl(kielisyys, "eiloydy");
         }
         if (henkiloDto.get().isPassivoitu()) {
-            return ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "passivoitu");
+            return getVahvatunnistusVirheUrl(kielisyys, "passivoitu");
         }
         Optional<Henkilo> henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloDto.get().getOidHenkilo());
         if (!henkilo.isPresent()) {
             log.error(String.format("Virkailijaa ei löytynyt oidilla %s", henkiloDto.get().getOidHenkilo()));
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "eivirkailija");
+            return getVahvatunnistusVirheUrl(kielisyys, "eivirkailija");
         }
         if (henkilo.get().getKayttajatiedot() == null) {
             log.warn("Käyttäjältä {} puuttuu käyttäjätunnus, vahva tunnistautuminen estetty", henkilo.get().getOidHenkilo());
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "eivirkailija");
+            return getVahvatunnistusVirheUrl(kielisyys, "eivirkailija");
         }
         if (henkilo.get().getOrganisaatioHenkilos().size() == 0) {
             // Ei ole koskaan ollut virkailija
             log.error("Henkilö ei ole koskaan ollut virkailija.");
-            return this.ophProperties.url("henkilo-ui.vahvatunnistus.virhe", kielisyys, "eivirkailija");
+            return getVahvatunnistusVirheUrl(kielisyys, "eivirkailija");
         }
 
         // ei haka-käyttäjille salasananvaihtoa = jos käyttäjällä on salasana on CAS-käyttäjä
@@ -151,6 +159,10 @@ public class VahvaTunnistusServiceImpl implements VahvaTunnistusService {
                 && StringUtils.hasLength(henkilo.get().getKayttajatiedot().getPassword());
         String loginToken = this.identificationService.createLoginToken(henkilo.get().getOidHenkilo(), salasananVaihto, hetu);
         return getRedirectUrl(loginToken, kielisyys, salasananVaihto, henkiloDto.get());
+    }
+
+    private String getVahvatunnistusVirheUrl(String kielisyys, String reason) {
+        return urlVirkailija + "/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/" + kielisyys + "/" + reason;
     }
 
 }

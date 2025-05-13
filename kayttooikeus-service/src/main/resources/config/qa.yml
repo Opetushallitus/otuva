@@ -14,11 +14,10 @@ cas.mfa.password: ${ssm_cas_mfa_password}
 cas.mfa.encryption-key: ${ssm_cas_gauth_encryption_key}
 cas.mfa.signing-key: ${ssm_cas_gauth_signing_key}
 
-host.host-virkailija: "virkailija.testiopintopolku.fi"
-host.host-oppija: "testiopintopolku.fi"
-host.host-cas: "virkailija.testiopintopolku.fi"
-host.host-shibboleth: "tunnistus.testiopintopolku.fi"
-host.host-varda: "frontend-qa.varda-db.csc.fi"
+host-virkailija: "virkailija.testiopintopolku.fi"
+host-oppija: "testiopintopolku.fi"
+host-cas: "virkailija.testiopintopolku.fi"
+host-varda: "frontend-qa.varda-db.csc.fi"
 
 palvelukayttaja.username: ${ssm_kayttooikeus_username}
 palvelukayttaja.password: ${ssm_kayttooikeus_password}

@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.service.external.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
-import fi.vm.sade.kayttooikeus.config.properties.UrlConfiguration;
 import fi.vm.sade.kayttooikeus.dto.enumeration.OrganisaatioStatus;
 import fi.vm.sade.kayttooikeus.dto.organisaatio.OrganisaatioRDTO;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
@@ -13,6 +12,8 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.service.external.OtuvaOauth2Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -37,27 +38,24 @@ import java.net.http.HttpRequest;
 @Component
 public class OrganisaatioClientImpl implements OrganisaatioClient {
     private final OtuvaOauth2Client httpClient;
-    private final UrlConfiguration urlConfiguration;
     private final CommonProperties commonProperties;
     private final ObjectMapper objectMapper;
     private final OrikaBeanMapper orikaBeanMapper;
 
     private OrganisaatioCache cache;
 
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
+
     @Override
     public synchronized long refreshCache() {
-        String haeHierarchyUrl = this.urlConfiguration.url(
-                "organisaatio-service.organisaatio.v4.jalkelaiset", commonProperties.getRootOrganizationOid());
+        String haeHierarchyUrl = urlVirkailija + "/organisaatio-service/rest/organisaatio/v4/" + commonProperties.getRootOrganizationOid() + "/jalkelaiset";
         // Add organisations to cache (active, incoming and passive)
         List<OrganisaatioPerustieto> organisaatiosWithoutRootOrg =
                 retrying(io(() -> get(haeHierarchyUrl, OrganisaatioHakutulos.class)), 2)
                         .get().orFail(mapper(haeHierarchyUrl)).getOrganisaatiot();
         // Add ryhmas to cache
-        Map<String, String> queryParamsRyhmat = new HashMap<String, String>() {{
-            put("aktiiviset", "true");
-            put("lakkautetut", "true");
-        }};
-        String haeRyhmasUrl = this.urlConfiguration.url("organisaatio-service.organisaatio.ryhmat", queryParamsRyhmat);
+        String haeRyhmasUrl = urlVirkailija + "/organisaatio-service/rest/organisaatio/v2/ryhmat?lakkautetut=true&aktiiviset=true";
         organisaatiosWithoutRootOrg.addAll(Arrays.stream(retrying(io(() ->
                 get(haeRyhmasUrl, OrganisaatioPerustieto[].class)), 2)
                 .get().<ExternalServiceException>orFail(mapper(haeRyhmasUrl)))
@@ -73,7 +71,7 @@ public class OrganisaatioClientImpl implements OrganisaatioClient {
     }
 
     private OrganisaatioPerustieto fetchPerustiedot(String oid) {
-        String url = urlConfiguration.url("organisaatio-service.organisaatio.perustiedot", oid);
+        String url = urlVirkailija + "/organisaatio-service/rest/organisaatio/v4/" + oid;
         return this.orikaBeanMapper.map(retrying(io(() -> get(url, OrganisaatioRDTO.class)), 2).get()
                 .orFail(mapper(url)), OrganisaatioPerustieto.class);
     }

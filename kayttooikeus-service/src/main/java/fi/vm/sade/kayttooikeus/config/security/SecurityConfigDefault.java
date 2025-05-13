@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.config.security;
 
 import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
-import fi.vm.sade.properties.OphProperties;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -13,6 +12,7 @@ import org.apereo.cas.client.session.SessionMappingStorage;
 import org.apereo.cas.client.session.SingleSignOutFilter;
 import org.apereo.cas.client.validation.Cas30ProxyTicketValidator;
 import org.apereo.cas.client.validation.TicketValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -45,15 +45,17 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 public class SecurityConfigDefault {
     private CasProperties casProperties;
-    private OphProperties ophProperties;
     private SessionMappingStorage sessionMappingStorage;
+
+    @Value("${cas.url}")
+    private String casUrl;
+    @Value("${cas.login}")
+    private String casLogin;
 
     public static final String SPRING_CAS_SECURITY_CHECK_PATH = "/j_spring_cas_security_check";
 
-    public SecurityConfigDefault(CasProperties casProperties, OphProperties ophProperties,
-                                 SessionMappingStorage sessionMappingStorage) {
+    public SecurityConfigDefault(CasProperties casProperties, SessionMappingStorage sessionMappingStorage) {
         this.casProperties = casProperties;
-        this.ophProperties = ophProperties;
         this.sessionMappingStorage = sessionMappingStorage;
     }
 
@@ -82,7 +84,7 @@ public class SecurityConfigDefault {
 
     @Bean
     TicketValidator ticketValidator() {
-        var validator = new Cas30ProxyTicketValidator(ophProperties.url("cas.url"));
+        var validator = new Cas30ProxyTicketValidator(casUrl);
         validator.setAcceptAnyProxy(true);
         return validator;
     }
@@ -128,7 +130,7 @@ public class SecurityConfigDefault {
     @Bean
     CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
         CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-        casAuthenticationEntryPoint.setLoginUrl(ophProperties.url("cas.login"));
+        casAuthenticationEntryPoint.setLoginUrl(casLogin);
         casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
         return casAuthenticationEntryPoint;
     }

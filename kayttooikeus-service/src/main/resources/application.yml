@@ -1,7 +1,3 @@
-logging.level.org:
-  springframework.web: info
-  hibernate: info
-
 spring.datasource.url: jdbc:postgresql://localhost:5436/kayttooikeus
 spring.datasource.username: oph
 spring.datasource.password: oph
@@ -34,12 +30,8 @@ spring:
   messages:
     use-code-as-default-message: true
 
-management:
-  endpoints:
-    enabled-by-default: false
-  endpoint:
-    health:
-      enabled: true
+management.endpoints.access.default: NONE
+management.endpoint.health.access: READ_ONLY
 
 server:
   servlet:
@@ -60,18 +52,11 @@ cas:
     encryption-key: LNLuxm3B5mQiIwggT9vPewkGM7JeDebZWCBjdXxCWQY
     signing-key: zMpvJwj7bEMW41YMJbAJzXHaSSH3A1JjzLfwXMSWth9yTFM3Ny3eHXmm9r5AEzU83rYNwGT__SicfrA-7ygRdA
 
-host:
-  host-virkailija: localhost:${server.port}
-  host-oppija: localhost:${server.port}
-  host-cas: virkailija.hahtuvaopintopolku.fi
-  host-shibboleth: localhost:${server.port}
-  host-varda: localhost:${server.port}
-
 palvelukayttaja.username: kayttooikeus
 palvelukayttaja.password: kayttooikeus
 kayttooikeus.palvelukayttaja.client-id: id
 kayttooikeus.palvelukayttaja.client-secret: secret
-kayttooikeus.jwt.issuer-uri: http://localhost:18080
+kayttooikeus.jwt.issuer-uri: http://localhost:${server.port}/kayttooikeus-service
 
 common:
   root-organization-oid: 1.2.246.562.10.00000000001
@@ -96,12 +81,25 @@ kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 kayttooikeus.mfa.setup.require-suomifi: true
 kayttooikeus.registration.allow-test-suomifi: false
 
-auth:
-  crypto-service:
-    static-salt: mock
+auth.crypto-service.static-salt: mock
 
 springdoc.packagesToScan: fi.vm.sade.kayttooikeus.controller
 springdoc.pathsToMatch: /**
 springdoc.swagger-ui.url: /v3/api-docs.yaml
 
 viestinvalitys.baseurl: https://viestinvalitys.hahtuvaopintopolku.fi/lahetys
+
+host-virkailija: localhost:${server.port}
+host-oppija: localhost:${server.port}
+host-cas: localhost:8080
+host-varda: localhost:${server.port}
+url-virkailija: https://${host-virkailija}
+url-oppija: https://${host-oppija}
+url-cas: https://${host-cas}
+url-varda: https://${host-varda}
+cas.url: ${url-cas}/cas
+cas.login: ${url-cas}/cas/login
+cas.oppija.url: ${url-oppija}/cas-oppija
+cas.oppija.login: ${cas.oppija.url}/login
+cas.oppija.logout: ${cas.oppija.url}/logout
+virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta

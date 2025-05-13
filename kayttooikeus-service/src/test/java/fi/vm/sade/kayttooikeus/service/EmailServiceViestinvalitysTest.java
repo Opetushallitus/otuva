@@ -106,7 +106,7 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
             Käyttöoikeutesi seuraaviin Opintopolussa oleviin palveluihin ovat vanhenemassa (suluissa vanhenemispäivä): Kuvaus (8.10.2021)
         </p>
         <p>
-            Kirjaudu Opintopolkuun ja hae jatkoaikaa omista tiedoistasi (sivun yläkulmassa oma nimi). Voit jatkaa palveluun tästä: <a href="http://testilinkki.fi/omattiedot">http://testilinkki.fi/omattiedot</a>
+            Kirjaudu Opintopolkuun ja hae jatkoaikaa omista tiedoistasi (sivun yläkulmassa oma nimi). Voit jatkaa palveluun tästä: <a href="https://localhost:9090/henkilo-ui/omattiedot">https://localhost:9090/henkilo-ui/omattiedot</a>
         </p>
     </div>
     <div class="box" style="text-align: right;">
@@ -180,7 +180,7 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
             Sinulle on saapunut uusia käyttöoikeusanomuksia.
         </p>
         <p>
-            Voit jatkaa palveluun tästä: <a href="http://testilinkki.fi/anomukset">http://testilinkki.fi/anomukset</a>
+            Voit jatkaa palveluun tästä: <a href="https://localhost:9090/henkilo-ui/anomukset">https://localhost:9090/henkilo-ui/anomukset</a>
         </p>
     </div>
     <div class="box" style="text-align: right;">
@@ -278,7 +278,7 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
             kayttooikeusryhmatunniste Beviljad
         </p>
         <p>
-            Du kan fortsätta till tjänsten: <a href="http://testilinkki.fi">http://testilinkki.fi</a>.
+            Du kan fortsätta till tjänsten: <a href="https://localhost:9090">https://localhost:9090</a>.
         </p>
     </div>
     <div class="box" style="text-align: right;">

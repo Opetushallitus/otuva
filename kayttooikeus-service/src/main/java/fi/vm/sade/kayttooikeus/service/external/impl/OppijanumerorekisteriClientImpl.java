@@ -12,11 +12,12 @@ import fi.vm.sade.kayttooikeus.service.external.OtuvaOauth2Client;
 import fi.vm.sade.kayttooikeus.service.impl.KayttoOikeusServiceImpl;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
-import fi.vm.sade.properties.OphProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -41,14 +42,16 @@ import java.net.http.HttpRequest.BodyPublishers;
 public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriClient {
     private final ObjectMapper objectMapper;
     private final OtuvaOauth2Client httpClient;
-    private final OphProperties urlProperties;
+
+    @Value("${url-virkailija}")
+    private String urlVirkailija;
 
     @Override
     public List<HenkiloPerustietoDto> getHenkilonPerustiedot(Collection<String> henkiloOid) {
         if (henkiloOid.isEmpty()) {
             return new ArrayList<>();
         }
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloPerustietosByHenkiloOidList");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/henkiloPerustietosByHenkiloOidList";
         Supplier<List<HenkiloPerustietoDto>> action = () -> post(url, henkiloOid, HenkiloPerustietoDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
@@ -57,7 +60,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public Set<String> getAllOidsForSamePerson(String personOid) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.duplicateHenkilos");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/s2s/duplicateHenkilos";
         Map<String,Object> criteria = new HashMap<>();
         criteria.put("henkiloOids", singletonList(personOid));
         Supplier<List<HenkiloViiteDto>> action = () -> post(url, criteria, HenkiloViiteDto[].class, 200)
@@ -69,7 +72,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public String getOidByHetu(String hetu) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.s2s.oidByHetu", hetu);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/s2s/oidByHetu/" + hetu;
         Supplier<String> action = () -> get(url)
                 .orElseThrow(() -> new NotFoundException("could not find oid with hetu: " + hetu));
         return retrying(action, 2).get().orFail(mapper(url));
@@ -80,15 +83,10 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         if (oidHenkiloList == null || oidHenkiloList.isEmpty()) {
             return new ArrayList<>();
         }
-
-        Map<String, String> params = new HashMap<String, String>() {{
-            put("offset", Long.toString(page));
-            put("limit", Long.toString(limit));
-        }};
         Map<String, List<String>> data = new HashMap<>();
         data.put("henkiloOids", oidHenkiloList);
 
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.henkilohaku-list-as-admin", params);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/s2s/henkilo/perustiedotAsAdmin?offset=" + page + "&limit=" + limit;
         Supplier<List<HenkiloHakuPerustietoDto>> action = () -> post(url, data, HenkiloHakuPerustietoDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
@@ -97,11 +95,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public List<String> getModifiedSince(LocalDateTime dateTime, long offset, long amount) {
-        Map<String, String> params = new HashMap<String, String>() {{
-            put("offset", Long.toString(offset));
-            put("amount", Long.toString(amount));
-        }};
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.s2s.modified-since", dateTime, params);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/s2s/changedSince/" + dateTime + "?offset=" + offset + "&amount=" + amount;
         Supplier<List<String>> action = () -> get(url, String[].class)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
@@ -110,7 +104,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public HenkiloDto getHenkiloByOid(String oid) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByOid", oid);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/" + oid;
 
         Supplier<HenkiloDto> action = () -> get(url, HenkiloDto.class)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
@@ -121,7 +115,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
     public Map<String, HenkiloDto> getMasterHenkilosByOidList(List<String> oids) {
         if (oids.isEmpty()) { return Map.of(); }
 
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.masterHenkilosByOidList");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/masterHenkilosByOidList";
         Supplier<Map<String, HenkiloDto>> action = () -> {
             try {
                 var req = HttpRequest.newBuilder()
@@ -144,7 +138,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public Optional<HenkiloDto> findHenkiloByOid(String oid) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByOid", oid);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/" + oid;
 
         Supplier<Optional<HenkiloDto>> action = () -> get(url, HenkiloDto.class);
         return retrying(action, 2).get().orFail(mapper(url));
@@ -152,13 +146,13 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public Optional<HenkiloDto> getHenkiloByHetu(String hetu) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo.henkiloByHetu", hetu);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/hetu=" + hetu;
         return get(url, HenkiloDto.class);
     }
 
     @Override
     public Collection<HenkiloYhteystiedotDto> listYhteystiedot(HenkiloHakuCriteria criteria) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.yhteystiedot");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/yhteystiedot";
         Supplier<Collection<HenkiloYhteystiedotDto>> action = () -> post(url, criteria, HenkiloYhteystiedotDto[].class, 200)
                 .map(array -> Arrays.stream(array).collect(toList()))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
@@ -167,7 +161,7 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public String createHenkilo(HenkiloCreateDto henkiloCreateDto) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo";
         Supplier<String> action = () -> post(url, henkiloCreateDto, 201)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
@@ -175,28 +169,28 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
 
     @Override
     public void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.cas.vahva-tunnistus", oidHenkilo);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/cas/henkilo/" + oidHenkilo + "/vahvaTunnistus";
         Supplier<String> action = () -> put(url, henkiloVahvaTunnistusDto);
         retrying(action, 2).get().orFail(mapper(url));
     }
 
     @Override
     public void updateHenkilo(HenkiloUpdateDto henkiloUpdateDto) {
-        String url = this.urlProperties.url("oppijanumerorekisteri-service.henkilo");
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo";
         Supplier<String> action = () -> put(url, henkiloUpdateDto);
         retrying(action, 2).get().orFail(mapper(url));
     }
 
     @Override
     public void yhdistaHenkilot(String oid, Collection<String> duplicateOids) {
-        String url = urlProperties.url("oppijanumerorekisteri-service.henkilo.byOid.yhdistaHenkilot", oid);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/" + oid + "/link";
         Supplier<String> action = () -> post(url, duplicateOids, 200).get();
         retrying(action, 2).get().orFail(mapper(url));
     }
 
     @Override
     public HenkiloOmattiedotDto getOmatTiedot(String oidHenkilo) {
-        String url = this.urlProperties.url("oppijanumerorekisteri.henkilo.omattiedot-by-oid", oidHenkilo);
+        String url = urlVirkailija + "/oppijanumerorekisteri-service/henkilo/" + oidHenkilo + "/omattiedot";
         Supplier<HenkiloOmattiedotDto> action = () -> get(url, HenkiloOmattiedotDto.class).get();
         return retrying(action, 2).get().orFail(mapper(url));
     }
