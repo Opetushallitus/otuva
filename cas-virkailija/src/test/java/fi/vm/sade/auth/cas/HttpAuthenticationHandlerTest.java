@@ -11,6 +11,9 @@ import org.apereo.cas.authentication.PreventedException;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.authentication.principal.AbstractWebApplicationService;
 import org.apereo.cas.authentication.principal.WebApplicationServiceFactory;
+import org.apereo.cas.multitenancy.TenantDefinition;
+import org.apereo.cas.multitenancy.TenantExtractor;
+import org.apereo.cas.multitenancy.TenantsManager;
 import org.apereo.cas.services.ServicesManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +23,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import javax.security.auth.login.FailedLoginException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -130,6 +134,18 @@ public class HttpAuthenticationHandlerTest {
         String serviceName = "http://example.com";
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addParameter(CasProtocolConstants.PARAMETER_SERVICE, serviceName);
-        return (AbstractWebApplicationService) new WebApplicationServiceFactory().createService(request);
+        return (AbstractWebApplicationService) new WebApplicationServiceFactory(new TenantExtractor() {
+
+            @Override
+            public TenantsManager getTenantsManager() {
+                return null;
+            }
+
+            @Override
+            public Optional<TenantDefinition> extract(String requestPath) {
+                return Optional.empty();
+            }
+
+        }).createService(request);
     }
 }
