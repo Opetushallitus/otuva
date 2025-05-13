@@ -43,7 +43,7 @@ public class LocaleConfigurationTest {
         LocaleResolver localeResolver = localeConfiguration.localeResolver();
         HttpServletRequest request = new MockHttpServletRequest();
         HttpServletResponse response = new MockHttpServletResponse();
-        Locale locale = new Locale("sv");
+        Locale locale = Locale.of("sv");
 
         localeResolver.setLocale(request, response, locale);
         locale = localeResolver.resolveLocale(request);
@@ -56,7 +56,7 @@ public class LocaleConfigurationTest {
         LocaleResolver localeResolver = localeConfiguration.localeResolver();
         HttpServletRequest request = new MockHttpServletRequest();
         HttpServletResponse response = new MockHttpServletResponse();
-        Locale locale = new Locale("fr");
+        Locale locale = Locale.of("fr");
 
         localeResolver.setLocale(request, response, locale);
         locale = localeResolver.resolveLocale(request);
@@ -92,7 +92,7 @@ public class LocaleConfigurationTest {
         LocaleContextResolver localeResolver = localeConfiguration.localeResolver();
         HttpServletRequest request = new MockHttpServletRequest();
         HttpServletResponse response = new MockHttpServletResponse();
-        LocaleContext context = new SimpleLocaleContext(new Locale("sv"));
+        LocaleContext context = new SimpleLocaleContext(Locale.of("sv"));
 
         localeResolver.setLocaleContext(request, response, context);
         context = localeResolver.resolveLocaleContext(request);
@@ -105,7 +105,7 @@ public class LocaleConfigurationTest {
         LocaleContextResolver localeResolver = localeConfiguration.localeResolver();
         HttpServletRequest request = new MockHttpServletRequest();
         HttpServletResponse response = new MockHttpServletResponse();
-        LocaleContext context = new SimpleLocaleContext(new Locale("fr"));
+        LocaleContext context = new SimpleLocaleContext(Locale.of("fr"));
 
         localeResolver.setLocaleContext(request, response, context);
         context = localeResolver.resolveLocaleContext(request);
