@@ -51,12 +51,12 @@ public class SamlDiscoveryReturnController {
         buffer.append("<body>\n");
         buffer.append("<form action=\"").append(escapeHtml(requestedUrl)).append("\" name=\"f\" method=\"post\">\n");
         buffer.append("<input type='hidden' name=\"execution\" value=\"")
-                .append(ticket.get(SamlDiscoveryWebflowConstants.PROPERTY_ID_WEBFLOW_KEY, String.class))
+                .append(ticket.getProperty(SamlDiscoveryWebflowConstants.PROPERTY_ID_WEBFLOW_KEY, String.class))
                 .append("\" />\n");
         buffer.append("<input type='hidden' name=\"")
                 .append(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER)
                 .append("\" value=\"")
-                .append(ticket.get(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER, String.class))
+                .append(ticket.getProperty(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER, String.class))
                 .append("\" />\n");
         buffer.append("<input type='hidden' name=\"entityID\" value=\"")
                 .append(entityId)
