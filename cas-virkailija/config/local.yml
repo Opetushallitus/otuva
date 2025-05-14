@@ -4,5 +4,4 @@ cas.server.name: http://localhost:8080
 cas.server.prefix: ${cas.server.name}/cas
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 
-cas.custom.properties.uusHakaEnabled: true
 cas.service-registry.json.location: file:///app/services/local
