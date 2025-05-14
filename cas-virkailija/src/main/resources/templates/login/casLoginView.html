@@ -37,7 +37,7 @@
                                         src="/cas/images/haka_landscape_medium.gif"
                                         th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
                                         th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
-                                        th:id="${delegatedAuthenticationProviderConfigurations[1].name}-button"
+                                        th:id="${delegatedAuthenticationProviderConfigurations[1].name + '-button'}"
                                         th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
                                         accesskey="m"
                                         height="38px"
