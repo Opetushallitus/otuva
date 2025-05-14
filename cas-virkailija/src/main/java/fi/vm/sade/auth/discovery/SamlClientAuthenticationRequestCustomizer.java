@@ -18,8 +18,9 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class SamlClientAuthenticationRequestCustomizer implements DelegatedClientAuthenticationRequestCustomizer {
-
     private final CasConfigurationProperties casProperties;
+
+    private int oneWeekInSeconds = 604800;
 
     @Override
     public void customize(IndirectClient client, WebContext webContext) {
@@ -32,6 +33,7 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
             LOGGER.debug("Setting discovered identity provider entity id to [{}] for SAML2 client [{}]",
                     entity.getEntityID(), client.getName());
             samlClient.getConfiguration().setIdentityProviderEntityId(entity.getEntityID());
+            samlClient.getConfiguration().setMaximumAuthenticationLifetime(oneWeekInSeconds);
             RequestContextHolder.getRequestContext().getConversationScope()
                     .remove(SamlDiscoveryWebflowConstants.CONVERSATION_VAR_ID_DELEGATED_AUTHENTICATION_IDP);
             return;
@@ -42,6 +44,7 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
             LOGGER.debug("Setting identity provider entity id to [{}] for SAML2 client [{}]",
                     samlProperties.getIdentityProviderEntityId(), client.getName());
             samlClient.getConfiguration().setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
+            samlClient.getConfiguration().setMaximumAuthenticationLifetime(oneWeekInSeconds);
         }
     }
 
