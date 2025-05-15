@@ -91,6 +91,7 @@ cas.locale.default-value: fi
 cas.view.default-redirect-url: http://localhost:8080
 cas.sso.services.allow-missing-service-parameter: false
 
+cas.custom.properties.uusHakaEnabled: false
 cas.custom.properties.suomifiUrl: http://untuvaopintopolku.fi/cas-oppija/login
 cas.custom.properties.suomifiUrlTarget: http://localhost:8101/kayttooikeus-service/cas/tunnistus?locale=
 cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
