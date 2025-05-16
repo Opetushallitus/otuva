@@ -32,6 +32,9 @@ exec java \
   -XX:MaxRAMPercentage=80.0 \
   -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
   -Dfi.vm.sade.javautils.http.HttpServletRequestUtils.HARMLESS_URLS=/cas/actuator/health \
+  -XX:+HeapDumpOnOutOfMemoryError \
+  -XX:HeapDumpPath=/tmp/heap_dump.hprof \
+  -XX:OnOutOfMemoryError="yum install -y aws-cli > /dev/null && aws s3 mv /tmp/heap_dump.hprof s3://${HEAP_DUMP_BUCKET}/'date+%F_%T'.hprof ; kill -9 %p" \
   -jar \
   cas.war
 EOF

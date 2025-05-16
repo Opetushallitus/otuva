@@ -813,6 +813,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
 
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
+    const heapDumpBucket = new s3.Bucket(this, "CasVirkailijaHeapDumpBucket", {})
+
     const database = new rds.DatabaseCluster(this, "Database", {
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
@@ -857,6 +859,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         },
       }
     );
+    heapDumpBucket.grantReadWrite(taskDefinition.taskRole);
 
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
@@ -867,6 +870,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         cas_postgres_host: database.clusterEndpoint.hostname,
         cas_postgres_port: database.clusterEndpoint.port.toString(),
         cas_postgres_database: "cas",
+        HEAP_DUMP_BUCKET: heapDumpBucket.bucketName,
       },
       secrets: {
         cas_postgres_username: ecs.Secret.fromSecretsManager(
