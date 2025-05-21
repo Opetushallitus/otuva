@@ -1,10 +1,7 @@
 server.port: 8101
 
-host.host-virkailija: localhost:8101
-host.host-oppija: "opintopolku.fi"
-host.host-cas: localhost:8080
-host.host-shibboleth: localhost:8101
-host.host-varda: localhost:8101
-
 kayttooikeus.oauth2.publickey: classpath:public_key.pem
 kayttooikeus.oauth2.privatekey: classpath:private_key.pem
+
+cas.url: http://${host-cas}/cas
+cas.login: http://${host-cas}/cas/login
