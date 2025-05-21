@@ -13,6 +13,13 @@
         </encoder>
     </appender>
 
+    <logger name="org.springframework.security.cas" level="DEBUG">
+        <appender-ref ref="STDOUT-CONSOLE"/>
+    </logger>
+    <logger name="org.apereo" level="DEBUG">
+        <appender-ref ref="STDOUT-CONSOLE"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT-CONSOLE"/>
     </root>
