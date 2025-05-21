@@ -940,7 +940,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
-      healthCheckGracePeriod: cdk.Duration.minutes(5),
+      healthCheckGracePeriod: cdk.Duration.minutes(10),
       circuitBreaker: { enable: true },
     });
     const scaling = service.autoScaleTaskCount({
