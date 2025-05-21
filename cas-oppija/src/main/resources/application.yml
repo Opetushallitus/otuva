@@ -89,7 +89,7 @@ management:
 # Spring Boot configuration
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
-logging.config: file:/Users/rce/work/oph/otuva/cas-oppija/config/log4j2.xml
+logging.config: file:./config/log4j2.xml
 
 server:
   port: 8081
