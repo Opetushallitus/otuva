@@ -37,7 +37,7 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     private final CasConfigurationProperties casProperties;
 
     public InterruptConfiguration(FlowBuilderServices flowBuilderServices,
-                                  @Qualifier("flowDefinitionRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                  @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
                                   ConfigurableApplicationContext applicationContext,
                                   CasConfigurationProperties casProperties) {
         this.flowBuilderServices = flowBuilderServices;
