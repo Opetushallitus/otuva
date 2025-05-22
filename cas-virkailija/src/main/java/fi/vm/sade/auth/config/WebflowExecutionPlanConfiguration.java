@@ -2,6 +2,7 @@ package fi.vm.sade.auth.config;
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.web.flow.CasWebflowConfigurer;
+import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPla
     private final CasWebflowConfigurer samlDiscoveryWebflowConfigurer;
 
     public WebflowExecutionPlanConfiguration(FlowBuilderServices flowBuilderServices,
-                                             @Qualifier("flowDefinitionRegistry") FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                             @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
                                              ConfigurableApplicationContext applicationContext,
                                              CasConfigurationProperties casProperties,
                                              @Qualifier("samlDiscoveryWebflowConfigurer") final CasWebflowConfigurer samlDiscoveryWebflowConfigurer) {
