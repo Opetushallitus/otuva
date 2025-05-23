@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * This is {@link Pac4jSamlClientProperties}.
- *
- * @author Misagh Moayyed
- * @since 5.2.0
+ * Overrides Pac4jSamlClientProperties from CAS to add an external discovery service discoveryServiceUrl
+ * and the user chosen IDP identityProviderEntityId.
  */
 @Getter
 @Setter

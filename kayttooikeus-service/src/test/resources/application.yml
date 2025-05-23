@@ -64,12 +64,10 @@ host-oppija: localhost:${server.port}
 host-cas: localhost:8080
 host-varda: localhost:${server.port}
 url-virkailija: https://${host-virkailija}
-url-oppija: https://${host-oppija}
-url-cas: https://${host-cas}
 url-varda: https://${host-varda}
-cas.url: ${url-cas}/cas
-cas.login: ${url-cas}/cas/login
-cas.oppija.url: ${url-oppija}/cas-oppija
+cas.url: https://${host-cas}/cas
+cas.login: https://${host-cas}/cas/login
+cas.oppija.url: https://${host-oppija}/cas-oppija
 cas.oppija.login: ${cas.oppija.url}/login
 cas.oppija.logout: ${cas.oppija.url}/logout
 virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta

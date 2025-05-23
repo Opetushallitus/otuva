@@ -1,8 +1,23 @@
 spring.datasource.url: jdbc:postgresql://host.docker.internal:5080/cas
 
+management.endpoints.web.exposure.include: health,springWebflow,auditevents
+management.endpoint.auditevents.access: READ_ONLY
+management.endpoint.springWebflow.access: READ_ONLY
+
 cas.server.name: http://localhost:8080
 cas.server.prefix: ${cas.server.name}/cas
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.tgc.secure: false
+cas.warning-cookie.secure: false
 
 cas.custom.properties.uusHakaEnabled: true
+cas.custom.properties.suomifiUrlTarget: http://host.docker.internal:8101/kayttooikeus-service/cas/tunnistus?locale=
+
+cas.authn.mfa.triggers.rest.url: http://host.docker.internal:8101/kayttooikeus-service/mfa/trigger
+cas.authn.mfa.gauth.rest.token-url: http://host.docker.internal:8101/kayttooikeus-service/mfa/token
+cas.authn.mfa.gauth.rest.url: http://host.docker.internal:8101/kayttooikeus-service/mfa/token
+
 cas.service-registry.json.location: file:///app/services/local
+
+host.alb: host.docker.internal:8101
+kayttooikeus.baseurl: http://host.docker.internal:8101
