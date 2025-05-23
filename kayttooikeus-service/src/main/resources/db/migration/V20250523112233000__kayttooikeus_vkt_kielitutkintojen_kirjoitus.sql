@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('KIELITUTKINTOREKISTERI', 'VKT_KIELITUTKINTOJEN_KIRJOITUS', 'VKT:n kielitutkintojen kirjoitus');
