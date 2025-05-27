@@ -6,3 +6,4 @@ fi.vm.sade.auth.config.InterruptConfiguration
 fi.vm.sade.auth.config.InterruptInquiryExecutionPlanConfiguration
 fi.vm.sade.auth.config.LocaleConfiguration
 fi.vm.sade.auth.config.WebflowExecutionPlanConfiguration
+fi.vm.sade.saml.action.SAMLAction
