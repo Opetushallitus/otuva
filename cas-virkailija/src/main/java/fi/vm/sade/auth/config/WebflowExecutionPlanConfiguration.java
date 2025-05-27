@@ -16,18 +16,18 @@ import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPlanConfigurer {
     private final FlowBuilderServices flowBuilderServices;
-    private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
+    private final FlowDefinitionRegistry flowDefinitionRegistry;
     private final ConfigurableApplicationContext applicationContext;
     private final CasConfigurationProperties casProperties;
     private final CasWebflowConfigurer samlDiscoveryWebflowConfigurer;
 
     public WebflowExecutionPlanConfiguration(FlowBuilderServices flowBuilderServices,
-                                             @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                             @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry flowDefinitionRegistry,
                                              ConfigurableApplicationContext applicationContext,
                                              CasConfigurationProperties casProperties,
                                              @Qualifier("samlDiscoveryWebflowConfigurer") final CasWebflowConfigurer samlDiscoveryWebflowConfigurer) {
         this.flowBuilderServices = flowBuilderServices;
-        this.loginFlowDefinitionRegistry = loginFlowDefinitionRegistry;
+        this.flowDefinitionRegistry = flowDefinitionRegistry;
         this.applicationContext = applicationContext;
         this.casProperties = casProperties;
         this.samlDiscoveryWebflowConfigurer = samlDiscoveryWebflowConfigurer;
@@ -35,7 +35,7 @@ public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPla
 
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
-        plan.registerWebflowConfigurer(new WebflowConfiguration(flowBuilderServices, loginFlowDefinitionRegistry,
+        plan.registerWebflowConfigurer(new WebflowConfiguration(flowBuilderServices, flowDefinitionRegistry,
                 applicationContext, casProperties));
         plan.registerWebflowConfigurer(this.samlDiscoveryWebflowConfigurer);
     }

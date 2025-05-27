@@ -88,14 +88,14 @@ public class CasOphConfiguration {
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY)
-            final FlowDefinitionRegistry loginFlowDefinitionRegistry,
+            final FlowDefinitionRegistry flowDefinitionRegistry,
             @Qualifier("delegatedClientRedirectFlowRegistry")
             final FlowDefinitionRegistry delegatedClientRedirectFlowRegistry,
             @Qualifier(DelegatedClientAuthenticationConfigurationContext.BEAN_NAME)
             final DelegatedClientAuthenticationConfigurationContext configContext,
             @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_BUILDER_SERVICES)
             final FlowBuilderServices flowBuilderServices) {
-        val cfg = new SamlDiscoveryWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry,
+        val cfg = new SamlDiscoveryWebflowConfigurer(flowBuilderServices, flowDefinitionRegistry,
                 delegatedClientRedirectFlowRegistry, configContext, applicationContext, casProperties);
         cfg.setOrder(casProperties.getAuthn().getPac4j().getWebflow().getOrder() + 100);
         return cfg;
