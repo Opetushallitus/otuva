@@ -22,10 +22,10 @@ public class WebflowConfiguration extends AbstractCasWebflowConfigurer {
 
     public WebflowConfiguration(
         final FlowBuilderServices flowBuilderServices,
-        final FlowDefinitionRegistry loginFlowDefinitionRegistry,
+        final FlowDefinitionRegistry flowDefinitionRegistry,
         final ConfigurableApplicationContext applicationContext,
         final CasConfigurationProperties casProperties) {
-        super(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties);
+        super(flowBuilderServices, flowDefinitionRegistry, applicationContext, casProperties);
         setOrder(casProperties.getAuthn().getPac4j().getWebflow().getOrder() + 1);
     }
 

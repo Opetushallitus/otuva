@@ -32,16 +32,16 @@ import static java.util.stream.Collectors.toList;
 public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer {
 
     private final FlowBuilderServices flowBuilderServices;
-    private final FlowDefinitionRegistry loginFlowDefinitionRegistry;
+    private final FlowDefinitionRegistry flowDefinitionRegistry;
     private final ConfigurableApplicationContext applicationContext;
     private final CasConfigurationProperties casProperties;
 
     public InterruptConfiguration(FlowBuilderServices flowBuilderServices,
-                                  @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry loginFlowDefinitionRegistry,
+                                  @Qualifier(CasWebflowConstants.BEAN_NAME_FLOW_DEFINITION_REGISTRY) FlowDefinitionRegistry flowDefinitionRegistry,
                                   ConfigurableApplicationContext applicationContext,
                                   CasConfigurationProperties casProperties) {
         this.flowBuilderServices = flowBuilderServices;
-        this.loginFlowDefinitionRegistry = loginFlowDefinitionRegistry;
+        this.flowDefinitionRegistry = flowDefinitionRegistry;
         this.applicationContext = applicationContext;
         this.casProperties = casProperties;
     }
@@ -49,9 +49,9 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
         // this is from default interruptWebflowConfigurer bean:
-        plan.registerWebflowConfigurer(new InterruptWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties));
+        plan.registerWebflowConfigurer(new InterruptWebflowConfigurer(flowBuilderServices, flowDefinitionRegistry, applicationContext, casProperties));
 
-        plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
+        plan.registerWebflowConfigurer(new AbstractCasWebflowConfigurer(flowBuilderServices, flowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
                 // fix interrupt inquirers called twice after successful login
@@ -71,7 +71,7 @@ public class InterruptConfiguration implements CasWebflowExecutionPlanConfigurer
     // override default interruptWebflowConfigurer to be able to override its flow definitions (see above)
     @Bean
     public CasWebflowConfigurer interruptWebflowConfigurer() {
-        return new AbstractCasWebflowConfigurer(flowBuilderServices, loginFlowDefinitionRegistry, applicationContext, casProperties) {
+        return new AbstractCasWebflowConfigurer(flowBuilderServices, flowDefinitionRegistry, applicationContext, casProperties) {
             @Override
             protected void doInitialize() {
                 // nop
