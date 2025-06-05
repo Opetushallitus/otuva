@@ -69,7 +69,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("ProdContinuousDeploymentPipeline"),
       connection,
       "prod",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      { owner: "Opetushallitus", name: "otuva", branch: "cas-7.2" },
       props
     );
   }
@@ -114,7 +114,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         repo: repository.name,
         branch: repository.branch,
         output: sourceOutput,
-        triggerOnPush: ["hahtuva", "dev"].includes(env),
+        triggerOnPush: ["hahtuva", "dev", "prod"].includes(env),
       });
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
