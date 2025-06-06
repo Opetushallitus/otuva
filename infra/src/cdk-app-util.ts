@@ -8,7 +8,7 @@ import * as constructs from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { legacyPrefix, CDK_QUALIFIER } from "./shared-account";
-import {ROUTE53_HEALTH_CHECK_REGION} from "./health-check";
+import { ROUTE53_HEALTH_CHECK_REGION } from "./health-check";
 
 class CdkAppUtil extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -45,7 +45,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("HahtuvaContinuousDeploymentPipeline"),
       connection,
       "hahtuva",
-      { owner: "Opetushallitus", name: "otuva", branch: "cas-7.2" },
+      { owner: "Opetushallitus", name: "otuva", branch: "master" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -53,7 +53,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("DevContinuousDeploymentPipeline"),
       connection,
       "dev",
-      { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -61,7 +61,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("QaContinuousDeploymentPipeline"),
       connection,
       "qa",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -69,7 +69,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("ProdContinuousDeploymentPipeline"),
       connection,
       "prod",
-      { owner: "Opetushallitus", name: "otuva", branch: "cas-7.2" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
       props
     );
   }
@@ -114,12 +114,12 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         repo: repository.name,
         branch: repository.branch,
         output: sourceOutput,
-        triggerOnPush: ["hahtuva", "dev", "prod"].includes(env),
+        triggerOnPush: ["hahtuva", "dev"].includes(env),
       });
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva" || env === "dev";
+    const runTests = env === "hahtuva";
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
       testStage.addAction(
@@ -257,7 +257,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
             actions: ["sts:AssumeRole"],
-            resources: targetRegions.flatMap(targetRegion => [
+            resources: targetRegions.flatMap((targetRegion) => [
               `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-lookup-role-${deploymentTargetAccount}-${targetRegion}`,
               `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-file-publishing-role-${deploymentTargetAccount}-${targetRegion}`,
               `arn:aws:iam::${deploymentTargetAccount}:role/cdk-${CDK_QUALIFIER}-image-publishing-role-${deploymentTargetAccount}-${targetRegion}`,
