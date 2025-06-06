@@ -28,9 +28,13 @@ public class KayttoOikeusRyhmaController {
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Listaa kaikki käyttöoikeusryhmät.",
-            description = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan.")
-    public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma(@RequestParam(required = false) Boolean passiiviset) {
-        return kayttoOikeusService.listAllKayttoOikeusRyhmas(passiiviset);
+            description = "Listaa kaikki käyttöoikeusryhmät, jotka on tallennettu henkilöhallintaan. "
+                + "Suodattaa käyttöoikeusryhmistä vain ne, jotka sisältävät palvelun ja käyttöoikeuden, jos molemmat parametrit annetaan.")
+    public List<KayttoOikeusRyhmaDto> listKayttoOikeusRyhma(
+                @RequestParam(required = false) Boolean passiiviset,
+                @RequestParam(required = false) String palvelu,
+                @RequestParam(required = false) String kayttooikeus) {
+        return kayttoOikeusService.listAllKayttoOikeusRyhmas(passiiviset, palvelu, kayttooikeus);
     }
 
     @Operation(summary = "Hakee henkilön käyttöoikeusryhmät organisaatioittain")

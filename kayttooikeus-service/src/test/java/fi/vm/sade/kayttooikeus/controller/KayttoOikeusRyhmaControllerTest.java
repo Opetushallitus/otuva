@@ -39,7 +39,7 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void listKayttoOikeusRyhmaTest() throws Exception {
-        given(this.kayttoOikeusService.listAllKayttoOikeusRyhmas(isNull()))
+        given(this.kayttoOikeusService.listAllKayttoOikeusRyhmas(isNull(), isNull(), isNull()))
             .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()
                     .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
                             .organisaatioTyyppi("organisaatiotyyppi")

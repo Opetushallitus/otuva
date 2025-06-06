@@ -70,9 +70,9 @@ public class KayttoOikeusServiceImpl implements KayttoOikeusService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas(Boolean passiiviset) {
+    public List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas(Boolean passiiviset, String palvelu, String kayttooikeus) {
         boolean naytaPassiiviset = Boolean.TRUE.equals(passiiviset) && this.permissionCheckerService.isCurrentUserAdmin();
-        return localizationService.localize(findAllKayttoOikeusRyhmasAsDtos(naytaPassiiviset));
+        return localizationService.localize(findAllKayttoOikeusRyhmasAsDtos(naytaPassiiviset, palvelu, kayttooikeus));
     }
 
     @Override
@@ -125,7 +125,7 @@ public class KayttoOikeusServiceImpl implements KayttoOikeusService {
     @Transactional(readOnly = true)
     public List<KayttoOikeusRyhmaDto> listPossibleRyhmasByOrganization(String organisaatioOid) {
         return localizationService.localize(getRyhmasWithoutOrganizationLimitations(
-                organisaatioOid, findAllKayttoOikeusRyhmasAsDtos(false)));
+                organisaatioOid, findAllKayttoOikeusRyhmasAsDtos(false, null, null)));
     }
 
     @Override
@@ -429,8 +429,10 @@ public class KayttoOikeusServiceImpl implements KayttoOikeusService {
         return new ArrayList<>(byIds.values());
     }
 
-    private List<KayttoOikeusRyhmaDto> findAllKayttoOikeusRyhmasAsDtos(boolean naytaPassiiviset) {
-        return addOrganisaatioViitteesToRyhmas(kayttoOikeusRyhmaRepository.listAll(naytaPassiiviset));
+    private List<KayttoOikeusRyhmaDto> findAllKayttoOikeusRyhmasAsDtos(boolean naytaPassiiviset, String palvelu, String kayttooikeus) {
+        return addOrganisaatioViitteesToRyhmas(palvelu != null && kayttooikeus != null
+            ? kayttoOikeusRyhmaRepository.listAll(naytaPassiiviset, palvelu, kayttooikeus)
+            : kayttoOikeusRyhmaRepository.listAll(naytaPassiiviset));
     }
 
     private List<KayttoOikeusRyhmaDto> getGrantableRyhmasWithoutOrgLimitations(String organisaatioOid, String myontajaOid) {

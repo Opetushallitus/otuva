@@ -92,6 +92,25 @@ public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implemen
     }
 
     @Override
+    public List<KayttoOikeusRyhmaDto> listAll(boolean naytaPassivoidut, String palvelu, String kayttooikeus) {
+        QKayttoOikeus kayttoOikeus = QKayttoOikeus.kayttoOikeus;
+        QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
+        BooleanBuilder whereBuilder = new BooleanBuilder()
+                .and(kayttoOikeus.palvelu.name.eq(palvelu))
+                .and(kayttoOikeus.rooli.eq(kayttooikeus));
+        if (!naytaPassivoidut) {
+            whereBuilder.and(kayttoOikeusRyhma.passivoitu.eq(false));
+        }
+
+        return jpa().from(kayttoOikeusRyhma)
+                .leftJoin(kayttoOikeusRyhma.nimi)
+                .innerJoin(kayttoOikeusRyhma.kayttoOikeus, kayttoOikeus)
+                .select(KayttoOikeusRyhmaDtoBean())
+                .where(whereBuilder)
+                .fetch();
+    }
+
+    @Override
     public List<Tuple> findOrganisaatioOidAndRyhmaIdByHenkiloOid(String oid) {
         QHenkilo henkilo = QHenkilo.henkilo;
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;

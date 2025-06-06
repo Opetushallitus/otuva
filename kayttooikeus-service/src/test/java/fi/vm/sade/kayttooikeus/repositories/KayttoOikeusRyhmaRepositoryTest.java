@@ -22,6 +22,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPop
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/truncate_tables.sql")
@@ -49,8 +50,32 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
                 .withOikeus(oikeus("APP2", "WRITE")));
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll(false);
-        assertEquals(2, ryhmas.size());
-        assertEquals("RYHMÄ", ryhmas.get(0).getName());
+        assertThat(ryhmas)
+                .extracting(KayttoOikeusRyhmaDto::getTunniste)
+                .containsExactlyInAnyOrder("RYHMÄ", "RYHMÄ2");
+    }
+
+    @Test
+    public void listAllFiltersByKayttooikeus() {
+        populate(kayttoOikeusRyhma("RYHMÄ")
+                .withNimi(text("FI", "ryhmän kuvaus"))
+                .withOikeus(oikeus("APP1", "READ"))
+                .withOikeus(oikeus("APP2", "WRITE")));
+
+        populate(kayttoOikeusRyhma("Piilotettu ryhmä")
+                .asPassivoitu()
+                .withOikeus(oikeus("APP1", "WRITE"))
+                .withOikeus(oikeus("APP2", "WRITE")));
+
+        populate(kayttoOikeusRyhma("RYHMÄ2")
+                .withNimi(text("FI", "ryhmän 2 kuvaus"))
+                .withOikeus(oikeus("APP1", "READ"))
+                .withOikeus(oikeus("APP2", "WRITE")));
+
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.listAll(true, "APP1", "READ");
+        assertThat(ryhmas)
+                .extracting(KayttoOikeusRyhmaDto::getTunniste)
+                .containsExactlyInAnyOrder("RYHMÄ", "RYHMÄ2");
     }
 
     @Test
@@ -91,7 +116,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
 
         List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList(id2));
         assertEquals(1, ryhmas.size());
-        assertEquals("RYHMÄ2", ryhmas.get(0).getName());
+        assertEquals("RYHMÄ2", ryhmas.get(0).getTunniste());
 
         ryhmas = kayttoOikeusRyhmaRepository.findByIdList(Arrays.asList());
         assertEquals(0, ryhmas.size());
@@ -217,14 +242,14 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         List<KayttoOikeusRyhmaDto> ryhmat = kayttoOikeusRyhmaRepository.findKayttoOikeusRyhmasByKayttoOikeusIds(
                 Collections.singletonList(oikeus.getId()));
         assertEquals(1, ryhmat.size());
-        assertEquals("RYHMÄ", ryhmat.get(0).getName());
+        assertEquals("RYHMÄ", ryhmat.get(0).getTunniste());
 
         ryhmat = kayttoOikeusRyhmaRepository.findKayttoOikeusRyhmasByKayttoOikeusIds(
                 Collections.singletonList(crudOikeus.getId()));
         assertEquals(2, ryhmat.size());
 
         assertTrue(Arrays.asList("RYHMÄ", "CRUDRYHMÄ").containsAll(
-                ryhmat.stream().map(KayttoOikeusRyhmaDto::getName).collect(Collectors.toList())));
+                ryhmat.stream().map(KayttoOikeusRyhmaDto::getTunniste).collect(Collectors.toList())));
 
         ryhma = populate(kayttoOikeusRyhma("UUSRYHMÄ")
                 .withOikeus(oikeus("APP7", "WRITE")));
@@ -233,7 +258,7 @@ public class KayttoOikeusRyhmaRepositoryTest extends AbstractRepositoryTest {
         ryhmat = kayttoOikeusRyhmaRepository.findKayttoOikeusRyhmasByKayttoOikeusIds(Arrays.asList(crudOikeus.getId(), oikeus.getId()));
         assertEquals(3, ryhmat.size());
         assertTrue(Arrays.asList("RYHMÄ", "CRUDRYHMÄ", "UUSRYHMÄ").containsAll(
-                ryhmat.stream().map(KayttoOikeusRyhmaDto::getName).collect(Collectors.toList())));
+                ryhmat.stream().map(KayttoOikeusRyhmaDto::getTunniste).collect(Collectors.toList())));
 
         ryhmat = kayttoOikeusRyhmaRepository.findKayttoOikeusRyhmasByKayttoOikeusIds(Collections.singletonList(234234L));
         assertEquals(0, ryhmat.size());

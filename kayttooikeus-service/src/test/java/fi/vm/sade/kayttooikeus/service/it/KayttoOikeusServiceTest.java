@@ -74,7 +74,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .withOrganisaatiorajoite("TYYPPI")
                 .withOikeus(oikeus("KOODISTO", "CRUD")));
 
-        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listAllKayttoOikeusRyhmas(false);
+        List<KayttoOikeusRyhmaDto> ryhmas = kayttoOikeusService.listAllKayttoOikeusRyhmas(false, null, null);
         assertEquals(2, ryhmas.size());
 
     }
@@ -217,7 +217,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
                 .containsExactlyInAnyOrder("RYHMA-ORGANISAATIORYHMILLE1", "RYHMA-ORGANISAATIORYHMILLE2");
 
         ryhmat = kayttoOikeusService.listPossibleRyhmasByOrganization("1.2.246.562.10.00000000001");
-        assertThat(ryhmat).hasSize(kayttoOikeusService.listAllKayttoOikeusRyhmas(false).size());
+        assertThat(ryhmat).hasSize(kayttoOikeusService.listAllKayttoOikeusRyhmas(false, null, null).size());
     }
 
     private static OrganisaatioPerustieto oppilaitos(String oid, String oppilaitostyyppi) {

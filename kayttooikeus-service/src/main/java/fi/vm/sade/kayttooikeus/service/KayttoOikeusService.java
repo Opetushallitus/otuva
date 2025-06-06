@@ -12,7 +12,7 @@ import java.util.Map;
 public interface KayttoOikeusService {
     KayttoOikeusDto findKayttoOikeusById(long kayttoOikeusId);
 
-    List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas(Boolean passiiviset);
+    List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas(Boolean passiiviset, String palvelu, String kayttooikeus);
 
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
