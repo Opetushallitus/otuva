@@ -2,6 +2,7 @@ const environments = ["hahtuva", "dev", "qa", "prod"] as const;
 type EnvironmentName = (typeof environments)[number];
 
 export type Config = {
+  otuvaDomain: string;
   opintopolkuHost: string;
   minCapacity: number;
   maxCapacity: number;
@@ -38,6 +39,7 @@ export function getConfig(): Config {
 
 export const hahtuva: Config = {
   ...defaultConfig,
+  otuvaDomain: "hahtuva.otuva.opintopolku.fi",
   opintopolkuHost: "hahtuvaopintopolku.fi",
   minCapacity: 1,
   maxCapacity: 2,
@@ -45,6 +47,7 @@ export const hahtuva: Config = {
 
 export const dev: Config = {
   ...defaultConfig,
+  otuvaDomain: "dev.otuva.opintopolku.fi",
   opintopolkuHost: "untuvaopintopolku.fi",
   minCapacity: 1,
   maxCapacity: 2,
@@ -56,6 +59,7 @@ export const dev: Config = {
 
 export const qa: Config = {
   ...defaultConfig,
+  otuvaDomain: "qa.otuva.opintopolku.fi",
   opintopolkuHost: "testiopintopolku.fi",
   minCapacity: 1,
   maxCapacity: 2,
@@ -67,6 +71,7 @@ export const qa: Config = {
 
 export const prod: Config = {
   ...defaultConfig,
+  otuvaDomain: "prod.otuva.opintopolku.fi",
   opintopolkuHost: "opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,

@@ -137,11 +137,12 @@ class AlarmStack extends cdk.Stack {
 }
 
 class DnsStack extends cdk.Stack {
+  private readonly config = getConfig();
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
     new route53.HostedZone(this, "OtuvaHostedZone", {
-      zoneName: ssm.StringParameter.valueFromLookup(this, "/otuva/zoneName"),
+      zoneName: this.config.otuvaDomain,
     });
   }
 }
