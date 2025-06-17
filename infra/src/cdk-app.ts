@@ -947,6 +947,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       healthCheckGracePeriod: cdk.Duration.minutes(5),
       circuitBreaker: { enable: true },
+      enableExecuteCommand: true,
     });
     const scaling = service.autoScaleTaskCount({
       minCapacity: config.minCapacity,
