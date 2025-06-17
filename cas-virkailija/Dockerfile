@@ -27,6 +27,7 @@ echo -n ${haka_keystore_base64} | base64 --decode > /app/etc/hakakeystore.jks
 echo -n ${haka_sp_metadata} > /app/etc/hakasp.xml
 
 exec java \
+  -XX:StartFlightRecording=duration=120s \
   -XX:InitialRAMPercentage=80.0 \
   -XX:MaxRAMPercentage=80.0 \
   -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
