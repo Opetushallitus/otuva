@@ -30,4 +30,6 @@ public interface PalvelukayttajaService {
      */
     Jarjestelmatunnus create(PalvelukayttajaCreateDto dto);
 
+    String createCasPassword(String oid);
+
 }

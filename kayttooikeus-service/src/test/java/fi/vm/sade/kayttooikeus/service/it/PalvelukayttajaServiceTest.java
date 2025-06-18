@@ -124,4 +124,22 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
                 .extracting(Kayttajatiedot::getUsername, Kayttajatiedot::getPassword)
                 .containsExactly(duplicate.kayttajatunnus(), null);
     }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void createCasPasswordCreatesPassword() throws Exception {
+        var create = new PalvelukayttajaCreateDto();
+        create.setNimi("Test service-1 ?");
+        when(oppijanumerorekisteriClient.createHenkilo(any()))
+                .thenReturn("1.2.3.4.6", "1.2.3.4.7");
+        Jarjestelmatunnus response = palvelukayttajaService.create(create);
+        assertThat(response)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::kayttajatunnus, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.6", create.getNimi(), "Testservice-1", new ArrayList<>());
+
+        String password = palvelukayttajaService.createCasPassword("1.2.3.4.6");
+        assertThat(password).hasSizeGreaterThan(32);
+        Kayttajatiedot kayttaja = kayttajatiedotService.getByUsernameAndPassword("Testservice-1", password);
+        assertThat(kayttaja).isNotNull();
+    }
 }

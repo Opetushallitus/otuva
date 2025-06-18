@@ -20,12 +20,16 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,6 +102,24 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         kayttajatiedotService.create(oid, new KayttajatiedotCreateDto(username));
 
         return new Jarjestelmatunnus(oid, createDto.getNimi(), username, new ArrayList<>());
+    }
+
+    private String generatePassword() {
+        var randomizer = RandomStringUtils.secure();
+        String password = randomizer.next(4, "!#$%*_+=?")
+            .concat(randomizer.nextAlphabetic(12).toLowerCase())
+            .concat(randomizer.nextAlphabetic(12).toUpperCase())
+            .concat(randomizer.nextNumeric(12));
+        List<String> chars = Arrays.asList(password.split(""));
+        Collections.shuffle(chars);
+        return chars.stream().collect(Collectors.joining());
+    }
+
+    @Override
+    public String createCasPassword(String oid) {
+        String password = generatePassword();
+        kayttajatiedotService.changePasswordAsAdmin(oid, password);
+        return password;
     }
 
 }

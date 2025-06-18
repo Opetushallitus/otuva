@@ -23,17 +23,21 @@ public class PalvelukayttajaController {
     private final PalvelukayttajaService palvelukayttajaService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     public Iterable<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria) {
         return palvelukayttajaService.list(criteria);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD',"
-            + "'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
     public Jarjestelmatunnus create(@RequestBody @Valid PalvelukayttajaCreateDto dto) {
         return palvelukayttajaService.create(dto);
+    }
+
+    @PutMapping(value = "/{oid}/cas", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    public String createCasPassword(@PathVariable String oid) {
+        return palvelukayttajaService.createCasPassword(oid);
     }
 
     public record Jarjestelmatunnus(String oid, String nimi, String kayttajatunnus, List<Oauth2ClientCredential> oauth2Credentials) {};
