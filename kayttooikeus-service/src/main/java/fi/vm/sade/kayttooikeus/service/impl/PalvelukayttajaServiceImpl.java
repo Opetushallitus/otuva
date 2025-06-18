@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
+import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
@@ -8,15 +10,19 @@ import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
+import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +37,8 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final OrganisaatioClient organisaatioClient;
+    private final KayttajatiedotService kayttajatiedotService;
+    private final KayttajatiedotRepository kayttajatiedotRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,8 +65,22 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
                 .toList();
     }
 
+    private String getUniqueUsername(String palvelu) {
+        String stripped = palvelu.replaceAll("[^a-zA-Z0-9_-]", "");
+        if (stripped.length() >= 5 && kayttajatiedotRepository.findByUsername(stripped).isEmpty()) {
+            return stripped;
+        }
+        String numbered;
+        Random r = new Random();
+        do {
+            int rand = r.nextInt(9000) + 1000;
+            numbered = stripped + rand;
+        } while (kayttajatiedotRepository.findByUsername(numbered).isPresent());
+        return numbered;
+    }
+
     @Override
-    public PalvelukayttajaReadDto create(PalvelukayttajaCreateDto createDto) {
+    public Jarjestelmatunnus create(PalvelukayttajaCreateDto createDto) {
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
         henkiloCreateDto.setSukunimi(createDto.getNimi());
         // oppijanumerorekisteri pakottaa näiden tietojen syöttämisen
@@ -72,7 +94,10 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         henkilo.setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
         henkiloDataRepository.save(henkilo);
 
-        return new PalvelukayttajaReadDto(oid, createDto.getNimi(), null);
+        String username = getUniqueUsername(createDto.getNimi());
+        kayttajatiedotService.create(oid, new KayttajatiedotCreateDto(username));
+
+        return new Jarjestelmatunnus(oid, createDto.getNimi(), username, new ArrayList<>());
     }
 
 }

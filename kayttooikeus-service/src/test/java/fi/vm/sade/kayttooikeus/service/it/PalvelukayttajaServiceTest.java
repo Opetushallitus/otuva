@@ -6,17 +6,24 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
+import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
+import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.palvelukayttaja;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -24,8 +31,12 @@ import static org.mockito.Mockito.when;
 public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private PalvelukayttajaService palvelukayttajaService;
+    @Autowired
+    private KayttajatiedotService kayttajatiedotService;
     @MockitoBean
     private OrganisaatioClient organisaatioClient;
+    @MockitoBean
+    private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
@@ -66,5 +77,51 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
         requestBySubOrganisations.setSubOrganisation(true);
         List<PalvelukayttajaReadDto> responseBySubOrganisations = palvelukayttajaService.list(requestBySubOrganisations);
         assertThat(responseBySubOrganisations.size()).isEqualTo(2);
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void createCreates() throws Exception {
+        var create = new PalvelukayttajaCreateDto();
+        create.setNimi("Test service-1 ?_");
+
+        when(oppijanumerorekisteriClient.createHenkilo(any()))
+                .thenReturn("1.2.3.4.6");
+
+        Jarjestelmatunnus response = palvelukayttajaService.create(create);
+        assertThat(response)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::kayttajatunnus, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.6", create.getNimi(), "Testservice-1_", new ArrayList<>());
+
+        var kayttaja = kayttajatiedotService.getKayttajatiedotByOidHenkilo("1.2.3.4.6");
+        assertThat(kayttaja.get())
+                .extracting(Kayttajatiedot::getUsername, Kayttajatiedot::getPassword)
+                .containsExactly("Testservice-1_", null);
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void createCreatesWithDuplicateKayttajatunnus() throws Exception {
+        var create = new PalvelukayttajaCreateDto();
+        create.setNimi("Test service-1 ?");
+
+        when(oppijanumerorekisteriClient.createHenkilo(any()))
+                .thenReturn("1.2.3.4.6", "1.2.3.4.7");
+
+        Jarjestelmatunnus response = palvelukayttajaService.create(create);
+        assertThat(response)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::kayttajatunnus, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.6", create.getNimi(), "Testservice-1", new ArrayList<>());
+
+        Jarjestelmatunnus duplicate = palvelukayttajaService.create(create);
+        assertThat(duplicate.kayttajatunnus()).matches("Testservice-1[0-9]{4}");
+        assertThat(duplicate)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.7", create.getNimi(), new ArrayList<>());
+
+        var kayttaja = kayttajatiedotService.getKayttajatiedotByOidHenkilo("1.2.3.4.7");
+        assertThat(kayttaja.get())
+                .extracting(Kayttajatiedot::getUsername, Kayttajatiedot::getPassword)
+                .containsExactly(duplicate.kayttajatunnus(), null);
     }
 }
