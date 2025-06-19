@@ -11,8 +11,8 @@ export type Config = {
   lampiExport?: {
     enabled: boolean;
     bucketName: string;
-  }
-}
+  };
+};
 const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
@@ -65,8 +65,8 @@ export const qa: Config = {
   otuvaDomain: "qa.otuva.opintopolku.fi",
   opintopolkuHost: "testiopintopolku.fi",
   oauthDomainName: "qa.otuva.opintopolku.fi",
-  minCapacity: 1,
-  maxCapacity: 2,
+  minCapacity: 2,
+  maxCapacity: 8,
   lampiExport: {
     enabled: true,
     bucketName: "oph-lampi-qa",
