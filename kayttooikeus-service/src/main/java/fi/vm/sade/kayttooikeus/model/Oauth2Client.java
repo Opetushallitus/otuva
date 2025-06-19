@@ -25,6 +25,9 @@ public class Oauth2Client {
     private UUID uuid;
 
     @Column(nullable = false)
+    private LocalDateTime created;
+
+    @Column(nullable = false)
     private LocalDateTime updated;
 
     @ManyToOne(fetch = FetchType.LAZY)
