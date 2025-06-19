@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.model;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -22,4 +23,11 @@ public class Oauth2Client {
 
     @Column(nullable = false)
     private UUID uuid;
+
+    @Column(nullable = false)
+    private LocalDateTime updated;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kasittelija_henkilo_id")
+    private Henkilo kasittelija;
 }

@@ -17,11 +17,13 @@ import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +53,7 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final Oauth2ClientRepository oauth2ClientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PermissionCheckerService permissionCheckerService;
 
     @Override
     @Transactional(readOnly = true)
@@ -131,6 +135,8 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
 
     @Override
     public String createOauth2ClientSecret(String oid) {
+        String kasittelijaOid = permissionCheckerService.getCurrentUserOid();
+        Henkilo kasittelija = henkiloDataRepository.findByOidHenkilo(kasittelijaOid).get();
         Kayttajatiedot kayttaja = kayttajatiedotService.getKayttajatiedotByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException(oid));
         String secret = generatePassword();
@@ -139,8 +145,11 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
                 .orElseGet(() -> Oauth2Client.builder()
                         .id(kayttaja.getUsername())
                         .secret(hash)
+                        .uuid(UUID.randomUUID())
                         .build());
         client.setSecret(hash);
+        client.setKasittelija(kasittelija);
+        client.setUpdated(LocalDateTime.now());
         oauth2ClientRepository.save(client);
         return secret;
     }

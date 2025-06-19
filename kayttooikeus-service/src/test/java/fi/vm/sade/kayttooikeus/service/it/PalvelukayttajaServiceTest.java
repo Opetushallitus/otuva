@@ -14,11 +14,13 @@ import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Oauth2Client;
 import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
+import fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,6 +152,7 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void createOauth2ClientSecretCreatesSecret() throws Exception {
+        populate(HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etu", "suku").withUsername("user"));
         var create = new PalvelukayttajaCreateDto();
         create.setNimi("Test service-1 ?");
         when(oppijanumerorekisteriClient.createHenkilo(any()))
@@ -161,12 +164,15 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
 
         String secret = palvelukayttajaService.createOauth2ClientSecret("1.2.3.4.6");
         assertThat(secret).hasSizeGreaterThan(32);
-        assertThat(oauth2ClientRepository.findById("Testservice-1")).isPresent();
+        Oauth2Client client = oauth2ClientRepository.findById("Testservice-1").get();
+        assertThat(client.getKasittelija().getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        assertThat(client.getUpdated()).isAfter(LocalDateTime.now().minusMinutes(1));
     }
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void createOauth2ClientSecretUpdatesExistingSecret() throws Exception {
+        populate(HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etu", "suku").withUsername("user"));
         var create = new PalvelukayttajaCreateDto();
         create.setNimi("Test service-1 ?");
         when(oppijanumerorekisteriClient.createHenkilo(any()))
@@ -183,7 +189,9 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
         String newSecret = palvelukayttajaService.createOauth2ClientSecret("1.2.3.4.6");
         assertThat(newSecret).hasSizeGreaterThan(32);
         assertThat(newSecret).isNotEqualTo(secret);
-        assertThat(oauth2ClientRepository.findById("Testservice-1")).isPresent();
+        Oauth2Client client = oauth2ClientRepository.findById("Testservice-1").get();
+        assertThat(client.getKasittelija().getOidHenkilo()).isEqualTo("1.2.3.4.5");
+        assertThat(client.getUpdated()).isAfter(LocalDateTime.now().minusMinutes(1));
         assertThat(oauth2ClientRepository.count()).isEqualTo(1);
     }
 }
