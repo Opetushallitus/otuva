@@ -46,7 +46,15 @@ public class PalvelukayttajaController {
         return palvelukayttajaService.createOauth2ClientSecret(oid);
     }
 
+    @GetMapping(value = "/{oid}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    public Jarjestelmatunnus getJarjestelmatunnus(@PathVariable String oid) {
+        return palvelukayttajaService.getJarjestelmatunnus(oid);
+    }
+
     public record Jarjestelmatunnus(String oid, String nimi, String kayttajatunnus, List<Oauth2ClientCredential> oauth2Credentials) {};
 
-    public record Oauth2ClientCredential(String clientId, LocalDateTime created, String kasittelijaOid, String kasittelijaNimi) {};
+    public record Oauth2ClientCredential(String clientId, LocalDateTime created, LocalDateTime updated, Kasittelija kasittelija) {};
+
+    public record Kasittelija(String oid, String etunimet, String sukunimi, String kutsumanimi) {}
 }

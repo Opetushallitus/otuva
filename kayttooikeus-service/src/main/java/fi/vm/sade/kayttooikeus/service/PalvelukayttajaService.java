@@ -34,4 +34,6 @@ public interface PalvelukayttajaService {
 
     String createOauth2ClientSecret(String oid);
 
+    Jarjestelmatunnus getJarjestelmatunnus(String oid);
+
 }

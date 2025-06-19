@@ -1,6 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
+import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Kasittelija;
+import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Oauth2ClientCredential;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
@@ -146,12 +148,29 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
                         .id(kayttaja.getUsername())
                         .secret(hash)
                         .uuid(UUID.randomUUID())
+                        .created(LocalDateTime.now())
                         .build());
         client.setSecret(hash);
         client.setKasittelija(kasittelija);
         client.setUpdated(LocalDateTime.now());
         oauth2ClientRepository.save(client);
         return secret;
+    }
+
+    @Override
+    public Jarjestelmatunnus getJarjestelmatunnus(String oid) {
+        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid)
+                .orElseThrow(() -> new NotFoundException(oid));
+        String username = henkilo.getKayttajatiedot().getUsername();
+        List<Oauth2ClientCredential> oauth2ClientCredentials = oauth2ClientRepository.findById(username)
+                .map(client -> {
+                    Henkilo k = client.getKasittelija();
+                    Kasittelija kasittelija = new Kasittelija(k.getOidHenkilo(), k.getEtunimetCached(), k.getSukunimiCached(), k.getKutsumanimiCached());
+                    return new Oauth2ClientCredential(client.getId(), client.getCreated(), client.getUpdated(), kasittelija);
+                })
+                .map(client -> List.of(client))
+                .orElseGet(() -> null);
+        return new Jarjestelmatunnus(oid, henkilo.getSukunimiCached(), username, oauth2ClientCredentials);
     }
 
 }
