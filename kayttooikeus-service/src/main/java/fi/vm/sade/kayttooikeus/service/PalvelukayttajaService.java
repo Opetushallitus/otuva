@@ -32,4 +32,6 @@ public interface PalvelukayttajaService {
 
     String createCasPassword(String oid);
 
+    String createOauth2ClientSecret(String oid);
+
 }

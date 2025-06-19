@@ -8,12 +8,16 @@ import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.Oauth2Client;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
+import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
+import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
@@ -30,6 +34,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +48,8 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final OrganisaatioClient organisaatioClient;
     private final KayttajatiedotService kayttajatiedotService;
     private final KayttajatiedotRepository kayttajatiedotRepository;
+    private final Oauth2ClientRepository oauth2ClientRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -120,6 +127,22 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         String password = generatePassword();
         kayttajatiedotService.changePasswordAsAdmin(oid, password);
         return password;
+    }
+
+    @Override
+    public String createOauth2ClientSecret(String oid) {
+        Kayttajatiedot kayttaja = kayttajatiedotService.getKayttajatiedotByOidHenkilo(oid)
+                .orElseThrow(() -> new NotFoundException(oid));
+        String secret = generatePassword();
+        String hash = passwordEncoder.encode(secret);
+        Oauth2Client client = oauth2ClientRepository.findById(kayttaja.getUsername())
+                .orElseGet(() -> Oauth2Client.builder()
+                        .id(kayttaja.getUsername())
+                        .secret(hash)
+                        .build());
+        client.setSecret(hash);
+        oauth2ClientRepository.save(client);
+        return secret;
     }
 
 }

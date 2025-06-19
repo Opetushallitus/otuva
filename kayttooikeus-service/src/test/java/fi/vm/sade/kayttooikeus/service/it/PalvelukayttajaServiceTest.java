@@ -12,6 +12,8 @@ import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.Oauth2Client;
+import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
@@ -33,6 +35,8 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
     private PalvelukayttajaService palvelukayttajaService;
     @Autowired
     private KayttajatiedotService kayttajatiedotService;
+    @Autowired
+    private Oauth2ClientRepository oauth2ClientRepository;
     @MockitoBean
     private OrganisaatioClient organisaatioClient;
     @MockitoBean
@@ -141,5 +145,45 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
         assertThat(password).hasSizeGreaterThan(32);
         Kayttajatiedot kayttaja = kayttajatiedotService.getByUsernameAndPassword("Testservice-1", password);
         assertThat(kayttaja).isNotNull();
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void createOauth2ClientSecretCreatesSecret() throws Exception {
+        var create = new PalvelukayttajaCreateDto();
+        create.setNimi("Test service-1 ?");
+        when(oppijanumerorekisteriClient.createHenkilo(any()))
+                .thenReturn("1.2.3.4.6");
+        Jarjestelmatunnus response = palvelukayttajaService.create(create);
+        assertThat(response)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::kayttajatunnus, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.6", create.getNimi(), "Testservice-1", new ArrayList<>());
+
+        String secret = palvelukayttajaService.createOauth2ClientSecret("1.2.3.4.6");
+        assertThat(secret).hasSizeGreaterThan(32);
+        assertThat(oauth2ClientRepository.findById("Testservice-1")).isPresent();
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void createOauth2ClientSecretUpdatesExistingSecret() throws Exception {
+        var create = new PalvelukayttajaCreateDto();
+        create.setNimi("Test service-1 ?");
+        when(oppijanumerorekisteriClient.createHenkilo(any()))
+                .thenReturn("1.2.3.4.6", "1.2.3.4.7");
+        Jarjestelmatunnus response = palvelukayttajaService.create(create);
+        assertThat(response)
+                .extracting(Jarjestelmatunnus::oid, Jarjestelmatunnus::nimi, Jarjestelmatunnus::kayttajatunnus, Jarjestelmatunnus::oauth2Credentials)
+                .containsExactly("1.2.3.4.6", create.getNimi(), "Testservice-1", new ArrayList<>());
+
+        String secret = palvelukayttajaService.createOauth2ClientSecret("1.2.3.4.6");
+        assertThat(secret).hasSizeGreaterThan(32);
+        assertThat(oauth2ClientRepository.findById("Testservice-1")).isPresent();
+
+        String newSecret = palvelukayttajaService.createOauth2ClientSecret("1.2.3.4.6");
+        assertThat(newSecret).hasSizeGreaterThan(32);
+        assertThat(newSecret).isNotEqualTo(secret);
+        assertThat(oauth2ClientRepository.findById("Testservice-1")).isPresent();
+        assertThat(oauth2ClientRepository.count()).isEqualTo(1);
     }
 }

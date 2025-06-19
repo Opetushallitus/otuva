@@ -40,6 +40,12 @@ public class PalvelukayttajaController {
         return palvelukayttajaService.createCasPassword(oid);
     }
 
+    @PutMapping(value = "/{oid}/oauth2", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    public String createOauth2ClientSecret(@PathVariable String oid) {
+        return palvelukayttajaService.createOauth2ClientSecret(oid);
+    }
+
     public record Jarjestelmatunnus(String oid, String nimi, String kayttajatunnus, List<Oauth2ClientCredential> oauth2Credentials) {};
 
     public record Oauth2ClientCredential(String clientId, LocalDateTime created, String kasittelijaOid, String kasittelijaNimi) {};
