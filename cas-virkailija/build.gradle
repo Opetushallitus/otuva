@@ -85,11 +85,11 @@ repositories {
     }
     // <custom>
     maven {
-        url "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local"
+        url = "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local"
         mavenContent { snapshotsOnly() }
     }
     maven {
-        url "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
+        url = "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
         mavenContent { releasesOnly() }
     }
     // </custom>
