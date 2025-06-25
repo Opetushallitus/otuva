@@ -6,6 +6,7 @@ COPY gradlew .
 COPY gradle.properties .
 COPY settings.gradle .
 COPY build.gradle .
+COPY gradle.lockfile .
 
 COPY lombok.config .
 COPY src ./src
