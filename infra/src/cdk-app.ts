@@ -144,10 +144,6 @@ class DnsStack extends cdk.Stack {
     new route53.HostedZone(this, "OtuvaHostedZone", {
       zoneName: this.config.otuvaDomain,
     });
-
-    new route53.HostedZone(this, "OtuvaOauthHostedZone", {
-      zoneName: getConfig().oauthDomainName,
-    });
   }
 }
 
