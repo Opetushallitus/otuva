@@ -43,8 +43,8 @@ export const hahtuva: Config = {
   otuvaDomain: "hahtuva.otuva.opintopolku.fi",
   opintopolkuHost: "hahtuvaopintopolku.fi",
   oauthDomainName: "hahtuva.otuva.opintopolku.fi",
-  minCapacity: 1,
-  maxCapacity: 2,
+  minCapacity: 2,
+  maxCapacity: 8,
 };
 
 export const dev: Config = {
@@ -52,8 +52,8 @@ export const dev: Config = {
   otuvaDomain: "dev.otuva.opintopolku.fi",
   opintopolkuHost: "untuvaopintopolku.fi",
   oauthDomainName: "dev.otuva.opintopolku.fi",
-  minCapacity: 1,
-  maxCapacity: 2,
+  minCapacity: 2,
+  maxCapacity: 8,
   lampiExport: {
     enabled: true,
     bucketName: "oph-lampi-dev",
