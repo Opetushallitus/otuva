@@ -7,6 +7,9 @@
         </Console>
     </Appenders>
     <Loggers>
+        <AsyncLogger name="org.pac4j" level="debug" />
+        <AsyncLogger name="org.opensaml" level="debug"/>
+        <AsyncLogger name="PROTOCOL_MESSAGE" level="debug" />
         <AsyncLogger name="org.apereo.cas" level="info" />
         <AsyncLogger name="fi.vm" level="debug" />
         <Root level="info">
