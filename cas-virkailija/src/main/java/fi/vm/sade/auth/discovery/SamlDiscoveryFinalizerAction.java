@@ -29,10 +29,10 @@ public class SamlDiscoveryFinalizerAction  extends BaseCasWebflowAction {
                 .orElseGet(() -> (String) request.getAttribute(Pac4jConstants.DEFAULT_CLIENT_NAME_PARAMETER));
 
         String selectedIdP = request.getParameter("entityID");
-        LOGGER.debug("Saving [{}] as entityID from discovery service to conversation scope", selectedIdP);
+        LOGGER.debug("Saving [{}] as entityID from discovery service to flow scope", selectedIdP);
         if(selectedIdP != null) {
-            requestContext.getConversationScope().put(
-                    SamlDiscoveryWebflowConstants.CONVERSATION_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
+            requestContext.getFlowScope().put(
+                    SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
                     new SamlDiscoverySelectedIdP(selectedIdP, clientName)
             );
         }

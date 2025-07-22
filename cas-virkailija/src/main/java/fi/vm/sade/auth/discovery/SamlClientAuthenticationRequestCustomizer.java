@@ -23,16 +23,16 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
     @Override
     public void customize(IndirectClient client, WebContext webContext) {
         val samlClient = (SAML2Client)client;
-        val entity = RequestContextHolder.getRequestContext().getConversationScope()
-                .get(SamlDiscoveryWebflowConstants.CONVERSATION_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
+        val entity = RequestContextHolder.getRequestContext().getFlowScope()
+                .get(SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
                         SamlDiscoverySelectedIdP.class);
 
         if(entity != null && entity.getClientName().equals(client.getName())) {
             LOGGER.debug("Setting discovered identity provider entity id to [{}] for SAML2 client [{}]",
                     entity.getEntityID(), client.getName());
             samlClient.getConfiguration().setIdentityProviderEntityId(entity.getEntityID());
-            RequestContextHolder.getRequestContext().getConversationScope()
-                    .remove(SamlDiscoveryWebflowConstants.CONVERSATION_VAR_ID_DELEGATED_AUTHENTICATION_IDP);
+            RequestContextHolder.getRequestContext().getFlowScope()
+                    .remove(SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP);
             return;
         }
         val samlProperties = getClientProperties(client.getName()).get();

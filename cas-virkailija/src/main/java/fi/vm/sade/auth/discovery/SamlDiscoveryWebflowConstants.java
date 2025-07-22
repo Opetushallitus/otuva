@@ -11,7 +11,7 @@ public class SamlDiscoveryWebflowConstants {
     public static final String TRANSITION_ID_DELEGATED_AUTHENTICATION_DISCOVERY_SUCCESS = "success";
     public static final String TRANSITION_ID_DELEGATED_AUTHENTICATION_DISCOVERY_REDIRECT = "redirect";
 
-    public static final String CONVERSATION_VAR_ID_DELEGATED_AUTHENTICATION_IDP = "samlSelectedIdP";
+    public static final String FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP = "samlSelectedIdP";
 
     public static final String REQUEST_VAR_ID_DELEGATED_AUTHENTICATION_REDIRECT_URL = "redirectTo";
     public static final String VAR_ID_DELEGATED_AUTHENTICATION_DISCOVERY_URL = "discoveryUrl";
