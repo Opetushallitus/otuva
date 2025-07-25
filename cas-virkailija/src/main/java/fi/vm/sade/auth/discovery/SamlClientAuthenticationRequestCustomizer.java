@@ -22,15 +22,15 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
 
     @Override
     public void customize(IndirectClient client, WebContext webContext) {
-        //val samlClient = (SAML2Client)client;
+        val samlClient = (SAML2Client)client;
         val entity = RequestContextHolder.getRequestContext().getFlowScope()
                 .get(SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
                         SamlDiscoverySelectedIdP.class);
 
         if(entity != null && entity.getClientName().equals(client.getName())) {
-            //LOGGER.debug("Setting discovered identity provider entity id to [{}] for SAML2 client [{}]",
-            //        entity.getEntityID(), client.getName());
-            //samlClient.getConfiguration().setIdentityProviderEntityId(entity.getEntityID());
+            LOGGER.debug("Setting discovered identity provider entity id to [{}] for SAML2 client [{}]",
+                    entity.getEntityID(), client.getName());
+            samlClient.getConfiguration().setIdentityProviderEntityId(entity.getEntityID());
             RequestContextHolder.getRequestContext().getFlowScope()
                     .remove(SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP);
             return;
@@ -38,9 +38,9 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
         val samlProperties = getClientProperties(client.getName()).get();
         if(samlProperties.getIdentityProviderEntityId() != null &&
                 !samlProperties.getIdentityProviderEntityId().isEmpty()) {
-            //LOGGER.debug("Setting identity provider entity id to [{}] for SAML2 client [{}]",
-            //        samlProperties.getIdentityProviderEntityId(), client.getName());
-            //samlClient.getConfiguration().setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
+            LOGGER.debug("Setting identity provider entity id to [{}] for SAML2 client [{}]",
+                    samlProperties.getIdentityProviderEntityId(), client.getName());
+            samlClient.getConfiguration().setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
         }
     }
 
