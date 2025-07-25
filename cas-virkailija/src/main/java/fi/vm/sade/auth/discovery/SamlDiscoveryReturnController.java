@@ -37,10 +37,13 @@ public class SamlDiscoveryReturnController {
             final HttpServletResponse response) throws Exception {
         val ticket = configContext.getTicketRegistry().getTicket(flowId, TransientSessionTicket.class);
         String entityId = request.getParameter("entityID");
+        LOGGER.info("Returning from discovery service with flowId [{}] and entityID [{}]", flowId, entityId);
         if(ticket != null) {
+            LOGGER.info("Found ticket [{}] for flowId [{}]", ticket.getId(), flowId);
             configContext.getTicketRegistry().deleteTicket(ticket.getId());
             return new DynamicHtmlView(buildRedirectPostContent(ticket, entityId));
         }
+        LOGGER.info("No ticket found for flowId [{}]. Redirecting to CAS login page", flowId);
         return new RedirectView(casProperties.getServer().getLoginUrl());
     }
 

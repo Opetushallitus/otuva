@@ -28,8 +28,8 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
                         SamlDiscoverySelectedIdP.class);
 
         if(entity != null && entity.getClientName().equals(client.getName())) {
-            LOGGER.debug("Setting discovered identity provider entity id to [{}] for SAML2 client [{}]",
-                    entity.getEntityID(), client.getName());
+            LOGGER.info("Setting discovered identity provider entity id to [{}] for SAML2 client [{}], was [{}]",
+                    entity.getEntityID(), client.getName(), samlClient.getConfiguration().getIdentityProviderEntityId());
             samlClient.getConfiguration().setIdentityProviderEntityId(entity.getEntityID());
             RequestContextHolder.getRequestContext().getFlowScope()
                     .remove(SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP);
@@ -38,8 +38,8 @@ public class SamlClientAuthenticationRequestCustomizer implements DelegatedClien
         val samlProperties = getClientProperties(client.getName()).get();
         if(samlProperties.getIdentityProviderEntityId() != null &&
                 !samlProperties.getIdentityProviderEntityId().isEmpty()) {
-            LOGGER.debug("Setting identity provider entity id to [{}] for SAML2 client [{}]",
-                    samlProperties.getIdentityProviderEntityId(), client.getName());
+            LOGGER.info("Setting identity provider entity id to [{}] for SAML2 client [{}], was [{}]",
+                    samlProperties.getIdentityProviderEntityId(), client.getName(), samlClient.getConfiguration().getIdentityProviderEntityId());
             samlClient.getConfiguration().setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
         }
     }
