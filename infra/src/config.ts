@@ -8,6 +8,8 @@ export type Config = {
   minCapacity: number;
   maxCapacity: number;
   serviceProviderCapacity: number;
+  casVirkailijaMinCapacity: number,
+  casVirkailijaMaxCapacity: number,
   lampiExport?: {
     enabled: boolean;
     bucketName: string;
@@ -16,6 +18,8 @@ export type Config = {
 const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
+  casVirkailijaMinCapacity: 2,
+  casVirkailijaMaxCapacity: 8,
 };
 
 export function getEnvironment(): EnvironmentName {
@@ -45,6 +49,8 @@ export const hahtuva: Config = {
   oauthDomainName: "hahtuva.otuva.opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
+  casVirkailijaMinCapacity: 1,
+  casVirkailijaMaxCapacity: 1,
 };
 
 export const dev: Config = {
