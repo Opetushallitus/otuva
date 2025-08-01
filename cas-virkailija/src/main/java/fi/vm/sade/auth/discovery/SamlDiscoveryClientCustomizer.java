@@ -33,7 +33,7 @@ public class SamlDiscoveryClientCustomizer implements DelegatedClientFactoryCust
                     !samlProperties.getIdentityProviderEntityId().isEmpty()) {
                 LOGGER.debug("Setting identity provider entity id to [{}] for SAML2 client [{}]",
                         samlProperties.getIdentityProviderEntityId(), saml2Client.getName());
-                cfg.setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
+                //cfg.setIdentityProviderEntityId(samlProperties.getIdentityProviderEntityId());
             }
         }
     }
