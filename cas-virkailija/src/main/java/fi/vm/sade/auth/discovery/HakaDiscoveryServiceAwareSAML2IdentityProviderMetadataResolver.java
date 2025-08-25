@@ -17,7 +17,7 @@ public class HakaDiscoveryServiceAwareSAML2IdentityProviderMetadataResolver exte
         try {
             LOGGER.info("Reading Haka DS provided entity ID from request context");
             var requestContext = RequestContextHolder.getRequestContext();
-            var flowScope = requestContext.getRequestScope();
+            var flowScope = requestContext.getFlowScope();
             val entity = flowScope.get(
                     SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
                     SamlDiscoverySelectedIdP.class
