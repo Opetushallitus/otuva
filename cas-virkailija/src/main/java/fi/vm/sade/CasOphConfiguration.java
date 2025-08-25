@@ -132,15 +132,8 @@ public class CasOphConfiguration {
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedClientFactoryCustomizer<Client> niaClientCustomizer(final CasConfigurationProperties casProperties) {
-        return new SamlDiscoveryClientCustomizer(casProperties);
-    }
-
-    @Bean
-    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedClientAuthenticationRequestCustomizer discoveryRequestCustomizer(
-            final CasConfigurationProperties casProperties) {
-        return new SamlClientAuthenticationRequestCustomizer(casProperties);
+    public DelegatedClientFactoryCustomizer<Client> niaClientCustomizer() {
+        return new SamlDiscoveryClientCustomizer();
     }
 
     @Bean
