@@ -23,6 +23,8 @@ public class SamlDiscoveryClientCustomizer implements DelegatedClientFactoryCust
             return;
         }
         SAML2Client saml2Client = (SAML2Client)client;
+        var config = saml2Client.getConfiguration();
+        config.setIdentityProviderMetadataResolver(new HakaDiscoveryServiceAwareSAML2IdentityProviderMetadataResolver(config));
         Optional<Pac4jSamlClientProperties> saml = getClientProperties(saml2Client.getName());
         if(saml.isPresent()) {
             LOGGER.info("Applying custom configuration to client {}", saml2Client.getName());
