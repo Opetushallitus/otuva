@@ -1011,10 +1011,9 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       targets: [service],
       healthCheck: {
         enabled: true,
+        interval: cdk.Duration.seconds(10),
         path: "/cas/actuator/health",
         port: appPort.toString(),
-        interval: cdk.Duration.seconds(120),
-        unhealthyThresholdCount: 5,
       },
     });
   }
