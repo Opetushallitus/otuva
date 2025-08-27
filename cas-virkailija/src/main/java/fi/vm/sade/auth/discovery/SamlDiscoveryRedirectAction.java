@@ -50,7 +50,7 @@ public class SamlDiscoveryRedirectAction extends AbstractAction {
         builder.addParameter("return",  returnBuilder.toString());
         val url = builder.toString();
 
-        LOGGER.info("Redirecting to discovery [{}] via client [{}]", url, clientName);
+        LOGGER.debug("Redirecting to discovery [{}] via client [{}]", url, clientName);
         requestContext.getExternalContext().requestExternalRedirect(url);
     }
 
