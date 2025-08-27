@@ -22,13 +22,8 @@ public class HakaDiscoveryServiceAwareSAML2IdentityProviderMetadataResolver exte
                     SamlDiscoveryWebflowConstants.FLOW_VAR_ID_DELEGATED_AUTHENTICATION_IDP,
                     SamlDiscoverySelectedIdP.class
             );
-            if (entity != null) {
-                LOGGER.info("Got Haka DS provided entity ID [{}] from request context ", entity.getEntityID());
-                return entity.getEntityID();
-            } else {
-                LOGGER.warn("No entity ID found in request context; falling back to default");
-                return super.getEntityId();
-            }
+            LOGGER.info("Got Haka DS provided entity ID [{}] from request context ", entity.getEntityID());
+            return entity.getEntityID();
         } catch (Exception e) {
             LOGGER.error("Error getting Haka DS provided entity ID from request context; falling back to default", e);
             return super.getEntityId();
