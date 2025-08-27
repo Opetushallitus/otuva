@@ -1,6 +1,5 @@
 package fi.vm.sade;
 
-import fi.vm.sade.auth.discovery.*;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -11,13 +10,11 @@ import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcess
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
-import org.apereo.cas.support.pac4j.authentication.clients.DelegatedClientFactoryCustomizer;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.DelegatedClientAuthenticationConfigurationContext;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
-import org.pac4j.core.client.Client;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -35,6 +32,12 @@ import fi.vm.sade.auth.cas.DelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
 import fi.vm.sade.auth.clients.HttpClientUtil;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
+import fi.vm.sade.auth.discovery.SamlClientAuthenticationRequestCustomizer;
+import fi.vm.sade.auth.discovery.SamlDiscoveryAction;
+import fi.vm.sade.auth.discovery.SamlDiscoveryFinalizerAction;
+import fi.vm.sade.auth.discovery.SamlDiscoveryReturnController;
+import fi.vm.sade.auth.discovery.SamlDiscoveryWebflowConfigurer;
+import fi.vm.sade.auth.discovery.SamlDiscoveryWebflowConstants;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 
@@ -127,12 +130,6 @@ public class CasOphConfiguration {
                 .withId(SamlDiscoveryWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_FINALIZE_DISCOVERY)
                 .build()
                 .get();
-    }
-
-    @Bean
-    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedClientFactoryCustomizer<Client> niaClientCustomizer(final CasConfigurationProperties casProperties) {
-        return new SamlDiscoveryClientCustomizer(casProperties);
     }
 
     @Bean
