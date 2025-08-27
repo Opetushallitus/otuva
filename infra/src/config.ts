@@ -4,7 +4,6 @@ type EnvironmentName = (typeof environments)[number];
 export type Config = {
   otuvaDomain: string;
   opintopolkuHost: string;
-  oauthDomainName: string;
   minCapacity: number;
   maxCapacity: number;
   serviceProviderCapacity: number;
@@ -42,7 +41,6 @@ export const hahtuva: Config = {
   ...defaultConfig,
   otuvaDomain: "hahtuva.otuva.opintopolku.fi",
   opintopolkuHost: "hahtuvaopintopolku.fi",
-  oauthDomainName: "hahtuva.otuva.opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
 };
@@ -51,7 +49,6 @@ export const dev: Config = {
   ...defaultConfig,
   otuvaDomain: "dev.otuva.opintopolku.fi",
   opintopolkuHost: "untuvaopintopolku.fi",
-  oauthDomainName: "dev.otuva.opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
   lampiExport: {
@@ -64,7 +61,6 @@ export const qa: Config = {
   ...defaultConfig,
   otuvaDomain: "qa.otuva.opintopolku.fi",
   opintopolkuHost: "testiopintopolku.fi",
-  oauthDomainName: "qa.otuva.opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
   lampiExport: {
@@ -77,7 +73,6 @@ export const prod: Config = {
   ...defaultConfig,
   otuvaDomain: "prod.otuva.opintopolku.fi",
   opintopolkuHost: "opintopolku.fi",
-  oauthDomainName: "prod.otuva.opintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
   lampiExport: {
