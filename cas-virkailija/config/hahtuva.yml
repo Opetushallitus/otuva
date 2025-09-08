@@ -1,4 +1,5 @@
 kayttooikeus.baseurl: https://kayttooikeus.hahtuva.yleiskayttoiset.opintopolku.fi
+cas.standalone.configuration-directory: /app/etc
 cas.server.name: https://virkailija.hahtuvaopintopolku.fi
 cas.server.prefix: ${cas.server.name}/cas
 cas.server.tomcat.http-proxy.enabled: true

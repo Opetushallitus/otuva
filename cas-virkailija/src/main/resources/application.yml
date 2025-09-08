@@ -20,6 +20,8 @@ management.endpoints.web.exposure.include: health
 management.endpoint.health.access: READ_ONLY
 management.endpoint.health.status.order: WARN,DOWN,OUT_OF_SERVICE,UNKNOWN,UP
 
+cas.standalone.configuration-directory: .
+
 cas.http-web-request.header.xframe: false
 cas.http-web-request.header.xss: false
 cas.http-web-request.header.xcontent: false
