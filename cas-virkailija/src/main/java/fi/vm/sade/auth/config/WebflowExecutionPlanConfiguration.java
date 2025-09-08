@@ -32,7 +32,7 @@ public class WebflowExecutionPlanConfiguration implements CasWebflowExecutionPla
     @Override
     public void configureWebflowExecutionPlan(CasWebflowExecutionPlan plan) {
         plan.registerWebflowConfigurer(new WebflowConfiguration(flowBuilderServices, flowDefinitionRegistry,
-                applicationContext, casProperties));q
+                applicationContext, casProperties));
     }
 
 }
