@@ -6,16 +6,21 @@ import lombok.val;
 
 import java.util.List;
 
+import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.pac4j.client.DelegatedClientAuthenticationRequestCustomizer;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
+import org.apereo.cas.pac4j.client.DelegatedIdentityProviderFactory;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.DelegatedClientAuthenticationConfigurationContext;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
+import org.apereo.cas.web.saml2.DelegatedClientSaml2Builder;
+import org.pac4j.saml.store.SAMLMessageStoreFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -164,5 +169,15 @@ public class CasOphConfiguration {
     @Bean
     TomcatGate tomcatGate() {
         return new TomcatGate();
+    }
+
+    @Bean(name = "delegatedSaml2ClientBuilder")
+    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+    public DelegatedClientSaml2Builder delegatedSaml2ClientBuilder(
+            @Qualifier(DelegatedIdentityProviderFactory.BEAN_NAME_SAML2_CLIENT_MESSAGE_FACTORY)
+            final ObjectProvider<SAMLMessageStoreFactory> samlMessageStoreFactory,
+            @Qualifier(CasSSLContext.BEAN_NAME)
+            final CasSSLContext casSslContext) {
+        return new HakaAwareDelegatedClientSaml2Builder(casSslContext, samlMessageStoreFactory);
     }
 }
