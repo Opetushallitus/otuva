@@ -84,14 +84,4 @@ public class CasOphConfiguration {
     TomcatGate tomcatGate() {
         return new TomcatGate();
     }
-
-    @Bean(name = "delegatedSaml2ClientBuilder")
-    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedClientSaml2Builder delegatedSaml2ClientBuilder(
-            @Qualifier(DelegatedIdentityProviderFactory.BEAN_NAME_SAML2_CLIENT_MESSAGE_FACTORY)
-            final ObjectProvider<SAMLMessageStoreFactory> samlMessageStoreFactory,
-            @Qualifier(CasSSLContext.BEAN_NAME)
-            final CasSSLContext casSslContext) {
-        return new HakaAwareDelegatedClientSaml2Builder(casSslContext, samlMessageStoreFactory);
-    }
 }
