@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 @WireMockTest(httpPort = 18080)
 @SpringBootTest
 @TestPropertySource(properties = {
+    "oppijanumerorekisteri.baseurl=" + AbstractClientTest.WIREMOCK_HOST + "/oppijanumerorekisteri-service",
     "url-virkailija=" + AbstractClientTest.WIREMOCK_HOST,
     "url-varda=" + AbstractClientTest.WIREMOCK_HOST
 })
