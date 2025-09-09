@@ -88,6 +88,7 @@ springdoc.pathsToMatch: /**
 springdoc.swagger-ui.url: /v3/api-docs.yaml
 
 viestinvalitys.baseurl: https://viestinvalitys.hahtuvaopintopolku.fi/lahetys
+oppijanumerorekisteri.baseurl: https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service
 
 host-virkailija: localhost:${server.port}
 host-oppija: localhost:${server.port}

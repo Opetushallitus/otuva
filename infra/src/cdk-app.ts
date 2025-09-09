@@ -291,6 +291,7 @@ class ApplicationStack extends cdk.Stack {
         postgres_database: "kayttooikeus",
         export_bucket_name: exportBucket.bucketName,
         ...lampiProperties,
+        "oppijanumerorekisteri.baseurl": config.oppijanumerorekisteriBaseUrl,
       },
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
