@@ -888,6 +888,9 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         cas_mpassid_oidc_id: this.ssmSecret("CasMpassidOidcId"),
         cas_mpassid_oidc_secret: this.ssmSecret("CasMpassidOidcSecret"),
         cas_haka_keystore_password: this.ssmSecret("CasHakaKeystorePassword"),
+        cas_suomifi_keystore_password: this.ssmSecret("SuomifiKeystorePassword", "cas-oppija"),
+        cas_suomifi_private_key_password: this.ssmSecret("SuomifiPrivateKeyPassword", "cas-oppija"),
+        cas_suomifi_keystore_base64: this.ssmSecret("keystore", "cas-oppija"),
         cas_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
         cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_webflow_encryption_key: this.ssmSecret("WebflowEncryptionKey"),
@@ -922,6 +925,20 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
             this,
             "HakaSpMetadata",
             "/cas/HakaSpMetadata"
+          )
+        ),
+        cas_suomifi_sp_metadata: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "SuomifiSpMetadata",
+            "/cas/SuomifiSpMetadata"
+          )
+        ),
+        cas_suomifi_idp_metadata: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "IdpMetadata",
+            "/cas-oppija/IdpMetadata"
           )
         ),
       },
