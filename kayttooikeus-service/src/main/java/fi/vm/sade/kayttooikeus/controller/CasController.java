@@ -38,6 +38,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
+import static fi.vm.sade.kayttooikeus.service.external.impl.HttpClientUtil.noContentOrNotFoundException;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -149,6 +152,19 @@ public class CasController {
         var kayttaja = kayttajatiedotService.getByHenkiloOid(oid);
         var roles = kayttajatiedotService.fetchKayttooikeudet(oid);
         return CasUserAttributes.fromKayttajatiedotReadDto(oid, kayttaja, roles);
+    }
+
+    record HetuDto(String hetu) {}
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @Operation(summary = "Hakee henkilön CAS-attribuutit")
+    @PostMapping(value = "/auth/hetu")
+    public CasUserAttributes getIdentityByHetu(@RequestBody @Valid HetuDto dto) {
+        var henkilo = oppijanumerorekisteriClient.getHenkiloByHetu(dto.hetu)
+                .orElseThrow(() -> noContentOrNotFoundException(""));
+        var kayttaja = kayttajatiedotService.getByHenkiloOid(henkilo.getOidHenkilo());
+        var roles = kayttajatiedotService.fetchKayttooikeudet(henkilo.getOidHenkilo());
+        return CasUserAttributes.fromKayttajatiedotReadDto(henkilo.getOidHenkilo(), kayttaja, roles);
     }
 
     @PutMapping(value = "/hakaregistration/{temporaryToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
