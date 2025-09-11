@@ -9,4 +9,7 @@ services:
       ENV: local
       haka_keystore_base64: ""
       haka_sp_metadata: ""
+      cas_suomifi_keystore_base64: ""
+      cas_suomifi_sp_metadata: ""
+      cas_suomifi_idp_metadata: ""
       HEAP_DUMP_BUCKET: dump
