@@ -48,10 +48,12 @@ cas.authn.pac4j.saml[0].discovery-service-url: https://testsp.funet.fi/DS
 cas.authn.pac4j.saml[1].client-name: suomifi
 cas.authn.pac4j.saml[1].keystore-password: dummy
 cas.authn.pac4j.saml[1].private-key-password: dummy
+cas.authn.pac4j.saml[1].keystore-path: /app/etc/localsuomifikeystore.jks
 cas.authn.pac4j.saml[1].service-provider-entity-id: http://localhost:8080/cas/login/suomifi
 cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/localsuomifi.xml
-cas.authn.pac4j.saml[1].keystore-path: /app/etc/localsuomifikeystore.jks
 cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml
+cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[1].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[1].sign-authn-request: true
 cas.authn.pac4j.saml[1].wants-assertions-signed: true
 cas.authn.pac4j.saml[1].wants-responses-signed: true

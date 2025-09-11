@@ -29,16 +29,16 @@
                         <span class="title-backline"><span th:text="#{login.muutKirjautumistavat}"></span></span>
                     </div>
                     <div class="row">
-                        <div class="kirjautumistapa kirjautumistapa-haka col-md-4">
-                            <form th:if="${cas.custom.properties['uusHakaEnabled']}" method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[0].name}" th:action="@{/login}">
+                        <div th:each="provider : ${delegatedAuthenticationProviderConfigurations}" class="kirjautumistapa col-md-4">
+                            <form th:if="${provider.name.equals('haka') && cas.custom.properties['uusHakaEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="haka-button"
                                         type="image"
                                         src="/cas/images/haka_landscape_medium.gif"
-                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[0].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[0].redirectUrl}}"
-                                        th:title="${delegatedAuthenticationProviderConfigurations[0].name + ' ' + delegatedAuthenticationProviderConfigurations[0].type}"
-                                        th:id="${delegatedAuthenticationProviderConfigurations[0].name + '-button'}"
-                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[0].type} + ${delegatedAuthenticationProviderConfigurations[0].cssClass}"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
+                                        th:title="${provider.name + ' ' + provider.type}"
+                                        th:id="${provider.name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${provider.type} + ${provider.cssClass}"
                                         accesskey="h"
                                         height="38px"
                                 />
@@ -46,26 +46,40 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                            <a th:unless="${cas.custom.properties['uusHakaEnabled']}"
+                            <a th:if="${provider.name.equals('haka') && !cas.custom.properties['uusHakaEnabled']}"
                                th:with="parameters=${service != null} ? '?redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
                                th:href="${cas.custom.properties['hakaUrl']} + ${parameters}">
                                 <img src="/cas/images/haka_landscape_medium.gif" />
                             </a>
-                        </div>
-                        <div class="kirjautumistapa kirjautumistapa-mpassid col-md-4">
-                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[1].name}" th:action="@{/login}">
+                            <form th:if="${provider.name.equals('mpassid')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="mpassid-button"
                                         type="image"
                                         src="/cas/images/mpassid-teksti.svg"
-                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[1].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[1].redirectUrl}}"
-                                        th:title="${delegatedAuthenticationProviderConfigurations[1].name + ' ' + delegatedAuthenticationProviderConfigurations[1].type}"
-                                        th:id="${delegatedAuthenticationProviderConfigurations[1].name + '-button'}"
-                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[1].type} + ${delegatedAuthenticationProviderConfigurations[1].cssClass}"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
+                                        th:title="${provider.name + ' ' + provider.type}"
+                                        th:id="${provider.name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${provider.type} + ${provider.cssClass}"
                                         accesskey="m"
                                         height="38px"
                                 />
                                 <input type="hidden" name="client_name" th:value="mpassid" />
+                                <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
+                                <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
+                            </form>
+                            <form th:if="${provider.name.equals('suomifi')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
+                                <input name="submitButton"
+                                        id="suomifi-button"
+                                        type="image"
+                                        src="/cas/images/suomi.fi-logo_beta.png"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
+                                        th:title="${provider.name + ' ' + provider.type}"
+                                        th:id="${provider.name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${provider.type} + ${provider.cssClass}"
+                                        accesskey="s"
+                                        height="38px"
+                                />
+                                <input type="hidden" name="client_name" th:value="suomifi" />
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
@@ -74,26 +88,6 @@
                             <a th:href="${cas.custom.properties['suomifiUrl']} + '?locale=' + ${#locale.getLanguage().toLowerCase()} + '&service=' + ${cas.custom.properties['suomifiUrlTarget']} + ${#locale.getLanguage().toLowerCase()}">
                                 <img src="/cas/images/suomi.fi-logo.png" />
                             </a>
-                        </div>
-                    </div>
-                    <div th:if="${cas.custom.properties['uusSuomifiEnabled'] && delegatedAuthenticationProviderConfigurations.size() > 2}" class="row">
-                        <div class="kirjautumistapa kirjautumistapa-suomifi col-md-4">
-                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[2].name}" th:action="@{/login}">
-                                <input name="submitButton"
-                                        id="suomifi-button"
-                                        type="image"
-                                        src="/cas/images/suomi.fi-logo_beta.png"
-                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[2].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[2].redirectUrl}}"
-                                        th:title="${delegatedAuthenticationProviderConfigurations[2].name + ' ' + delegatedAuthenticationProviderConfigurations[2].type}"
-                                        th:id="${delegatedAuthenticationProviderConfigurations[2].name + '-button'}"
-                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[2].type} + ${delegatedAuthenticationProviderConfigurations[2].cssClass}"
-                                        accesskey="s"
-                                        height="38px"
-                                />
-                                <input type="hidden" name="client_name" th:value="suomifi" />
-                                <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
-                                <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
-                            </form>
                         </div>
                     </div>
                 </div>
