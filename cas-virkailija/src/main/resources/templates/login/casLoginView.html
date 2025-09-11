@@ -76,7 +76,7 @@
                             </a>
                         </div>
                     </div>
-                    <div th:if="${cas.custom.properties['uusSuomifiEnabled']}" class="row">
+                    <div th:if="${cas.custom.properties['uusSuomifiEnabled'] && delegatedAuthenticationProviderConfigurations.size() > 2}" class="row">
                         <div class="kirjautumistapa kirjautumistapa-suomifi col-md-4">
                             <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[2].name}" th:action="@{/login}">
                                 <input name="submitButton"
