@@ -70,17 +70,6 @@ public class CasOphConfiguration {
     }
 
     @Bean
-    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    CasWebSecurityConfigurer<Void> samlDiscoveryReturnControllerWebSecurityConfigurer() {
-        return new CasWebSecurityConfigurer<>() {
-            @Override
-            public List<String> getIgnoredEndpoints() {
-                return List.of("/discovery");
-            }
-        };
-    }
-
-    @Bean
     TomcatGate tomcatGate() {
         return new TomcatGate();
     }
