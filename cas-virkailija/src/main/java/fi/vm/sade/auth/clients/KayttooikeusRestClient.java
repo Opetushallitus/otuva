@@ -103,6 +103,19 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    public CasUserAttributes getUserAttributesByHetu(String hetu) {
+        String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByHetu");
+        return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.post(url).setEntity(
+                    new OphHttpEntity.Builder()
+                        .content("{\"hetu\": \"" + hetu + "\"}")
+                        .contentType(ContentType.APPLICATION_JSON)
+                        .build()
+                ).build())
+                .expectedStatus(200)
+                .mapWith(json -> Json.parse(json, CasUserAttributes.class))
+                .orElseThrow(() -> noContentOrNotFoundException(url));
+    }
+
     public CasUserAttributes hakaRegistration(String temporaryToken, String identifier) {
         String url = ophProperties.url("kayttooikeus-service.cas.hakaRegistration", temporaryToken);
         OphHttpRequest request = OphHttpRequest.Builder

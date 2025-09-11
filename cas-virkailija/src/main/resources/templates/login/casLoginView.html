@@ -76,6 +76,26 @@
                             </a>
                         </div>
                     </div>
+                    <div th:if="${cas.custom.properties['uusSuomifiEnabled']}" class="row">
+                        <div class="kirjautumistapa kirjautumistapa-suomifi col-md-4">
+                            <form method="post" th:id="${'form' + delegatedAuthenticationProviderConfigurations[2].name}" th:action="@{/login}">
+                                <input name="submitButton"
+                                        id="suomifi-button"
+                                        type="image"
+                                        src="/cas/images/suomi.fi-logo_beta.png"
+                                        th:attr="autoRedirectType=${#strings.toLowerCase(delegatedAuthenticationProviderConfigurations[2].autoRedirectType)},redirectUrl=@{${delegatedAuthenticationProviderConfigurations[2].redirectUrl}}"
+                                        th:title="${delegatedAuthenticationProviderConfigurations[2].name + ' ' + delegatedAuthenticationProviderConfigurations[2].type}"
+                                        th:id="${delegatedAuthenticationProviderConfigurations[2].name + '-button'}"
+                                        th:classappend="'mdc-button-' + ${delegatedAuthenticationProviderConfigurations[2].type} + ${delegatedAuthenticationProviderConfigurations[2].cssClass}"
+                                        accesskey="s"
+                                        height="38px"
+                                />
+                                <input type="hidden" name="client_name" th:value="suomifi" />
+                                <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
+                                <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 </div>
             </div>

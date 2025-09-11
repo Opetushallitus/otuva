@@ -26,6 +26,9 @@ set -o errexit -o nounset -o pipefail
 mkdir -p /app/etc
 echo -n ${haka_keystore_base64} | base64 --decode > /app/etc/hakakeystore.jks
 echo -n ${haka_sp_metadata} > /app/etc/hakasp.xml
+echo -n ${cas_suomifi_keystore_base64} | base64 --decode > /app/etc/suomifi_keystore.jks
+echo -n ${cas_suomifi_sp_metadata} > /app/etc/suomifi_sp.xml
+echo -n ${cas_suomifi_idp_metadata} > /app/etc/suomifi_idp.xml
 
 exec java \
   -XX:InitialRAMPercentage=80.0 \
