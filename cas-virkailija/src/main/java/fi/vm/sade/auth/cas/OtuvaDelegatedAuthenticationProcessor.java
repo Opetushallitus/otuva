@@ -32,7 +32,7 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
             LOGGER.info("Delegated authentication processing principal [{}] returned [{}]", principal, casPrincipal);
             return casPrincipal;
         } catch (Exception e) {
-            LOGGER.error("failed to process delegated authentication (client + " + client.getName() + ") for principal " + principal.getId(), e);
+            LOGGER.error("failed to process delegated authentication (client " + client.getName() + ") for principal " + principal.getId(), e);
             throw new PreventedException(e);
         }
     }
