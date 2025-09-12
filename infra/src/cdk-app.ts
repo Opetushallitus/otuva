@@ -913,14 +913,14 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           "AppPasswordToUserManagement",
           "service-provider"
         ),
-        haka_keystore_base64: ecs.Secret.fromSecretsManager(
+        cas_haka_keystore_base64: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "HakaKeystore",
             "/cas/HakaKeystore"
           )
         ),
-        haka_sp_metadata: ecs.Secret.fromSecretsManager(
+        cas_haka_sp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "HakaSpMetadata",
