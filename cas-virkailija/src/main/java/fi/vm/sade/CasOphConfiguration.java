@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
+import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -58,6 +59,13 @@ public class CasOphConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public DelegatedClientIdentityProviderRedirectionStrategy delegatedClientIdentityProviderRedirectionStrategy() {
         return new DelegatedIdpRedirectionStrategy();
+    }
+
+    @Bean
+    public TicketSerializationExecutionPlanConfigurer ticketSerializationExecutionPlanConfigurer() {
+        return plan -> {
+            plan.registerTicketSerializer(new OtuvaTransientSessionTicketSerializer());
+        };
     }
 
     @Bean
