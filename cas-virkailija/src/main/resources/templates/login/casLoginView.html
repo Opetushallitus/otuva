@@ -29,6 +29,12 @@
                         <span class="title-backline"><span th:text="#{login.muutKirjautumistavat}"></span></span>
                     </div>
                     <div class="row">
+                        <div th:unless="${cas.custom.properties['uusHakaEnabled']}" class="kirjautumistapa col-md-4">
+                            <a th:with="parameters=${service != null} ? '?redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
+                               th:href="${cas.custom.properties['hakaUrl']} + ${parameters}">
+                                <img src="/cas/images/haka_landscape_medium.gif" />
+                            </a>
+                        </div>
                         <div th:each="provider : ${delegatedAuthenticationProviderConfigurations}" class="kirjautumistapa col-md-4">
                             <form th:if="${provider.name.equals('haka') && cas.custom.properties['uusHakaEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
@@ -46,11 +52,6 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                            <a th:if="${provider.name.equals('haka') && !cas.custom.properties['uusHakaEnabled']}"
-                               th:with="parameters=${service != null} ? '?redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
-                               th:href="${cas.custom.properties['hakaUrl']} + ${parameters}">
-                                <img src="/cas/images/haka_landscape_medium.gif" />
-                            </a>
                             <form th:if="${provider.name.equals('mpassid')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="mpassid-button"
@@ -67,7 +68,7 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                            <form th:if="${provider.name.equals('suomifi')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
+                            <form th:if="${provider.name.equals('suomifi') && cas.custom.properties['uusSuomifiEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="suomifi-button"
                                         type="image"
