@@ -43,7 +43,6 @@ cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
 cas.authn.pac4j.saml[0].maximum-authentication-lifetime: PT31536000S
 cas.authn.pac4j.saml[0].accepted-skew: PT7200S
-cas.authn.pac4j.saml[0].discovery-service-url: https://testsp.funet.fi/DS
 
 cas.authn.pac4j.saml[1].client-name: suomifi
 cas.authn.pac4j.saml[1].keystore-password: dummy
