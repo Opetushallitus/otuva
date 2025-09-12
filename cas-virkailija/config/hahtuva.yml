@@ -79,7 +79,6 @@ cas.authn.pac4j.saml[1].wants-assertions-signed: true
 cas.authn.pac4j.saml[1].wants-responses-signed: true
 cas.authn.pac4j.saml[1].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[1].use-name-qualifier: false
-cas.authn.pac4j.saml[1].principal-id-attribute: nationalIdentificationNumber
 cas.authn.pac4j.saml[1].requested-attributes[0].name: urn:oid:1.2.246.21
 cas.authn.pac4j.saml[1].requested-attributes[0].friendly-name: nationalIdentificationNumber
 cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
