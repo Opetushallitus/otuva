@@ -3,18 +3,9 @@ package fi.vm.sade;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
-import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
-import org.apereo.cas.pac4j.client.DelegatedIdentityProviderFactory;
-import org.apereo.cas.web.CasWebSecurityConfigurer;
-import org.apereo.cas.web.saml2.DelegatedClientSaml2Builder;
-import org.pac4j.saml.store.SAMLMessageStoreFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
 
-import fi.vm.sade.auth.cas.DelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
+import fi.vm.sade.auth.cas.OtuvaDelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.clients.HttpClientUtil;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
@@ -60,7 +51,7 @@ public class CasOphConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor() {
-        return new DelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient());
+        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient());
     }
 
     @Bean

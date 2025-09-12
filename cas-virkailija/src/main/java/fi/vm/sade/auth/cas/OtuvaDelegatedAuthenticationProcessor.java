@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class DelegatedAuthenticationProcessor implements DelegatedAuthenticationPreProcessor {
+public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthenticationPreProcessor {
     final PrincipalFactory principalFactory;
     final KayttooikeusRestClient kayttooikeusRestClient;
 
@@ -32,6 +32,7 @@ public class DelegatedAuthenticationProcessor implements DelegatedAuthentication
             LOGGER.info("Delegated authentication processing principal [{}] returned [{}]", principal, casPrincipal);
             return casPrincipal;
         } catch (Exception e) {
+            LOGGER.error("failed to process delegated authentication (client + " + client.getName() + ") for principal " + principal.getId(), e);
             throw new PreventedException(e);
         }
     }
