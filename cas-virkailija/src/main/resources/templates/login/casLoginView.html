@@ -67,9 +67,9 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                            <form th:if="${provider.name.equals('vetuma')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
+                            <form th:if="${provider.name.equals('suomifi')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
-                                        id="vetuma-button"
+                                        id="suomifi-button"
                                         type="image"
                                         src="/cas/images/suomi.fi-logo_beta.png"
                                         th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
@@ -79,7 +79,7 @@
                                         accesskey="s"
                                         height="38px"
                                 />
-                                <input type="hidden" name="client_name" th:value="vetuma" />
+                                <input type="hidden" name="client_name" th:value="suomifi" />
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>

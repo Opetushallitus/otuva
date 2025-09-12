@@ -56,11 +56,15 @@ public class DelegatedAuthenticationProcessor implements DelegatedAuthentication
         var a = switch (client.getName()) {
             case "mpassid" -> kayttooikeusRestClient.getUserAttributesByOid(principal.getId());
             case "haka" -> kayttooikeusRestClient.getUserAttributesByIdpIdentifier(client.getName(), (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
-            case "vetuma" -> kayttooikeusRestClient.getUserAttributesByHetu(principal.getId());
+            case "suomifi" -> kayttooikeusRestClient.getUserAttributesByHetu(principal.getId());
             default -> {
                 throw new PreventedException("invalid delegated authentication client (" + client.getName() + ") for principal " + principal.getId());
             }
         };
-        return new CasUserAttributes(a.oidHenkilo(), a.username(), a.mfaProvider(), a.kayttajaTyyppi(), Optional.of(client.getName()), a.roles(), Optional.empty());
+        return new CasUserAttributes(a.oidHenkilo(), a.username(), a.mfaProvider(), a.kayttajaTyyppi(), getIdpEntityId(client), a.roles(), Optional.empty());
+    }
+
+    Optional<String> getIdpEntityId(BaseClient client) {
+        return "suomifi".equals(client.getName()) ? Optional.of("vetuma") :  Optional.of(client.getName());
     }
 }

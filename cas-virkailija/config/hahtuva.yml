@@ -66,7 +66,7 @@ cas.authn.pac4j.saml[0].maximum-authentication-lifetime: PT31536000S
 cas.authn.pac4j.saml[0].accepted-skew: PT7200S
 cas.authn.pac4j.saml[0].discovery-service-url: https://testsp.funet.fi/DS
 
-cas.authn.pac4j.saml[1].client-name: vetuma
+cas.authn.pac4j.saml[1].client-name: suomifi
 cas.authn.pac4j.saml[1].keystore-password: ${cas_suomifi_keystore_password}
 cas.authn.pac4j.saml[1].private-key-password: ${cas_suomifi_private_key_password}
 cas.authn.pac4j.saml[1].keystore-path: /app/etc/suomifi_keystore.jks
