@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -36,25 +35,15 @@ import java.util.Objects;
  * Remove if the original class org.apereo.cas.web.flow.actions.logout.DelegatedSaml2ClientLogoutAction ever gets fixed in CAS
  */
 @Slf4j
-@Transactional(transactionManager = "ticketTransactionManager")
+@Transactional
 @RequiredArgsConstructor
 public class FixedDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction {
     private final TicketRegistry ticketRegistry;
     private final SingleLogoutRequestExecutor singleLogoutRequestExecutor;
 
-    private void removeSsoSessionsForSessionIndexes(final HttpServletRequest request,
-                                                    final HttpServletResponse response,
-                                                    final LogoutRequest logoutRequest) {
-        logoutRequest.getSessionIndexes().forEach(sessionIndex -> ticketRegistry
-            .getSessionsWithAttributes(Map.of("sessionindex", List.of(Objects.requireNonNull(sessionIndex.getValue()))))
-            .filter(ticket -> !ticket.isExpired())
-            .map(TicketGrantingTicket.class::cast)
-            .findFirst()
-            .ifPresent(ticket -> singleLogoutRequestExecutor.execute(ticket.getId(), request, response)));
-    }
-
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
+    @Transactional
+    public Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         val clientCredential = WebUtils.getCredential(requestContext, ClientCredential.class);
 
@@ -62,7 +51,12 @@ public class FixedDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction 
             val message = saml2Credentials.getContext().getMessageContext().getMessage();
             if (message instanceof final LogoutRequest logoutRequest && isDirectLogoutRequest(request)) {
                 val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
-                removeSsoSessionsForSessionIndexes(request, response, logoutRequest);
+                logoutRequest.getSessionIndexes().forEach(sessionIndex -> ticketRegistry
+                    .getSessionsWithAttributes(Map.of("sessionindex", List.of(Objects.requireNonNull(sessionIndex.getValue()))))
+                    .filter(ticket -> !ticket.isExpired())
+                    .map(TicketGrantingTicket.class::cast)
+                    .findFirst()
+                    .ifPresent(ticket -> singleLogoutRequestExecutor.execute(ticket.getId(), request, response)));
             }
             if (message instanceof final LogoutResponse logoutResponse) {
                 val logoutRequestTicketId = TransientSessionTicketFactory.normalizeTicketId(logoutResponse.getInResponseTo());
