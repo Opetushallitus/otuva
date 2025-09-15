@@ -11,6 +11,8 @@ cas.tgc.crypto.encryption.key: ${cas_tgc_encryption_key}
 cas.tgc.crypto.signing.key: ${cas_tgc_signing_key}
 cas.webflow.crypto.encryption.key: ${cas_webflow_encryption_key}
 cas.webflow.crypto.signing.key: ${cas_webflow_signing_key}
+cas.interrupt.cookie.crypto.encryption.key: ${cas_interrupt_cookie_encryption_key}
+cas.interrupt.cookie.crypto.signing.key: ${cas_interrupt_cookie_signing_key}
 
 cas.view.default-redirect-url: https://virkailija.hahtuvaopintopolku.fi/virkailijan-tyopoyta
 

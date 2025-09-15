@@ -895,6 +895,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_webflow_encryption_key: this.ssmSecret("WebflowEncryptionKey"),
         cas_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
+        cas_interrupt_cookie_encryption_key: this.ssmSecret("InterruptCookieEncryptionKey"),
+        cas_interrupt_cookie_signing_key: this.ssmSecret("InterruptCookieSigningKey"),
         cas_mfa_username: this.ssmSecret("CasMfaUsername", "kayttooikeus"),
         cas_mfa_password: this.ssmSecret("CasMfaPassword", "kayttooikeus"),
         cas_gauth_encryption_key: this.ssmSecret(
