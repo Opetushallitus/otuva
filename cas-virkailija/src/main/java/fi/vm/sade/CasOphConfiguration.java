@@ -12,7 +12,6 @@ import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
-import org.apereo.cas.web.flow.actions.logout.DelegatedSaml2ClientLogoutAction;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -94,7 +93,7 @@ public class CasOphConfiguration {
         return WebflowActionBeanSupplier.builder()
             .withApplicationContext(applicationContext)
             .withProperties(casProperties)
-            .withAction(() -> new DelegatedSaml2ClientLogoutAction(ticketRegistry, singleLogoutRequestExecutor))
+            .withAction(() -> new FixedDelegatedSaml2ClientLogoutAction(ticketRegistry, singleLogoutRequestExecutor))
             .withId(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
             .build()
             .get();
