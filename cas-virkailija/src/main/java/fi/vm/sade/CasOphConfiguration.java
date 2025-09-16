@@ -9,7 +9,6 @@ import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
 import org.apereo.cas.ticket.TicketCatalog;
-import org.apereo.cas.ticket.registry.JpaTicketRegistry;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
@@ -102,7 +101,7 @@ public class CasOphConfiguration {
             .supply(() -> {
                 var jpa = casProperties.getTicket().getRegistry().getJpa();
                 var cipher = CoreTicketUtils.newTicketRegistryCipherExecutor(jpa.getCrypto(), "jpa");
-                return new JpaTicketRegistry(cipher, ticketSerializationManager, ticketCatalog, applicationContext,
+                return new OtuvaJpaTicketRegistry(cipher, ticketSerializationManager, ticketCatalog, applicationContext,
                     jpaBeanFactory, jpaTicketRegistryTransactionTemplate, casProperties);
             })
             .otherwiseProxy()
