@@ -16,8 +16,11 @@
   "accessStrategy": {
     "@class": "org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy",
     "delegatedAuthenticationPolicy": {
-      "@class": "fi.vm.sade.HakaAwareRegisteredServiceDelegationAuthenticationPolicy",
-      "allowedProviders": ["java.util.ArrayList", ["haka", "mpassid", "suomifi"]],
+      "@class": "org.apereo.cas.services.DefaultRegisteredServiceDelegatedAuthenticationPolicy",
+      "allowedProviders": [
+        "java.util.ArrayList",
+        ["haka", "mpassid", "suomifi"]
+      ],
       "permitUndefined": true,
       "exclusive": false
     }
