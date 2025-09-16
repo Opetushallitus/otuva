@@ -47,7 +47,16 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
         String temporaryToken = splitUrl[splitUrl.length - 1];
         if (StringUtils.hasText(identifier) && StringUtils.hasText(temporaryToken)) {
             CasUserAttributes a = kayttooikeusRestClient.hakaRegistration(temporaryToken, identifier);
-            return new CasUserAttributes(a.oidHenkilo(), a.username(), a.mfaProvider(), a.kayttajaTyyppi(), Optional.of("haka"), a.roles(), Optional.of(temporaryToken));
+            return new CasUserAttributes(
+                a.oidHenkilo(),
+                a.username(),
+                principal.getAttributes().get("sessionindex"),
+                a.mfaProvider(),
+                a.kayttajaTyyppi(),
+                Optional.of("haka"),
+                a.roles(),
+                Optional.of(temporaryToken)
+            );
         } else {
             throw new PreventedException("invalid haka registration for identifier (" + identifier + ") with temporary token " + temporaryToken);
         }
@@ -62,7 +71,16 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
                 throw new PreventedException("invalid delegated authentication client (" + client.getName() + ") for principal " + principal.getId());
             }
         };
-        return new CasUserAttributes(a.oidHenkilo(), a.username(), a.mfaProvider(), a.kayttajaTyyppi(), getIdpEntityId(client), a.roles(), Optional.empty());
+        return new CasUserAttributes(
+            a.oidHenkilo(),
+            a.username(),
+            principal.getAttributes().get("sessionindex"),
+            a.mfaProvider(),
+            a.kayttajaTyyppi(),
+            getIdpEntityId(client),
+            a.roles(),
+            Optional.empty()
+        );
     }
 
     Optional<String> getIdpEntityId(BaseClient client) {

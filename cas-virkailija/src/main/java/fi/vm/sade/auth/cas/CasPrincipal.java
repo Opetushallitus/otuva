@@ -19,6 +19,7 @@ public class CasPrincipal {
                     "idpEntityId", List.of(userAttributes.idpEntityId().orElse("usernamePassword")),
                     "kayttajaTyyppi", List.of(userAttributes.kayttajaTyyppi().orElse("VIRKAILIJA")),
                     "roles", List.copyOf(userAttributes.roles()),
+                    "sessionindex", userAttributes.sessionindex(),
                     "hakaRegistrationToken", hakaRegistrationToken
             );
             return principalFactory.createPrincipal(userAttributes.username(), attributes);
