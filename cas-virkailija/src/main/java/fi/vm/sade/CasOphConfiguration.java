@@ -6,12 +6,15 @@ import lombok.RequiredArgsConstructor;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
+import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
+import org.apereo.cas.ticket.TicketCatalog;
+import org.apereo.cas.ticket.registry.JpaTicketRegistry;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
-import org.apereo.cas.web.flow.CasWebflowConstants;
-import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
+import org.apereo.cas.ticket.serialization.TicketSerializationManager;
+import org.apereo.cas.util.CoreTicketUtils;
+import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -20,7 +23,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
-import org.springframework.webflow.execution.Action;
+import org.springframework.transaction.support.TransactionOperations;
 
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
 import fi.vm.sade.auth.cas.OtuvaDelegatedAuthenticationProcessor;
@@ -81,21 +84,28 @@ public class CasOphConfiguration {
         return new TomcatGate();
     }
 
-    @Bean(name = CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
+    @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public Action delegatedSaml2ClientLogoutAction(
-        final CasConfigurationProperties casProperties,
+    public TicketRegistry ticketRegistry(
+        @Qualifier(TicketSerializationManager.BEAN_NAME)
+        final TicketSerializationManager ticketSerializationManager,
         final ConfigurableApplicationContext applicationContext,
-        @Qualifier(TicketRegistry.BEAN_NAME)
-        final TicketRegistry ticketRegistry,
-        @Qualifier(SingleLogoutRequestExecutor.BEAN_NAME)
-        final SingleLogoutRequestExecutor singleLogoutRequestExecutor) {
-        return WebflowActionBeanSupplier.builder()
-            .withApplicationContext(applicationContext)
-            .withProperties(casProperties)
-            .withAction(() -> new FixedDelegatedSaml2ClientLogoutAction(ticketRegistry, singleLogoutRequestExecutor))
-            .withId(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
-            .build()
+        final CasConfigurationProperties casProperties,
+        @Qualifier("jpaTicketRegistryTransactionTemplate")
+        final TransactionOperations jpaTicketRegistryTransactionTemplate,
+        @Qualifier(TicketCatalog.BEAN_NAME)
+        final TicketCatalog ticketCatalog,
+        @Qualifier(JpaBeanFactory.DEFAULT_BEAN_NAME)
+        final JpaBeanFactory jpaBeanFactory) {
+        return BeanSupplier.of(TicketRegistry.class)
+            .when(true)
+            .supply(() -> {
+                var jpa = casProperties.getTicket().getRegistry().getJpa();
+                var cipher = CoreTicketUtils.newTicketRegistryCipherExecutor(jpa.getCrypto(), "jpa");
+                return new JpaTicketRegistry(cipher, ticketSerializationManager, ticketCatalog, applicationContext,
+                    jpaBeanFactory, jpaTicketRegistryTransactionTemplate, casProperties);
+            })
+            .otherwiseProxy()
             .get();
     }
 }
