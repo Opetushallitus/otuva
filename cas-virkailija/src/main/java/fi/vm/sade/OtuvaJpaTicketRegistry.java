@@ -1,17 +1,13 @@
 package fi.vm.sade;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.monitor.Monitorable;
-import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketCatalog;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.JpaTicketRegistry;
-import org.apereo.cas.ticket.registry.generic.BaseTicketEntity;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -43,32 +39,15 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
         this.transactionTemplate = transactionTemplate;
     }
 
-    public List<? extends Ticket> getSessionListWithAttributes(final Map<String, List<Object>> queryAttributes) {
+    public Optional<String> getTicketIdWithSessionindex(String sessionindex) {
         return transactionTemplate.execute(status -> {
             val factory = getJpaTicketEntityFactory();
-            val criterias = queryAttributes.entrySet()
-                .stream()
-                .map(entry -> {
-                    val criteriaValues = entry.getValue()
-                        .stream()
-                        .map(queryValue -> String.format("(t.attributes->'%s')\\:\\:jsonb \\?\\? '%s'", digestIdentifier(entry.getKey()), digestIdentifier(queryValue.toString())))
-                        .collect(Collectors.joining(" OR "));
-                    return String.format("(%s)", criteriaValues);
-                })
-                .collect(Collectors.joining(" AND "));
-            val selectClause = new StringBuilder(String.format("SELECT t.* FROM %s t ", factory.getTableName()));
-            val sql = String.format("%s WHERE t.type='%s' AND %s", selectClause,
-                getTicketTypeName(TicketGrantingTicket.class), criterias);
+            val sql = "SELECT t.id FROM cas_tickets t WHERE t.type = :type AND (t.attributes->'sessionindex')::jsonb ? :sessionindex";
             LOGGER.info("Executing SQL query [{}]", sql);
-
-            val query = entityManager.createQuery(sql, factory.getType());
-            return query
-                .getResultStream()
-                .map(BaseTicketEntity.class::cast)
-                .map(factory::toTicket)
-                .map(this::decodeTicket)
-                .filter(ticket -> !ticket.isExpired())
-                .collect(Collectors.toList());
+            val query = entityManager.createNativeQuery(sql, factory.getType());
+            query.setParameter("type", getTicketTypeName(TicketGrantingTicket.class));
+            query.setParameter("sessionindex", sessionindex);
+            return (Optional<String>) query.getResultStream().findFirst();
         });
     }
 }

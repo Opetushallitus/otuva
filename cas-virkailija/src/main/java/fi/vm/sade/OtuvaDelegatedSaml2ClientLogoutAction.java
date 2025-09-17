@@ -24,12 +24,8 @@ import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * Gets a list of tickets to logout instead of an open stream without a transaction like the original.
+ * The original DelegatedSaml2ClientLogoutAction class in CAS fails to get tickets with sessionindex
  */
 @Slf4j
 @Transactional
@@ -49,11 +45,10 @@ public class OtuvaDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction 
             if (message instanceof final LogoutRequest logoutRequest && isDirectLogoutRequest(request)) {
                 val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
                 logoutRequest.getSessionIndexes().forEach(sessionIndex -> ticketRegistry
-                    .getSessionListWithAttributes(Map.of("sessionindex", List.of(Objects.requireNonNull(sessionIndex.getValue()))))
-                    .stream()
+                    .getTicketIdWithSessionindex(sessionIndex.getValue())
+                    .map(ticketRegistry::getTicket)
                     .filter(ticket -> !ticket.isExpired())
                     .map(TicketGrantingTicket.class::cast)
-                    .findFirst()
                     .ifPresent(ticket -> singleLogoutRequestExecutor.execute(ticket.getId(), request, response)));
             }
             if (message instanceof final LogoutResponse logoutResponse) {
