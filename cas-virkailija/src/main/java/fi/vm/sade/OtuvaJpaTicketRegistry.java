@@ -44,7 +44,6 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
         this.jpaBeanFactory = jpaBeanFactory;
     }
 
-
     @Override
     public Stream<? extends Ticket> getSessionsWithAttributes(final Map<String, List<Object>> queryAttributes) {
         LOGGER.info("Executing getSessionsWithAttributes");
@@ -73,5 +72,4 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
             .map(this::decodeTicket)
             .filter(ticket -> !ticket.isExpired());
     }
-
 }
