@@ -9,7 +9,6 @@ import org.apereo.cas.ticket.InvalidTicketException;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TransientSessionTicket;
 import org.apereo.cas.ticket.TransientSessionTicketFactory;
-import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.web.flow.DelegationWebflowUtils;
 import org.apereo.cas.web.flow.actions.BaseCasWebflowAction;
 import org.apereo.cas.web.support.WebUtils;
@@ -30,15 +29,13 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Fixed to include a transaction which is required by the JPA ticketRegistry.getSessionsWithAttributes
- *
- * Remove if the original class org.apereo.cas.web.flow.actions.logout.DelegatedSaml2ClientLogoutAction ever gets fixed in CAS
+ * Gets a list of tickets to logout instead of an open stream without a transaction like the original.
  */
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class OtuvaDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction {
-    private final TicketRegistry ticketRegistry;
+    private final OtuvaJpaTicketRegistry ticketRegistry;
     private final SingleLogoutRequestExecutor singleLogoutRequestExecutor;
 
     @Override
@@ -52,7 +49,8 @@ public class OtuvaDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction 
             if (message instanceof final LogoutRequest logoutRequest && isDirectLogoutRequest(request)) {
                 val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
                 logoutRequest.getSessionIndexes().forEach(sessionIndex -> ticketRegistry
-                    .getSessionsWithAttributes(Map.of("sessionindex", List.of(Objects.requireNonNull(sessionIndex.getValue()))))
+                    .getSessionListWithAttributes(Map.of("sessionindex", List.of(Objects.requireNonNull(sessionIndex.getValue()))))
+                    .stream()
                     .filter(ticket -> !ticket.isExpired())
                     .map(TicketGrantingTicket.class::cast)
                     .findFirst()

@@ -10,11 +10,9 @@ import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
 import org.apereo.cas.ticket.TicketCatalog;
-import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.CoreTicketUtils;
-import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -89,7 +87,7 @@ public class CasOphConfiguration {
 
     @Bean(name = "otuvaJpaTicketRegistry")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public TicketRegistry otuvaJpaTicketRegistry(
+    public OtuvaJpaTicketRegistry otuvaJpaTicketRegistry(
             @Qualifier(TicketSerializationManager.BEAN_NAME)
             final TicketSerializationManager ticketSerializationManager,
             final ConfigurableApplicationContext applicationContext,
@@ -112,13 +110,13 @@ public class CasOphConfiguration {
         final CasConfigurationProperties casProperties,
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("otuvaJpaTicketRegistry")
-        final TicketRegistry ticketRegistry,
+        final OtuvaJpaTicketRegistry otuvaJpaTicketRegistry,
         @Qualifier(SingleLogoutRequestExecutor.BEAN_NAME)
         final SingleLogoutRequestExecutor singleLogoutRequestExecutor) {
         return WebflowActionBeanSupplier.builder()
             .withApplicationContext(applicationContext)
             .withProperties(casProperties)
-            .withAction(() -> new OtuvaDelegatedSaml2ClientLogoutAction(ticketRegistry, singleLogoutRequestExecutor))
+            .withAction(() -> new OtuvaDelegatedSaml2ClientLogoutAction(otuvaJpaTicketRegistry, singleLogoutRequestExecutor))
             .withId(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
             .build()
             .get();

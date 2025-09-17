@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Monitorable
 public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
-    private final JpaBeanFactory jpaBeanFactory;
     private final TransactionOperations transactionTemplate;
 
     @PersistenceContext(unitName = "jpaTicketRegistryContext")
@@ -42,7 +41,6 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
                              final CasConfigurationProperties casProperties) {
         super(cipherExecutor, ticketSerializationManager, ticketCatalog, applicationContext, jpaBeanFactory, transactionTemplate, casProperties);
         this.transactionTemplate = transactionTemplate;
-        this.jpaBeanFactory = jpaBeanFactory;
     }
 
     public List<? extends Ticket> getSessionListWithAttributes(final Map<String, List<Object>> queryAttributes) {
