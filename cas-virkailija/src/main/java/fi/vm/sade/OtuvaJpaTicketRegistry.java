@@ -3,7 +3,6 @@ package fi.vm.sade;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
@@ -29,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Monitorable
 public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
     private final JpaBeanFactory jpaBeanFactory;
+    private final TransactionOperations transactionTemplate;
 
     @PersistenceContext(unitName = "jpaTicketRegistryContext")
     private EntityManager entityManager;
@@ -41,35 +41,36 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
                              final TransactionOperations transactionTemplate,
                              final CasConfigurationProperties casProperties) {
         super(cipherExecutor, ticketSerializationManager, ticketCatalog, applicationContext, jpaBeanFactory, transactionTemplate, casProperties);
+        this.transactionTemplate = transactionTemplate;
         this.jpaBeanFactory = jpaBeanFactory;
     }
 
-    @Override
-    public Stream<? extends Ticket> getSessionsWithAttributes(final Map<String, List<Object>> queryAttributes) {
-        LOGGER.info("Executing getSessionsWithAttributes");
-        val factory = getJpaTicketEntityFactory();
-        val criterias = queryAttributes.entrySet()
-            .stream()
-            .map(entry -> {
-                val criteriaValues = entry.getValue()
-                    .stream()
-                    .map(queryValue -> String.format("(t.attributes->'%s')\\:\\:jsonb \\?\\? '%s'", digestIdentifier(entry.getKey()), digestIdentifier(queryValue.toString())))
-                    .collect(Collectors.joining(" OR "));
-                return String.format("(%s)", criteriaValues);
-            })
-            .collect(Collectors.joining(" AND "));
+    public List<? extends Ticket> getSessionListWithAttributes(final Map<String, List<Object>> queryAttributes) {
+        return transactionTemplate.execute(status -> {
+            val factory = getJpaTicketEntityFactory();
+            val criterias = queryAttributes.entrySet()
+                .stream()
+                .map(entry -> {
+                    val criteriaValues = entry.getValue()
+                        .stream()
+                        .map(queryValue -> String.format("(t.attributes->'%s')\\:\\:jsonb \\?\\? '%s'", digestIdentifier(entry.getKey()), digestIdentifier(queryValue.toString())))
+                        .collect(Collectors.joining(" OR "));
+                    return String.format("(%s)", criteriaValues);
+                })
+                .collect(Collectors.joining(" AND "));
+            val selectClause = new StringBuilder(String.format("SELECT t.* FROM %s t ", factory.getTableName()));
+            val sql = String.format("%s WHERE t.type='%s' AND %s", selectClause,
+                getTicketTypeName(TicketGrantingTicket.class), criterias);
+            LOGGER.info("Executing SQL query [{}]", sql);
 
-        val selectClause = new StringBuilder(String.format("SELECT t.* FROM %s t ", factory.getTableName()));
-
-        val sql = String.format("%s WHERE t.type='%s' AND %s", selectClause,
-            getTicketTypeName(TicketGrantingTicket.class), criterias);
-        LOGGER.info("Executing SQL query [{}]", sql);
-
-        val query = entityManager.createNativeQuery(sql, factory.getType());
-        return jpaBeanFactory.streamQuery(query)
-            .map(BaseTicketEntity.class::cast)
-            .map(factory::toTicket)
-            .map(this::decodeTicket)
-            .filter(ticket -> !ticket.isExpired());
+            val query = entityManager.createQuery(sql, factory.getType());
+            return query
+                .getResultStream()
+                .map(BaseTicketEntity.class::cast)
+                .map(factory::toTicket)
+                .map(this::decodeTicket)
+                .filter(ticket -> !ticket.isExpired())
+                .collect(Collectors.toList());
+        });
     }
 }
