@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'corretto'
-          java-version: '21'
+          java-version: '11'
       - run: ./scripts/ci/run-tests-cas-oppija.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
