@@ -45,11 +45,14 @@ cas.service-registry.json.location: file:///app/services/dev
 
 cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
 cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
+
+cas.authn.pac4j.oidc[0].generic.client-name: mpassid
 cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy-test.csc.fi/.well-known/openid-configuration
 cas.authn.pac4j.oidc[0].generic.id: ${cas_mpassid_oidc_id}
 cas.authn.pac4j.oidc[0].generic.secret: ${cas_mpassid_oidc_secret}
-cas.authn.pac4j.oidc[0].generic.client-name: mpassid
 cas.authn.pac4j.oidc[0].generic.principal-id-attribute: urn:oid:1.3.6.1.4.1.16161.1.1.27
+
+cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].keystore-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].private-key-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.untuvaopintopolku.fi/cas/login/haka
@@ -58,7 +61,6 @@ cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc
 cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
-cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
@@ -66,6 +68,25 @@ cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
 cas.authn.pac4j.saml[0].maximum-authentication-lifetime: PT31536000S
 cas.authn.pac4j.saml[0].accepted-skew: PT7200S
+
+cas.authn.pac4j.saml[1].client-name: suomifi
+cas.authn.pac4j.saml[1].keystore-password: ${cas_suomifi_keystore_password}
+cas.authn.pac4j.saml[1].private-key-password: ${cas_suomifi_private_key_password}
+cas.authn.pac4j.saml[1].keystore-path: /app/etc/suomifi_keystore.jks
+cas.authn.pac4j.saml[1].service-provider-entity-id: https://virkailija.untuvaopintopolku.fi/cas/login/suomifi
+cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/suomifi_sp.xml
+cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml
+cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[1].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[1].sign-authn-request: true
+cas.authn.pac4j.saml[1].wants-assertions-signed: true
+cas.authn.pac4j.saml[1].wants-responses-signed: true
+cas.authn.pac4j.saml[1].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[1].use-name-qualifier: false
+cas.authn.pac4j.saml[1].requested-attributes[0].name: urn:oid:1.2.246.21
+cas.authn.pac4j.saml[1].requested-attributes[0].friendly-name: nationalIdentificationNumber
+cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+cas.authn.pac4j.saml[1].requested-attributes[0].required: true
 
 # postgres
 spring.datasource.url: jdbc:postgresql://${cas_postgres_host}:${cas_postgres_port}/${cas_postgres_database}
