@@ -17,7 +17,7 @@
     "@class": "org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy",
     "delegatedAuthenticationPolicy": {
       "@class": "org.apereo.cas.services.DefaultRegisteredServiceDelegatedAuthenticationPolicy",
-      "allowedProviders": ["java.util.ArrayList", ["haka", "mpassid"]],
+      "allowedProviders": ["java.util.ArrayList", ["haka", "mpassid", "suomifi"]],
       "permitUndefined": true,
       "exclusive": false
     }
