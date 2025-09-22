@@ -4,11 +4,19 @@ readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../.. && pwd )"
 
 trap "docker compose down" EXIT
 
-
 function main {
   cd "$repo/kayttooikeus-service"
   docker compose up -d
-  mvn clean install -s ./settings.xml
+
+  if is_running_on_codebuild; then
+    mvn clean install -s ./settings.xml
+  else
+    mvn clean install
+  fi
+}
+
+function is_running_on_codebuild {
+  [ -n "${CODEBUILD_BUILD_ID:-}" ]
 }
 
 main "$@"
