@@ -45,7 +45,7 @@ class CdkApp extends cdk.App {
 
     const config = getConfig();
 
-    new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
+    const { oauthHostedZone } = new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
     const { alarmsToSlackLambda, alarmTopic } = new AlarmStack(this, prefix("AlarmStack"), stackProps);
     const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
     const appStack = new ApplicationStack(
@@ -54,6 +54,7 @@ class CdkApp extends cdk.App {
       {
         ...stackProps,
         alarmTopic,
+        oauthHostedZone,
       }
     );
     new CasVirkailijaApplicationStack(
@@ -137,11 +138,12 @@ class AlarmStack extends cdk.Stack {
 }
 
 class DnsStack extends cdk.Stack {
+  readonly oauthHostedZone: route53.IHostedZone;
   private readonly config = getConfig();
   constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
-    new route53.HostedZone(this, "OtuvaHostedZone", {
+    this.oauthHostedZone = new route53.HostedZone(this, "OtuvaHostedZone", {
       zoneName: this.config.otuvaDomain,
     });
   }
@@ -168,6 +170,7 @@ class ApplicationStack extends cdk.Stack {
     id: string,
     props: cdk.StackProps & {
       alarmTopic: sns.ITopic;
+      oauthHostedZone: route53.IHostedZone;
     }
   ) {
     super(scope, id, props);
@@ -407,13 +410,24 @@ class ApplicationStack extends cdk.Stack {
       ),
     });
 
+    new route53.ARecord(this, "OAuthARecord", {
+      zone: props.oauthHostedZone,
+      recordName: config.otuvaDomain,
+      target: route53.RecordTarget.fromAlias(
+        new route53_targets.LoadBalancerTarget(alb),
+      ),
+    });
+
     const albCertificate = new certificatemanager.Certificate(
       this,
       "AlbCertificate",
       {
         domainName: albHostname,
-        validation:
-          certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
+        subjectAlternativeNames: [config.otuvaDomain],
+        validation: certificatemanager.CertificateValidation.fromDnsMultiZone({
+          [albHostname]: sharedHostedZone,
+          [config.otuvaDomain]: props.oauthHostedZone,
+        }),
       }
     );
 
