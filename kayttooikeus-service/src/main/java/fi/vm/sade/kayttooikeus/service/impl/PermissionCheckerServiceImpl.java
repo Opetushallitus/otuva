@@ -105,13 +105,13 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         }
 
         if (!StringUtils.hasLength(personOidToAccess) || permissionCheckService == null) {
-            LOG.error("isAllowedToAccess() called with empty personOid or permissionCheckService");
+            LOG.warn("isAllowedToAccess() called with empty personOid or permissionCheckService");
             return false;
         }
 
         // Get orgs for logged in user
         if (callingUserOid == null) {
-            LOG.error("isAllowedToAccess(): no logged in user found -> return no permission");
+            LOG.warn("isAllowedToAccess(): no logged in user found -> return no permission");
             return false;
         }
 
@@ -128,7 +128,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
                         .collect(Collectors.toSet()))
                 .orElse(emptySet());
         if (flattedOrgs.isEmpty()) {
-            LOG.error("No organisations found for logged in user with oid: " + callingUserOid);
+            LOG.warn("No organisations found for logged in user with oid: " + callingUserOid);
             return false;
         }
 
@@ -143,7 +143,7 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         PermissionCheckResponseDto response = externalPermissionClient.getPermission(permissionCheckService,  permissionCheckRequestDto);
 
         if (!response.isAccessAllowed()) {
-            LOG.error("Insufficient roles. permission check done from external service: {} " +
+            LOG.warn("Insufficient roles. permission check done from external service: {} " +
                     "Logged in user: {} " +
                     "Accessed personId: {} " +
                     "Loginuser orgs: {} " +
