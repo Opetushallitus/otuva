@@ -203,9 +203,6 @@ public class CasController {
             String redirectUrl = getRedirectViaLoginUrl(
                     getVahvaTunnistusRedirectUrl(loginToken, kielisyys, details.hetu));
             response.sendRedirect(redirectUrl);
-        } else {
-            response.sendRedirect(getRedirectViaLoginUrl(
-                    vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(details.hetu, kielisyys)));
         }
     }
 

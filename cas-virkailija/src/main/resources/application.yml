@@ -64,9 +64,6 @@ cas.sso.services.allow-missing-service-parameter: false
 cas.service-registry.core.init-from-json: true
 
 cas.custom.properties.uusHakaEnabled: false
-cas.custom.properties.uusSuomifiEnabled: false
-cas.custom.properties.suomifiUrl: http://untuvaopintopolku.fi/cas-oppija/login
-cas.custom.properties.suomifiUrlTarget: http://localhost:8101/kayttooikeus-service/cas/tunnistus?locale=
 cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
 
 cas.authn.mfa.triggers.rest.url: http://localhost:8101/kayttooikeus-service/mfa/trigger

@@ -11,8 +11,6 @@ cas.tgc.secure: false
 cas.warning-cookie.secure: false
 
 cas.custom.properties.uusHakaEnabled: true
-cas.custom.properties.uusSuomifiEnabled: true
-cas.custom.properties.suomifiUrlTarget: http://host.docker.internal:8101/kayttooikeus-service/cas/tunnistus?locale=
 
 cas.authn.mfa.triggers.rest.url: http://host.docker.internal:8101/kayttooikeus-service/mfa/trigger
 cas.authn.mfa.gauth.rest.token-url: http://host.docker.internal:8101/kayttooikeus-service/mfa/token

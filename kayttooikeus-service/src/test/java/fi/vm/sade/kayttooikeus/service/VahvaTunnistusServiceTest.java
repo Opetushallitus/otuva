@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusRequestDto;
 import fi.vm.sade.kayttooikeus.dto.VahvaTunnistusResponseDto;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -13,11 +12,7 @@ import fi.vm.sade.kayttooikeus.repositories.TunnistusTokenDataRepository;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.it.AbstractServiceIntegrationTest;
-import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,11 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Optional;
-
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
-import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
-import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
@@ -157,27 +148,4 @@ public class VahvaTunnistusServiceTest extends AbstractServiceIntegrationTest {
 
         assertThat(redirectUrl).contains("/henkilo-ui/", "eivirkailija");
     }
-
-    @Test
-    public void kirjaaKayttajaVahvallaTunnistuksellaIlmanKayttajatunnusta() {
-        String oid = "oid123";
-        String hetu = "hetu123";
-        populate(organisaatioHenkilo(henkilo(oid).withTyyppi(KayttajaTyyppi.VIRKAILIJA), "organisaatio123"));
-        HenkiloDto henkiloDto = new HenkiloDto();
-        henkiloDto.setOidHenkilo(oid);
-        henkiloDto.setHetu(hetu);
-        henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto.builder()
-                .ryhmaKuvaus(YhteystietoUtil.TYOOSOITE)
-                .yhteystieto(YhteystietoDto.builder()
-                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .yhteystietoArvo("oid123@example.com")
-                        .build())
-                .build()));
-        when(oppijanumerorekisteriClient.getHenkiloByHetu(any())).thenReturn(Optional.ofNullable(henkiloDto));
-
-        String redirectUrl = vahvaTunnistusService.kirjaaKayttajaVahvallaTunnistuksella(hetu, "fi");
-
-        assertThat(redirectUrl).contains("/henkilo-ui/", "eivirkailija");
-    }
-
 }

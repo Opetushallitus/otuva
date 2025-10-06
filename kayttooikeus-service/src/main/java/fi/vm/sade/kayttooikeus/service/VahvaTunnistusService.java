@@ -35,14 +35,4 @@ public interface VahvaTunnistusService {
      * @return
      */
     String kasitteleKutsunTunnistus(String kutsuToken, String kielisyys, String hetu, String etunimet, String sukunimi);
-
-    /**
-     * Kirjaa käyttäjän sisään palveluun hetun perusteella. Tunnistaa käyttäjän tarvittaessa vahvasti hetun perusteella.
-     * Jos lisätietoja tarvitaan ohjaa web-sivulle lisätietojen täyttämistä varten. Käyttäjän täytyy olla olemassa oleva
-     * virkailija.
-     * @param hetu Käyttäjän henkilötunnus
-     * @param kielisyys Käyttäjän asiointikieli
-     * @return Osoite johon käyttäjä tulee ohjata
-     */
-    String kirjaaKayttajaVahvallaTunnistuksella(String hetu, String kielisyys);
 }

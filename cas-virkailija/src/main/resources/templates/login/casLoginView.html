@@ -68,11 +68,11 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                            <form th:if="${provider.name.equals('suomifi') && cas.custom.properties['uusSuomifiEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
+                            <form th:if="${provider.name.equals('suomifi')}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="suomifi-button"
                                         type="image"
-                                        src="/cas/images/suomi.fi-logo_beta.png"
+                                        src="/cas/images/suomi.fi-logo.png"
                                         th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
                                         th:title="${provider.name + ' ' + provider.type}"
                                         th:id="${provider.name + '-button'}"
@@ -84,11 +84,6 @@
                                 <input type="hidden" name="_eventId" value="delegatedAuthenticationRedirect" />
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
-                        </div>
-                        <div class="kirjautumistapa kirjautumistapa-suomifi col-md-4">
-                            <a th:href="${cas.custom.properties['suomifiUrl']} + '?locale=' + ${#locale.getLanguage().toLowerCase()} + '&service=' + ${cas.custom.properties['suomifiUrlTarget']} + ${#locale.getLanguage().toLowerCase()}">
-                                <img src="/cas/images/suomi.fi-logo.png" />
-                            </a>
                         </div>
                     </div>
                 </div>
