@@ -102,6 +102,19 @@ class AlarmStack extends cdk.Stack {
     this.alarmTopic.addSubscription(
       new sns_subscriptions.LambdaSubscription(this.alarmsToSlackLambda),
     );
+
+    const pagerDutyIntegrationUrlParam =
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        "PagerDutyIntegrationUrlParam",
+        { parameterName: `/otuva/PagerDutyIntegrationUrl` },
+      );
+
+    this.alarmTopic.addSubscription(
+      new sns_subscriptions.UrlSubscription(
+        pagerDutyIntegrationUrlParam.stringValue,
+      ),
+    );
     this.exportValue(this.alarmTopic.topicArn);
   }
 
