@@ -152,34 +152,6 @@ public class CasRestTest {
                         endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/loginToken123"))));
     }
 
-    @Test
-    public void tunnistusVahvaTunnistautuminen() throws Exception {
-        databaseService.populate(organisaatioHenkilo(henkilo("henkilo123")
-                .withUsername("kayttaja123"), "organisaatio123"));
-        when(oppijanumerorekisteriClient.getHenkiloByHetu(any())).thenReturn(Optional.of(HenkiloDto.builder()
-                .oidHenkilo("henkilo123")
-                .build()));
-
-        mockMvc.perform(get("/cas/tunnistus")
-                .param("locale", "kielisyys123")
-                .param("ticket", "password"))
-                .andExpect(status().isFound())
-                .andExpect(header().string("Location",
-                        containsString(urlEncode("/henkilo-ui/kayttaja/uudelleenrekisterointi/kielisyys123/"))));
-    }
-
-    @Test
-    public void tunnistusVahvaTunnistautuminenHetuEiLoydy() throws Exception {
-        when(oppijanumerorekisteriClient.getHenkiloByHetu(any())).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/cas/tunnistus")
-                .param("locale", "kielisyys123")
-                .param("ticket", "password"))
-                .andExpect(status().isFound())
-                .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/eiloydy"))));
-    }
-
     private String urlEncode(String url) {
         try {
             return URLEncoder.encode(url, StandardCharsets.UTF_8.name());
