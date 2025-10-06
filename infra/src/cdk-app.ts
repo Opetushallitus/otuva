@@ -103,16 +103,16 @@ class AlarmStack extends cdk.Stack {
       new sns_subscriptions.LambdaSubscription(this.alarmsToSlackLambda),
     );
 
-    const pagerDutyIntegrationUrlParam =
-      ssm.StringParameter.fromSecureStringParameterAttributes(
+    const pagerDutyIntegrationUrlSecret =
+      secretsmanager.Secret.fromSecretNameV2(
         this,
-        "PagerDutyIntegrationUrlParam",
-        { parameterName: `/otuva/PagerDutyIntegrationUrl` },
+        "PagerDutyIntegrationUrlSecret",
+        "/otuva/PagerDutyIntegrationUrl",
       );
 
     this.alarmTopic.addSubscription(
       new sns_subscriptions.UrlSubscription(
-        pagerDutyIntegrationUrlParam.stringValue,
+        pagerDutyIntegrationUrlSecret.secretValue.toString(),
         { protocol: sns.SubscriptionProtocol.HTTPS },
       ),
     );
