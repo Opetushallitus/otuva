@@ -113,6 +113,7 @@ class AlarmStack extends cdk.Stack {
     this.alarmTopic.addSubscription(
       new sns_subscriptions.UrlSubscription(
         pagerDutyIntegrationUrlParam.stringValue,
+        { protocol: sns.SubscriptionProtocol.HTTPS },
       ),
     );
     this.exportValue(this.alarmTopic.topicArn);
