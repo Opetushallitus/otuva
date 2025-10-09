@@ -119,6 +119,9 @@ public class AuthorizationServerSecurityConfig {
         return context -> {
             if (context.getTokenType() == OAuth2TokenType.ACCESS_TOKEN) {
                 String username = context.getPrincipal().getName();
+                var kayttajatiedot = kayttajatiedotRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("Kayttajatiedot not found for username: " + username));
+                kayttajatiedot.incrementLoginCount();
                 var oid = kayttajatiedotRepository.findOidByUsername(username)
                         .orElseThrow(() -> new RuntimeException("Henkilö oid not found for username: " + username));
                 var roles = kayttajarooliProvider.getRolesByOrganisation(oid);
