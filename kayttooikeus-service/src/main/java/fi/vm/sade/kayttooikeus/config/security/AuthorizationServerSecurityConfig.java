@@ -119,9 +119,7 @@ public class AuthorizationServerSecurityConfig {
         return context -> {
             if (context.getTokenType() == OAuth2TokenType.ACCESS_TOKEN) {
                 String username = context.getPrincipal().getName();
-                var kayttajatiedot = kayttajatiedotRepository.findByUsername(username)
-                        .orElseThrow(() -> new RuntimeException("Kayttajatiedot not found for username: " + username));
-                kayttajatiedot.incrementLoginCount();
+                incrementLoginCounter(username);
                 var oid = kayttajatiedotRepository.findOidByUsername(username)
                         .orElseThrow(() -> new RuntimeException("Henkilö oid not found for username: " + username));
                 var roles = kayttajarooliProvider.getRolesByOrganisation(oid);
@@ -129,5 +127,12 @@ public class AuthorizationServerSecurityConfig {
                 context.getClaims().claim("roles", roles);
             }
         };
+    }
+
+    private void incrementLoginCounter(String username) {
+        var kayttajatiedot = kayttajatiedotRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Kayttajatiedot not found for username: " + username));
+        kayttajatiedot.incrementLoginCount();
+        kayttajatiedotRepository.save(kayttajatiedot);
     }
 }
