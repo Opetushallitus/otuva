@@ -23,7 +23,8 @@ public class DisableInactiveServiceUsersTask {
     private final CommonProperties commonProperties;
 
     public void execute() {
-        log.info("{} task is disabled", this.getClass().getSimpleName());
+        LocalDateTime passiveSince = LocalDateTime.now().minus(Period.parse(kayttooikeusProperties.getScheduling().getConfiguration().getDisableInactiveServiceUsersThreshold()));
+        summarize(passivateUnusedServiceUsers(passiveSince));
     }
 
     protected Map<Boolean, Integer> passivateUnusedServiceUsers(LocalDateTime passiveSince) {
