@@ -331,6 +331,7 @@ dependencies {
     // <custom>
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.webjars:bootstrap'
+    compileOnly 'jakarta.persistence:jakarta.persistence-api'
     implementation "com.google.code.gson:gson"
     implementation "fi.vm.sade.java-utils:java-http:0.5.0-SNAPSHOT"
     compileOnly "org.apache.tomcat.embed:tomcat-embed-core"
