@@ -35,7 +35,7 @@ cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
 cas.custom.properties.uusHakaEnabled: false
-cas.custom.properties.hakaUrl: https://virkailija.hahtuvaopintopolku.fi/service-provider-app/saml/login/alias/hakasp
+cas.custom.properties.hakaUrl: https://virkailija.hahtuvaopintopolku.fi/service-provider-app/saml/login/alias/hakatestsp
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet
 
 cas.service-registry.json.location: file:///app/services/hahtuva
