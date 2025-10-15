@@ -14,7 +14,6 @@ import org.apereo.cas.authentication.principal.WebApplicationServiceFactory;
 import org.apereo.cas.multitenancy.TenantDefinition;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.multitenancy.TenantsManager;
-import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.web.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
