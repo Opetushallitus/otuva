@@ -40,7 +40,6 @@ public class HttpAuthenticationHandlerTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup() throws IOException {
-        ServicesManager servicesManagerMock = mock(ServicesManager.class);
         OphHttpClientProxyRequest httpClientProxyRequestMock = mock(OphHttpClientProxyRequest.class);
         when(httpClientProxyRequestMock.execute(any())).thenAnswer(invocation
                 -> ((OphHttpResponseHandler<Object>) invocation.getArguments()[0]).handleResponse(httpResponseMock));
@@ -54,7 +53,7 @@ public class HttpAuthenticationHandlerTest {
         OphProperties properties = new CasOphProperties(environmentMock);
         OphHttpClient httpClient = new OphHttpClient(httpClientProxyMock, "cas", properties);
 
-        authenticationHandler = new HttpAuthenticationHandler(servicesManagerMock, 0, httpClient);
+        authenticationHandler = new HttpAuthenticationHandler(0, httpClient);
     }
 
     @Test
