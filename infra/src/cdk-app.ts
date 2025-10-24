@@ -32,6 +32,7 @@ import {
 } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
 import {createHealthCheckStacks} from "./health-check";
+import { ResponseAlarms } from "./response-alarms";
 
 class CdkApp extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -61,6 +62,7 @@ class CdkApp extends cdk.App {
       this,
       prefix("CasVirkailijaApplicationStack"),
       {
+        alarmTopic,
         ecsCluster: ecsStack.cluster,
         ...stackProps,
         bastion: appStack.bastion,
@@ -68,6 +70,7 @@ class CdkApp extends cdk.App {
     );
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
       ...stackProps,
+      alarmTopic,
       bastion: appStack.bastion,
       ecsCluster: ecsStack.cluster,
     });
@@ -452,7 +455,7 @@ class ApplicationStack extends cdk.Stack {
       certificates: [albCertificate],
     });
 
-    listener.addTargets("ServiceTarget", {
+    const target = listener.addTargets("ServiceTarget", {
       port: appPort,
       targets: [service],
       healthCheck: {
@@ -461,6 +464,15 @@ class ApplicationStack extends cdk.Stack {
         path: "/kayttooikeus-service/actuator/health",
         port: appPort.toString(),
       },
+    });
+
+    new ResponseAlarms(this, "ResponseAlarms", {
+      prefix: prefix("Kayttooikeus"),
+      alarmTopic: props.alarmTopic,
+      alb,
+      albThreshold: 10,
+      target,
+      targetThreshold: 25,
     });
 
     this.ipRestrictions(alb);
@@ -606,6 +618,7 @@ class ApplicationStack extends cdk.Stack {
 }
 
 type CasOppijaApplicationStackProps = cdk.StackProps & {
+  alarmTopic: sns.ITopic;
   bastion: ec2.BastionHostLinux;
   ecsCluster: ecs.Cluster;
 };
@@ -806,7 +819,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       certificates: [albCertificate],
     });
 
-    listener.addTargets("ServiceTarget", {
+    const target = listener.addTargets("ServiceTarget", {
       port: appPort,
       targets: [service],
       healthCheck: {
@@ -815,6 +828,15 @@ class CasOppijaApplicationStack extends cdk.Stack {
         path: "/cas-oppija/actuator/health",
         port: appPort.toString(),
       },
+    });
+
+    new ResponseAlarms(this, "ResponseAlarms", {
+      prefix: prefix("CasOppija"),
+      alarmTopic: props.alarmTopic,
+      alb,
+      albThreshold: 10,
+      target,
+      targetThreshold: 10,
     });
   }
   ssmSecret(name: string, prefix: string = "cas-oppija"): ecs.Secret {
@@ -829,6 +851,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
 }
 
 type CasVirkailijaApplicationStackProps = cdk.StackProps & {
+  alarmTopic: sns.ITopic;
   ecsCluster: ecs.Cluster;
   bastion: ec2.BastionHostLinux;
 };
@@ -1059,7 +1082,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       certificates: [albCertificate],
     });
 
-    listener.addTargets("ServiceTarget", {
+    const target = listener.addTargets("ServiceTarget", {
       port: appPort,
       targets: [service],
       healthCheck: {
@@ -1069,6 +1092,14 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         interval: cdk.Duration.seconds(120),
         unhealthyThresholdCount: 5,
       },
+    });
+    new ResponseAlarms(this, "ResponseAlarms", {
+      prefix: prefix("CasVirkailija"),
+      alarmTopic: props.alarmTopic,
+      alb,
+      albThreshold: 10,
+      target,
+      targetThreshold: 10,
     });
   }
   ssmSecret(name: string, prefix: string = "cas"): ecs.Secret {
