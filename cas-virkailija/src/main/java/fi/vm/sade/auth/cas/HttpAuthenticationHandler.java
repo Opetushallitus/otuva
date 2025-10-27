@@ -22,12 +22,12 @@ public class HttpAuthenticationHandler extends AbstractUsernamePasswordAuthentic
     private final OphHttpClient httpClient;
     private final Gson gson;
 
-    public HttpAuthenticationHandler(ServicesManager servicesManager, Integer order, OphHttpClient httpClient) {
-        this(servicesManager, new DefaultPrincipalFactory(), order, httpClient, new Gson());
+    public HttpAuthenticationHandler(Integer order, OphHttpClient httpClient) {
+        this(new DefaultPrincipalFactory(), order, httpClient, new Gson());
     }
 
-    public HttpAuthenticationHandler(ServicesManager servicesManager, PrincipalFactory principalFactory, Integer order, OphHttpClient httpClient, Gson gson) {
-        super("HttpAuthenticationHandler", servicesManager, principalFactory, order);
+    public HttpAuthenticationHandler(PrincipalFactory principalFactory, Integer order, OphHttpClient httpClient, Gson gson) {
+        super("HttpAuthenticationHandler", principalFactory, order);
         this.httpClient = httpClient;
         this.gson = gson;
     }

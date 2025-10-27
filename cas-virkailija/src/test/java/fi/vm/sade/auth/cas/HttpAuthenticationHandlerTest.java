@@ -15,8 +15,10 @@ import org.apereo.cas.multitenancy.TenantDefinition;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.multitenancy.TenantsManager;
 import org.apereo.cas.services.ServicesManager;
+import org.apereo.cas.web.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -40,7 +42,6 @@ public class HttpAuthenticationHandlerTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setup() throws IOException {
-        ServicesManager servicesManagerMock = mock(ServicesManager.class);
         OphHttpClientProxyRequest httpClientProxyRequestMock = mock(OphHttpClientProxyRequest.class);
         when(httpClientProxyRequestMock.execute(any())).thenAnswer(invocation
                 -> ((OphHttpResponseHandler<Object>) invocation.getArguments()[0]).handleResponse(httpResponseMock));
@@ -54,7 +55,7 @@ public class HttpAuthenticationHandlerTest {
         OphProperties properties = new CasOphProperties(environmentMock);
         OphHttpClient httpClient = new OphHttpClient(httpClientProxyMock, "cas", properties);
 
-        authenticationHandler = new HttpAuthenticationHandler(servicesManagerMock, 0, httpClient);
+        authenticationHandler = new HttpAuthenticationHandler(0, httpClient);
     }
 
     @Test
@@ -142,10 +143,30 @@ public class HttpAuthenticationHandlerTest {
             }
 
             @Override
+            public ApplicationContext getApplicationContext() {
+                return null;
+            }
+
+            @Override
             public Optional<TenantDefinition> extract(String requestPath) {
                 return Optional.empty();
             }
 
+            @Override
+            public String getTenantKey(TenantDefinition tenantDefinition) {
+                return "";
+            }
+
+        }, new UrlValidator() {
+            @Override
+            public boolean isValid(String value) {
+                return false;
+            }
+
+            @Override
+            public boolean isValidDomain(String value) {
+                return false;
+            }
         }).createService(request);
     }
 }
