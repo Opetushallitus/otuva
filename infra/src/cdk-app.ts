@@ -267,8 +267,8 @@ class ApplicationStack extends cdk.Stack {
       this,
       "TaskDefinition",
       {
-        cpu: 1024,
-        memoryLimitMiB: 2048,
+        cpu: 2048,
+        memoryLimitMiB: 4096,
         runtimePlatform: {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
