@@ -19,10 +19,10 @@
                 text_sv = []
             }
             if (window.location.hostname === "virkailija.opintopolku.fi") {
-                text_fi = ["Oppijanumeropalvelussa on ilmennyt virhe, jonka johdosta VTJ-yksilöinnit epäonnistuvat. Asiaa korjataan paraikaa."]
-                text_sv = ["Ett fel har uppstått i Studentnummertjänsten och därför misslyckas BDC-identifieringen. Ärendet håller på att rättas till."]
+                text_fi = ["Huoltotoimenpiteiden vuoksi KOSKI- ja Valpas-palveluissa voi esiintyä käyttökatkoja 28.10.2025 klo 10–14 välisenä aikana."]
+                text_sv = ["På grund av serviceåtgärder kan det förekomma avbrott i KOSKI- och Valpas-tjänsterna 28.10.2025 kl. 10–14."]
             }
-            var language = $("body").attr("data-language") || "fi";
+            var language = $(document.documentElement).attr("lang") || "fi";
 
             var text = language === "sv" ? text_sv : text_fi;
             var textNodes = text.map(toDiv)
