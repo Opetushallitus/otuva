@@ -109,6 +109,7 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(oid).orElseGet(Henkilo::new);
         henkilo.setOidHenkilo(oid);
         henkilo.setKayttajaTyyppi(KayttajaTyyppi.PALVELU);
+        henkilo.setSukunimiCached(createDto.getNimi());
         henkiloDataRepository.save(henkilo);
 
         String username = getUniqueUsername(createDto.getNimi());
