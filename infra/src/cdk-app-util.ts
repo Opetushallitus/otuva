@@ -45,7 +45,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("HahtuvaContinuousDeploymentPipeline"),
       connection,
       "hahtuva",
-      { owner: "Opetushallitus", name: "otuva", branch: "cas-7.3.0" },
+      { owner: "Opetushallitus", name: "otuva", branch: "master" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -53,7 +53,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("DevContinuousDeploymentPipeline"),
       connection,
       "dev",
-      { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -61,7 +61,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("QaContinuousDeploymentPipeline"),
       connection,
       "qa",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -69,7 +69,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("ProdContinuousDeploymentPipeline"),
       connection,
       "prod",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
       props
     );
   }
@@ -122,7 +122,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva" || env === "dev";
+    const runTests = env === "hahtuva";
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
       testStage.addAction(
