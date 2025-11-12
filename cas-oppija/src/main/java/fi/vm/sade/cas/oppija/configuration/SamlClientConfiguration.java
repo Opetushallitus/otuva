@@ -85,8 +85,8 @@ public class SamlClientConfiguration {
                 if (oidByHetu.isPresent()) {
                     attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oidByHetu.get()));
                 } else {
-                    resolveEidasId(attributes)
-                        .flatMap(this::findOidByEidasId)
+                    resolveEidasTunniste(attributes)
+                        .flatMap(this::findOidByEidasTunniste)
                         .ifPresent((oid) -> attributes.put(ATTRIBUTE_NAME_PERSON_OID, List.of(oid)));
                 }
             } catch (Exception e) {
@@ -100,7 +100,7 @@ public class SamlClientConfiguration {
             return resolveAttribute(attributes, ATTRIBUTE_NAME_NATIONAL_IDENTIFICATION_NUMBER, String.class);
         }
 
-        private Optional<String> resolveEidasId(Map<String, List<Object>> attributes) {
+        private Optional<String> resolveEidasTunniste(Map<String, List<Object>> attributes) {
             return resolveAttribute(attributes, ATTRIBUTE_NAME_EIDAS_ID, String.class);
         }
 
@@ -108,8 +108,8 @@ public class SamlClientConfiguration {
             return personService.findOidByNationalIdentificationNumber(nationalIdentificationNumber);
         }
 
-        private Optional<String> findOidByEidasId(String eidasId) throws SystemException {
-            return personService.findOidByEidasId(eidasId);
+        private Optional<String> findOidByEidasTunniste(String eidasTunniste) throws SystemException {
+            return personService.findOidByEidasTunniste(eidasTunniste);
         }
     }
 

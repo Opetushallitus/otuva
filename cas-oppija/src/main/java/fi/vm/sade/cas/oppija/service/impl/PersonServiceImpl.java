@@ -2,7 +2,7 @@ package fi.vm.sade.cas.oppija.service.impl;
 
 import fi.vm.sade.cas.oppija.exception.SystemException;
 import fi.vm.sade.cas.oppija.service.PersonService;
-import fi.vm.sade.cas.oppija.service.impl.PersonServiceImpl.OidByEidasIdRequest;
+import fi.vm.sade.cas.oppija.service.impl.PersonServiceImpl.OidByEidasRequest;
 import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpEntity;
 import fi.vm.sade.javautils.http.OphHttpRequest;
@@ -46,12 +46,12 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Optional<String> findOidByEidasId(String eidasId) throws SystemException {
+    public Optional<String> findOidByEidasTunniste(String eidasTunniste) throws SystemException {
         String url = properties.url("oppijanumerorekisteri-service.henkilo.byEidas.oid");
         OphHttpRequest request = OphHttpRequest.Builder
                 .post(url)
                 .setEntity(new OphHttpEntity.Builder()
-                        .content(ioExceptionToSystemException(() -> objectMapper.writeValueAsString(new OidByEidasIdRequest(eidasId))))
+                        .content(ioExceptionToSystemException(() -> objectMapper.writeValueAsString(new OidByEidasRequest(eidasTunniste))))
                         .contentType(ContentType.APPLICATION_JSON)
                         .build())
                 .build();
@@ -64,7 +64,7 @@ public class PersonServiceImpl implements PersonService {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    class OidByEidasIdRequest {
-        public String eidasId;
+    class OidByEidasRequest {
+        public String eidasTunniste;
     }
 }

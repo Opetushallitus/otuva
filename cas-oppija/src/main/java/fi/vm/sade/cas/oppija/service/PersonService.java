@@ -8,6 +8,6 @@ public interface PersonService {
 
     Optional<String> findOidByNationalIdentificationNumber(String nationalIdentificationNumber);
 
-    Optional<String> findOidByEidasId(String eidasId) throws SystemException;
+    Optional<String> findOidByEidasTunniste(String eidasTunniste) throws SystemException;
 
 }
