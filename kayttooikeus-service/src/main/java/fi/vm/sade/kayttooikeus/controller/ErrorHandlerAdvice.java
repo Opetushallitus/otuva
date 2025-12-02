@@ -164,6 +164,11 @@ public class ErrorHandlerAdvice {
         return handleException(req, exception, "internal_server_error", exception.getMessage());
     }
 
+    @ExceptionHandler(GoneException.class)
+    public ResponseEntity<String> gone(GoneException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(ex.getMessage());
+    }
+
     @ExceptionHandler(UnprocessableEntityException.class)
     public ResponseEntity<Map<String, Object>> unprocessableEntityException(UnprocessableEntityException exception, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

@@ -26,6 +26,8 @@ kayttooikeus.palvelukayttaja.client-id: ${ssm_kayttooikeus_oauth2_client_id}
 kayttooikeus.palvelukayttaja.client-secret: ${ssm_kayttooikeus_oauth2_client_secret}
 kayttooikeus.jwt.issuer-uri: https://prod.otuva.opintopolku.fi/kayttooikeus-service
 
+kayttooikeus.userdetails.enabled: true
+
 common.admin-oid: "1.2.246.562.24.00000000001"
 common.crypto-password: ${ssm_kayttooikeus_crypto_password}
 
