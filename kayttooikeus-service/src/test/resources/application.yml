@@ -35,6 +35,8 @@ kayttooikeus.palvelukayttaja.client-id: id
 kayttooikeus.palvelukayttaja.client-secret: secret
 kayttooikeus.jwt.issuer-uri: http://localhost:18080
 
+kayttooikeus.userdetails.enabled: true
+
 common:
   root-organization-oid: 1.2.246.562.10.00000000001
   group-organization-id: 1.2.246.562.28
