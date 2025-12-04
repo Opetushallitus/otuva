@@ -29,13 +29,15 @@
                         <span class="title-backline"><span th:text="#{login.muutKirjautumistavat}"></span></span>
                     </div>
                     <div class="row">
-                        <div th:unless="${cas.custom.properties['uusHakaEnabled']}" class="kirjautumistapa col-md-4">
+                        <div class="kirjautumistapa col-md-4">
                             <a th:with="parameters=${service != null} ? '?redirect=' + ${T(fi.vm.sade.Encode).uri(service.originalUrl)} : ''"
                                th:href="${cas.custom.properties['hakaUrl']} + ${parameters}">
                                 <img src="/cas/images/haka_landscape_medium.gif" />
                             </a>
                         </div>
-                        <div th:each="provider : ${delegatedAuthenticationProviderConfigurations}" class="kirjautumistapa col-md-4">
+                        <div th:each="provider : ${delegatedAuthenticationProviderConfigurations}"
+                             th:if="${provider.name.equals('haka') || provider.name.equals('mpassid') || provider.name.equals('suomifi')}"
+                             class="kirjautumistapa col-md-4">
                             <form th:if="${provider.name.equals('haka') && cas.custom.properties['uusHakaEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
                                         id="haka-button"
@@ -85,6 +87,78 @@
                                 <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
                             </form>
                         </div>
+                    </div>
+                    <div th:if="${cas.custom.properties['uusHakaEnabled']}" class="row">
+                        <div class="haka-select-wrapper">
+                            <img src="/cas/images/haka.png" style="margin-right: 24px; width: 64px;">
+                            <select id="identityProviderOptions" th:if="${#lists.size(delegatedAuthenticationProviderConfigurations) > 10}">
+                                <option th:each="entry : ${delegatedAuthenticationProviderConfigurations}"
+                                        th:if="${!entry.name.equals('suomifi') && !entry.name.equals('mpassid')}"
+                                        th:title="${#strings.defaultString(entry.title,entry.name)}"
+                                        th:id="${entry.name}"
+                                        th:value="${entry.name}"
+                                        th:text="${#strings.defaultString(entry.title,entry.name)}"/>
+                            </select>
+                        </div>
+
+                        <script type="text/javascript" th:inline="javascript">
+                            /*<![CDATA[*/
+
+                            const identityProviderOptions = $('#identityProviderOptions');
+                            const options = identityProviderOptions.find('option');
+                            const sorted = options.sort((a, b) => $(a).text().localeCompare($(b).text()));
+                            identityProviderOptions.empty().append(sorted).prop("selectedIndex", 0);
+
+                            $(identityProviderOptions).on('change', function () {
+                                const selectedValue = $(this).val();
+
+                                const formAction = /*[[@{/login}]]*/;
+                                const flowExecutionKey = /*[[${flowExecutionKey}]]*/;
+
+                                const form = $('<form>', {
+                                    method: 'POST',
+                                    action: formAction
+                                });
+
+                                $('<input>', {
+                                    type: 'hidden',
+                                    name: 'client_name',
+                                    value: selectedValue
+                                }).appendTo(form);
+                                $('<input>', {
+                                    type: 'hidden',
+                                    name: '_eventId',
+                                    value: 'delegatedAuthenticationRedirect'
+                                }).appendTo(form);
+                                $('<input>', {
+                                    type: 'hidden',
+                                    name: 'execution',
+                                    value: flowExecutionKey
+                                }).appendTo(form);
+
+                                form.appendTo('body').submit();
+                            });
+
+
+                            let primaryUrl = /*[[${delegatedAuthenticationProviderPrimary?.redirectUrl}]]*/;
+                            let primaryName = /*[[${delegatedAuthenticationProviderPrimary?.name}]]*/;
+
+                            const redirectTo = $("button[autoRedirectType=client]").attr("id");
+                            if (primaryUrl != null) {
+                                console.log(`Redirecting to primary identity provider ${primaryName} via URL ${primaryUrl}`)
+                                let form = document.getElementById(`form${primaryName}`);
+                                form.submit();
+                            }
+                            else if (redirectTo !== null && redirectTo !== undefined) {
+                                console.log(`Redirecting to identity provider URL ${redirectTo}`)
+                                let form = document.getElementById(`form${redirectTo}`);
+                                form.submit();
+                            } else {
+                                console.log("No identity provider is configured for auto redirection.");
+                            }
+                            /*]]>*/
+                        </script>
+
                     </div>
                 </div>
                 </div>

@@ -34,7 +34,7 @@ cas.authn.mfa.gauth.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
-cas.custom.properties.uusHakaEnabled: false
+cas.custom.properties.uusHakaEnabled: true
 cas.custom.properties.hakaUrl: https://virkailija.hahtuvaopintopolku.fi/service-provider-app/saml/login/alias/hakatestsp
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet
 
@@ -52,6 +52,7 @@ cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].keystore-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].private-key-password: ${cas_haka_keystore_password}
 cas.authn.pac4j.saml[0].service-provider-entity-id: https://virkailija.hahtuvaopintopolku.fi/cas/login/haka
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-aggregate: true
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
 cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
 cas.authn.pac4j.saml[0].keystore-path: /app/etc/hakakeystore.jks
@@ -63,7 +64,6 @@ cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
 cas.authn.pac4j.saml[0].maximum-authentication-lifetime: PT31536000S
 cas.authn.pac4j.saml[0].accepted-skew: PT7200S
-cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-aggregate: true
 
 cas.authn.pac4j.saml[1].client-name: suomifi
 cas.authn.pac4j.saml[1].keystore-password: ${cas_suomifi_keystore_password}

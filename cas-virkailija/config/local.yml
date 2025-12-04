@@ -31,9 +31,10 @@ cas.authn.pac4j.saml[0].client-name: haka
 cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8080/cas/login/haka
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-aggregate: true
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
 cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/localhakasp.xml
 cas.authn.pac4j.saml[0].keystore-path: /app/etc/localhakakeystore.jks
-cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka_test_metadata_signed.xml
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
