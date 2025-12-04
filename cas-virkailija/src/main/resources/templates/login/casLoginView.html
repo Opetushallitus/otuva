@@ -100,14 +100,19 @@
                                         th:text="${#strings.defaultString(entry.title,entry.name)}"/>
                             </select>
                         </div>
-
+                        <span id="hakaplaceholder" style="display: none;" th:text="#{haka.placeholder}"></span>
                         <script type="text/javascript" th:inline="javascript">
                             /*<![CDATA[*/
 
                             const identityProviderOptions = $('#identityProviderOptions');
                             const options = identityProviderOptions.find('option');
                             const sorted = options.sort((a, b) => $(a).text().localeCompare($(b).text()));
-                            identityProviderOptions.empty().append(sorted).prop("selectedIndex", 0);
+                            identityProviderOptions.empty()
+                                .append($('<option></option>')
+                                    .attr({ value: undefined, disabled: true })
+                                    .text($("#hakaplaceholder").text()))
+                                .append(sorted)
+                                .prop("selectedIndex", 0);
 
                             $(identityProviderOptions).on('change', function () {
                                 const selectedValue = $(this).val();
