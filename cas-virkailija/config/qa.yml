@@ -80,6 +80,24 @@ cas.authn.pac4j.saml[0].requested-attributes[0].friendly-name: nationalIdentific
 cas.authn.pac4j.saml[0].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
 cas.authn.pac4j.saml[0].requested-attributes[0].required: true
 
+cas.authn.pac4j.saml[1].client-name: haka
+cas.authn.pac4j.saml[1].keystore-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[1].private-key-password: ${cas_haka_keystore_password}
+cas.authn.pac4j.saml[1].service-provider-entity-id: https://virkailija.testiopintopolku.fi/cas/login/haka
+cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-aggregate: true
+cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
+cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/hakasp.xml
+cas.authn.pac4j.saml[1].keystore-path: /app/etc/hakakeystore.jks
+cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+cas.authn.pac4j.saml[1].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
+cas.authn.pac4j.saml[1].sign-authn-request: true
+cas.authn.pac4j.saml[1].wants-assertions-signed: true
+cas.authn.pac4j.saml[1].wants-responses-signed: true
+cas.authn.pac4j.saml[1].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[1].use-name-qualifier: false
+cas.authn.pac4j.saml[1].maximum-authentication-lifetime: PT31536000S
+cas.authn.pac4j.saml[1].accepted-skew: PT7200S
+
 host.cas: virkailija.testiopintopolku.fi
 host.virkailija: virkailija.testiopintopolku.fi
 host.alb: virkailija.testiopintopolku.fi
