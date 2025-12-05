@@ -345,7 +345,11 @@ main {
 }
 
 .haka-select-wrapper {
-    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 90%;
     border: 1px solid #000;
     border-radius: 6px;
     padding: 16px;
@@ -353,5 +357,11 @@ main {
 }
 
 #identityProviderOptions {
-    height: 26px;
+    height: 32px;
+    max-width: 340px;
+}
+
+#haka-login {
+    height: 32px;
+    line-height: 16px;
 }

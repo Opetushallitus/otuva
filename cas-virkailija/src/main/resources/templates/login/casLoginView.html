@@ -90,7 +90,7 @@
                     </div>
                     <div th:if="${cas.custom.properties['uusHakaEnabled']}" class="row">
                         <div class="haka-select-wrapper">
-                            <img src="/cas/images/haka.png" style="margin-right: 24px; width: 64px;">
+                            <img src="/cas/images/haka.png" style="height: 32px;">
                             <select id="identityProviderOptions" th:if="${#lists.size(delegatedAuthenticationProviderConfigurations) > 10}">
                                 <option th:each="entry : ${delegatedAuthenticationProviderConfigurations}"
                                         th:if="${!entry.name.equals('suomifi') && !entry.name.equals('mpassid')}"
@@ -99,6 +99,7 @@
                                         th:value="${entry.name}"
                                         th:text="${#strings.defaultString(entry.title,entry.name)}"/>
                             </select>
+                            <button id="haka-login" class="btn btn-submit btn-primary" th:text="#{login.button}" disabled></button>
                         </div>
                         <span id="hakaplaceholder" style="display: none;" th:text="#{haka.placeholder}"></span>
                         <script type="text/javascript" th:inline="javascript">
@@ -111,11 +112,21 @@
                                 .append($('<option></option>')
                                     .attr({ value: undefined, disabled: true })
                                     .text($("#hakaplaceholder").text()))
-                                .append(sorted)
-                                .prop("selectedIndex", 0);
+                                .append(sorted);
 
-                            $(identityProviderOptions).on('change', function () {
-                                const selectedValue = $(this).val();
+                            const hakaOrganisation = window.localStorage.getItem("hakaOrganisation");
+                            if (hakaOrganisation) {
+                                identityProviderOptions.find(`option[value="${hakaOrganisation}"]`).attr({ selected: true });
+                                $("#haka-login").attr({ disabled: false });
+                            } else {
+                                identityProviderOptions.prop("selectedIndex", 0);
+                            }
+
+                            const hakaLogin = () => {
+                                const selectedValue = identityProviderOptions.val();
+                                if (!selectedValue) {
+                                    return;
+                                }
 
                                 const formAction = /*[[@{/login}]]*/;
                                 const flowExecutionKey = /*[[${flowExecutionKey}]]*/;
@@ -142,8 +153,17 @@
                                 }).appendTo(form);
 
                                 form.appendTo('body').submit();
+                            }
+
+                            $(identityProviderOptions).on('change', function () {
+                                const selectedValue = $(this).val();
+                                if (selectedValue) {
+                                    window.localStorage.setItem("hakaOrganisation", selectedValue);
+                                    $("#haka-login").attr({ disabled: false });
+                                }
                             });
 
+                            $("#haka-login").on('click', hakaLogin)
 
                             let primaryUrl = /*[[${delegatedAuthenticationProviderPrimary?.redirectUrl}]]*/;
                             let primaryName = /*[[${delegatedAuthenticationProviderPrimary?.name}]]*/;
