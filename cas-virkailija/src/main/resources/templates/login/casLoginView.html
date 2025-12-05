@@ -42,7 +42,7 @@
                                 <input name="submitButton"
                                         id="haka-button"
                                         type="image"
-                                        src="/cas/images/haka_landscape_medium.gif"
+                                        src="/cas/images/haka.png"
                                         th:attr="autoRedirectType=${#strings.toLowerCase(provider.autoRedirectType)},redirectUrl=@{${provider.redirectUrl}}"
                                         th:title="${provider.name + ' ' + provider.type}"
                                         th:id="${provider.name + '-button'}"
@@ -88,12 +88,12 @@
                             </form>
                         </div>
                     </div>
-                    <div th:if="${cas.custom.properties['uusHakaEnabled']}" class="row">
+                    <div th:if="${cas.custom.properties['uusHakaEnabled'] && #lists.size(delegatedAuthenticationProviderConfigurations) > 6}" class="row">
                         <div class="haka-select-wrapper">
                             <img src="/cas/images/haka.png" style="height: 32px;">
-                            <select id="identityProviderOptions" th:if="${#lists.size(delegatedAuthenticationProviderConfigurations) > 10}">
+                            <select id="identityProviderOptions">
                                 <option th:each="entry : ${delegatedAuthenticationProviderConfigurations}"
-                                        th:if="${!entry.name.equals('suomifi') && !entry.name.equals('mpassid')}"
+                                        th:if="${entry.name.startsWith('haka')}"
                                         th:title="${#strings.defaultString(entry.title,entry.name)}"
                                         th:id="${entry.name}"
                                         th:value="${entry.name}"
