@@ -1,6 +1,5 @@
 fi.vm.sade.CasOphConfiguration
 fi.vm.sade.auth.config.AuthenticationEventExecutionPlanConfiguration
-fi.vm.sade.auth.config.FilterConfiguration
 fi.vm.sade.auth.config.HttpClientConfiguration
 fi.vm.sade.auth.config.InterruptConfiguration
 fi.vm.sade.auth.config.InterruptInquiryExecutionPlanConfiguration
