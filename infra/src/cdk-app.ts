@@ -1085,7 +1085,6 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
     const target = listener.addTargets("ServiceTarget", {
       port: appPort,
       targets: [service],
-      stickinessCookieName: "CasVirkailijaStickiness",
       stickinessCookieDuration: cdk.Duration.hours(1),
       healthCheck: {
         enabled: true,
