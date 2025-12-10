@@ -97,6 +97,7 @@ cas.authn.pac4j.saml[1].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[1].use-name-qualifier: false
 cas.authn.pac4j.saml[1].maximum-authentication-lifetime: PT31536000S
 cas.authn.pac4j.saml[1].accepted-skew: PT7200S
+cas.authn.pac4j.saml[1].callback-url-type: NONE
 
 host.cas: virkailija.testiopintopolku.fi
 host.virkailija: virkailija.testiopintopolku.fi
