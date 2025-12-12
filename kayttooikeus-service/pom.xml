@@ -34,6 +34,7 @@
         <sonar.organization>opetushallitus</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>**/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <querydslVersion>5.1</querydslVersion>
     </properties>
 
     <repositories>
@@ -297,22 +298,22 @@
             <artifactId>freemarker</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
+            <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <classifier>jakarta</classifier>
-            <version>${querydsl.version}</version>
+            <version>${querydslVersion}</version>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
+            <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
             <classifier>jakarta</classifier>
-            <version>${querydsl.version}</version>
+            <version>${querydslVersion}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
+            <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-sql</artifactId>
-            <version>${querydsl.version}</version>
+            <version>${querydslVersion}</version>
         </dependency>
 
         <!-- Test -->
