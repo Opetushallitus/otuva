@@ -34,7 +34,7 @@
         <sonar.organization>opetushallitus</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>**/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <querydslVersion>5.1</querydslVersion>
+        <querydslVersion>5.6.1</querydslVersion>
     </properties>
 
     <repositories>
