@@ -723,6 +723,9 @@ class CasOppijaApplicationStack extends cdk.Stack {
         keystore_base64: this.ssmSecret("keystore"),
         registered_service_1: this.ssmSecret("RegisteredService1"),
         registered_service_2: this.ssmSecret("RegisteredService2"),
+        registered_service_tiedotuspalvelu: this.ssmSecret(
+          "RegisteredService/Tiedotuspalvelu",
+        ),
         sp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
