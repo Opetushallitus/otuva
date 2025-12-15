@@ -4,12 +4,12 @@
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.162.1-alpha.0",
     "@aws-sdk/client-iam": "^3.515.0",
     "@aws-sdk/client-sts": "^3.515.0",
-    "@types/node": "^20.11.19",
+    "@types/node": "24.10.3",
     "aws-cdk": "^2.162.1",
     "aws-cdk-lib": "^2.162.1",
     "constructs": "^10.3.0",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "5.9.3"
   }
 }
