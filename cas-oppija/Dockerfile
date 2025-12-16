@@ -27,6 +27,7 @@ echo -n ${idp_metadata} > /app/config/idp-metadata.xml
 
 echo -n ${registered_service_1} > /app/config/service-1.json
 echo -n ${registered_service_2} > /app/config/service-2.json
+echo -n ${registered_service_tiedotuspalvelu} > /app/config/tiedotuspalvelu-3.json
 
 exec java \
   -XX:InitialRAMPercentage=80.0 \
