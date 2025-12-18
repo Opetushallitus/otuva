@@ -1,15 +1,19 @@
 {
-  "extends": ["config:best-practices"],
-  "schedule": ["at any time"],
-  "automerge": false,
-  "packageRules": [{
-    "matchPackageNames": ["*"],
-    "enabled": false
-  }, {
-    "matchFileNames": ["kayttooikeus-service/**"],
-    "automerge": true
-  }],
+  "extends": ["config:best-practices", ":automergePatch", ":automergeDigest"],
+  "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
-    "enabled": true
-  }
+    "enabled": true,
+    "labels": ["security"]
+  },
+  "prConcurrentLimit": 10,
+  "packageRules": [
+    {
+      "matchFileNames": [
+        "service-provider/**",
+        "cas-oppija/**",
+        "cas-virkailija/**"
+      ],
+      "enabled": false
+    }
+  ]
 }
