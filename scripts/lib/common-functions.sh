@@ -1,4 +1,5 @@
 export repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+export CDK_DISABLE_CLI_TELEMETRY=true
 
 function require_docker {
   require_command docker
