@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+import org.apereo.cas.interrupt.InterruptInquirer;
+import org.apereo.cas.interrupt.InterruptInquiryExecutionPlanConfigurer;
 import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
@@ -30,6 +32,9 @@ import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
 import fi.vm.sade.auth.cas.OtuvaDelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.clients.HttpClientUtil;
 import fi.vm.sade.auth.clients.KayttooikeusRestClient;
+import fi.vm.sade.auth.clients.OppijanumerorekisteriRestClient;
+import fi.vm.sade.auth.interrupt.LoginRedirectInterruptInquirer;
+import fi.vm.sade.auth.interrupt.LoginRedirectUrlGenerator;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
 
@@ -56,6 +61,11 @@ public class CasOphConfiguration {
     }
 
     @Bean
+    public OppijanumerorekisteriRestClient oppijanumerorekisteriRestClient() {
+        return new OppijanumerorekisteriRestClient(casOphProperties(), environment);
+    }
+
+    @Bean
     public ObservationRegistry observationRegistry() {
         // Disable all observations
         return ObservationRegistry.NOOP;
@@ -77,6 +87,22 @@ public class CasOphConfiguration {
     public TicketSerializationExecutionPlanConfigurer ticketSerializationExecutionPlanConfigurer() {
         return plan -> {
             plan.registerTicketSerializer(new OtuvaTransientSessionTicketSerializer());
+        };
+    }
+
+    @Bean
+    public InterruptInquirer loginRedirectInterruptInquirer() {
+        return new LoginRedirectInterruptInquirer(
+                kayttooikeusRestClient(),
+                new LoginRedirectUrlGenerator(kayttooikeusRestClient(), oppijanumerorekisteriRestClient(), casOphProperties())
+        );
+    }
+
+    @Bean
+    public InterruptInquiryExecutionPlanConfigurer interruptInquiryExecutionPlanConfigurer(
+            @Qualifier("loginRedirectInterruptInquirer") InterruptInquirer loginRedirectInterruptInquirer) {
+        return plan -> {
+            plan.registerInterruptInquirer(loginRedirectInterruptInquirer);
         };
     }
 
