@@ -50,7 +50,7 @@ public class KayttooikeusRestClient {
     }
 
     private String jsonString(String json) {
-        LOGGER.info("Parsing json {}", json);
+        LOGGER.trace("Parsing json {}", json);
         if (json == null) {
             return "";
         }
@@ -75,15 +75,15 @@ public class KayttooikeusRestClient {
 
     public Optional<String> getRedirectCodeByUsername(String username) {
         String url = this.ophProperties.url("kayttooikeus-service.cas.login.redirect.username", username);
-        LOGGER.info("Fetching redirect code for username {}", username);
+        LOGGER.trace("Fetching redirect code for username {}", username);
         String redirectCode = httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())
                 .expectedStatus(200)
                 .mapWith(this::jsonString)
                 .orElseThrow(() -> {
-                    LOGGER.info("No redirect code for username {}", username);
+                    LOGGER.trace("No redirect code for username {}", username);
                     return noContentOrNotFoundException(url);
                 });
-        LOGGER.info("Received redirect code {} for username {}", redirectCode, username);
+        LOGGER.trace("Received redirect code {} for username {}", redirectCode, username);
         return Optional.ofNullable(redirectCode).map(String::trim).filter(not(String::isEmpty));
     }
 
