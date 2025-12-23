@@ -29,18 +29,18 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
     private final Base64.Decoder decoder = Base64.getDecoder();
 
     public OtuvaTransientSessionTicketSerializer() {
-        LOGGER.info("Initializing OtuvaTransientSessionTicketSerializer");
+        LOGGER.trace("Initializing OtuvaTransientSessionTicketSerializer");
     }
 
     @Override
     public TransientSessionTicketImpl from(String s) {
-        LOGGER.info("from String");
+        LOGGER.trace("from String");
         return fromBase64String(s);
     }
 
     @Override
     public TransientSessionTicketImpl from(Reader reader) {
-        LOGGER.info("from Reader");
+        LOGGER.trace("from Reader");
         try {
             return fromBase64String(IOUtils.toString(reader));
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public TransientSessionTicketImpl from(InputStream stream) {
-        LOGGER.info("from InputStream");
+        LOGGER.trace("from InputStream");
         try {
             return fromBase64String(IOUtils.toString(stream, charset));
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public TransientSessionTicketImpl from(File file) {
-        LOGGER.info("from File");
+        LOGGER.trace("from File");
         try (FileInputStream fis = new FileInputStream(file)) {
             return from(fis);
         } catch (IOException e) {
@@ -70,7 +70,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public TransientSessionTicketImpl from(Writer writer) {
-        LOGGER.info("from Writer");
+        LOGGER.trace("from Writer");
         // Seems like a bug as toString is inherited from java.lang.Object but AbstractJacksonBackedSerializer does the same
         return from(writer.toString());
     }
@@ -82,7 +82,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public void to(OutputStream out, TransientSessionTicketImpl object) {
-        LOGGER.info("to OutputStream");
+        LOGGER.trace("to OutputStream");
         try {
             IOUtils.write(toBase64String(object), out, charset);
         } catch (IOException e) {
@@ -92,7 +92,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public void to(Writer out, TransientSessionTicketImpl object) {
-        LOGGER.info("to Writer");
+        LOGGER.trace("to Writer");
         try {
             IOUtils.write(toBase64String(object), out);
         } catch (IOException e) {
@@ -102,7 +102,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public void to(File out, TransientSessionTicketImpl object) {
-        LOGGER.info("to File");
+        LOGGER.trace("to File");
         try {
             FileUtils.write(out, toBase64String(object), charset);
         } catch (IOException e) {
@@ -116,7 +116,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public String toString(TransientSessionTicketImpl object) {
-        LOGGER.info("to String");
+        LOGGER.trace("to String");
         return toBase64String(object);
     }
 
@@ -127,14 +127,14 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
 
     @Override
     public List<TransientSessionTicketImpl> fromList(String s) {
-        LOGGER.info("List from String");
+        LOGGER.trace("List from String");
         byte[] bytes = decoder.decode(s.getBytes(StandardCharsets.UTF_8));
         return SerializationUtils.deserialize(bytes, List.class);
     }
 
     @Override
     public String fromList(Collection<TransientSessionTicketImpl> json) {
-        LOGGER.info("List to String");
+        LOGGER.trace("List to String");
         var list = new ArrayList<>();
         list.addAll(json);
         return encoder.encodeToString(SerializationUtils.serialize(list));
@@ -143,7 +143,7 @@ public class OtuvaTransientSessionTicketSerializer implements StringSerializer<T
     @Override
     public TransientSessionTicketImpl merge(TransientSessionTicketImpl baseEntity,
             TransientSessionTicketImpl childEntity) {
-        LOGGER.info("merge " + baseEntity.getId() + " to " + childEntity.getId());
+        LOGGER.trace("merge " + baseEntity.getId() + " to " + childEntity.getId());
         return childEntity;
     }
 }

@@ -42,7 +42,7 @@ public class OtuvaJpaTicketRegistry extends JpaTicketRegistry {
     public Optional<String> getTicketIdWithSessionindex(String sessionindex) {
         return transactionTemplate.execute(status -> {
             val sql = "SELECT t.id FROM cas_tickets t WHERE t.type = :type AND (t.attributes->'sessionindex')\\:\\:jsonb \\?\\? :sessionindex";
-            LOGGER.info("Executing SQL query [{}]", sql);
+            LOGGER.trace("Executing SQL query [{}]", sql);
             val query = entityManager.createNativeQuery(sql, String.class);
             query.setParameter("type", getTicketTypeName(TicketGrantingTicket.class));
             query.setParameter("sessionindex", sessionindex);
