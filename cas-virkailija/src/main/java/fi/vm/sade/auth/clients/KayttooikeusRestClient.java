@@ -8,6 +8,7 @@ import fi.vm.sade.javautils.http.OphHttpEntity;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.properties.OphProperties;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.http.entity.ContentType;
 import org.springframework.core.env.Environment;
@@ -19,6 +20,7 @@ import static fi.vm.sade.auth.clients.HttpClientUtil.CALLER_ID;
 import static fi.vm.sade.auth.clients.HttpClientUtil.noContentOrNotFoundException;
 import static java.util.function.Predicate.not;
 
+@Slf4j
 @Component
 public class KayttooikeusRestClient {
     private final OphHttpClient httpClient;
@@ -76,6 +78,7 @@ public class KayttooikeusRestClient {
                 .expectedStatus(200)
                 .mapWith(this::jsonString)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
+        LOGGER.info("Received redirect code {} for username {}", redirectCode, username);
         return Optional.ofNullable(redirectCode).map(String::trim).filter(not(String::isEmpty));
     }
 
