@@ -111,4 +111,4 @@ require-strong-identification.usernamelist: ""
 # To all users
 email-verification-enabled: false
 # To specified users even if cas.email-verification-enabled is false
-email-verification-enabled.usernamelist: ""
+email-verification-enabled.usernamelist: "tottitesti"
