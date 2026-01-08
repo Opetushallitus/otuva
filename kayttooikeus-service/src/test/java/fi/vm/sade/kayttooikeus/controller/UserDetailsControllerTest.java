@@ -30,7 +30,7 @@ public class UserDetailsControllerTest extends AbstractControllerTest {
     @Test
     public void getUserDetailsReturnsOkWithoutAuthentication() throws Exception {
         mvc.perform(get("/userDetails/user1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isGone());
     }
 
     @Test
