@@ -155,12 +155,18 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.00000000001"})
-    public void henkilohakuAsNormalUserCantFindOppija() {
+    public void henkilohakuAsNormalFindsOnlyHenkilosFromOwnOrganisations() {
+        // user without organisation (i.e. oppija)
         populate(henkilo("1.2.3.4.2").withNimet("arpa1", "kuutio").withPassive(false).withDuplikate(false));
+        // user in different organisation
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.3").withNimet("arpa3", "kuutio").withPassive(false).withDuplikate(false), "3.4.5.6.8"),
+                kayttoOikeusRyhma("RYHMA").withOikeus(oikeus("OPPIJANUMEROREKISTERI", "HENKILON_RU"))
+        ));
         // current user
         populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.1").withNimet("arpa2", "kuutio").withPassive(false).withDuplikate(false), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA")
+                kayttoOikeusRyhma("RYHMA").withOikeus(oikeus("OPPIJANUMEROREKISTERI", "HENKILON_RU"))
         ));
 
         HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, true,
