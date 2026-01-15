@@ -228,6 +228,11 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @Test
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void henkilohakuAsAdminByKayttooikeusryhma() {
+        populate(myonnettyKayttoOikeus(
+                organisaatioHenkilo(henkilo("1.2.3.4.1"), commonProperties.getRootOrganizationOid()),
+                kayttoOikeusRyhma("REKISTERINPITAJA").withOikeus(oikeus("OPPIJANUMEROREKISTERI", "REKISTERINPITAJA"))
+        ));
+
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
                 kayttoOikeusRyhma("RYHMA")
@@ -241,7 +246,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("3.4.5.6.7")))
                 .willReturn(Optional.of(creaetOrganisaatioPerustietoWithNimi("3.4.5.6.7", "nimiFi")));
 
-        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(null, null,
+        HenkilohakuCriteriaDto henkilohakuCriteriaDto = new HenkilohakuCriteriaDto(true, null,
                 null, null, null, null, null, null, null,
                 myonnettyKayttoOikeusRyhmaTapahtuma.getKayttoOikeusRyhma().getId());
         Collection<HenkilohakuResultDto> henkilohakuResultDtoList = this.henkiloService.henkilohaku(henkilohakuCriteriaDto, 0L, OrderByHenkilohaku.HENKILO_NIMI_ASC);
