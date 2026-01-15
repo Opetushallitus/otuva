@@ -22,7 +22,6 @@ public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
     private LocalDateTime aikaleima;
     private String kasittelija;
     private String organisaatioOid;
-    private String tehtavanimike;
     private long kayttoOikeusRyhmaId;
     private TextGroupListDto kuvaus;
     private String rooli;
@@ -30,7 +29,7 @@ public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
     private TextGroupListDto kayttoOikeusKuvaus;
     private String palvelu;
     private TextGroupListDto palveluKuvaus;
-    
+
     public void setKuvausId(Long id) {
         this.kuvaus = localizeAsListLaterById(id);
     }
@@ -42,7 +41,7 @@ public class KayttoOikeusHistoriaDto implements Serializable, LocalizableDto {
     public void setPalveluKuvausId(Long id) {
         this.palveluKuvaus = localizeAsListLaterById(id);
     }
-    
+
     @Override
     public Stream<Localizable> localizableTexts() {
         return LocalizableDto.of(kuvaus, kayttoOikeusKuvaus, palveluKuvaus).localizableTexts();

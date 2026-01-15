@@ -403,7 +403,7 @@ public class PermissionCheckerTest {
         "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
         "ROLE_APP_PALVELU1_OIKEUS1_" + ORG2,
     })
-    public void hasRoleForOrganisationShouldReturnFalseWhenUserNotAssociatedWithOrg() {
+    public void checkRoleForOrganisationShouldReturnFalseWhenUserNotAssociatedWithOrg() {
         assertThat(permissionChecker.checkRoleForOrganisation(singletonList("orgThatLoggedInUserIsNotAssociatedWith"),
                 singletonMap("PALVELU1", singletonList("OIKEUS1"))))
                 .isFalse();
@@ -424,7 +424,7 @@ public class PermissionCheckerTest {
         "ROLE_APP_PALVELU1_OIKEUS1_" + ORG1,
         "ROLE_APP_PALVELU1_OIKEUS1_" + ORG2,
     })
-    public void hasRoleForOrganisationShouldReturnTrueWhenUserIsAssociatedWithOrg() {
+    public void checkRoleForOrganisationShouldReturnTrueWhenUserIsAssociatedWithOrg() {
         Mockito.when(organisaatioClient.getActiveParentOids(anyString()))
                 .thenReturn(Lists.newArrayList(ORG2, "parent1", "parent2", "parent3"));
         assertThat(permissionChecker.checkRoleForOrganisation(singletonList(ORG1), singletonMap("PALVELU1", singletonList("OIKEUS1")))).isTrue();

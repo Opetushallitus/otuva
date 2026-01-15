@@ -109,7 +109,6 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                         .tyyppi("joku tyyppi")
                         .myonnettyTapahtumaId(43L)
                         .selected(true)
-                        .tehtavanimike("joku nimike")
                         .voimassaPvm(LocalDate.of(2015, 1, 22))
                         .build()));
 
@@ -339,7 +338,6 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .ryhmaNames(new TextGroupListDto(1L).put("FI", "Ryhmänimi test"))
                 .tyyppi("joku tyyppi")
                 .voimassaPvm(LocalDate.of(2016, 2, 22))
-                .tehtavanimike("joku tehtävä")
                 .selected(true)
                 .myonnettyTapahtumaId(234234L)
                 .alkuPvm(LocalDate.of(2016, 1, 1))

@@ -84,8 +84,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         // Passivoitava
         String oidHenkilo = "1.2.3.4.5";
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo(oidHenkilo).withUsername("Passivoitava"), "4.5.6.7.8")
-                        .tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo(oidHenkilo).withUsername("Passivoitava"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaAlkaen(LocalDate.now().minusMonths(1)).voimassaPaattyen(LocalDate.now().plusMonths(1)));

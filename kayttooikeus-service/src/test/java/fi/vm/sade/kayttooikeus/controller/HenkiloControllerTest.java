@@ -17,7 +17,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,11 +68,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     public void listOrganisatioHenkilosTest() throws Exception {
         given(this.service.listOrganisaatioHenkilos("1.2.3.4.5", "fi", null)).willReturn(singletonList(
                 OrganisaatioHenkiloWithOrganisaatioDto.organisaatioBuilder().id(1L)
-                        .voimassaAlkuPvm(LocalDate.of(2016,1,1))
-                        .voimassaLoppuPvm(LocalDate.of(2016,12,31))
-                        .tyyppi(OrganisaatioHenkiloTyyppi.HAKIJA)
                         .passivoitu(false)
-                        .tehtavanimike("Devaaja")
                         .organisaatio(OrganisaatioWithChildrenDto.builder()
                                 .oid("1.2.3.4.7")
                                 .nimi(new TextGroupMapDto().put("fi", "Suomeksi")

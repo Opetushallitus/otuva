@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
@@ -23,18 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.PALVELU;
-import static fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi.VIRKAILIJA;
 import static fi.vm.sade.kayttooikeus.dto.Localizable.comparingPrimarlyBy;
-import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -50,15 +42,12 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
     private final String FALLBACK_LANGUAGE = "fi";
 
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
-    private final KayttoOikeusRepository kayttoOikeusRepository;
     private final HenkiloDataRepository henkiloDataRepository;
     private final LakkautettuOrganisaatioRepository lakkautettuOrganisaatioRepository;
     private final HaettuKayttooikeusRyhmaRepository haettuKayttooikeusRyhmaRepository;
 
     private final PermissionCheckerService permissionCheckerService;
     private final MyonnettyKayttoOikeusService myonnettyKayttoOikeusService;
-
-    private final OrikaBeanMapper mapper;
 
     private final OrganisaatioClient organisaatioClient;
 
@@ -100,20 +89,6 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<KayttajaTyyppi> listPossibleHenkiloTypesAccessibleForCurrentUser() {
-        if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(UserDetailsUtil.getCurrentUserOid(),
-                PALVELU_KAYTTOOIKEUS, ROLE_REKISTERINPITAJA)) {
-            return asList(VIRKAILIJA, PALVELU);
-        }
-        if (kayttoOikeusRepository.isHenkiloMyonnettyKayttoOikeusToPalveluInRole(UserDetailsUtil.getCurrentUserOid(),
-                PALVELU_KAYTTOOIKEUS, ROLE_CRUD)) {
-            return singletonList(VIRKAILIJA);
-        }
-        return emptyList();
-    }
-
-    @Override
     public Collection<String> listOrganisaatioOidBy(OrganisaatioHenkiloCriteria criteria) {
         String kayttajaOid = permissionCheckerService.getCurrentUserOid();
         List<String> organisaatioOids = organisaatioHenkiloRepository.findUsersOrganisaatioHenkilosByPalveluRoolis(
@@ -137,65 +112,6 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
         return organisaatioHenkiloRepository.findOrganisaatioHenkilosForHenkilo(henkiloOid);
     }
 
-    @Override
-    @Transactional
-    public List<OrganisaatioHenkiloDto> addOrganisaatioHenkilot(String henkiloOid,
-                                                                List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot) {
-        Henkilo henkilo = henkiloDataRepository.findByOidHenkilo(henkiloOid)
-                .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
-        return findOrCreateOrganisaatioHenkilos(organisaatioHenkilot, henkilo);
-    }
-
-    private List<OrganisaatioHenkiloDto> findOrCreateOrganisaatioHenkilos(List<OrganisaatioHenkiloCreateDto> organisaatioHenkilot,
-                                                                          Henkilo henkilo) {
-        organisaatioHenkilot.stream()
-                .filter((OrganisaatioHenkiloCreateDto createDto) ->
-                    henkilo.getOrganisaatioHenkilos().stream()
-                            .noneMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(createDto.getOrganisaatioOid()))
-                )
-                .forEach((OrganisaatioHenkiloCreateDto createDto) -> {
-                    validateOrganisaatioOid(createDto.getOrganisaatioOid());
-                    OrganisaatioHenkilo organisaatioHenkilo = mapper.map(createDto, OrganisaatioHenkilo.class);
-                    organisaatioHenkilo.setHenkilo(henkilo);
-                    henkilo.getOrganisaatioHenkilos().add(organisaatioHenkiloRepository.save(organisaatioHenkilo));
-                });
-
-        return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
-    }
-
-    @Override
-    @Transactional
-    public List<OrganisaatioHenkiloDto> createOrUpdateOrganisaatioHenkilos(String henkiloOid,
-                                                                           List<OrganisaatioHenkiloUpdateDto> organisaatioHenkiloDtoList) {
-        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
-                .orElseThrow(() -> new NotFoundException("Henkilöä ei löytynyt OID:lla " + henkiloOid));
-        this.findOrCreateOrganisaatioHenkilos(this.mapper.mapAsList(organisaatioHenkiloDtoList, OrganisaatioHenkiloCreateDto.class),
-                henkilo);
-
-        organisaatioHenkiloDtoList.stream()
-                .filter((OrganisaatioHenkiloUpdateDto t) ->
-                        henkilo.getOrganisaatioHenkilos().stream()
-                                .anyMatch((OrganisaatioHenkilo u) -> u.getOrganisaatioOid().equals(t.getOrganisaatioOid()))
-                )
-                .forEach(organisaatioHenkiloUpdateDto -> {
-                    if (!UserDetailsUtil.getCurrentUserOid().equals(henkiloOid)) {
-                        Map<String, List<String>> allowedRoles = Collections.singletonMap(PALVELU_KAYTTOOIKEUS, asList("CRUD"));
-                        this.permissionCheckerService.hasRoleForOrganisations(Collections.singletonList(organisaatioHenkiloUpdateDto),
-                                allowedRoles);
-                    }
-                    // Make sure organisation exists.
-                    validateOrganisaatioOid(organisaatioHenkiloUpdateDto.getOrganisaatioOid());
-                    OrganisaatioHenkilo savedOrgHenkilo = this.findFirstMatching(organisaatioHenkiloUpdateDto,
-                            henkilo.getOrganisaatioHenkilos());
-                    // Do not allow updating organisation oid (should never happen since organisaatiohenkilo is found by this value)
-                    if (!savedOrgHenkilo.getOrganisaatioOid().equals(organisaatioHenkiloUpdateDto.getOrganisaatioOid())) {
-                        throw new InternalError("Trying to update organisaatio henkilo organisation oid");
-                    }
-                    this.mapper.map(organisaatioHenkiloUpdateDto, savedOrgHenkilo);
-                });
-        return mapper.mapAsList(henkilo.getOrganisaatioHenkilos(), OrganisaatioHenkiloDto.class);
-    }
-
     @Transactional
     @Override
     public void passivoiHenkiloOrganisation(String oidHenkilo, String henkiloOrganisationOid) {
@@ -205,14 +121,6 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
                 .findByHenkiloOidHenkiloAndOrganisaatioOid(oidHenkilo, henkiloOrganisationOid)
                 .orElseThrow(() -> new NotFoundException("Unknown organisation" + henkiloOrganisationOid + "for henkilo" + oidHenkilo));
         this.passivoiOrganisaatioHenkiloJaPoistaKayttooikeudet(organisaatioHenkilo, kasittelija, "Henkilön passivointi");
-    }
-
-    private OrganisaatioHenkilo findFirstMatching(OrganisaatioHenkiloUpdateDto organisaatioHenkilo,
-                                                           Set<OrganisaatioHenkilo> organisaatioHenkiloCreateDtoList) {
-        return organisaatioHenkiloCreateDtoList.stream().filter((OrganisaatioHenkilo t) ->
-                organisaatioHenkilo.getOrganisaatioOid().equals(t.getOrganisaatioOid())
-        ).findFirst().orElseThrow(() -> new NotFoundException("Could not update organisaatiohenkilo with oid "
-                + organisaatioHenkilo.getOrganisaatioOid()));
     }
 
     // passivoi organisaatiohenkilön ja poistaa käyttöoikeudet
@@ -280,11 +188,4 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
             this.haettuKayttooikeusRyhmaRepository.delete(h);
         });
     }
-
-    private void validateOrganisaatioOid(String organisaatioOid) {
-        organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
-                .filter(new OrganisaatioMyontoPredicate(permissionCheckerService.isCurrentUserAdmin()))
-                .orElseThrow(() -> new ValidationException("Active organisation not found with oid " + organisaatioOid));
-    }
-
 }

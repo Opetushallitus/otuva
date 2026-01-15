@@ -28,22 +28,6 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
     public static BooleanExpression voimassa(QMyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma, LocalDate at) {
         return tapahtuma.voimassaAlkuPvm.loe(at).and(tapahtuma.voimassaLoppuPvm.isNull().or(tapahtuma.voimassaLoppuPvm.goe(at)));
     }
-    
-    @Override
-    public boolean isHenkiloMyonnettyKayttoOikeusToPalveluInRole(String henkiloOid, String palveluName, String role) {
-        QMyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = myonnettyKayttoOikeusRyhmaTapahtuma;
-        QKayttoOikeusRyhma ryhma = tapahtuma.kayttoOikeusRyhma;
-        QKayttoOikeus oikeus = new QKayttoOikeus("oikeus");
-        QPalvelu palvelu = oikeus.palvelu;
-        return exists(jpa().from(tapahtuma)
-                .innerJoin(ryhma.kayttoOikeus, oikeus)
-                .where(tapahtuma.organisaatioHenkilo.henkilo.oidHenkilo.eq(henkiloOid)
-                    .and(oikeus.rooli.eq(role))
-                    .and(palvelu.name.eq(palveluName))
-                    .and(voimassa(tapahtuma, LocalDate.now()))
-                    .and(OrganisaatioHenkiloRepositoryImpl.voimassa(tapahtuma.organisaatioHenkilo, LocalDate.now()))
-                ).select(tapahtuma.id));
-    }
 
     @Override
     public List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName) {
@@ -71,7 +55,6 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
                 .select(Projections.bean(KayttoOikeusHistoriaDto.class,
                         oh.organisaatioOid.as("organisaatioOid"),
                         ko.id.as("kayttoOikeusId"),
-                        oh.tehtavanimike.as("tehtavanimike"),
                         kor.id.as("kayttoOikeusRyhmaId"),
                         kor.nimi.id.as("kuvausId"),
                         ko.rooli.as("rooli"),

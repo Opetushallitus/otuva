@@ -1,11 +1,9 @@
 package fi.vm.sade.kayttooikeus.model;
 
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,28 +23,17 @@ public class OrganisaatioHenkilo extends IdentifiableAndVersionedEntity {
     @Column(name = "organisaatio_oid", nullable = false)
     private String organisaatioOid;
 
-    @Column(name = "tyyppi")
-    @Enumerated(EnumType.STRING)
-    private OrganisaatioHenkiloTyyppi organisaatioHenkiloTyyppi;
-
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
     @BatchSize(size = 50)
+    @Builder.Default
     private Set<MyonnettyKayttoOikeusRyhmaTapahtuma> myonnettyKayttoOikeusRyhmas = new HashSet<>();
 
     @OneToMany(mappedBy = "organisaatioHenkilo", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<KayttoOikeusRyhmaTapahtumaHistoria> kayttoOikeusRyhmaHistorias = new HashSet<>();
 
     @Column(name = "passivoitu", nullable = false)
     private boolean passivoitu;
-
-    @Column(name = "voimassa_alku_pvm")
-    private LocalDate voimassaAlkuPvm;
-
-    @Column(name = "voimassa_loppu_pvm")
-    private LocalDate voimassaLoppuPvm;
-
-    @Column(name = "tehtavanimike")
-    private String tehtavanimike;
 
     public void addMyonnettyKayttooikeusryhmaTapahtuma(MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma) {
         if(this.myonnettyKayttoOikeusRyhmas == null) {

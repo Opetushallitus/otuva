@@ -15,13 +15,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi.OPISKELIJA;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
@@ -52,10 +50,7 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     @Test
     public void findOrganisaatioHenkiloListDtosTest() {
         OrganisaatioHenkilo oh1 = populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"));
-        OrganisaatioHenkilo oh2 =populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.8")
-                .voimassaAlkaen(LocalDate.now().minusDays(2)).tyyppi(OPISKELIJA)
-                .voimassaAsti(LocalDate.now().plusYears(1))
-                .tehtavanimike("Devaaja"));
+        OrganisaatioHenkilo oh2 =populate(organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.8"));
         populate(organisaatioHenkilo(henkilo("1.2.3.4.6"), "3.4.5.6.9"));
 
         List<OrganisaatioHenkiloWithOrganisaatioDto> results = organisaatioHenkiloRepository.findActiveOrganisaatioHenkiloListDtos("1.2.3.4.5");
@@ -65,19 +60,13 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
         assertThat(results).extracting(OrganisaatioHenkiloWithOrganisaatioDto::getId)
                 .containsExactlyInAnyOrder(oh1.getId(), oh2.getId());
         OrganisaatioHenkiloWithOrganisaatioDto result2 = results.get(1);
-        assertThat(result2.getTehtavanimike()).isEqualTo(oh2.getTehtavanimike());
-        assertThat(result2.getOrganisaatioHenkiloTyyppi()).isEqualTo(OPISKELIJA);
-        assertThat(result2.getVoimassaAlkuPvm()).isEqualTo(oh2.getVoimassaAlkuPvm());
-        assertThat(result2.getVoimassaLoppuPvm()).isEqualTo(oh2.getVoimassaLoppuPvm());
+        assertThat(result2).isNotNull();
     }
 
     @Test
     public void findActiveOrganisaatioHenkiloListDtosWithoutGivenRoles() {
         // organisaatio, johon 'henkilö'llä on voimassa oleva palvelurooli KAYTTOOIKEUS_READ
-        OrganisaatioHenkilo oh1 = populate(organisaatioHenkilo(henkilo("henkilo"), "oh1")
-                .voimassaAlkaen(LocalDate.now().minusDays(2)).tyyppi(OPISKELIJA)
-                .voimassaAsti(LocalDate.now().plusYears(1))
-                .tehtavanimike("Devaaja"));
+        OrganisaatioHenkilo oh1 = populate(organisaatioHenkilo(henkilo("henkilo"), "oh1"));
         KayttoOikeusRyhmaPopulator kor1Populator = KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("kor1Populator");
         kor1Populator.withOikeus(KayttoOikeusPopulator.oikeus("KAYTTOOIKEUS", "READ"));
         KayttoOikeusRyhma kor1 = populate(kor1Populator);
@@ -85,10 +74,7 @@ public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
         oh1.setMyonnettyKayttoOikeusRyhmas(Sets.newHashSet(Arrays.asList(mkor1)));
 
         //organisaatio, johon henkilöllä voimassa oleva palvelurooli KAYTTOOIKEUS_VASTUUKAYTTAJA
-        OrganisaatioHenkilo oh2 = populate(organisaatioHenkilo(henkilo("henkilo"), "oh2")
-            .voimassaAlkaen(LocalDate.now().minusDays(2)).tyyppi(OPISKELIJA)
-                .voimassaAsti(LocalDate.now().plusYears(1))
-                .tehtavanimike("Devaaja"));
+        OrganisaatioHenkilo oh2 = populate(organisaatioHenkilo(henkilo("henkilo"), "oh2"));
         KayttoOikeusRyhmaPopulator kor2Populator = KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("kor2Populator");
         kor2Populator.withOikeus(KayttoOikeusPopulator.oikeus("KAYTTOOIKEUS", "VASTUUKAYTTAJA"));
         KayttoOikeusRyhma kor2 = populate(kor2Populator);

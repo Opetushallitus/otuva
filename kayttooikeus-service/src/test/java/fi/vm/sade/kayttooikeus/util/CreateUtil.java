@@ -101,9 +101,9 @@ public class CreateUtil {
     }
 
     public static HaettuKayttoOikeusRyhma createHaettuKayttoOikeusRyhma(String anojaOid, String kasittelijaOid,
-                                                                         String organisaatioOid, String tehtavanimike,
+                                                                         String organisaatioOid,
                                                                          String perustelut, Long kayttooikeusryhmaId) {
-        Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike, perustelut);
+        Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, perustelut);
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = new HaettuKayttoOikeusRyhma(anomus, createKayttoOikeusRyhmaWithViite(kayttooikeusryhmaId),
                 LocalDateTime.now().minusDays(5), KayttoOikeudenTila.ANOTTU);
         haettuKayttoOikeusRyhma.setAnomus(anomus);
@@ -128,17 +128,16 @@ public class CreateUtil {
     }
 
     public static Anomus createAnomusWithHaettuKayttooikeusryhma(String anojaOid, String kasittelijaOid,
-                                                                 String organisaatioOid, String tehtavanimike,
+                                                                 String organisaatioOid,
                                                                  String perustelut, Long kayttooikeusryhmaId) {
-        Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike, perustelut);
-        anomus.setHaettuKayttoOikeusRyhmas(Sets.newHashSet(createHaettuKayttoOikeusRyhma(anojaOid, kasittelijaOid, organisaatioOid, tehtavanimike,
+        Anomus anomus = createAnomus(anojaOid, kasittelijaOid, organisaatioOid, perustelut);
+        anomus.setHaettuKayttoOikeusRyhmas(Sets.newHashSet(createHaettuKayttoOikeusRyhma(anojaOid, kasittelijaOid, organisaatioOid,
                 perustelut, kayttooikeusryhmaId)));
         return anomus;
     }
 
-    public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String tehtavanimike,
-                                       String perustelut) {
-        return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid, tehtavanimike,
+    public static Anomus createAnomus(String anojaOid, String kasittelijaOid, String organisaatioOid, String perustelut) {
+        return new Anomus(createHenkilo(anojaOid), createHenkilo(kasittelijaOid), organisaatioOid,
                 AnomusTyyppi.UUSI, AnomuksenTila.ANOTTU, LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(5),
                 perustelut, "", "", "", "",
                 Sets.newHashSet(), Sets.newHashSet());

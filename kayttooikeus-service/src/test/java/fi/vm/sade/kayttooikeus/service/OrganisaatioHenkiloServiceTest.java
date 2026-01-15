@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -26,17 +25,13 @@ import static fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila.SULJETTU;
 import static fi.vm.sade.kayttooikeus.repositories.populate.AnomusPopulator.anomus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HaettuKayttoOikeusRyhmaPopulator.haettuKayttooikeusryhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
-import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulator.oikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma;
-import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
-import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -87,15 +82,9 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                             .build()));
             return Optional.of(orgDto);
         });
-        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.1")
-                .voimassaAlkaen(LocalDate.now()).voimassaAsti(LocalDate.now().plusYears(1))
-                .tehtavanimike("Devaaja"));
-        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.2")
-                .voimassaAlkaen(LocalDate.now().minusYears(1))
-                .tehtavanimike("Opettaja"));
-        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.3")
-                .voimassaAlkaen(LocalDate.now().minusYears(1))
-                .tehtavanimike("Testaaja"));
+        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.1"));
+        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.2"));
+        populate(organisaatioHenkilo("1.2.3.4.5", "1.2.3.4.3"));
 
         List<OrganisaatioHenkiloWithOrganisaatioDto> result = organisaatioHenkiloService.listOrganisaatioHenkilos("1.2.3.4.5", "fi", null);
         assertThat(result)
@@ -117,37 +106,6 @@ public class OrganisaatioHenkiloServiceTest extends AbstractServiceIntegrationTe
                 .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getOrganisaatio)
                 .flatExtracting(OrganisaatioWithChildrenDto::getTyypit)
                 .containsExactlyInAnyOrder("KOULUTUSTOIMIJA", "OPPILAITOS", "KOULUTUSTOIMIJA");
-        assertThat(result)
-                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getTehtavanimike)
-                .containsExactlyInAnyOrder("Devaaja", "Opettaja", "Testaaja");
-        assertThat(result)
-                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaAlkuPvm)
-                .allSatisfy(alkupvm -> assertThat(alkupvm).isBeforeOrEqualTo(LocalDate.now()));
-        assertThat(result)
-                .extracting(OrganisaatioHenkiloWithOrganisaatioDto::getVoimassaLoppuPvm)
-                .filteredOn(Objects::nonNull)
-                .hasSize(1)
-                .allSatisfy(loppupvm -> assertThat(loppupvm).isAfterOrEqualTo(LocalDate.now()));
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5")
-    public void listPossibleHenkiloTypesAccessibleForCurrentUserRekisterinpitajaTest() {
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.5", "6.7.8.9.0"),
-                kayttoOikeusRyhma("kayttooikeusryhma1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_REKISTERINPITAJA))));
-
-        List<KayttajaTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
-        assertEquals(new HashSet<>(asList(KayttajaTyyppi.VIRKAILIJA, KayttajaTyyppi.PALVELU)), new HashSet<>(list));
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5")
-    public void listPossibleHenkiloTypesAccessibleForCurrentUserCrudTest() {
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3.4.5", "6.7.8.9.0"),
-                kayttoOikeusRyhma("kayttooikeusryhma1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-
-        List<KayttajaTyyppi> list = organisaatioHenkiloService.listPossibleHenkiloTypesAccessibleForCurrentUser();
-        assertEquals(new HashSet<>(asList(KayttajaTyyppi.VIRKAILIJA)), new HashSet<>(list));
     }
 
     @Test

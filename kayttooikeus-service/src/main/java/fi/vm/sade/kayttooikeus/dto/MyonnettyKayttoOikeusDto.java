@@ -24,7 +24,6 @@ public class MyonnettyKayttoOikeusDto implements LocalizableDto, Serializable{
     private Long ryhmaId;
     private Long myonnettyTapahtumaId;
     private String organisaatioOid;
-    private String tehtavanimike;
     private String ryhmaTunniste;
     private TextGroupDto ryhmaNames;
     private TextGroupDto ryhmaKuvaus;

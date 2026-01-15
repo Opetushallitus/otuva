@@ -2,7 +2,6 @@ package fi.vm.sade.kayttooikeus.report;
 
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -215,38 +215,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
     }
 
     @Override
-    public boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
-            Map<String, List<String>> allowedRoles) {
-        return hasRoleForOrganisations(organisaatioHenkiloDtoList, orgOidList
-                -> checkRoleForOrganisation(orgOidList, allowedRoles));
-    }
-
-    private boolean hasRoleForOrganisations(List<Object> organisaatioHenkiloDtoList,
-            Function<List<String>, Boolean> checkRoleForOrganisationFunc) {
-        List<String> orgOidList;
-        if (organisaatioHenkiloDtoList == null || organisaatioHenkiloDtoList.isEmpty()) {
-            LOG.warn(this.getCurrentUserOid() + " called permission checker with empty input");
-            return true;
-        }
-        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloCreateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloCreateDto.class::cast)
-                    .map(OrganisaatioHenkiloCreateDto::getOrganisaatioOid).collect(Collectors.toList());
-        }
-        else if (organisaatioHenkiloDtoList.get(0) instanceof OrganisaatioHenkiloUpdateDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream().map(OrganisaatioHenkiloUpdateDto.class::cast)
-                    .map(OrganisaatioHenkiloUpdateDto::getOrganisaatioOid).collect(Collectors.toList());
-        }
-        else if (organisaatioHenkiloDtoList.get(0) instanceof HaettuKayttooikeusryhmaDto) {
-            orgOidList = organisaatioHenkiloDtoList.stream().map(HaettuKayttooikeusryhmaDto.class::cast)
-                    .map(HaettuKayttooikeusryhmaDto::getAnomus).map(AnomusDto::getOrganisaatioOid).collect(Collectors.toList());
-        }
-        else {
-            throw new InvalidKayttoOikeusException("Unsupported input type.");
-        }
-        return checkRoleForOrganisationFunc.apply(orgOidList);
-    }
-
-    @Override
     public boolean checkRoleForOrganisation(List<String> orgOidList, Map<String, List<String>> allowedRoles) {
         for(String oid : orgOidList) {
             if (!this.hasRoleForOrganisation(oid, allowedRoles, this.getCasRoles())) {

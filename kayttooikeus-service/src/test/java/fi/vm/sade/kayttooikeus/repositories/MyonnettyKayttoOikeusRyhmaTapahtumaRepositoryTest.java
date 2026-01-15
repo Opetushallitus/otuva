@@ -41,20 +41,19 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
                 .voimassaPaattyen(LocalDate.now())).getKayttoOikeusRyhma().getId();
 
         Long id2 = populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8").tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3))).getKayttoOikeusRyhma().getId();
 
         Long id3 = populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.7"), "4.5.6.7.8").tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo("1.2.3.4.7"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3))).getKayttoOikeusRyhma().getId();
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.9"), "4.5.6.7.8")
-                        .tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo("1.2.3.4.9"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaAlkaen(LocalDate.now().minusMonths(2))
@@ -93,13 +92,13 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryTest extends AbstractR
         assertEquals("1.2.3.4.5", list.get(0).getKasittelijaOid());
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8").tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE")))
                 .voimassaPaattyen(LocalDate.now().plusMonths(3)));
 
         populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.9").tehtavanimike("testaaja"),
+                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.9"),
                 kayttoOikeusRyhma("RYHMA2")
                         .withOikeus(oikeus("KOODISTO", "WRITE"))
                         .asPassivoitu())

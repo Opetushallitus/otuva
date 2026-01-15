@@ -63,7 +63,6 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
                         .palvelu("PALVELU")
                         .palveluKuvaus(new TextGroupListDto(4L).put("FI", "Palvelu"))
                         .organisaatioOid("orgOid")
-                        .tehtavanimike("nimike")
                         .tila(KayttoOikeudenTila.HYLATTY)
                         .tyyppi(KayttoOikeusTyyppi.KOOSTEROOLI)
                         .voimassaAlkuPvm(LocalDate.of(2015, 1, 1))

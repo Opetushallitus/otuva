@@ -11,8 +11,6 @@ import java.time.Period;
 import java.util.List;
 
 public interface KayttoOikeusRepository extends BaseRepository<KayttoOikeus> {
-    boolean isHenkiloMyonnettyKayttoOikeusToPalveluInRole(String henkiloOid, String palvelu, String role);
-
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
     List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForHenkilo(String henkiloOid);

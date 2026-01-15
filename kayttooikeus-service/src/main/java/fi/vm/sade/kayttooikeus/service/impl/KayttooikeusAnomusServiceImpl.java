@@ -174,7 +174,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                     anoja.getOidHenkilo(),
                     anojanAnomus.getOrganisaatioOid(),
                     anottuKayttoOikeusRyhma,
-                    anojanAnomus.getTehtavanimike(),
                     this.permissionCheckerService.getCurrentUserOid());
             anojanAnomus.addMyonnettyKayttooikeusRyhma(myonnettyKayttoOikeusRyhmaTapahtuma);
         }
@@ -221,7 +220,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
     }
 
     // Sets organisaatiohenkilo active since it might be passive
-    private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja, String tehtavanimike) {
+    private OrganisaatioHenkilo findOrCreateHaettuOrganisaatioHenkilo(String organisaatioOid, Henkilo anoja) {
         Henkilo savedAnoja = this.henkiloDataRepository.save(anoja);
 
         organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
@@ -234,7 +233,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                 .findFirst().orElseGet(() ->
                         this.organisaatioHenkiloRepository.save(OrganisaatioHenkilo.builder()
                                 .organisaatioOid(organisaatioOid)
-                                .tehtavanimike(tehtavanimike)
                                 .henkilo(savedAnoja)
                                 .build()));
         foundOrCreatedOrganisaatioHenkilo.setPassivoitu(false);
@@ -260,7 +258,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                         organisaatioOid,
                         this.kayttooikeusryhmaDataRepository.findById(haettuKayttooikeusryhmaDto.getId())
                                 .orElseThrow(() -> new NotFoundException("Kayttooikeusryhma not found with id " + haettuKayttooikeusryhmaDto.getId())),
-                        "",
                         this.permissionCheckerService.getCurrentUserOid()));
     }
 
@@ -272,7 +269,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                 anoja,
                 organisaatioOid,
                 kayttooikeusryhma,
-                "",
                 myontajaOid)); // anoja == kasittelija in this case
     }
 
@@ -387,7 +383,6 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
                                                                        String anojaOid,
                                                                        String organisaatioOid,
                                                                        KayttoOikeusRyhma myonnettavaKayttoOikeusRyhma,
-                                                                       String tehtavanimike,
                                                                        String kasittelijaOid) {
         Henkilo anoja = this.henkiloDataRepository.findByOidHenkilo(anojaOid)
                 .orElseThrow(() -> new NotFoundException("Anoja not found with oid " + anojaOid));
@@ -400,7 +395,7 @@ public class KayttooikeusAnomusServiceImpl implements KayttooikeusAnomusService 
             throw new IllegalStateException(String.format("Passivoituun käyttöoikeusryhmään %d ei voi myöntää oikeuksia", myonnettavaKayttoOikeusRyhma.getId()));
         }
         OrganisaatioHenkilo myonnettavaOrganisaatioHenkilo = this.findOrCreateHaettuOrganisaatioHenkilo(
-                organisaatioOid, anoja, tehtavanimike);
+                organisaatioOid, anoja);
 
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma =
                 this.findOrCreateMyonnettyKayttooikeusryhmaTapahtuma(anojaOid, myonnettavaOrganisaatioHenkilo,

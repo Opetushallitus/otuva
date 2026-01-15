@@ -42,7 +42,6 @@ public class KayttoOikeusRyhmaTapahtumaHistoriaRepositoryImpl extends AbstractRe
                 .select(Projections.bean(MyonnettyKayttoOikeusDto.class,
                         korth.kayttoOikeusRyhma.id.as("ryhmaId"),
                         korth.id.as("myonnettyTapahtumaId"),
-                        korth.organisaatioHenkilo.tehtavanimike.as("tehtavanimike"),
                         korth.organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
                         korth.tila.as("tila"),
                         korth.kasittelija.oidHenkilo.as("kasittelijaOid"),

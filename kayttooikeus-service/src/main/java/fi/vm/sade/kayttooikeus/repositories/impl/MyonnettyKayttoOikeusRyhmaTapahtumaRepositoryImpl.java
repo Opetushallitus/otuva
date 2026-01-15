@@ -55,7 +55,6 @@ public class MyonnettyKayttoOikeusRyhmaTapahtumaRepositoryImpl extends AbstractR
                 .select(Projections.bean(MyonnettyKayttoOikeusDto.class,
                         myonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.as("ryhmaId"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.id.as("myonnettyTapahtumaId"),
-                        myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.tehtavanimike.as("tehtavanimike"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.organisaatioHenkilo.organisaatioOid.as("organisaatioOid"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.tila.as("tila"),
                         myonnettyKayttoOikeusRyhmaTapahtuma.kasittelija.oidHenkilo.as("kasittelijaOid"),

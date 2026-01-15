@@ -8,7 +8,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Oauth2ClientCredential;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioHenkiloTyyppi;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
@@ -54,14 +53,12 @@ public class PalvelukayttajaServiceTest extends AbstractServiceIntegrationTest {
         populate(palvelukayttaja("1.2.3.4.500")
                 .withNimet("_", "one")
                 .withUsername("one"));
-        populate(organisaatioHenkilo("1.2.3.4.500", "1.2.3.4.600")
-                .tyyppi(OrganisaatioHenkiloTyyppi.PALVELU));
+        populate(organisaatioHenkilo("1.2.3.4.500", "1.2.3.4.600"));
 
         populate(palvelukayttaja("1.2.3.4.100")
                 .withNimet("_", "two")
                 .withUsername("two"));
-        populate(organisaatioHenkilo("1.2.3.4.100", "1.2.3.4.200")
-                .tyyppi(OrganisaatioHenkiloTyyppi.PALVELU));
+        populate(organisaatioHenkilo("1.2.3.4.100", "1.2.3.4.200"));
 
         var requestAll = new PalvelukayttajaCriteriaDto();
         List<PalvelukayttajaReadDto> responseAll = palvelukayttajaService.list(requestAll);

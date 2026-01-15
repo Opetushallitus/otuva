@@ -537,7 +537,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void updateHaettuKayttooikeusryhmaMyonnetty() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
@@ -573,7 +573,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void vainPalvelulleSallitunKayttoikeusRyhmanMyontaminenEiOnnistu() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().setSallittuKayttajatyyppi(KayttajaTyyppi.PALVELU);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
@@ -606,7 +606,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void updateHaettuKayttooikeusryhmaHylatty() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
         given(this.kayttooikeusryhmaDataRepository.findById(2001L)).willReturn(Optional.of(haettuKayttoOikeusRyhma.getKayttoOikeusRyhma()));
@@ -634,7 +634,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void vainPalvelulleSallitunKayttoikeusRyhmanHylkaaminenOnnistuu() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().setSallittuKayttajatyyppi(KayttajaTyyppi.PALVELU);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
@@ -663,7 +663,7 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void passivoidunKayttoikeusRyhmanHylkaaminenOnnistuu() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         haettuKayttoOikeusRyhma.getKayttoOikeusRyhma().setPassivoitu(true);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
@@ -692,10 +692,10 @@ public class KayttooikeusAnomusServiceTest {
     @WithMockUser("1.2.3.4.1")
     public void updateHaettuKayttooikeusryhmaHylkaaOneFromAnomus() {
         HaettuKayttoOikeusRyhma haettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2001L);
+                "1.2.0.0.1", "Haluan devata", 2001L);
         // Second haettu kayttooikeusryhma so anomus will not be finalized
         HaettuKayttoOikeusRyhma anotherHaettuKayttoOikeusRyhma = createHaettuKayttoOikeusRyhma("1.2.3.4.5", "1.2.3.4.1",
-                "1.2.0.0.1", "devaaja", "Haluan devata", 2002L);
+                "1.2.0.0.1", "Haluan devata", 2002L);
         haettuKayttoOikeusRyhma.getAnomus().addHaettuKayttoOikeusRyhma(anotherHaettuKayttoOikeusRyhma);
         given(this.haettuKayttooikeusRyhmaRepository.findById(1L))
                 .willReturn(Optional.of(haettuKayttoOikeusRyhma));
@@ -901,7 +901,7 @@ public class KayttooikeusAnomusServiceTest {
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
-                        "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
+                        "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2001L)));
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
@@ -919,7 +919,7 @@ public class KayttooikeusAnomusServiceTest {
     public void findCurrentHenkiloCanGrantWithNegativeOrganisaatioviite() {
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
-                        "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
+                        "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2001L)));
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
@@ -942,7 +942,7 @@ public class KayttooikeusAnomusServiceTest {
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
-                        "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
+                        "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2001L)));
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
@@ -969,7 +969,7 @@ public class KayttooikeusAnomusServiceTest {
 
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6",
-                        "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L)));
+                        "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2001L)));
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(Lists.newArrayList(createMyonnettyKayttoOikeusRyhmaTapahtumaWithOrganisation(1001L, 2002L, "1.2.0.0.2")));
         given(this.kayttoOikeusRyhmaTapahtumaHistoriaDataRepository.findByOrganisaatioHenkiloHenkiloOidHenkiloAndTila("1.2.3.4.6", KayttoOikeudenTila.SULJETTU))
@@ -1005,8 +1005,8 @@ public class KayttooikeusAnomusServiceTest {
                 .willReturn(newHashMap("1.2.0.0.1", Stream.of(2001L, 2002L).collect(toSet())));
         given(this.anomusRepository.findByHenkiloOidHenkilo("1.2.3.4.6"))
                 .willReturn(asList(
-                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2001L),
-                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "tehtava", "perustelu", 2002L))
+                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2001L),
+                        createAnomusWithHaettuKayttooikeusryhma("1.2.3.4.6", "1.2.3.4.7", "1.2.0.0.1", "perustelu", 2002L))
                 );
         given(this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findByOrganisaatioHenkiloHenkiloOidHenkilo(any()))
                 .willReturn(emptyList());
