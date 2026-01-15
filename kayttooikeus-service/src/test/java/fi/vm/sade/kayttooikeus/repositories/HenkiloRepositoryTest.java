@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +53,63 @@ public class HenkiloRepositoryTest extends AbstractRepositoryTest {
                 .containsExactly("1.2.3.4.8", "1.2.3.4.7", "1.2.3.4.6", "1.2.3.4.5");
         assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getKayttajatunnus)
                 .containsExactly(null, "arpa3", "arpa2", "arpa1");
+    }
+
+    @Test
+    public void findByCriteriaNameQueryShouldReturnResultsOnMatchingOrganisaatioOids() {
+        KayttoOikeusRyhma kayttooikeusryhma = populate(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("tunniste"));
+        OrganisaatioHenkilo organisaatioHenkilo1 = populate(OrganisaatioHenkiloPopulator.organisaatioHenkilo(
+            HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etunimi1", "sukunimi1").withUsername("arpa1"),
+            "1.2.33.44.55")
+        );
+        populate(MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma(
+            organisaatioHenkilo1,
+            kayttooikeusryhma
+        ));
+        OrganisaatioHenkilo organisaatioHenkilo2 = populate(OrganisaatioHenkiloPopulator.organisaatioHenkilo(
+            HenkiloPopulator.henkilo("1.2.3.4.6").withNimet("etunimi2", "sukunimi2").withUsername("arpa2"),
+            "1.2.33.44.66")
+        );
+        populate(MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma(
+            organisaatioHenkilo2,
+            kayttooikeusryhma
+        ));
+
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = henkiloHibernateRepository.findByCriteria(
+                HenkiloCriteria.builder()
+                        .nameQuery("etunimi")
+                        .organisaatioOids(new HashSet<>(Arrays.asList(organisaatioHenkilo2.getOrganisaatioOid())))
+                        .noOrganisation(false)
+                        .build(),
+                0l,
+                100L,
+                OrderByHenkilohaku.HENKILO_NIMI_DESC.getValue());
+        assertThat(henkilohakuResultDtoList).extracting(HenkilohakuResultDto::getOidHenkilo)
+                .containsExactly(organisaatioHenkilo2.getHenkilo().getOidHenkilo());
+    }
+
+    @Test
+    public void findByCriteriaNameQueryShouldReturnEmptySetOnEmptyOrganisaatioOids() {
+        KayttoOikeusRyhma kayttooikeusryhma = populate(KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma("tunniste"));
+        OrganisaatioHenkilo organisaatioHenkilo = populate(OrganisaatioHenkiloPopulator.organisaatioHenkilo(
+            HenkiloPopulator.henkilo("1.2.3.4.5").withNimet("etunimi1", "sukunimi1").withUsername("arpa1"),
+            "1.2.33.44.55")
+        );
+        populate(MyonnettyKayttooikeusRyhmaTapahtumaPopulator.kayttooikeusTapahtuma(
+            organisaatioHenkilo,
+            kayttooikeusryhma
+        ));
+
+        List<HenkilohakuResultDto> henkilohakuResultDtoList = henkiloHibernateRepository.findByCriteria(
+                HenkiloCriteria.builder()
+                        .nameQuery("etunimi")
+                        .organisaatioOids(new HashSet<>())
+                        .noOrganisation(false)
+                        .build(),
+                0l,
+                100L,
+                OrderByHenkilohaku.HENKILO_NIMI_DESC.getValue());
+        assertThat(henkilohakuResultDtoList).isEmpty();
     }
 
     private void populateFindOidsStuff() {

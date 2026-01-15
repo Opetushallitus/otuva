@@ -10,7 +10,6 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -177,7 +176,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             // Exclude henkilos without active organisation
             query.innerJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
                     .on(qOrganisaatioHenkilo.passivoitu.isFalse());
-            if (!CollectionUtils.isEmpty(criteria.getOrganisaatioOids())) {
+            if (criteria.getOrganisaatioOids() != null) {
                 query.on(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids()));
             }
             query.leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
