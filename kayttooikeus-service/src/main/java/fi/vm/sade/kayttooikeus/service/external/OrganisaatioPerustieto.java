@@ -59,18 +59,6 @@ public class OrganisaatioPerustieto {
      * @deprecated refaktoroi henkilo-ui käyttämään organisaatiotyyppi-koodistoa
      */
     @Deprecated
-    public List<String> getOrganisaatiotyypit() {
-        return Optional.ofNullable(organisaatiotyypit)
-                .map(tyypit -> tyypit.stream().map(ORGANISAATIOTYYPIT::get).filter(Objects::nonNull).collect(toList()))
-                .orElse(null);
-    }
-
-    /**
-     * Palauttaa organisaatiotyypit organisaatiopalvelun v2-muodossa.
-     * @return organisaatiotyypit v2-muodossa
-     * @deprecated refaktoroi henkilo-ui käyttämään organisaatiotyyppi-koodistoa
-     */
-    @Deprecated
     public List<String> getTyypit() {
         return Optional.ofNullable(resolveOrganisaatiotyypit())
                 .map(tyypit -> tyypit.stream().map(tyyppi -> {

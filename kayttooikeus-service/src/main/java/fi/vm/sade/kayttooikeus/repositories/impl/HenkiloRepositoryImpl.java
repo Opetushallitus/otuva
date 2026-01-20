@@ -1,8 +1,12 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
+
+import fi.vm.sade.kayttooikeus.dto.VirkailijahakuCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
@@ -12,10 +16,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.querydsl.core.types.ExpressionUtils.eq;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 @Repository
@@ -127,7 +135,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 tuple.get(qHenkilo.etunimetCached),
                 tuple.get(qHenkilo.sukunimiCached),
                 tuple.get(qHenkilo.kayttajatiedot.username)
-        )).collect(Collectors.toList());
+        )).collect(toList());
     }
 
     @Override
@@ -148,7 +156,66 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 tuple.get(qHenkilo.etunimetCached),
                 tuple.get(qHenkilo.sukunimiCached),
                 tuple.get(qHenkilo.kayttajatiedot.username)
-        )).collect(Collectors.toList());
+        )).collect(toList());
+    }
+
+    @Override
+    public Set<HenkilohakuResultDto> findVirkailijaByCriteria(VirkailijahakuCriteria criteria) {
+        QHenkilo qHenkilo = QHenkilo.henkilo;
+        QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
+        QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
+                = QMyonnettyKayttoOikeusRyhmaTapahtuma.myonnettyKayttoOikeusRyhmaTapahtuma;
+        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
+
+        JPAQuery<Tuple> query = jpa().from(qHenkilo)
+                .innerJoin(qHenkilo.kayttajatiedot, qKayttajatiedot)
+                .select(qHenkilo.sukunimiCached, qHenkilo.etunimetCached, qHenkilo.oidHenkilo, qHenkilo.kayttajatiedot.username)
+                .distinct();
+
+        if (criteria.getOrganisaatioOids() != null) {
+            query.innerJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo)
+                    .on(qOrganisaatioHenkilo.passivoitu.isFalse()
+                            .and(qOrganisaatioHenkilo.organisaatioOid.in(criteria.getOrganisaatioOids())));
+        } else {
+            query.leftJoin(qHenkilo.organisaatioHenkilos, qOrganisaatioHenkilo);
+        }
+
+        if (criteria.getKayttooikeusryhmaId() != null) {
+            query.leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
+        }
+
+        query.where(getVirkailijahakuWhereCriteria(criteria, qHenkilo, qKayttajatiedot, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+
+        return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
+                tuple.get(qHenkilo.oidHenkilo),
+                tuple.get(qHenkilo.etunimetCached),
+                tuple.get(qHenkilo.sukunimiCached),
+                tuple.get(qHenkilo.kayttajatiedot.username)
+        )).collect(toSet());
+    }
+
+    private BooleanBuilder getVirkailijahakuWhereCriteria(
+                                VirkailijahakuCriteria criteria,
+                                QHenkilo qHenkilo,
+                                QKayttajatiedot qKayttajatiedot,
+                                QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (StringUtils.hasLength(criteria.getNameQuery())) {
+            String trimmedQuery = criteria.getNameQuery().trim();
+            builder.and(
+                Expressions.anyOf(
+                    qHenkilo.oidHenkilo.eq(trimmedQuery),
+                    qHenkilo.etunimetCached.startsWithIgnoreCase(trimmedQuery),
+                    qHenkilo.sukunimiCached.startsWithIgnoreCase(trimmedQuery),
+                    qHenkilo.kutsumanimiCached.startsWithIgnoreCase(trimmedQuery),
+                    qKayttajatiedot.username.startsWithIgnoreCase(trimmedQuery)
+                )
+            );
+        }
+        if (criteria.getKayttooikeusryhmaId() != null) {
+            builder.and(qMyonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(criteria.getKayttooikeusryhmaId()));
+        }
+        return builder;
     }
 
     @Override

@@ -5,18 +5,26 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
+import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
+import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.HashSet;
 
 @Service
 @Transactional
@@ -41,6 +52,7 @@ public class VirkailijaServiceImpl implements VirkailijaService {
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final HenkiloDataRepository henkiloRepository;
     private final OrikaBeanMapper mapper;
+    private final OrganisaatioClient organisaatioClient;
 
     @Override
     public String create(VirkailijaCreateDto createDto) {
@@ -105,5 +117,78 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         }
 
         return henkiloHibernateRepository.findOidsBy(organisaatioHenkiloCriteria);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<HenkilohakuResultDto> virkailijahaku(VirkailijahakuCriteria virkailijaCriteria) {
+        virkailijaCriteria.setOrganisaatioOids(getOrganisaatioOids(virkailijaCriteria));
+        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findVirkailijaByCriteria(virkailijaCriteria);
+
+        List<String> oidList = result.stream().map(HenkilohakuResultDto::getOidHenkilo).collect(toList());
+        List<Henkilo> henkiloList = henkiloRepository.readByOidHenkiloIn(oidList);
+        return result.stream().map(henkilohakuResultDto -> {
+            Henkilo henkilo = henkiloList.stream().filter(henkilo1 -> Objects.equals(henkilo1.getOidHenkilo(), henkilohakuResultDto.getOidHenkilo()))
+                    .findFirst()
+                    .orElseThrow(IllegalStateException::new);
+            henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
+                    .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
+                    .map(OrganisaatioHenkilo::getOrganisaatioOid)
+                    .map(organisaatioOid -> {
+                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
+                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(organisaatioOid));
+                        return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getOrganisaatiotyypit(), organisaatio.getNimi());
+                    })
+                    .collect(toList()));
+            return henkilohakuResultDto;
+        }).collect(toSet());
+    }
+
+    private Set<String> getOrganisaatioOids(VirkailijahakuCriteria criteria) {
+        List<String> userOrganisaatioOids = organisaatioHenkiloRepository
+                .findUsersOrganisaatioHenkilosByPalveluRoolis(permissionCheckerService.getCurrentUserOid(), PalveluRooliGroup.HENKILOHAKU);
+        return userOrganisaatioOids.contains(commonProperties.getRootOrganizationOid())
+            ? getOrganisaatioOidsForOphUser(criteria)
+            : getOrganisaatioOidsForNonOphUser(criteria, userOrganisaatioOids);
+    }
+
+    private Set<String> getOrganisaatioOidsForOphUser(VirkailijahakuCriteria criteria) {
+        if (criteria.getOrganisaatioOids() == null) {
+            // OPH user searches from all organisations including henkilos without organisation
+            return null;
+        }
+        if (criteria.getOrganisaatioOids().contains(commonProperties.getRootOrganizationOid())
+                && Boolean.TRUE.equals(criteria.getSubOrganisation())) {
+            // this case is for performance optimization. this will find henkilos without organisation also which is kind of unintuitive.
+            return null;
+        }
+        if (Boolean.TRUE.equals(criteria.getSubOrganisation())) {
+            return criteria.getOrganisaatioOids().stream()
+                .flatMap(organisaatioOid -> Stream.concat(
+                        Stream.of(organisaatioOid),
+                        organisaatioClient.getChildOids(organisaatioOid).stream()
+                ))
+                .collect(toSet());
+        }
+        return criteria.getOrganisaatioOids();
+    }
+
+    private Set<String> getOrganisaatioOidsForNonOphUser(VirkailijahakuCriteria criteria, List<String> userOrganisaatioOids) {
+        Set<String> organisaatioOids = criteria.getOrganisaatioOids() != null
+            ? criteria.getOrganisaatioOids()
+            : new HashSet<>(userOrganisaatioOids);
+        if (Boolean.TRUE.equals(criteria.getSubOrganisation())) {
+            organisaatioOids.addAll(
+                organisaatioOids.stream()
+                    .flatMap(organisaatioOid -> organisaatioClient.getChildOids(organisaatioOid).stream())
+                    .collect(toSet()));
+        }
+        Set<String> kayttajaOrganisaatioOids = userOrganisaatioOids.stream()
+                .flatMap(organisaatioOid -> Stream.concat(
+                        Stream.of(organisaatioOid),
+                        organisaatioClient.getChildOids(organisaatioOid).stream()))
+                .collect(toSet());
+        organisaatioOids.retainAll(kayttajaOrganisaatioOids);
+        return organisaatioOids;
     }
 }

@@ -64,7 +64,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
         assertThat(organisaatio).hasValueSatisfying(org ->
             assertThat(org)
-                    .returns(singletonList("MUU_ORGANISAATIO"), OrganisaatioPerustieto::getOrganisaatiotyypit)
+                    .returns(singletonList("organisaatiotyyppi_05"), OrganisaatioPerustieto::getOrganisaatiotyypit)
                     .returns(singletonList("MUU_ORGANISAATIO"), OrganisaatioPerustieto::getTyypit));
     }
 
@@ -88,7 +88,7 @@ public class OrganisaatioClientTest extends AbstractClientTest {
 
         assertThat(organisaatio).hasValueSatisfying(org ->
             assertThat(org)
-                    .returns(singletonList("KOULUTUSTOIMIJA"), OrganisaatioPerustieto::getOrganisaatiotyypit)
+                    .returns(singletonList("organisaatiotyyppi_01"), OrganisaatioPerustieto::getOrganisaatiotyypit)
                     .returns(singletonList("KOULUTUSTOIMIJA"), OrganisaatioPerustieto::getTyypit));
     }
 
