@@ -5,7 +5,6 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -14,7 +13,6 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioPerustieto;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
@@ -22,9 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -36,7 +32,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 @Service
@@ -128,21 +123,21 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findVirkailijaByCriteria(virkailijaCriteria);
 
         List<String> oidList = result.stream().map(HenkilohakuResultDto::getOidHenkilo).collect(toList());
-        Map<String, Henkilo> henkiloByOid = new HashMap<>();
-        henkiloRepository.readByOidHenkiloIn(oidList).stream().forEach((h) -> henkiloByOid.put(h.getOidHenkilo(), h));
-        return result.stream().map(henkilohakuResultDto -> {
-            henkilohakuResultDto.setOrganisaatioNimiList(
-                henkiloByOid.get(henkilohakuResultDto.getOidHenkilo()).getOrganisaatioHenkilos().stream()
-                    .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
-                    .map(o -> {
-                        var oid = o.getOrganisaatioOid();
-                        var perustiedot = organisaatioClient.getOrganisaatioPerustiedotCached(oid)
-                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(oid));
-                        return new OrganisaatioMinimalDto(oid, perustiedot.getOrganisaatiotyypit(), perustiedot.getNimi());
-                    })
-                    .collect(toList())
-            );
-            return henkilohakuResultDto;
+        Map<String, List<String>> organisaatioHenkiloByHenkiloOid = organisaatioHenkiloRepository.findActiveByHenkiloOids(oidList);
+        return result.stream().map(dto -> {
+            var orgList = organisaatioHenkiloByHenkiloOid.get(dto.getOidHenkilo());
+            if (orgList != null) {
+                dto.setOrganisaatioNimiList(
+                    orgList.stream()
+                        .map(oid -> {
+                            var perustiedot = organisaatioClient.getOrganisaatioPerustiedotCached(oid)
+                                    .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(oid));
+                            return new OrganisaatioMinimalDto(oid, perustiedot.getOrganisaatiotyypit(), perustiedot.getNimi());
+                        })
+                        .collect(toList())
+                );
+            }
+            return dto;
         }).collect(toSet());
     }
 

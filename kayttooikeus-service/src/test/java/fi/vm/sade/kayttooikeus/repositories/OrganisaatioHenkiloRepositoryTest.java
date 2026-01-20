@@ -13,6 +13,7 @@ import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloP
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Sql("/truncate_tables.sql")
 @ExtendWith(SpringExtension.class)
 public class OrganisaatioHenkiloRepositoryTest extends AbstractRepositoryTest {
     @Autowired

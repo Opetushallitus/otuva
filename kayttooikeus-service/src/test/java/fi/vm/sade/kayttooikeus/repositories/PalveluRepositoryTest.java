@@ -29,7 +29,7 @@ public class PalveluRepositoryTest extends AbstractRepositoryTest {
     public void findAllTest() {
         populate(palvelu("PALVELU1"));
         populate(palvelu("PALVELU2"));
-        
+
         List<PalveluDto> palvelus = palveluRepository.findAll();
         assertEquals(2, palvelus.size());
         assertEquals(new HashSet<>(asList("PALVELU1", "PALVELU2")),
