@@ -21,6 +21,7 @@ import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -35,6 +36,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 @Service
@@ -126,20 +128,20 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findVirkailijaByCriteria(virkailijaCriteria);
 
         List<String> oidList = result.stream().map(HenkilohakuResultDto::getOidHenkilo).collect(toList());
-        List<Henkilo> henkiloList = henkiloRepository.readByOidHenkiloIn(oidList);
+        Map<String, Henkilo> henkiloByOid = new HashMap<>();
+        henkiloRepository.readByOidHenkiloIn(oidList).stream().forEach((h) -> henkiloByOid.put(h.getOidHenkilo(), h));
         return result.stream().map(henkilohakuResultDto -> {
-            Henkilo henkilo = henkiloList.stream().filter(henkilo1 -> Objects.equals(henkilo1.getOidHenkilo(), henkilohakuResultDto.getOidHenkilo()))
-                    .findFirst()
-                    .orElseThrow(IllegalStateException::new);
-            henkilohakuResultDto.setOrganisaatioNimiList(henkilo.getOrganisaatioHenkilos().stream()
+            henkilohakuResultDto.setOrganisaatioNimiList(
+                henkiloByOid.get(henkilohakuResultDto.getOidHenkilo()).getOrganisaatioHenkilos().stream()
                     .filter(((Predicate<OrganisaatioHenkilo>) OrganisaatioHenkilo::isPassivoitu).negate())
-                    .map(OrganisaatioHenkilo::getOrganisaatioOid)
-                    .map(organisaatioOid -> {
-                        OrganisaatioPerustieto organisaatio = this.organisaatioClient.getOrganisaatioPerustiedotCached(organisaatioOid)
-                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(organisaatioOid));
-                        return new OrganisaatioMinimalDto(organisaatioOid, organisaatio.getOrganisaatiotyypit(), organisaatio.getNimi());
+                    .map(o -> {
+                        var oid = o.getOrganisaatioOid();
+                        var perustiedot = organisaatioClient.getOrganisaatioPerustiedotCached(oid)
+                                .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(oid));
+                        return new OrganisaatioMinimalDto(oid, perustiedot.getOrganisaatiotyypit(), perustiedot.getNimi());
                     })
-                    .collect(toList()));
+                    .collect(toList())
+            );
             return henkilohakuResultDto;
         }).collect(toSet());
     }
