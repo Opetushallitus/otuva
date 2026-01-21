@@ -3,13 +3,15 @@ VALUES
     (333,'1.2.246.562.24.37535704268', 'VIRKAILIJA', 'Opa', 'Opetushallituslainen', false, false, true, '160807A963M', 'Opa', null),
     (444,'1.2.246.562.24.23462357366', 'VIRKAILIJA', 'Ville', 'Virkailija', false, false, true, '010108A9195', 'Ville', null),
     (555,'1.2.246.562.24.12342342565', 'VIRKAILIJA', 'Pasi', 'Passivoitu', false, false, true, '040591-921T', 'Pasi', null),
-    (666,'1.2.246.562.24.53673452656', 'VIRKAILIJA', 'Olli', 'Oppija', false, false, true, '160807A963M', 'Olli', null);
+    (666,'1.2.246.562.24.53673452656', 'VIRKAILIJA', 'Olli', 'Oppija', false, false, true, '160807A963M', 'Olli', null),
+    (777,'1.2.246.562.24.73645346564', 'PALVELU', '_', 'Paten Palvelu', false, false, true, null, '_', null);
 
 INSERT INTO kayttajatiedot (id, version, password, salt, henkiloid, createdat, invalidated, username, mfaprovider, passwordchange)
 VALUES
     (333, 0, '***', '***', 333, now(), false, 'opa', null, null),
     (444, 0, '***', '***', 444, now(), false, 'ville', null, null),
-    (555, 0, '***', '***', 555, now(), false, 'pasi', null, null);
+    (555, 0, '***', '***', 555, now(), false, 'pasi', null, null),
+    (666, 0, '***', '***', 777, now(), false, 'patenpalvelu', null, null);
 
 
 INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu, tyyppi, voimassa_alku_pvm, voimassa_loppu_pvm)
@@ -17,7 +19,8 @@ VALUES
     (333,0,'1.2.246.562.10.00000000001',333,false,null,null,null),
     (444,0,'1.2.246.562.10.71948887212',333,false,null,null,null),
     (555,0,'1.2.246.562.10.71948887212',444,false,null,null,null),
-    (666,0,'1.2.246.562.10.71948887212',555,true,null,null,null);
+    (666,0,'1.2.246.562.10.71948887212',555,true,null,null,null),
+    (777,0,'1.2.246.562.10.00000000001',777,false,null,null,null);
 
 INSERT INTO text_group (id, version)
 VALUES

@@ -6,6 +6,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.VirkailijahakuCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
@@ -200,6 +201,8 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                                 QKayttajatiedot qKayttajatiedot,
                                 QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qHenkilo.kayttajaTyyppi.ne(KayttajaTyyppi.PALVELU));
+
         if (StringUtils.hasLength(criteria.getNameQuery())) {
             String trimmedQuery = criteria.getNameQuery().trim();
             builder.and(
@@ -212,9 +215,11 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 )
             );
         }
+
         if (criteria.getKayttooikeusryhmaId() != null) {
             builder.and(qMyonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(criteria.getKayttooikeusryhmaId()));
         }
+
         return builder;
     }
 
