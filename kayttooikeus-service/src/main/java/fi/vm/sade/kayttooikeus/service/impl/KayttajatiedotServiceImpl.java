@@ -105,12 +105,8 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     private KayttajatiedotReadDto updateKayttajatiedot(Henkilo henkilo, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
-        Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot()).orElseGet(() -> {
-            if (!henkilo.isPalvelu()) {
-                throw new ValidationException("Vain palvelukäyttäjälle voi lisätä käyttäjätunnuksen");
-            }
-            return new Kayttajatiedot();
-        });
+        Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot()).orElseThrow(
+                () -> new NotFoundException(String.format("Käyttäjää ei löytynyt OID:lla %s", henkilo.getOidHenkilo())));
         mapper.map(kayttajatiedotUpdateDto, kayttajatiedot);
         return saveKayttajatiedot(henkilo, kayttajatiedot);
     }
