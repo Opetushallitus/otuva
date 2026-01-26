@@ -96,7 +96,9 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
                 .map(k -> new KayttajatiedotReadDto(
                     k.getUsername(),
                     k.getMfaProvider(),
-                    k.getHenkilo().getKayttajaTyyppi()
+                    k.getHenkilo().getKayttajaTyyppi(),
+                    k.getHenkilo().getEtunimetCached(),
+                    k.getHenkilo().getSukunimiCached()
                 ))
                 .orElseThrow(() -> new NotFoundException("Käyttäjätietoja ei löytynyt OID:lla " + henkiloOid));
     }
@@ -111,7 +113,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
 
     private KayttajatiedotReadDto updateKayttajatiedot(Henkilo henkilo, KayttajatiedotUpdateDto kayttajatiedotUpdateDto) {
         Kayttajatiedot kayttajatiedot = Optional.ofNullable(henkilo.getKayttajatiedot()).orElseThrow(
-                () -> new NotFoundException(String.format("Käyttäjää ei löytynyt OID:lla %s", henkilo.getOidHenkilo())));
+                () -> new ValidationException(String.format("Käyttäjätietoja ei löytynyt OID:lla %s", henkilo.getOidHenkilo())));
         mapper.map(kayttajatiedotUpdateDto, kayttajatiedot);
         return saveKayttajatiedot(henkilo, kayttajatiedot);
     }
@@ -123,7 +125,9 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
         return new KayttajatiedotReadDto(
                 henkilo.getKayttajatiedot().getUsername(),
                 henkilo.getKayttajatiedot().getMfaProvider(),
-                henkilo.getKayttajaTyyppi()
+                henkilo.getKayttajaTyyppi(),
+                henkilo.getEtunimetCached(),
+                henkilo.getSukunimiCached()
         );
     }
 

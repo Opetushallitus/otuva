@@ -151,6 +151,21 @@ public class KayttajatiedotServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "oid1")
+    public void getByOid() {
+        populate(henkilo("1.2.3.4.5")
+                .withNimet("etu", "suku")
+                .withUsername("user")
+                .withTyyppi(KayttajaTyyppi.VIRKAILIJA));
+
+        var readDto = kayttajatiedotService.getByHenkiloOid("1.2.3.4.5");
+        assertThat(readDto.getEtunimet()).isEqualTo("etu");
+        assertThat(readDto.getSukunimi()).isEqualTo("suku");
+        assertThat(readDto.getUsername()).isEqualTo("user");
+        assertThat(readDto.getKayttajaTyyppi()).isEqualTo(KayttajaTyyppi.VIRKAILIJA);
+    }
+
+    @Test
     @WithMockUser(username = "counterTest")
     public void countSuccessfullLogins() {
         populate(henkilo("counterTest"));

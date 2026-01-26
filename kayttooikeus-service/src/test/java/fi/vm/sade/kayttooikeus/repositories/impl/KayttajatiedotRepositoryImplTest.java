@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -13,7 +12,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.*;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
@@ -28,15 +26,6 @@ public class KayttajatiedotRepositoryImplTest extends AbstractServiceIntegration
     OrganisaatioClient organisaatioClient;
     @Autowired
     private KayttajatiedotRepository repository;
-
-    @Test
-    public void testQueryExecutes() {
-        String oid = "oid1";
-
-        Optional<KayttajatiedotReadDto> kayttajatiedot = repository.findByHenkiloOid(oid);
-
-        assertThat(kayttajatiedot).isEmpty();
-    }
 
     @Test
     public void cleanObsoletedIdentifications() {

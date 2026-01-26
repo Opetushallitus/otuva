@@ -7,4 +7,6 @@ public class KayttajatiedotReadDto {
     private final String username;
     private final MfaProvider mfaProvider;
     private final KayttajaTyyppi kayttajaTyyppi;
+    private final String etunimet;
+    private final String sukunimi;
 }
