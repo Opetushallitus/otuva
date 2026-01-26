@@ -1,9 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
-import com.querydsl.core.types.Projections;
-
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
-import fi.vm.sade.kayttooikeus.dto.KayttajatiedotReadDto;
 import fi.vm.sade.kayttooikeus.dto.MfaProvider;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepositoryCustom;
@@ -13,19 +10,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 public class KayttajatiedotRepositoryImpl extends AbstractRepository implements KayttajatiedotRepositoryCustom {
-    @Override
-    public Optional<KayttajatiedotReadDto> findByHenkiloOid(String henkiloOid) {
-        QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;
-        QHenkilo qHenkilo = QHenkilo.henkilo;
-
-        KayttajatiedotReadDto dto = jpa()
-                .from(qKayttajatiedot).join(qKayttajatiedot.henkilo, qHenkilo)
-                .where(qHenkilo.oidHenkilo.eq(henkiloOid))
-                .select(Projections.constructor(KayttajatiedotReadDto.class, qKayttajatiedot.username, qKayttajatiedot.mfaProvider, qHenkilo.kayttajaTyyppi))
-                .fetchOne();
-        return Optional.ofNullable(dto);
-    }
-
     @Override
     public Optional<Kayttajatiedot> findByUsername(String username) {
         QKayttajatiedot qKayttajatiedot = QKayttajatiedot.kayttajatiedot;

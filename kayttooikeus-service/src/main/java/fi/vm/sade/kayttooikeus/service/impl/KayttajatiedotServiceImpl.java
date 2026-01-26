@@ -92,7 +92,12 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     @Override
     @Transactional(readOnly = true)
     public KayttajatiedotReadDto getByHenkiloOid(String henkiloOid) {
-        return kayttajatiedotRepository.findByHenkiloOid(henkiloOid)
+        return kayttajatiedotRepository.findByHenkiloOidHenkilo(henkiloOid)
+                .map(k -> new KayttajatiedotReadDto(
+                    k.getUsername(),
+                    k.getMfaProvider(),
+                    k.getHenkilo().getKayttajaTyyppi()
+                ))
                 .orElseThrow(() -> new NotFoundException("Käyttäjätietoja ei löytynyt OID:lla " + henkiloOid));
     }
 
