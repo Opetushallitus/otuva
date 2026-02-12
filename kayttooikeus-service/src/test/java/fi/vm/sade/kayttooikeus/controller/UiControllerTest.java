@@ -192,7 +192,7 @@ class UiControllerTest {
 
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
-    public void virkailijahakuFiltersVirkailijasByKayttoikeusryhmaId() throws Exception {
+    public void jarjestelmatunnushakuFiltersVirkailijasByKayttoikeusryhmaId() throws Exception {
         var response = mvc.perform(post("/internal/virkailijahaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
@@ -205,5 +205,56 @@ class UiControllerTest {
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("opa", "ville");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuFiltersJarjestelmatunnusByUsername() throws Exception {
+        var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"query":"paten"}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("patenpalvelu");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuFiltersJarjestelmatunnusByName() throws Exception {
+        var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"query":"krypt"}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("patenpalvelu");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuFiltersJarjestelmatunnusByKayttooikeusryhmaId() throws Exception {
+        var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"kayttooikeusryhmaId":444}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("patenpalvelu");
     }
 }

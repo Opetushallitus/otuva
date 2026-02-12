@@ -2,11 +2,11 @@ package fi.vm.sade.kayttooikeus.service.impl;
 
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
-import fi.vm.sade.kayttooikeus.dto.OrganisaatioWithChildrenDto;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.AnomusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
@@ -187,5 +187,26 @@ public class OrganisaatioHenkiloServiceImpl implements OrganisaatioHenkiloServic
             anomus.setAnomusTilaTapahtumaPvm(LocalDateTime.now());
             this.haettuKayttooikeusRyhmaRepository.delete(h);
         });
+    }
+
+    @Override
+    public Set<HenkilohakuResultDto> addOrganisaatioInformation(Set<HenkilohakuResultDto> set) {
+        List<String> oidList = set.stream().map(HenkilohakuResultDto::getOidHenkilo).collect(toList());
+        Map<String, List<String>> organisaatioHenkiloByHenkiloOid = organisaatioHenkiloRepository.findActiveByHenkiloOids(oidList);
+        return set.stream().map(dto -> {
+            var orgList = organisaatioHenkiloByHenkiloOid.get(dto.getOidHenkilo());
+            if (orgList != null) {
+                dto.setOrganisaatioNimiList(
+                    orgList.stream()
+                        .map(oid -> {
+                            var perustiedot = organisaatioClient.getOrganisaatioPerustiedotCached(oid)
+                                    .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(oid));
+                            return new OrganisaatioMinimalDto(oid, perustiedot.getOrganisaatiotyypit(), perustiedot.getNimi());
+                        })
+                        .collect(toList())
+                );
+            }
+            return dto;
+        }).collect(toSet());
     }
 }

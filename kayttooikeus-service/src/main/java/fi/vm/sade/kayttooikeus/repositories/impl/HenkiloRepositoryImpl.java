@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
-import fi.vm.sade.kayttooikeus.dto.VirkailijahakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
@@ -161,7 +161,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     @Override
-    public Set<HenkilohakuResultDto> findVirkailijaByCriteria(VirkailijahakuCriteria criteria) {
+    public Set<HenkilohakuResultDto> findHenkiloByCriteria(HenkilohakuCriteria criteria, KayttajaTyyppi kayttajaTyyppi) {
         QHenkilo qHenkilo = QHenkilo.henkilo;
         QOrganisaatioHenkilo qOrganisaatioHenkilo = QOrganisaatioHenkilo.organisaatioHenkilo;
         QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma
@@ -185,7 +185,7 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             query.leftJoin(qOrganisaatioHenkilo.myonnettyKayttoOikeusRyhmas, qMyonnettyKayttoOikeusRyhmaTapahtuma);
         }
 
-        query.where(getVirkailijahakuWhereCriteria(criteria, qHenkilo, qKayttajatiedot, qMyonnettyKayttoOikeusRyhmaTapahtuma));
+        query.where(getVirkailijahakuWhereCriteria(criteria, kayttajaTyyppi, qHenkilo, qKayttajatiedot, qMyonnettyKayttoOikeusRyhmaTapahtuma));
 
         return query.fetch().stream().map(tuple -> new HenkilohakuResultDto(
                 tuple.get(qHenkilo.oidHenkilo),
@@ -196,12 +196,13 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
     }
 
     private BooleanBuilder getVirkailijahakuWhereCriteria(
-                                VirkailijahakuCriteria criteria,
+                                HenkilohakuCriteria criteria,
+                                KayttajaTyyppi kayttajaTyyppi,
                                 QHenkilo qHenkilo,
                                 QKayttajatiedot qKayttajatiedot,
                                 QMyonnettyKayttoOikeusRyhmaTapahtuma qMyonnettyKayttoOikeusRyhmaTapahtuma) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qHenkilo.kayttajaTyyppi.ne(KayttajaTyyppi.PALVELU));
+        builder.and(qHenkilo.kayttajaTyyppi.eq(kayttajaTyyppi));
 
         if (StringUtils.hasLength(criteria.getNameQuery())) {
             String trimmedQuery = criteria.getNameQuery().trim();

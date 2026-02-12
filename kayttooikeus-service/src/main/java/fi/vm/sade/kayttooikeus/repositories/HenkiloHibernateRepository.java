@@ -3,7 +3,8 @@ package fi.vm.sade.kayttooikeus.repositories;
 import com.querydsl.core.types.OrderSpecifier;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
-import fi.vm.sade.kayttooikeus.dto.VirkailijahakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
 import org.springframework.stereotype.Repository;
@@ -38,7 +39,7 @@ public interface HenkiloHibernateRepository extends BaseRepository<Henkilo> {
 
     List<HenkilohakuResultDto> findByCriteria(HenkiloCriteria criteria, Long offset, Long limit, List<OrderSpecifier> orderBy);
 
-    Set<HenkilohakuResultDto> findVirkailijaByCriteria(VirkailijahakuCriteria criteria);
+    Set<HenkilohakuResultDto> findHenkiloByCriteria(HenkilohakuCriteria criteria, KayttajaTyyppi kayttajaTyyppi);
 
     /**
      * Palauttaa criterian perusteella löytyvien henkilöiden lukumäärän. Ei haeta annetuilla henkilo oideilla

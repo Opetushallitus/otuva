@@ -8,7 +8,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VirkailijahakuCriteria {
+public class HenkilohakuCriteria {
     private Boolean subOrganisation;
     private String nameQuery;
     private Set<String> organisaatioOids;

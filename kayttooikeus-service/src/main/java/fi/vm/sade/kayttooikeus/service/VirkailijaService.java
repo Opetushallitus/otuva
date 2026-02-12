@@ -2,7 +2,7 @@ package fi.vm.sade.kayttooikeus.service;
 
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.VirkailijahakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 
 import java.util.Set;
@@ -26,6 +26,6 @@ public interface VirkailijaService {
 
     Iterable<KayttajaReadDto> list(VirkailijaCriteriaDto criteria);
 
-    Set<HenkilohakuResultDto> virkailijahaku(VirkailijahakuCriteria criteria);
+    Set<HenkilohakuResultDto> virkailijahaku(HenkilohakuCriteria criteria);
 
 }

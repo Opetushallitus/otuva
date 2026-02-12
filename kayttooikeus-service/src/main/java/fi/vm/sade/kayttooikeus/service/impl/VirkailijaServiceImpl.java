@@ -13,13 +13,11 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
-import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -45,6 +43,7 @@ public class VirkailijaServiceImpl implements VirkailijaService {
     private final OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     private final CommonProperties commonProperties;
     private final KayttajatiedotService kayttajatiedotService;
+    private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final CryptoService cryptoService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final HenkiloDataRepository henkiloRepository;
@@ -118,30 +117,13 @@ public class VirkailijaServiceImpl implements VirkailijaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Set<HenkilohakuResultDto> virkailijahaku(VirkailijahakuCriteria virkailijaCriteria) {
-        virkailijaCriteria.setOrganisaatioOids(getOrganisaatioOids(virkailijaCriteria));
-        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findVirkailijaByCriteria(virkailijaCriteria);
-
-        List<String> oidList = result.stream().map(HenkilohakuResultDto::getOidHenkilo).collect(toList());
-        Map<String, List<String>> organisaatioHenkiloByHenkiloOid = organisaatioHenkiloRepository.findActiveByHenkiloOids(oidList);
-        return result.stream().map(dto -> {
-            var orgList = organisaatioHenkiloByHenkiloOid.get(dto.getOidHenkilo());
-            if (orgList != null) {
-                dto.setOrganisaatioNimiList(
-                    orgList.stream()
-                        .map(oid -> {
-                            var perustiedot = organisaatioClient.getOrganisaatioPerustiedotCached(oid)
-                                    .orElseGet(() -> UserDetailsUtil.createUnknownOrganisation(oid));
-                            return new OrganisaatioMinimalDto(oid, perustiedot.getOrganisaatiotyypit(), perustiedot.getNimi());
-                        })
-                        .collect(toList())
-                );
-            }
-            return dto;
-        }).collect(toSet());
+    public Set<HenkilohakuResultDto> virkailijahaku(HenkilohakuCriteria criteria) {
+        criteria.setOrganisaatioOids(getOrganisaatioOids(criteria));
+        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findHenkiloByCriteria(criteria, KayttajaTyyppi.VIRKAILIJA);
+        return organisaatioHenkiloService.addOrganisaatioInformation(result);
     }
 
-    private Set<String> getOrganisaatioOids(VirkailijahakuCriteria criteria) {
+    private Set<String> getOrganisaatioOids(HenkilohakuCriteria criteria) {
         List<String> userOrganisaatioOids = organisaatioHenkiloRepository
                 .findUsersOrganisaatioHenkilosByPalveluRoolis(permissionCheckerService.getCurrentUserOid(), PalveluRooliGroup.HENKILOHAKU);
         return userOrganisaatioOids.contains(commonProperties.getRootOrganizationOid())
@@ -149,7 +131,7 @@ public class VirkailijaServiceImpl implements VirkailijaService {
             : getOrganisaatioOidsForNonOphUser(criteria, userOrganisaatioOids);
     }
 
-    private Set<String> getOrganisaatioOidsForOphUser(VirkailijahakuCriteria criteria) {
+    private Set<String> getOrganisaatioOidsForOphUser(HenkilohakuCriteria criteria) {
         if (criteria.getOrganisaatioOids() == null) {
             // OPH user searches from all organisations including henkilos without organisation
             return null;
@@ -170,7 +152,7 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         return criteria.getOrganisaatioOids();
     }
 
-    private Set<String> getOrganisaatioOidsForNonOphUser(VirkailijahakuCriteria criteria, List<String> userOrganisaatioOids) {
+    private Set<String> getOrganisaatioOidsForNonOphUser(HenkilohakuCriteria criteria, List<String> userOrganisaatioOids) {
         Set<String> organisaatioOids = criteria.getOrganisaatioOids() != null
             ? criteria.getOrganisaatioOids()
             : new HashSet<>(userOrganisaatioOids);

@@ -3,6 +3,8 @@ package fi.vm.sade.kayttooikeus.service.impl;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Kasittelija;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Oauth2ClientCredential;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.JarjestelmatunnushakuCriteria;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
@@ -17,7 +19,9 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
+import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
+import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
@@ -52,6 +56,7 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final OrganisaatioClient organisaatioClient;
     private final KayttajatiedotService kayttajatiedotService;
+    private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final Oauth2ClientRepository oauth2ClientRepository;
     private final PasswordEncoder passwordEncoder;
@@ -174,4 +179,10 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         return new Jarjestelmatunnus(oid, henkilo.getSukunimiCached(), username, oauth2ClientCredentials);
     }
 
+    @Override
+    public Set<HenkilohakuResultDto> jarjestelmatunnushaku(JarjestelmatunnushakuCriteria criteria) {
+        HenkilohakuCriteria henkilohakuCriteria = new HenkilohakuCriteria(null, criteria.getQuery(), null, criteria.getKayttooikeusryhmaId());
+        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findHenkiloByCriteria(henkilohakuCriteria, KayttajaTyyppi.PALVELU);
+        return organisaatioHenkiloService.addOrganisaatioInformation(result);
+    }
 }
