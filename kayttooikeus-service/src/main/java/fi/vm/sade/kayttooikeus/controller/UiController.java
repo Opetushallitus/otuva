@@ -11,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
-import fi.vm.sade.kayttooikeus.dto.JarjestelmatunnushakuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
@@ -44,8 +43,8 @@ public class UiController {
 
     @PostMapping("/jarjestelmatunnushaku")
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    public Set<HenkilohakuResultDto> jarjestelmatunnushaku(@Validated @RequestBody JarjestelmatunnushakuCriteria criteria) {
-        if ((criteria.getQuery() == null || criteria.getQuery().length() < 3) && criteria.getKayttooikeusryhmaId() == null) {
+    public Set<HenkilohakuResultDto> jarjestelmatunnushaku(@Validated @RequestBody HenkilohakuCriteria criteria) {
+        if (!isHakuByName(criteria) && !isHakuByOrganisation(criteria) && criteria.getKayttooikeusryhmaId() == null) {
             throw new ValidationException("search by name or kayttooikeusryhma id");
         }
         return palvelukayttajaService.jarjestelmatunnushaku(criteria);

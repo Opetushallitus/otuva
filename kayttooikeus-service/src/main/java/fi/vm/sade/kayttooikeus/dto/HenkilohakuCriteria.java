@@ -9,7 +9,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HenkilohakuCriteria {
-    private Boolean subOrganisation;
+    private Boolean subOrganisation = false;
     private String nameQuery;
     private Set<String> organisaatioOids;
     private Long kayttooikeusryhmaId;

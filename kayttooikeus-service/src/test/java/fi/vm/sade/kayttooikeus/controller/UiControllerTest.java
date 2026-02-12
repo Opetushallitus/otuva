@@ -213,7 +213,7 @@ class UiControllerTest {
         var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-    {"query":"paten"}""")
+    {"nameQuery":"paten"}""")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -230,7 +230,24 @@ class UiControllerTest {
         var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-    {"query":"krypt"}""")
+    {"nameQuery":"krypt"}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("patenpalvelu");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuFiltersJarjestelmatunnusByOrganisation() throws Exception {
+        var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"organisaatioOids":["1.2.246.562.10.00000000001"]}""")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

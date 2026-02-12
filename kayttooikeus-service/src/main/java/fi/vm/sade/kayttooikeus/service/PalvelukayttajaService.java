@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
-import fi.vm.sade.kayttooikeus.dto.JarjestelmatunnushakuCriteria;
+import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
@@ -25,7 +25,7 @@ public interface PalvelukayttajaService {
      */
     List<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria);
 
-    Set<HenkilohakuResultDto> jarjestelmatunnushaku(JarjestelmatunnushakuCriteria criteria);
+    Set<HenkilohakuResultDto> jarjestelmatunnushaku(HenkilohakuCriteria criteria);
 
     /**
      * Luo palvelukäyttäjän.

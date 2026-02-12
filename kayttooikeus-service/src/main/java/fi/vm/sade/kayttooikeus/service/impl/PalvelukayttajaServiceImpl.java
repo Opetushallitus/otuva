@@ -1,10 +1,10 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Kasittelija;
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Oauth2ClientCredential;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
-import fi.vm.sade.kayttooikeus.dto.JarjestelmatunnushakuCriteria;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
@@ -61,6 +61,7 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final Oauth2ClientRepository oauth2ClientRepository;
     private final PasswordEncoder passwordEncoder;
     private final PermissionCheckerService permissionCheckerService;
+    private final CommonProperties commonProperties;
 
     @Override
     @Transactional(readOnly = true)
@@ -180,9 +181,11 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     }
 
     @Override
-    public Set<HenkilohakuResultDto> jarjestelmatunnushaku(JarjestelmatunnushakuCriteria criteria) {
-        HenkilohakuCriteria henkilohakuCriteria = new HenkilohakuCriteria(null, criteria.getQuery(), null, criteria.getKayttooikeusryhmaId());
-        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findHenkiloByCriteria(henkilohakuCriteria, KayttajaTyyppi.PALVELU);
+    public Set<HenkilohakuResultDto> jarjestelmatunnushaku(HenkilohakuCriteria criteria) {
+        if (criteria.getOrganisaatioOids() != null && criteria.getOrganisaatioOids().contains(commonProperties.getRootOrganizationOid())) {
+            criteria.setSubOrganisation(false);
+        }
+        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findHenkiloByCriteria(criteria, KayttajaTyyppi.PALVELU);
         return organisaatioHenkiloService.addOrganisaatioInformation(result);
     }
 }
