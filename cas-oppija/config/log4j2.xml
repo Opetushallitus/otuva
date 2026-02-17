@@ -8,7 +8,7 @@
     </Appenders>
     <Loggers>
         <AsyncLogger name="org.apereo.cas" level="debug"/>
-        <AsyncLogger name="fi.vm" level="debug"/>
+        <AsyncLogger name="fi.vm.sade" level="debug"/>
         <AsyncRoot level="info">
             <AppenderRef ref="console"/>
         </AsyncRoot>
