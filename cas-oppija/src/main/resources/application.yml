@@ -1,148 +1,63 @@
-# CAS configuration
-# https://apereo.github.io/cas/6.5.x/configuration/Configuration-Management.html etc...
-
-
-# CAS session lifetime configuration
-cas.ticket.tgt.timeout.max-time-to-live-in-seconds: PT4H30M
-
-cas:
-  server:
-    name: "http://localhost:8081"
-    prefix: "http://localhost:8081/cas-oppija"
-  http-web-request:
-    cors:
-      allow-headers:
-        - "*"
-      enabled: true
-      allow-credentials: true
-      allow-methods:
-        - "*"
-      allow-origin-patterns: [ "http://localhost:[*]", "https://localhost:[*]", "https://testi.apro.tunnistus.fi"]
-
-    header:
-      xframe: false
-      xss: false
-      xcontent: false
-      hsts: false
-  authn:
-    pac4j:
-      core:
-        lazy-init: true
-    accept:
-      users:
-    errors:
-      exceptions:
-        - fi.vm.sade.cas.oppija.surrogate.exception.SurrogateNotAllowedException
-    authentication-attribute-release:
-      only-release:
-        - clientName
-  tgc:
-    secure: false
-    path: /cas-oppija
-    pin-to-session: false
-  warning-cookie:
-    secure: false
-    path: /cas-oppija
-  monitor:
-    endpoints:
-      endpoint:
-        health:
-          access: PERMIT
-        springWebflow:
-          access: PERMIT
-  webflow:
-    session:
-      storage: true
-      compress: false
-
-
-spring.datasource.url: jdbc:postgresql://localhost:5081/casoppija
-spring.datasource.driver-class-name: org.postgresql.Driver
-spring.datasource.username: app
-spring.datasource.password: app
-spring.flyway.enabled: true
-cas.ticket.registry.core.enable-locking: false
-cas.ticket.registry.cleaner.schedule.enabled: true
-cas.ticket.registry.jpa.enabled: true
-cas.ticket.registry.jpa.ddl-auto: validate
-cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQLDialect
-cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
-cas.ticket.registry.jpa.url: ${spring.datasource.url}
-cas.ticket.registry.jpa.user: ${spring.datasource.username}
-cas.ticket.registry.jpa.password: ${spring.datasource.password}
-
-cas.service-registry.json.location: classpath:/opintopolku-1.json
-
-management:
-  endpoints:
-    web:
-     exposure:
-      include:
-       - springWebflow
-       - health
-  endpoint:
-    health:
-      enabled: true
-    springWebflow:
-      enabled: true
-
-# Spring Boot configuration
-# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
-logging.config: file:./config/log4j2.xml
-
-server:
-  port: 8081
-  servlet:
-    context-path: /cas-oppija
-    encoding:
-      charset: UTF-8
-      force: true
-      enabled: true
-  ssl:
-    enabled: false
-  forward-headers-strategy: NONE
-  tomcat:
-    remoteip:
-      port-header:
-      protocol-header:
-      remote-ip-header:
-  error:
-    include-stacktrace: never
-
-# Custom configuration
-
-cas.custom.properties:
-  suomiFiClientName: suomi.fi
-  fakeSuomiFiClientName: fakesuomi.fi
-
-# Read as Properties from Environment
-
-host.virkailija: http://localhost:8080
-
-# Valtuudet config
-valtuudet.enabled: true
-valtuudet.required: true
-
-valtuudet.host: http://localhost:8080
-valtuudet.client-id: client    # Who needs this?
-valtuudet.api-key: key
-valtuudet.oauth-password: password
-
-
-service-user.username: user
-service-user.password: pass
-
-#implementation "org.apereo.cas:cas-server-support-reports:${project.'cas.version'}"
-management.endpoint.springWebflow.enabled: true
-#cas.monitor.endpoints.endpoint.springWebflow.access: IP_ADDRESS
-#cas.monitor.endpoints.endpoint.springWebflow.required-ip-addresses: 127.0.0.1
-
+server.port: 8081
+server.servlet.context-path: /cas-oppija
+server.ssl.enabled: false
+server.servlet.encoding.charset: UTF-8
+server.servlet.encoding.force: true
+server.servlet.encoding.enabled: true
+server.forward-headers-strategy: NONE
+server.max-http-request-header-size: 64KB
 server.tomcat.accesslog.enabled: true
 server.tomcat.accesslog.directory: /dev
 server.tomcat.accesslog.prefix: stdout
 server.tomcat.accesslog.buffered: false
 server.tomcat.accesslog.suffix:
 server.tomcat.accesslog.file-date-format:
-server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"requestId\": \"%{x-amzn-trace-id}i\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"service\": \"cas-oppija\", \"environment\": \"${env.name}\", \"customer\": \"OPH\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"clientSubSystemCode\": \"%{clientSubSystemCode}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"session\": \"%{JSESSIONID}c\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\", \"opintopolku-api-key\": \"%{Opintopolku-Api-Key}i\"}"
+server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\"}"
 server.tomcat.accesslog.request-attributes-enabled: true
+server.tomcat.max-http-response-header-size: 64KB
+
+spring.datasource.url: jdbc:postgresql://localhost:5081/casoppija
+spring.datasource.driver-class-name: org.postgresql.Driver
+spring.datasource.username: app
+spring.datasource.password: app
+spring.flyway.enabled: true
+
+management.endpoints.web.exposure.include: health
+management.endpoint.health.access: READ_ONLY
+management.endpoint.health.status.order: WARN,DOWN,OUT_OF_SERVICE,UNKNOWN,UP
+
+cas.authn.accept.users:
+cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
+cas.http-web-request.cors.allow-headers: ["*"]
+cas.http-web-request.cors.enabled: true
+cas.http-web-request.cors.allow-credentials: true
+cas.http-web-request.cors.allow-methods: ["*"]
+cas.http-web-request.cors.allow-origin-patterns: [ "http://localhost:[*]", "https://localhost:[*]", "https://testi.apro.tunnistus.fi"]
+cas.http-web-request.header.xframe: false
+cas.http-web-request.header.xss: false
+cas.http-web-request.header.xcontent: false
+cas.http-web-request.header.hsts: false
+cas.locale.default-value: fi
+cas.logout.follow-service-redirects: true
+cas.service-registry.core.init-from-json: true
+cas.slo.asynchronous: false
+cas.sso.services.allow-missing-service-parameter: false
+cas.standalone.configuration-directory: .
+cas.tgc.secure: true
+cas.tgc.path: /cas-oppija
+cas.tgc.pin-to-session: true
+cas.ticket.registry.cleaner.schedule.enabled: true
+cas.ticket.registry.core.enable-locking: false
+cas.ticket.registry.jpa.ddl-auto: validate
+cas.ticket.registry.jpa.dialect: org.hibernate.dialect.PostgreSQLDialect
+cas.ticket.registry.jpa.enabled: true
+cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
+cas.ticket.registry.jpa.password: ${spring.datasource.password}
+cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.ticket.registry.jpa.user: ${spring.datasource.username}
+cas.ticket.tgt.primary.time-to-kill-in-seconds: 28800
+# CAS session lifetime configuration
+cas.ticket.tgt.primary.max-time-to-live-in-seconds: PT4H30M
+cas.view.default-redirect-url: http://localhost:8080
+cas.warning-cookie.secure: true
+cas.warning-cookie.path: /cas-oppija

@@ -1,0 +1,38 @@
+spring.datasource.url: jdbc:postgresql://host.docker.internal:5081/casoppija
+
+management.endpoints.web.exposure.include: health,springWebflow,auditevents
+management.endpoint.auditevents.access: READ_ONLY
+management.endpoint.springWebflow.access: READ_ONLY
+
+cas.server.name: http://localhost:8081
+cas.server.prefix: ${cas.server.name}/cas-oppija
+cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.tgc.secure: false
+cas.tgc.pin-to-session: false
+cas.warning-cookie.secure: false
+
+cas.authn.pac4j.saml[0].client-name: suomi.fi
+cas.authn.pac4j.saml[0].auto-redirect-type: CLIENT
+cas.authn.pac4j.saml[0].keystore-password: dummy
+cas.authn.pac4j.saml[0].private-key-password: dummy
+cas.authn.pac4j.saml[0].keystore-path: /app/config/localkeystore.jks
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://hahtuvaopintopolku.fi/cas-oppija
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/config/localsp-metadata.xml
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml
+cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[0].sign-authn-request: true
+cas.authn.pac4j.saml[0].wants-assertions-signed: true
+cas.authn.pac4j.saml[0].wants-responses-signed: true
+cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[0].use-name-qualifier: false
+cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
+
+cas.service-registry.json.location: file:///app/services/local
+
+host.alb: host.docker.internal:8101
+
+kayttooikeus.baseurl: http://host.docker.internal:8101/kayttooikeus-service
+oppijanumerorekisteri.baseurl: http://host.docker.internal:8101/oppijanumerorekisteri-service
+oauth2.client-id: id
+oauth2.client-secret: secret
