@@ -1,7 +1,5 @@
 package fi.vm.sade.cas.oppija.controller;
 
-import fi.vm.sade.cas.oppija.exception.BadRequestException;
-import fi.vm.sade.cas.oppija.exception.UnauthorizedException;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.Service;
@@ -20,11 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 import java.util.Map;
-
-import static fi.vm.sade.cas.oppija.controller.ControllerUtils.wrapExceptionToApplicationException;
 
 @RestController
 @RequestMapping("/user")
@@ -46,9 +43,8 @@ public class UserController {
     }
 
     @GetMapping(value = "/current/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    //TODO: return Map value type  changed from Object to List<Object>!!!!
     public Map<String, List<Object>> getAttributes(HttpServletRequest request) {
-        return wrapExceptionToApplicationException(() -> getAttributesInternal(request));
+        return getAttributesInternal(request);
     }
 
     private Map<String, List<Object>> getAttributesInternal(HttpServletRequest request) {
@@ -58,7 +54,11 @@ public class UserController {
         RegisteredServiceAttributeReleasePolicy attributeReleasePolicy = registeredService.getAttributeReleasePolicy();
         RegisteredServiceAttributeReleasePolicyContext context = RegisteredServiceAttributeReleasePolicyContext.builder().principal(principal).service(service).registeredService(registeredService).build();
 
-        return attributeReleasePolicy.getAttributes(context);
+        try {
+            return attributeReleasePolicy.getAttributes(context);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Principal getPrincipal(HttpServletRequest request) {
@@ -70,11 +70,11 @@ public class UserController {
     private TicketGrantingTicket getTicketGrantingTicket(HttpServletRequest request) {
         String ticket = ticketGrantingTicketCookieGenerator.retrieveCookieValue(request);
         if (ticket == null) {
-            throw new UnauthorizedException("Ticket granting ticket was not provided");
+            throw new RuntimeException("Ticket granting ticket was not provided");
         }
         TicketGrantingTicket ticketGrantingTicket = ticketRegistry.getTicket(ticket, TicketGrantingTicket.class);
         if (ticketGrantingTicket == null) {
-            throw new UnauthorizedException("Ticket granting ticket doesn't exist");
+            throw new RuntimeException("Ticket granting ticket doesn't exist");
         }
         return ticketGrantingTicket;
     }
@@ -82,7 +82,7 @@ public class UserController {
     private Service getService(HttpServletRequest request) {
         WebApplicationService service = argumentExtractor.extractService(request);
         if (service == null) {
-            throw new BadRequestException("Required parameter 'service' is missing");
+            throw new RuntimeException("Required parameter 'service' is missing");
         }
         return service;
     }
@@ -90,7 +90,7 @@ public class UserController {
     private RegisteredService getRegisteredService(Service service) {
         RegisteredService registeredService = servicesManager.findServiceBy(service);
         if (registeredService == null) {
-            throw new BadRequestException(String.format("Service '%s' is unauthorized", service));
+            throw new RuntimeException(String.format("Service '%s' is unauthorized", service));
         }
         return registeredService;
     }
