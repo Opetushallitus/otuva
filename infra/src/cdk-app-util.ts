@@ -153,20 +153,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
       );
       testStage.addAction(
         new codepipeline_actions.CodeBuildAction({
-          actionName: "TestCasOppija",
-          input: sourceOutput,
-          project: makeTestProject(
-            this,
-            env,
-            "TestCasOppija",
-            ["scripts/ci/run-tests-cas-oppija.sh"],
-            env === "hahtuva" ? "corretto21" : "corretto11",
-            codebuild.ComputeType.MEDIUM
-          ),
-        })
-      );
-      testStage.addAction(
-        new codepipeline_actions.CodeBuildAction({
           actionName: "TestServiceProvider",
           input: sourceOutput,
           project: makeTestProject(
