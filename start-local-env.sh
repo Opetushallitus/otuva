@@ -8,7 +8,7 @@ function main {
   tmux kill-session -t "$session" || true
   tmux start-server
   tmux new-session -d -s "$session"
-  
+
   tmux select-pane -t 0
   tmux splitw -h
   tmux select-pane -t 0
@@ -29,7 +29,7 @@ function main {
   tmux send-keys "$repo/cas-oppija/scripts/run-database.sh" C-m
 
   tmux select-pane -t 1
-  tmux send-keys "while sleep 0.5; do $repo/cas-oppija/scripts/run-cas-java-11.sh; done" C-m
+  tmux send-keys "while sleep 0.5; do $repo/cas-oppija/scripts/run-cas-oppija.sh; done" C-m
 
   tmux select-pane -t 2
   tmux send-keys "$repo/cas-oppija/scripts/open-browser.sh; exit" C-m

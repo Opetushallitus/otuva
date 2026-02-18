@@ -3,12 +3,11 @@ set -o errexit -o nounset -o pipefail
 readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 function main {
+  use_java_version 21
   cd "${repo}/cas-oppija"
-  use_java_version 11
   ./gradlew dependencies --write-locks
 
   cd "${repo}/cas-virkailija"
-  use_java_version 21
   ./gradlew dependencies --write-locks
 }
 
