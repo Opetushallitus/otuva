@@ -11,8 +11,6 @@ cas.tgc.crypto.signing.key: ${cas_tgc_signing_key}
 cas.webflow.crypto.encryption.key: ${cas_webflow_encryption_key}
 cas.webflow.crypto.signing.key: ${cas_webflow_signing_key}
 
-cas.service-registry.json.location: file:///app/config/
-
 cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
 cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
 
