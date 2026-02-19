@@ -48,3 +48,4 @@ kayttooikeus.baseurl: https://hahtuva.otuva.opintopolku.fi/kayttooikeus-service
 oppijanumerorekisteri.baseurl: https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service
 oauth2.client-id: ${cas_oppija_service_user_username}
 oauth2.client-secret: ${cas_oppija_oauth2_client_secret}
+user-controller.enabled: true
