@@ -1,8 +1,9 @@
 spring.datasource.url: jdbc:postgresql://host.docker.internal:5081/casoppija
 
-management.endpoints.web.exposure.include: health,springWebflow,auditevents
+management.endpoints.web.exposure.include: health,springWebflow,auditevents,beans
 management.endpoint.auditevents.access: READ_ONLY
 management.endpoint.springWebflow.access: READ_ONLY
+management.endpoint.beans.access: READ_ONLY
 
 cas.server.name: http://localhost:8081
 cas.server.prefix: ${cas.server.name}/cas-oppija
@@ -36,3 +37,4 @@ kayttooikeus.baseurl: http://host.docker.internal:8101/kayttooikeus-service
 oppijanumerorekisteri.baseurl: http://host.docker.internal:8101/oppijanumerorekisteri-service
 oauth2.client-id: id
 oauth2.client-secret: secret
+user-controller.enabled: true
