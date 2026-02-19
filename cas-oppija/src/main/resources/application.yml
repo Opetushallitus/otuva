@@ -57,8 +57,8 @@ cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
 cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
-cas.ticket.tgt.primary.time-to-kill-in-seconds: 28800
 # CAS session lifetime configuration
+cas.ticket.tgt.primary.time-to-kill-in-seconds: PT4H30M
 cas.ticket.tgt.primary.max-time-to-live-in-seconds: PT4H30M
 cas.view.default-redirect-url: http://localhost:8080
 cas.warning-cookie.secure: true
