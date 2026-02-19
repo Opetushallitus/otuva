@@ -12,37 +12,30 @@ import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.support.ArgumentExtractor;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final CasCookieBuilder ticketGrantingTicketCookieGenerator;
     private final TicketRegistry ticketRegistry;
     private final ArgumentExtractor argumentExtractor;
     private final ServicesManager servicesManager;
+    private final ApplicationContext applicationContext;
 
-    public UserController(@Qualifier("ticketGrantingTicketCookieGenerator") CasCookieBuilder ticketGrantingTicketCookieGenerator,
-                          TicketRegistry ticketRegistry,
-                          ArgumentExtractor argumentExtractor,
-                          ServicesManager servicesManager) {
-        this.ticketGrantingTicketCookieGenerator = ticketGrantingTicketCookieGenerator;
-        this.ticketRegistry = ticketRegistry;
-        this.argumentExtractor = argumentExtractor;
-        this.servicesManager = servicesManager;
-    }
-
-    @GetMapping(value = "/current/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, List<Object>> getAttributes(HttpServletRequest request) {
         return getAttributesInternal(request);
     }
@@ -52,7 +45,12 @@ public class UserController {
         Service service = getService(request);
         RegisteredService registeredService = getRegisteredService(service);
         RegisteredServiceAttributeReleasePolicy attributeReleasePolicy = registeredService.getAttributeReleasePolicy();
-        RegisteredServiceAttributeReleasePolicyContext context = RegisteredServiceAttributeReleasePolicyContext.builder().principal(principal).service(service).registeredService(registeredService).build();
+        RegisteredServiceAttributeReleasePolicyContext context = RegisteredServiceAttributeReleasePolicyContext.builder()
+                .applicationContext(applicationContext)
+                .principal(principal)
+                .service(service)
+                .registeredService(registeredService)
+                .build();
 
         try {
             return attributeReleasePolicy.getAttributes(context);
