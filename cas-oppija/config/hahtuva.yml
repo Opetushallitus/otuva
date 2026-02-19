@@ -3,8 +3,6 @@ cas.standalone.configuration-directory: /app/config
 cas.server.name: https://hahtuvaopintopolku.fi
 cas.server.prefix: ${cas.server.name}/cas-oppija
 cas.server.tomcat.http-proxy.enabled: true
-cas.server.tomcat.http-proxy.secure: true
-cas.server.tomcat.http-proxy.scheme: https
 cas.server.tomcat.http-proxy.protocol: HTTP/1.1
 
 cas.tgc.crypto.encryption.key: ${cas_oppija_tgc_encryption_key}
@@ -34,15 +32,11 @@ cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
 spring.datasource.url: jdbc:postgresql://${cas_oppija_postgres_host}:${cas_oppija_postgres_port}/${cas_oppija_postgres_db}
 spring.datasource.username: ${cas_oppija_postgres_username}
 spring.datasource.password: ${cas_oppija_postgres_password}
-cas.ticket.registry.core.enable-locking: false
-cas.ticket.registry.jpa.enabled: true
 cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
 cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
-cas.logout.follow-service-redirects: true
-cas.logout.redirect-parameter: service
 cas.logout.redirect-url: https://hahtuvaopintopolku.fi/oma-opintopolku
 
 cas.http-web-request.cors.allow-origins[0]: https://hahtuvaopintopolku.fi
