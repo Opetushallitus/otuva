@@ -42,7 +42,7 @@ public class UserController {
         this.servicesManager = servicesManager;
     }
 
-    @GetMapping(value = "/current/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, List<Object>> getAttributes(HttpServletRequest request) {
         return getAttributesInternal(request);
     }

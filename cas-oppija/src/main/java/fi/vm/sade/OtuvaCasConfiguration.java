@@ -3,6 +3,8 @@ package fi.vm.sade;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcessor;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -14,11 +16,13 @@ import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.CoreTicketUtils;
+import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
 import org.apereo.cas.web.support.ArgumentExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -108,5 +112,17 @@ public class OtuvaCasConfiguration {
             ArgumentExtractor argumentExtractor,
             ServicesManager servicesManager) {
         return new UserController(casCookieBuilder, ticketRegistry, argumentExtractor, servicesManager);
+    }
+
+    @Bean
+    @ConditionalOnProperty("user-controller.enabled")
+    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+    CasWebSecurityConfigurer<Void> otuvaUserControllerSecurityConfigurer() {
+        return new CasWebSecurityConfigurer<>() {
+            @Override
+            public List<String> getIgnoredEndpoints() {
+                return List.of("/user");
+            }
+        };
     }
 }
