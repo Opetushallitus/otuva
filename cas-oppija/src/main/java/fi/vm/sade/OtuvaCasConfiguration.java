@@ -34,6 +34,7 @@ import fi.vm.sade.client.OppijanumerorekisteriClient;
 @RequiredArgsConstructor
 public class OtuvaCasConfiguration {
     final PrincipalFactory principalFactory;
+    final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     final Environment environment;
 
     @Bean
@@ -56,8 +57,7 @@ public class OtuvaCasConfiguration {
 
     @Bean
     DelegatedAuthenticationPreProcessor otuvaDelegatedAuthenticationPreProcessor() {
-        var oauth2Client = new Oauth2Client(new Oauth2BearerClient());
-        return new OtuvaDelegatedAuthenticationPreProcessor(principalFactory, new OppijanumerorekisteriClient(oauth2Client));
+        return new OtuvaDelegatedAuthenticationPreProcessor(principalFactory, oppijanumerorekisteriClient);
     }
 
     @Bean(name = "otuvaJpaTicketRegistry")
