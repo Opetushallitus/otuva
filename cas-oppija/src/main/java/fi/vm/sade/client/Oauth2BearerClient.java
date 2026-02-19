@@ -4,11 +4,14 @@ import static fi.vm.sade.CacheConfiguration.CACHE_NAME_OAUTH2_BEARER;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
@@ -25,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @CacheConfig(cacheNames = CACHE_NAME_OAUTH2_BEARER)
 @RequiredArgsConstructor
-public class Oauth2BearerClient implements HttpFormEncoding {
+public class Oauth2BearerClient {
     private final Gson gson = new Gson();
 
     @Value("${kayttooikeus.baseurl}")
@@ -60,6 +63,17 @@ public class Oauth2BearerClient implements HttpFormEncoding {
     @CacheEvict(value = CACHE_NAME_OAUTH2_BEARER, allEntries = true)
     public void evictOauth2Bearer() {
         LOGGER.info("evicting oauth2 bearer cache");
+    }
+
+    HttpRequest.BodyPublisher encodeFormBody(Map<String, String> params) {
+        var body = params.entrySet().stream()
+                .map(entry -> encode(entry.getKey()) + "=" + encode(entry.getValue()))
+                .collect(Collectors.joining("&"));
+        return HttpRequest.BodyPublishers.ofString(body);
+    }
+
+    String encode(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
     record Oauth2Token(String access_token, String token_type, Integer expires_in) {}
