@@ -40,6 +40,7 @@ cas.http-web-request.header.hsts: false
 cas.locale.default-value: fi
 cas.logout.follow-service-redirects: true
 cas.service-registry.core.init-from-json: true
+cas.service-registry.json.location: file:///app/config/
 cas.slo.asynchronous: false
 cas.sso.services.allow-missing-service-parameter: false
 cas.standalone.configuration-directory: .
