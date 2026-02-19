@@ -1,3 +1,6 @@
 fi.vm.sade.OtuvaCasConfiguration
 fi.vm.sade.CacheConfiguration
 fi.vm.sade.CustomTicketRegistryCleaner
+fi.vm.sade.client.Oauth2BearerClient
+fi.vm.sade.client.Oauth2Client
+fi.vm.sade.client.OppijanumerorekisteriClient
