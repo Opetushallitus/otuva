@@ -30,7 +30,7 @@
 <body>
 <script th:replace="fragments/scripts"></script>
 
-<div th:replace="fragments/header :: header">
+<div th:replace="~{fragments/header :: header}">
     <a href="fragments/header.html">Header</a> fragment will go here
 </div>
 
@@ -44,7 +44,7 @@
     </main>
 </div>
 
-<div th:replace="fragments/footer :: footer">
+<div th:replace="~{fragments/footer :: footer}">
     <a href="fragments/footer.html">Footer</a> fragment will go here
 </div>
 
