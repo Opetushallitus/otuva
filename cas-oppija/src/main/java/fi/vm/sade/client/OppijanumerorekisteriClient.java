@@ -23,7 +23,6 @@ public class OppijanumerorekisteriClient {
     private String oppijanumerorekisteriBaseurl;
 
     public String getOidByHetu(String hetu) {
-        LOGGER.info("loaded base url " + oppijanumerorekisteriBaseurl);
         var request = HttpRequest.newBuilder()
             .uri(URI.create(oppijanumerorekisteriBaseurl + "/s2s/oidByHetu/" + hetu))
             .GET();
