@@ -4,4 +4,3 @@ fi.vm.sade.CustomTicketRegistryCleaner
 fi.vm.sade.client.Oauth2BearerClient
 fi.vm.sade.client.Oauth2Client
 fi.vm.sade.client.OppijanumerorekisteriClient
-fi.vm.sade.cas.oppija.controller.UserController

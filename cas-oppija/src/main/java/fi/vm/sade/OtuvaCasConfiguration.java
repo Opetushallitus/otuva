@@ -8,12 +8,16 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
+import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.TicketCatalog;
+import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.CoreTicketUtils;
+import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
+import org.apereo.cas.web.support.ArgumentExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -25,8 +29,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.webflow.execution.Action;
 
-import fi.vm.sade.client.Oauth2BearerClient;
-import fi.vm.sade.client.Oauth2Client;
+import fi.vm.sade.cas.oppija.controller.UserController;
 import fi.vm.sade.client.OppijanumerorekisteriClient;
 
 @Configuration
@@ -95,5 +98,15 @@ public class OtuvaCasConfiguration {
             .withId(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
             .build()
             .get();
+    }
+
+    @Bean(name = "otuvaUserController")
+    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+    UserController otuvaUserController(
+            @Qualifier("ticketGrantingTicketCookieGenerator") CasCookieBuilder casCookieBuilder,
+            TicketRegistry ticketRegistry,
+            ArgumentExtractor argumentExtractor,
+            ServicesManager servicesManager) {
+        return new UserController(casCookieBuilder, ticketRegistry, argumentExtractor, servicesManager);
     }
 }
