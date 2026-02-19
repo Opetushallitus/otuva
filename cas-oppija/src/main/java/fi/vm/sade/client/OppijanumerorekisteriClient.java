@@ -15,7 +15,7 @@ public class OppijanumerorekisteriClient {
     private final Oauth2Client httpClient;
     private final Gson gson = new Gson();
 
-    @Value("oppijanumerorekisteri.baseurl")
+    @Value("${oppijanumerorekisteri.baseurl}")
     private String oppijanumerorekisteriBaseurl;
 
     public String getOidByHetu(String hetu) {
