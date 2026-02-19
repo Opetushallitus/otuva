@@ -5,11 +5,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
 public class OppijanumerorekisteriClient {
     private final Oauth2Client httpClient;
@@ -19,6 +23,7 @@ public class OppijanumerorekisteriClient {
     private String oppijanumerorekisteriBaseurl;
 
     public String getOidByHetu(String hetu) {
+        LOGGER.info("loaded base url " + oppijanumerorekisteriBaseurl);
         var request = HttpRequest.newBuilder()
             .uri(URI.create(oppijanumerorekisteriBaseurl + "/s2s/oidByHetu/" + hetu))
             .GET();
