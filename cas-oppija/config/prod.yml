@@ -27,7 +27,7 @@ cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
-cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
+cas.authn.pac4j.saml[0].mapped-attributes[0]: urn:oid:2.5.4.3->personName
 
 spring.datasource.url: jdbc:postgresql://${cas_oppija_postgres_host}:${cas_oppija_postgres_port}/${cas_oppija_postgres_db}
 spring.datasource.username: ${cas_oppija_postgres_username}
