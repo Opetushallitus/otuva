@@ -24,6 +24,7 @@ import org.apereo.cas.web.support.ArgumentExtractor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -110,8 +111,9 @@ public class OtuvaCasConfiguration {
             @Qualifier("ticketGrantingTicketCookieGenerator") CasCookieBuilder casCookieBuilder,
             TicketRegistry ticketRegistry,
             ArgumentExtractor argumentExtractor,
-            ServicesManager servicesManager) {
-        return new UserController(casCookieBuilder, ticketRegistry, argumentExtractor, servicesManager);
+            ServicesManager servicesManager,
+            ApplicationContext applicationContext) {
+        return new UserController(casCookieBuilder, ticketRegistry, argumentExtractor, servicesManager, applicationContext);
     }
 
     @Bean
