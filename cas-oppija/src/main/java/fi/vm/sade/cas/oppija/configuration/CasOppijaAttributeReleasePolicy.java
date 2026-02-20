@@ -19,6 +19,7 @@ public class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePo
         "nationalIdentificationNumber",
         "notBefore",
         "notOnOrAfter",
+        "personName",
         "personOid",
         "sn",
         "TurvakieltoTieto",
