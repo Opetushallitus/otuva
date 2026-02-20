@@ -37,8 +37,6 @@ cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
-cas.logout.redirect-url: https://opintopolku.fi/
-
 cas.http-web-request.cors.allow-origins[0]: https://opintopolku.fi
 cas.http-web-request.cors.allow-origins[1]: https://studyinfo.fi
 cas.http-web-request.cors.allow-origins[2]: https://studieinfo.fi

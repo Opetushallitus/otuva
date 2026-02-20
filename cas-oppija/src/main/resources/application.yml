@@ -38,8 +38,6 @@ cas.http-web-request.header.xss: false
 cas.http-web-request.header.xcontent: false
 cas.http-web-request.header.hsts: false
 cas.locale.default-value: fi
-cas.logout.follow-service-redirects: true
-cas.logout.redirect-parameter: service
 cas.service-registry.core.init-from-json: true
 cas.service-registry.json.location: file:///app/config/
 cas.slo.asynchronous: false
