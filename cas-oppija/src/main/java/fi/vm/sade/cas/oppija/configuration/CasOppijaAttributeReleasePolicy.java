@@ -7,11 +7,36 @@ import java.util.List;
 import java.util.Map;
 
 public class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePolicy {
+    private final List<String> attributes = List.of(
+        "cn",
+        "displayName",
+        "firstName",
+        "givenName",
+        "KotikuntaKuntanumero",
+        "KotikuntaKuntaR",
+        "KotikuntaKuntaS",
+        "mail",
+        "nationalIdentificationNumber",
+        "notBefore",
+        "notOnOrAfter",
+        "personOid",
+        "sn",
+        "TurvakieltoTieto",
+        "VakinainenKotimainenLahiosoitePostinumero",
+        "VakinainenKotimainenLahiosoitePostitoimipaikkaR",
+        "VakinainenKotimainenLahiosoitePostitoimipaikkaS",
+        "VakinainenKotimainenLahiosoiteR",
+        "VakinainenKotimainenLahiosoiteS",
+        "VakinainenUlkomainenLahiosoite",
+        "VakinainenUlkomainenLahiosoitePaikkakuntaJaValtioS",
+        "VakinainenUlkomainenLahiosoitePaikkakuntaJaValtioR",
+        "VakinainenUlkomainenLahiosoitePaikkakuntaJaValtioSelvakielinen",
+        "vtjVerified"
+    );
+
     @Override
     protected Map<String, List<Object>> returnFinalAttributesCollection(Map<String, List<Object>> attributesToRelease, RegisteredService service) {
-        // pac4j adds both saml name (e.g. urn:oid:2.5.4.3) and friendly name (e.g. cn) to principal attributes
-        // and cas converts all attributes containing ":" into numbers which is not allowed in xml tags
-        attributesToRelease.entrySet().removeIf(entry -> entry.getKey().contains(":"));
+        attributesToRelease.entrySet().removeIf(entry -> !attributes.contains(entry.getKey()));
         return attributesToRelease;
     }
 }
