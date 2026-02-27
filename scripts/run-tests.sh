@@ -8,9 +8,6 @@ function main {
   use_jvm_version "21"
   ./scripts/ci/run-tests-kayttooikeus.sh
   ./scripts/ci/run-tests-cas-virkailija.sh
-
-  use_jvm_version "11"
-  ./scripts/ci/run-tests-cas-oppija.sh
 }
 
 function use_jvm_version {

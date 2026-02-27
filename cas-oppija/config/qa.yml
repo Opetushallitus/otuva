@@ -1,86 +1,48 @@
-# CAS configuration
-# https://apereo.github.io/cas/6.0.x/configuration/Configuration-Properties.html
-
 server.port: 8080
-
-logging.config: file:/app/config/log4j2.xml
-
+cas.standalone.configuration-directory: /app/config
 cas.server.name: https://testiopintopolku.fi
-cas.server.prefix: https://testiopintopolku.fi/cas-oppija
+cas.server.prefix: ${cas.server.name}/cas-oppija
+cas.server.tomcat.http-proxy.enabled: true
+cas.server.tomcat.http-proxy.protocol: HTTP/1.1
 
-cas.server.tomcat.http-proxy:
-    enabled: true
-    secure: true
-    scheme: https
-    protocol: HTTP/1.1
+cas.tgc.crypto.encryption.key: ${cas_oppija_tgc_encryption_key}
+cas.tgc.crypto.signing.key: ${cas_oppija_tgc_signing_key}
+cas.webflow.crypto.encryption.key: ${cas_oppija_webflow_encryption_key}
+cas.webflow.crypto.signing.key: ${cas_oppija_webflow_signing_key}
+cas.authn.pac4j.core.session-replication.cookie.crypto.encryption.key: ${cas_pac4j_encryption_key}
+cas.authn.pac4j.core.session-replication.cookie.crypto.signing.key: ${cas_pac4j_signing_key}
 
-cas.tgc.secure: true
-
-cas.warning-cookie.secure: true
-
-cas.tgc.pin-to-session: true
-cas.audit.engine.alternate-client-addr-header-name: X-Real-IP
-cas.tgc.crypto:
-    encryption.key: ${cas_oppija_tgc_encryption_key}
-    signing.key: ${cas_oppija_tgc_signing_key}
-cas.webflow.crypto:
-    encryption.key: ${cas_oppija_webflow_encryption_key}
-    signing.key: ${cas_oppija_webflow_signing_key}
+cas.authn.pac4j.saml[0].client-name: suomi.fi
+cas.authn.pac4j.saml[0].auto-redirect-type: CLIENT
+cas.authn.pac4j.saml[0].keystore-password: ${cas_oppija_suomifi_keystore_password}
+cas.authn.pac4j.saml[0].private-key-password: ${cas_oppija_suomifi_private_key_password}
+cas.authn.pac4j.saml[0].keystore-path: /app/config/keystore.jks
+cas.authn.pac4j.saml[0].service-provider-entity-id: https://testiopintopolku.fi/cas-oppija
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/config/sp-metadata.xml
+cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml
+cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
+cas.authn.pac4j.saml[0].sign-authn-request: true
+cas.authn.pac4j.saml[0].wants-assertions-signed: true
+cas.authn.pac4j.saml[0].wants-responses-signed: true
+cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
+cas.authn.pac4j.saml[0].use-name-qualifier: false
+cas.authn.pac4j.saml[0].mapped-attributes[0]: urn:oid:2.5.4.3->personName
 
 spring.datasource.url: jdbc:postgresql://${cas_oppija_postgres_host}:${cas_oppija_postgres_port}/${cas_oppija_postgres_db}
 spring.datasource.username: ${cas_oppija_postgres_username}
 spring.datasource.password: ${cas_oppija_postgres_password}
-
-cas.authn.pac4j.saml:
-  - client-name: suomi.fi
-    auto-redirect-type: CLIENT
-    keystore-path: /app/config/keystore.jks
-    keystore-password: ${cas_oppija_suomifi_keystore_password}
-    keystore-alias: testiopintopolku.fi
-    private-key-password: ${cas_oppija_suomifi_private_key_password}
-    service-provider-entity-id: https://testiopintopolku.fi/cas-oppija
-    service-provider-metadata-path: /app/config/sp-metadata.xml
-    identity-provider-metadata-path: /app/config/idp-metadata.xml
-    principal-attribute-id: nationalIdentificationNumber
-    requested-attributes:
-      - name: urn:oid:1.2.246.21
-        friendly-name: nationalIdentificationNumber
-        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
-        required: true
-      - name: urn:oid:2.5.4.3
-        friendly-name: cn
-        name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
-        required: true
-    mapped-attributes:
-      - personName->urn:oid:2.5.4.3
-
-management.endpoints.web.exposure.include: health,springWebflow
-management.endpoint.springWebflow.enabled: True
-cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
-cas.logout.follow-service-redirects: true
-cas.logout.redirect-parameter: service
-cas.logout.redirect-url: https://testiopintopolku.fi/
-
-cas.service-registry.json.location: file:///app/config/
+cas.ticket.registry.jpa.driver-class: ${spring.datasource.driver-class-name}
+cas.ticket.registry.jpa.password: ${spring.datasource.password}
+cas.ticket.registry.jpa.url: ${spring.datasource.url}
+cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
 cas.http-web-request.cors.allow-origins[0]: https://testiopintopolku.fi
 cas.http-web-request.cors.allow-origins[1]: https://testistudyinfo.fi
 cas.http-web-request.cors.allow-origins[2]: https://testistudieinfo.fi
 cas.http-web-request.cors.allow-origin-patterns: ['http://localhost:[*]', 'https://*hahtuvaopintopolku.fi', 'https://*hahtuvastudyinfo.fi', 'https://*hahtuvastudieinfo.fi', 'https://testi.apro.tunnistus.fi']
 
-cas.slo.asynchronous: false
-
-# Spring Boot configuration
-# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
-# Oph properties overrides
-
-host.virkailija: https://virkailija.testiopintopolku.fi
-valtuudet.enabled: true
-valtuudet.required: true
-valtuudet.host: https://asiointivaltuustarkastus.test.suomi.fi
-valtuudet.client-id: ${cas_oppija_suomifi_valtuudet_client_id}
-valtuudet.api-key: ${cas_oppija_suomifi_valtuudet_api_key}
-valtuudet.oauth-password: ${cas_oppija_suomifi_valtuudet_oauth_password}
-service-user.username: ${cas_oppija_service_user_username}
-service-user.password: ${cas_oppija_service_user_password}
+kayttooikeus.baseurl: https://qa.otuva.opintopolku.fi/kayttooikeus-service
+oppijanumerorekisteri.baseurl: https://qa.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service
+oauth2.client-id: ${cas_oppija_service_user_username}
+oauth2.client-secret: ${cas_oppija_oauth2_client_secret}
