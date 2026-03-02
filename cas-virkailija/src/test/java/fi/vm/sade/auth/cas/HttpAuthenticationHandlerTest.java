@@ -1,6 +1,7 @@
 package fi.vm.sade.auth.cas;
 
 import fi.vm.sade.CasOphProperties;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
 import fi.vm.sade.javautils.httpclient.*;
 import fi.vm.sade.properties.OphProperties;
 import fi.vm.sade.saml.action.SAMLCredentials;
@@ -42,6 +43,7 @@ public class HttpAuthenticationHandlerTest {
     @SuppressWarnings("unchecked")
     public void setup() throws IOException {
         OphHttpClientProxyRequest httpClientProxyRequestMock = mock(OphHttpClientProxyRequest.class);
+        KayttooikeusClient kayttooikeusClient = mock(KayttooikeusClient.class);
         when(httpClientProxyRequestMock.execute(any())).thenAnswer(invocation
                 -> ((OphHttpResponseHandler<Object>) invocation.getArguments()[0]).handleResponse(httpResponseMock));
         when(httpClientProxyRequestMock.handleManually()).thenReturn(httpResponseMock);
@@ -54,7 +56,7 @@ public class HttpAuthenticationHandlerTest {
         OphProperties properties = new CasOphProperties(environmentMock);
         OphHttpClient httpClient = new OphHttpClient(httpClientProxyMock, "cas", properties);
 
-        authenticationHandler = new HttpAuthenticationHandler(0, httpClient);
+        authenticationHandler = new HttpAuthenticationHandler(0, httpClient, kayttooikeusClient);
     }
 
     @Test

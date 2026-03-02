@@ -18,7 +18,7 @@ public class AuthenticationEventExecutionPlanConfiguration implements Authentica
 
     @Override
     public void configureAuthenticationExecutionPlan(AuthenticationEventExecutionPlan plan) {
-        plan.registerAuthenticationHandler(new HttpAuthenticationHandler(1, httpClient));
+        plan.registerAuthenticationHandler(new HttpAuthenticationHandler(1, httpClient, kayttooikeusClient));
         plan.registerAuthenticationHandler(new SAMLAuthenticationHandler(2, kayttooikeusClient));
     }
 

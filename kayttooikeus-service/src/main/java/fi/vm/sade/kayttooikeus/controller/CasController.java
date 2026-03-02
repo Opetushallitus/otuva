@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiUserDetails;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
+import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -123,6 +124,14 @@ public class CasController {
     @RequestMapping(value = "/auth/henkilo/{oidHenkilo}/loginToken", method = RequestMethod.GET)
     public String createLoginToken(@PathVariable String oidHenkilo, @RequestParam(required = false) Boolean salasananVaihto) {
         return this.identificationService.createLoginToken(oidHenkilo, salasananVaihto, null);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @PostMapping(value = "/auth", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public CasUserAttributes getByUsernameAndPassword(@Valid @RequestBody LoginDto dto) {
+        Kayttajatiedot kayttajatiedot = kayttajatiedotService.getByUsernameAndPassword(dto.getUsername(), dto.getPassword());
+        var roles = kayttajatiedotService.fetchKayttooikeudet(kayttajatiedot.getHenkilo().getOidHenkilo());
+        return CasUserAttributes.fromKayttajatiedot(kayttajatiedot, roles);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")

@@ -89,6 +89,11 @@ public class KayttooikeusRestClient implements KayttooikeusClient {
     }
 
     @Override
+    public Optional<CasUserAttributes> getUserAttributesByUsernamePassword(String username, String password) {
+        throw new UnsupportedOperationException("Not supported by CAS client");
+    }
+
+    @Override
     public CasUserAttributes getHenkiloByAuthToken(String authToken) {
         String url = ophProperties.url("kayttooikeus-service.cas.henkiloByAuthToken", authToken);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())

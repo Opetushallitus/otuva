@@ -12,6 +12,8 @@ public interface KayttooikeusClient {
 
     Optional<String> getRedirectCodeByUsername(String username);
 
+    Optional<CasUserAttributes> getUserAttributesByUsernamePassword(String username, String password);
+
     CasUserAttributes getHenkiloByAuthToken(String authToken);
 
     CasUserAttributes getUserAttributesByOid(String oid);

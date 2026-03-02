@@ -2,14 +2,17 @@ package fi.vm.sade.auth.cas;
 
 import com.google.gson.Gson;
 import fi.vm.sade.auth.Json;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import lombok.Data;
+
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.PreventedException;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.authentication.handler.support.AbstractUsernamePasswordAuthenticationHandler;
 import org.apereo.cas.authentication.principal.DefaultPrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.security.auth.login.FailedLoginException;
 import java.security.GeneralSecurityException;
@@ -19,15 +22,20 @@ import static java.util.Collections.emptyList;
 
 public class HttpAuthenticationHandler extends AbstractUsernamePasswordAuthenticationHandler {
     private final OphHttpClient httpClient;
+    private final KayttooikeusClient kayttooikeusClient;
     private final Gson gson;
 
-    public HttpAuthenticationHandler(Integer order, OphHttpClient httpClient) {
-        this(new DefaultPrincipalFactory(), order, httpClient, new Gson());
+    @Value("${oauth2.enabled}")
+    private boolean oauth2Enabled;
+
+    public HttpAuthenticationHandler(Integer order, OphHttpClient httpClient, KayttooikeusClient kayttooikeusClient) {
+        this(new DefaultPrincipalFactory(), order, httpClient, kayttooikeusClient, new Gson());
     }
 
-    public HttpAuthenticationHandler(PrincipalFactory principalFactory, Integer order, OphHttpClient httpClient, Gson gson) {
+    public HttpAuthenticationHandler(PrincipalFactory principalFactory, Integer order, OphHttpClient httpClient, KayttooikeusClient kayttooikeusClient, Gson gson) {
         super("HttpAuthenticationHandler", principalFactory, order);
         this.httpClient = httpClient;
+        this.kayttooikeusClient = kayttooikeusClient;
         this.gson = gson;
     }
 
@@ -35,7 +43,9 @@ public class HttpAuthenticationHandler extends AbstractUsernamePasswordAuthentic
     protected AuthenticationHandlerExecutionResult authenticateUsernamePasswordInternal(UsernamePasswordCredential credential, String originalPassword) throws GeneralSecurityException, PreventedException {
         Optional<CasUserAttributes> opt;
         try {
-            opt = validateUsernamePassword(credential.getUsername(), String.valueOf(credential.getPassword()));
+            opt = oauth2Enabled
+                ? kayttooikeusClient.getUserAttributesByUsernamePassword(credential.getUsername(), String.valueOf(credential.getPassword()))
+                : validateUsernamePassword(credential.getUsername(), String.valueOf(credential.getPassword()));
         } catch (Exception e) {
             throw new PreventedException(e);
         }

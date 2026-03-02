@@ -59,6 +59,22 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         return Optional.ofNullable(response).map(String::trim).filter(not(String::isEmpty));
     }
 
+    record Login(String username, String password) {}
+
+    @Override
+    public Optional<CasUserAttributes> getUserAttributesByUsernamePassword(String username, String password) {
+        var path = "cas/auth";
+        var request = HttpRequest.newBuilder()
+            .uri(URI.create(baseurl + path))
+            .header("Content-Type", "application/json")
+            .POST(BodyPublishers.ofString(gson.toJson(new Login(username, password))));
+        var response = httpClient.executeRequest(request);
+        if (response.statusCode() == 401) {
+            return Optional.empty();
+        }
+        return Optional.of(gson.fromJson(response.body(), CasUserAttributes.class));
+    }
+
     @Override
     public CasUserAttributes getHenkiloByAuthToken(String authToken) {
         var path = "cas/auth/token/" + authToken;
