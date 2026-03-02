@@ -40,7 +40,7 @@ public class Oauth2BearerClient {
 
     @Cacheable(value = CACHE_NAME_OAUTH2_BEARER, sync = true)
     public String getOauth2Bearer() throws IOException, InterruptedException {
-        String tokenUrl = kayttooikeusBaseurl + "/oauth2/token";
+        String tokenUrl = kayttooikeusBaseurl + "oauth2/token";
         LOGGER.info("refetching oauth2 bearer from " + tokenUrl);
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(tokenUrl))
