@@ -31,8 +31,8 @@ import org.springframework.webflow.execution.Action;
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
 import fi.vm.sade.auth.cas.OtuvaDelegatedAuthenticationProcessor;
 import fi.vm.sade.auth.clients.HttpClientUtil;
-import fi.vm.sade.auth.clients.KayttooikeusRestClient;
-import fi.vm.sade.auth.clients.OppijanumerorekisteriRestClient;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
+import fi.vm.sade.auth.clients.OppijanumerorekisteriClient;
 import fi.vm.sade.auth.interrupt.LoginRedirectInterruptInquirer;
 import fi.vm.sade.auth.interrupt.LoginRedirectUrlGenerator;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
@@ -46,60 +46,50 @@ public class CasOphConfiguration {
     final Environment environment;
 
     @Bean
-    public CasOphProperties casOphProperties() {
+    CasOphProperties casOphProperties() {
         return new CasOphProperties(environment);
     }
 
     @Bean
-    public OphHttpClient httpClient() {
+    OphHttpClient httpClient() {
         return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, casOphProperties());
     }
 
     @Bean
-    public KayttooikeusRestClient kayttooikeusRestClient() {
-        return new KayttooikeusRestClient(casOphProperties(), environment);
-    }
-
-    @Bean
-    public OppijanumerorekisteriRestClient oppijanumerorekisteriRestClient() {
-        return new OppijanumerorekisteriRestClient(casOphProperties(), environment);
-    }
-
-    @Bean
-    public ObservationRegistry observationRegistry() {
+    ObservationRegistry observationRegistry() {
         // Disable all observations
         return ObservationRegistry.NOOP;
     }
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor() {
-        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusRestClient());
+    DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor(KayttooikeusClient kayttooikeusClient) {
+        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusClient);
     }
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public DelegatedClientIdentityProviderRedirectionStrategy delegatedClientIdentityProviderRedirectionStrategy() {
+    DelegatedClientIdentityProviderRedirectionStrategy delegatedClientIdentityProviderRedirectionStrategy() {
         return new DelegatedIdpRedirectionStrategy();
     }
 
     @Bean
-    public TicketSerializationExecutionPlanConfigurer ticketSerializationExecutionPlanConfigurer() {
+    TicketSerializationExecutionPlanConfigurer ticketSerializationExecutionPlanConfigurer() {
         return plan -> {
             plan.registerTicketSerializer(new OtuvaTransientSessionTicketSerializer());
         };
     }
 
     @Bean
-    public InterruptInquirer loginRedirectInterruptInquirer() {
+    InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient) {
         return new LoginRedirectInterruptInquirer(
-                kayttooikeusRestClient(),
-                new LoginRedirectUrlGenerator(kayttooikeusRestClient(), oppijanumerorekisteriRestClient(), casOphProperties())
+                kayttooikeusClient,
+                new LoginRedirectUrlGenerator(kayttooikeusClient, oppijanumerorekisteriClient, casOphProperties())
         );
     }
 
     @Bean
-    public InterruptInquiryExecutionPlanConfigurer interruptInquiryExecutionPlanConfigurer(
+    InterruptInquiryExecutionPlanConfigurer interruptInquiryExecutionPlanConfigurer(
             @Qualifier("loginRedirectInterruptInquirer") InterruptInquirer loginRedirectInterruptInquirer) {
         return plan -> {
             plan.registerInterruptInquirer(loginRedirectInterruptInquirer);
@@ -113,7 +103,7 @@ public class CasOphConfiguration {
 
     @Bean(name = "otuvaJpaTicketRegistry")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public OtuvaJpaTicketRegistry otuvaJpaTicketRegistry(
+    OtuvaJpaTicketRegistry otuvaJpaTicketRegistry(
             @Qualifier(TicketSerializationManager.BEAN_NAME)
             final TicketSerializationManager ticketSerializationManager,
             final ConfigurableApplicationContext applicationContext,
@@ -132,7 +122,7 @@ public class CasOphConfiguration {
 
     @Bean(name = CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public Action delegatedSaml2ClientLogoutAction(
+    Action delegatedSaml2ClientLogoutAction(
         final CasConfigurationProperties casProperties,
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("otuvaJpaTicketRegistry")

@@ -11,7 +11,7 @@ import static fi.vm.sade.auth.clients.HttpClientUtil.CALLER_ID;
 import static fi.vm.sade.auth.clients.HttpClientUtil.noContentOrNotFoundException;
 
 @Component
-public class OppijanumerorekisteriRestClient {
+public class OppijanumerorekisteriRestClient implements OppijanumerorekisteriClient {
 
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
@@ -42,6 +42,7 @@ public class OppijanumerorekisteriRestClient {
         return json.replaceAll("\"", "");
     }
 
+    @Override
     public String getAsiointikieli(String henkiloOid) {
         String url = this.ophProperties.url("oppijanumerorekisteri.henkilo.kieliKoodi", henkiloOid);
         return httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())

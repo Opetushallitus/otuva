@@ -11,7 +11,7 @@ import org.apereo.cas.authentication.principal.Service;
 import org.pac4j.core.client.BaseClient;
 import org.springframework.util.StringUtils;
 
-import fi.vm.sade.auth.clients.KayttooikeusRestClient;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthenticationPreProcessor {
     final PrincipalFactory principalFactory;
-    final KayttooikeusRestClient kayttooikeusRestClient;
+    final KayttooikeusClient kayttooikeusClient;
 
     @Override
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
@@ -46,7 +46,7 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
         String[] splitUrl = service.getOriginalUrl().split("/");
         String temporaryToken = splitUrl[splitUrl.length - 1];
         if (StringUtils.hasText(identifier) && StringUtils.hasText(temporaryToken)) {
-            CasUserAttributes a = kayttooikeusRestClient.hakaRegistration(temporaryToken, identifier);
+            CasUserAttributes a = kayttooikeusClient.hakaRegistration(temporaryToken, identifier);
             return new CasUserAttributes(
                 a.oidHenkilo(),
                 a.username(),
@@ -64,13 +64,13 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
 
     CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
         var a = switch (client.getName()) {
-            case "mpassid" -> kayttooikeusRestClient.getUserAttributesByOid(principal.getId());
-            case "haka" -> kayttooikeusRestClient.getUserAttributesByIdpIdentifier(client.getName(), (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
-            case "suomifi" -> kayttooikeusRestClient.getUserAttributesByHetu((String) principal.getAttributes().get("urn:oid:1.2.246.21").get(0));
+            case "mpassid" -> kayttooikeusClient.getUserAttributesByOid(principal.getId());
+            case "haka" -> kayttooikeusClient.getUserAttributesByIdpIdentifier(client.getName(), (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
+            case "suomifi" -> kayttooikeusClient.getUserAttributesByHetu((String) principal.getAttributes().get("urn:oid:1.2.246.21").get(0));
             default -> null;
         };
         if (isHakaIdp(client) && a == null) {
-            a = kayttooikeusRestClient.getUserAttributesByIdpIdentifier("haka", (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
+            a = kayttooikeusClient.getUserAttributesByIdpIdentifier("haka", (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
         }
         if (a == null) {
             throw new PreventedException("invalid delegated authentication client (" + client.getName() + ") for principal " + principal.getId());

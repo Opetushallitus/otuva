@@ -22,7 +22,7 @@ import static java.util.function.Predicate.not;
 
 @Slf4j
 @Component
-public class KayttooikeusRestClient {
+public class KayttooikeusRestClient implements KayttooikeusClient {
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
     private final Gson gson;
@@ -57,6 +57,7 @@ public class KayttooikeusRestClient {
         return json.replaceAll("\"", "");
     }
 
+    @Override
     public String getHenkiloOid(String username) {
         String url = this.ophProperties.url("kayttooikeus-service.cas.get-oid", username);
         return httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())
@@ -65,6 +66,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public String createLoginToken(String henkiloOid) {
         String url = this.ophProperties.url("kayttooikeus-service.cas.create-login-token", henkiloOid);
         return httpClient.<String>execute(OphHttpRequest.Builder.get(url).build())
@@ -73,6 +75,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public Optional<String> getRedirectCodeByUsername(String username) {
         String url = this.ophProperties.url("kayttooikeus-service.cas.login.redirect.username", username);
         LOGGER.trace("Fetching redirect code for username {}", username);
@@ -87,6 +90,7 @@ public class KayttooikeusRestClient {
         return Optional.ofNullable(redirectCode).map(String::trim).filter(not(String::isEmpty));
     }
 
+    @Override
     public CasUserAttributes getHenkiloByAuthToken(String authToken) {
         String url = ophProperties.url("kayttooikeus-service.cas.henkiloByAuthToken", authToken);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
@@ -95,6 +99,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public CasUserAttributes getUserAttributesByOid(String oid) {
         String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByOid", oid);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
@@ -103,6 +108,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public CasUserAttributes getUserAttributesByIdpIdentifier(String idp, String identifier) {
         String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByIdpIdentifier", idp, identifier);
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.get(url).build())
@@ -111,6 +117,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public CasUserAttributes getUserAttributesByHetu(String hetu) {
         String url = ophProperties.url("kayttooikeus-service.cas.userAttributesByHetu");
         return httpClient.<CasUserAttributes>execute(OphHttpRequest.Builder.post(url).setEntity(
@@ -124,6 +131,7 @@ public class KayttooikeusRestClient {
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
 
+    @Override
     public CasUserAttributes hakaRegistration(String temporaryToken, String identifier) {
         String url = ophProperties.url("kayttooikeus-service.cas.hakaRegistration", temporaryToken);
         OphHttpRequest request = OphHttpRequest.Builder

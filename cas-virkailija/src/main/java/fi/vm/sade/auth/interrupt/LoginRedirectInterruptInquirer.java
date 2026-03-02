@@ -1,6 +1,8 @@
 package fi.vm.sade.auth.interrupt;
 
-import fi.vm.sade.auth.clients.KayttooikeusRestClient;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
+import lombok.RequiredArgsConstructor;
+
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.principal.Service;
@@ -22,21 +24,17 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 
 @Component
+@RequiredArgsConstructor
 public class LoginRedirectInterruptInquirer implements InterruptInquirer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginRedirectInterruptInquirer.class);
 
-    private final KayttooikeusRestClient kayttooikeusRestClient;
+    private final KayttooikeusClient kayttooikeusClient;
     private final LoginRedirectUrlGenerator loginRedirectUrlGenerator;
     private boolean requireStrongIdentification;
     private List<String> requireStrongIdentificationUsernameList = new ArrayList<>();
     private boolean emailVerificationEnabled;
     private List<String> emailVerificationUsernameList = new ArrayList<>();
-
-    public LoginRedirectInterruptInquirer(KayttooikeusRestClient kayttooikeusRestClient, LoginRedirectUrlGenerator loginRedirectUrlGenerator) {
-        this.kayttooikeusRestClient = kayttooikeusRestClient;
-        this.loginRedirectUrlGenerator = loginRedirectUrlGenerator;
-    }
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
@@ -47,7 +45,7 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         }
 
         Optional<String> idpEntityId = getPrincipalAttribute(authentication, "idpEntityId");
-        return kayttooikeusRestClient.getRedirectCodeByUsername(username)
+        return kayttooikeusClient.getRedirectCodeByUsername(username)
                 .flatMap(redirectCode -> getRedirectUrl(redirectCode, username, idpEntityId))
                 .map(this::getInterruptResponseByUrl)
                 .orElseGet(InterruptResponse::none);

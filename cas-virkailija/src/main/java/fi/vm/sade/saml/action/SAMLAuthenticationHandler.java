@@ -1,7 +1,8 @@
 package fi.vm.sade.saml.action;
 
 import fi.vm.sade.auth.cas.CasPrincipal;
-import fi.vm.sade.auth.clients.KayttooikeusRestClient;
+import fi.vm.sade.auth.clients.KayttooikeusClient;
+
 import org.apereo.cas.authentication.*;
 import org.apereo.cas.authentication.principal.DefaultPrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
@@ -21,16 +22,16 @@ public class SAMLAuthenticationHandler implements AuthenticationHandler {
 
     private final PrincipalFactory principalFactory;
     private final Integer order;
-    private final KayttooikeusRestClient kayttooikeusRestClient;
+    private final KayttooikeusClient kayttooikeusClient;
 
-    public SAMLAuthenticationHandler(Integer order, KayttooikeusRestClient kayttooikeusRestClient) {
-        this(new DefaultPrincipalFactory(), order, kayttooikeusRestClient);
+    public SAMLAuthenticationHandler(Integer order, KayttooikeusClient kayttooikeusClient) {
+        this(new DefaultPrincipalFactory(), order, kayttooikeusClient);
     }
 
-    public SAMLAuthenticationHandler(PrincipalFactory principalFactory, Integer order, KayttooikeusRestClient kayttooikeusRestClient) {
+    public SAMLAuthenticationHandler(PrincipalFactory principalFactory, Integer order, KayttooikeusClient kayttooikeusClient) {
         this.principalFactory = requireNonNull(principalFactory);
         this.order = requireNonNull(order);
-        this.kayttooikeusRestClient = requireNonNull(kayttooikeusRestClient);
+        this.kayttooikeusClient = requireNonNull(kayttooikeusClient);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class SAMLAuthenticationHandler implements AuthenticationHandler {
     }
 
     private AuthenticationHandlerExecutionResult doAuthentication(Credential credential) {
-        var userAttributes = kayttooikeusRestClient.getHenkiloByAuthToken(credential.getId());
+        var userAttributes = kayttooikeusClient.getHenkiloByAuthToken(credential.getId());
         var principal = CasPrincipal.of(principalFactory, userAttributes);
         return new DefaultAuthenticationHandlerExecutionResult(this, credential, principal, emptyList());
     }
