@@ -971,6 +971,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           "AppPasswordToUserManagement",
           "service-provider"
         ),
+        cas_virkailija_oauth2_client_secret: this.ssmSecret("Oauth2ClientSecret"),
         haka_keystore_base64: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,

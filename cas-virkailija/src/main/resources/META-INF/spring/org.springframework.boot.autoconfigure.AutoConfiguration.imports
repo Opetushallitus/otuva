@@ -1,9 +1,15 @@
 fi.vm.sade.CasOphConfiguration
+fi.vm.sade.CasOphProperties
 fi.vm.sade.auth.config.AuthenticationEventExecutionPlanConfiguration
+fi.vm.sade.auth.config.CacheConfiguration
 fi.vm.sade.auth.config.HttpClientConfiguration
 fi.vm.sade.auth.config.LocaleConfiguration
 fi.vm.sade.auth.config.WebflowExecutionPlanConfiguration
+fi.vm.sade.auth.clients.KayttooikeusOauth2Client
 fi.vm.sade.auth.clients.KayttooikeusRestClient
+fi.vm.sade.auth.clients.Oauth2BearerClient
+fi.vm.sade.auth.clients.Oauth2Client
+fi.vm.sade.auth.clients.OppijanumerorekisteriOauth2Client
 fi.vm.sade.auth.clients.OppijanumerorekisteriRestClient
 fi.vm.sade.saml.action.SAMLAction
 fi.vm.sade.CustomTicketRegistryCleaner

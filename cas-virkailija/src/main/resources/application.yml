@@ -95,3 +95,9 @@ require-strong-identification: false
 require-strong-identification.usernamelist: example11,example12
 email-verification-enabled: false
 email-verification-enabled.usernamelist: example21,example22
+
+kayttooikeus-service.baseurl: http://localhost:8101/kayttooikeus-service
+oppijanumerorekisteri-service.baseurl: http://localhost:8080/oppijanumerorekisteri-service
+oauth2.enabled: false
+oauth2.client-id: user1
+oauth2.client-secret: pass1

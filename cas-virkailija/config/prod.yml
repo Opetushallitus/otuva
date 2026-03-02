@@ -93,3 +93,9 @@ require-strong-identification.usernamelist: ""
 email-verification-enabled: true
 # To specified users even if cas.email-verification-enabled is false
 email-verification-enabled.usernamelist: ""
+
+kayttooikeus-service.baseurl: https://prod.otuva.opintopolku.fi/kayttooikeus-service/
+oppijanumerorekisteri-service.baseurl: https://prod.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service/
+oauth2.enabled: false
+oauth2.client-id: ${serviceprovider_app_username_to_usermanagement}
+oauth2.client-secret: ${cas_virkailija_oauth2_client_secret}

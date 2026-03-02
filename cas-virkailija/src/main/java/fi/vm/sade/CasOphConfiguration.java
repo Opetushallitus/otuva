@@ -37,6 +37,7 @@ import fi.vm.sade.auth.interrupt.LoginRedirectInterruptInquirer;
 import fi.vm.sade.auth.interrupt.LoginRedirectUrlGenerator;
 import fi.vm.sade.javautils.httpclient.OphHttpClient;
 import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
+import fi.vm.sade.properties.OphProperties;
 
 @Configuration
 @ComponentScan
@@ -46,13 +47,8 @@ public class CasOphConfiguration {
     final Environment environment;
 
     @Bean
-    CasOphProperties casOphProperties() {
-        return new CasOphProperties(environment);
-    }
-
-    @Bean
-    OphHttpClient httpClient() {
-        return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, casOphProperties());
+    OphHttpClient httpClient(OphProperties ophProperties) {
+        return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, ophProperties);
     }
 
     @Bean
@@ -81,10 +77,10 @@ public class CasOphConfiguration {
     }
 
     @Bean
-    InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient) {
+    InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient, OphProperties ophProperties) {
         return new LoginRedirectInterruptInquirer(
                 kayttooikeusClient,
-                new LoginRedirectUrlGenerator(kayttooikeusClient, oppijanumerorekisteriClient, casOphProperties())
+                new LoginRedirectUrlGenerator(kayttooikeusClient, oppijanumerorekisteriClient, ophProperties)
         );
     }
 

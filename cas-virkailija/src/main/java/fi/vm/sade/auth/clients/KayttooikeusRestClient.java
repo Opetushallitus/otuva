@@ -11,6 +11,7 @@ import fi.vm.sade.properties.OphProperties;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.http.entity.ContentType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import static java.util.function.Predicate.not;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "oauth2.enabled", havingValue = "false")
 public class KayttooikeusRestClient implements KayttooikeusClient {
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
@@ -30,13 +32,9 @@ public class KayttooikeusRestClient implements KayttooikeusClient {
     private record HenkiloDto(String oid) {}
 
     public KayttooikeusRestClient(OphProperties ophProperties, Environment environment) {
-        this(newHttpClient(ophProperties, environment), ophProperties, new Gson());
-    }
-
-    public KayttooikeusRestClient(OphHttpClient httpClient, OphProperties ophProperties, Gson gson) {
-        this.httpClient = httpClient;
+        this.httpClient = newHttpClient(ophProperties, environment);
         this.ophProperties = ophProperties;
-        this.gson = gson;
+        this.gson = new Gson();
     }
 
     private static OphHttpClient newHttpClient(OphProperties properties, Environment environment) {

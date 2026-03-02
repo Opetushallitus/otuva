@@ -4,6 +4,8 @@ import fi.vm.sade.javautils.http.OphHttpClient;
 import fi.vm.sade.javautils.http.OphHttpRequest;
 import fi.vm.sade.javautils.http.auth.CasAuthenticator;
 import fi.vm.sade.properties.OphProperties;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -11,17 +13,14 @@ import static fi.vm.sade.auth.clients.HttpClientUtil.CALLER_ID;
 import static fi.vm.sade.auth.clients.HttpClientUtil.noContentOrNotFoundException;
 
 @Component
+@ConditionalOnProperty(name = "oauth2.enabled", havingValue = "false")
 public class OppijanumerorekisteriRestClient implements OppijanumerorekisteriClient {
 
     private final OphHttpClient httpClient;
     private final OphProperties ophProperties;
 
     public OppijanumerorekisteriRestClient(OphProperties ophProperties, Environment environment) {
-        this(newHttpClient(ophProperties, environment), ophProperties);
-    }
-
-    public OppijanumerorekisteriRestClient(OphHttpClient httpClient, OphProperties ophProperties) {
-        this.httpClient = httpClient;
+        this.httpClient = newHttpClient(ophProperties, environment);
         this.ophProperties = ophProperties;
     }
 
