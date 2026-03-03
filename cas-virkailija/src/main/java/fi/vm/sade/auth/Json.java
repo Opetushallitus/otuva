@@ -17,4 +17,12 @@ public class Json {
             throw new RuntimeException(e);
         }
     }
+
+    public static String write(Object o) {
+        try {
+            return objectMapper.writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

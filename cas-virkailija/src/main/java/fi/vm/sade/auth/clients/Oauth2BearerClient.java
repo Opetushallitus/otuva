@@ -19,8 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
+import fi.vm.sade.auth.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,8 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 @CacheConfig(cacheNames = CACHE_NAME_OAUTH2_BEARER)
 @RequiredArgsConstructor
 public class Oauth2BearerClient {
-    private final Gson gson = new Gson();
-
     @Value("${kayttooikeus-service.baseurl}")
     private String kayttooikeusBaseurl;
     @Value("${oauth2.client-id}")
@@ -57,7 +54,7 @@ public class Oauth2BearerClient {
             throw new RuntimeException("Oauth2 bearer returned status code " + res.statusCode() + ": " + res.body());
         }
         LOGGER.info("oauth2 bearer body: " + res.body());
-        return gson.fromJson(res.body(), Oauth2Token.class).access_token();
+        return Json.parse(res.body(), Oauth2Token.class).access_token();
     }
 
     @CacheEvict(value = CACHE_NAME_OAUTH2_BEARER, allEntries = true)

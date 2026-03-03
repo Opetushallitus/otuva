@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.auth.cas.CasUserAttributes;
+import fi.vm.sade.auth.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +22,6 @@ import static java.util.function.Predicate.not;
 @ConditionalOnProperty(name = "oauth2.enabled", havingValue = "true")
 public class KayttooikeusOauth2Client implements KayttooikeusClient {
     private final Oauth2Client httpClient;
-    private final Gson gson = new Gson();
 
     @Value("${kayttooikeus-service.baseurl}")
     private String baseurl;
@@ -36,7 +34,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        var response = gson.fromJson(httpClient.executeRequest(request).body(), HenkiloDto.class);
+        var response = Json.parse(httpClient.executeRequest(request).body(), HenkiloDto.class);
         return response.oid();
     }
 
@@ -46,7 +44,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        return gson.fromJson(httpClient.executeRequest(request).body(), String.class);
+        return Json.parse(httpClient.executeRequest(request).body(), String.class);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        var response = gson.fromJson(httpClient.executeRequest(request).body(), String.class);
+        var response = Json.parse(httpClient.executeRequest(request).body(), String.class);
         return Optional.ofNullable(response).map(String::trim).filter(not(String::isEmpty));
     }
 
@@ -67,12 +65,12 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .header("Content-Type", "application/json")
-            .POST(BodyPublishers.ofString(gson.toJson(new Login(username, password))));
+            .POST(BodyPublishers.ofString(Json.write(new Login(username, password))));
         var response = httpClient.executeRequest(request);
         if (response.statusCode() == 401) {
             return Optional.empty();
         }
-        return Optional.of(gson.fromJson(response.body(), CasUserAttributes.class));
+        return Optional.of(Json.parse(response.body(), CasUserAttributes.class));
     }
 
     @Override
@@ -81,7 +79,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        return gson.fromJson(httpClient.executeRequest(request).body(), CasUserAttributes.class);
+        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
 
     @Override
@@ -90,7 +88,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        return gson.fromJson(httpClient.executeRequest(request).body(), CasUserAttributes.class);
+        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
 
     @Override
@@ -99,7 +97,7 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        return gson.fromJson(httpClient.executeRequest(request).body(), CasUserAttributes.class);
+        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
 
     record UserAttributesByHetu(String hetu) {};
@@ -110,8 +108,8 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .header("Content-Type", "application/json")
-            .POST(BodyPublishers.ofString(gson.toJson(new UserAttributesByHetu(hetu))));
-        return gson.fromJson(httpClient.executeRequest(request).body(), CasUserAttributes.class);
+            .POST(BodyPublishers.ofString(Json.write(new UserAttributesByHetu(hetu))));
+        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
 
     record HakaRegistration(String hakaIdentifier) {};
@@ -122,8 +120,8 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .header("Content-Type", "application/json")
-            .POST(BodyPublishers.ofString(gson.toJson(new HakaRegistration(identifier))));
-        return gson.fromJson(httpClient.executeRequest(request).body(), CasUserAttributes.class);
+            .POST(BodyPublishers.ofString(Json.write(new HakaRegistration(identifier))));
+        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
 
 }

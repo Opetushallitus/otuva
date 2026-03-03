@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
+import fi.vm.sade.auth.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "oauth2.enabled", havingValue = "true")
 public class OppijanumerorekisteriOauth2Client implements OppijanumerorekisteriClient {
     private final Oauth2Client httpClient;
-    private final Gson gson = new Gson();
-
     @Value("${oppijanumerorekisteri-service.baseurl}")
     private String baseurl;
 
@@ -29,7 +26,7 @@ public class OppijanumerorekisteriOauth2Client implements OppijanumerorekisteriC
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        return gson.fromJson(httpClient.executeRequest(request).body(), String.class);
+        return Json.parse(httpClient.executeRequest(request).body(), String.class);
     }
 
 }
