@@ -34,6 +34,8 @@ exec java \
   -XX:InitialRAMPercentage=80.0 \
   -XX:MaxRAMPercentage=80.0 \
   -Dcas.standalone.configurationFile=/app/config/${ENV}.yml \
+  --add-opens java.base/java.lang=ALL-UNNAMED \
+  --add-opens java.base/java.util=ALL-UNNAMED \
   -jar \
   cas.war
 EOF
