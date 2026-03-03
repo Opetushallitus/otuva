@@ -13,6 +13,7 @@ import org.apereo.cas.configuration.model.core.authentication.HttpClientProperti
 import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.util.http.SimpleHttpClientFactoryBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ import static fi.vm.sade.auth.clients.HttpClientUtil.CALLER_ID;
 
 @Configuration
 @EnableConfigurationProperties(CasConfigurationProperties.class)
+@ConditionalOnProperty(name = "oauth2.enabled", havingValue = "false")
 public class HttpClientConfiguration {
 
     private final CasConfigurationProperties casProperties;
