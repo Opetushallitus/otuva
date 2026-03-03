@@ -38,6 +38,8 @@ exec java \
   -XX:+HeapDumpOnOutOfMemoryError \
   -XX:HeapDumpPath=/tmp/heap_dump.hprof \
   -XX:OnOutOfMemoryError="yum install -y aws-cli > /dev/null && aws s3 mv /tmp/heap_dump.hprof s3://${HEAP_DUMP_BUCKET}/'date+%F_%T'.hprof ; kill -9 %p" \
+  --add-opens java.base/java.lang=ALL-UNNAMED \
+  --add-opens java.base/java.util=ALL-UNNAMED \
   -jar \
   cas.war
 EOF
