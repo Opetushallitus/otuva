@@ -53,8 +53,15 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(baseurl + path))
             .GET();
-        var response = Json.parse(httpClient.executeRequest(request).body(), String.class);
-        return Optional.ofNullable(response).map(String::trim).filter(not(String::isEmpty));
+        var response = httpClient.executeRequest(request);
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Failed to get redirect code for username " + username);
+        } else if (response.body() != null && response.body().length() > 0) {
+            var redirectCode = Json.parse(response.body(), String.class);
+            return Optional.ofNullable(redirectCode).map(String::trim).filter(not(String::isEmpty));
+        } else {
+            return Optional.empty();
+        }
     }
 
     record Login(String username, String password) {}
