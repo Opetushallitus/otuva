@@ -32,6 +32,7 @@ public class OppijanumerorekisteriClient {
     public String getOidByEidas(String eidas) {
         var request = HttpRequest.newBuilder()
             .uri(URI.create(oppijanumerorekisteriBaseurl + "/s2s/oidByEidas"))
+            .header("Content-Type", "application/json")
             .POST(BodyPublishers.ofString(gson.toJson(new OidByEidasBody(eidas))));
         return httpClient.executeRequest(request).body();
     }
