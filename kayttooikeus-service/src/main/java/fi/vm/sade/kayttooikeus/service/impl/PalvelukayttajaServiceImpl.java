@@ -172,7 +172,9 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         List<Oauth2ClientCredential> oauth2ClientCredentials = oauth2ClientRepository.findById(username)
                 .map(client -> {
                     Henkilo k = client.getKasittelija();
-                    Kasittelija kasittelija = new Kasittelija(k.getOidHenkilo(), k.getEtunimetCached(), k.getSukunimiCached(), k.getKutsumanimiCached());
+                    Kasittelija kasittelija = k != null
+                        ? new Kasittelija(k.getOidHenkilo(), k.getEtunimetCached(), k.getSukunimiCached(), k.getKutsumanimiCached())
+                        : null;
                     return new Oauth2ClientCredential(client.getId(), client.getCreated(), client.getUpdated(), kasittelija);
                 })
                 .map(client -> List.of(client))
