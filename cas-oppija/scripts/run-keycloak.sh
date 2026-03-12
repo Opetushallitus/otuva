@@ -4,6 +4,9 @@ readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 function main {
   cd "$repo"
+
+  cp ./keycloak/localkeystore.jks ./config
+
   docker compose --file docker-compose.keycloak.yml down --volumes --remove-orphans
   docker compose --file docker-compose.keycloak.yml up --force-recreate --renew-anon-volumes
 }

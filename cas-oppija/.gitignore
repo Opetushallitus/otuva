@@ -47,3 +47,6 @@ apache-tomcat.zip
 config-metadata.properties
 node-modules
 package-lock.json
+
+### Keycloak and test authentication ###
+./config/localkeystore.jks
