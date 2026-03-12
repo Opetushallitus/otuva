@@ -12,12 +12,16 @@ function main {
   tmux select-pane -t 0
   tmux send-keys "$repo/scripts/run-database.sh" C-m
 
-  tmux splitw -v
+  tmux split -v
   tmux select-pane -t 1
-  tmux send-keys "while sleep 0.5; do $repo/scripts/run-cas-oppija.sh; done" C-m
+  tmux send-keys "$repo/scripts/run-keycloak.sh" C-m
 
   tmux splitw -v
   tmux select-pane -t 2
+  tmux send-keys "while sleep 0.5; do $repo/scripts/run-cas-oppija.sh; done" C-m
+
+  tmux splitw -v
+  tmux select-pane -t 3
   tmux send-keys "$repo/scripts/open-browser.sh; exit" C-m
 
   tmux attach-session -t "$session"
