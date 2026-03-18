@@ -390,9 +390,17 @@
     "username" : "testuser",
     "firstName" : "Testi",
     "lastName" : "Testaaja",
-    "email" : "otto.uusihakala@reaktor.com",
+    "email" : "testi.testaaja@testi.fi",
     "emailVerified" : false,
     "attributes" : {
+      "telephoneNumber" : [ "0401234567" ],
+      "mail" : [ "testi.testaaja@testi.fi" ],
+      "displayName" : [ "Testi" ],
+      "street" : [ "Testikatu 11" ],
+      "givenName" : [ "Testi Testaaja" ],
+      "mobile" : [ "+358401234567" ],
+      "cn" : [ "Testi" ],
+      "sn" : [ "Testaaja" ],
       "nationalIdentificationNumber" : [ "210191-1111" ]
     },
     "enabled" : true,
@@ -602,7 +610,7 @@
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
-    "defaultClientScopes" : [ "saml_organization", "role_list", "nationalIdentificationNumber" ],
+    "defaultClientScopes" : [ "saml_organization", "telephoneNumber", "role_list", "mail", "displayName", "street", "givenName", "sukunimi", "mobile", "cn", "nationalIdentificationNumber" ],
     "optionalClientScopes" : [ ]
   }, {
     "id" : "575fe3d0-7f53-4e5f-9cb5-e1da8c0ee0b4",
@@ -984,6 +992,32 @@
       }
     } ]
   }, {
+    "id" : "7853c2d2-ae22-4334-a12e-b3c228ebbad8",
+    "name" : "sukunimi",
+    "description" : "Provides access to sn attribute",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "d38451e6-954a-4c53-9801-026d55a205c6",
+      "name" : "sukunimi",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.attribute" : "sn",
+        "attribute.nameformat" : "URI Reference",
+        "aggregate.attrs" : "false",
+        "friendly.name" : "sn",
+        "attribute.name" : "urn:oid:2.5.4.4"
+      }
+    } ]
+  }, {
     "id" : "8bb77217-e192-4981-b755-768cd68a0071",
     "name" : "offline_access",
     "description" : "OpenID Connect built-in scope: offline_access",
@@ -1011,8 +1045,9 @@
       "protocolMapper" : "saml-user-attribute-mapper",
       "consentRequired" : false,
       "config" : {
-        "attribute.nameformat" : "Basic",
         "user.attribute" : "nationalIdentificationNumber",
+        "attribute.nameformat" : "URI Reference",
+        "aggregate.attrs" : "false",
         "friendly.name" : "nationalIdentificationNumber",
         "attribute.name" : "urn:oid:1.2.246.21"
       }
@@ -1053,6 +1088,31 @@
       }
     } ]
   }, {
+    "id" : "7d95415a-1ce6-4f58-afc3-78b4761908ef",
+    "name" : "displayName",
+    "description" : "SAML access for displayName",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "432d3160-0ea8-4346-990c-8902c252a83f",
+      "name" : "displayName",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "displayName",
+        "friendly.name" : "displayName",
+        "attribute.name" : "urn:oid:2.16.840.1.113730.3.1.241"
+      }
+    } ]
+  }, {
     "id" : "34f9a6ad-d8cf-4535-8666-5df882c4e328",
     "name" : "saml_organization",
     "description" : "Organization Membership",
@@ -1067,6 +1127,82 @@
       "protocolMapper" : "saml-organization-membership-mapper",
       "consentRequired" : false,
       "config" : { }
+    } ]
+  }, {
+    "id" : "b7c2f548-c33e-4f45-8ed0-fa65fd252cd4",
+    "name" : "cn",
+    "description" : "Provides access to cn, ie. common name",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "efe6c74e-0519-4416-84d3-2575874ffd39",
+      "name" : "commonname",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "user.attribute" : "cn",
+        "attribute.nameformat" : "URI Reference",
+        "aggregate.attrs" : "false",
+        "friendly.name" : "cn",
+        "attribute.name" : "urn:oid:2.5.4.3"
+      }
+    } ]
+  }, {
+    "id" : "55db8cda-28b5-44c8-8c07-8e9cd61f03fb",
+    "name" : "mail",
+    "description" : "SAML access to mail",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "c6556186-3b50-47d3-ae50-34776e00a2ce",
+      "name" : "mail",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "mail",
+        "friendly.name" : "mail",
+        "attribute.name" : "urn:oid:0.9.2342.19200300.100.1.3"
+      }
+    } ]
+  }, {
+    "id" : "8f0875f7-82e9-45fc-9829-58e8013ebbb1",
+    "name" : "givenName",
+    "description" : "SAML access to givenName",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "a8210204-cc59-49c2-b1bb-d90036320201",
+      "name" : "givenName",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "givenName",
+        "friendly.name" : "givenName",
+        "attribute.name" : "urn:oid:2.5.4.42"
+      }
     } ]
   }, {
     "id" : "93958637-07f7-4cd0-9b0d-12009f48fb06",
@@ -1216,6 +1352,31 @@
       }
     } ]
   }, {
+    "id" : "745abb71-e628-4f25-9211-40636c70a064",
+    "name" : "mobile",
+    "description" : "SAML access to mobile",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "6ed4ef3c-c5f1-4bc5-9164-16ff52f97e8b",
+      "name" : "mobile",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "mobile",
+        "friendly.name" : "mobile",
+        "attribute.name" : "urn:oid:0.9.2342.19200300.100.1.41"
+      }
+    } ]
+  }, {
     "id" : "886325eb-d9f1-4047-98ab-399c599beb54",
     "name" : "phone",
     "description" : "OpenID Connect built-in scope: phone",
@@ -1312,6 +1473,31 @@
       }
     } ]
   }, {
+    "id" : "e22a079f-950f-409e-8d0a-0abaecb7d783",
+    "name" : "telephoneNumber",
+    "description" : "SAML access to telephoneNumber",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "8737c7aa-6dd2-4dd8-ad9f-bf9706b511a4",
+      "name" : "telephoneNumber",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "telephoneNumber",
+        "friendly.name" : "telephoneNumber",
+        "attribute.name" : "urn:oid:2.5.4.20"
+      }
+    } ]
+  }, {
     "id" : "757767bd-05e6-4d0b-b5a5-438aaf7a33e3",
     "name" : "role_list",
     "description" : "SAML role list",
@@ -1330,6 +1516,31 @@
         "single" : "false",
         "attribute.nameformat" : "Basic",
         "attribute.name" : "Role"
+      }
+    } ]
+  }, {
+    "id" : "565f2a11-bbe1-4b93-af9b-3da1d7a4c243",
+    "name" : "street",
+    "description" : "SAML access to street",
+    "protocol" : "saml",
+    "attributes" : {
+      "include.in.token.scope" : "false",
+      "display.on.consent.screen" : "true",
+      "gui.order" : "",
+      "consent.screen.text" : "",
+      "include.in.openid.provider.metadata" : "true"
+    },
+    "protocolMappers" : [ {
+      "id" : "47e9aab3-ed06-4d14-ac0d-94c28d350d45",
+      "name" : "street",
+      "protocol" : "saml",
+      "protocolMapper" : "saml-user-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "attribute.nameformat" : "URI Reference",
+        "user.attribute" : "street",
+        "friendly.name" : "street",
+        "attribute.name" : "urn:oid:2.5.4.9"
       }
     } ]
   } ],
@@ -1376,7 +1587,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper" ]
       }
     }, {
       "id" : "9521f698-cd24-4e32-8cfd-70cefc21ed44",
@@ -1425,7 +1636,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-full-name-mapper", "saml-role-list-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper" ]
       }
     }, {
       "id" : "78558b6e-fcfa-42e1-9cfe-2377979265cf",
@@ -1442,7 +1653,7 @@
       "providerId" : "declarative-user-profile",
       "subComponents" : { },
       "config" : {
-        "kc.user.profile.config" : [ "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"nationalIdentificationNumber\",\"displayName\":\"${nationalIdentificationNumber}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}" ]
+        "kc.user.profile.config" : [ "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"nationalIdentificationNumber\",\"displayName\":\"${nationalIdentificationNumber}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"sn\",\"displayName\":\"${sn}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"cn\",\"displayName\":\"${cn}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"displayName\",\"displayName\":\"${displayName}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"givenName\",\"displayName\":\"${givenName}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"mail\",\"displayName\":\"${mail}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"mobile\",\"displayName\":\"${mobile}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"street\",\"displayName\":\"${street}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"telephoneNumber\",\"displayName\":\"${telephoneNumber}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {
