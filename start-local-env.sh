@@ -46,6 +46,9 @@ function main {
   tmux select-pane -t 5
   tmux send-keys "$repo/kayttooikeus-service/scripts/run-kayttooikeus.sh" C-m
 
+  tmux select-pane -t 6
+  tmux send-keys "$repo/mock-homepage/scripts/run-nginx.sh" C-m
+
   tmux attach-session -t "$session"
 }
 
