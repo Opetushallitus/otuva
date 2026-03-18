@@ -1,4 +1,4 @@
-spring.datasource.url: jdbc:postgresql://localhost:5436/kayttooikeus
+spring.datasource.url: jdbc:postgresql://localhost:5438/kayttooikeus
 spring.datasource.username: oph
 spring.datasource.password: oph
 spring.datasource.hikari.maximum-pool-size: 2
@@ -102,3 +102,5 @@ cas.oppija.url: https://${host-oppija}/cas-oppija
 cas.oppija.login: ${cas.oppija.url}/login
 cas.oppija.logout: ${cas.oppija.url}/logout
 virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta
+
+feature.local-authentication: false

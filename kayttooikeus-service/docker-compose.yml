@@ -7,7 +7,7 @@ services:
       - POSTGRES_USER=oph
       - POSTGRES_PASSWORD=oph
     ports:
-      - 5436:5432
+      - 5438:5432
     command: ["postgres", "-c", "log_statement=all"]
   test-database:
     container_name: kayttooikeus-test-db
@@ -17,5 +17,5 @@ services:
       - POSTGRES_USER=app
       - POSTGRES_PASSWORD=kayttooikeus
     ports:
-      - 5437:5432
+      - 5439:5432
     command: ["postgres", "-c", "log_statement=all"]
