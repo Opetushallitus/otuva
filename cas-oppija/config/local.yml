@@ -21,7 +21,7 @@ cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
 cas.authn.pac4j.saml[0].keystore-path: /app/config/localkeystore.jks
 # Remember to use the Client Id defined for the corresponding keycloak client as the service-provider-entity-id
-cas.authn.pac4j.saml[0].service-provider-entity-id: cas-oppija-keycloak
+cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8081/cas-oppija
 cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/config/localsp-metadata.xml
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: http://host.docker.internal:8083/realms/test/protocol/saml/descriptor
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
