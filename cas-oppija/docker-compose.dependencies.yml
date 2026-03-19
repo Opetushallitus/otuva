@@ -8,17 +8,3 @@ services:
       POSTGRES_DB: casoppija
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
-
-  keycloak:
-    container_name: cas-oppija-keycloak
-    image: quay.io/keycloak/keycloak:26.5.4
-    command: ["start-dev", "--import-realm", "--hostname=http://localhost:8083"]
-    ports:
-      - "8083:8080"
-    expose:
-      - "8083"
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
-      KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
-    volumes:
-      - ./keycloak:/opt/keycloak/data/import
