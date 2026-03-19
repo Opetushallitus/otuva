@@ -17,3 +17,6 @@ rebel.xml
 
 cdk.out/
 infra/cdk.context.json
+
+## Ignore localkeystore at root level, another ignore definition in cas-oppija/.gitignore
+**/localkeystore.jks
