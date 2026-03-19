@@ -1,5 +1,5 @@
 server.port: 9090
-spring.datasource.url: jdbc:postgresql://localhost:5437/kayttooikeus
+spring.datasource.url: jdbc:postgresql://localhost:5439/kayttooikeus
 spring.datasource.username: app
 spring.datasource.password: kayttooikeus
 spring.datasource.hikari.maximumPoolSize: 2

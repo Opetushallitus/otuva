@@ -3,6 +3,22 @@ server.port: 8101
 kayttooikeus.oauth2.publickey: classpath:public_key.pem
 kayttooikeus.oauth2.privatekey: classpath:private_key.pem
 
-host-cas: localhost:8083
-cas.url: http://${host-cas}/cas-oppija
-cas.login: http://${host-cas}/cas-oppija/login
+kayttooikeus.registration.allow-test-suomifi: true
+kayttooikeus.mfa.setup.require-suomifi: false
+kayttooikeus.disable-same-site-cookie: true
+kayttooikeus.palvelukayttaja.client-id: palvelukayttaja
+kayttooikeus.palvelukayttaja.client-secret: palvelukayttaja-secret
+kayttooikeus.palvelukayttaja.client-uuid: 4191c64a-3f68-4a40-bd51-9bb751a3cdbb
+kayttooikeus.jwt.issuer-uri: http://localhost:${server.port}/kayttooikeus-service
+
+oppijanumerorekisteri.baseurl: http://localhost:8090/oppijanumerorekisteri-service
+
+host.cas-oppija: localhost:8081
+cas.oppija.url: http://${host.cas-oppija}/cas-oppija
+cas.oppija.login: ${cas.oppija.url}/login
+cas.oppija.logout: ${cas.oppija.url}/logout
+
+feature.local-authentication: true
+cas.oppija.oauth2.id: cas-oppija
+cas.oppija.oauth2.secret: cas-oppija-oauth2-secret
+cas.oppija.oauth2.uuid: f5a9fa46-2019-41f4-afe2-b586b889c0a8
