@@ -86,6 +86,7 @@
       "attributes" : { }
     } ],
     "client" : {
+      "http://localhost:8081/cas-oppija" : [ ],
       "realm-management" : [ {
         "id" : "12510cb0-44d1-4734-94e1-cde0ad7ff9b7",
         "name" : "query-clients",
@@ -266,7 +267,6 @@
         "containerId" : "3c0bd8e6-b709-4e14-ba09-9b011a5e8951",
         "attributes" : { }
       } ],
-      "cas-oppija-keycloak" : [ ],
       "account" : [ {
         "id" : "024fea0b-46a3-43ce-9103-e36d36edb285",
         "name" : "view-profile",
@@ -562,12 +562,12 @@
     "optionalClientScopes" : [ "address", "phone", "offline_access", "organization", "microprofile-jwt" ]
   }, {
     "id" : "ecc00f8d-88f1-4142-b877-ad5c14c7f0d1",
-    "clientId" : "cas-oppija-keycloak",
-    "name" : "",
+    "clientId" : "http://localhost:8081/cas-oppija",
+    "name" : "cas-oppija-keycloak",
     "description" : "",
     "rootUrl" : "http://localhost:8081/cas-oppija",
     "adminUrl" : "",
-    "baseUrl" : "http://localhost:8081/cas-oppija/login",
+    "baseUrl" : "http://localhost:8081/cas-oppija",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
@@ -585,27 +585,33 @@
     "frontchannelLogout" : true,
     "protocol" : "saml",
     "attributes" : {
-      "saml.assertion.signature" : "true",
       "saml.force.post.binding" : "true",
       "post.logout.redirect.uris" : "http://localhost:8081/cas-oppija/*",
-      "saml.server.signature" : "true",
       "saml.server.signature.keyinfo.ext" : "false",
       "realm_client" : "false",
       "saml.signing.certificate" : "MIIEtTCCAp0CBgGc9ojSxjANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNjYXMtb3BwaWphLWtleWNsb2FrMB4XDTI2MDMxNjEyMDMwN1oXDTI5MDMxNjEyMDQ0NlowHjEcMBoGA1UEAwwTY2FzLW9wcGlqYS1rZXljbG9hazCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAMvDFKk5qUCxQavJSZ+JPjRS4fp31Cy8UGcoaNbGqEk61dVJdQrXGN8DTuKiZ3sv9yUWITLtlHB8tdDB4ti2SY/6j7PFagbzGXNOyiQnXlkpOLAS4islBXCYGbIfMgZPClZnRdVfbudZm9hp20BMW+J2vFU6Mm3f8NxZdHwMdmtNn6El5iQDYXPO20QsJ7PRj7xzaMF/aIeXUQFIc0H/FJDexbExa+Fidflmb5Lkmm0/aPLc518RKkebEs9qqE6ukViMeN2lSSUaMpajw8hXECaMlmoVNh/4vb/hu6NbSLC89EECphVLAn1HXUnZxpB2SGOe/wWMuOJd2IikbzEY443wCZqf2fITjSJrMc4OxAZmrPTL1j0sIsrhVJJntTY1Zw7uT9uH+W7e17+p0XR8lLGEXQWJVx2iJV1rNZjo7E8OcgZu+Sb8wESsr1TDGO0VuF9UNICvVtjcOEuQDFAkN2a2ZtJfLTZ6DaEtyIZE06Cwf9SgpOOhu7Kc/vvDRi6G7shEuflcf7bc7LhILcBnxTKpX9X4EyPghTUkoUq5szkKmmnU23a6XqjiNUP1erI296blsic52S2TiPChIbpcLJCOVSyVgDxp4BF2dMaRlMVSVE8yLhcy1M2xG53A5KpJKBRthsuJ0snfvl0Jup/zHr6T93u9/VVAN4ALAkdBXuhTAgMBAAEwDQYJKoZIhvcNAQELBQADggIBABSXai041UOAq9rOTUaSpKHJjWrHYoAmFguclpUlFBFpFnoLwJ6YX0buSy0uZ6MCQX0iCZXZAItG8B6kedHjuLPZs9zRKy4OkChTdNyMjKB9c1jU8YJmOEnY5fCc8sYKAIlO8kdQUGkLV0WBWEsIV79v5P7HSEgwbyzB72d7YHyG8FUUuijOSILCGHU2TsYHItTiJfCHvqTGcMtfJNlPzTavkzaE9/PVOU7gz/p8d0WtnYycejJpidXJdGMQLHmGhNkSqbKlqNYpDmI8rlwhDpGXtvJeHrjJLefTk0QIHnLuLc3krxiTCB56Tm09XKDJot8bJiveytONCidekKrxLKC0EBfFcejqL/Lir7LB6nZBMeEzqSlqC2B8Ny4667Eis22AA1Ah3Rn4ss/E5uMjKps9tuS3YZTk9FAHxd8Ce6xukgVrKvs1SUoyx/lekzrJaktrP3ADi+nkZXVUme6Oa9dsV9AUVEDddPT0JFP+3VD1T8Ocs5wgxc0PhB+VPITnqXER6XO3JZ7LuHLQLg0kYa74HzGLEABloeMUtrDYQ3/yqBtq3XMXaMLUTabmMjma7wnU8lHkrxb3npJgdpKA53k6dQ3SsiQbkaC00sG4WXpfePSejFYc8+WNLc/i0eI64yOMNFwf7t5zh3xcfDCgEGuQejHCAV9u74myMJ+ogb0A",
+      "saml.signature.algorithm" : "RSA_SHA256",
+      "saml.useMetadataDescriptorUrl" : "true",
+      "saml.client.signature" : "true",
+      "saml.signing.private.key" : "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",
+      "saml.allow.ecp.flow" : "false",
+      "saml.server.signature.keyinfo.xmlSigKeyInfoKeyNameTransformer" : "NONE",
+      "saml.assertion.signature" : "true",
+      "saml_single_logout_service_url_post" : "http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak",
+      "saml.encrypt" : "false",
+      "saml_assertion_consumer_url_post" : "http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak",
+      "saml.server.signature" : "true",
       "saml.artifact.binding.identifier" : "hiZPicG5UPvxeOIpOcOn17Na4jw=",
       "saml.artifact.binding" : "false",
-      "saml.signature.algorithm" : "RSA_SHA256",
-      "saml.useMetadataDescriptorUrl" : "false",
+      "saml_single_logout_service_url_redirect" : "http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak",
+      "quickLoginUsers" : "[{\"label\":\"testuser\",\"username\":\"testuser\",\"password\":\"password\"}]",
       "saml_force_name_id_format" : "false",
-      "saml.client.signature" : "true",
       "saml.authnstatement" : "true",
       "display.on.consent.screen" : "false",
       "saml_name_id_format" : "username",
-      "saml.signing.private.key" : "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",
-      "saml.allow.ecp.flow" : "false",
       "saml.onetimeuse.condition" : "false",
-      "saml.server.signature.keyinfo.xmlSigKeyInfoKeyNameTransformer" : "NONE",
-      "saml_signature_canonicalization_method" : "http://www.w3.org/2001/10/xml-exc-c14n#"
+      "saml_signature_canonicalization_method" : "http://www.w3.org/2001/10/xml-exc-c14n#",
+      "saml.metadataDescriptorUrl" : "http://host.docker.internal:8081/cas-oppija/sp/metadata"
     },
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
@@ -1556,6 +1562,10 @@
     "strictTransportSecurity" : "max-age=31536000; includeSubDomains"
   },
   "smtpServer" : { },
+  "loginTheme" : "dev-quicklogin",
+  "accountTheme" : "",
+  "adminTheme" : "",
+  "emailTheme" : "",
   "eventsEnabled" : false,
   "eventsListeners" : [ "jboss-logging" ],
   "enabledEventTypes" : [ ],
@@ -1587,7 +1597,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-usermodel-property-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "9521f698-cd24-4e32-8cfd-70cefc21ed44",
@@ -1636,7 +1646,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "78558b6e-fcfa-42e1-9cfe-2377979265cf",
@@ -2406,17 +2416,18 @@
   "firstBrokerLoginFlow" : "first broker login",
   "attributes" : {
     "cibaBackchannelTokenDeliveryMode" : "poll",
-    "cibaExpiresIn" : "120",
     "cibaAuthRequestedUserHint" : "login_hint",
-    "oauth2DeviceCodeLifespan" : "600",
     "clientOfflineSessionMaxLifespan" : "0",
     "oauth2DevicePollingInterval" : "5",
     "clientSessionIdleTimeout" : "0",
-    "parRequestUriLifespan" : "60",
-    "clientSessionMaxLifespan" : "0",
     "clientOfflineSessionIdleTimeout" : "0",
     "cibaInterval" : "5",
-    "realmReusableOtpCode" : "false"
+    "realmReusableOtpCode" : "false",
+    "cibaExpiresIn" : "120",
+    "oauth2DeviceCodeLifespan" : "600",
+    "parRequestUriLifespan" : "60",
+    "clientSessionMaxLifespan" : "0",
+    "darkMode" : "true"
   },
   "keycloakVersion" : "26.5.4",
   "userManagedAccessAllowed" : false,
