@@ -7,7 +7,7 @@ function main {
 
   use_correct_jvm_version
   wait_for_database
-  ./gradlew clean run
+  ./gradlew clean run -Dcas.standalone.configurationFile=config/local.yml
 }
 
 function wait_for_database {

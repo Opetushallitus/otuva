@@ -1,4 +1,4 @@
-spring.datasource.url: jdbc:postgresql://host.docker.internal:5081/casoppija
+spring.datasource.url: jdbc:postgresql://localhost:5081/casoppija
 
 management.endpoints.web.exposure.include: health,springWebflow,auditevents,beans
 management.endpoint.auditevents.access: READ_ONLY
@@ -19,26 +19,32 @@ cas.authn.pac4j.saml[0].client-name: cas-oppija-keycloak
 cas.authn.pac4j.saml[0].auto-redirect-type: CLIENT
 cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
-cas.authn.pac4j.saml[0].keystore-path: /app/config/localkeystore.jks
+cas.authn.pac4j.saml[0].keystore-path: keycloak/localkeystore.jks
 # Remember to use the Client Id defined for the corresponding keycloak client as the service-provider-entity-id
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8081/cas-oppija
-cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/config/localsp-metadata.xml
-cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: http://host.docker.internal:8083/realms/test/protocol/saml/descriptor
+cas.authn.pac4j.saml[0].service-provider-metadata-path: keycloak/sp-metadata.xml
+cas.authn.pac4j.saml[0].identity-provider-metadata-path: keycloak/idp-metadata.xml
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
-cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
+cas.authn.pac4j.saml[0].requested-attributes[0].name: urn:oid:1.2.246.21
+cas.authn.pac4j.saml[0].requested-attributes[0].friendly-name: nationalIdentificationNumber
+cas.authn.pac4j.saml[0].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+cas.authn.pac4j.saml[0].requested-attributes[0].required: true
+cas.authn.pac4j.saml[0].requested-attributes[1].name: urn:oid:2.5.4.3
+cas.authn.pac4j.saml[0].requested-attributes[1].friendly-name: cn
+cas.authn.pac4j.saml[0].requested-attributes[1].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
+cas.authn.pac4j.saml[0].requested-attributes[1].required: true
 cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
 
-cas.service-registry.json.location: file:///app/services/local
+host.alb: localhost:8101
 
-host.alb: host.docker.internal:8101
-
-kayttooikeus.baseurl: http://host.docker.internal:8101/kayttooikeus-service
-oppijanumerorekisteri.baseurl: http://host.docker.internal:8080/mock-oppijanumerorekisteri-service
+kayttooikeus.baseurl: http://localhost:8101/kayttooikeus-service
+oppijanumerorekisteri.baseurl: http://localhost:8080/mock-oppijanumerorekisteri-service
 oauth2.client-id: cas-oppija
 oauth2.client-secret: cas-oppija-oauth2-secret
 user-controller.enabled: true
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
