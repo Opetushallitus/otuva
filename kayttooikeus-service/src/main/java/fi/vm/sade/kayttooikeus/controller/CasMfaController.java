@@ -8,6 +8,7 @@ import fi.vm.sade.kayttooikeus.dto.MfaTriggerDto;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.util.Crypto;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +37,7 @@ import jakarta.validation.Valid;
 @Slf4j
 @RestController
 @RequestMapping(value = "/mfa")
+@Hidden
 @RequiredArgsConstructor
 public class CasMfaController {
     private final KayttajatiedotService kayttajatiedotService;

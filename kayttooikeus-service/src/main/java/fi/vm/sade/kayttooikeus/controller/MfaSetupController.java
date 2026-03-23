@@ -13,14 +13,14 @@ import fi.vm.sade.kayttooikeus.dto.GoogleAuthSetupDto;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.MfaService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
 import static fi.vm.sade.kayttooikeus.model.Identification.STRONG_AUTHENTICATION_IDP;
 
 @RestController
 @RequestMapping(value = "/mfasetup", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "MFA setup API")
+@Hidden
 @RequiredArgsConstructor
 public class MfaSetupController {
     private final MfaService mfaService;
