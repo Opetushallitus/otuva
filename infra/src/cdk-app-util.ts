@@ -201,11 +201,11 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           },
           DOCKER_USERNAME: {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-            value: "/docker/username",
+            value: "/otuva/docker/username",
           },
           DOCKER_PASSWORD: {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-            value: "/docker/password",
+            value: "/otuva/docker/password",
           },
           SLACK_NOTIFICATIONS_CHANNEL_WEBHOOK_URL: {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
@@ -309,11 +309,11 @@ function makeTestProject(
         },
         DOCKER_USERNAME: {
           type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-          value: "/docker/username",
+          value: "/otuva/docker/username",
         },
         DOCKER_PASSWORD: {
           type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-          value: "/docker/password",
+          value: "/otuva/docker/password",
         },
         MVN_SETTINGSXML: {
           type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
