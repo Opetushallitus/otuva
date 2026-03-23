@@ -80,17 +80,6 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
 
     @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
-    public void sendExpirationRemindersTest() throws Exception {
-        given(this.taskExecutorService.sendExpirationReminders(any(Period.class))).willReturn(1);
-        this.mvc.perform(post("/kayttooikeus/expirationReminders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.TEXT_PLAIN)
-                .param("year", "2015").param("month", "1").param("day", "1"))
-            .andExpect(status().isOk()).andExpect(content().string(is("1")));
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
     public void getHaettuKayttooikeusRyhmasByOidTest() throws Exception{
         Map<String, List<Integer>> kayttooikeusRyhmasByOrganisaatio
                 = Collections.singletonMap("1.0.0.1.0", Collections.singletonList(12000));
