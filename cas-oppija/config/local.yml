@@ -24,12 +24,7 @@ cas.authn.pac4j.saml[0].keystore-path: keycloak/localkeystore.jks
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8081/cas-oppija
 cas.authn.pac4j.saml[0].service-provider-metadata-path: keycloak/sp-metadata.xml
 cas.authn.pac4j.saml[0].identity-provider-metadata-path: keycloak/idp-metadata.xml
-cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
-cas.authn.pac4j.saml[0].sign-authn-request: true
-cas.authn.pac4j.saml[0].wants-assertions-signed: true
-cas.authn.pac4j.saml[0].wants-responses-signed: true
-cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
-cas.authn.pac4j.saml[0].use-name-qualifier: false
+cas.authn.pac4j.saml[0].principal-attribute-id: nationalIdentificationNumber
 cas.authn.pac4j.saml[0].requested-attributes[0].name: urn:oid:1.2.246.21
 cas.authn.pac4j.saml[0].requested-attributes[0].friendly-name: nationalIdentificationNumber
 cas.authn.pac4j.saml[0].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
@@ -40,11 +35,15 @@ cas.authn.pac4j.saml[0].requested-attributes[1].name-format: urn:oasis:names:tc:
 cas.authn.pac4j.saml[0].requested-attributes[1].required: true
 cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
 
+cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
+cas.logout.follow-service-redirects: true
+cas.logout.redirect-parameter: service
+cas.logout.redirect-url: https://localhost:8080/
+
 host.alb: localhost:8101
 
-kayttooikeus.baseurl: http://localhost:8101/kayttooikeus-service
-oppijanumerorekisteri.baseurl: http://localhost:8080/mock-oppijanumerorekisteri-service
-oauth2.client-id: cas-oppija
-oauth2.client-secret: cas-oppija-oauth2-secret
-user-controller.enabled: true
-cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
+cas.slo.asynchronous: false
+
+# Oph properties overrides
+valtuudet.enabled: false
+valtuudet.required: false
