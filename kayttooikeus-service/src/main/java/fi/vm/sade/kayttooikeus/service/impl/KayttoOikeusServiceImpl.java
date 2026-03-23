@@ -83,12 +83,6 @@ public class KayttoOikeusServiceImpl implements KayttoOikeusService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForCurrentUser() {
-        return localizationService.localize(kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo(UserDetailsUtil.getCurrentUserOid()));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<KayttooikeusPerustiedotDto> listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria criteria, Long limit, Long offset) {
         List<Henkilo> henkilos = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.listCurrentKayttooikeusForHenkilo(criteria, limit, offset);
         return this.mapper.mapAsList(henkilos, KayttooikeusPerustiedotDto.class);

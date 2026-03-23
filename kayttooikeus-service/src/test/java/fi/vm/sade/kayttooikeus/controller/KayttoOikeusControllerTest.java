@@ -11,7 +11,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collections;
 import java.util.List;
@@ -46,31 +45,6 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
         this.mvc.perform(get("/kayttooikeus/HENKILOHALLINTA").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeus/palveluOikeusList.json")));
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
-    public void listKayttoOikeusCurrentUserTest() throws Exception {
-        given(this.kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser())
-                .willReturn(singletonList(KayttoOikeusHistoriaDto.builder()
-                        .aikaleima(LocalDate.of(2015, 1, 1).atStartOfDay())
-                        .kasittelija("kasittelija")
-                        .kayttoOikeusRyhmaId(5L)
-                        .kayttoOikeusId(1L)
-                        .kuvaus(new TextGroupListDto(2L).put("FI", "nimi"))
-                        .rooli("ROOLI")
-                        .kayttoOikeusKuvaus(new TextGroupListDto(3L).put("FI", "Oikeus"))
-                        .palvelu("PALVELU")
-                        .palveluKuvaus(new TextGroupListDto(4L).put("FI", "Palvelu"))
-                        .organisaatioOid("orgOid")
-                        .tila(KayttoOikeudenTila.HYLATTY)
-                        .tyyppi(KayttoOikeusTyyppi.KOOSTEROOLI)
-                        .voimassaAlkuPvm(LocalDate.of(2015, 1, 1))
-                        .voimassaLoppuPvm(LocalDate.of(2015, 12, 31))
-                .build()));
-        this.mvc.perform(get("/kayttooikeus/kayttaja/current").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(jsonResource("classpath:kayttooikeus/currentUserHistoria.json")));
     }
 
     @Test

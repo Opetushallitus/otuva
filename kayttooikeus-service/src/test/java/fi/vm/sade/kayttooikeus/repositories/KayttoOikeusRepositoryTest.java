@@ -1,7 +1,5 @@
 package fi.vm.sade.kayttooikeus.repositories;
 
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusHistoriaDto;
-import fi.vm.sade.kayttooikeus.dto.KayttoOikeusTyyppi;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeus;
@@ -23,7 +21,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
-import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,43 +74,6 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals("CRUD", results.get(0).getRooli());
         assertEquals("READ", results.get(1).getRooli());
         assertNotNull(results.get(0).getOikeusLangs());
-    }
-
-    @Test
-    public void listMyonnettyKayttoOikeusHistoriaForHenkiloTest() {
-        populate(myonnettyKayttoOikeus(
-                    organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                    kayttoOikeusRyhma("RYHMA").withNimi(text("FI", "Kuvaus"))
-                            .withOikeus(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Luku-muokkaus")))
-                            .withOikeus(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Palvelukuvaus")), "READ")))
-                        .voimassaPaattyen(LocalDate.now()));
-
-        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma2 = populate(myonnettyKayttoOikeus(
-                    organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
-                    kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Ryhmäkuvaus"))
-                            .withOikeus(oikeus("KOODISTO", "WRITE").kuvaus(text("FI", "Kirjoitusoikeus"))))
-                    .voimassaPaattyen(LocalDate.now().plusMonths(3)));
-
-        List<KayttoOikeusHistoriaDto> historia = kayttoOikeusRepository.listMyonnettyKayttoOikeusHistoriaForHenkilo("1.2.3.4.5");
-        assertEquals(3, historia.size());
-        assertEquals(tapahtuma2.getAikaleima(), historia.get(0).getAikaleima());
-        assertEquals(tapahtuma2.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
-                historia.get(0).getKayttoOikeusId());
-        assertEquals(tapahtuma2.getTila(), historia.get(0).getTila());
-        assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, historia.get(0).getTyyppi());
-        assertEquals("4.5.6.7.8", historia.get(0).getOrganisaatioOid());
-        assertEquals(LocalDate.now().plusMonths(3), historia.get(0).getVoimassaLoppuPvm());
-        assertEquals(LocalDate.now(), historia.get(0).getVoimassaAlkuPvm());
-        assertEquals(tapahtuma2.getKasittelija().getOidHenkilo(), historia.get(0).getKasittelija());
-        assertEquals(tapahtuma2.getKayttoOikeusRyhma().getNimi().getId(), historia.get(0).getKuvaus().getId());
-        assertEquals("KOODISTO", historia.get(0).getPalvelu());
-        assertEquals("WRITE", historia.get(0).getRooli());
-        assertNotNull(historia.get(0).getKuvaus());
-        assertNotNull(historia.get(0).getKuvaus().getId());
-        assertNotNull(historia.get(0).getPalveluKuvaus());
-        assertNotNull(historia.get(0).getPalveluKuvaus().getId());
-        assertNotNull(historia.get(0).getKayttoOikeusKuvaus());
-        assertNotNull(historia.get(0).getKayttoOikeusKuvaus().getId());
     }
 
     @Test

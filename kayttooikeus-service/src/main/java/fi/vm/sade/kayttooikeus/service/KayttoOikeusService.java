@@ -16,8 +16,6 @@ public interface KayttoOikeusService {
 
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
-    List<KayttoOikeusHistoriaDto> listMyonnettyKayttoOikeusHistoriaForCurrentUser();
-
     List<KayttooikeusPerustiedotDto> listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria criteria, Long limit, Long offset);
 
     List<ExpiringKayttoOikeusDto> findToBeExpiringMyonnettyKayttoOikeus(LocalDate at, Period... expirationPeriods);

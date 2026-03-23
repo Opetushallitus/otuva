@@ -95,41 +95,6 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.3.4.5")
-    public void listMyonnettyKayttoOikeusHistoriaForCurrentUser() {
-        populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
-                kayttoOikeusRyhma("RYHMA")
-                        .withOikeus(oikeus("HENKILOHALLINTA", "CRUD"))
-                        .withOikeus(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Palvelukuvaus")), "READ"))
-        ));
-        MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
-                organisaatioHenkilo(henkilo("1.2.3.4.5"), "4.5.6.7.8"),
-                kayttoOikeusRyhma("RYHMA2").withNimi(text("FI", "Koodistonhallinta"))
-                        .withOikeus(oikeus("KOODISTO", "CRUD")
-                                .kuvaus(text("FI", "Kirjoitusoikeus")))
-        ));
-
-        List<KayttoOikeusHistoriaDto> list = kayttoOikeusService.listMyonnettyKayttoOikeusHistoriaForCurrentUser();
-        assertEquals(3, list.size());
-        KayttoOikeusHistoriaDto kayttoOikeusHistoriaResult = list.stream().filter(kayttoOikeusHistoriaDto -> kayttoOikeusHistoriaDto.getOrganisaatioOid().equals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid())).findFirst().orElseThrow(RuntimeException::new);
-        assertEquals(tapahtuma.getAikaleima(), kayttoOikeusHistoriaResult.getAikaleima());
-        assertEquals(tapahtuma.getKasittelija().getOidHenkilo(), kayttoOikeusHistoriaResult.getKasittelija());
-        assertEquals(tapahtuma.getOrganisaatioHenkilo().getOrganisaatioOid(), kayttoOikeusHistoriaResult.getOrganisaatioOid());
-        assertEquals(KayttoOikeudenTila.MYONNETTY, kayttoOikeusHistoriaResult.getTila());
-        assertEquals(KayttoOikeusTyyppi.KOOSTEROOLI, kayttoOikeusHistoriaResult.getTyyppi());
-        assertEquals(tapahtuma.getVoimassaAlkuPvm(), kayttoOikeusHistoriaResult.getVoimassaAlkuPvm());
-        assertEquals(tapahtuma.getVoimassaLoppuPvm(), kayttoOikeusHistoriaResult.getVoimassaLoppuPvm());
-        assertEquals(tapahtuma.getKayttoOikeusRyhma().getKayttoOikeus().iterator().next().getId().longValue(),
-                kayttoOikeusHistoriaResult.getKayttoOikeusId());
-        assertEquals("CRUD", kayttoOikeusHistoriaResult.getRooli());
-        assertEquals("KOODISTO", kayttoOikeusHistoriaResult.getPalvelu());
-        assertEquals("Koodistonhallinta", kayttoOikeusHistoriaResult.getKuvaus().get("FI"));
-        assertEquals("Kirjoitusoikeus", kayttoOikeusHistoriaResult.getKayttoOikeusKuvaus().get("FI"));
-        assertEquals("Palvelukuvaus", kayttoOikeusHistoriaResult.getPalveluKuvaus().get("FI"));
-    }
-
-    @Test
     public void findToBeExpiringMyonnettyKayttoOikeusTest() {
         MyonnettyKayttoOikeusRyhmaTapahtuma tapahtuma = populate(myonnettyKayttoOikeus(
                 organisaatioHenkilo(henkilo("1.2.3.4.5"), "3.4.5.6.7"),
