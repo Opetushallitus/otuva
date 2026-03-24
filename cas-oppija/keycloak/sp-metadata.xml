@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://localhost:8081/cas-oppija">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    entityID="http://localhost:8081/cas-oppija">
     <md:Extensions xmlns:alg="urn:oasis:names:tc:SAML:metadata:algsupport">
         <alg:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
         <alg:SigningMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha384" />
@@ -19,48 +20,68 @@
         <alg:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
     </md:Extensions>
     <md:SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="false"
-                        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.0:protocol urn:oasis:names:tc:SAML:1.1:protocol">
+        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol urn:oasis:names:tc:SAML:1.0:protocol urn:oasis:names:tc:SAML:1.1:protocol">
         <md:Extensions xmlns:init="urn:oasis:names:tc:SAML:profiles:SSO:request-init">
             <init:RequestInitiator Binding="urn:oasis:names:tc:SAML:profiles:SSO:request-init"
-                                   Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak" />
+                Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak" />
         </md:Extensions>
         <md:KeyDescriptor use="signing">
             <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
                 <ds:X509Data>
-                    <ds:X509Certificate>MIIC0zCCAbugAwIBAgIJAKvDwXHd72wuMA0GCSqGSIb3DQEBBQUAMA8xDTALBgNV
-                        BAMTBGhvcHMwHhcNMTQwNTA5MTIzNjE5WhcNMjQwNTA2MTIzNjE5WjAPMQ0wCwYD
-                        VQQDEwRob3BzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz3a4plCA
-                        Vifc2WrDQwRgp5g1Q3SnU1wpENFQjxAOXo9Y12bGEf1MQFx6A5tGhWnd6DVGZSC3
-                        tsft1qLNYcoDFQz0DcacDeH93J9vJYExcVsnBlvm6Sk5n4otLSoCuZVazAMFvj+t
-                        /il+hxrh+zpYzBs5MJF+Z1xkyEY3z36lkiXpbm3GC8xAyqmulkX9DMrJ5RK2oZSX
-                        4vtKa15sVbaXCkg9JiN2kHKW+fV6Bs9wOHyMcUbrO/0Y1/QG75yWy1VKcniaXph2
-                        56IO+nM3Cte3uXqNWSEqvzdnZ+lQ+3DZoQmJfOa2VT1MMY/stsJtp06bS0pk4tiD
-                        8Uxk6Q4x7TH1lwIDAQABozIwMDAPBgNVHREECDAGggRob3BzMB0GA1UdDgQWBBSq
-                        AhyV/LR0deZDF2bo/9ROZdv8tzANBgkqhkiG9w0BAQUFAAOCAQEAxQo2hdyaWx/1
-                        D2b0WKz+GDdLQdvOVhtJWZcvAFJc8AO8067sQZiW3LhoTTEXBsqbzLso+ytox7Qg
-                        YB/xcxluMeE6sV4ns9mbgcwYsXJEeJnjVK6aYS15S1v+LWXUKELOW8RRdY1JSpSa
-                        6YeEal7fhY4/uAVe0XEjSZ3iIyyratjHMF75BFHf2qGcDVwTU8su3BvAktiBusPQ
-                        KIYLrePeoD26VNe37/GnUWz3X8m19xMFMKMrVFRoEyhwDPkM4PvKAf6nQezD3b3G
-                        QHAsvDkJRGPKxwHCQamaCkTqtx71ZZBcZZ7jLlmWRaMJ+yG7k7y5cG06A+vQQ9G5
-                        aaooVUbrQQ==</ds:X509Certificate>
+                    <ds:X509Certificate>MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAy8MUqTmpQLFBq8lJn4k+
+NFLh+nfULLxQZyho1saoSTrV1Ul1CtcY3wNO4qJney/3JRYhMu2UcHy10MHi2LZJ
+j/qPs8VqBvMZc07KJCdeWSk4sBLiKyUFcJgZsh8yBk8KVmdF1V9u51mb2GnbQExb
+4na8VToybd/w3Fl0fAx2a02foSXmJANhc87bRCwns9GPvHNowX9oh5dRAUhzQf8U
+kN7FsTFr4WJ1+WZvkuSabT9o8tznXxEqR5sSz2qoTq6RWIx43aVJJRoylqPDyFcQ
+JoyWahU2H/i9v+G7o1tIsLz0QQKmFUsCfUddSdnGkHZIY57/BYy44l3YiKRvMRjj
+jfAJmp/Z8hONImsxzg7EBmas9MvWPSwiyuFUkme1NjVnDu5P24f5bt7Xv6nRdHyU
+sYRdBYlXHaIlXWs1mOjsTw5yBm75JvzARKyvVMMY7RW4X1Q0gK9W2Nw4S5AMUCQ3
+ZrZm0l8tNnoNoS3IhkTToLB/1KCk46G7spz++8NGLobuyES5+Vx/ttzsuEgtwGfF
+Mqlf1fgTI+CFNSShSrmzOQqaadTbdrpeqOI1Q/V6sjb3puWyJznZLZOI8KEhulws
+kI5VLJWAPGngEXZ0xpGUxVJUTzIuFzLUzbEbncDkqkkoFG2Gy4nSyd++XQm6n/Me
+vpP3e739VUA3gAsCR0Fe6FMCAwEAAQ==</ds:X509Certificate>
                 </ds:X509Data>
             </ds:KeyInfo>
         </md:KeyDescriptor>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true"/>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true"/>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true"/>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true"/>
+        <md:KeyDescriptor use="encryption">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAy8MUqTmpQLFBq8lJn4k+
+NFLh+nfULLxQZyho1saoSTrV1Ul1CtcY3wNO4qJney/3JRYhMu2UcHy10MHi2LZJ
+j/qPs8VqBvMZc07KJCdeWSk4sBLiKyUFcJgZsh8yBk8KVmdF1V9u51mb2GnbQExb
+4na8VToybd/w3Fl0fAx2a02foSXmJANhc87bRCwns9GPvHNowX9oh5dRAUhzQf8U
+kN7FsTFr4WJ1+WZvkuSabT9o8tznXxEqR5sSz2qoTq6RWIx43aVJJRoylqPDyFcQ
+JoyWahU2H/i9v+G7o1tIsLz0QQKmFUsCfUddSdnGkHZIY57/BYy44l3YiKRvMRjj
+jfAJmp/Z8hONImsxzg7EBmas9MvWPSwiyuFUkme1NjVnDu5P24f5bt7Xv6nRdHyU
+sYRdBYlXHaIlXWs1mOjsTw5yBm75JvzARKyvVMMY7RW4X1Q0gK9W2Nw4S5AMUCQ3
+ZrZm0l8tNnoNoS3IhkTToLB/1KCk46G7spz++8NGLobuyES5+Vx/ttzsuEgtwGfF
+Mqlf1fgTI+CFNSShSrmzOQqaadTbdrpeqOI1Q/V6sjb3puWyJznZLZOI8KEhulws
+kI5VLJWAPGngEXZ0xpGUxVJUTzIuFzLUzbEbncDkqkkoFG2Gy4nSyd++XQm6n/Me
+                        vpP3e739VUA3gAsCR0Fe6FMCAwEAAQ==</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true" />
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign"
+            Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true" />
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true" />
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+            Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak&amp;logoutendpoint=true" />
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
-        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak" index="0"/>
+        <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            Location="http://localhost:8081/cas-oppija/login?client_name=cas-oppija-keycloak"
+            index="0" />
         <md:AttributeConsumingService index="0">
-            <md:RequestedAttribute FriendlyName="nationalIdentificationNumber"
-                                   Name="urn:oid:1.2.246.21"
-                                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
-            <md:RequestedAttribute FriendlyName="cn" Name="urn:oid:2.5.4.3"
-                                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
+            <md:ServiceName xml:lang="fi">Opintopolku</md:ServiceName>
+            <md:ServiceName xml:lang="sv">Studieinfo</md:ServiceName>
+            <md:ServiceName xml:lang="en">Studyinfo</md:ServiceName>
+            <md:RequestedAttribute FriendlyName="nationalIdentificationNumber" Name="urn:oid:1.2.246.21" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
+            <md:RequestedAttribute FriendlyName="cn" Name="urn:oid:2.5.4.3" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri" isRequired="true" />
         </md:AttributeConsumingService>
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
