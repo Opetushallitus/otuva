@@ -160,7 +160,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasOppija",
             ["scripts/ci/run-tests-cas-oppija.sh"],
-            "corretto11"
+              env === "hahtuva" ? "corretto21" : "corretto11"
           ),
         })
       );
