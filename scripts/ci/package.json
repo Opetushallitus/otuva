@@ -1,6 +1,7 @@
 {
   "name": "otuva",
   "devDependencies": {
-    "@types/node": "24.10.13"
+    "@types/node": "24.10.13",
+    "ts-node": "10.9.2"
   }
 }
