@@ -160,7 +160,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasOppija",
             ["scripts/ci/run-tests-cas-oppija.sh"],
-              env === "hahtuva" ? "corretto21" : "corretto11"
+            env === "hahtuva" ? "corretto21" : "corretto11",
+            codebuild.ComputeType.MEDIUM
           ),
         })
       );
@@ -285,7 +286,8 @@ function makeTestProject(
   env: string,
   name: string,
   testCommands: string[],
-  javaVersion: "corretto11" | "corretto21"
+  javaVersion: "corretto11" | "corretto21",
+  computeType: codebuild.ComputeType = codebuild.ComputeType.SMALL,
 ): codebuild.PipelineProject {
   return new codebuild.PipelineProject(
     scope,
@@ -295,7 +297,7 @@ function makeTestProject(
       concurrentBuildLimit: 1,
       environment: {
         buildImage: codebuild.LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0,
-        computeType: codebuild.ComputeType.SMALL,
+        computeType: computeType,
         privileged: true,
       },
       environmentVariables: {
