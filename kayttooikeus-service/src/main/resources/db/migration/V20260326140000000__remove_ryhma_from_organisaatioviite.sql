@@ -1,0 +1,1 @@
+DELETE FROM organisaatioviite WHERE organisaatio_tyyppi = '1.2.246.562.28';

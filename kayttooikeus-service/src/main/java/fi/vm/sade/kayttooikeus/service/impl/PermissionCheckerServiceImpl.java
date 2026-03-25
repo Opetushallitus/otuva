@@ -345,11 +345,20 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
         if (isCurrentUserAdmin()) {
             return true;
         }
+        if (isRyhmaOid(organisaatioOid)) {
+            return kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
+                    .map(KayttoOikeusRyhma::isRyhmaRestriction)
+                    .orElse(false);
+        }
         return kayttooikeusryhmaDataRepository.findById(kayttooikeusryhmaId)
                 .map(KayttoOikeusRyhma::getOrganisaatioViite)
                 .filter(not(Collection::isEmpty))
                 .map(organisaatioViite -> organisaatioLimitationCheck(organisaatioOid, organisaatioViite))
                 .orElse(false);
+    }
+
+    private boolean isRyhmaOid(String oid) {
+        return oid.startsWith(commonProperties.getOrganisaatioRyhmaPrefix());
     }
 
 
@@ -380,10 +389,6 @@ public class PermissionCheckerServiceImpl implements PermissionCheckerService {
 
     @Override
     public boolean organisaatioLimitationCheck(String organisaatioOid, List<OrganisaatioPerustieto> organisaatiot, Set<String> viiteSet) {
-        // Group organizations have to match only as a general set since they're not separated by type or by individual groups
-        if (organisaatioOid.startsWith(this.commonProperties.getOrganisaatioRyhmaPrefix())) {
-            return viiteSet.contains(this.commonProperties.getOrganisaatioRyhmaPrefix());
-        }
         return viiteSet.stream().anyMatch(organisaatioOid::equals)
                 || organisaatiot.stream().anyMatch(organisaatio -> organisaatioLimitationCheck(organisaatioOid, viiteSet, organisaatio));
     }
