@@ -7,10 +7,8 @@
     "test": "playwright test",
     "test-ui": "playwright test --ui",
     "test-headed": "playwright test --headed --project chrome",
-    "lint": "tsc --noEmit && eslint --ext .ts,.tsx tests",
-    "lint:fix": "eslint --ext .ts,.tsx src --fix",
-    "prettier": "prettier --check 'src/**/*{js,jsx,ts,tsx}'",
-    "prettier:fix": "prettier --write 'src/**/*{js,jsx,ts,tsx}'"
+    "prettier": "prettier --check 'tests/**/*{js,jsx,ts,tsx}'",
+    "prettier:fix": "prettier --write 'tests/**/*{js,jsx,ts,tsx}'"
   },
   "keywords": [],
   "private": true,
