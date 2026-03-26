@@ -100,15 +100,19 @@ function stop_cas_oppija {
 }
 
 function select_java_version {
+  local java_version="$1"
   if is_running_on_codebuild; then
     info "Running on CodeBuild; Java version is managed in buildspec"
   elif is_running_on_github_actions; then
-    info "Switching to Java $1"
-    java_version_var="JAVA_HOME_$1"
-    export JAVA_HOME="${!java_version_var}"
+    info "Switching to Java $java_version"
+    JAVA_HOME=$(env | grep -E "^JAVA_HOME_$1" | head -n 1 | cut -d= -f2 || true)
+    if [ -n "$JAVA_HOME" ]; then
+      export JAVA_HOME
+    else
+      fatal "Java version $1 not found. Available JAVA_HOME_* variables: $(env | grep JAVA_HOME_ || true)"
+    fi
   else
     info "Switching to Java $1"
-    java_version="$1"
     JAVA_HOME="$(/usr/libexec/java_home -v "${java_version}")"
     export JAVA_HOME
   fi
