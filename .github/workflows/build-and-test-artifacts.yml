@@ -24,8 +24,8 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: |
-            '11'
-            '21'
+            11
+            21
       - run: ./scripts/ci/run-tests-cas-oppija-e2e.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
