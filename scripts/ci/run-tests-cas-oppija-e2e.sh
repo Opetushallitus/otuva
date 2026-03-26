@@ -103,7 +103,9 @@ function select_java_version {
   if is_running_on_codebuild; then
     info "Running on CodeBuild; Java version is managed in buildspec"
   elif is_running_on_github_actions; then
-    info "Running on Github actions; Java version is managed by actions/setup-java"
+    info "Switching to Java $1"
+    java_version_var="JAVA_HOME_$1"
+    export JAVA_HOME="${!java_version_var}"
   else
     info "Switching to Java $1"
     java_version="$1"
