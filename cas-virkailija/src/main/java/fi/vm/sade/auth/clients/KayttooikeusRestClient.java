@@ -133,20 +133,4 @@ public class KayttooikeusRestClient implements KayttooikeusClient {
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
-
-    @Override
-    public CasUserAttributes hakaRegistration(String temporaryToken, String identifier) {
-        String url = ophProperties.url("kayttooikeus-service.cas.hakaRegistration", temporaryToken);
-        OphHttpRequest request = OphHttpRequest.Builder
-                .put(url)
-                .setEntity(new OphHttpEntity.Builder()
-                        .content("{\"hakaIdentifier\": \"" + identifier + "\"}")
-                        .contentType(ContentType.APPLICATION_JSON)
-                        .build())
-                .build();
-        return httpClient.<CasUserAttributes>execute(request)
-                .expectedStatus(200)
-                .mapWith(json -> Json.parse(json, CasUserAttributes.class))
-                .orElseThrow(() -> noContentOrNotFoundException(url));
-    }
 }

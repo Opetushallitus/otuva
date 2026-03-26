@@ -10,7 +10,6 @@ public record CasUserAttributes(
         Optional<String> mfaProvider,
         Optional<String> kayttajaTyyppi,
         Optional<String> idpEntityId,
-        List<String> roles,
-        Optional<String> hakaRegistrationToken
+        List<String> roles
 ) {
 }

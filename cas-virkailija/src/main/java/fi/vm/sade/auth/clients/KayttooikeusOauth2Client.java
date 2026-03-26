@@ -118,17 +118,4 @@ public class KayttooikeusOauth2Client implements KayttooikeusClient {
             .POST(BodyPublishers.ofString(Json.write(new UserAttributesByHetu(hetu))));
         return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
     }
-
-    record HakaRegistration(String hakaIdentifier) {};
-
-    @Override
-    public CasUserAttributes hakaRegistration(String temporaryToken, String identifier) {
-        var path = "cas/hakaregistration/" + temporaryToken;
-        var request = HttpRequest.newBuilder()
-            .uri(URI.create(baseurl + path))
-            .header("Content-Type", "application/json")
-            .POST(BodyPublishers.ofString(Json.write(new HakaRegistration(identifier))));
-        return Json.parse(httpClient.executeRequest(request).body(), CasUserAttributes.class);
-    }
-
 }

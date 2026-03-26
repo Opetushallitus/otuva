@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
-import fi.vm.sade.kayttooikeus.service.KutsuService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
@@ -54,13 +53,11 @@ import java.util.List;
 @Tag(name = "CAS:a varten olevat rajapinnat.")
 @RequiredArgsConstructor
 public class CasController {
-
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
     private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
     private final KayttajatiedotService kayttajatiedotService;
-    private final KutsuService kutsuService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Value("${kayttooikeus.registration.allow-test-suomifi:false}")
@@ -174,18 +171,6 @@ public class CasController {
         var kayttaja = kayttajatiedotService.getByHenkiloOid(henkilo.getOidHenkilo());
         var roles = kayttajatiedotService.fetchKayttooikeudet(henkilo.getOidHenkilo());
         return CasUserAttributes.fromKayttajatiedotReadDto(henkilo.getOidHenkilo(), kayttaja, roles);
-    }
-
-    @PutMapping(value = "/hakaregistration/{temporaryToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Kutsun päivittäminen väliaikaisella tokenilla. Sallii osittaisen päivittämisen.")
-    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    public CasUserAttributes hakaRegistration(@PathVariable String temporaryToken, @RequestBody KutsuUpdateDto kutsuUpdateDto) {
-        HenkiloUpdateDto henkiloUpdateDto = this.kutsuService.createHenkiloWithHakaIdentifier(temporaryToken, kutsuUpdateDto.getHakaIdentifier());
-        oppijanumerorekisteriClient.updateHenkilo(henkiloUpdateDto);
-        identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(henkiloUpdateDto.getOidHenkilo());
-        var kayttaja = kayttajatiedotService.getByHenkiloOid(henkiloUpdateDto.getOidHenkilo());
-        var roles = kayttajatiedotService.fetchKayttooikeudet(henkiloUpdateDto.getOidHenkilo());
-        return CasUserAttributes.fromKayttajatiedotReadDto(henkiloUpdateDto.getOidHenkilo(), kayttaja, roles);
     }
 
     @Operation(summary = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +

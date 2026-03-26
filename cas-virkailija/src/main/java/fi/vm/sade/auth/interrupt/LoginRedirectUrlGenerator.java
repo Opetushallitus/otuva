@@ -20,10 +20,4 @@ public class LoginRedirectUrlGenerator {
         String asiointiKieli = this.oppijanumerorekisteriRestClient.getAsiointikieli(oidHenkilo);
         return this.ophProperties.url(urlProperty, asiointiKieli, loginToken);
     }
-
-    public String createRegistrationUrl(String username) {
-        String oidHenkilo = this.kayttooikeusClient.getHenkiloOid(username);
-        String asiointiKieli = this.oppijanumerorekisteriRestClient.getAsiointikieli(oidHenkilo);
-        return ophProperties.url("henkilo-ui.register", asiointiKieli);
-    }
 }
