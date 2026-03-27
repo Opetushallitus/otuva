@@ -72,7 +72,13 @@ services:
   keycloak:
     container_name: cas-oppija-keycloak
     image: quay.io/keycloak/keycloak:26.5.4
-    command: ["start-dev", "--import-realm"]
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     ports:
       - "127.0.0.1:8083:8080"
     expose:

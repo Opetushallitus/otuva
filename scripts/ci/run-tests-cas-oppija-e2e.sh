@@ -114,7 +114,7 @@ function is_running_on_github_actions {
 
 function start_container {
   local service_name="$1"
-  docker compose up --force-recreate --renew-anon-volumes --detach "$service_name"
+  docker compose up --force-recreate --renew-anon-volumes --detach "$service_name" --wait
 }
 
 function stop_container {
