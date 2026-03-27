@@ -1,0 +1,100 @@
+services:
+  # kayttooikeus-service
+  kayttooikeus-db:
+    container_name: kayttooikeus-db
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    environment:
+      - POSTGRES_DB=kayttooikeus
+      - POSTGRES_USER=oph
+      - POSTGRES_PASSWORD=oph
+    ports:
+      - 5438:5432
+    command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U oph -d kayttooikeus" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kayttooikeus-test-db:
+    container_name: kayttooikeus-test-db
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    environment:
+      - POSTGRES_DB=kayttooikeus
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=kayttooikeus
+    ports:
+      - 5439:5432
+    command: ["postgres", "-c", "log_statement=all"]
+
+  # cas-virkailija
+  cas-virkailija-db:
+    container_name: cas-virkailija-db
+    image: postgres:16.4
+    ports:
+      - 5080:5432
+    environment:
+      POSTGRES_DB: cas
+      POSTGRES_USER: cas
+      POSTGRES_PASSWORD: cas
+    command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cas -d cas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # cas-oppija
+  cas-oppija-db:
+    container_name: cas-oppija-db
+    image: postgres:16.4
+    ports:
+      - 5081:5432
+    environment:
+      POSTGRES_DB: casoppija
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U app -d casoppija" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak-db:
+    container_name: cas-oppija-keycloak-db
+    image: postgres:16.4
+    ports:
+      - "5082:5432"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+
+  keycloak:
+    container_name: cas-oppija-keycloak
+    image: quay.io/keycloak/keycloak:26.5.4
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "127.0.0.1:8083:8080"
+    expose:
+      - "8083"
+    environment:
+      KC_HOSTNAME: "http://localhost:8083"
+      KC_DB: postgres
+      KC_DB_URL_HOST: host.docker.internal
+      KC_DB_URL_PORT: 5082
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HTTP_ENABLED: true
+      KC_OVERRIDE: true
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
+      - ./keycloak/themes/dev-quicklogin:/opt/keycloak/themes/dev-quicklogin
+    depends_on:
+      - keycloak-db
+  mock-homepage:
+    image: nginx:1.29.6-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./mock-homepage/nginx/index.html:/usr/share/nginx/html/index.html:ro
+      - ./mock-homepage/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro

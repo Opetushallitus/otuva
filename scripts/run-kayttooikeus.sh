@@ -3,7 +3,7 @@ set -o errexit -o nounset -o pipefail
 readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 function main {
-  cd "$repo"
+  cd "$repo/kayttooikeus-service"
 
   wait_for_postgres
   use_correct_jvm_version

@@ -13,41 +13,25 @@ function main {
   tmux splitw -h
   tmux select-pane -t 0
   tmux splitw -v
-  tmux splitw -v
-  tmux splitw -v
-  tmux select-pane -t 4
-  tmux splitw -v
+  tmux select-pane -t 2
   tmux splitw -v
   # +---+---+
-  # | 0 | 4 |
-  # +---+ - +
-  # | 1 | 5 |
+  # | 0 | 2 |
   # +---+---+
-  # | 2 | 6 |
-  # +---+   |
-  # | 3 |   |
+  # | 1 | 3 |
   # +---+---+
 
   tmux select-pane -t 0
-  tmux send-keys "$repo/cas-oppija/scripts/run-database.sh" C-m
+  tmux send-keys "$repo/scripts/run-docker-compose.sh" C-m
 
   tmux select-pane -t 1
-  tmux send-keys "$repo/cas-oppija/scripts/run-keycloak.sh" C-m
+  tmux send-keys "$repo/scripts/run-cas-virkailija.sh" C-m
 
   tmux select-pane -t 2
-  tmux send-keys "while sleep 0.5; do $repo/cas-oppija/scripts/run-cas-java-11.sh; done" C-m
+  tmux send-keys "$repo/scripts/run-cas-oppija.sh" C-m
 
   tmux select-pane -t 3
-  tmux send-keys "$repo/cas-oppija/scripts/open-browser.sh; exit" C-m
-
-  tmux select-pane -t 4
-  tmux send-keys "$repo/kayttooikeus-service/scripts/run-database.sh" C-m
-
-  tmux select-pane -t 5
-  tmux send-keys "$repo/kayttooikeus-service/scripts/run-kayttooikeus.sh" C-m
-
-  tmux select-pane -t 6
-  tmux send-keys "$repo/mock-homepage/scripts/run-nginx.sh" C-m
+  tmux send-keys "$repo/scripts/run-kayttooikeus.sh" C-m
 
   tmux attach-session -t "$session"
 }

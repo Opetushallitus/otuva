@@ -9,7 +9,7 @@ function main {
   require_docker
 
   start_keycloak
-  start_mock_homepage
+  start_container mock-homepage
   start_kayttooikeus
   start_cas_oppija
 
@@ -21,25 +21,13 @@ function start_keycloak {
   cp ./keycloak/localkeystore.jks ./config
   popd
 
-  start_container cas-oppija/docker-compose.keycloak.yml
-}
-
-function stop_keycloak {
-  stop_container cas-oppija/docker-compose.keycloak.yml
-}
-
-function start_mock_homepage {
-  start_container mock-homepage/docker-compose.yml
-}
-
-function stop_mock_homepage {
-  stop_container mock-homepage/docker-compose.yml
+  start_container keycloak
 }
 
 kayttooikeus_backend_pid=""
 
 function start_kayttooikeus {
-  start_container kayttooikeus-service/docker-compose.yml
+  start_container kayttooikeus-db
 
   select_java_version "21"
   cd "$repo"/kayttooikeus-service
@@ -74,19 +62,19 @@ info "Waiting for backend ${name} to start on port ${port}"
 
 function stop_kayttooikeus {
   stop_process kaytoikeus_backend $kayttooikeus_backend_pid
-  stop_container kayttooikeus-service/docker-compose.yml
+  stop_container kayttooikeus-db
 }
 
 cas_oppija_backend_pid=""
 
 function start_cas_oppija {
-  start_container cas-oppija/docker-compose.dependencies.yml
+  start_container cas-oppija-db
 
   select_java_version "11"
   cd "$repo"/cas-oppija
 
   ./gradlew clean build -x test --no-daemon
-  wait_for_container_to_be_healthy cas-oppija-postgres
+  wait_for_container_to_be_healthy cas-oppija-db
 
   java -Dcas.standalone.configurationFile=config/local.yml -jar build/libs/cas.war &
   cas_oppija_backend_pid=$!
@@ -96,7 +84,7 @@ function start_cas_oppija {
 
 function stop_cas_oppija {
   stop_process cas_oppija_backend $cas_oppija_backend_pid
-  stop_container cas-oppija/docker-compose.dependencies.yml
+  stop_container cas-oppija-db
 }
 
 function select_java_version {
@@ -128,13 +116,13 @@ function is_running_on_github_actions {
 }
 
 function start_container {
-  local compose_file="$repo"/$1
-  docker compose --file "$compose_file" up --force-recreate --renew-anon-volumes --detach
+  local service_name="$1"
+  docker compose up --force-recreate --renew-anon-volumes --detach "$service_name"
 }
 
 function stop_container {
-  local compose_file="$repo"/$1
-  docker compose --file $compose_file down --volumes --remove-orphans
+  local service_name="$1"
+  docker compose rm --stop --force --volumes "$service_name" >/dev/null 2>&1 || true
 }
 
 function stop_process {
@@ -154,9 +142,9 @@ function cleanup {
   docker logs cas-oppija-keycloak > "$repo"/logs/keycloak.log 2>&1 || true
 
   stop_cas_oppija
-  stop_mock_homepage
+  stop_container mock-homepage
   stop_kayttooikeus
-  stop_keycloak
+  stop_container keycloak
 }
 
 function wait_for_container_to_be_healthy {

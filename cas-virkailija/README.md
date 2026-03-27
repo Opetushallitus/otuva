@@ -14,10 +14,6 @@ Project includes gradle wrapper so it doesn't have to be installed. Just use `./
 
     gradle build
 
-## Database
-
-    docker compose --file docker-compose.dependencies.yml up
-
 ## Run
 
     java -jar build/libs/cas.war
