@@ -31,10 +31,13 @@ function start_kayttooikeus {
   ./mvnw clean install -Dmaven.test.skip=true
   wait_for_container_to_be_healthy kayttooikeus-db
 
-  nohup java -Dspring.config.additional-location=classpath:/config/local.yml \
-    --add-opens java.base/java.lang=ALL-UNNAMED \
-    --add-opens java.base/java.util=ALL-UNNAMED \
-    -jar target/kayttooikeus.jar &
+  local -r jvm_args=(
+    "--add-opens=java.base/java.util=ALL-UNNAMED"
+    "--add-opens=java.base/java.lang=ALL-UNNAMED"
+    "-Dspring.config.additional-location=classpath:/config/local.yml"
+  )
+
+  nohup ./mvnw -Dspring-boot.run.jvmArguments="${jvm_args[*]}" spring-boot:run &
   kayttooikeus_backend_pid=$!
 
   wait_for_backend_to_be_healthy kayttooikeus-service 8101
@@ -69,10 +72,9 @@ function start_cas_oppija {
   select_java_version "11"
   cd "$repo"/cas-oppija
 
-  ./gradlew clean build -x test --no-daemon
   wait_for_container_to_be_healthy cas-oppija-db
 
-  java -Dcas.standalone.configurationFile=config/local.yml -jar build/libs/cas.war &
+  ./gradlew --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
   cas_oppija_backend_pid=$!
 
   wait_for_backend_to_be_healthy cas-oppija 8081

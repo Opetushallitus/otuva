@@ -8,9 +8,14 @@ function main {
   wait_for_postgres
   use_correct_jvm_version
 
-  ./mvnw clean install -Dmaven.test.skip=true
-  ./mvnw spring-boot:run \
-    -Dspring-boot.run.jvmArguments="-Dspring.config.additional-location=classpath:/config/local.yml --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
+  local -r jvm_args=(
+    "--add-opens=java.base/java.util=ALL-UNNAMED"
+    "--add-opens=java.base/java.lang=ALL-UNNAMED"
+    "-Dspring.config.additional-location=classpath:/config/local.yml"
+  )
+
+  ./mvnw clean install -DskipTests
+  ./mvnw -Dspring-boot.run.jvmArguments="${jvm_args[*]}" spring-boot:run
 }
 
 function wait_for_postgres {
