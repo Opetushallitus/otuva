@@ -584,14 +584,6 @@ public class PermissionCheckerTest {
     }
 
     @Test
-    public void organisaatioLimitationCheckOrganisaatioRyhmaCorrectOid() {
-        OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.246.562.28").build();
-        boolean hasPermission = this.permissionChecker
-                .organisaatioLimitationCheck("1.2.246.562.28.0.0.1", Sets.newHashSet(organisaatioViite));
-        assertThat(hasPermission).isTrue();
-    }
-
-    @Test
     public void organisaatioLimitationCheckOrganisaatioRyhmaWrongOid() {
         OrganisaatioViite organisaatioViite = OrganisaatioViite.builder().organisaatioTyyppi("1.2.3.4.5").build();
         boolean hasPermission = this.permissionChecker

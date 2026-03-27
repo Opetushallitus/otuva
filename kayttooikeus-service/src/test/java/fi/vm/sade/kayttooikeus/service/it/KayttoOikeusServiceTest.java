@@ -150,7 +150,7 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
         populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIOLLE").withOrganisaatiorajoite("1.2.246.562.10.12345678901"));
         populate(kayttoOikeusRyhma("RYHMA-OPPILAITOKSEN_PERUSTEELLA").withOrganisaatiorajoite("oppilaitostyyppi_12"));
         populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIONTYYPIN_PERUSTEELLA").withOrganisaatiorajoite("organisaatiotyyppi_02"));
-        populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIORYHMILLE1").withOrganisaatiorajoite("1.2.246.562.28"));
+        populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIORYHMILLE1").asRyhmaRestriction());
         populate(kayttoOikeusRyhma("RYHMA-ORGANISAATIORYHMILLE2").asRyhmaRestriction());
         populate(kayttoOikeusRyhma("RYHMA-VAIN_OPH"));
 
