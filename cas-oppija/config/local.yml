@@ -19,11 +19,11 @@ cas.authn.pac4j.saml[0].client-name: cas-oppija-keycloak
 cas.authn.pac4j.saml[0].auto-redirect-type: CLIENT
 cas.authn.pac4j.saml[0].keystore-password: dummy
 cas.authn.pac4j.saml[0].private-key-password: dummy
-cas.authn.pac4j.saml[0].keystore-path: keycloak/localkeystore.jks
+cas.authn.pac4j.saml[0].keystore-path: ../keycloak/localkeystore.jks
 # Remember to use the Client Id defined for the corresponding keycloak client as the service-provider-entity-id
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8081/cas-oppija
-cas.authn.pac4j.saml[0].service-provider-metadata-path: keycloak/sp-metadata.xml
-cas.authn.pac4j.saml[0].identity-provider-metadata-path: keycloak/idp-metadata.xml
+cas.authn.pac4j.saml[0].service-provider-metadata-path: ../keycloak/sp-metadata.xml
+cas.authn.pac4j.saml[0].identity-provider-metadata-path: ../keycloak/idp-metadata.xml
 cas.authn.pac4j.saml[0].principal-attribute-id: nationalIdentificationNumber
 cas.authn.pac4j.saml[0].requested-attributes[0].name: urn:oid:1.2.246.21
 cas.authn.pac4j.saml[0].requested-attributes[0].friendly-name: nationalIdentificationNumber

@@ -17,10 +17,7 @@ function main {
 }
 
 function start_keycloak {
-  pushd "$repo"/cas-oppija
-  cp ./keycloak/localkeystore.jks ./config
-  popd
-
+  cp "$repo/keycloak/localkeystore.jks" "$repo/cas-oppija/config"
   start_container keycloak
 }
 
