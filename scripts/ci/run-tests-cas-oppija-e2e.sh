@@ -149,6 +149,10 @@ function stop_process {
 }
 
 function cleanup {
+  info "Capturing Keycloak logs"
+  mkdir -p "$repo"/logs
+  docker logs cas-oppija-keycloak > "$repo"/logs/keycloak.log 2>&1 || true
+
   stop_cas_oppija
   stop_mock_homepage
   stop_kayttooikeus

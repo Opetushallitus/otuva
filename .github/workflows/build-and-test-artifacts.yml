@@ -29,11 +29,17 @@ jobs:
       - run: ./scripts/ci/run-tests-cas-oppija-e2e.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@4ced501f61852b5573711838150776b707475456 # v4
         if: always()
         with:
           name: playwright-report
           path: e2e-tests/playwright-report/
+          retention-days: 30
+      - uses: actions/upload-artifact@4ced501f61852b5573711838150776b707475456 # v4
+        if: always()
+        with:
+          name: keycloak-logs
+          path: logs/keycloak.log
           retention-days: 30
   run-tests-cas-virkailija:
     runs-on: ubuntu-latest
