@@ -11,7 +11,7 @@ function main {
 }
 
 function wait_for_database {
-  while ! docker compose port cas-virkailija-postgres 5432 &> /dev/null; do
+  while ! docker compose port cas-virkailija-db 5432 &> /dev/null; do
     >&2 echo "Waiting for database to start..."
     sleep 1
   done

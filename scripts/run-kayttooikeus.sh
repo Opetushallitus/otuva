@@ -14,7 +14,7 @@ function main {
 }
 
 function wait_for_postgres {
-  while ! docker compose port database 5432 >&2; do
+  while ! docker compose port kayttooikeus-db 5432 >&2; do
     echo "Waiting for database to start..."
     sleep 1
   done
