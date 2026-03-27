@@ -2,8 +2,6 @@ services:
   keycloak-postgres:
     container_name: cas-oppija-keycloak-postgres
     image: postgres:16.4
-    ports:
-      - "5082:5432"
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -20,8 +18,8 @@ services:
     environment:
       KC_HOSTNAME: "http://localhost:8083"
       KC_DB: postgres
-      KC_DB_URL_HOST: host.docker.internal
-      KC_DB_URL_PORT: 5082
+      KC_DB_URL_HOST: keycloak-postgres
+      KC_DB_URL_PORT: 5432
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
       KC_HTTP_ENABLED: true
