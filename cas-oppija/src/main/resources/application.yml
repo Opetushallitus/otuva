@@ -5,7 +5,6 @@
 # CAS session lifetime configuration
 cas.ticket.tgt.timeout.max-time-to-live-in-seconds: PT4H30M
 
-cas.authn.pac4j.core.lazy-init: false
 cas:
   server:
     name: "http://localhost:8081"
@@ -26,6 +25,9 @@ cas:
       xcontent: false
       hsts: false
   authn:
+    pac4j:
+      core:
+        lazy-init: true
     accept:
       users:
     errors:
