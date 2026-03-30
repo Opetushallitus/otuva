@@ -13,6 +13,7 @@ import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
+import fi.vm.sade.kayttooikeus.service.VirkailijaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -58,6 +60,7 @@ public class CasController {
     private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
     private final KayttajatiedotService kayttajatiedotService;
+    private final VirkailijaService virkailijaService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     @Value("${kayttooikeus.registration.allow-test-suomifi:false}")
@@ -171,6 +174,16 @@ public class CasController {
         var kayttaja = kayttajatiedotService.getByHenkiloOid(henkilo.getOidHenkilo());
         var roles = kayttajatiedotService.fetchKayttooikeudet(henkilo.getOidHenkilo());
         return CasUserAttributes.fromKayttajatiedotReadDto(henkilo.getOidHenkilo(), kayttaja, roles);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @Operation(summary = "Rekisteröi virkailijan ja palauttaa CAS-attribuutit")
+    @PostMapping(value = "/register")
+    public CasUserAttributes registerVirkailija(@RequestBody @Valid VirkailijaRegistration dto) {
+        String oid = virkailijaService.register(dto);
+        var kayttaja = kayttajatiedotService.getByHenkiloOid(oid);
+        var roles = kayttajatiedotService.fetchKayttooikeudet(oid);
+        return CasUserAttributes.fromKayttajatiedotReadDto(oid, kayttaja, roles);
     }
 
     @Operation(summary = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
