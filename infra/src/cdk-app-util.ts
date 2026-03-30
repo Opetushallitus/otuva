@@ -9,6 +9,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { legacyPrefix, CDK_QUALIFIER } from "./shared-account";
 import { ROUTE53_HEALTH_CHECK_REGION } from "./health-check";
+import * as dm from "./dependency-management";
 
 class CdkAppUtil extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -18,9 +19,17 @@ class CdkAppUtil extends cdk.App {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: process.env.CDK_DEFAULT_REGION,
     };
+    const dependencyManagement = new dm.DependencyManagementStack(
+      this,
+      legacyPrefix("DependencyManagementStack"),
+      {
+        env,
+      }
+    );
     new ContinousDeploymentStack(
       this,
       legacyPrefix("ContinuousDeploymentStack"),
+      dependencyManagement,
       {
         env,
       }
@@ -29,7 +38,7 @@ class CdkAppUtil extends cdk.App {
 }
 
 class ContinousDeploymentStack extends cdk.Stack {
-  constructor(scope: constructs.Construct, id: string, props: cdk.StackProps) {
+  constructor(scope: constructs.Construct, id: string, dependencyManagement: dm.DependencyManagementStack, props: cdk.StackProps) {
     super(scope, id, props);
     const connection = new codestarconnections.CfnConnection(
       this,
@@ -46,6 +55,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       connection,
       "hahtuva",
       { owner: "Opetushallitus", name: "otuva", branch: "cas-oppija-7" },
+      dependencyManagement,
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -54,6 +64,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       connection,
       "dev",
       { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      dependencyManagement,
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -62,6 +73,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       connection,
       "qa",
       { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      dependencyManagement,
       props
     );
     new ContinousDeploymentPipelineStack(
@@ -70,6 +82,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       connection,
       "prod",
       { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
+      dependencyManagement,
       props
     );
   }
@@ -90,6 +103,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     connection: codestarconnections.CfnConnection,
     env: EnvironmentName,
     repository: Repository,
+    dependencyManagement: dm.DependencyManagementStack,
     props: cdk.StackProps
   ) {
     super(scope, id, props);
@@ -134,7 +148,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestKayttooikeus",
             ["scripts/ci/run-tests-kayttooikeus.sh"],
-            "corretto21"
+            "corretto21",
+            dependencyManagement
           ),
         })
       );
@@ -147,7 +162,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasVirkailija",
             ["scripts/ci/run-tests-cas-virkailija.sh"],
-            "corretto21"
+            "corretto21",
+            dependencyManagement
           ),
         })
       );
@@ -160,7 +176,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestServiceProvider",
             ["scripts/ci/run-tests-service-provider.sh"],
-            "corretto21"
+            "corretto21",
+            dependencyManagement
           ),
         })
       );
@@ -198,10 +215,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
             value: `/env/${env}/slack-notifications-channel-webhook`,
           },
-          MVN_SETTINGSXML: {
-            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-            value: `/mvn/settingsxml`,
-          },
         },
         buildSpec: codebuild.BuildSpec.fromObject({
           version: "0.2",
@@ -218,7 +231,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
               commands: [
                 "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
                 "sudo yum install -y perl-Digest-SHA", // for shasum command
-                "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
+                ...dependencyManagement.createMavenSettingsXmlCommands(),
+                "cp codebuild-mvn-settings.xml ./kayttooikeus-service/codebuild-mvn-settings.xml"
               ],
             },
             build: {
@@ -230,6 +244,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
         }),
       }
     );
+
+    dependencyManagement.grantRead(deployProject);
 
     const deploymentTargetAccount = ssm.StringParameter.valueFromLookup(
       this,
@@ -273,9 +289,10 @@ function makeTestProject(
   name: string,
   testCommands: string[],
   javaVersion: "corretto11" | "corretto21",
+  dependencyManagement: dm.DependencyManagementStack,
   computeType: codebuild.ComputeType = codebuild.ComputeType.SMALL,
 ): codebuild.PipelineProject {
-  return new codebuild.PipelineProject(
+  const project = new codebuild.PipelineProject(
     scope,
     `${name}${capitalize(env)}Project`,
     {
@@ -303,10 +320,6 @@ function makeTestProject(
           type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
           value: "/otuva/docker/password",
         },
-        MVN_SETTINGSXML: {
-          type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-          value: "/mvn/settingsxml",
-        },
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: "0.2",
@@ -323,7 +336,8 @@ function makeTestProject(
             commands: [
               "docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD",
               "sudo yum install -y perl-Digest-SHA", // for shasum command
-              "echo $MVN_SETTINGSXML > ./kayttooikeus-service/settings.xml",
+              ...dependencyManagement.createMavenSettingsXmlCommands(),
+              "cp codebuild-mvn-settings.xml ./kayttooikeus-service/codebuild-mvn-settings.xml",
             ],
           },
           build: {
@@ -333,6 +347,8 @@ function makeTestProject(
       }),
     }
   );
+  dependencyManagement.grantRead(project);
+  return project;
 }
 
 function capitalize(s: string) {
