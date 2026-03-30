@@ -9,7 +9,7 @@ function main {
   docker compose up -d
 
   if is_running_on_codebuild; then
-    "${repo}"/kayttooikeus-service/mvnw clean install -s ./codebuild-mvn-settings.xml"
+    "${repo}"/kayttooikeus-service/mvnw clean install -s ./codebuild-mvn-settings.xml
   else
     "${repo}"/kayttooikeus-service/mvnw clean install
   fi
