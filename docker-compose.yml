@@ -113,3 +113,8 @@ services:
       - POSTGRES_USER=oph
       - POSTGRES_PASSWORD=oph
     command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U oph -d otuvamocksubstanceservice" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
