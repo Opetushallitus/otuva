@@ -9,6 +9,7 @@ import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.pac4j.core.client.BaseClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import fi.vm.sade.auth.clients.KayttooikeusClient;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthenticationPreProcessor {
     final PrincipalFactory principalFactory;
     final KayttooikeusClient kayttooikeusClient;
+    final boolean registrationEnabled;
 
     @Override
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
             throws Throwable {
         try {
-            var userAttributes = getUserAttributes(client, principal);
+            var registrationToken = registrationEnabled ? getRegistrationToken(service) : null;
+            var userAttributes = registrationToken != null && client.getName().equals("suomifi")
+                ? registerVirkailija(principal, client, registrationToken)
+                : getUserAttributes(client, principal);
             var casPrincipal = CasPrincipal.of(principalFactory, userAttributes);
             LOGGER.info("Delegated authentication processing principal [{}] returned [{}]", principal, casPrincipal);
             return casPrincipal;
@@ -34,15 +39,37 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
         }
     }
 
+    String getRegistrationToken(Service service) {
+        try {
+            var uri = UriComponentsBuilder.fromUriString(service.getOriginalUrl()).build();
+            var registrationToken = uri.getQueryParams().getFirst("virkailijaRegistrationToken");
+            LOGGER.info("Parsed token " + registrationToken + "from service url " + service.getOriginalUrl());
+            return registrationToken;
+        } catch (Exception e) {
+            LOGGER.info("Failed tu parse registration token from url " + service.getOriginalUrl());
+            return null;
+        }
+    }
+
+    CasUserAttributes registerVirkailija(Principal principal, BaseClient client, String registrationToken) {
+        LOGGER.info("registration attributes");
+        principal.getAttributes().keySet().forEach(k -> {
+            principal.getAttributes().get(k).forEach(a -> {
+                LOGGER.info(k + ":" + (String) a);
+            });
+        });
+        return getUserAttributes(client, principal);
+    }
+
     CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
         var a = switch (client.getName()) {
             case "mpassid" -> kayttooikeusClient.getUserAttributesByOid(principal.getId());
-            case "haka" -> kayttooikeusClient.getUserAttributesByIdpIdentifier(client.getName(), (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
-            case "suomifi" -> kayttooikeusClient.getUserAttributesByHetu((String) principal.getAttributes().get("urn:oid:1.2.246.21").get(0));
+            case "haka" -> kayttooikeusClient.getUserAttributesByIdpIdentifier(client.getName(), getAttribute(principal, "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"));
+            case "suomifi" -> kayttooikeusClient.getUserAttributesByHetu(getAttribute(principal, "urn:oid:1.2.246.21"));
             default -> null;
         };
         if (isHakaIdp(client) && a == null) {
-            a = kayttooikeusClient.getUserAttributesByIdpIdentifier("haka", (String) principal.getAttributes().get("urn:oid:1.3.6.1.4.1.5923.1.1.1.6").get(0));
+            a = kayttooikeusClient.getUserAttributesByIdpIdentifier("haka", getAttribute(principal, "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"));
         }
         if (a == null) {
             throw new PreventedException("invalid delegated authentication client (" + client.getName() + ") for principal " + principal.getId());
@@ -64,5 +91,14 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
 
     Optional<String> getIdpEntityId(BaseClient client) {
         return "suomifi".equals(client.getName()) ? Optional.of("vetuma") :  Optional.of(client.getName());
+    }
+
+    String getAttribute(Principal principal, String attr) {
+        var attrList = principal.getAttributes().get(attr);
+        if (attrList != null && attrList.size() > 0) {
+            return (String) attrList.get(0);
+        } else {
+            return null;
+        }
     }
 }

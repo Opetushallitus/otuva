@@ -18,6 +18,7 @@ import org.apereo.cas.util.CoreTicketUtils;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,6 +47,9 @@ public class CasOphConfiguration {
     final PrincipalFactory principalFactory;
     final Environment environment;
 
+    @Value("${registration.enabled}")
+    private boolean registrationEnabled;
+
     @Bean
     OphHttpClient httpClient(OphProperties ophProperties) {
         return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, ophProperties);
@@ -60,7 +64,7 @@ public class CasOphConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor(KayttooikeusClient kayttooikeusClient) {
-        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusClient);
+        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusClient, registrationEnabled);
     }
 
     @Bean

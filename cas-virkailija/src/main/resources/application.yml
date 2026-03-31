@@ -101,3 +101,5 @@ oppijanumerorekisteri-service.baseurl: http://localhost:8080/oppijanumerorekiste
 oauth2.enabled: false
 oauth2.client-id: user1
 oauth2.client-secret: pass1
+
+registration.enabled: false

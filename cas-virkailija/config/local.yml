@@ -67,3 +67,5 @@ cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:
 cas.authn.pac4j.saml[1].requested-attributes[0].required: true
 
 oauth2.enabled: false
+
+registration.enabled: true

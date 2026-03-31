@@ -99,3 +99,5 @@ oppijanumerorekisteri-service.baseurl: https://prod.oppijanumerorekisteri.opinto
 oauth2.enabled: false
 oauth2.client-id: ${serviceprovider_app_username_to_usermanagement}
 oauth2.client-secret: ${cas_virkailija_oauth2_client_secret}
+
+registration.enabled: false
