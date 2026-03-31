@@ -33,8 +33,6 @@ public class CasOppijaConfiguration {
 
     private final OtuvaMockSubstanceServiceProperties properties;
 
-    private final JdbcSessionMappingStorage jdbcSessionMappingStorage;
-
     @Bean
     @Qualifier(CAS_OPPIJA_QUALIFIER)
     ServiceProperties casOppijaServiceProperties() {

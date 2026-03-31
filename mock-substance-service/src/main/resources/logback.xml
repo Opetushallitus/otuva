@@ -7,10 +7,6 @@
     </encoder>
   </appender>
 
-  <root level="DEBUG">
-    <appender-ref ref="STDOUT-CONSOLE"/>
-  </root>
-
   <logger
       name="fi.vm.sade.oppijanumerorekisteri.tiedotuspalvelu.LoggingHttpClient"
       level="INFO"

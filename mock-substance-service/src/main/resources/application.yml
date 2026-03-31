@@ -31,7 +31,7 @@ spring.mandatory-file-encoding: UTF-8
 spring.profiles.active: default
 # spring.jackson.serialization.write-dates-as-timestamps: true
 
-server.servlet.context-path: /
+server.servlet.context-path: /mock-substance-service
 server.servlet.session.cookie.name: JSESSIONID
 server.port: 8180
 spring.web.error.include-stacktrace: NEVER
@@ -45,4 +45,4 @@ cas.mfa.encryption-key: changethis
 cas.mfa.signing-key: changethis
 
 mock-substance-service.cas-oppija.server-url: http://localhost:8081/cas-oppija
-mock-substance-service.cas-oppija.service-base-url: http://localhost:8180/
+mock-substance-service.cas-oppija.service-base-url: http://localhost:8180/mock-substance-service

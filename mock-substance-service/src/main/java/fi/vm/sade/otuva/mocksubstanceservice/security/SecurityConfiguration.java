@@ -32,9 +32,8 @@ public class SecurityConfiguration {
     @Order(1)
     SecurityFilterChain publicSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher(
-                        "/asd",
-                        "/",
-                        "/index")
+                        "/actuator/health",
+                        "/")
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
@@ -56,12 +55,13 @@ public class SecurityConfiguration {
                 .authenticationProvider(casOppijaAuthProvider)
                 .addFilterAt(casOppijaAuthFilter, CasAuthenticationFilter.class)
                 .addFilterBefore(casOppijaSsoFilter, CasAuthenticationFilter.class)
-                .securityContext(
-                        context -> context.requireExplicitSave(true).securityContextRepository(casOppijaCtxRepo))
-                .exceptionHandling(
-                        handler -> handler.authenticationEntryPoint(casOppijaEntryPoint))
-                .logout(
-                        logout -> logout.logoutUrl("/logout").logoutSuccessHandler(casOppijaLogoutHandler));
+                .securityContext(context ->
+                        context.requireExplicitSave(true)
+                                .securityContextRepository(casOppijaCtxRepo))
+                .exceptionHandling(handler ->
+                        handler.authenticationEntryPoint(casOppijaEntryPoint))
+                .logout(logout ->
+                        logout.logoutUrl("/logout").logoutSuccessHandler(casOppijaLogoutHandler));
 
         return http.build();
     }

@@ -38,9 +38,6 @@ public class HomeController {
     public String secure(Model model) {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         var principal = (CasOppijaUserDetailsService.CasAuthenticatedUser) auth.getPrincipal();
-        log.debug("principal.getAttributes " + principal.getAttributes());
-        log.debug("auth.getName " + auth.getName());
-        log.debug("auth.getCredentials " + auth.getCredentials());
         populateSessionDetails(auth, model);
         model.addAttribute("username", principal.getUsername());
         model.addAttribute("clientName", principal.getAttributes().get("clientName"));
