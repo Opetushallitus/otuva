@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock Substance Service - Secure Page</title>
+</head>
+<body>
+<header>
+    <h1>Secure Page, user details</h1>
+</header>
+
+<main>
+    <p>credentials (CAS ticket): <span th:text="${credentials}"></span></p>
+    <p>SessionId: <span th:text="${sessionId}"></span></p>
+    <p>username: <span th:text="${username}"></span></p>
+    <p>clientName: <span th:text="${clientName}"></span></p>
+    <p>displayName: <span th:text="${displayName}"></span></p>
+    <p>givenName: <span th:text="${givenName}"></span></p>
+    <p>cn: <span th:text="${cn}"></span></p>
+    <a th:href="@{/}">
+        Go to home
+    </a>
+</main>
+
+</body>
+</html>

@@ -15,10 +15,13 @@ function main {
   tmux splitw -v
   tmux select-pane -t 2
   tmux splitw -v
+  tmux splitw -v
   # +---+---+
   # | 0 | 2 |
   # +---+---+
   # | 1 | 3 |
+  # +---+---+
+  # |   | 4 |
   # +---+---+
 
   tmux select-pane -t 0
@@ -32,6 +35,9 @@ function main {
 
   tmux select-pane -t 3
   tmux send-keys "$repo/scripts/run-kayttooikeus.sh" C-m
+
+  tmux select-pane -t 4
+  tmux send-keys "$repo/scripts/run-mock-substance-service.sh" C-m
 
   tmux attach-session -t "$session"
 }
