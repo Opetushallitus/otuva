@@ -9,7 +9,7 @@ function main {
   require_docker
 
   start_keycloak
-  start_container mock-homepage
+  start_mock_substance_service
   start_kayttooikeus
   start_cas_oppija
 
@@ -41,6 +41,34 @@ function start_kayttooikeus {
   kayttooikeus_backend_pid=$!
 
   wait_for_backend_to_be_healthy kayttooikeus-service 8101
+}
+
+mock_substance_service_backend_pid=""
+
+function start_mock_substance_service {
+  start_container mock-substance-service-db
+
+  select_java_version "21"
+  cd "$repo/mock-substance-service"
+
+  ./mvnw clean install -Dmaven.test.skip=true
+  wait_for_container_to_be_healthy otuva-mock-substance-service-db
+
+  local -r jvm_args=(
+    "--add-opens=java.base/java.util=ALL-UNNAMED"
+    "--add-opens=java.base/java.lang=ALL-UNNAMED"
+    "-Dspring.config.additional-location=classpath:/config/local.yml"
+  )
+
+  nohup ./mvnw -Dspring-boot.run.jvmArguments="${jvm_args[*]}" spring-boot:run &
+  mock_substance_service_backend_pidd=$!
+
+  wait_for_backend_to_be_healthy mock_substance_service 8180
+}
+
+function stop_mock_substance_service {
+  stop_process mock_substance_service $mock_substance_service_backend_pid
+  stop_container otuva-mock-substance-service-db
 }
 
 function wait_for_backend_to_be_healthy {
@@ -140,7 +168,7 @@ function cleanup {
   docker logs cas-oppija-keycloak
 
   stop_cas_oppija
-  stop_container mock-homepage
+  stop_mock_substance_service
   stop_kayttooikeus
   stop_container keycloak
 }
