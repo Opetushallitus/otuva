@@ -55,7 +55,7 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
         LOGGER.info("registration attributes");
         principal.getAttributes().keySet().forEach(k -> {
             principal.getAttributes().get(k).forEach(a -> {
-                LOGGER.info(k + ":" + (String) a);
+                LOGGER.info(k + ":" + a);
             });
         });
         return getUserAttributes(client, principal);
