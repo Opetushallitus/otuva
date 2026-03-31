@@ -10,8 +10,8 @@
 </header>
 
 <main>
-    <p>Sessionid: <span th:text="${sessionId}"></span></p>
-    <p>Credentials (CAS ticket): <span th:text="${credentials}"></span></p>
+    <p>Sessionid: <span id="sessionId" data-testid="sessionId" th:text="${sessionId}"></span></p>
+    <p>Credentials (CAS ticket): <span id="credentials" data-testid="credentials" th:text="${credentials}"></span></p>
     <ul>
         <li>
             <a th:href="@{/secure}">

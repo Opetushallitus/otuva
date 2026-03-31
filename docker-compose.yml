@@ -97,7 +97,7 @@ services:
       - keycloak-db
 
   mock-substance-service-db:
-    container_name: mock-substance-service-db
+    container_name: otuva-mock-substance-service-db
     image: postgres:16.4
     ports:
       - "5440:5432"

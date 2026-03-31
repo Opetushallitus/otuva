@@ -5,7 +5,7 @@ test.describe('Authentication', () => {
     const password = process.env.TEST_PASS || 'password';
 
     const login = async (page: Page) => {
-        await navigateAndRetryUntilRedirectedToDelegatedIdp(page, '/secure');
+        await navigateAndRetryUntilRedirectedToDelegatedIdp(page, '/mock-substance-service/secure');
 
         await page.fill('input[name="username"]', username);
         await page.fill('input[name="password"]', password);
@@ -17,20 +17,24 @@ test.describe('Authentication', () => {
         await login(page);
 
         // Await for the url to have ticket
-        await page.waitForURL((url) => url.searchParams.has('ticket'));
+        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/')
+
         // Check ticket
-        const url = new URL(page.url());
-        expect(url.searchParams.get('ticket')).toMatch(/^ST-/);
+        const credentials = page.getByText('Credentials');
+        expect(await credentials.innerText()).toMatch(/ST-/);
     });
 
     test('should logout successfully', async ({ page }) => {
         await login(page);
 
-        await page.goto('/logout');
+        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/');
 
-        await page.waitForURL((url) => !url.searchParams.has('ticket'));
-        const url = new URL(page.url());
-        expect(url.searchParams.get('ticket')).toBeNull();
+        await page.goto('/mock-substance-service/logout');
+
+        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/');
+
+        const credentials = page.getByText('Credentials');
+        expect(await credentials.innerText()).not.toMatch(/ST-/);
     });
 });
 

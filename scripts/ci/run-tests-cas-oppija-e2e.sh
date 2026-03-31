@@ -61,9 +61,9 @@ function start_mock_substance_service {
   )
 
   nohup ./mvnw -Dspring-boot.run.jvmArguments="${jvm_args[*]}" spring-boot:run &
-  mock_substance_service_backend_pidd=$!
+  mock_substance_service_backend_pid=$!
 
-  wait_for_backend_to_be_healthy mock_substance_service 8180
+  wait_for_backend_to_be_healthy mock-substance-service 8180
 }
 
 function stop_mock_substance_service {
@@ -102,7 +102,7 @@ function start_cas_oppija {
 
   wait_for_container_to_be_healthy cas-oppija-db
 
-  ./gradlew --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
+  nohup ./gradlew --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
   cas_oppija_backend_pid=$!
 
   wait_for_backend_to_be_healthy cas-oppija 8081
