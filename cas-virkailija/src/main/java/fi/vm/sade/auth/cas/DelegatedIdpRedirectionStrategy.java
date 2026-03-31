@@ -17,12 +17,16 @@ public class DelegatedIdpRedirectionStrategy implements DelegatedClientIdentityP
     public Optional<DelegatedClientIdentityProviderConfiguration> select(RequestContext context,
             WebApplicationService service, Set<DelegatedClientIdentityProviderConfiguration> provider)
             throws Throwable {
-        return Optional
-            .ofNullable(context.getRequestParameters().get("forceIdp"))
-            .flatMap(idp -> provider.stream().filter(p -> idp.equals(p.getName())).findFirst())
-            .map(p -> {
-                p.setAutoRedirectType(DelegationAutoRedirectTypes.SERVER);
-                return p;
-            });
+        if (service.getOriginalUrl().contains("virkailijaRegistrationToken")) {
+            return provider.stream()
+                    .filter(idp -> idp.getName().equals("suomifi"))
+                    .findFirst()
+                    .map(idp -> {
+                        idp.setAutoRedirectType(DelegationAutoRedirectTypes.SERVER);
+                        return idp;
+                    });
+        } else {
+            return Optional.empty();
+        }
     }
 }
