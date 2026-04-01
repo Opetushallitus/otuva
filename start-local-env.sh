@@ -2,13 +2,19 @@
 set -o errexit -o nounset -o pipefail -o xtrace
 readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+function stop() {
+  cd "$repo"
+  docker compose down
+}
+trap stop EXIT
+
 function main {
   cd "$repo"
   local -r session="$( basename "$( pwd )" )"
   tmux kill-session -t "$session" || true
   tmux start-server
   tmux new-session -d -s "$session"
-  
+
   tmux select-pane -t 0
   tmux splitw -h
   tmux select-pane -t 0
