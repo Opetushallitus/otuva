@@ -133,4 +133,9 @@ public class KayttooikeusRestClient implements KayttooikeusClient {
                 .mapWith(json -> Json.parse(json, CasUserAttributes.class))
                 .orElseThrow(() -> noContentOrNotFoundException(url));
     }
+
+    @Override
+    public CasUserAttributes registerVirkailija(VirkailijaRegistration dto) {
+        throw new UnsupportedOperationException("Unimplemented method 'registerVirkailija'");
+    }
 }

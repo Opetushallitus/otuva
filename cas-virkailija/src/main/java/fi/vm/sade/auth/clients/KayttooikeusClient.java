@@ -21,4 +21,6 @@ public interface KayttooikeusClient {
     CasUserAttributes getUserAttributesByIdpIdentifier(String idp, String identifier);
 
     CasUserAttributes getUserAttributesByHetu(String hetu);
+
+    CasUserAttributes registerVirkailija(VirkailijaRegistration dto);
 }

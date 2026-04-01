@@ -12,6 +12,7 @@ import org.pac4j.core.client.BaseClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import fi.vm.sade.auth.clients.KayttooikeusClient;
+import fi.vm.sade.auth.clients.VirkailijaRegistration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,13 +53,12 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
     }
 
     CasUserAttributes registerVirkailija(Principal principal, BaseClient client, String registrationToken) {
-        LOGGER.info("registration attributes");
-        principal.getAttributes().keySet().forEach(k -> {
-            principal.getAttributes().get(k).forEach(a -> {
-                LOGGER.info(k + ":" + a);
-            });
-        });
-        return getUserAttributes(client, principal);
+        var dto = new VirkailijaRegistration(
+            registrationToken,
+            getAttribute(principal, "urn:oid:1.2.246.21"),
+            getAttribute(principal, "givenName"),
+            getAttribute(principal, "sn"));
+        return kayttooikeusClient.registerVirkailija(dto);
     }
 
     CasUserAttributes getUserAttributes(BaseClient client, Principal principal) {
