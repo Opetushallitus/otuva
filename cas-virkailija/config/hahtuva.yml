@@ -113,6 +113,7 @@ email-verification-enabled.usernamelist: "opettaja40"
 
 kayttooikeus-service.baseurl: https://hahtuva.otuva.opintopolku.fi/kayttooikeus-service/
 oppijanumerorekisteri-service.baseurl: https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service/
+henkilo-ui.baseurl: https://virkailija.hahtuvaopintopolku.fi/henkilo-ui/
 oauth2.client-id: ${serviceprovider_app_username_to_usermanagement}
 oauth2.client-secret: ${cas_virkailija_oauth2_client_secret}
 

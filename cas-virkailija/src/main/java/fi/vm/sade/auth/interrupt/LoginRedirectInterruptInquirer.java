@@ -31,13 +31,11 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
 
     private final KayttooikeusClient kayttooikeusClient;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
+    private final String henkiloUiBaseurl;
     private boolean requireStrongIdentification;
     private List<String> requireStrongIdentificationUsernameList = new ArrayList<>();
     private boolean emailVerificationEnabled;
     private List<String> emailVerificationUsernameList = new ArrayList<>();
-
-    @Value("${kayttooikeus-service.baseurl}")
-    private String baseurl;
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
@@ -100,7 +98,7 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         String oidHenkilo = kayttooikeusClient.getHenkiloOid(username);
         String loginToken = kayttooikeusClient.createLoginToken(oidHenkilo);
         String asiointiKieli = oppijanumerorekisteriClient.getAsiointikieli(oidHenkilo);
-        return baseurl + path + "/" + asiointiKieli + "/" + loginToken;
+        return henkiloUiBaseurl + path + "/" + asiointiKieli + "/" + loginToken;
     }
 
     @Value("${require-strong-identification}")

@@ -45,6 +45,9 @@ public class CasOphConfiguration {
     @Value("${registration.enabled}")
     private boolean registrationEnabled;
 
+    @Value("${henkilo-ui.baseurl}")
+    private String henkiloUiBaseurl;
+
     @Bean
     ObservationRegistry observationRegistry() {
         // Disable all observations
@@ -72,7 +75,7 @@ public class CasOphConfiguration {
 
     @Bean
     InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient) {
-        return new LoginRedirectInterruptInquirer(kayttooikeusClient, oppijanumerorekisteriClient);
+        return new LoginRedirectInterruptInquirer(kayttooikeusClient, oppijanumerorekisteriClient, henkiloUiBaseurl);
     }
 
     @Bean

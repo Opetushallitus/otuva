@@ -98,6 +98,7 @@ email-verification-enabled.usernamelist: example21,example22
 
 kayttooikeus-service.baseurl: http://localhost:8101/kayttooikeus-service
 oppijanumerorekisteri-service.baseurl: http://localhost:8080/oppijanumerorekisteri-service
+henkilo-ui.baseurl: http://localhost:8082/henkilo-ui/
 oauth2.client-id: user1
 oauth2.client-secret: pass1
 
