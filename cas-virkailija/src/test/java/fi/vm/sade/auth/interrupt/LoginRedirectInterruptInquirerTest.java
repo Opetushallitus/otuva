@@ -13,7 +13,6 @@ import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.interrupt.InterruptResponse;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.core.env.Environment;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -40,12 +39,7 @@ public class LoginRedirectInterruptInquirerTest {
         when(kayttooikeusClientMock.createLoginToken(any())).thenReturn("loginToken1");
         oppijanumerorekisteriClientMock = mock(OppijanumerorekisteriOauth2Client.class);
         when(oppijanumerorekisteriClientMock.getAsiointikieli(any())).thenReturn("fi");
-        Environment environmentMock = mock(Environment.class);
-        when(environmentMock.getRequiredProperty("host.cas")).thenReturn("localhost:8081");
-        when(environmentMock.getRequiredProperty("host.virkailija")).thenReturn("localhost:8082");
-        when(environmentMock.getRequiredProperty("host.alb")).thenReturn("localhost:8083");
-        when(environmentMock.getRequiredProperty("kayttooikeus.baseurl")).thenReturn("localhost:8101");
-        inquirer = new LoginRedirectInterruptInquirer(kayttooikeusClientMock, oppijanumerorekisteriClientMock);
+        inquirer = new LoginRedirectInterruptInquirer(kayttooikeusClientMock, oppijanumerorekisteriClientMock, "https://localhost:8082/henkilo-ui/");
     }
 
     @Test

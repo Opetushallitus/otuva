@@ -37,7 +37,7 @@ public class HttpAuthenticationHandlerTest {
 
     @Before
     public void setup() throws IOException {
-        KayttooikeusClient kayttooikeusClient = mock(KayttooikeusOauth2Client.class);
+        kayttooikeusClient = mock(KayttooikeusOauth2Client.class);
         authenticationHandler = new HttpAuthenticationHandler(0, kayttooikeusClient);
     }
 
