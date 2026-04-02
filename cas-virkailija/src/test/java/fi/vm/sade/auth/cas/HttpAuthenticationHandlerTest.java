@@ -1,9 +1,7 @@
 package fi.vm.sade.auth.cas;
 
-import fi.vm.sade.CasOphProperties;
 import fi.vm.sade.auth.clients.KayttooikeusClient;
-import fi.vm.sade.javautils.httpclient.*;
-import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.auth.clients.KayttooikeusOauth2Client;
 import fi.vm.sade.saml.action.SAMLCredentials;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.AuthenticationHandler;
@@ -19,7 +17,6 @@ import org.apereo.cas.web.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.security.auth.login.FailedLoginException;
@@ -35,28 +32,13 @@ import static org.mockito.Mockito.when;
 
 
 public class HttpAuthenticationHandlerTest {
-    private AuthenticationHandler authenticationHandler;
-
-    private OphHttpResponse httpResponseMock;
+    AuthenticationHandler authenticationHandler;
+    KayttooikeusClient kayttooikeusClient;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setup() throws IOException {
-        OphHttpClientProxyRequest httpClientProxyRequestMock = mock(OphHttpClientProxyRequest.class);
-        KayttooikeusClient kayttooikeusClient = mock(KayttooikeusClient.class);
-        when(httpClientProxyRequestMock.execute(any())).thenAnswer(invocation
-                -> ((OphHttpResponseHandler<Object>) invocation.getArguments()[0]).handleResponse(httpResponseMock));
-        when(httpClientProxyRequestMock.handleManually()).thenReturn(httpResponseMock);
-        OphHttpClientProxy httpClientProxyMock = mock(OphHttpClientProxy.class);
-        when(httpClientProxyMock.createRequest(any())).thenReturn(httpClientProxyRequestMock);
-        httpResponseMock = mock(OphHttpResponse.class);
-        when(httpResponseMock.getStatusCode()).thenReturn(200);
-        Environment environmentMock = mock(Environment.class);
-        when(environmentMock.getRequiredProperty(any())).thenReturn("localhost");
-        OphProperties properties = new CasOphProperties(environmentMock);
-        OphHttpClient httpClient = new OphHttpClient(httpClientProxyMock, "cas", properties);
-
-        authenticationHandler = new HttpAuthenticationHandler(0, httpClient, kayttooikeusClient);
+        KayttooikeusClient kayttooikeusClient = mock(KayttooikeusOauth2Client.class);
+        authenticationHandler = new HttpAuthenticationHandler(0, kayttooikeusClient);
     }
 
     @Test
@@ -76,16 +58,16 @@ public class HttpAuthenticationHandlerTest {
 
     @Test
     public void authenticate() throws Throwable {
-        when(httpResponseMock.getStatusCode()).thenReturn(200);
-        when(httpResponseMock.asText()).thenReturn("""
-                {
-                    "username":"USER1",
-                    "oidHenkilo": "1.2.246.562.24.74168788054",
-                    "kayttajaTyyppi": "VIRKAILIJA",
-                    "roles": [],
-                    "kayttajatiedot": { "username":"USER1" }
-                }
-                """);
+        when(kayttooikeusClient.getUserAttributesByUsernamePassword(any(), any()))
+            .thenReturn(Optional.of(
+                    new CasUserAttributes(
+                        "1.2.246.562.24.74168788054",
+                        "USER1",
+                        List.of(),
+                        Optional.empty(),
+                        Optional.of("VIRKAILIJA"),
+                        Optional.empty(),
+                        List.of())));
 
         AuthenticationHandlerExecutionResult authenticate = authenticationHandler.authenticate(new UsernamePasswordCredential("user1", "pass1"), getService());
 
@@ -96,15 +78,16 @@ public class HttpAuthenticationHandlerTest {
 
     @Test
     public void defaultKayttajaTyyppiToVirkailijaIfMissing() throws Throwable {
-        when(httpResponseMock.getStatusCode()).thenReturn(200);
-        when(httpResponseMock.asText()).thenReturn("""
-                {
-                    "username":"USER1",
-                    "oidHenkilo": "1.2.246.562.24.74168788054",
-                    "roles": [],
-                    "kayttajatiedot": { "username":"USER1" }
-                }
-                """);
+        when(kayttooikeusClient.getUserAttributesByUsernamePassword(any(), any()))
+            .thenReturn(Optional.of(
+                    new CasUserAttributes(
+                        "1.2.246.562.24.74168788054",
+                        "USER1",
+                        List.of(),
+                        Optional.empty(),
+                        Optional.of("VIRKAILIJA"),
+                        Optional.empty(),
+                        List.of())));
 
         AuthenticationHandlerExecutionResult authenticate = authenticationHandler.authenticate(new UsernamePasswordCredential("user1", "pass1"), getService());
 
@@ -116,7 +99,7 @@ public class HttpAuthenticationHandlerTest {
 
     @Test
     public void authenticateShouldThrowFailedLoginException() {
-        when(httpResponseMock.getStatusCode()).thenReturn(401);
+        when(kayttooikeusClient.getUserAttributesByUsernamePassword(any(), any())).thenReturn(Optional.empty());
 
         Throwable throwable = catchThrowable(() -> authenticationHandler.authenticate(new UsernamePasswordCredential("user1", "pass1"), getService()));
 
@@ -125,7 +108,7 @@ public class HttpAuthenticationHandlerTest {
 
     @Test
     public void authenticateShouldThrowPreventedException() {
-        when(httpResponseMock.getStatusCode()).thenReturn(500);
+        when(kayttooikeusClient.getUserAttributesByUsernamePassword(any(), any())).thenThrow(new RuntimeException("json parse exception"));
 
         Throwable throwable = catchThrowable(() -> authenticationHandler.authenticate(new UsernamePasswordCredential("user1", "pass1"), getService()));
 

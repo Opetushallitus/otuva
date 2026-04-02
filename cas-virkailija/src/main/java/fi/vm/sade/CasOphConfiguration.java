@@ -31,14 +31,9 @@ import org.springframework.webflow.execution.Action;
 
 import fi.vm.sade.auth.cas.DelegatedIdpRedirectionStrategy;
 import fi.vm.sade.auth.cas.OtuvaDelegatedAuthenticationProcessor;
-import fi.vm.sade.auth.clients.HttpClientUtil;
 import fi.vm.sade.auth.clients.KayttooikeusClient;
 import fi.vm.sade.auth.clients.OppijanumerorekisteriClient;
 import fi.vm.sade.auth.interrupt.LoginRedirectInterruptInquirer;
-import fi.vm.sade.auth.interrupt.LoginRedirectUrlGenerator;
-import fi.vm.sade.javautils.httpclient.OphHttpClient;
-import fi.vm.sade.javautils.httpclient.apache.ApacheOphHttpClient;
-import fi.vm.sade.properties.OphProperties;
 
 @Configuration
 @ComponentScan
@@ -49,11 +44,6 @@ public class CasOphConfiguration {
 
     @Value("${registration.enabled}")
     private boolean registrationEnabled;
-
-    @Bean
-    OphHttpClient httpClient(OphProperties ophProperties) {
-        return ApacheOphHttpClient.createDefaultOphClient(HttpClientUtil.CALLER_ID, ophProperties);
-    }
 
     @Bean
     ObservationRegistry observationRegistry() {
@@ -81,11 +71,8 @@ public class CasOphConfiguration {
     }
 
     @Bean
-    InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient, OphProperties ophProperties) {
-        return new LoginRedirectInterruptInquirer(
-                kayttooikeusClient,
-                new LoginRedirectUrlGenerator(kayttooikeusClient, oppijanumerorekisteriClient, ophProperties)
-        );
+    InterruptInquirer loginRedirectInterruptInquirer(KayttooikeusClient kayttooikeusClient, OppijanumerorekisteriClient oppijanumerorekisteriClient) {
+        return new LoginRedirectInterruptInquirer(kayttooikeusClient, oppijanumerorekisteriClient);
     }
 
     @Bean

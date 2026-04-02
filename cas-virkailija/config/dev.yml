@@ -115,7 +115,6 @@ email-verification-enabled.usernamelist: ""
 
 kayttooikeus-service.baseurl: https://dev.otuva.opintopolku.fi/kayttooikeus-service/
 oppijanumerorekisteri-service.baseurl: https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service/
-oauth2.enabled: true
 oauth2.client-id: ${serviceprovider_app_username_to_usermanagement}
 oauth2.client-secret: ${cas_virkailija_oauth2_client_secret}
 

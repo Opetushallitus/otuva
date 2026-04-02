@@ -66,6 +66,4 @@ cas.authn.pac4j.saml[1].requested-attributes[0].friendly-name: nationalIdentific
 cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
 cas.authn.pac4j.saml[1].requested-attributes[0].required: true
 
-oauth2.enabled: false
-
 registration.enabled: true

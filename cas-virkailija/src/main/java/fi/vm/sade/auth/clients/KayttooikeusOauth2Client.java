@@ -6,7 +6,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.auth.cas.CasUserAttributes;
@@ -19,7 +18,6 @@ import static java.util.function.Predicate.not;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "oauth2.enabled", havingValue = "true")
 public class KayttooikeusOauth2Client implements KayttooikeusClient {
     private final Oauth2Client httpClient;
 

@@ -1,6 +1,7 @@
 package fi.vm.sade.auth.interrupt;
 
 import fi.vm.sade.auth.clients.KayttooikeusClient;
+import fi.vm.sade.auth.clients.OppijanumerorekisteriClient;
 import lombok.RequiredArgsConstructor;
 
 import org.apereo.cas.authentication.Authentication;
@@ -29,11 +30,14 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginRedirectInterruptInquirer.class);
 
     private final KayttooikeusClient kayttooikeusClient;
-    private final LoginRedirectUrlGenerator loginRedirectUrlGenerator;
+    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private boolean requireStrongIdentification;
     private List<String> requireStrongIdentificationUsernameList = new ArrayList<>();
     private boolean emailVerificationEnabled;
     private List<String> emailVerificationUsernameList = new ArrayList<>();
+
+    @Value("${kayttooikeus-service.baseurl}")
+    private String baseurl;
 
     @Override
     public InterruptResponse inquire(Authentication authentication, RegisteredService registeredService, Service service, Credential credential, RequestContext requestContext) {
@@ -60,19 +64,19 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
             case "STRONG_IDENTIFICATION":
                 LOGGER.info("Strong identification interrupt received for {}", username);
                 if (requireStrongIdentification || requireStrongIdentificationUsernameList.contains(username)) {
-                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.strong-identification"));
+                    return Optional.of(createRedirectUrl(username, "kayttaja/vahvatunnistusinfo"));
                 }
                 break;
             case "EMAIL_VERIFICATION":
                 LOGGER.info("Email verification interrupt received for {}", username);
                 if (emailVerificationEnabled || emailVerificationUsernameList.contains(username)) {
-                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.email-verification"));
+                    return Optional.of(createRedirectUrl(username, "kayttaja/sahkopostivarmistus"));
                 }
                 break;
             case "PASSWORD_CHANGE":
                 LOGGER.info("Password change interrupt received for {}", username);
                 if (!idpEntityId.orElse("").equals("vetuma")) {
-                    return Optional.of(loginRedirectUrlGenerator.createRedirectUrl(username, "henkilo-ui.password-change"));
+                    return Optional.of(createRedirectUrl(username, "kayttaja/salasananvaihto"));
                 } else {
                     LOGGER.info("Bypassing password change for {} due to Suomi.fi", username);
                 }
@@ -90,6 +94,13 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         interruptResponse.setBlock(true);
         interruptResponse.setAutoRedirect(true);
         return interruptResponse;
+    }
+
+    public String createRedirectUrl(String username, String path) {
+        String oidHenkilo = kayttooikeusClient.getHenkiloOid(username);
+        String loginToken = kayttooikeusClient.createLoginToken(oidHenkilo);
+        String asiointiKieli = oppijanumerorekisteriClient.getAsiointikieli(oidHenkilo);
+        return baseurl + path + "/" + asiointiKieli + "/" + loginToken;
     }
 
     @Value("${require-strong-identification}")

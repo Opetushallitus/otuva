@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.auth.Json;
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "oauth2.enabled", havingValue = "true")
 public class OppijanumerorekisteriOauth2Client implements OppijanumerorekisteriClient {
     private final Oauth2Client httpClient;
     @Value("${oppijanumerorekisteri-service.baseurl}")
