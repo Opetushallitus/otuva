@@ -42,8 +42,8 @@ cas.logout.redirect-url: https://localhost:8080/
 
 host.alb: localhost:8101
 
-cas.slo.asynchronous: false
-
-# Oph properties overrides
-valtuudet.enabled: false
-valtuudet.required: false
+kayttooikeus.baseurl: http://host.docker.internal:8101/kayttooikeus-service
+oppijanumerorekisteri.baseurl: http://host.docker.internal:8080/mock-oppijanumerorekisteri-service
+oauth2.client-id: cas-oppija
+oauth2.client-secret: cas-oppija-oauth2-secret
+user-controller.enabled: true
