@@ -1,4 +1,3 @@
-kayttooikeus.baseurl: https://kayttooikeus.hahtuva.yleiskayttoiset.opintopolku.fi
 cas.standalone.configuration-directory: /app/etc
 cas.server.name: https://virkailija.hahtuvaopintopolku.fi
 cas.server.prefix: ${cas.server.name}/cas
@@ -85,7 +84,6 @@ cas.authn.pac4j.saml[1].requested-attributes[0].friendly-name: nationalIdentific
 cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
 cas.authn.pac4j.saml[1].requested-attributes[0].required: true
 
-# postgres
 spring.datasource.url: jdbc:postgresql://${cas_postgres_host}:${cas_postgres_port}/${cas_postgres_database}
 spring.datasource.driver-class-name: org.postgresql.Driver
 spring.datasource.username: ${cas_postgres_username}
@@ -97,18 +95,9 @@ cas.ticket.registry.jpa.password: ${spring.datasource.password}
 cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.ticket.registry.jpa.user: ${spring.datasource.username}
 
-host.cas: virkailija.hahtuvaopintopolku.fi
-host.virkailija: virkailija.hahtuvaopintopolku.fi
-host.alb: virkailija.hahtuvaopintopolku.fi
-serviceprovider.app.username.to.usermanagement: ${serviceprovider_app_username_to_usermanagement}
-serviceprovider.app.password.to.usermanagement: ${serviceprovider_app_password_to_usermanagement}
-# To all users
 require-strong-identification: false
-# To specified users even if cas.require-strong-identification is false
 require-strong-identification.usernamelist: ""
-# To all users
 email-verification-enabled: false
-# To specified users even if cas.email-verification-enabled is false
 email-verification-enabled.usernamelist: "opettaja40"
 
 kayttooikeus-service.baseurl: https://hahtuva.otuva.opintopolku.fi/kayttooikeus-service/

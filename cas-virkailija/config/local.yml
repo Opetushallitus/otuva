@@ -20,9 +20,6 @@ cas.authn.mfa.gauth.rest.url: http://host.docker.internal:8101/kayttooikeus-serv
 
 cas.service-registry.json.location: file://${PWD}/services/local
 
-host.alb: host.docker.internal:8101
-kayttooikeus.baseurl: http://host.docker.internal:8101
-
 cas.authn.pac4j.oidc[0].generic.discovery-uri: https://mpass-proxy-test.csc.fi/.well-known/openid-configuration
 cas.authn.pac4j.oidc[0].generic.id: dummy
 cas.authn.pac4j.oidc[0].generic.secret: dummy
