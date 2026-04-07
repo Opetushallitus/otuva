@@ -40,8 +40,12 @@
                         clearLocalStorage();
                         clearSessionStorage();
 
+                        /*<![CDATA[*/
+                        var redirectUrl = /*[[${logoutRedirectUrl}]]*/ '/oma-opintopolku';
+                        /*]]>*/
+
                         setTimeout(() => {
-                            window.location.href = "/oma-opintopolku"
+                            window.location.href = redirectUrl
                         }, 3000)
                     </script>
                 </div>
