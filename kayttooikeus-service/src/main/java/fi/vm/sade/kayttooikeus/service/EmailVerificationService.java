@@ -13,11 +13,6 @@ public interface EmailVerificationService {
     CasRedirectParametersResponse emailVerification(HenkiloUpdateDto henkiloUpdate, String loginToken);
 
     /*
-     * Palauttaa uudelleenohjausurlin logintokenin perusteella
-     */
-    CasRedirectParametersResponse redirectUrlByLoginToken(String loginToken);
-
-    /*
      * Hakee henkilön tiedot loginTokenin perusteella.
      */
     HenkiloDto getHenkiloByLoginToken(String loginToken);

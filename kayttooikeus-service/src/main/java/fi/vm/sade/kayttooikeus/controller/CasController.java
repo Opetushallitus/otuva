@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -69,8 +68,6 @@ public class CasController {
     private String urlVirkailija;
     @Value("${cas.oppija.logout}")
     private String casOppijaLogout;
-    @Value("${virkailijan-tyopoyta}")
-    private String virkailijanTyopoytaUrl;
 
     @Operation(summary = "Generoi autentikointitokenin henkilölle.",
             description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -278,12 +275,6 @@ public class CasController {
         return kayttajatiedotService.changePassword(changePassword);
     }
 
-    @GetMapping(value = "/loginparams", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Palauttaa CAS-kirjautumiseen vaaditut parametrit")
-    public CasLoginParametersResponse getChangePasswordLoginParams() {
-        return new CasLoginParametersResponse(virkailijanTyopoytaUrl);
-    }
-
     @PostMapping(value = "/emailverification/{loginToken}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Asettaa käyttäjän sähköpostiosoitteet vahvistetuksi")
     public CasRedirectParametersResponse emailVerification(@RequestBody @Validated HenkiloUpdateDto henkiloUpdate,
@@ -296,12 +287,6 @@ public class CasController {
             description = "Validointikoodista käyttöliittymässä tiedetään täytyykö käyttäjälle näyttää virhesivu")
     public LoginTokenValidationCode getLoginTokenValidationCode(@PathVariable String loginToken) {
         return this.emailVerificationService.getLoginTokenValidationCode(loginToken);
-    }
-
-    @GetMapping(value = "/emailverification/redirectByLoginToken/{loginToken}")
-    @Operation(summary = "Palauttaa uudelleenohjausurlin loginTokenin perusteella.")
-    public CasRedirectParametersResponse getFrontPageRedirectByLoginToken(@PathVariable String loginToken) {
-        return this.emailVerificationService.redirectUrlByLoginToken(loginToken);
     }
 
     @GetMapping(value = "/henkilo/loginToken/{loginToken}")

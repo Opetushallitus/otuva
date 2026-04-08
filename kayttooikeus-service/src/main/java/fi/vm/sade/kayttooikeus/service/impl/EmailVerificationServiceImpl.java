@@ -58,21 +58,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
-    @Transactional
-    public CasRedirectParametersResponse redirectUrlByLoginToken(String loginToken) {
-        TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
-                .orElseThrow(() -> new NotFoundException(String.format("Login tokenia %s ei löydy tai se on vanhentunut", loginToken)));
-        if(tunnistusToken.getKaytetty() != null){
-            throw new LoginTokenException(String.format("Login token %s on jo käytetty", loginToken));
-        }
-        String authToken = identificationService.consumeLoginToken(tunnistusToken.getLoginToken(), CAS_AUTHENTICATION_IDP);
-        return CasRedirectParametersResponse.builder()
-                .authToken(authToken)
-                .service(virkailijanTyopoytaUrl)
-                .build();
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public HenkiloDto getHenkiloByLoginToken(String loginToken) {
         TunnistusToken tunnistusToken = tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
