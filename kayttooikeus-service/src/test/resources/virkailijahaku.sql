@@ -4,14 +4,20 @@ VALUES
     (444,'1.2.246.562.24.23462357366', 'VIRKAILIJA', 'Ville', 'Virkailija', false, false, true, '010108A9195', 'Ville', null),
     (555,'1.2.246.562.24.12342342565', 'VIRKAILIJA', 'Pasi', 'Passivoitu', false, false, true, '040591-921T', 'Pasi', null),
     (666,'1.2.246.562.24.53673452656', 'VIRKAILIJA', 'Olli', 'Oppija', false, false, true, '160807A963M', 'Olli', null),
-    (777,'1.2.246.562.24.73645346564', 'PALVELU', '_', 'kryptinen nimi joka ei vastaa palvelua', false, false, true, null, '_', null);
+    (777,'1.2.246.562.24.73645346564', 'PALVELU', '_', 'kryptinen nimi joka ei vastaa palvelua', false, false, true, null, '_', null),
+    (888,'1.2.246.562.24.73645346565', 'PALVELU','_','Organisaatio jolla on alaorganisaatioita',false,false,true,null,'_',null),
+    (889,'1.2.246.562.24.73645346566','PALVELU','_','Suuremman organisaation 1. aliorganisaatio',false,false,true,null,'_',null),
+    (890,'1.2.246.562.24.73645346567','PALVELU','_','Passivoitu suuremman organisaation 2. aliorganisaatio',false,false,true,null,'_',null);
 
 INSERT INTO kayttajatiedot (id, version, password, salt, henkiloid, createdat, invalidated, username, mfaprovider, passwordchange)
 VALUES
     (333, 0, '***', '***', 333, now(), false, 'opa', null, null),
     (444, 0, '***', '***', 444, now(), false, 'ville', null, null),
     (555, 0, '***', '***', 555, now(), false, 'pasi', null, null),
-    (666, 0, '***', '***', 777, now(), false, 'patenpalvelu', null, null);
+    (666, 0, '***', '***', 777, now(), false, 'patenpalvelu', null, null),
+    (777,0,'***','***',888,now(),false,'isoorganisaatiopalvelu',null,null),
+    (778,0,'***','***',889,now(),false,'aliorganisaatiopalvelu1',null,null),
+    (779,0,'***','***',890,now(),false,'aliorganisaatiopalvelu2_passivoitu',null,null);
 
 
 INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu, tyyppi, voimassa_alku_pvm, voimassa_loppu_pvm)
@@ -20,7 +26,10 @@ VALUES
     (444,0,'1.2.246.562.10.71948887212',333,false,null,null,null),
     (555,0,'1.2.246.562.10.71948887212',444,false,null,null,null),
     (666,0,'1.2.246.562.10.71948887212',555,true,null,null,null),
-    (777,0,'1.2.246.562.10.00000000001',777,false,null,null,null);
+    (777,0,'1.2.246.562.10.00000000001',777,false,null,null,null),
+    (888,0,'1.2.246.562.10.722837895010',888,false,null,null,null),
+    (889,0,'1.2.246.562.10.79146016781',889,false,null,null,null),
+    (890,0,'1.2.246.562.10.80321339568',890,true,null,null,null);
 
 INSERT INTO text_group (id, version)
 VALUES

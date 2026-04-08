@@ -274,4 +274,32 @@ class UiControllerTest {
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("patenpalvelu");
     }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuFiltersJarjestelmatunnusByOrganisationIncludesActiveSubOrgs() throws Exception {
+        // Copies of Kurun yhtenäiskoulu and Mutalan koulu org oids, which are sub orgs for Ylöjärven kaupunki.
+        // Related to ticket https://jira.eduuni.fi/browse/OPHYK-1202.
+        // Mutalan koulu (1.2.246.562.10.80321339568) organisaatiohenkilo is passivoitu: true,
+        // should not be included in results.
+        when(organisaatioClient.getChildOids("1.2.246.562.10.722837895010"))
+                .thenReturn(List.of("1.2.246.562.10.79146016781", "1.2.246.562.10.80321339568"));
+
+        var response = mvc.perform(
+                post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"organisaatioOids": ["1.2.246.562.10.722837895010"], "subOrganisation": true}""")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder(
+                        "isoorganisaatiopalvelu",
+                        "aliorganisaatiopalvelu1")
+                .doesNotContain("aliorganisaatiopalvelu2_passivoitu");
+    }
 }
