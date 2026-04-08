@@ -187,7 +187,14 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
         if (criteria.getOrganisaatioOids() != null && criteria.getOrganisaatioOids().contains(commonProperties.getRootOrganizationOid())) {
             criteria.setSubOrganisation(false);
         }
-        Set<HenkilohakuResultDto> result = henkiloHibernateRepository.findHenkiloByCriteria(criteria, KayttajaTyyppi.PALVELU);
+        if (criteria.getOrganisaatioOids() != null && criteria.getSubOrganisation()) {
+            var childOrgOids = criteria.getOrganisaatioOids().stream()
+                    .flatMap(orgOid -> organisaatioClient.getChildOids(orgOid).stream())
+                    .collect(Collectors.toSet());
+            criteria.getOrganisaatioOids().addAll(childOrgOids);
+        }
+        Set<HenkilohakuResultDto> result = henkiloHibernateRepository
+                .findHenkiloByCriteria(criteria, KayttajaTyyppi.PALVELU);
         return organisaatioHenkiloService.addOrganisaatioInformation(result);
     }
 }

@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
+import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ class UiControllerTest {
     protected MockMvc mvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private CommonProperties commonProperties;
     @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
@@ -170,7 +173,7 @@ class UiControllerTest {
                 .containsExactlyInAnyOrder("opa");
         assertThat(result.get(0).getOrganisaatioNimiList())
                 .extracting("identifier")
-                .containsExactlyInAnyOrder("1.2.246.562.10.00000000001", "1.2.246.562.10.71948887212");
+                .containsExactlyInAnyOrder(commonProperties.getRootOrganizationOid(), "1.2.246.562.10.71948887212");
     }
 
     @Test
@@ -205,6 +208,82 @@ class UiControllerTest {
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("opa", "ville");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuWithEmptyCriteriaIsInvalid() throws Exception {
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuWithTooShortNameIsInvalid() throws Exception {
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+    {"nameQuery":"aa"}""")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+    {"nameQuery":"aaa"}""")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuWithOnlyRootOrgAndSubOrgsIsInvalid() throws Exception {
+        var rootOrgOid = commonProperties.getRootOrganizationOid();
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+{"organisaatioOids":["%s"], "subOrganisation": true}""".formatted(rootOrgOid))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+{"organisaatioOids":["%s"], "subOrganisation": false}""".formatted(rootOrgOid))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"organisaatioOids":["%s"]}""".formatted(rootOrgOid))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"organisaatioOids":["1.2.246.562.10.00000000002"], "subOrganisation": true}""")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"nameQuery":"valid", "organisaatioOids":["%s"], "subOrganisation": true}""".formatted(rootOrgOid))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"organisaatioOids":["%s"], "subOrganisation": true, "kayttooikeusryhmaId":444}""".formatted(rootOrgOid))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -244,10 +323,11 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
     public void jarjestelmatunnushakuFiltersJarjestelmatunnusByOrganisation() throws Exception {
+        var rootOrgOid = commonProperties.getRootOrganizationOid();
         var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-    {"organisaatioOids":["1.2.246.562.10.00000000001"]}""")
+    {"organisaatioOids":["%s"]}""".formatted(rootOrgOid))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -301,5 +381,73 @@ class UiControllerTest {
                         "isoorganisaatiopalvelu",
                         "aliorganisaatiopalvelu1")
                 .doesNotContain("aliorganisaatiopalvelu2_passivoitu");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuReturnsSubOrgsForAllOrgs() throws Exception {
+        when(organisaatioClient.getChildOids("1.2.246.562.10.722837895010"))
+                .thenReturn(List.of("1.2.246.562.10.79146016781", "1.2.246.562.10.80321339568"));
+        when(organisaatioClient.getChildOids("1.2.246.562.10.00000000030"))
+                .thenReturn(List.of("1.2.246.562.10.00000000031"));
+
+        var response = mvc.perform(
+                        post("/internal/jarjestelmatunnushaku")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+{"organisaatioOids": ["1.2.246.562.10.722837895010", "1.2.246.562.10.00000000030"], "subOrganisation": true}""")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder(
+                        "isoorganisaatiopalvelu",
+                        "aliorganisaatiopalvelu1",
+                        "toinen_suurempi_org",
+                        "2org_aliorg");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void jarjestelmatunnushakuDoesNotReturnSubOrgs() throws Exception {
+        when(organisaatioClient.getChildOids("1.2.246.562.10.722837895010"))
+                .thenReturn(List.of("1.2.246.562.10.79146016781", "1.2.246.562.10.80321339568"));
+        when(organisaatioClient.getChildOids("1.2.246.562.10.00000000030"))
+                .thenReturn(List.of("1.2.246.562.10.00000000031"));
+
+        var responseIncludeSubOrgFalse = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+{"organisaatioOids": ["1.2.246.562.10.722837895010", "1.2.246.562.10.00000000030"], "subOrganisation": false}""")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> resultIncludeSubOrgFalse = objectMapper.readValue(responseIncludeSubOrgFalse, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(resultIncludeSubOrgFalse)
+                .extracting("kayttajatunnus")
+                .doesNotContain("aliorganisaatiopalvelu1", "aliorganisaatiopalvelu2", "2org_aliorg")
+                .containsExactlyInAnyOrder(
+                        "isoorganisaatiopalvelu",
+                        "toinen_suurempi_org");
+
+        var responseNoSubOrgCriteria = mvc.perform(post("/internal/jarjestelmatunnushaku")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+{"organisaatioOids": ["1.2.246.562.10.722837895010", "1.2.246.562.10.00000000030"]}""")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> resultNoSubOrgCriteria = objectMapper.readValue(responseNoSubOrgCriteria, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(resultNoSubOrgCriteria)
+                .extracting("kayttajatunnus")
+                .doesNotContain("aliorganisaatiopalvelu1", "aliorganisaatiopalvelu2", "2org_aliorg")
+                .containsExactlyInAnyOrder(
+                        "isoorganisaatiopalvelu",
+                        "toinen_suurempi_org");
     }
 }
