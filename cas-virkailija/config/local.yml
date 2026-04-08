@@ -64,3 +64,4 @@ cas.authn.pac4j.saml[1].requested-attributes[0].name-format: urn:oasis:names:tc:
 cas.authn.pac4j.saml[1].requested-attributes[0].required: true
 
 registration.enabled: true
+registration.test-suomifi: true

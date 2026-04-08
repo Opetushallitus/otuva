@@ -9,6 +9,7 @@ import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.pac4j.core.client.BaseClient;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import fi.vm.sade.auth.clients.KayttooikeusClient;
@@ -22,6 +23,7 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
     final PrincipalFactory principalFactory;
     final KayttooikeusClient kayttooikeusClient;
     final boolean registrationEnabled;
+    final boolean registrationTestSuomifi;
 
     @Override
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
@@ -44,20 +46,27 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
         try {
             var uri = UriComponentsBuilder.fromUriString(service.getOriginalUrl()).build();
             var registrationToken = uri.getQueryParams().getFirst("virkailijaRegistrationToken");
-            LOGGER.info("Parsed token " + registrationToken + "from service url " + service.getOriginalUrl());
+            LOGGER.info("Parsed token " + registrationToken + " from service url " + service.getOriginalUrl());
             return registrationToken;
         } catch (Exception e) {
-            LOGGER.info("Failed tu parse registration token from url " + service.getOriginalUrl());
+            LOGGER.info("Failed to parse registration token from url " + service.getOriginalUrl());
             return null;
         }
     }
 
     CasUserAttributes registerVirkailija(Principal principal, BaseClient client, String registrationToken) {
+        String etunimet = registrationTestSuomifi && !StringUtils.hasLength(getAttribute(principal, "givenName"))
+                ? "Testi Etunimi"
+                : getAttribute(principal, "givenName");
+        String sukunimi = registrationTestSuomifi && !StringUtils.hasLength(getAttribute(principal, "sn"))
+                ? "Testi-Sukunimi"
+                : getAttribute(principal, "sn");
         var dto = new VirkailijaRegistration(
             registrationToken,
             getAttribute(principal, "urn:oid:1.2.246.21"),
-            getAttribute(principal, "givenName"),
-            getAttribute(principal, "sn"));
+            etunimet,
+            sukunimi);
+        LOGGER.info("Registering virkailija [{}]", dto);
         return kayttooikeusClient.registerVirkailija(dto);
     }
 

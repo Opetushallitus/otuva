@@ -96,3 +96,4 @@ oauth2.client-id: user1
 oauth2.client-secret: pass1
 
 registration.enabled: false
+registration.test-suomifi: false
