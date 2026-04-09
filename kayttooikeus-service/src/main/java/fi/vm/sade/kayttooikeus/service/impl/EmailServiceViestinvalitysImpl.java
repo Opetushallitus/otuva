@@ -59,6 +59,8 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
     private String urlVirkailija;
     @Value("${cas.oppija.login}")
     private String casOppijaLogin;
+    @Value("${feature.cas-virkailija-registration}")
+    private boolean casVirkailijaRegistration;
 
     @Data
     @Builder
@@ -241,7 +243,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
 
             KutsuEmail VanhenemisMuistutus = KutsuEmail.builder()
                 .kutsu(kutsu)
-                .linkki(getKutsuLink(kutsu))
+                .linkki(casVirkailijaRegistration ? getCasVirkailijaRegistrationLink(kutsu) : getKutsuLink(kutsu))
                 .kutsuja(inviterOverride.orElseGet(() -> resolveInviterName(kutsu)))
                 .voimassa(kutsu.getAikaleima().plusMonths(1).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
                 .organisaatiot(organisaatiot)
@@ -273,6 +275,18 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
         return UriComponentsBuilder.fromUriString(casOppijaLogin)
                 .queryParam("service", URLEncoder.encode(targetUri, StandardCharsets.UTF_8))
                 .queryParam("locale", language.toUpperCase())
+                .build()
+                .toUriString();
+    }
+
+    private String getCasVirkailijaRegistrationLink(Kutsu kutsu) {
+        String targetUri = UriComponentsBuilder.fromUriString(urlVirkailija + "/henkilo-ui/rekisteroityminen")
+                .queryParam("virkailijaRegistrationToken", kutsu.getSalaisuus())
+                .build()
+                .toUriString();
+        return UriComponentsBuilder.fromUriString(urlVirkailija + "/cas/login")
+                .queryParam("service", URLEncoder.encode(targetUri, StandardCharsets.UTF_8))
+                .queryParam("locale", kutsu.getKieliKoodi().toUpperCase())
                 .build()
                 .toUriString();
     }

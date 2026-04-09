@@ -22,3 +22,5 @@ feature.local-authentication: true
 cas.oppija.oauth2.id: cas-oppija
 cas.oppija.oauth2.secret: cas-oppija-oauth2-secret
 cas.oppija.oauth2.uuid: f5a9fa46-2019-41f4-afe2-b586b889c0a8
+
+feature.cas-virkailija-registration: true

@@ -40,3 +40,5 @@ kayttooikeus.oauth2.privatekey: ${ssm_kayttooikeus_oauth2_privatekey}
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
 
 viestinvalitys.baseurl: https://viestinvalitys.untuvaopintopolku.fi/lahetys
+
+feature.cas-virkailija-registration: true

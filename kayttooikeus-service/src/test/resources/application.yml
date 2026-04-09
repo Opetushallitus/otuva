@@ -72,3 +72,5 @@ cas.oppija.url: https://${host-oppija}/cas-oppija
 cas.oppija.login: ${cas.oppija.url}/login
 cas.oppija.logout: ${cas.oppija.url}/logout
 virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta
+
+feature.cas-virkailija-registration: false

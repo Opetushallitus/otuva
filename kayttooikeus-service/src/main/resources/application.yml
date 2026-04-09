@@ -104,3 +104,4 @@ cas.oppija.logout: ${cas.oppija.url}/logout
 virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta
 
 feature.local-authentication: false
+feature.cas-virkailija-registration: false
