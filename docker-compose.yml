@@ -111,3 +111,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  mock-oppijanumerorekisteri:
+    container_name: mock-oppijanumerorekisteri
+    image: wiremock/wiremock:3.13.2-3
+    ports:
+      - "8084:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings

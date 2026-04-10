@@ -1,0 +1,18 @@
+{
+  "mappings": [
+    {
+      "name": "testuser Testi Testaaja (210191-1111)",
+      "request": {
+        "method": "GET",
+        "url": "/s2s/oidByHetu/210191-1111"
+      },
+      "response": {
+        "status": 200,
+        "body": "1.2.246.562.24.10000000001",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      }
+    }
+  ]
+}
