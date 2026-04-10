@@ -97,7 +97,7 @@ cas_oppija_backend_pid=""
 function start_cas_oppija {
   start_container cas-oppija-db
 
-  select_java_version "11"
+  select_java_version "21"
   cd "$repo"/cas-oppija
 
   wait_for_container_to_be_healthy cas-oppija-db
