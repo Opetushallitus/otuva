@@ -11,6 +11,7 @@ cas.ticket.registry.jpa.url: ${spring.datasource.url}
 cas.tgc.secure: false
 cas.tgc.pin-to-session: false
 cas.warning-cookie.secure: false
+cas.service-registry.json.location: classpath:/opintopolku-1.json
 
 # Disable CAS CORS validation for testing
 cas.http-web-request.cors.enabled: false
