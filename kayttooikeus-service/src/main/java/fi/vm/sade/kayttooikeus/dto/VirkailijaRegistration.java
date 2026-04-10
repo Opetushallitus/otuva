@@ -10,10 +10,8 @@ public class VirkailijaRegistration {
     @NotBlank
     String hetu;
 
-    @NotBlank
     String etunimet;
 
-    @NotBlank
     String sukunimi;
 
     @NotBlank

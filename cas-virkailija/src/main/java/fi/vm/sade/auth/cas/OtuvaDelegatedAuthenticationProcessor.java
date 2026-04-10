@@ -9,7 +9,6 @@ import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.pac4j.core.client.BaseClient;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import fi.vm.sade.auth.clients.KayttooikeusClient;
@@ -23,7 +22,6 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
     final PrincipalFactory principalFactory;
     final KayttooikeusClient kayttooikeusClient;
     final boolean registrationEnabled;
-    final boolean registrationTestSuomifi;
 
     @Override
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
@@ -55,17 +53,11 @@ public class OtuvaDelegatedAuthenticationProcessor implements DelegatedAuthentic
     }
 
     CasUserAttributes registerVirkailija(Principal principal, BaseClient client, String registrationToken) {
-        String etunimet = registrationTestSuomifi && !StringUtils.hasLength(getAttribute(principal, "givenName"))
-                ? "Testi Etunimi"
-                : getAttribute(principal, "givenName");
-        String sukunimi = registrationTestSuomifi && !StringUtils.hasLength(getAttribute(principal, "sn"))
-                ? "Testi-Sukunimi"
-                : getAttribute(principal, "sn");
         var dto = new VirkailijaRegistration(
             registrationToken,
             getAttribute(principal, "urn:oid:1.2.246.21"),
-            etunimet,
-            sukunimi);
+            getAttribute(principal, "givenName"),
+            getAttribute(principal, "sn"));
         LOGGER.info("Registering virkailija [{}]", dto);
         return kayttooikeusClient.registerVirkailija(dto);
     }

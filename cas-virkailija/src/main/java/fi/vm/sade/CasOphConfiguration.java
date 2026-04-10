@@ -45,9 +45,6 @@ public class CasOphConfiguration {
     @Value("${registration.enabled}")
     private boolean registrationEnabled;
 
-    @Value("${registration.test-suomifi}")
-    private boolean registrationTestSuomifi;
-
     @Value("${henkilo-ui.baseurl}")
     private String henkiloUiBaseurl;
 
@@ -60,7 +57,7 @@ public class CasOphConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     DelegatedAuthenticationPreProcessor delegatedAuthenticationProcessor(KayttooikeusClient kayttooikeusClient) {
-        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusClient, registrationEnabled, registrationTestSuomifi);
+        return new OtuvaDelegatedAuthenticationProcessor(principalFactory, kayttooikeusClient, registrationEnabled);
     }
 
     @Bean

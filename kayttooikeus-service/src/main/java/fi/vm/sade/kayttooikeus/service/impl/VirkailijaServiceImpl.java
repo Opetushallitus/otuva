@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -215,8 +216,8 @@ public class VirkailijaServiceImpl implements VirkailijaService {
                 .orElseGet(() -> henkiloRepository.save(
                     Henkilo.builder()
                         .oidHenkilo(henkiloOid)
-                        .etunimetCached(dto.getEtunimet())
-                        .sukunimiCached(dto.getSukunimi())
+                        .etunimetCached(getEtunimet(dto, kutsu))
+                        .sukunimiCached(getSukunimi(dto, kutsu))
                         .hetuCached(dto.getHetu())
                         .build()));
         henkilo.setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
@@ -266,12 +267,13 @@ public class VirkailijaServiceImpl implements VirkailijaService {
     }
 
     private String createHenkilo(VirkailijaRegistration dto, Kutsu kutsu) {
+        String etunimet = getEtunimet(dto, kutsu);
         HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
         henkiloCreateDto.setHetu(dto.getHetu());
         henkiloCreateDto.setAsiointiKieli(new KielisyysDto(kutsu.getKieliKoodi(), kutsu.getKieliKoodi()));
-        henkiloCreateDto.setEtunimet(dto.getEtunimet());
-        henkiloCreateDto.setSukunimi(dto.getSukunimi());
-        henkiloCreateDto.setKutsumanimi(dto.getEtunimet().split(" ")[0]);
+        henkiloCreateDto.setEtunimet(etunimet);
+        henkiloCreateDto.setSukunimi(getSukunimi(dto, kutsu));
+        henkiloCreateDto.setKutsumanimi(etunimet.split(" ")[0]);
         henkiloCreateDto.setYhteystiedotRyhma(Set.of(YhteystiedotRyhmaDto.builder()
                 .ryhmaAlkuperaTieto(commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
                 .ryhmaKuvaus(commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
@@ -306,5 +308,13 @@ public class VirkailijaServiceImpl implements VirkailijaService {
             yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
         }
         henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
+    }
+
+    private String getEtunimet(VirkailijaRegistration dto, Kutsu kutsu) {
+        return StringUtils.hasLength(dto.getEtunimet()) ? dto.getEtunimet() : kutsu.getEtunimi();
+    }
+
+    private String getSukunimi(VirkailijaRegistration dto, Kutsu kutsu) {
+        return StringUtils.hasLength(dto.getSukunimi()) ? dto.getSukunimi() : kutsu.getSukunimi();
     }
 }
