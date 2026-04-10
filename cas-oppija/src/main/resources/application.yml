@@ -61,3 +61,4 @@ cas.ticket.tgt.primary.max-time-to-live-in-seconds: PT4H30M
 cas.view.default-redirect-url: http://localhost:8080
 cas.warning-cookie.secure: true
 cas.warning-cookie.path: /cas-oppija
+cas.theme.default-theme-name: cas-oppija-theme
