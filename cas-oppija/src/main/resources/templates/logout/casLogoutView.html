@@ -36,12 +36,12 @@
                         Service. You may <a th:href="@{/login}">log in</a> again.</p>
                     <p class="banner-message" th:utext="#{screen.logout.security}">For security reasons, exit your web browser.</p>
 
-                    <script type="text/javascript">
+                    <script th:inline="javascript">
                         clearLocalStorage();
                         clearSessionStorage();
 
                         setTimeout(() => {
-                            window.location.href = "/oma-opintopolku"
+                            window.location.href = /*[[${@environment.getProperty('cas.view.default-redirect-url')}]]*/ "/oma-opintopolku";
                         }, 3000)
                     </script>
                 </div>
