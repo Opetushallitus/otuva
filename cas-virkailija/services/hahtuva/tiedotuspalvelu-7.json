@@ -1,6 +1,6 @@
 {
   "@class": "org.apereo.cas.services.CasRegisteredService",
-  "serviceId": "^https://hahtuva\\.tiedotuspalvelu\\.opintopolku\\.fi/tiedotuspalvelu(/.*)?$",
+  "serviceId": "^https://(hahtuva\\.tiedotuspalvelu\\.opintopolku\\.fi|virkailija\\.hahtuvaopintopolku\\.fi)/tiedotuspalvelu(/.*)?$",
   "name": "tiedotuspalvelu",
   "description": "Tiedotuspalvelu",
   "id": 7,
