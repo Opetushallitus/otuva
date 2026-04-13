@@ -24,18 +24,18 @@ VALUES
     (902,0,'***', '***',902,now(),false,'2org_aliorg',null,null);
 
 
-INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu, tyyppi, voimassa_alku_pvm, voimassa_loppu_pvm)
+INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu)
 VALUES
-    (333,0,'1.2.246.562.10.00000000001',333,false,null,null,null),
-    (444,0,'1.2.246.562.10.71948887212',333,false,null,null,null),
-    (555,0,'1.2.246.562.10.71948887212',444,false,null,null,null),
-    (666,0,'1.2.246.562.10.71948887212',555,true,null,null,null),
-    (777,0,'1.2.246.562.10.00000000001',777,false,null,null,null),
-    (888,0,'1.2.246.562.10.722837895010',888,false,null,null,null),
-    (889,0,'1.2.246.562.10.79146016781',889,false,null,null,null),
-    (890,0,'1.2.246.562.10.80321339568',890,true,null,null,null),
-    (901,0,'1.2.246.562.10.00000000030',901,false,null,null,null),
-    (902,0,'1.2.246.562.10.00000000031',902,false,null,null,null);
+    (333,0,'1.2.246.562.10.00000000001',333,false),
+    (444,0,'1.2.246.562.10.71948887212',333,false),
+    (555,0,'1.2.246.562.10.71948887212',444,false),
+    (666,0,'1.2.246.562.10.71948887212',555,true),
+    (777,0,'1.2.246.562.10.00000000001',777,false),
+    (888,0,'1.2.246.562.10.722837895010',888,false),
+    (889,0,'1.2.246.562.10.79146016781',889,false),
+    (890,0,'1.2.246.562.10.80321339568',890,true),
+    (901,0,'1.2.246.562.10.00000000030',901,false),
+    (902,0,'1.2.246.562.10.00000000031',902,false);
 
 INSERT INTO text_group (id, version)
 VALUES

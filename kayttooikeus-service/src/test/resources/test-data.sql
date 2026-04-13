@@ -3,11 +3,11 @@ VALUES
     (1,'1.2.246.562.24.37535704268', 'VIRKAILIJA', 'Hetuttomien', 'Hypistelijä', false, false, true, '280760-542K', 'Hetuttomien', null),
     (2,'1.2.246.562.24.67357428459', 'VIRKAILIJA', 'Hetullisten', 'Hypistelijä', false, false, true, '280760-542K', 'Hetullisten', null);
 
-INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu, tyyppi, voimassa_alku_pvm, voimassa_loppu_pvm)
+INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu)
 VALUES
-    (1,0,'1.2.246.562.10.71948887212',1,false,null,null,null),
-    (2,0,'1.2.246.562.10.71948887213',1,false,null,null,null),
-    (3,0,'1.2.246.562.10.71948887213',2,false,null,null,null);
+    (1,0,'1.2.246.562.10.71948887212',1,false),
+    (2,0,'1.2.246.562.10.71948887213',1,false),
+    (3,0,'1.2.246.562.10.71948887213',2,false);
 
 INSERT INTO text_group (id, version)
 VALUES
