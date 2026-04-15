@@ -9,6 +9,7 @@ import org.apereo.cas.authentication.principal.DelegatedAuthenticationPreProcess
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
+import org.apereo.cas.logout.LogoutExecutionPlanConfigurer;
 import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.TicketCatalog;
@@ -114,6 +115,11 @@ public class OtuvaCasConfiguration {
             ServicesManager servicesManager,
             ApplicationContext applicationContext) {
         return new UserController(casCookieBuilder, ticketRegistry, argumentExtractor, servicesManager, applicationContext);
+    }
+
+    @Bean
+    LogoutExecutionPlanConfigurer otuvaLogoutExecutionPlanConfigurer() {
+        return plan -> plan.registerLogoutRedirectionStrategy(new OtuvaServiceInitiatedSloRedirectStrategy());
     }
 
     @Bean
