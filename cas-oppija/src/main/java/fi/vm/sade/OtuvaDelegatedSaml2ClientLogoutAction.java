@@ -15,6 +15,7 @@ import org.apereo.cas.web.support.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.opensaml.saml.saml2.core.LogoutResponse;
 import org.pac4j.saml.credentials.SAML2Credentials;
@@ -59,6 +60,10 @@ public class OtuvaDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction 
                         val delegatedAuthLogoutRequest = logoutRequestTicket.getProperty(DelegatedAuthenticationClientLogoutRequest.class.getName(),
                             DelegatedAuthenticationClientLogoutRequest.class);
                         DelegationWebflowUtils.putDelegatedAuthenticationLogoutRequest(requestContext, delegatedAuthLogoutRequest);
+                        if (delegatedAuthLogoutRequest != null && StringUtils.isNotBlank(delegatedAuthLogoutRequest.getTarget())) {
+                            requestContext.getConversationScope().put(OtuvaServiceInitiatedSloRedirectStrategy.CONVERSATION_KEY,
+                                delegatedAuthLogoutRequest.getTarget());
+                        }
                     }
                 } catch (final InvalidTicketException e) {
                     LOGGER.info("Delegated authentication logout request ticket [{}] is not found", logoutRequestTicketId);
