@@ -39,8 +39,6 @@ cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
 cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
 cas.logout.follow-service-redirects: true
 cas.logout.redirect-parameter: service
-cas.logout.redirect-url: https://localhost:8080/
-cas.view.default-redirect-url: http://localhost:8180/mock-substance-service
 host.alb: localhost:8101
 
 kayttooikeus.baseurl: http://localhost:8101/kayttooikeus-service
