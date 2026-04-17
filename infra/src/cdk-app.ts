@@ -698,6 +698,8 @@ class CasOppijaApplicationStack extends cdk.Stack {
           "password"
         ),
         cas_oppija_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
+        cas_oppija_tgc_encryption_key_6_x: this.ssmSecret("6.x/TgcEncryptionKey"),
+        cas_oppija_tgc_encryption_key_7_x: this.ssmSecret("7.x/TgcEncryptionKey"),
         cas_oppija_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_oppija_webflow_encryption_key: this.ssmSecret(
           "WebflowEncryptionKey"
