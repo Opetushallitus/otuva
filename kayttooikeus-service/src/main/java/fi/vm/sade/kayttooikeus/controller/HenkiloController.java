@@ -2,9 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
-import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
@@ -19,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -193,27 +190,6 @@ public class HenkiloController {
     @Operation(summary = "Palauttaa henkilöiden oid:t joiden tietoihin annetulla henkilöllä on oikeutus")
     public KayttooikeudetDto postKayttooikeudet(@PathVariable String oid, @RequestBody OrganisaatioHenkiloCriteria criteria) {
         return henkiloService.getKayttooikeudet(oid, criteria);
-    }
-
-    @PostMapping(value = "/henkilohaku", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta. EI tarkoitettu palveluiden käyttöön. Muutosaltis.",
-            description = "Palauttaa suppean setin henkilöiden tietoja annetuilla hakukriteereillä. Toimii eri tavalla eri käyttäjäryhmille! " +
-                    "(rekisterinpitäjä, OPH:n virkaiilja, muu virkailija) Hakua rajoitetaan näille ryhmille joten ei tarvitse " +
-                    "erillisiä käyttöoikeuksia. Hakutuloksen maksimikoko saattaa olla 100 tai 101 käyttäjätunnuksella " +
-                    "haun takia.")
-    public Collection<HenkilohakuResultDto> henkilohaku(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto,
-                                                        @RequestParam(defaultValue = "0") Long offset,
-                                                        @RequestParam(required = false) OrderByHenkilohaku orderBy) {
-        return this.henkiloService.henkilohaku(henkilohakuCriteriaDto, offset, orderBy);
-    }
-
-    @PostMapping(value = "/henkilohakucount", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "UI:ta varten tehty mahdollisesti HIDAS hakurajapinta palauttaa henkilohaun tulosten lukumäärän ilman sivutusrajoitusta",
-            description = "Palauttaa annetuilla rajoitteilla löytyvän henkilöjoukon koon")
-    public Long henkilohakuCount(@Validated @RequestBody HenkilohakuCriteriaDto henkilohakuCriteriaDto ) {
-        return this.henkiloService.henkilohakuCount(henkilohakuCriteriaDto);
     }
 
     @PreAuthorize("isAuthenticated()")

@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.service.PalvelukayttajaService;
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +19,6 @@ import jakarta.validation.Valid;
 public class PalvelukayttajaController {
 
     private final PalvelukayttajaService palvelukayttajaService;
-
-    @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
-    public Iterable<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria) {
-        return palvelukayttajaService.list(criteria);
-    }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_PALVELUKAYTTAJA_CRUD', 'ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")

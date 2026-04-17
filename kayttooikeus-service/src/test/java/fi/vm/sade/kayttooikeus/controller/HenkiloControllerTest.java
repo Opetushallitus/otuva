@@ -17,9 +17,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -116,34 +113,6 @@ public class HenkiloControllerTest extends AbstractControllerTest {
         mvc.perform(put("/henkilo/{oid}/kayttajatiedot", "1.2.3.4.6")
                 .content("{\"username\": \"pirjo\"}").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
-    public void testHenkilohakuDoesntAllowNullsInOrganisaatioList() throws Exception {
-        HenkilohakuCriteriaDto request = new HenkilohakuCriteriaDto();
-        request.setNameQuery("Minna Meikäläinen");
-        request.setNoOrganisation(false);
-        Set<String> organisaatioOids = new HashSet<>();
-        organisaatioOids.add(null);
-        request.setOrganisaatioOids(organisaatioOids);
-        request.setPassivoitu(false);
-        request.setSubOrganisation(true);
-        mvc.perform(createRequest(post("/henkilo/henkilohaku?offset=0"), request))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "1.2.3.4.5", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
-    public void testHenkilohakuAllowsNullOrganisaatioList() throws Exception {
-        HenkilohakuCriteriaDto request = new HenkilohakuCriteriaDto();
-        request.setNameQuery("Minna Meikäläinen");
-        request.setNoOrganisation(false);
-        request.setOrganisaatioOids(null);
-        request.setPassivoitu(false);
-        request.setSubOrganisation(true);
-        mvc.perform(createRequest(post("/henkilo/henkilohaku?offset=0"), request))
-                .andExpect(status().isOk());
     }
 
     protected <RequestT> MockHttpServletRequestBuilder createRequest(MockHttpServletRequestBuilder builder, RequestT requestBody) throws JsonProcessingException {

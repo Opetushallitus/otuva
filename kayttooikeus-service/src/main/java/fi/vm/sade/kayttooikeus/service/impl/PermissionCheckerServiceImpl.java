@@ -17,7 +17,6 @@ import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttajarooliProvider;
 import fi.vm.sade.kayttooikeus.service.MyontooikeusService;
 import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
-import fi.vm.sade.kayttooikeus.service.exception.InvalidKayttoOikeusException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalPermissionClient;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -34,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

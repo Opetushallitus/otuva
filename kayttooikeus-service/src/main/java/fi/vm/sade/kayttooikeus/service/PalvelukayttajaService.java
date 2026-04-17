@@ -1,13 +1,10 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import java.util.List;
 import java.util.Set;
 
 import fi.vm.sade.kayttooikeus.controller.PalvelukayttajaController.Jarjestelmatunnus;
 import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 
 /**
@@ -16,15 +13,6 @@ import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
  * @see HenkiloService yleiskäyttöisempi palvelu henkilöiden käsittelyyn
  */
 public interface PalvelukayttajaService {
-
-    /**
-     * Palauttaa palvelukäyttäjät.
-     *
-     * @param criteria hakukriteerit
-     * @return palvelukäyttäjät
-     */
-    List<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto criteria);
-
     Set<HenkilohakuResultDto> jarjestelmatunnushaku(HenkilohakuCriteria criteria);
 
     /**

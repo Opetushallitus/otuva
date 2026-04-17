@@ -17,12 +17,6 @@ import java.util.Set;
 @Table(name = "henkilo", schema = "public")
 @NamedEntityGraphs({
     @NamedEntityGraph(
-        name = "henkilohaku",
-        attributeNodes = {
-            @NamedAttributeNode("organisaatioHenkilos"),
-        }
-    ),
-    @NamedEntityGraph(
             name = "henkiloperustietohaku",
             attributeNodes = {
                     @NamedAttributeNode("organisaatioHenkilos"),

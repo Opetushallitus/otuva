@@ -4,16 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
-import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
-import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
@@ -22,9 +19,7 @@ import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.util.HenkiloUtils;
-import fi.vm.sade.kayttooikeus.util.HenkilohakuBuilder;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloOmattiedotDto;
 import lombok.RequiredArgsConstructor;
@@ -57,12 +52,9 @@ public class HenkiloServiceImpl implements HenkiloService {
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
     private final IdentificationService identificationService;
 
-    private final CommonProperties commonProperties;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private final OrikaBeanMapper mapper;
-
-    private final OrganisaatioClient organisaatioClient;
 
     private final ObjectMapper objectMapper;
 
@@ -142,31 +134,6 @@ public class HenkiloServiceImpl implements HenkiloService {
 
     private void poistaVarmennustiedot(Henkilo henkilo) {
         henkilo.getHenkiloVarmennettavas().forEach(henkiloVarmentaja -> henkiloVarmentaja.setTila(false));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Collection<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto,
-                                                        Long offset,
-                                                        OrderByHenkilohaku orderBy) {
-        return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
-                this.henkiloDataRepository, this.organisaatioClient, this.organisaatioHenkiloRepository, this.commonProperties)
-                .builder(henkilohakuCriteriaDto)
-                .exclusion()
-                .search(offset, orderBy)
-                .enrichment()
-                .build();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Long henkilohakuCount(HenkilohakuCriteriaDto henkiloHakuCriteriaDto) {
-        return new HenkilohakuBuilder(this.henkiloHibernateRepository, this.mapper, this.permissionCheckerService,
-                this.henkiloDataRepository, this.organisaatioClient, this.organisaatioHenkiloRepository, this.commonProperties)
-                .builder(henkiloHakuCriteriaDto)
-                .exclusion()
-                .searchCount()
-                .buildHakuResultCount();
     }
 
     @Override

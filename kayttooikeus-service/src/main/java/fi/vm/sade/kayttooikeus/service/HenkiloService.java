@@ -3,10 +3,8 @@ package fi.vm.sade.kayttooikeus.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
-import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.criteria.OrganisaatioHenkiloCriteria;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -49,10 +47,6 @@ public interface HenkiloService {
     void passivoi(String henkiloOid, String kasittelijaOid);
 
     void poistaOikeudet(Henkilo henkilo, String kasittelijaOid, String selite);
-
-    Collection<HenkilohakuResultDto> henkilohaku(HenkilohakuCriteriaDto henkilohakuCriteriaDto, Long offset, OrderByHenkilohaku orderBy);
-
-    Long henkilohakuCount(HenkilohakuCriteriaDto henkilohakuCriteriaDto);
 
     boolean isVahvastiTunnistettu(String oidHenkilo);
 

@@ -8,9 +8,6 @@ import fi.vm.sade.kayttooikeus.dto.HenkilohakuCriteria;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCreateDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaCriteriaDto;
-import fi.vm.sade.kayttooikeus.dto.PalvelukayttajaReadDto;
-import fi.vm.sade.kayttooikeus.enumeration.OrderByHenkilohaku;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.Oauth2Client;
@@ -18,7 +15,6 @@ import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
-import fi.vm.sade.kayttooikeus.repositories.criteria.HenkiloCriteria;
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
@@ -33,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -62,31 +57,6 @@ public class PalvelukayttajaServiceImpl implements PalvelukayttajaService {
     private final PasswordEncoder passwordEncoder;
     private final PermissionCheckerService permissionCheckerService;
     private final CommonProperties commonProperties;
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PalvelukayttajaReadDto> list(PalvelukayttajaCriteriaDto palvelukayttajaCriteriaDto) {
-        Set<String> organisaatioOids = palvelukayttajaCriteriaDto.getOrganisaatioOid() != null
-            ? new HashSet<>(Arrays.asList(palvelukayttajaCriteriaDto.getOrganisaatioOid()))
-            : null;
-        if (organisaatioOids != null && Boolean.TRUE.equals(palvelukayttajaCriteriaDto.getSubOrganisation())) {
-            organisaatioOids.addAll(organisaatioClient.getChildOids(palvelukayttajaCriteriaDto.getOrganisaatioOid()));
-        }
-
-        HenkiloCriteria criteria = HenkiloCriteria.builder()
-                .sukunimi(palvelukayttajaCriteriaDto.getNameQuery())
-                .kayttajatunnus(palvelukayttajaCriteriaDto.getNameQuery())
-                .noOrganisation(palvelukayttajaCriteriaDto.getOrganisaatioOid() == null)
-                .organisaatioOids(organisaatioOids)
-                .kayttajaTyyppi(KayttajaTyyppi.PALVELU)
-                .passivoitu(true)
-                .build();
-
-        return henkiloHibernateRepository.findByCriteria(criteria, 0l, null, OrderByHenkilohaku.HENKILO_NIMI_ASC.getValue())
-                .stream()
-                .map(h -> new PalvelukayttajaReadDto(h.getOidHenkilo(), h.getSukunimi(), h.getKayttajatunnus()))
-                .toList();
-    }
 
     private String getUniqueUsername(String palvelu) {
         String stripped = palvelu.replaceAll("[^a-zA-Z0-9_-]", "");
