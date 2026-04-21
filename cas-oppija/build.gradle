@@ -173,7 +173,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
     implementation 'com.github.kagkarlsson:db-scheduler:11.0'
     implementation 'org.opensaml:opensaml-core:4.0.1'
-    implementation 'org.pac4j:pac4j-core:5.4.3'
+    implementation 'org.pac4j:pac4j-core:5.7.10'
     implementation('org.pac4j:pac4j-saml:5.4.3') {
         exclude(group: "ch.qos.logback", module: "logback-classic")
     }
