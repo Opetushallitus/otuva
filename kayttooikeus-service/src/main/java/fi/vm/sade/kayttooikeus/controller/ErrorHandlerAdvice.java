@@ -55,7 +55,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(NotFoundException.class)
     @ResponseBody
     public Map<String,Object> notFound(HttpServletRequest req, NotFoundException exception) {
-        return handleException(req, exception, "error_NotFoundException",
+        return handle400Exception(req, exception, "error_NotFoundException",
                 !Objects.equals(exception.getMessage(), "") ?
                         exception.getMessage() :
                         messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
@@ -65,7 +65,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseBody
     public Map<String,Object> noSuchElement(HttpServletRequest req, NoSuchElementException exception) {
-        return handleException(req, exception, "error_NotFoundException",
+        return handle400Exception(req, exception, "error_NotFoundException",
                 messageSource.getMessage("error_NotFoundException", new Object[0], getLocale(req)));
     }
 
@@ -73,7 +73,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseBody
     public Map<String,Object> notAuthorized(HttpServletRequest req, AccessDeniedException exception) {
-        return handleException(req, exception, "error_NotAuthorizedException",
+        return handle400Exception(req, exception, "error_NotAuthorizedException",
                 messageSource.getMessage("error_NotAuthorizedException", new Object[0], getLocale(req)));
     }
 
@@ -86,7 +86,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(ExternalServiceException.class)
     @ResponseBody
     public Map<String,Object> errorCallingExternalService(HttpServletRequest req, ExternalServiceException exception) {
-        return handleException(req, exception, "error_calling_external_service",
+        return handle500Exception(req, exception, "error_calling_external_service",
                 messageSource.getMessage("error_calling_external_service", new Object[]{exception.getResource()}, getLocale(req)));
     }
 
@@ -106,7 +106,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     @ResponseBody
     public Map<String,Object> dataIntegrityViolatingRequest(HttpServletRequest req, DataIntegrityViolationException exception) {
-        return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
+        return handle400Exception(req, exception, "bad_request_illegal_argument", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad request.
@@ -134,21 +134,21 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler({IllegalArgumentException.class, PasswordException.class, UsernameAlreadyExistsException.class})
     @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, RuntimeException exception) {
-        return handleException(req, exception, "bad_request_illegal_argument", exception.getMessage());
+        return handle400Exception(req, exception, "bad_request_illegal_argument", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST) // 400 Bad Request
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
     public Map<String,Object> badRequest(HttpServletRequest req, ValidationException exception) {
-        return handleException(req, exception, "bad_request", exception.getMessage());
+        return handle400Exception(req, exception, "bad_request", exception.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN) // 403 Forbidden
     @ExceptionHandler(ForbiddenException.class)
     @ResponseBody
     public Map<String,Object> forbidden(HttpServletRequest req, ForbiddenException exception) {
-        return handleException(req, exception, "forbidden", exception.getMessage());
+        return handle400Exception(req, exception, "forbidden", exception.getMessage());
     }
 
     @ExceptionHandler(DataInconsistencyException.class)
@@ -161,7 +161,7 @@ public class ErrorHandlerAdvice {
     @ExceptionHandler(Exception.class)
     @ResponseBody // any other type
     public Map<String,Object> internalError(HttpServletRequest req, Exception exception) {
-        return handleException(req, exception, "internal_server_error", exception.getMessage());
+        return handle500Exception(req, exception, "internal_server_error", exception.getMessage());
     }
 
     @ExceptionHandler(UnprocessableEntityException.class)
@@ -213,7 +213,7 @@ public class ErrorHandlerAdvice {
                                                           Set<? extends ConstraintViolation<?>> exViolations) {
         Collection<ViolationDto> violations = Collections2.transform(exViolations, VIOLATIONS_TRANSFORMER::apply);
         Collection<String> violationsMsgs = Collections2.transform(exViolations, MESSAGES_TRANSFORMER::apply);
-        Map<String,Object> result = handleException(req, exception, "bad_request_error",
+        Map<String,Object> result = handle400Exception(req, exception, "bad_request_error",
                 String.join(", ", violationsMsgs));
         result.put("errors", violationsMsgs);
         result.put("violations", violations);
@@ -227,16 +227,26 @@ public class ErrorHandlerAdvice {
                 .collect(toList());
         Collection<String> violationsMsgs = exViolations.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(toList());
-        Map<String,Object> result = handleException(req, exception, "bad_request_error",
+        Map<String,Object> result = handle400Exception(req, exception, "bad_request_error",
                 String.join(", ", violationsMsgs));
         result.put("errors", violationsMsgs);
         result.put("violations", violations);
         return result;
     }
 
-    private Map<String,Object> handleException(HttpServletRequest req, Throwable exception, String messageKey, String message,
+    private Map<String,Object> handle400Exception(HttpServletRequest req, Throwable exception, String messageKey, String message,
+                                               Object... params) {
+        logger.warn("Request: " + req.getRequestURL() + " raised " + exception);
+        return getResponseBody(req, exception, messageKey, message, params);
+    }
+
+    private Map<String,Object> handle500Exception(HttpServletRequest req, Throwable exception, String messageKey, String message,
                                                Object... params) {
         logger.error("Request: " + req.getRequestURL() + " raised " + exception, exception);
+        return getResponseBody(req, exception, messageKey, message, params);
+    }
+
+    private Map<String, Object> getResponseBody(HttpServletRequest req, Throwable exception, String messageKey, String message, Object[] params) {
         Map<String,Object> result = new HashMap<String,Object>();
         result.put("message", message);
         result.put("messageKey", messageKey);
