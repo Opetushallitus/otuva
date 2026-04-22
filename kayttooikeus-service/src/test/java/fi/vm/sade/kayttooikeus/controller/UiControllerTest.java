@@ -128,7 +128,7 @@ class UiControllerTest {
         var response = mvc.perform(post("/internal/virkailijahaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-    {"nameQuery":"Virkailija"}""")
+    {"nameQuery":"ville"}""")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -136,7 +136,7 @@ class UiControllerTest {
         List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
         assertThat(result)
                 .extracting("kayttajatunnus")
-                .containsExactlyInAnyOrder("ville");
+                .containsExactlyInAnyOrder("ville", "ville2");
     }
 
     @Test

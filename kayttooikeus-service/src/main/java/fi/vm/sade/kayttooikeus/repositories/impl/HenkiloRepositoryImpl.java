@@ -175,10 +175,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             // search by "Lastname, Firstname (Middlename)"
             String etunimiCached = trimmedQuery.substring(trimmedQuery.indexOf(",") + 1).trim().toLowerCase();
             String sukunimiCached = trimmedQuery.split(",")[0].trim().toLowerCase();
+            builder.and(qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached));
             builder.and(
                 Expressions.anyOf(
                     qHenkilo.etunimetCached.startsWithIgnoreCase(etunimiCached),
-                    qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached),
                     qHenkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiCached)
                 )
             );
@@ -186,10 +186,10 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
             // search by "Firstname (Middlename) Lastname"
             String etunimiCached = trimmedQuery.substring(0, trimmedQuery.lastIndexOf(" ") + 1).trim().toLowerCase();
             String sukunimiCached = trimmedQuery.substring(trimmedQuery.lastIndexOf(" ") + 1).trim().toLowerCase();
+            builder.and(qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached));
             builder.and(
                 Expressions.anyOf(
                     qHenkilo.etunimetCached.startsWithIgnoreCase(etunimiCached),
-                    qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached),
                     qHenkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiCached)
                 )
             );
