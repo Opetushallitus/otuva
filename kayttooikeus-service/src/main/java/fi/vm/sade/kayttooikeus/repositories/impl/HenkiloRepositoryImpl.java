@@ -159,7 +159,41 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
         builder.and(qHenkilo.kayttajaTyyppi.eq(kayttajaTyyppi));
 
         if (StringUtils.hasLength(criteria.getNameQuery())) {
-            String trimmedQuery = criteria.getNameQuery().trim();
+            setNameQuery(builder, criteria, qHenkilo, qKayttajatiedot);
+        }
+
+        if (criteria.getKayttooikeusryhmaId() != null) {
+            builder.and(qMyonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(criteria.getKayttooikeusryhmaId()));
+        }
+
+        return builder;
+    }
+
+    private void setNameQuery(BooleanBuilder builder, HenkilohakuCriteria criteria, QHenkilo qHenkilo, QKayttajatiedot qKayttajatiedot) {
+        String trimmedQuery = criteria.getNameQuery().trim();
+        if (trimmedQuery.contains(",")) {
+            // search by "Lastname, Firstname (Middlename)"
+            String etunimiCached = trimmedQuery.substring(trimmedQuery.indexOf(",") + 1).trim().toLowerCase();
+            String sukunimiCached = trimmedQuery.split(",")[0].trim().toLowerCase();
+            builder.and(
+                Expressions.anyOf(
+                    qHenkilo.etunimetCached.startsWithIgnoreCase(etunimiCached),
+                    qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached),
+                    qHenkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiCached)
+                )
+            );
+        } else if (trimmedQuery.contains(" ")) {
+            // search by "Firstname (Middlename) Lastname"
+            String etunimiCached = trimmedQuery.substring(0, trimmedQuery.lastIndexOf(" ") + 1).trim().toLowerCase();
+            String sukunimiCached = trimmedQuery.substring(trimmedQuery.lastIndexOf(" ") + 1).trim().toLowerCase();
+            builder.and(
+                Expressions.anyOf(
+                    qHenkilo.etunimetCached.startsWithIgnoreCase(etunimiCached),
+                    qHenkilo.sukunimiCached.startsWithIgnoreCase(sukunimiCached),
+                    qHenkilo.kutsumanimiCached.startsWithIgnoreCase(etunimiCached)
+                )
+            );
+        } else {
             builder.and(
                 Expressions.anyOf(
                     qHenkilo.oidHenkilo.eq(trimmedQuery),
@@ -170,12 +204,6 @@ public class HenkiloRepositoryImpl extends BaseRepositoryImpl<Henkilo> implement
                 )
             );
         }
-
-        if (criteria.getKayttooikeusryhmaId() != null) {
-            builder.and(qMyonnettyKayttoOikeusRyhmaTapahtuma.kayttoOikeusRyhma.id.eq(criteria.getKayttooikeusryhmaId()));
-        }
-
-        return builder;
     }
 
     @Override

@@ -141,6 +141,40 @@ class UiControllerTest {
 
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void virkailijahakuFiltersVirkailijasByNameWithNameQueryWithComma() throws Exception {
+        var response = mvc.perform(post("/internal/virkailijahaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"nameQuery":"Virkailija, Ville"}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("ville");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void virkailijahakuFiltersVirkailijasByNameWithNameQueryWithWhitespace() throws Exception {
+        var response = mvc.perform(post("/internal/virkailijahaku")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+    {"nameQuery":"Ville Virkailija"}""")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("ville");
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByOidWithNameQuery() throws Exception {
         var response = mvc.perform(post("/internal/virkailijahaku")
                     .contentType(MediaType.APPLICATION_JSON)
