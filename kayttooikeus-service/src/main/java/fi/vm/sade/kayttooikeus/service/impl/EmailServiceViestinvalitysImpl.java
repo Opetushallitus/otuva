@@ -250,7 +250,9 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
                 .subject(subject)
                 .build();
 
-            Template template = freemarker.getTemplate("emails/kutsu_" + language + ".ftl");
+            Template template = casVirkailijaRegistration
+                ? freemarker.getTemplate("emails/kutsu2_" + language + ".ftl")
+                : freemarker.getTemplate("emails/kutsu_" + language + ".ftl");
             QueuedEmail email = QueuedEmail.builder()
                 .subject(subject)
                 .recipients(List.of(kutsu.getSahkoposti()))
