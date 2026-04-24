@@ -178,9 +178,25 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             ["scripts/ci/run-tests-service-provider.sh"],
             "corretto21",
             dependencyManagement
-          ),
+          )
         })
       );
+      if (env == "hahtuva") {
+        testStage.addAction(
+          new codepipeline_actions.CodeBuildAction({
+            actionName: "TestCasOppija",
+            input: sourceOutput,
+            project: makeTestProject(
+              this,
+              env,
+              "TestCasOppija",
+              ["scripts/ci/run-tests-cas-oppija-e2e.sh"],
+              "corretto21",
+              dependencyManagement
+            )
+          })
+        );
+      }
     }
 
     const deployProject = new codebuild.PipelineProject(
