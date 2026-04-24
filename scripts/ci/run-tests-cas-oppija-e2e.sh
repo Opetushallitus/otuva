@@ -90,7 +90,7 @@ function start_cas_oppija {
   select_java_version "21"
   cd "$repo"/cas-oppija
 
-  nohup ./gradlew --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
+  nohup ./gradlew --debug --stacktrace --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
   cas_oppija_backend_pid=$!
 
   wait_for_backend_to_be_healthy cas-oppija 8081
