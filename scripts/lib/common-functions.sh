@@ -98,3 +98,7 @@ function npm_ci_if_needed {
   shasum package-lock.json > "./node_modules/package-lock.json.checksum"
   shasum package.json > "./node_modules/package.json.checksum"
 }
+
+function is_running_on_codebuild {
+  [ -n "${CODEBUILD_BUILD_ID:-}" ]
+}
