@@ -180,7 +180,7 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         Set<String> organisaatioOids = criteria.getOrganisaatioOids() != null
             ? criteria.getOrganisaatioOids()
             : new HashSet<>(userOrganisaatioOids);
-        if (Boolean.TRUE.equals(criteria.getSubOrganisation())) {
+        if (criteria.getOrganisaatioOids() == null || Boolean.TRUE.equals(criteria.getSubOrganisation())) {
             organisaatioOids.addAll(
                 organisaatioOids.stream()
                     .flatMap(organisaatioOid -> organisaatioClient.getChildOids(organisaatioOid).stream())

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -73,35 +74,29 @@ class UiControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    private List<HenkilohakuResultDto> doVirkailijahaku(@NonNull String content) throws Exception {
+        var response = mvc.perform(post("/internal/virkailijahaku")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+    }
+
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuDoesNotFindHenkilosWithoutKayttajatiedot() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"Olli"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"Olli"}""");
         assertThat(result).hasSize(0);
     }
 
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuForOphUserFindsUsersWithoutOrganisation() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"pasi"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"pasi"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("pasi");
@@ -110,30 +105,28 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.23462357366", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuForNonOphUserDoesNotFindUsersWithPassiveOrganisation() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"pasi"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"pasi"}""");
         assertThat(result).hasSize(0);
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.23462357366", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    public void virkailijahakuForNonOphUserFindsUsersFromChildOrganisations() throws Exception {
+        when(organisaatioClient.getChildOids("1.2.246.562.10.71948887212"))
+                .thenReturn(List.of("1.2.246.562.10.36458346583"));
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"alli"}""");
+        assertThat(result)
+                .extracting("kayttajatunnus")
+                .containsExactlyInAnyOrder("alli");
     }
 
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByNameWithNameQuery() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"ville"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"ville"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("ville", "ville2");
@@ -142,15 +135,8 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByNameWithNameQueryWithComma() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"Virkailija, Ville"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"Virkailija, Ville"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("ville");
@@ -159,15 +145,8 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByNameWithNameQueryWithWhitespace() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"Ville Virkailija"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"Ville Virkailija"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("ville");
@@ -176,15 +155,8 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByOidWithNameQuery() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"1.2.246.562.24.12342342565"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"1.2.246.562.24.12342342565"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("pasi");
@@ -193,15 +165,8 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByUsernameWithNameQuery() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"nameQuery":"opa"}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"nameQuery":"opa"}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("opa");
@@ -213,15 +178,8 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByOrganisation() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"organisaatioOids":["1.2.246.562.10.71948887212"]}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"organisaatioOids":["1.2.246.562.10.71948887212"]}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("opa", "ville");
@@ -230,18 +188,11 @@ class UiControllerTest {
     @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void jarjestelmatunnushakuFiltersVirkailijasByKayttoikeusryhmaId() throws Exception {
-        var response = mvc.perform(post("/internal/virkailijahaku")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-    {"kayttooikeusryhmaId":333}""")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<HenkilohakuResultDto> result = objectMapper.readValue(response, new TypeReference<List<HenkilohakuResultDto>>(){});
+        List<HenkilohakuResultDto> result = doVirkailijahaku("""
+    {"kayttooikeusryhmaId":333}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
-                .containsExactlyInAnyOrder("opa", "ville");
+                .containsExactlyInAnyOrder("opa", "ville", "alli");
     }
 
     @Test
