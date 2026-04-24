@@ -22,7 +22,11 @@ function start_kayttooikeus {
   select_java_version "21"
   cd "$repo"/kayttooikeus-service
 
-  ./mvnw clean install -Dmaven.test.skip=true
+  if is_running_on_codebuild; then
+    ./mvnw clean install -Dmaven.test.skip=true -s ./codebuild-mvn-settings.xml
+  else
+    ./mvnw clean install -Dmaven.test.skip=true
+  fi
 
   local -r jvm_args=(
     "--add-opens=java.base/java.util=ALL-UNNAMED"
