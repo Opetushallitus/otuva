@@ -12,7 +12,6 @@ import fi.vm.sade.kayttooikeus.service.EmailVerificationService;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
-import fi.vm.sade.kayttooikeus.service.VahvaTunnistusService;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
@@ -56,7 +55,6 @@ import java.util.List;
 public class CasController {
     private final IdentificationService identificationService;
     private final HenkiloService henkiloService;
-    private final VahvaTunnistusService vahvaTunnistusService;
     private final EmailVerificationService emailVerificationService;
     private final KayttajatiedotService kayttajatiedotService;
     private final VirkailijaService virkailijaService;
@@ -196,10 +194,10 @@ public class CasController {
         handleOppijaLogout(request, response);
         if (StringUtils.hasLength(kutsuToken)) {
             // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
-            response.sendRedirect(getRedirectViaLoginUrl(
-                    vahvaTunnistusService.kasitteleKutsunTunnistus(
-                    kutsuToken, kielisyys, details.hetu,
-                    details.etunimet, details.sukunimi)));
+            String originalUrl = identificationService.updateKutsuAndGenerateTemporaryKutsuToken(kutsuToken, details.hetu, details.etunimet, details.sukunimi)
+                    .map(token -> urlVirkailija + "/henkilo-ui/kayttaja/rekisteroidy?temporaryKutsuToken=" + token)
+                    .orElseGet(() -> urlVirkailija + "/henkilo-ui/kayttaja/kutsu/vanhentunut/" + kielisyys);
+            response.sendRedirect(getRedirectViaLoginUrl(originalUrl));
         }
     }
 
