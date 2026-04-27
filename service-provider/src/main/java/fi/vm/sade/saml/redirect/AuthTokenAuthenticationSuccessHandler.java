@@ -44,6 +44,11 @@ public class AuthTokenAuthenticationSuccessHandler extends SimpleUrlAuthenticati
         setDefaultTargetUrl(ophProperties.url("cas.login"));
     }
 
+    private String localeUrl(String henkiloOid, String urlKey) {
+        String languageCode = oppijanumeroRekisteriRestClient.getAsiointikieli(henkiloOid);
+        return ophProperties.url(urlKey, languageCode);
+    }
+
     private String loginTokenUrl(String henkiloOid, String urlKey) {
         String languageCode = oppijanumeroRekisteriRestClient.getAsiointikieli(henkiloOid);
         String loginToken = kayttooikeusRestClient.createLoginToken(henkiloOid);
@@ -62,9 +67,9 @@ public class AuthTokenAuthenticationSuccessHandler extends SimpleUrlAuthenticati
             targetUrl = ophProperties.url("cas.login", parameters);
         }
         final String temporaryToken = (String) request.getSession().getAttribute(RequestSavingSAMLEntryPoint.KUTSU_TEMP_TOKEN_KEY);
-        
+
         logger.info("Target url: " + targetUrl);
-        
+
         if (authentication instanceof AbstractAuthenticationToken token) {
             if (StringUtils.isEmpty(temporaryToken) && token.getDetails() != null && token.getDetails() instanceof UserDetailsDto userDetails) {
                 String authToken;
@@ -72,7 +77,7 @@ public class AuthTokenAuthenticationSuccessHandler extends SimpleUrlAuthenticati
                     AbstractIdpBasedAuthTokenProvider tokenProvider = tokenProviders.get(userDetails.getAuthenticationMethod());
                     authToken = tokenProvider.createAuthenticationToken((SAMLCredential) authentication.getCredentials(), userDetails);
                 } catch (NoStrongIdentificationException e) {
-                    getRedirectStrategy().sendRedirect(request, response, loginTokenUrl(e.getMessage(), "henkilo-ui.strong-identification"));
+                    getRedirectStrategy().sendRedirect(request, response, localeUrl(e.getMessage(), "henkilo-ui.strong-identification"));
                     return;
                 } catch (EmailVerificationException e) {
                     getRedirectStrategy().sendRedirect(request, response, loginTokenUrl(e.getMessage(), "henkilo-ui.email-verification"));
