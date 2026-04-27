@@ -192,7 +192,8 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
               "TestCasOppija",
               ["scripts/ci/run-tests-cas-oppija-e2e.sh"],
               "corretto21",
-              dependencyManagement
+              dependencyManagement,
+              codebuild.ComputeType.MEDIUM
             )
           })
         );
