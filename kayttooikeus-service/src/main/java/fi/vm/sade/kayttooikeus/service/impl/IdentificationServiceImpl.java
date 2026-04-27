@@ -180,18 +180,6 @@ public class IdentificationServiceImpl implements IdentificationService {
     }
 
     @Override
-    @Transactional
-    public Optional<TunnistusToken> updateLoginToken(String loginToken, String hetu) {
-        return tunnistusTokenDataRepository.findByValidLoginToken(loginToken)
-                .map(tunnistusToken -> updateLoginToken(tunnistusToken, hetu));
-    }
-
-    public TunnistusToken updateLoginToken(TunnistusToken tunnistusToken, String hetu) {
-        tunnistusToken.setHetu(hetu);
-        return tunnistusTokenDataRepository.save(tunnistusToken);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public TunnistusToken getByValidLoginToken(String loginToken) {
         return tunnistusTokenDataRepository.findByValidLoginToken(loginToken)

@@ -3,7 +3,6 @@ package fi.vm.sade.kayttooikeus.service.external.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.ExternalServiceException;
@@ -171,13 +170,6 @@ public class OppijanumerorekisteriClientImpl implements OppijanumerorekisteriCli
         Supplier<String> action = () -> post(url, henkiloCreateDto, 201)
                 .orElseThrow(() -> noContentOrNotFoundException(url));
         return retrying(action, 2).get().orFail(mapper(url));
-    }
-
-    @Override
-    public void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto) {
-        var url = path("/cas/henkilo/").pathSegment(oidHenkilo).path("/vahvaTunnistus").toUriString();
-        Supplier<String> action = () -> put(url, henkiloVahvaTunnistusDto);
-        retrying(action, 2).get().orFail(mapper(url));
     }
 
     @Override

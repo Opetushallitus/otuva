@@ -25,8 +25,6 @@ public interface IdentificationService {
 
     String createLoginToken(String oidHenkilo, Boolean salasananVaihto, String hetu);
 
-    Optional<TunnistusToken> updateLoginToken(String loginToken, String hetu);
-
     TunnistusToken getByValidLoginToken(String loginToken);
 
     String consumeLoginToken(String loginToken, String identification_idp);

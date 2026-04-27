@@ -188,8 +188,7 @@ public class CasController {
     @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
     public void requestGet(HttpServletRequest request, HttpServletResponse response,
                            Principal principal,
-                           @RequestParam(value="loginToken", required = false) String loginToken,
-                           @RequestParam(value="kutsuToken", required = false) String kutsuToken,
+                           @RequestParam(required = false) String kutsuToken,
                            @RequestParam(value = "locale", required = false) String kielisyys)
             throws IOException {
         SuomiFiUserDetails details = getSuomiFiAuthenticationDetails(principal);
@@ -201,12 +200,6 @@ public class CasController {
                     vahvaTunnistusService.kasitteleKutsunTunnistus(
                     kutsuToken, kielisyys, details.hetu,
                     details.etunimet, details.sukunimi)));
-        } else if (StringUtils.hasLength(loginToken)) {
-            // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 1
-            // Joko päästetään suoraan sisään tai käytetään lisätietojen keräyssivun kautta
-            String redirectUrl = getRedirectViaLoginUrl(
-                    getVahvaTunnistusRedirectUrl(loginToken, kielisyys, details.hetu));
-            response.sendRedirect(redirectUrl);
         }
     }
 
@@ -225,15 +218,6 @@ public class CasController {
         return details.getSuomiFiUserDetails();
     }
 
-    private String getVahvaTunnistusRedirectUrl(String loginToken, String kielisyys, String hetu) {
-        try {
-            return vahvaTunnistusService.kirjaaVahvaTunnistus(loginToken, kielisyys, hetu);
-        } catch (Exception e) {
-            log.error("User failed strong identification", e);
-            return urlVirkailija + "/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/" + kielisyys + "/" + loginToken;
-        }
-    }
-
     private String getRedirectViaLoginUrl(String originalUrl) {
         // kierrätetään CAS-oppijan logoutista, jotta CAS-virkailijaa ei hämmennetä
         // sen sessiolla, tiketeillä tms.
@@ -241,16 +225,6 @@ public class CasController {
                 .queryParam("service", URLEncoder.encode(originalUrl, StandardCharsets.UTF_8))
                 .build()
                 .toUriString();
-    }
-
-    @PostMapping(value = "/uudelleenrekisterointi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Virkailijan uudelleenrekisteröinti")
-    public VahvaTunnistusResponseDto tunnistauduVahvasti(
-            @RequestParam(value = "kielisyys") String kielisyys,
-            @RequestParam(value = "loginToken") String loginToken,
-            @RequestBody @Valid VahvaTunnistusRequestDto dto) {
-        // Kirjataan henkilön vahva tunnistautuminen järjestelmään, vaihe 2
-        return vahvaTunnistusService.tunnistaudu(loginToken, dto);
     }
 
     @Operation(summary = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",

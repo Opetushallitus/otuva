@@ -178,16 +178,6 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     }
 
     @Override
-    public void throwIfOldPassword(String oidHenkilo, String newPassword) {
-        Kayttajatiedot kayttajatiedot = this.kayttajatiedotRepository.findByHenkiloOidHenkilo(oidHenkilo)
-                .orElseThrow(() -> new ValidationException("Käyttäjätunnus on asetettava ennen salasanaa"));
-
-        if(this.cryptoService.check(newPassword, kayttajatiedot.getPassword(), kayttajatiedot.getSalt())){
-            throw new PasswordException("Salasana on jo käytössä");
-        }
-    }
-
-    @Override
     @Transactional
     public Kayttajatiedot getByUsernameAndPassword(String username, String password) {
         return kayttajatiedotRepository.findByUsername(username)

@@ -38,8 +38,6 @@ public interface KayttajatiedotService {
 
     void throwIfUsernameIsNotValid(String username);
 
-    void throwIfOldPassword(String oidHenkilo, String password);
-
     Kayttajatiedot getByUsernameAndPassword(String username, String password);
 
     List<String> fetchKayttooikeudet(String henkiloOid);

@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
-import fi.vm.sade.kayttooikeus.service.dto.HenkiloVahvaTunnistusDto;
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 
@@ -40,8 +39,6 @@ public interface OppijanumerorekisteriClient {
     Collection<HenkiloYhteystiedotDto> listYhteystiedot(HenkiloHakuCriteria criteria);
 
     String createHenkilo(HenkiloCreateDto henkiloCreateDto);
-
-    void setStrongIdentifiedHetu(String oidHenkilo, HenkiloVahvaTunnistusDto henkiloVahvaTunnistusDto);
 
     void updateHenkilo(HenkiloUpdateDto henkiloUpdateDto);
 

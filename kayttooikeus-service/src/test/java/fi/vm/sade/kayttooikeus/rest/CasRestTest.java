@@ -4,7 +4,6 @@ import fi.vm.sade.kayttooikeus.DatabaseService;
 import fi.vm.sade.kayttooikeus.config.security.TunnistusSecurityConfig;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 
 import org.apereo.cas.client.authentication.AttributePrincipal;
 import org.apereo.cas.client.validation.Assertion;
@@ -30,11 +29,8 @@ import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthentic
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.HETU_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationProcessingFilter.SUKUNIMI_ATTRIBUTE;
 import static fi.vm.sade.kayttooikeus.controller.KutsuPopulator.kutsu;
-import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
-import static fi.vm.sade.kayttooikeus.repositories.populate.TunnistusTokenPopulator.tunnistusToken;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -97,57 +93,11 @@ public class CasRestTest {
     public void tunnistusKutsuTokenEiLoydy() throws Exception {
         mockMvc.perform(get("/cas/tunnistus")
                 .param("kutsuToken", "kutsuToken123")
-                .param("locale", "kielisyys123")
+                .param("locale", "fi")
                 .param("ticket", "password"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/vanhakutsu"))));
-    }
-
-    @Test
-    public void tunnistusLoginToken() throws Exception {
-        databaseService.populate(tunnistusToken(henkilo("henkilo123").withUsername("kayttaja123"))
-                .loginToken("loginToken123")
-                .aikaleima(LocalDateTime.now()));
-        when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenReturn(HenkiloDto.builder()
-                .oidHenkilo("henkilo123")
-                .hetu("hetu123")
-                .build());
-
-        mockMvc.perform(get("/cas/tunnistus")
-                .param("loginToken", "loginToken123")
-                .param("locale", "kielisyys123")
-                .param("ticket", "password"))
-                .andExpect(status().isFound())
-                .andExpect(header().string("Location",
-                        containsString(urlEncode("/henkilo-ui/kayttaja/uudelleenrekisterointi/kielisyys123/loginToken123/"))));
-    }
-
-    @Test
-    public void tunnistusLoginTokenEiLoydy() throws Exception {
-        mockMvc.perform(get("/cas/tunnistus")
-                .param("loginToken", "loginToken123")
-                .param("locale", "kielisyys123")
-                .param("ticket", "password"))
-                .andExpect(status().isFound())
-                .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/vanha"))));
-    }
-
-    @Test
-    public void tunnistusLoginTokenOppijanumerorekisteriEiToimi() throws Exception {
-        databaseService.populate(tunnistusToken(henkilo("henkilo123"))
-                .loginToken("loginToken123")
-                .aikaleima(LocalDateTime.now()));
-        when(oppijanumerorekisteriClient.getHenkiloByOid(any())).thenThrow(new RuntimeException("oppijanumerorekisteri ei toimi"));
-
-        mockMvc.perform(get("/cas/tunnistus")
-                .param("loginToken", "loginToken123")
-                .param("locale", "kielisyys123")
-                .param("ticket", "password"))
-                .andExpect(status().isFound())
-                .andExpect(header().string("Location",
-                        endsWith(urlEncode("/henkilo-ui/kayttaja/vahvatunnistusinfo/virhe/kielisyys123/loginToken123"))));
+                        endsWith(urlEncode("/henkilo-ui/kayttaja/kutsu/vanhentunut/fi"))));
     }
 
     private String urlEncode(String url) {
