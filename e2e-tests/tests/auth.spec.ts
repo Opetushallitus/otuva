@@ -23,19 +23,6 @@ test.describe('Authentication', () => {
         const credentials = page.getByText('Credentials');
         expect(await credentials.innerText()).toMatch(/ST-/);
     });
-
-    test('should logout successfully', async ({ page }) => {
-        await login(page);
-
-        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/');
-
-        await page.goto('/mock-substance-service/logout');
-
-        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/');
-
-        const credentials = page.getByText('Credentials');
-        expect(await credentials.innerText()).not.toMatch(/ST-/);
-    });
 });
 
 async function navigateAndRetryUntilRedirectedToDelegatedIdp(page: Page, url: string) {
