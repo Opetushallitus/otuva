@@ -62,7 +62,7 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
             case "STRONG_IDENTIFICATION":
                 LOGGER.info("Strong identification interrupt received for {}", username);
                 if (requireStrongIdentification || requireStrongIdentificationUsernameList.contains(username)) {
-                    return Optional.of(createRedirectUrl(username, "kayttaja/vahvatunnistusinfo"));
+                    return Optional.of(createStrongIdentificationUrl(username));
                 }
                 break;
             case "EMAIL_VERIFICATION":
@@ -92,6 +92,12 @@ public class LoginRedirectInterruptInquirer implements InterruptInquirer {
         interruptResponse.setBlock(true);
         interruptResponse.setAutoRedirect(true);
         return interruptResponse;
+    }
+
+    public String createStrongIdentificationUrl(String username) {
+        String oidHenkilo = kayttooikeusClient.getHenkiloOid(username);
+        String asiointiKieli = oppijanumerorekisteriClient.getAsiointikieli(oidHenkilo);
+        return henkiloUiBaseurl + "kayttaja/vanhentunut/" + asiointiKieli;
     }
 
     public String createRedirectUrl(String username, String path) {
