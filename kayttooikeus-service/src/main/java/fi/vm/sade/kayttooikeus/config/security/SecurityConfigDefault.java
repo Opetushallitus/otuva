@@ -213,7 +213,6 @@ public class SecurityConfigDefault {
                     .requestMatchers("/buildversion.txt").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers("/kutsu/token/*").permitAll()
-                    .requestMatchers("/cas/uudelleenrekisterointi").permitAll()
                     .requestMatchers("/cas/henkilo/loginToken/*").permitAll()
                     .requestMatchers("/cas/emailverification/*").permitAll()
                     .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
