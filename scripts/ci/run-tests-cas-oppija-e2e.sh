@@ -102,7 +102,8 @@ function start_cas_oppija {
 
   wait_for_container_to_be_healthy cas-oppija-db
 
-  nohup ./gradlew --no-daemon clean run -Dcas.standalone.configurationFile=config/local.yml &
+  ./gradlew --no-daemon clean build
+  nohup ./gradlew --no-daemon run -Dcas.standalone.configurationFile=config/local.yml &
   cas_oppija_backend_pid=$!
 
   wait_for_backend_to_be_healthy cas-oppija 8081
