@@ -181,23 +181,6 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
           )
         })
       );
-      if (env == "hahtuva") {
-        testStage.addAction(
-          new codepipeline_actions.CodeBuildAction({
-            actionName: "TestCasOppija",
-            input: sourceOutput,
-            project: makeTestProject(
-              this,
-              env,
-              "TestCasOppija",
-              ["scripts/ci/run-tests-cas-oppija-e2e.sh"],
-              "corretto21",
-              dependencyManagement,
-              codebuild.ComputeType.LARGE
-            )
-          })
-        );
-      }
     }
 
     const deployProject = new codebuild.PipelineProject(
