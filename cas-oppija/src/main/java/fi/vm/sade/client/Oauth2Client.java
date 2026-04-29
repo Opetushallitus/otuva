@@ -30,7 +30,9 @@ public class Oauth2Client {
                     .build();
             var client = HttpClient.newBuilder().build();
             var response = client.send(request, BodyHandlers.ofString());
-            if (response.statusCode() == 404 || response.statusCode() == 204) {
+            if (response.statusCode() == 404) {
+                throw new NotFoundException(request.uri().toString());
+            } else if (response.statusCode() == 204) {
                 throw new RestClientException(request.uri().toString());
             } else if (response.statusCode() != 401 && (response.statusCode() < 200 || response.statusCode() > 299)) {
                 LOGGER.error("request failed (HTTP " + response.statusCode() + ") with body: " + response.body());

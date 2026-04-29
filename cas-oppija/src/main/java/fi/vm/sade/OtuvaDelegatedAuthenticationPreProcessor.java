@@ -26,13 +26,12 @@ public class OtuvaDelegatedAuthenticationPreProcessor implements DelegatedAuthen
     public Principal process(Principal principal, BaseClient client, Credential credential, Service service)
             throws Throwable {
         try {
-            String oid = resolveAttribute(principal.getAttributes(), "nationalIdentificationNumber", String.class)
-                .map(oppijanumerorekisteriClient::getOidByHetu)
+            resolveAttribute(principal.getAttributes(), "nationalIdentificationNumber", String.class)
+                .flatMap(oppijanumerorekisteriClient::getOidByHetu)
                 .or(() -> resolveAttribute(principal.getAttributes(), "personIdentifier", String.class)
-                        .map(oppijanumerorekisteriClient::getOidByEidas)
+                        .flatMap(oppijanumerorekisteriClient::getOidByEidas)
                 )
-                .orElse(null);
-            principal.getAttributes().put("personOid", List.of(oid));
+                .ifPresent(oid -> principal.getAttributes().put("personOid", List.of(oid)));
             LOGGER.debug("Delegated authentication processed principal [{}]", principal);
             return principal;
         } catch (Exception e) {
