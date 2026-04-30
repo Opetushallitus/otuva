@@ -15,7 +15,7 @@ cas.interrupt.cookie.crypto.signing.key: ${cas_interrupt_cookie_signing_key}
 
 cas.view.default-redirect-url: https://virkailija.untuvaopintopolku.fi/virkailijan-tyopoyta
 
-cas.authn.mfa.triggers.rest.url: https://virkailija.untuvaopintopolku.fi/kayttooikeus-service/mfa/trigger
+cas.authn.mfa.triggers.rest.url: https://dev.otuva.opintopolku.fi/kayttooikeus-service/mfa/trigger
 cas.authn.mfa.triggers.rest.headers.Caller-Id: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.triggers.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.triggers.rest.method: POST
@@ -26,8 +26,8 @@ cas.authn.mfa.gauth.core.issuer: Opetushallitus
 cas.authn.mfa.gauth.core.label: Opintopolku
 cas.authn.mfa.gauth.crypto.encryption.key: ${cas_gauth_encryption_key}
 cas.authn.mfa.gauth.crypto.signing.key: ${cas_gauth_signing_key}
-cas.authn.mfa.gauth.rest.token-url: https://virkailija.untuvaopintopolku.fi/kayttooikeus-service/mfa/token
-cas.authn.mfa.gauth.rest.url: https://virkailija.untuvaopintopolku.fi/kayttooikeus-service/mfa/token
+cas.authn.mfa.gauth.rest.token-url: https://dev.otuva.opintopolku.fi/kayttooikeus-service/mfa/token
+cas.authn.mfa.gauth.rest.url: https://dev.otuva.opintopolku.fi/kayttooikeus-service/mfa/token
 cas.authn.mfa.gauth.rest.headers.Caller-Id: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
 cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
