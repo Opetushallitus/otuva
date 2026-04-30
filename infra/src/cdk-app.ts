@@ -31,7 +31,7 @@ import {
   VPC_NAME,
 } from "./shared-account";
 import { getConfig, getEnvironment } from "./config";
-import {createHealthCheckStacks} from "./health-check";
+import { createHealthCheckStacks } from "./health-check";
 import { ResponseAlarms } from "./response-alarms";
 
 class CdkApp extends cdk.App {
@@ -46,8 +46,16 @@ class CdkApp extends cdk.App {
 
     const config = getConfig();
 
-    const { oauthHostedZone } = new DnsStack(this, legacyPrefix("DnsStack"), stackProps);
-    const { alarmsToSlackLambda, alarmTopic } = new AlarmStack(this, prefix("AlarmStack"), stackProps);
+    const { oauthHostedZone } = new DnsStack(
+      this,
+      legacyPrefix("DnsStack"),
+      stackProps,
+    );
+    const { alarmsToSlackLambda, alarmTopic } = new AlarmStack(
+      this,
+      prefix("AlarmStack"),
+      stackProps,
+    );
     const ecsStack = new ECSStack(this, prefix("ECSStack"), stackProps);
     const appStack = new ApplicationStack(
       this,
@@ -56,7 +64,7 @@ class CdkApp extends cdk.App {
         ...stackProps,
         alarmTopic,
         oauthHostedZone,
-      }
+      },
     );
     new CasVirkailijaApplicationStack(
       this,
@@ -66,7 +74,7 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
         ...stackProps,
         bastion: appStack.bastion,
-      }
+      },
     );
     new CasOppijaApplicationStack(this, prefix("CasOppijaApplicationStack"), {
       ...stackProps,
@@ -81,15 +89,35 @@ class CdkApp extends cdk.App {
         ...stackProps,
         bastion: appStack.bastion,
         ecsCluster: ecsStack.cluster,
-      }
+      },
     );
 
     createHealthCheckStacks(this, alarmsToSlackLambda, [
-      { name: "Kayttooikeus", url: new URL(`https://virkailija.${config.opintopolkuHost}/kayttooikeus-service/actuator/health`) },
-      { name: "CasVirkailija", url: new URL(`https://virkailija.${config.opintopolkuHost}/cas/actuator/health`) },
-      { name: "CasOppija", url: new URL(`https://${config.opintopolkuHost}/cas-oppija/actuator/health`) },
-      { name: "ServiceProvider", url: new URL(`https://virkailija.${config.opintopolkuHost}/service-provider-app/buildversion.txt`) },
-    ])
+      {
+        name: "Kayttooikeus",
+        url: new URL(
+          `https://virkailija.${config.opintopolkuHost}/kayttooikeus-service/actuator/health`,
+        ),
+      },
+      {
+        name: "CasVirkailija",
+        url: new URL(
+          `https://virkailija.${config.opintopolkuHost}/cas/actuator/health`,
+        ),
+      },
+      {
+        name: "CasOppija",
+        url: new URL(
+          `https://${config.opintopolkuHost}/cas-oppija/actuator/health`,
+        ),
+      },
+      {
+        name: "ServiceProvider",
+        url: new URL(
+          `https://virkailija.${config.opintopolkuHost}/service-provider-app/buildversion.txt`,
+        ),
+      },
+    ]);
   }
 }
 
@@ -188,7 +216,7 @@ class ApplicationStack extends cdk.Stack {
     props: cdk.StackProps & {
       alarmTopic: sns.ITopic;
       oauthHostedZone: route53.IHostedZone;
-    }
+    },
   ) {
     super(scope, id, props);
     const config = getConfig();
@@ -198,7 +226,7 @@ class ApplicationStack extends cdk.Stack {
     const dbSecurityGroup = new ec2.SecurityGroup(
       this,
       "DatabaseSecurityGroup",
-      { vpc }
+      { vpc },
     );
 
     const exportBucket = new s3.Bucket(this, "ExportBucket", {});
@@ -219,7 +247,7 @@ class ApplicationStack extends cdk.Stack {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
-          ec2.InstanceSize.LARGE
+          ec2.InstanceSize.LARGE,
         ),
       }),
       readers: [],
@@ -244,7 +272,7 @@ class ApplicationStack extends cdk.Stack {
     });
     dbSecurityGroup.addIngressRule(
       backup.securityGroup,
-      ec2.Port.tcp(database.clusterEndpoint.port)
+      ec2.Port.tcp(database.clusterEndpoint.port),
     );
 
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
@@ -273,7 +301,7 @@ class ApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      }
+      },
     );
     exportBucket.grantReadWrite(taskDefinition.taskRole);
 
@@ -288,17 +316,19 @@ class ApplicationStack extends cdk.Stack {
             "kayttooikeus.tasks.export.copy-to-lampi": "true",
           }
         : {
-          "kayttooikeus.tasks.export.enabled": "false",
-          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+            "kayttooikeus.tasks.export.enabled": "false",
+            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
           };
 
-    const lampiSecrets: ecs.ContainerDefinitionProps["secrets"] = config.lampiExport
-      ? {
-          "kayttooikeus.tasks.export.lampi-role-arn":
-            this.ssmString("LampiRoleArn2"),
-          "kayttooikeus.tasks.export.lampi-external-id":
-            this.ssmSecret("LampiExternalId"),
-        } : {};
+    const lampiSecrets: ecs.ContainerDefinitionProps["secrets"] =
+      config.lampiExport
+        ? {
+            "kayttooikeus.tasks.export.lampi-role-arn":
+              this.ssmString("LampiRoleArn2"),
+            "kayttooikeus.tasks.export.lampi-external-id":
+              this.ssmSecret("LampiExternalId"),
+          }
+        : {};
 
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
@@ -316,11 +346,11 @@ class ApplicationStack extends cdk.Stack {
       secrets: {
         postgres_username: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "username"
+          "username",
         ),
         postgres_password: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "password"
+          "password",
         ),
         ssm_cas_mfa_username: this.ssmSecret("CasMfaUsername"),
         ssm_cas_mfa_password: this.ssmSecret("CasMfaPassword"),
@@ -328,14 +358,18 @@ class ApplicationStack extends cdk.Stack {
         ssm_cas_gauth_signing_key: this.ssmSecret("CasGauthSigningKey"),
         ssm_kayttooikeus_username: this.ssmSecret("PalvelukayttajaUsername"),
         ssm_kayttooikeus_password: this.ssmSecret("PalvelukayttajaPassword"),
-        ssm_kayttooikeus_oauth2_client_id: this.ssmSecret("PalvelukayttajaClientId"),
-        ssm_kayttooikeus_oauth2_client_secret: this.ssmSecret("PalvelukayttajaClientSecret"),
+        ssm_kayttooikeus_oauth2_client_id: this.ssmSecret(
+          "PalvelukayttajaClientId",
+        ),
+        ssm_kayttooikeus_oauth2_client_secret: this.ssmSecret(
+          "PalvelukayttajaClientSecret",
+        ),
         ssm_kayttooikeus_crypto_password: this.ssmSecret("CryptoPassword"),
         ssm_kayttooikeus_kutsu_allowlist: this.ssmSecret("KutsuAllowlist"),
         ssm_kayttooikeus_oauth2_publickey: this.ssmSecret("Oauth2PublicKey"),
         ssm_kayttooikeus_oauth2_privatekey: this.ssmSecret("Oauth2PrivateKey"),
         ssm_auth_cryptoservice_static_salt: this.ssmSecret(
-          "CryptoserviceStaticSalt"
+          "CryptoserviceStaticSalt",
         ),
         ...lampiSecrets,
       },
@@ -356,10 +390,10 @@ class ApplicationStack extends cdk.Stack {
           resources: [
             ssm.StringParameter.valueFromLookup(
               this,
-              "/kayttooikeus/LampiRoleArn2"
+              "/kayttooikeus/LampiRoleArn2",
             ),
           ],
-        })
+        }),
       );
     }
 
@@ -395,7 +429,7 @@ class ApplicationStack extends cdk.Stack {
 
     dbSecurityGroup.addIngressRule(
       appSecurityGroup,
-      ec2.Port.tcp(database.clusterEndpoint.port)
+      ec2.Port.tcp(database.clusterEndpoint.port),
     );
 
     const albSecurityGroup = new ec2.SecurityGroup(this, "AlbSecurityGroup", {
@@ -408,7 +442,7 @@ class ApplicationStack extends cdk.Stack {
         vpc,
         internetFacing: true,
         securityGroup: albSecurityGroup,
-      }
+      },
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -416,14 +450,14 @@ class ApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      }
+      },
     );
     const albHostname = `kayttooikeus.${sharedHostedZone.zoneName}`;
     const albRecord = new route53.ARecord(this, "ALBARecord", {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb)
+        new route53_targets.LoadBalancerTarget(alb),
       ),
     });
 
@@ -445,7 +479,7 @@ class ApplicationStack extends cdk.Stack {
           [albHostname]: sharedHostedZone,
           [config.otuvaDomain]: props.oauthHostedZone,
         }),
-      }
+      },
     );
 
     const listener = alb.addListener("Listener", {
@@ -483,12 +517,12 @@ class ApplicationStack extends cdk.Stack {
       "ExportTaskSuccessMetricFilter",
       {
         filterPattern: logs.FilterPattern.literal(
-          '"Kayttooikeus export task completed"'
+          '"Kayttooikeus export task completed"',
         ),
         metricName: prefix("KayttooikeusExportTaskSuccess"),
         metricNamespace: "Otuva",
         metricValue: "1",
-      }
+      },
     );
     const alarm = new cloudwatch.Alarm(this, "ExportFailingAlarm", {
       alarmName: prefix("KayttooikeusExportFailing"),
@@ -509,7 +543,7 @@ class ApplicationStack extends cdk.Stack {
   getIpAddresses(name: string): string[] {
     const parameterValue = ssm.StringParameter.valueFromLookup(
       this,
-      `/ip-addresses/${name}`
+      `/ip-addresses/${name}`,
     );
     return parameterValue.split(",");
   }
@@ -537,7 +571,7 @@ class ApplicationStack extends cdk.Stack {
           "/kayttooikeus-service/userDetails",
           "/kayttooikeus-service/userDetails/.*",
         ],
-      }
+      },
     );
 
     const denyAccessRule: wafv2.CfnWebACL.RuleProperty = {
@@ -601,8 +635,8 @@ class ApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromStringParameterName(
         this,
         `Param${name}`,
-        `/kayttooikeus/${name}`
-      )
+        `/kayttooikeus/${name}`,
+      ),
     );
   }
 
@@ -611,8 +645,8 @@ class ApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/kayttooikeus/${name}` }
-      )
+        { parameterName: `/kayttooikeus/${name}` },
+      ),
     );
   }
 }
@@ -627,7 +661,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
   constructor(
     scope: constructs.Construct,
     id: string,
-    props: CasOppijaApplicationStackProps
+    props: CasOppijaApplicationStackProps,
   ) {
     super(scope, id, props);
 
@@ -648,7 +682,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
-          ec2.InstanceSize.LARGE
+          ec2.InstanceSize.LARGE,
         ),
       }),
       readers: [],
@@ -675,7 +709,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      }
+      },
     );
 
     const appPort = 8080;
@@ -691,36 +725,40 @@ class CasOppijaApplicationStack extends cdk.Stack {
       secrets: {
         cas_oppija_postgres_username: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "username"
+          "username",
         ),
         cas_oppija_postgres_password: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "password"
+          "password",
         ),
         cas_oppija_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
-        cas_oppija_tgc_encryption_key_6_x: this.ssmSecret("6.x/TgcEncryptionKey"),
-        cas_oppija_tgc_encryption_key_7_x: this.ssmSecret("7.x/TgcEncryptionKey"),
+        cas_oppija_tgc_encryption_key_6_x: this.ssmSecret(
+          "6.x/TgcEncryptionKey",
+        ),
+        cas_oppija_tgc_encryption_key_7_x: this.ssmSecret(
+          "7.x/TgcEncryptionKey",
+        ),
         cas_oppija_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_oppija_webflow_encryption_key: this.ssmSecret(
-          "WebflowEncryptionKey"
+          "WebflowEncryptionKey",
         ),
         cas_oppija_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
         cas_pac4j_encryption_key: this.ssmSecret("Pac4jCookieEncryptionKey"),
         cas_pac4j_signing_key: this.ssmSecret("Pac4jCookieSigningKey"),
         cas_oppija_suomifi_keystore_password: this.ssmSecret(
-          "SuomifiKeystorePassword"
+          "SuomifiKeystorePassword",
         ),
         cas_oppija_suomifi_private_key_password: this.ssmSecret(
-          "SuomifiPrivateKeyPassword"
+          "SuomifiPrivateKeyPassword",
         ),
         cas_oppija_suomifi_valtuudet_client_id: this.ssmSecret(
-          "SuomifiValtuudetClientId"
+          "SuomifiValtuudetClientId",
         ),
         cas_oppija_suomifi_valtuudet_api_key: this.ssmSecret(
-          "SuomifiValtuudetApiKey"
+          "SuomifiValtuudetApiKey",
         ),
         cas_oppija_suomifi_valtuudet_oauth_password: this.ssmSecret(
-          "SuomifiValtuudetOauthPassword"
+          "SuomifiValtuudetOauthPassword",
         ),
         cas_oppija_service_user_username: this.ssmSecret("ServiceUserUsername"),
         cas_oppija_service_user_password: this.ssmSecret("ServiceUserPassword"),
@@ -735,15 +773,15 @@ class CasOppijaApplicationStack extends cdk.Stack {
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "SpMetadata",
-            "/cas-oppija/SpMetadata"
-          )
+            "/cas-oppija/SpMetadata",
+          ),
         ),
         idp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "IdpMetadata",
-            "/cas-oppija/IdpMetadata"
-          )
+            "/cas-oppija/IdpMetadata",
+          ),
         ),
       },
       portMappings: [
@@ -790,7 +828,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       {
         vpc,
         internetFacing: true,
-      }
+      },
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -798,7 +836,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      }
+      },
     );
     const albHostname = `cas-oppija.${sharedHostedZone.zoneName}`;
 
@@ -806,7 +844,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb)
+        new route53_targets.LoadBalancerTarget(alb),
       ),
     });
 
@@ -817,7 +855,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
         domainName: albHostname,
         validation:
           certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-      }
+      },
     );
 
     const listener = alb.addListener("Listener", {
@@ -852,8 +890,8 @@ class CasOppijaApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/${prefix}/${name}` }
-      )
+        { parameterName: `/${prefix}/${name}` },
+      ),
     );
   }
 }
@@ -868,13 +906,17 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
   constructor(
     scope: constructs.Construct,
     id: string,
-    props: CasVirkailijaApplicationStackProps
+    props: CasVirkailijaApplicationStackProps,
   ) {
     super(scope, id, props);
 
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
-    const heapDumpBucket = new s3.Bucket(this, "CasVirkailijaHeapDumpBucket", {})
+    const heapDumpBucket = new s3.Bucket(
+      this,
+      "CasVirkailijaHeapDumpBucket",
+      {},
+    );
 
     const database = new rds.DatabaseCluster(this, "Database", {
       vpc,
@@ -891,7 +933,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         enablePerformanceInsights: true,
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.T4G,
-          ec2.InstanceSize.LARGE
+          ec2.InstanceSize.LARGE,
         ),
       }),
       readers: [],
@@ -918,7 +960,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      }
+      },
     );
     heapDumpBucket.grantReadWrite(taskDefinition.taskRole);
 
@@ -936,78 +978,87 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       secrets: {
         cas_postgres_username: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "username"
+          "username",
         ),
         cas_postgres_password: ecs.Secret.fromSecretsManager(
           database.secret!,
-          "password"
+          "password",
         ),
         cas_pac4j_encryption_key: this.ssmSecret("CasPac4jEncryptionKey"),
         cas_pac4j_signing_key: this.ssmSecret("CasPac4jSigningKey"),
         cas_mpassid_oidc_id: this.ssmSecret("CasMpassidOidcId"),
         cas_mpassid_oidc_secret: this.ssmSecret("CasMpassidOidcSecret"),
         cas_haka_keystore_password: this.ssmSecret("CasHakaKeystorePassword"),
-        cas_suomifi_keystore_password: this.ssmSecret("SuomifiKeystorePassword"),
-        cas_suomifi_private_key_password: this.ssmSecret("SuomifiPrivateKeyPassword"),
+        cas_suomifi_keystore_password: this.ssmSecret(
+          "SuomifiKeystorePassword",
+        ),
+        cas_suomifi_private_key_password: this.ssmSecret(
+          "SuomifiPrivateKeyPassword",
+        ),
         cas_tgc_encryption_key: this.ssmSecret("TgcEncryptionKey"),
         cas_tgc_signing_key: this.ssmSecret("TgcSigningKey"),
         cas_webflow_encryption_key: this.ssmSecret("WebflowEncryptionKey"),
         cas_webflow_signing_key: this.ssmSecret("WebflowSigningKey"),
-        cas_interrupt_cookie_encryption_key: this.ssmSecret("InterruptCookieEncryptionKey"),
-        cas_interrupt_cookie_signing_key: this.ssmSecret("InterruptCookieSigningKey"),
+        cas_interrupt_cookie_encryption_key: this.ssmSecret(
+          "InterruptCookieEncryptionKey",
+        ),
+        cas_interrupt_cookie_signing_key: this.ssmSecret(
+          "InterruptCookieSigningKey",
+        ),
         cas_mfa_username: this.ssmSecret("CasMfaUsername", "kayttooikeus"),
         cas_mfa_password: this.ssmSecret("CasMfaPassword", "kayttooikeus"),
         cas_gauth_encryption_key: this.ssmSecret(
           "CasGauthEncryptionKey",
-          "kayttooikeus"
+          "kayttooikeus",
         ),
         cas_gauth_signing_key: this.ssmSecret(
           "CasGauthSigningKey",
-          "kayttooikeus"
+          "kayttooikeus",
         ),
         serviceprovider_app_username_to_usermanagement: this.ssmSecret(
           "AppUsernameToUserManagement",
-          "service-provider"
+          "service-provider",
         ),
         serviceprovider_app_password_to_usermanagement: this.ssmSecret(
           "AppPasswordToUserManagement",
-          "service-provider"
+          "service-provider",
         ),
-        cas_virkailija_oauth2_client_secret: this.ssmSecret("Oauth2ClientSecret"),
+        cas_virkailija_oauth2_client_secret:
+          this.ssmSecret("Oauth2ClientSecret"),
         haka_keystore_base64: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "HakaKeystore",
-            "/cas/HakaKeystore"
-          )
+            "/cas/HakaKeystore",
+          ),
         ),
         haka_sp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "HakaSpMetadata",
-            "/cas/HakaSpMetadata"
-          )
+            "/cas/HakaSpMetadata",
+          ),
         ),
         cas_suomifi_sp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "SuomifiSpMetadata",
-            "/cas/SuomifiSpMetadata"
-          )
+            "/cas/SuomifiSpMetadata",
+          ),
         ),
         cas_suomifi_keystore_base64: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "SuomifiKeystore",
-            "/cas/SuomifiKeystore"
-          )
+            "/cas/SuomifiKeystore",
+          ),
         ),
         cas_suomifi_idp_metadata: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "IdpMetadata",
-            "/cas-oppija/IdpMetadata"
-          )
+            "/cas-oppija/IdpMetadata",
+          ),
         ),
       },
       portMappings: [
@@ -1054,7 +1105,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       {
         vpc,
         internetFacing: true,
-      }
+      },
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -1062,7 +1113,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      }
+      },
     );
     const albHostname = `cas.${sharedHostedZone.zoneName}`;
 
@@ -1070,7 +1121,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb)
+        new route53_targets.LoadBalancerTarget(alb),
       ),
     });
 
@@ -1081,7 +1132,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
         domainName: albHostname,
         validation:
           certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-      }
+      },
     );
 
     const listener = alb.addListener("Listener", {
@@ -1117,8 +1168,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/${prefix}/${name}` }
-      )
+        { parameterName: `/${prefix}/${name}` },
+      ),
     );
   }
 }
@@ -1132,7 +1183,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
   constructor(
     scope: constructs.Construct,
     id: string,
-    props: ServiceProviderApplicationStackProps
+    props: ServiceProviderApplicationStackProps,
   ) {
     super(scope, id, props);
 
@@ -1158,7 +1209,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
         },
-      }
+      },
     );
 
     const appPort = 8080;
@@ -1170,8 +1221,12 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       },
       secrets: {
         ssm_keystore_password: this.ssmSecret("KeystorePassword"),
-        ssm_app_username_to_usermanagement: this.ssmSecret("AppUsernameToUserManagement"),
-        ssm_app_password_to_usermanagement: this.ssmSecret("AppPasswordToUserManagement"),
+        ssm_app_username_to_usermanagement: this.ssmSecret(
+          "AppUsernameToUserManagement",
+        ),
+        ssm_app_password_to_usermanagement: this.ssmSecret(
+          "AppPasswordToUserManagement",
+        ),
         ssm_sp_keyalias: this.ssmSecret("SpKeyAlias"),
         ssm_sp_keyalias_secondary: this.ssmSecret("SpKeyAliasSecondary"),
         ssm_sp_keypassword: this.ssmSecret("SpKeyPassword"),
@@ -1180,15 +1235,15 @@ class ServiceProviderApplicationStack extends cdk.Stack {
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "Keystore",
-            "/service-provider/Keystore"
-          )
+            "/service-provider/Keystore",
+          ),
         ),
         hakasp: ecs.Secret.fromSecretsManager(
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "HakaSpMetadata",
-            "/service-provider/HakaSpMetadata"
-          )
+            "/service-provider/HakaSpMetadata",
+          ),
         ),
       },
       portMappings: [
@@ -1218,7 +1273,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       {
         vpc,
         internetFacing: true,
-      }
+      },
     );
 
     const sharedHostedZone = route53.HostedZone.fromLookup(
@@ -1226,7 +1281,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       "YleiskayttoisetHostedZone",
       {
         domainName: ssm.StringParameter.valueFromLookup(this, "zoneName"),
-      }
+      },
     );
     const albHostname = `service-provider.${sharedHostedZone.zoneName}`;
 
@@ -1234,7 +1289,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       zone: sharedHostedZone,
       recordName: albHostname,
       target: route53.RecordTarget.fromAlias(
-        new route53_targets.LoadBalancerTarget(alb)
+        new route53_targets.LoadBalancerTarget(alb),
       ),
     });
 
@@ -1245,7 +1300,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
         domainName: albHostname,
         validation:
           certificatemanager.CertificateValidation.fromDns(sharedHostedZone),
-      }
+      },
     );
 
     const listener = alb.addListener("Listener", {
@@ -1271,8 +1326,8 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       ssm.StringParameter.fromSecureStringParameterAttributes(
         this,
         `Param${name}`,
-        { parameterName: `/${prefix}/${name}` }
-      )
+        { parameterName: `/${prefix}/${name}` },
+      ),
     );
   }
 }
