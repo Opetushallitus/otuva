@@ -3,6 +3,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
+  merge_group:
 
 jobs:
   run-tests-cas-oppija-e2e:
