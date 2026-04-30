@@ -567,10 +567,7 @@ class ApplicationStack extends cdk.Stack {
       "UserDetailsPathPatternSet",
       {
         scope: "REGIONAL",
-        regularExpressionList: [
-          "/kayttooikeus-service/userDetails",
-          "/kayttooikeus-service/userDetails/.*",
-        ],
+        regularExpressionList: ["/kayttooikeus-service/mfa/.*"],
       },
     );
 
