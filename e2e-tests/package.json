@@ -15,7 +15,7 @@
   "author": "",
   "type": "commonjs",
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@types/node": "25.5.2",
     "eslint": "10.1.0",
     "eslint-config-prettier": "10.1.8",
