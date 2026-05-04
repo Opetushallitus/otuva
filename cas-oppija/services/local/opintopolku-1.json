@@ -2,6 +2,7 @@
   "@class": "org.apereo.cas.services.CasRegisteredService",
   "serviceId": "^https?://.*",
   "name": "opintopolku",
+  "theme": "cas-oppija-theme",
   "id": 1,
   "proxyPolicy": {
     "@class": "org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicy",
