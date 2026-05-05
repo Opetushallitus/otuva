@@ -29,7 +29,7 @@ services:
   # cas-virkailija
   cas-virkailija-db:
     container_name: cas-virkailija-db
-    image: postgres:16.4
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
     ports:
       - 5080:5432
     environment:
@@ -46,7 +46,7 @@ services:
   # cas-oppija
   cas-oppija-db:
     container_name: cas-oppija-db
-    image: postgres:16.4
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
     ports:
       - 5081:5432
     environment:
@@ -61,7 +61,7 @@ services:
 
   keycloak-db:
     container_name: cas-oppija-keycloak-db
-    image: postgres:16.4
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -98,7 +98,7 @@ services:
 
   mock-substance-service-db:
     container_name: otuva-mock-substance-service-db
-    image: postgres:16.4
+    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
     ports:
       - "5440:5432"
     environment:
@@ -114,7 +114,7 @@ services:
 
   mock-oppijanumerorekisteri:
     container_name: mock-oppijanumerorekisteri
-    image: wiremock/wiremock:3.13.2-3
+    image: wiremock/wiremock:3.13.2-3@sha256:fd27e46090916e85326229e5102ee169ae729059f3374549615bd20a35fee1f2
     ports:
       - "8084:8080"
     volumes:
