@@ -7,6 +7,7 @@ import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.PermissionCheckerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,11 +28,11 @@ import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_I
 @Tag(name = "Henkilöön liittyvät operaatiot")
 @RequiredArgsConstructor
 public class HenkiloController {
-
     private final OrganisaatioHenkiloService organisaatioHenkiloService;
     private final HenkiloService henkiloService;
     private final KayttajatiedotService kayttajatiedotService;
     private final IdentificationService identificationService;
+    private final PermissionCheckerService permissionCheckerService;
 
     @GetMapping("/{oid}")
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPersonOrSelf(#oid, {'KAYTTOOIKEUS': {'PALVELUKAYTTAJA_CRUD'}}, null)")
@@ -126,26 +127,38 @@ public class HenkiloController {
         this.henkiloService.passivoi(henkiloOid, kasittelijaOid);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping(value = "/hakatunnus")
+    @Operation(summary = "Hakee henkilön omat Haka-tunnukset.")
+    public Set<String> getOwnHakatunnusteet() {
+        String oid = permissionCheckerService.getCurrentUserOid();
+        return identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping(value = "/hakatunnus", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Päivittää henkilön omat Haka-tunnukset.")
+    public Set<String> updateHenkilosHakaTunnisteet(@RequestBody Set<String> hakatunnisteet) {
+        String oid = permissionCheckerService.getCurrentUserOid();
+        return identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid, hakatunnisteet);
+    }
+
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
-    @RequestMapping(value = "/{oid}/hakatunnus", method = RequestMethod.GET)
+    @GetMapping(value = "/{oid}/hakatunnus")
     @Operation(summary = "Hakee henkilön Haka-tunnisteet.",
             description = "Hakee annetun henkilön Haka-tunnisteet.")
-    public Set<String> getHenkilosHakaTunnisteet(@PathVariable("oid") @Parameter(description = "Henkilön OID") String oid,
-                                                 @RequestHeader(value = "External-Permission-Service", required = false)
-                                                                  ExternalPermissionService permissionService) {
+    public Set<String> getHenkilosHakaTunnisteet(@Parameter(description = "Henkilön OID") String oid,
+                                                @RequestHeader(value = "External-Permission-Service", required = false) ExternalPermissionService permissionService) {
         return identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid);
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
     @PutMapping(value = "/{oid}/hakatunnus", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Päivittää henkilön Haka-tunnisteet. ",
-            description = "Päivittää annetun henkilön Haka-tunnisteet.")
-    public Set<String> updateHenkilosHakaTunnisteet(@PathVariable("oid") @Parameter(description = "Henkilön OID") String oid,
-                                                 @RequestBody Set<String> hakatunnisteet,
-                                                 @RequestHeader(value = "External-Permission-Service", required = false)
-                                                                  ExternalPermissionService permissionService) {
+    @Operation(summary = "Päivittää henkilön Haka-tunnisteet. ", description = "Päivittää annetun henkilön Haka-tunnisteet.")
+    public Set<String> updateHenkilosHakaTunnisteet(@Parameter(description = "Henkilön OID") String oid,
+                                                @RequestBody Set<String> hakatunnisteet,
+                                                @RequestHeader(value = "External-Permission-Service", required = false) ExternalPermissionService permissionService) {
         return identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oid, hakatunnisteet);
-
     }
 
     @PreAuthorize("@permissionCheckerServiceImpl.isAllowedToAccessPerson(#oid, {'KAYTTOOIKEUS': {'CRUD', 'PALVELUKAYTTAJA_CRUD'}}, #permissionService)")
@@ -206,5 +219,4 @@ public class HenkiloController {
                                      @Parameter(description = "Lista käyttöoikeusryhmä ID:itä. Formaatti: [id1, id2,...]") @RequestBody Set<Long> anomusilmoitusKayttooikeusRyhmat) {
         this.henkiloService.updateAnomusilmoitus(oid, anomusilmoitusKayttooikeusRyhmat);
     }
-
 }

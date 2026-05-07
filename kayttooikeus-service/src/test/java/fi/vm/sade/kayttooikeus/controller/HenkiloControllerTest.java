@@ -1,23 +1,24 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.KayttajatiedotService;
 import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.context.jdbc.Sql;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -28,7 +29,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+import java.util.List;
+
+@Sql("/truncate_tables.sql")
+@Sql("/test-data.sql")
+@SpringBootTest
 public class HenkiloControllerTest extends AbstractControllerTest {
     @MockitoBean
     private OrganisaatioHenkiloService service;
@@ -115,10 +120,32 @@ public class HenkiloControllerTest extends AbstractControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    protected <RequestT> MockHttpServletRequestBuilder createRequest(MockHttpServletRequestBuilder builder, RequestT requestBody) throws JsonProcessingException {
-        builder.accept(MediaType.APPLICATION_JSON);
-        if (requestBody == null) return builder;
-        return builder.contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestBody));
+    @Test
+    @WithMockUser(username = "1.2.246.562.24.37535704268")
+    public void updatesAndGetsOwnHakaTunnus() throws Exception {
+
+        String getOriginal = mvc.perform(get("/henkilo/hakatunnus").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(getOriginal);
+
+        String putNewTunnukset = mvc.perform(put("/henkilo/hakatunnus")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content("""
+["hakatunus", "uustunus"]""")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(putNewTunnukset, "hakatunus", "uustunus");
+
+        String getUpdatedTunnukset = mvc.perform(get("/henkilo/hakatunnus").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(getUpdatedTunnukset, "hakatunus", "uustunus");
+    }
+
+    private void assertHakaTunnukset(String response, String... tunnukset) throws Exception {
+        List<String> hakaTunnukset = objectMapper.readValue(response, TypeFactory.defaultInstance().constructCollectionType(List.class, String.class));
+        assertThat(hakaTunnukset).containsExactlyInAnyOrder(tunnukset);
     }
 }
