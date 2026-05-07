@@ -121,9 +121,32 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "1.2.3.4.5", roles = {"APP_KAYTTOOIKEUS_REKISTERINPITAJA", "APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
+    public void updatesAndGetHakaTunnus() throws Exception {
+
+        String getOriginal = mvc.perform(get("/henkilo/1.2.246.562.24.37535704268/hakatunnus").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(getOriginal);
+
+        String putNewTunnukset = mvc.perform(put("/henkilo/1.2.246.562.24.37535704268/hakatunnus")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content("""
+["hakatunus", "uustunus"]""")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(putNewTunnukset, "hakatunus", "uustunus");
+
+        String getUpdatedTunnukset = mvc.perform(get("/henkilo/1.2.246.562.24.37535704268/hakatunnus").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertHakaTunnukset(getUpdatedTunnukset, "hakatunus", "uustunus");
+    }
+
+    @Test
     @WithMockUser(username = "1.2.246.562.24.37535704268")
     public void updatesAndGetsOwnHakaTunnus() throws Exception {
-
         String getOriginal = mvc.perform(get("/henkilo/hakatunnus").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
