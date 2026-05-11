@@ -13,21 +13,21 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700">
     <link rel="stylesheet" href="/cas/css/bootstrap-v4.0.0.min.css" />
 
-    <span th:remove="tag" th:if="${'true' == #strings.defaultString(#themes.code('cas.css.core.enabled'), 'true')}">
+    <span th:remove="tag" th:if="${'true' == #strings.defaultString(#cas.theme('cas.css.core.enabled'), 'true')}">
         <span th:replace="~{fragments/includes :: stylesheets}">
             <a href="fragments/includes.html">Theme</a> stylesheet fragment will go here
         </span>
     </span>
 
-    <span th:remove="tag" th:each="file : ${#strings.arraySplit(#themes.code('cas.standard.css.file'), ',')}">
+    <span th:remove="tag" th:each="file : ${#strings.arraySplit(#cas.theme('cas.standard.css.file'), ',')}">
         <link rel="stylesheet" type="text/css" href="../static/css/cas.css" th:href="@{${file}}" />
     </span>
 
     <link rel="shortcut icon"
-          th:href="@{${#strings.defaultString(#themes.code('cas.favicon.file'), '/favicon.ico')}}" />
+          th:href="@{${#strings.defaultString(#cas.theme('cas.favicon.file'), '/favicon.ico')}}" />
     <script type="text/javascript" th:src="@{#{webjars.jquery.js}}"></script>
 
-    <span th:remove="tag" th:each="name : ${#strings.arraySplit(#themes.code('cas.standard.fragments.head'), ',')}">
+    <span th:remove="tag" th:each="name : ${#strings.arraySplit(#cas.theme('cas.standard.fragments.head'), ',')}">
         <span th:replace="~{fragments/custom :: ${name}}" th:remove="tag" />
     </span>
 </head>
