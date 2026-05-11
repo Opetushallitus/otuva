@@ -2,103 +2,102 @@ package fi.vm.sade.kayttooikeus;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW;
 
+@ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AccessLogTest {
 
-    private final PrintStream restore = System.out;
     @Autowired
     private TestRestTemplate restTemplate;
-    private ByteArrayOutputStream output;
+    private TestRestTemplate restTemplateWithoutRedirects;
 
     @BeforeEach
     public void setUp() {
-        output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(output));
-    }
-
-    @AfterEach
-    public void tearDown() throws IOException {
-        System.setOut(restore);
-        output.close();
+        restTemplateWithoutRedirects = restTemplate.withRedirects(DONT_FOLLOW);
     }
 
     @Test
-    public void requestIsLogged() {
-        restTemplate.getForEntity("/", String.class);
+    public void requestIsLogged(CapturedOutput output) {
+        getForEntity("/");
         assertEquals("GET / HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void sensitiveInformationInPathIsMasked() {
-        restTemplate.getForEntity("/123456+7890", String.class);
+    public void sensitiveInformationInPathIsMasked(CapturedOutput output) {
+        getForEntity("/123456+7890");
         assertEquals("GET /123456+**** HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void sensitiveInformationInPathIsMaskedNewSpec() {
-        restTemplate.getForEntity("/123456X7890", String.class);
+    public void sensitiveInformationInPathIsMaskedNewSpec(CapturedOutput output) {
+        getForEntity("/123456X7890");
         assertEquals("GET /123456X**** HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void sensitiveInformationInRequestParameterIsMasked() {
-        restTemplate.getForEntity("/?test=123456-7890", String.class);
+    public void sensitiveInformationInRequestParameterIsMasked(CapturedOutput output) {
+        getForEntity("/?test=123456-7890");
         assertEquals("GET /?test=123456-**** HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void allSensitiveInformationIsMasked() {
-        restTemplate.getForEntity("/123456+789A/123456-789B?test=123456A7890&test=123456-789R", String.class);
+    public void allSensitiveInformationIsMasked(CapturedOutput output) {
+        getForEntity("/123456+789A/123456-789B?test=123456A7890&test=123456-789R");
         assertEquals("GET /123456+****/123456-****?test=123456A****&test=123456-**** HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void onlyExactMatchesAreMaskedIncorrectPrefix() {
-        restTemplate.getForEntity("/1234567-890A", String.class);
+    public void onlyExactMatchesAreMaskedIncorrectPrefix(CapturedOutput output) {
+        getForEntity("/1234567-890A");
         assertEquals("GET /1234567-890A HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void onlyExactMatchesAreMaskedIncorrectSuffix() {
-        restTemplate.getForEntity("/123456-890AA", String.class);
+    public void onlyExactMatchesAreMaskedIncorrectSuffix(CapturedOutput output) {
+        getForEntity("/123456-890AA");
         assertEquals("GET /123456-890AA HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void handlesOids() {
-        restTemplate.getForEntity("/1.2.246.562.24.43116640405", String.class);
+    public void handlesOids(CapturedOutput output) {
+        getForEntity("/1.2.246.562.24.43116640405");
         assertEquals("GET /1.2.246.562.24.43116640405 HTTP/1.1", resolveLog(output));
     }
 
     @Test
-    public void hasRequestMappingField() {
-        restTemplate.getForEntity("/henkilo/1.2.246.562.24.43116640405", String.class);
+    public void hasRequestMappingField(CapturedOutput output) {
+        getForEntity("/henkilo/1.2.246.562.24.43116640405");
         // For whatever reason in tests the request mapping is not resolved correctly so basically this tests the field
         // is at least attempted to be included in the access log.
         //assertEquals("/henkilo/{oid}", resolveLogLine(output).requestMapping);
         assertEquals("-", resolveLogLine(output).requestMapping);
     }
 
-    private String resolveLog(ByteArrayOutputStream output) {
+    private void getForEntity(String url) {
+        restTemplateWithoutRedirects.getForEntity(url, String.class);
+    }
+
+    private String resolveLog(CapturedOutput output) {
         return resolveLogLine(output).request;
     }
 
-    private AccessLogLine resolveLogLine(ByteArrayOutputStream output) {
-        for (String s : output.toString().split(System.getProperty("line.separator"), 10)) {
-            System.err.println(s);
+    private AccessLogLine resolveLogLine(CapturedOutput output) {
+        var lines = output.getOut().split(System.lineSeparator());
+        for (int i = lines.length - 1; i >= 0; i--) {
+            var s = lines[i];
             var result = tryParse(s);
             if (result != null) return result;
         }
