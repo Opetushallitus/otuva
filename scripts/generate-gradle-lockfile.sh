@@ -7,6 +7,7 @@ function main {
   cd "${repo}/cas-oppija"
   ./gradlew dependencies --write-locks
 
+  use_java_version 25
   cd "${repo}/cas-virkailija"
   ./gradlew dependencies --write-locks
 }
