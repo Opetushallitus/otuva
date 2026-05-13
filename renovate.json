@@ -15,5 +15,11 @@
       ],
       "enabled": false
     }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["aws-cdk", "aws-cdk-lib", "constructs"],
+      "automerge": true
+    }
   ]
 }
