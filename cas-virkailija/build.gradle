@@ -44,9 +44,6 @@ buildscript {
         classpath "de.undercouch:gradle-download-task:${project.gradleDownloadTaskVersion}"
         classpath "org.apereo.cas:cas-server-core-api-configuration-model:${project.'cas.version'}"
         classpath "org.apereo.cas:cas-server-support-configuration-metadata-repository:${project.'cas.version'}"
-        // <custom>
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
-        // </custom>
     }
 }
 
@@ -109,10 +106,6 @@ apply from: rootProject.file("gradle/springboot.gradle")
 apply plugin: "com.google.cloud.tools.jib"
 apply plugin: "com.bmuschko.docker-remote-api"
 apply from: rootProject.file("gradle/tasks.gradle")
-// <custom>
-apply plugin: "jacoco"
-apply plugin: "org.sonarqube"
-// </custom>
 
 def out = services.get(StyledTextOutputFactory).create("cas")
 def configurationCacheRequested = services.get(BuildFeatures).configurationCache.requested.getOrElse(true)
@@ -381,11 +374,5 @@ dependencies {
 }
 
 // <custom>
-sonarqube {
-    properties {
-        property "sonar.projectKey", "Opetushallitus_cas"
-        property "sonar.organization", "opetushallitus"
-        property "sonar.host.url", "https://sonarcloud.io"
-    }
 }
 // </custom>
