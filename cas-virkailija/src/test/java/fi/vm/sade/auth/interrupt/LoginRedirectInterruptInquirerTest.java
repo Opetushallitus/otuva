@@ -11,8 +11,8 @@ import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.interrupt.InterruptResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,7 +33,7 @@ public class LoginRedirectInterruptInquirerTest {
     KayttooikeusClient kayttooikeusClientMock;
     OppijanumerorekisteriClient oppijanumerorekisteriClientMock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         kayttooikeusClientMock = mock(KayttooikeusOauth2Client.class);
         when(kayttooikeusClientMock.createLoginToken(any())).thenReturn("loginToken1");
