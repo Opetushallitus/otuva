@@ -101,10 +101,6 @@ function stop_cas_oppija {
   stop_process cas_oppija_backend $cas_oppija_backend_pid
 }
 
-function is_running_on_codebuild {
-  [ -n "${CODEBUILD_BUILD_ID:-}" ]
-}
-
 function start_support_containers {
   docker compose up --force-recreate --renew-anon-volumes --detach --wait
 }
