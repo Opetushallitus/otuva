@@ -137,12 +137,6 @@ configurations {
         exclude(group: "org.slf4j", module: "jcl-over-slf4j")
         exclude(group: "org.apache.logging.log4j", module: "log4j-to-slf4j")
     }
-
-    // <custom>
-    testRuntimeClasspath {
-        resolutionStrategy.deactivateDependencyLocking()
-    }
-    // </custom>
 }
 
 war {
@@ -356,7 +350,6 @@ dependencies {
     implementation "org.apereo.cas:cas-server-webapp-init"
     implementation "org.pac4j:pac4j-saml"
     implementation "org.springframework.security:spring-security-config"
-    testImplementation "junit:junit"
     testImplementation "org.apereo.cas:cas-server-core-services-registry"
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
@@ -374,5 +367,7 @@ dependencies {
 }
 
 // <custom>
+tasks.named("test") {
+    useJUnitPlatform()
 }
 // </custom>
