@@ -14,8 +14,8 @@ import org.apereo.cas.multitenancy.TenantDefinition;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.multitenancy.TenantsManager;
 import org.apereo.cas.web.UrlValidator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -35,7 +35,7 @@ public class HttpAuthenticationHandlerTest {
     AuthenticationHandler authenticationHandler;
     KayttooikeusClient kayttooikeusClient;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         kayttooikeusClient = mock(KayttooikeusOauth2Client.class);
         authenticationHandler = new HttpAuthenticationHandler(0, kayttooikeusClient);
