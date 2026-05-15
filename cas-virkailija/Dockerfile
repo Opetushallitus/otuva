@@ -11,6 +11,7 @@ COPY build.gradle .
 
 COPY lombok.config .
 COPY src ./src
+RUN yum install -y findutils
 RUN ./gradlew clean build -x test
 
 FROM amazoncorretto:25
