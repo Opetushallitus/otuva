@@ -105,10 +105,6 @@ function is_running_on_codebuild {
   [ -n "${CODEBUILD_BUILD_ID:-}" ]
 }
 
-function is_running_on_github_actions {
-  [ -n "${GITHUB_ACTIONS:-}" ]
-}
-
 function start_support_containers {
   docker compose up --force-recreate --renew-anon-volumes --detach --wait
 }
