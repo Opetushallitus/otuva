@@ -166,7 +166,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasVirkailija",
             ["scripts/ci/run-tests-cas-virkailija.sh"],
-            "corretto21",
+            (env === "hahtuva") ? "corretto25" : "corretto21",
             dependencyManagement
           ),
         })
@@ -292,7 +292,7 @@ function makeTestProject(
   env: string,
   name: string,
   testCommands: string[],
-  javaVersion: "corretto11" | "corretto21",
+  javaVersion: "corretto21" | "corretto25",
   dependencyManagement: dm.DependencyManagementStack,
   computeType: codebuild.ComputeType = codebuild.ComputeType.SMALL,
 ): codebuild.PipelineProject {
