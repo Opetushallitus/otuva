@@ -54,7 +54,11 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("HahtuvaContinuousDeploymentPipeline"),
       connection,
       "hahtuva",
-      { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      {
+        owner: "Opetushallitus",
+        name: "otuva",
+        branch: "cas-virkailija-8.0.0-RC4",
+      },
       dependencyManagement,
       props
     );
@@ -63,7 +67,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("DevContinuousDeploymentPipeline"),
       connection,
       "dev",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
+      { owner: "Opetushallitus", name: "otuva", branch: "master" },
       dependencyManagement,
       props
     );
@@ -136,7 +140,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva";
+    const runTests = env === "hahtuva" || env === "dev";
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
       testStage.addAction(
