@@ -67,7 +67,11 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("DevContinuousDeploymentPipeline"),
       connection,
       "dev",
-      { owner: "Opetushallitus", name: "otuva", branch: "master" },
+      {
+        owner: "Opetushallitus",
+        name: "otuva",
+        branch: "cas-virkailija-8.0.0-RC4",
+      },
       dependencyManagement,
       props
     );
@@ -166,7 +170,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasVirkailija",
             ["scripts/ci/run-tests-cas-virkailija.sh"],
-            "corretto21",
+            (env === "dev") ? "corretto25" : "corretto21",
             dependencyManagement
           ),
         })
