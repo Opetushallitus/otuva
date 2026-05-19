@@ -1,4 +1,4 @@
-FROM amazoncorretto:21 AS build
+FROM amazoncorretto:21@sha256:cc5af6b7df0e0bf2f5952dd53fdc90e011d33c26e31c749357227808dca871d7 AS build
 WORKDIR /app
 
 COPY gradle ./gradle
@@ -12,7 +12,7 @@ COPY lombok.config .
 COPY src ./src
 RUN ./gradlew clean build -x test
 
-FROM amazoncorretto:21
+FROM amazoncorretto:21@sha256:cc5af6b7df0e0bf2f5952dd53fdc90e011d33c26e31c749357227808dca871d7
 
 WORKDIR /app
 COPY services ./services
