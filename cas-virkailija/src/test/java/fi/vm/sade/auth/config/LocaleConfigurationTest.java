@@ -1,8 +1,8 @@
 package fi.vm.sade.auth.config;
 
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -21,7 +21,7 @@ public class LocaleConfigurationTest {
     private CasConfigurationProperties casProperties;
     private LocaleConfiguration localeConfiguration;
 
-    @Before
+    @BeforeEach
     public void setup() {
         casProperties = new CasConfigurationProperties();
         casProperties.getLocale().setDefaultValue("fi");
