@@ -107,7 +107,7 @@
 
                             const identityProviderOptions = $('#identityProviderOptions');
                             const options = identityProviderOptions.find('option');
-                            const sorted = options.sort((a, b) => $(a).text().localeCompare($(b).text()));
+                            const sorted = options.toArray().sort((a, b) => $(a).text().localeCompare($(b).text()));
                             identityProviderOptions.empty()
                                 .append($('<option></option>')
                                     .attr({ value: undefined, disabled: true })
