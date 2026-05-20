@@ -13,7 +13,7 @@ cas.webflow.crypto.signing.key: ${cas_webflow_signing_key}
 cas.interrupt.cookie.crypto.encryption.key: ${cas_interrupt_cookie_encryption_key}
 cas.interrupt.cookie.crypto.signing.key: ${cas_interrupt_cookie_signing_key}
 
-cas.view.default-redirect-url: https://virkailija.hahtuvaopintopolku.fi/virkailijan-tyopoyta
+cas.logout.follow-service-redirects: false
 
 cas.authn.mfa.triggers.rest.url: https://hahtuva.otuva.opintopolku.fi/kayttooikeus-service/mfa/trigger
 cas.authn.mfa.triggers.rest.headers.Caller-Id: '1.2.246.562.10.00000000001.cas'

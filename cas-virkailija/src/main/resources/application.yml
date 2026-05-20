@@ -65,6 +65,9 @@ cas.service-registry.core.init-from-json: true
 
 cas.custom.properties.uusHakaEnabled: false
 cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
+cas.custom.properties.arvo: https://arvo.csc.fi/
+cas.custom.properties.oiva: https://oiva.okm.fi/
+cas.custom.properties.valssi: https://valssi.karvi.fi/virkailija-ui/
 
 cas.authn.mfa.triggers.rest.url: http://localhost:8101/kayttooikeus-service/mfa/trigger
 cas.authn.mfa.triggers.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}

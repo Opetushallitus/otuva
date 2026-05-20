@@ -80,6 +80,11 @@ main {
     grid-gap: 20px;
     padding: 40px;
 }
+#logoutBody > .card-body {
+    display: block;
+    text-align: left;
+    padding: 40px;
+}
 
 .taustakuva .login-kortti input[type=tex†] { margin-top: 15px; }
 .taustakuva .login-kortti input[type=submit] { margin-top: 30px; }
@@ -242,6 +247,9 @@ main {
               "muut-kirjautumistavat"
               "palveluinfot";
         grid-template-columns: 1fr;
+        padding: 32px;
+    }
+    #logoutBody > .card-body {
         padding: 32px;
     }
 
