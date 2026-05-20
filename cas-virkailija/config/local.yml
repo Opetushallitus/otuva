@@ -32,8 +32,8 @@ cas.authn.pac4j.saml[0].private-key-password: dummy
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:${server.port}/cas/login/haka
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-aggregate: true
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://haka.funet.fi/metadata/haka-metadata-v9.xml
-cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /app/etc/localhakasp.xml
-cas.authn.pac4j.saml[0].keystore-path: /app/etc/localhakakeystore.jks
+cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: /tmp/localhakasp.xml
+cas.authn.pac4j.saml[0].keystore-path: /tmp/localhakakeystore.jks
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: true
 cas.authn.pac4j.saml[0].wants-responses-signed: true
@@ -46,9 +46,9 @@ cas.authn.pac4j.saml[0].callback-url-type: NONE
 cas.authn.pac4j.saml[1].client-name: suomifi
 cas.authn.pac4j.saml[1].keystore-password: dummy
 cas.authn.pac4j.saml[1].private-key-password: dummy
-cas.authn.pac4j.saml[1].keystore-path: /app/etc/localsuomifikeystore.jks
+cas.authn.pac4j.saml[1].keystore-path: /tmp/localsuomifikeystore.jks
 cas.authn.pac4j.saml[1].service-provider-entity-id: http://localhost:${server.port}/cas/login/suomifi
-cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /app/etc/localsuomifi.xml
+cas.authn.pac4j.saml[1].metadata.service-provider.file-system.location: /tmp/localsuomifi.xml
 cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path: https://static.apro.tunnistus.fi/static/metadata/idp-metadata.xml
 cas.authn.pac4j.saml[1].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[1].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
