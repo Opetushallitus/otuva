@@ -17,7 +17,7 @@ test.describe('Authentication', () => {
         await login(page);
 
         // Await for the url to have ticket
-        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/')
+        await page.waitForURL((url) => url.href === 'http://localhost:8180/mock-substance-service/');
 
         // Check ticket
         const credentials = page.getByText('Credentials');

@@ -44,7 +44,8 @@ export const hahtuva: Config = {
   opintopolkuHost: "hahtuvaopintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
-  oppijanumerorekisteriBaseUrl: "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
+  oppijanumerorekisteriBaseUrl:
+    "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
 };
 
 export const dev: Config = {
@@ -57,7 +58,8 @@ export const dev: Config = {
     enabled: true,
     bucketName: "oph-lampi-dev",
   },
-  oppijanumerorekisteriBaseUrl: "https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
+  oppijanumerorekisteriBaseUrl:
+    "https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
 };
 
 export const qa: Config = {
@@ -70,7 +72,8 @@ export const qa: Config = {
     enabled: true,
     bucketName: "oph-lampi-qa",
   },
-  oppijanumerorekisteriBaseUrl: "https://qa.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
+  oppijanumerorekisteriBaseUrl:
+    "https://qa.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
 };
 
 export const prod: Config = {
@@ -83,5 +86,6 @@ export const prod: Config = {
     enabled: true,
     bucketName: "oph-lampi-prod",
   },
-  oppijanumerorekisteriBaseUrl: "https://prod.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
+  oppijanumerorekisteriBaseUrl:
+    "https://prod.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
 };
