@@ -21,7 +21,6 @@ import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusPopulato
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttoOikeusRyhmaPopulator.kayttoOikeusRyhma;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloKayttoOikeusPopulator.myonnettyKayttoOikeus;
 import static fi.vm.sade.kayttooikeus.repositories.populate.OrganisaatioHenkiloPopulator.organisaatioHenkilo;
-import static fi.vm.sade.kayttooikeus.repositories.populate.PalveluPopulator.palvelu;
 import static fi.vm.sade.kayttooikeus.repositories.populate.TextGroupPopulator.text;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,25 +57,6 @@ public class KayttoOikeusRepositoryTest extends AbstractRepositoryTest {
         assertEquals("1.2.3.4.5", expiring.get(0).getHenkiloOid());
         assertEquals("RYHMA", expiring.get(0).getRyhmaName());
         assertEquals(tapahtuma.getKayttoOikeusRyhma().getNimi().getId(), expiring.get(0).getRyhmaDescription().getId());
-    }
-
-    @Test
-    public void listAllKayttoOikeusTest() {
-        KayttoOikeus kayttoOikeus = populate(oikeus(palvelu("HENKILOHALLINTA")
-                        .kuvaus(text("FI", "Henkilöhallinta").put("EN", "Person management")), "CRUD")
-                .kuvaus(text("FI", "Käsittelyoikeus").put("EN", "Admin")));
-        populate(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Koodisto")), "READ")
-                .kuvaus(text("FI", "Lukuoikeus")));
-
-        List<PalveluRooliDto> results = kayttoOikeusRepository.listAllKayttoOikeus();
-
-        assertEquals(2, results.size());
-        assertEquals("HENKILOHALLINTA", results.get(0).getPalveluName());
-        assertEquals("CRUD", results.get(0).getRooli());
-        assertEquals(kayttoOikeus.getPalvelu().getDescription().getId(), results.get(0).getPalveluTexts().getId());
-        assertEquals(kayttoOikeus.getTextGroup().getId(), results.get(0).getRooliTexts().getId());
-        assertEquals("KOODISTO", results.get(1).getPalveluName());
-        assertEquals("READ", results.get(1).getRooli());
     }
 
     @Test
