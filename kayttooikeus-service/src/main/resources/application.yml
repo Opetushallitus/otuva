@@ -85,7 +85,6 @@ auth.crypto-service.static-salt: mock
 
 springdoc.packagesToScan: fi.vm.sade.kayttooikeus.controller
 springdoc.pathsToMatch: /**
-springdoc.swagger-ui.url: /v3/api-docs.yaml
 
 viestinvalitys.baseurl: https://viestinvalitys.hahtuvaopintopolku.fi/lahetys
 oppijanumerorekisteri.baseurl: https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service

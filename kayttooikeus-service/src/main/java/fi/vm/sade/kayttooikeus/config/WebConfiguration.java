@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -49,10 +50,15 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void extendMessageConverters(@NonNull List<HttpMessageConverter<?>> converters) {
-        // Add this as primary converter. Spring tests which one to use in order of this list. This needs to be
-        // before stringhttpmessageconverter or apis will return plain string as json content type string. (without
-        // double quote marks)
-        converters.add(0, mappingJackson2HttpMessageConverter());
+        // Keep byte[] responses, such as Springdoc's /v3/api-docs, handled as raw bytes instead of Base64 JSON.
+        // Jackson must still stay before StringHttpMessageConverter for existing JSON string response behavior.
+        int jacksonIndex = 0;
+        for (int i = 0; i < converters.size(); i++) {
+            if (converters.get(i) instanceof ByteArrayHttpMessageConverter) {
+                jacksonIndex = i + 1;
+            }
+        }
+        converters.add(jacksonIndex, mappingJackson2HttpMessageConverter());
     }
 
     @Override

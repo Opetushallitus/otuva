@@ -218,7 +218,7 @@ public class SecurityConfigDefault {
                     .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
                     .requestMatchers("/cas/salasananvaihto").permitAll()
                     .requestMatchers("/cas/tunnistus").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
                     .requestMatchers("/.well-known/**").permitAll()
                     .requestMatchers("/error").permitAll()
