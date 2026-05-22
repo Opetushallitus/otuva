@@ -77,6 +77,12 @@ public class KayttoOikeusServiceImpl implements KayttoOikeusService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<PalveluRooliDto> listAllKayttoOikeus() {
+        return localizationService.localize(kayttoOikeusRepository.listAllKayttoOikeus());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName) {
         return localizationService.localize(kayttoOikeusRepository.listKayttoOikeusByPalvelu(palveluName));
     }

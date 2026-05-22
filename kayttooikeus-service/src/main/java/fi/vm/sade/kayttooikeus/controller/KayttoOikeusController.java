@@ -2,6 +2,7 @@ package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.dto.KayttooikeusPerustiedotDto;
 import fi.vm.sade.kayttooikeus.dto.PalveluKayttoOikeusDto;
+import fi.vm.sade.kayttooikeus.dto.PalveluRooliDto;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KayttooikeusCriteria;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KayttoOikeusController {
     private final KayttoOikeusService kayttoOikeusService;
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA')")
+    @Operation(summary = "Hakee kaikki käyttöoikeudet.",
+            description = "Listaa kaikki käyttöoikeudet palvelun nimellä, käyttöoikeuden nimellä sekä molempien lokalisoiduilla teksteillä.")
+    @GetMapping()
+    public List<PalveluRooliDto> listAllKayttoOikeus() {
+        return kayttoOikeusService.listAllKayttoOikeus();
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_KAYTTOOIKEUS_READ',"
             + "'ROLE_APP_KAYTTOOIKEUS_CRUD',"

@@ -80,6 +80,27 @@ public class KayttoOikeusServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
+    public void listAllKayttoOikeusTest() {
+        populate(oikeus(palvelu("HENKILOHALLINTA").kuvaus(text("FI", "Henkilöhallinta")
+                        .put("EN", "Person management")), "CRUD")
+                .kuvaus(text("FI", "Käsittelyoikeus").put("EN", "Admin")));
+        populate(oikeus(palvelu("KOODISTO").kuvaus(text("FI", "Koodisto")), "READ")
+                .kuvaus(text("FI", "Lukuoikeus")));
+
+        List<PalveluRooliDto> results = kayttoOikeusService.listAllKayttoOikeus();
+
+        assertEquals(2, results.size());
+        assertEquals("HENKILOHALLINTA", results.get(0).getPalveluName());
+        assertEquals("Henkilöhallinta", results.get(0).getPalveluTexts().get("FI"));
+        assertEquals("Person management", results.get(0).getPalveluTexts().get("EN"));
+        assertEquals("CRUD", results.get(0).getRooli());
+        assertEquals("Käsittelyoikeus", results.get(0).getRooliTexts().get("FI"));
+        assertEquals("Admin", results.get(0).getRooliTexts().get("EN"));
+        assertEquals("KOODISTO", results.get(1).getPalveluName());
+        assertEquals("Lukuoikeus", results.get(1).getRooliTexts().get("FI"));
+    }
+
+    @Test
     public void listKayttoOikeusByPalveluTest() {
         populate(oikeus("HENKILOHALLINTA", "CRUD").kuvaus(text("FI", "Käsittelyoikeus")
                                                         .put("EN", "Admin")));

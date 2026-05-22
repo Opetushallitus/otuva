@@ -14,6 +14,8 @@ public interface KayttoOikeusService {
 
     List<KayttoOikeusRyhmaDto> listAllKayttoOikeusRyhmas(Boolean passiiviset, String palvelu, String kayttooikeus);
 
+    List<PalveluRooliDto> listAllKayttoOikeus();
+
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
     List<KayttooikeusPerustiedotDto> listMyonnettyKayttoOikeusForUser(KayttooikeusCriteria criteria, Long limit, Long offset);

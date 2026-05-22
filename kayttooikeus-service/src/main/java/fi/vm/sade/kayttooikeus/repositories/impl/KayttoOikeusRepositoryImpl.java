@@ -29,6 +29,19 @@ public class KayttoOikeusRepositoryImpl extends BaseRepositoryImpl<KayttoOikeus>
     }
 
     @Override
+    public List<PalveluRooliDto> listAllKayttoOikeus() {
+        return jpa().from(kayttoOikeus)
+                .innerJoin(kayttoOikeus.palvelu, palvelu)
+                .select(Projections.bean(PalveluRooliDto.class,
+                        palvelu.name.as("palveluName"),
+                        palvelu.description.id.as("palveluTextsId"),
+                        kayttoOikeus.rooli.as("rooli"),
+                        kayttoOikeus.textGroup.id.as("rooliTextsId")
+                ))
+                .orderBy(palvelu.name.asc(), kayttoOikeus.rooli.asc()).fetch();
+    }
+
+    @Override
     public List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName) {
         return jpa().from(palvelu)
                 .innerJoin(palvelu.kayttoOikeus, kayttoOikeus)

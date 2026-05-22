@@ -10,6 +10,8 @@ import java.time.Period;
 import java.util.List;
 
 public interface KayttoOikeusRepository extends BaseRepository<KayttoOikeus> {
+    List<PalveluRooliDto> listAllKayttoOikeus();
+
     List<PalveluKayttoOikeusDto> listKayttoOikeusByPalvelu(String palveluName);
 
     List<ExpiringKayttoOikeusDto> findSoonToBeExpiredTapahtumas(LocalDate now, Period...expireThresholds);

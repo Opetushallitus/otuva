@@ -32,6 +32,22 @@ public class KayttoOikeusControllerTest extends AbstractControllerTest {
     private TaskExecutorService taskExecutorService;
 
     @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA")
+    public void listAllKayttoOikeusTest() throws Exception {
+        given(this.kayttoOikeusService.listAllKayttoOikeus())
+                .willReturn(singletonList(PalveluRooliDto.builder()
+                        .palveluName("palvelunimi")
+                        .palveluTexts(new TextGroupListDto(1L).put("FI", "palvelu kuvaus"))
+                        .rooli("joku rooli")
+                        .rooliTexts(new TextGroupListDto(2L).put("FI", "rooli kuvaus"))
+                        .build()));
+
+        this.mvc.perform(get("/kayttooikeus").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResource("classpath:kayttooikeus/palveluRooliList.json")));
+    }
+
+    @Test
     @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
     public void listKayttoOikeusByPalveluTest() throws Exception {
         given(this.kayttoOikeusService.listKayttoOikeusByPalvelu("HENKILOHALLINTA"))
