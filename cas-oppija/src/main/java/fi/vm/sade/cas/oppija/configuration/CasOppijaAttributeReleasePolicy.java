@@ -10,6 +10,7 @@ public class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePo
     private final List<String> attributes = List.of(
         "cn",
         "displayName",
+        "dateOfBirth",
         "firstName",
         "givenName",
         "familyName",
