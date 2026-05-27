@@ -32,7 +32,7 @@ public class OtuvaDelegatedAuthenticationPreProcessor implements DelegatedAuthen
                         .flatMap(oppijanumerorekisteriClient::getOidByEidas)
                 )
                 .ifPresent(oid -> principal.getAttributes().put("personOid", List.of(oid)));
-            LOGGER.debug("Delegated authentication processed principal [{}]", principal);
+            LOGGER.info("Delegated authentication processed principal [{}]", principal);
             return principal;
         } catch (Exception e) {
             LOGGER.error("failed to process delegated authentication for principal " + principal.getId(), e);
