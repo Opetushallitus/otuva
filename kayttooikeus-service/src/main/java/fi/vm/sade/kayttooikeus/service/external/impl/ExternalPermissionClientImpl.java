@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.vm.sade.javautils.httpclient.OphHttpClient;
+import fi.vm.sade.kayttooikeus.config.HttpClientConfiguration;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckResponseDto;
@@ -13,14 +13,18 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.JSON;
-import static fi.vm.sade.javautils.httpclient.OphHttpClient.UTF8;
 import static java.util.Objects.requireNonNull;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 @Component
 public class ExternalPermissionClientImpl implements ExternalPermissionClient {
-
-    private final OphHttpClient httpClient;
+    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     public final Map<ExternalPermissionService, String> SERVICE_URIS = new HashMap<>();
 
@@ -29,7 +33,7 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
     @Value("${url-varda}")
     private String urlVarda;
 
-    public ExternalPermissionClientImpl(OphHttpClient httpClient, ObjectMapper objectMapper) {
+    public ExternalPermissionClientImpl(HttpClient httpClient, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
 
@@ -42,11 +46,23 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
 
     @Override
     public PermissionCheckResponseDto getPermission(ExternalPermissionService service, PermissionCheckRequestDto requestDto) {
-        String path = requireNonNull(SERVICE_URIS.get(service), "service uri puuttuu: " + service);
-        String host = ExternalPermissionService.VARDA.equals(service) ? urlVarda : urlVirkailija;
-        return httpClient.post(host + path)
-                .dataWriter(JSON, UTF8, out -> out.write(objectMapper.writeValueAsString(requestDto)))
-                .execute(response -> objectMapper.readValue(response.asInputStream(), PermissionCheckResponseDto.class));
+        try {
+            String path = requireNonNull(SERVICE_URIS.get(service), "service uri puuttuu: " + service);
+            String host = ExternalPermissionService.VARDA.equals(service) ? urlVarda : urlVirkailija;
+            String body = objectMapper.writeValueAsString(requestDto);
+            var request = HttpRequest.newBuilder()
+                    .uri(new URI(host + path))
+                    .header("Caller-Id", HttpClientConfiguration.CALLER_ID)
+                    .header("CSRF", "CSRF")
+                    .header("Cookie", "CSRF=CSRF")
+                    .timeout(Duration.ofSeconds(30))
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return objectMapper.readValue(response.body(), PermissionCheckResponseDto.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
