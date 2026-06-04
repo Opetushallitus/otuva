@@ -22,7 +22,6 @@ import fi.vm.sade.kayttooikeus.service.validators.HaettuKayttooikeusryhmaValidat
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -92,8 +91,6 @@ public class KayttooikeusAnomusServiceTest {
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
     @MockitoBean
     private OrganisaatioService organisaatioService;
-    @Captor
-    private ArgumentCaptor<Set<String>> henkiloOidsCaptor;
     @MockitoSpyBean
     private KayttooikeusAnomusService kayttooikeusAnomusService;
 
@@ -746,6 +743,7 @@ public class KayttooikeusAnomusServiceTest {
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("organisaatio1"))
         );
+        ArgumentCaptor<Set<String>> henkiloOidsCaptor = ArgumentCaptor.forClass(Set.class);
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
@@ -777,6 +775,7 @@ public class KayttooikeusAnomusServiceTest {
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
         );
+        ArgumentCaptor<Set<String>> henkiloOidsCaptor = ArgumentCaptor.forClass(Set.class);
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactlyInAnyOrder("user2", "user3");
@@ -814,6 +813,7 @@ public class KayttooikeusAnomusServiceTest {
         verify(henkiloHibernateRepository).findByKayttoOikeusRyhmatAndOrganisaatiot(
                 eq(Stream.of(1L, 2L).collect(toSet())), eq(singleton("rootOid"))
         );
+        ArgumentCaptor<Set<String>> henkiloOidsCaptor = ArgumentCaptor.forClass(Set.class);
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactlyInAnyOrder("adminTilatullaRyhmällä", "user2", "user3");
@@ -846,6 +846,7 @@ public class KayttooikeusAnomusServiceTest {
 
         verifyNoInteractions(organisaatioClient);
         verifyNoInteractions(henkiloHibernateRepository);
+        ArgumentCaptor<Set<String>> henkiloOidsCaptor = ArgumentCaptor.forClass(Set.class);
         verify(emailService).sendNewRequisitionNotificationEmails(henkiloOidsCaptor.capture());
         Set<String> henkilot = henkiloOidsCaptor.getValue();
         assertThat(henkilot).containsExactly("adminTilatullaRyhmällä");

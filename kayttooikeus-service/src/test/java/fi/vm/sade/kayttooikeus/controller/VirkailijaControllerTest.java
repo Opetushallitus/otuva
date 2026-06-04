@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import fi.vm.sade.kayttooikeus.dto.VirkailijaCreateDto;
 import fi.vm.sade.kayttooikeus.service.VirkailijaService;
 import org.junit.jupiter.api.Test;

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -61,6 +60,9 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -97,9 +99,6 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
 
     @MockitoBean
     private EmailService emailService;
-
-    @Captor
-    private ArgumentCaptor<Collection<KayttoOikeusRyhma>> kayttooikeusRyhmaCollectionCaptor;
 
     @BeforeEach
     public void setup() {
@@ -861,8 +860,9 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         OrganisaatioPerustieto organisaatio = OrganisaatioPerustieto.builder().status(OrganisaatioStatus.AKTIIVINEN).build();
         given(this.organisaatioClient.getOrganisaatioPerustiedotCached(any())).willReturn(Optional.of(organisaatio));
         this.kutsuService.createHenkilo("123", henkiloCreateByKutsuDto);
-        verify(this.kayttooikeusAnomusService).grantPreValidatedKayttooikeusryhma(anyString(), anyString(), any(), this.kayttooikeusRyhmaCollectionCaptor.capture(), anyString());
-        assertThat(this.kayttooikeusRyhmaCollectionCaptor.getValue()).isEmpty();
+        ArgumentCaptor<Collection<KayttoOikeusRyhma>> kayttooikeusRyhmaCollectionCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(this.kayttooikeusAnomusService).grantPreValidatedKayttooikeusryhma(anyString(), anyString(), any(), kayttooikeusRyhmaCollectionCaptor.capture(), anyString());
+        assertThat(kayttooikeusRyhmaCollectionCaptor.getValue()).isEmpty();
     }
 
     @Test

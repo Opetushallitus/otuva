@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -37,7 +36,7 @@ public class SchedulingConfiguration implements SchedulingConfigurer {
     private ScheduledFuture<?> organisaatioRetryTask;
 
     @Override
-    public void configureTasks(@NonNull ScheduledTaskRegistrar taskRegistrar) {
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setScheduler(taskExecutor());
         this.onStartup(taskRegistrar.getScheduler());
     }

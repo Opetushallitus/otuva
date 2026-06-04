@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import fi.vm.sade.kayttooikeus.dto.GrantKayttooikeusryhmaDto;
 import fi.vm.sade.kayttooikeus.dto.KayttoOikeudenTila;

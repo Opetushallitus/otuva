@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
@@ -89,7 +88,7 @@ public interface HenkiloService {
      * @return Käyttäjän tietoja.
      */
     @Deprecated
-    MeDto getMe() throws JsonProcessingException;
+    MeDto getMe();
 
     Collection<Henkilo> findPassiveServiceUsers(LocalDateTime passiveSince);
 }

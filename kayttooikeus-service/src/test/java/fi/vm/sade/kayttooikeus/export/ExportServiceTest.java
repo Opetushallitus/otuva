@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.export;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql("/test-data.sql")
 @SpringBootTest
 class ExportServiceTest {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired ObjectMapper objectMapper;
     @Autowired ExportService exportService;
     @Autowired JdbcTemplate jdbcTemplate;
 

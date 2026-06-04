@@ -1,7 +1,5 @@
 {
-  "organisaatioTyypit": [
-    "org tyyppi"
-  ],
+  "organisaatioTyypit": ["org tyyppi"],
   "palvelutRoolit": [
     {
       "palveluName": "palvelunimi",
@@ -57,6 +55,7 @@
       }
     ]
   },
+  "ryhmaRestriction": false,
   "kuvaus": {
     "texts": [
       {

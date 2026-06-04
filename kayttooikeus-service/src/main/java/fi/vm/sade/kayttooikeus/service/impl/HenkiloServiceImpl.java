@@ -1,7 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -257,7 +256,7 @@ public class HenkiloServiceImpl implements HenkiloService {
 
     @Override
     @Transactional(readOnly = true)
-    public MeDto getMe() throws JsonProcessingException {
+    public MeDto getMe() {
         String oid = this.permissionCheckerService.getCurrentUserOid();
         Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oid)
                 .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oid));

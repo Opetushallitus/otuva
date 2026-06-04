@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.config.security;
 
-import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.kayttooikeus.config.properties.CasProperties;
+import fi.vm.sade.kayttooikeus.config.security.cas.OpintopolkuCasAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
@@ -140,7 +139,7 @@ public class SecurityConfigDefault {
             JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
 
             @Override
-            public AbstractAuthenticationToken convert(@NonNull Jwt source) {
+            public AbstractAuthenticationToken convert(Jwt source) {
                 var authorityList = extractRoles(source);
                 var delegateAuthorities = delegate.convert(source);
                 if (delegateAuthorities != null) {
@@ -218,7 +217,7 @@ public class SecurityConfigDefault {
                     .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
                     .requestMatchers("/cas/salasananvaihto").permitAll()
                     .requestMatchers("/cas/tunnistus").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
                     .requestMatchers("/.well-known/**").permitAll()
                     .requestMatchers("/error").permitAll()

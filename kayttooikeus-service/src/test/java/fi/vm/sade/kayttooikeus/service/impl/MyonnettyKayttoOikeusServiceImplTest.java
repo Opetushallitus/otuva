@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class MyonnettyKayttoOikeusServiceImplTest {
     @InjectMocks
     private MyonnettyKayttoOikeusServiceImpl myonnettyKayttoOikeusService;
@@ -49,8 +49,6 @@ public class MyonnettyKayttoOikeusServiceImplTest {
     @Test
     public void varmentajallaOnYhaOikeuksiaSamaanOrganisaatioon() {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("kasittelija").build();
-        given(this.henkiloDataRepository.findByOidHenkilo(eq("kasittelija"))).willReturn(Optional.of(henkilo));
-
         Henkilo varmennettavaHenkilo = Henkilo.builder()
                 .oidHenkilo("varmennettava")
                 .build();
@@ -101,8 +99,6 @@ public class MyonnettyKayttoOikeusServiceImplTest {
     @Test
     public void varmentajallaEiOleEnaaOikeuksiaSamaanOrganisaatioon() {
         Henkilo henkilo = Henkilo.builder().oidHenkilo("kasittelija").build();
-        given(this.henkiloDataRepository.findByOidHenkilo(eq("kasittelija"))).willReturn(Optional.of(henkilo));
-
         Henkilo varmennettavaHenkilo = Henkilo.builder()
                 .oidHenkilo("varmennettava")
                 .build();
