@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.aspects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.Target;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
@@ -64,7 +63,7 @@ public class HenkiloHelper {
         auditLogger.log(KayttooikeusOperation.UPDATE_KAYTTAJATIEDOT, target, changes);
     }
 
-    void logCreateHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Object result) throws JsonProcessingException {
+    void logCreateHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Object result) {
         Target.Builder targetBuilder = new Target.Builder();
         Optional.ofNullable(result)
                 .filter(HenkiloUpdateDto.class::isInstance)

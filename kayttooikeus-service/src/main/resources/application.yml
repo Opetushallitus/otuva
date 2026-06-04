@@ -24,9 +24,6 @@ spring:
     banner-mode: "off"
   mandatory-file-encoding: UTF-8
   profiles.active: default
-  jackson:
-    serialization:
-      write-dates-as-timestamps: true
   messages:
     use-code-as-default-message: true
 
@@ -40,7 +37,7 @@ server:
       cookie:
         name: JSESSIONID
   port: 8080
-server.error.include-stacktrace: NEVER
+spring.web.error.include-stacktrace: NEVER
 
 cas:
   service: http://localhost:${server.port}/kayttooikeus-service

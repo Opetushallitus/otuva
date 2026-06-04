@@ -47,8 +47,7 @@ public class MfaSecurityConfig {
   }
 
   AuthenticationManager mfaBasicAuthManager() {
-    DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-    authenticationProvider.setUserDetailsService(mfaBasicAuthUsers());
+    DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(mfaBasicAuthUsers());
     return new ProviderManager(authenticationProvider);
   }
 

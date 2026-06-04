@@ -1,14 +1,12 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.KayttoOikeusService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
     @MockitoBean
     private KayttoOikeusService kayttoOikeusService;
@@ -53,6 +51,27 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                     .build()));
 
         this.mvc.perform(get("/kayttooikeusryhma").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_READ")
+    public void listKayttoOikeusRyhmaTrailingSlashTest() throws Exception {
+        given(this.kayttoOikeusService.listAllKayttoOikeusRyhmas(isNull(), isNull(), isNull()))
+            .willReturn(singletonList(KayttoOikeusRyhmaDto.builder()
+                    .organisaatioViite(singletonList(OrganisaatioViiteDto.builder()
+                            .organisaatioTyyppi("organisaatiotyyppi")
+                            .id(44L).build()))
+                    .rooliRajoite("roolirajoite")
+                    .id(14L)
+                    .tunniste("Nimi")
+                    .muokattu(OffsetDateTime.of(2019, 10, 29, 14, 07, 58, 0, ZoneOffset.UTC))
+                    .muokkaaja("1.2.3.4.5")
+                    .nimi(new TextGroupListDto(1L).put("FI", "Test"))
+                    .build()));
+
+        this.mvc.perform(get("/kayttooikeusryhma/").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttoOikeusRyhmaList.json")));
     }
@@ -166,6 +185,17 @@ public class KayttoOikeusRyhmaControllerTest extends AbstractControllerTest {
                 .willReturn(buildKayttoOikeusRyhma());
 
         this.mvc.perform(get("/kayttooikeusryhma/44").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma2.json")));
+    }
+
+    @Test
+    @WithMockUser(username = "1.2.3.4.5", authorities = "ROLE_APP_KAYTTOOIKEUS_KAYTTOOIKEUSRYHMIEN_LUKU")
+    public void getKayttoOikeusRyhmaTrailingSlashTest() throws Exception {
+        given(this.kayttoOikeusService.findKayttoOikeusRyhma(eq(44L), isNull()))
+                .willReturn(buildKayttoOikeusRyhma());
+
+        this.mvc.perform(get("/kayttooikeusryhma/44/").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonResource("classpath:kayttooikeusryhma/kayttooikeusRyhma2.json")));
     }

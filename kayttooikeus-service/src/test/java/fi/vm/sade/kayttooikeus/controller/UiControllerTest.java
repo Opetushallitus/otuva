@@ -4,17 +4,16 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import fi.vm.sade.kayttooikeus.repositories.dto.HenkilohakuResultDto;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -43,7 +42,7 @@ class UiControllerTest {
     private OrganisaatioClient organisaatioClient;
 
     @BeforeEach
-    private void beforeEach() {
+    public void beforeEach() {
         when(organisaatioClient.getOrganisaatioPerustiedotCached(any())).thenReturn(Optional.empty());
     }
 
@@ -74,7 +73,7 @@ class UiControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private List<HenkilohakuResultDto> doVirkailijahaku(@NonNull String content) throws Exception {
+    private List<HenkilohakuResultDto> doVirkailijahaku(String content) throws Exception {
         var response = mvc.perform(post("/internal/virkailijahaku")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content)
@@ -179,7 +178,7 @@ class UiControllerTest {
     @WithMockUser(username = "1.2.246.562.24.37535704268", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
     public void virkailijahakuFiltersVirkailijasByOrganisation() throws Exception {
         List<HenkilohakuResultDto> result = doVirkailijahaku("""
-    {"organisaatioOids":["1.2.246.562.10.71948887212"]}""");
+    {"organisaatioOids":["1.2.246.562.10.71948887212"], "subOrganisation":false}""");
         assertThat(result)
                 .extracting("kayttajatunnus")
                 .containsExactlyInAnyOrder("opa", "ville");
@@ -245,7 +244,7 @@ class UiControllerTest {
         mvc.perform(post("/internal/jarjestelmatunnushaku")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-{"organisaatioOids":["%s"]}""".formatted(rootOrgOid))
+{"organisaatioOids":["%s"], "subOrganisation": false}""".formatted(rootOrgOid))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -312,7 +311,7 @@ class UiControllerTest {
         var response = mvc.perform(post("/internal/jarjestelmatunnushaku")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-    {"organisaatioOids":["%s"]}""".formatted(rootOrgOid))
+    {"organisaatioOids":["%s"], "subOrganisation":false}""".formatted(rootOrgOid))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -422,7 +421,7 @@ class UiControllerTest {
         var responseNoSubOrgCriteria = mvc.perform(post("/internal/jarjestelmatunnushaku")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-{"organisaatioOids": ["1.2.246.562.10.722837895010", "1.2.246.562.10.00000000030"]}""")
+{"organisaatioOids": ["1.2.246.562.10.722837895010", "1.2.246.562.10.00000000030"], "subOrganisation":false}""")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

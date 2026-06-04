@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.kayttooikeus.CasUserAttributes;
 import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationDetails;
 import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiUserDetails;
@@ -271,7 +270,7 @@ public class CasController {
             description = "Deprekoitu. Käytä /henkilo/current/omattiedot ja oppijanumerorekisterin /henkilo/current/omattiedot rajapintoja.")
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/me", method = RequestMethod.GET)
-    public MeDto getMe() throws JsonProcessingException {
+    public MeDto getMe() {
         return this.henkiloService.getMe();
     }
 
