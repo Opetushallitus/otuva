@@ -2,7 +2,6 @@ package fi.vm.sade.otuva.mocksubstanceservice;
 
 import fi.vm.sade.otuva.mocksubstanceservice.properties.OtuvaMockSubstanceServiceProperties;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -2,6 +2,9 @@ package fi.vm.sade.kayttooikeus.report;
 
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Generated
@@ -46,7 +49,42 @@ public class AccessRightReportRow {
         this.modifiedBy = modifiedBy;
     }
 
+    public AccessRightReportRow(
+            Long id,
+            String personName,
+            String personOid,
+            String organisationName,
+            String organisationOid,
+            String accessRightName,
+            Long accessRightId,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalDateTime modified,
+            String modifiedBy) {
+        this(
+                id,
+                personName,
+                personOid,
+                organisationName,
+                organisationOid,
+                accessRightName,
+                accessRightId,
+                toDate(startDate),
+                toDate(endDate),
+                toDate(modified),
+                modifiedBy
+        );
+    }
+
     public AccessRightReportRow withOrganisation(String name) {
         return toBuilder().organisationName(name).build();
+    }
+
+    private static Date toDate(LocalDate value) {
+        return value == null ? null : Date.from(value.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    private static Date toDate(LocalDateTime value) {
+        return value == null ? null : Date.from(value.atZone(ZoneId.systemDefault()).toInstant());
     }
 }

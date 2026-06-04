@@ -1,25 +1,25 @@
 package fi.vm.sade.kayttooikeus;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.boot.http.client.ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW;
+import static org.springframework.boot.http.client.HttpRedirects.DONT_FOLLOW;
 
 @ExtendWith(OutputCaptureExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 public class AccessLogTest {
-
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private TestRestTemplate restTemplate;
     private TestRestTemplate restTemplateWithoutRedirects;
@@ -98,24 +98,11 @@ public class AccessLogTest {
         var lines = output.getOut().split(System.lineSeparator());
         for (int i = lines.length - 1; i >= 0; i--) {
             var s = lines[i];
-            var result = tryParse(s);
+            var result = objectMapper.readValue(s, AccessLogLine.class);
             if (result != null) return result;
         }
         throw new RuntimeException("No log line found");
     }
-
-    private AccessLogLine tryParse(String s) {
-        try {
-            return objectMapper.readValue(s, AccessLogLine.class);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-            .enable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
 
     record AccessLogLine(String request, String requestMapping, String callerHenkiloOid) {}
 }

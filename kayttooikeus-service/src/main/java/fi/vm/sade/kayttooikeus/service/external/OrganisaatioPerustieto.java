@@ -38,9 +38,13 @@ public class OrganisaatioPerustieto {
     private String oid;
     private String parentOidPath;
     private String oppilaitostyyppi;
+    @Builder.Default
     private Map<String, String> nimi = new HashMap<>();
+    @Builder.Default
     private List<String> organisaatiotyypit = new ArrayList<>(); // GET /organisaatio/v4/hierarkia/hae palauttaa tämän
+    @Builder.Default
     private List<String> tyypit = new ArrayList<>(); // GET /organisaatio/v4/<oid> palauttaa tämän
+    @Builder.Default
     private List<OrganisaatioPerustieto> children = new ArrayList<>();
     @JsonIgnore // avoid recursion if this is returned in JSON
     private OrganisaatioPerustieto parent;
@@ -77,9 +81,20 @@ public class OrganisaatioPerustieto {
                 .orElse(false);
     }
 
+    public List<OrganisaatioPerustieto> getChildren() {
+        if (children == null) {
+            children = new ArrayList<>();
+        }
+        return children;
+    }
+
+    public void setChildren(List<OrganisaatioPerustieto> children) {
+        this.children = children == null ? new ArrayList<>() : children;
+    }
+
     public Stream<OrganisaatioPerustieto> andChildren() {
         return Stream.concat(Stream.of(this),
-                children.stream().flatMap(OrganisaatioPerustieto::andChildren));
+                getChildren().stream().flatMap(OrganisaatioPerustieto::andChildren));
     }
 
     public Stream<OrganisaatioPerustieto> andParents() {

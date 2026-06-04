@@ -45,8 +45,7 @@
       }
     }
   ],
-  "organisaatioTyypit": [
-    "ORGANISAATIOTYYPPI"
-  ],
+  "organisaatioTyypit": ["ORGANISAATIOTYYPPI"],
+  "ryhmaRestriction": false,
   "rooliRajoite": "roolirajoite"
 }
