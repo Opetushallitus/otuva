@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.TypeFactory;
 
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
@@ -168,7 +168,7 @@ public class HenkiloControllerTest extends AbstractControllerTest {
     }
 
     private void assertHakaTunnukset(String response, String... tunnukset) throws Exception {
-        List<String> hakaTunnukset = objectMapper.readValue(response, TypeFactory.defaultInstance().constructCollectionType(List.class, String.class));
+        List<String> hakaTunnukset = objectMapper.readValue(response, TypeFactory.createDefaultInstance().constructCollectionType(List.class, String.class));
         assertThat(hakaTunnukset).containsExactlyInAnyOrder(tunnukset);
     }
 }

@@ -24,12 +24,11 @@ import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -41,11 +40,14 @@ import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @WithMockUser
 public class PermissionCheckerTest {
 
@@ -57,14 +59,14 @@ public class PermissionCheckerTest {
 
     private KayttooikeusryhmaDataRepository kayttooikeusryhmaDataRepository;
 
-    @Mock
+    @MockitoBean
     private ExternalPermissionClient externalPermissionClient;
-    @Mock
+    @MockitoBean
     private OppijanumerorekisteriClient oppijanumerorekisteriClient;
 
     private OrganisaatioClient organisaatioClient;
 
-    @Mock
+    @MockitoBean
     private KayttajarooliProvider kayttajarooliProvider;
 
     private static final String ORG1 = "org1";

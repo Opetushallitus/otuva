@@ -1,6 +1,6 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import fi.vm.sade.kayttooikeus.config.HttpClientConfiguration;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.ExternalPermissionService;
 import fi.vm.sade.kayttooikeus.dto.permissioncheck.PermissionCheckRequestDto;

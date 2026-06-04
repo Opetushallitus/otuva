@@ -12,7 +12,7 @@ import org.springframework.session.SessionRepository;
 public class SessionMappingStorageConfiguration {
 
     @Bean
-    public OphSessionMappingStorage sessionMappingStorage(JdbcTemplate jdbcTemplate, SessionRepository sessionRepository) {
+    public OphSessionMappingStorage sessionMappingStorage(JdbcTemplate jdbcTemplate, SessionRepository<?> sessionRepository) {
         return new JdbcSessionMappingStorage(jdbcTemplate, sessionRepository);
     }
 

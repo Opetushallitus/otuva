@@ -14,9 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +31,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ExportService {
     private static final String S3_PREFIX = "fulldump/kayttooikeus/v2";
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    private final ObjectMapper objectMapper;
     private final JdbcTemplate jdbcTemplate;
     private final S3AsyncClient opintopolkuS3Client;
     private final S3AsyncClient lampiS3Client;
@@ -269,7 +266,7 @@ public class ExportService {
         writeManifest(S3_PREFIX + "/json/manifest.json", new ExportManifest(jsonManifest));
     }
 
-    private void writeManifest(String objectKey, ExportManifest manifest) throws JsonProcessingException {
+    private void writeManifest(String objectKey, ExportManifest manifest) {
         var manifestJson = objectMapper.writeValueAsString(manifest);
         var response = lampiS3Client.putObject(
                 b -> b.bucket(lampiBucketName).key(objectKey),

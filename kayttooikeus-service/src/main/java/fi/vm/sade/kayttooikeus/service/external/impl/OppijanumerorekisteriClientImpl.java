@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.service.external.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
