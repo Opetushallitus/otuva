@@ -20,7 +20,7 @@ import java.util.List;
 public class KutsuRepositoryImpl extends AbstractRepository implements KutsuRepositoryCustom {
     @Override
     public List<Kutsu> listKutsuListDtos(KutsuCriteria criteria,
-                                         List<OrderSpecifier> orderSpecifier, Long offset, Long amount) {
+                                         List<OrderSpecifier<?>> orderSpecifier, Long offset, Long amount) {
         QKutsu kutsu = QKutsu.kutsu;
         QKutsuOrganisaatio kutsuOrganisaatio = QKutsuOrganisaatio.kutsuOrganisaatio;
         QKayttoOikeusRyhma kutsuKayttoOikeusryhma = new QKayttoOikeusRyhma("kutsuKayttoOikeusryhma");
@@ -38,7 +38,7 @@ public class KutsuRepositoryImpl extends AbstractRepository implements KutsuRepo
                 .select(kutsu)
                 .where(henkilo.oidHenkilo.eq(kutsu.kutsuja))
                 .where(criteria.onCondition(kutsuKayttoOikeusryhma, kutsujaKayttooikeusryhma))
-                .orderBy(orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]));
+                .orderBy(orderSpecifier.toArray(new OrderSpecifier<?>[orderSpecifier.size()]));
         if (offset != null) {
             query.offset(offset);
         }
