@@ -16,18 +16,18 @@ public enum KutsuOrganisaatioOrder {
     AIKALEIMA(List.of(kutsu.aikaleima)),
     ;
 
-    private List<ComparableExpressionBase> orders;
+    private final List<ComparableExpressionBase<? extends Comparable<?>>> orders;
 
-    KutsuOrganisaatioOrder(List<ComparableExpressionBase> orders) {
+    KutsuOrganisaatioOrder(List<ComparableExpressionBase<? extends Comparable<?>>> orders) {
         this.orders = orders;
     }
 
-    public List<OrderSpecifier> getSortWithDirection() {
+    public List<OrderSpecifier<?>> getSortWithDirection() {
         return this.getSortWithDirection(Sort.DEFAULT_DIRECTION);
     }
 
-    public List<OrderSpecifier> getSortWithDirection(Sort.Direction direction) {
-        Function<ComparableExpressionBase, OrderSpecifier> directionFunc = direction.isAscending()
+    public List<OrderSpecifier<?>> getSortWithDirection(Sort.Direction direction) {
+        Function<ComparableExpressionBase<? extends Comparable<?>>, OrderSpecifier<?>> directionFunc = direction.isAscending()
                 ? ComparableExpressionBase::asc
                 : ComparableExpressionBase::desc;
         return this.orders.stream().map(directionFunc::apply).collect(Collectors.toList());

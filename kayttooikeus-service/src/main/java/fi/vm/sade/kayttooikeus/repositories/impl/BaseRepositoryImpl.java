@@ -12,9 +12,10 @@ import static java.util.Optional.ofNullable;
 public class BaseRepositoryImpl<E extends Identifiable> extends AbstractRepository implements BaseRepository<E> {
     private final Class<E> clz;
 
+    @SuppressWarnings("unchecked")
     protected BaseRepositoryImpl() {
-        Class clz = classifyGenericTypeParameters(getClass().getGenericSuperclass())[0];
-        this.clz = clz;
+        Class<?> clz = classifyGenericTypeParameters(getClass().getGenericSuperclass())[0];
+        this.clz = (Class<E>) clz;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class BaseRepositoryImpl<E extends Identifiable> extends AbstractReposito
             Type[] actualTypes = ((ParameterizedType) genericType).getActualTypeArguments();
             Class<?>[] classes = new Class<?>[actualTypes.length];
             for (int i = 0; i < actualTypes.length; ++i) {
-                classes[i] = (actualTypes[i] instanceof Class) ? (Class<?>) actualTypes[i] : null;
+                classes[i] = (actualTypes[i] instanceof Class<?> actualClass) ? actualClass : null;
             }
             return classes;
         }
