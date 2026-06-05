@@ -70,12 +70,11 @@ public class KayttoOikeusRyhmaRepositoryImpl extends AbstractRepository implemen
     @Override
     public Boolean ryhmaNameFiExists(String ryhmaNameFi) {
         QKayttoOikeusRyhma kayttoOikeusRyhma = QKayttoOikeusRyhma.kayttoOikeusRyhma;
-        return jpa().from(kayttoOikeusRyhma)
+        return jpa().selectOne()
+                .from(kayttoOikeusRyhma)
                 .where(kayttoOikeusRyhma.nimi.texts.any().lang.eq("FI"),
                         kayttoOikeusRyhma.nimi.texts.any().text.eq(ryhmaNameFi))
-                .select(kayttoOikeusRyhma)
-                .limit(1)
-                .fetchCount() > 0;
+                .fetchFirst() != null;
     }
 
     @Override
