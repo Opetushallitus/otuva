@@ -89,7 +89,8 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         String oid = oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
 
         // tallennetaan virkailijaksi käyttöoikeuspalveluun
-        Henkilo entity = henkiloRepository.findByOidHenkilo(oid).orElseGet(() -> new Henkilo(oid));
+        Henkilo entity = henkiloRepository.findByOidHenkilo(oid)
+                .orElseGet(() -> Henkilo.builder().oidHenkilo(oid).build());
         mapper.map(createDto, entity);
         entity.setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
         Kayttajatiedot kayttajatiedot = new Kayttajatiedot();

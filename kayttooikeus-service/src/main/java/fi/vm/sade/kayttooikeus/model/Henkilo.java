@@ -81,10 +81,6 @@ public class Henkilo implements Identifiable {
     @Builder.Default
     private Set<HenkiloVarmentaja> henkiloVarmentajas = new HashSet<>();
 
-    public Henkilo(String oidHenkilo) {
-        this.oidHenkilo = oidHenkilo;
-    }
-
     public OrganisaatioHenkilo addOrganisaatioHenkilo(OrganisaatioHenkilo organisaatioHenkilo) {
         this.organisaatioHenkilos.add(organisaatioHenkilo);
         return organisaatioHenkilo;

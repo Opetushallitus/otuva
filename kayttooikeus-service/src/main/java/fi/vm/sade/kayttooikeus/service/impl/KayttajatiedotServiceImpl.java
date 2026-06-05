@@ -47,7 +47,7 @@ public class KayttajatiedotServiceImpl implements KayttajatiedotService {
     public KayttajatiedotReadDto create(String henkiloOid, KayttajatiedotCreateDto createDto) {
         return henkiloDataRepository.findByOidHenkilo(henkiloOid)
                 .map(henkilo -> create(henkilo, createDto))
-                .orElseGet(() -> create(new Henkilo(henkiloOid), createDto));
+                .orElseGet(() -> create(Henkilo.builder().oidHenkilo(henkiloOid).build(), createDto));
     }
 
     public KayttajatiedotReadDto create(Henkilo henkilo, KayttajatiedotCreateDto createDto) {
