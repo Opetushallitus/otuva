@@ -20,6 +20,7 @@ import java.util.Set;
 public class KayttooikeusCriteria {
     String username;
     String oidHenkilo;
+    @Builder.Default
     Set<String> palvelu = new HashSet<>();
     String hetu;
 
