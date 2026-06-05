@@ -21,6 +21,7 @@ public class KutsuReadDto {
     private String sahkoposti;
     private LocalDateTime aikaleima;
     private Asiointikieli asiointikieli;
+    @Builder.Default
     private Set<KutsuOrganisaatioReadDto> organisaatiot = new HashSet<>();
     private Boolean hakaIdentifier;
     private String saate;
