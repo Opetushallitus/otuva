@@ -11,9 +11,9 @@ public enum OrderByAnomus {
     ;
 
     private final String entry;
-    private final OrderSpecifier value;
+    private final OrderSpecifier<?> value;
 
-    OrderByAnomus(String entry, OrderSpecifier value) {
+    OrderByAnomus(String entry, OrderSpecifier<?> value) {
         this.entry = entry;
         this.value = value;
     }

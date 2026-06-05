@@ -39,11 +39,11 @@ public class OrderBy<T extends Enum<T>> {
         return this;
     }
 
-    public<E extends ComparableExpressionBase<? extends Comparable>> OrderBy<T> order(T when, E then) {
-        return order(when, (Supplier<? extends ComparableExpressionBase<? extends Comparable>>) () -> then);
+    public<E extends ComparableExpressionBase<? extends Comparable<?>>> OrderBy<T> order(T when, E then) {
+        return order(when, (Supplier<? extends ComparableExpressionBase<? extends Comparable<?>>>) () -> then);
     }
 
-    public<E extends ComparableExpressionBase<? extends Comparable>> OrderBy<T> order(E inAllCases) {
+    public<E extends ComparableExpressionBase<? extends Comparable<?>>> OrderBy<T> order(E inAllCases) {
         return order(direction == DESC ? inAllCases.desc() : inAllCases.asc());
     }
 
@@ -52,7 +52,7 @@ public class OrderBy<T extends Enum<T>> {
         return this;
     }
 
-    public OrderBy<T> order(T when, Supplier<? extends ComparableExpressionBase<? extends Comparable>> then) {
+    public OrderBy<T> order(T when, Supplier<? extends ComparableExpressionBase<? extends Comparable<?>>> then) {
         if (when == by) {
             specifiers.add(direction == DESC ? then.get().desc() : then.get().asc());
         }
