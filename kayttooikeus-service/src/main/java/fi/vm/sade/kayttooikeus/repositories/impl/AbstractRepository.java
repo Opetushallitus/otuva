@@ -1,5 +1,6 @@
 package fi.vm.sade.kayttooikeus.repositories.impl;
 
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,7 +17,7 @@ public abstract class AbstractRepository {
     }
 
     protected boolean exists(JPAQuery<?> q) {
-        return q.limit(1).fetchCount() > 0;
+        return q.select(Expressions.ONE).limit(1).fetchFirst() != null;
     }
 
 }
