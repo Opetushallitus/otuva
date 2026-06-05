@@ -60,6 +60,7 @@ public class Kayttajatiedot extends IdentifiableAndVersionedEntity {
      * Manually invalidated password
      */
     @Column(name = "invalidated")
+    @Builder.Default
     private Boolean invalidated = false;
 
     @Column(name = "mfaprovider")

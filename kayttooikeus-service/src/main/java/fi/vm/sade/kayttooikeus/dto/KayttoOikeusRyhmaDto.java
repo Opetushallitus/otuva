@@ -22,6 +22,7 @@ public class KayttoOikeusRyhmaDto implements Serializable, LocalizableDto {
     // Not used anywhere
     @Deprecated
     private String rooliRajoite;
+    @Builder.Default
     private List<OrganisaatioViiteDto> organisaatioViite = new ArrayList<>();
     private TextGroupDto nimi;
     private TextGroupDto kuvaus;

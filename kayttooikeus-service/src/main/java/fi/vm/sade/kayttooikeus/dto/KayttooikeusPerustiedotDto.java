@@ -14,6 +14,7 @@ public class KayttooikeusPerustiedotDto {
     protected String oidHenkilo;
     protected String username;
     protected KayttajaTyyppi kayttajaTyyppi;
+    @Builder.Default
     protected Set<KayttooikeusOrganisaatiotDto> organisaatiot = new HashSet<>();
 
     @Getter
@@ -23,6 +24,7 @@ public class KayttooikeusPerustiedotDto {
     @Builder
     public static class KayttooikeusOrganisaatiotDto {
         protected String organisaatioOid;
+        @Builder.Default
         protected Set<KayttooikeusOikeudetDto> kayttooikeudet = new HashSet<>();
 
         @Getter

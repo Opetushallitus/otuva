@@ -44,6 +44,7 @@ public class Henkilo implements Identifiable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "henkilo", cascade = { CascadeType.MERGE, CascadeType.PERSIST,
             CascadeType.REFRESH })
     @BatchSize(size = 50)
+    @Builder.Default
     private Set<OrganisaatioHenkilo> organisaatioHenkilos = new HashSet<>();
 
     private String etunimetCached;
@@ -65,16 +66,19 @@ public class Henkilo implements Identifiable {
     @JoinTable(name = "henkilo_anomusilmoitus_kayttooikeusryhma",
             joinColumns = @JoinColumn(name = "henkilo_id", nullable = false, updatable = true),
             inverseJoinColumns = @JoinColumn(name = "kayttooikeusryhma_id", nullable = false, updatable = true))
+    @Builder.Default
     private Set<KayttoOikeusRyhma> anomusilmoitus = new HashSet<>();
 
     private LocalDateTime sahkopostivarmennusAikaleima;
 
     // Suhteet, joissa henkilö on varmentajana
     @OneToMany(mappedBy = "varmentavaHenkilo", fetch = FetchType.LAZY)
+    @Builder.Default
     private Set<HenkiloVarmentaja> henkiloVarmennettavas = new HashSet<>();
 
     // Suhteet, joissa henkilö on varmennettavana
     @OneToMany(mappedBy = "varmennettavaHenkilo", fetch = FetchType.LAZY)
+    @Builder.Default
     private Set<HenkiloVarmentaja> henkiloVarmentajas = new HashSet<>();
 
     public Henkilo(String oidHenkilo) {
