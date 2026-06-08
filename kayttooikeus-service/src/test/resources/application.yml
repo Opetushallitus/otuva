@@ -20,7 +20,7 @@ spring.flyway.baseline-version: 0
 db-scheduler:
   enabled: false
 cas:
-  service: http://localhost/kayttooikeus-service
+  service: http://localhost:${server.port}/kayttooikeus-service
   send-renew: false
   key: kayttooikeus-service
   mfa:
