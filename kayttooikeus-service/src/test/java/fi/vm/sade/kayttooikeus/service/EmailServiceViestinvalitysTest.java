@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Optional.of;
@@ -122,10 +123,10 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
         henkiloDto.setYhteystiedotRyhma(singleton(YhteystiedotRyhmaDto
                 .builder()
                 .ryhmaKuvaus(YhteystietoUtil.TYOOSOITE)
-                .yhteystieto(YhteystietoDto.builder()
+                .yhteystieto(Set.of(YhteystietoDto.builder()
                         .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
                         .yhteystietoArvo(WORK_EMAIL)
-                        .build())
+                        .build()))
                 .build()));
         return henkiloDto;
     }

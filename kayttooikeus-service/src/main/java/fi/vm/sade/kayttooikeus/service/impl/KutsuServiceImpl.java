@@ -21,7 +21,14 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsujaValidator;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
-import fi.vm.sade.oppijanumerorekisteri.dto.*;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -479,10 +486,10 @@ public class KutsuServiceImpl implements KutsuService {
         henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
                 .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
                 .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
-                .yhteystieto(YhteystietoDto.builder()
+                .yhteystieto(Set.of(YhteystietoDto.builder()
                         .yhteystietoArvo(kutsuByToken.getSahkoposti())
                         .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .build()).build()));
+                        .build())).build()));
         return henkiloCreateDto;
     }
 

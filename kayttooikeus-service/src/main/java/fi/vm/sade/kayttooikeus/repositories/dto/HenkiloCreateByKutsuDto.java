@@ -1,7 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.dto;
 
 import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
-import fi.vm.sade.oppijanumerorekisteri.validation.ValidateAsiointikieli;
+import fi.vm.sade.kayttooikeus.dto.validate.ValidateAsiointikieli;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

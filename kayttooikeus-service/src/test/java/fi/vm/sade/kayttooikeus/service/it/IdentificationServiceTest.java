@@ -127,7 +127,7 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
                     .yhteystietoArvo("test@test.com")
                     .build();
             YhteystiedotRyhmaDto yhteystietoRyhma = YhteystiedotRyhmaDto.builder()
-                    .yhteystieto(yhteystieto)
+                    .yhteystieto(Set.of(yhteystieto))
                     .build();
             given(oppijanumerorekisteriClient.getHenkiloByOid("1.2.3.4.5"))
                     .willReturn(HenkiloDto.builder()

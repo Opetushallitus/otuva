@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -169,9 +170,9 @@ public class CreateUtil {
 
     public static YhteystiedotRyhmaDto createYhteystietoSahkoposti(String email, String tyyppi) {
         return YhteystiedotRyhmaDto.builder()
-                .yhteystieto(YhteystietoDto.builder()
+                .yhteystieto(Set.of(YhteystietoDto.builder()
                         .yhteystietoArvo(email)
-                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI).build())
+                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI).build()))
                 .ryhmaKuvaus(tyyppi)
                 .build();
     }

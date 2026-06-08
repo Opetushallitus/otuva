@@ -1,7 +1,13 @@
 package fi.vm.sade.kayttooikeus.service.external;
 
 import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.*;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuPerustietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloOmattiedotDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 
 import java.time.LocalDateTime;
 import java.util.*;

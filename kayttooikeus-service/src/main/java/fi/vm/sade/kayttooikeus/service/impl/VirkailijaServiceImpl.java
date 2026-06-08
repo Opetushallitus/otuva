@@ -278,10 +278,10 @@ public class VirkailijaServiceImpl implements VirkailijaService {
         henkiloCreateDto.setYhteystiedotRyhma(Set.of(YhteystiedotRyhmaDto.builder()
                 .ryhmaAlkuperaTieto(commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
                 .ryhmaKuvaus(commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
-                .yhteystieto(YhteystietoDto.builder()
+                .yhteystieto(Set.of(YhteystietoDto.builder()
                         .yhteystietoArvo(kutsu.getSahkoposti())
                         .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .build()).build()));
+                        .build())).build()));
         return oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
     }
 

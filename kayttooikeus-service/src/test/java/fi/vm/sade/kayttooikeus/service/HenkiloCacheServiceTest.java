@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -62,7 +63,7 @@ public class HenkiloCacheServiceTest extends AbstractServiceTest {
                 .willReturn(Lists.newArrayList("1.2.3.4.5"));
         given(this.oppijanumerorekisteriClient.getAllByOids(eq(0L), eq(2000L), anyList()))
                 .willReturn(Lists.newArrayList(new HenkiloHakuPerustietoDto("1.2.3.4.5", "fakehetu",
-                        "arpa arpa2", "arpa", "kuutio", true, false, false, false)));
+                        "arpa arpa2", "arpa", "kuutio", true, false, List.of(), false, false, false)));
         given(this.henkiloDataRepository.findByOidHenkiloIn(anyList()))
                 .willReturn(Lists.newArrayList(henkilo));
         given(this.henkiloDataRepository.countByEtunimetCachedNotNull()).willReturn(1L);
