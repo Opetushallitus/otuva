@@ -40,4 +40,4 @@ auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
 
 viestinvalitys.baseurl: https://viestinvalitys.opintopolku.fi/lahetys
 
-feature.cas-virkailija-registration: false
+feature.cas-virkailija-registration: true
