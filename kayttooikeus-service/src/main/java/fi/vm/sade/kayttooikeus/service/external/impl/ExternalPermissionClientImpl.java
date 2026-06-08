@@ -55,6 +55,8 @@ public class ExternalPermissionClientImpl implements ExternalPermissionClient {
                     .header("Caller-Id", HttpClientConfiguration.CALLER_ID)
                     .header("CSRF", "CSRF")
                     .header("Cookie", "CSRF=CSRF")
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
                     .timeout(Duration.ofSeconds(30))
                     .POST(BodyPublishers.ofString(body))
                     .build();
