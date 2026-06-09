@@ -196,7 +196,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
             env,
             "TestCasVirkailija",
             ["scripts/ci/run-tests-cas-virkailija.sh"],
-            "corretto21",
+            env == "dev" ? "corretto25" : "corretto21",
             dependencyManagement,
           ),
         }),
