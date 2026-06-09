@@ -62,7 +62,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       {
         owner: "Opetushallitus",
         name: "otuva",
-        branch: "kayttooikeus-service-sb4",
+        branch: "master",
       },
       dependencyManagement,
       props,
@@ -75,7 +75,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       {
         owner: "Opetushallitus",
         name: "otuva",
-        branch: "master",
+        branch: "green-hahtuva",
       },
       dependencyManagement,
       props,
@@ -85,7 +85,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("QaContinuousDeploymentPipeline"),
       connection,
       "qa",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
       dependencyManagement,
       props,
     );
@@ -94,7 +94,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("ProdContinuousDeploymentPipeline"),
       connection,
       "prod",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
       dependencyManagement,
       props,
     );
