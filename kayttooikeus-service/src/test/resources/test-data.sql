@@ -3,6 +3,14 @@ VALUES
     (1,'1.2.246.562.24.37535704268', 'VIRKAILIJA', 'Hetuttomien', 'Hypistelijä', false, false, true, '280760-542K', 'Hetuttomien', null),
     (2,'1.2.246.562.24.67357428459', 'VIRKAILIJA', 'Hetullisten', 'Hypistelijä', false, false, true, '280760-542K', 'Hetullisten', null);
 
+INSERT INTO kayttajatiedot (id, version, password, salt, henkiloid, createdat, invalidated, username, mfaprovider, passwordchange)
+VALUES
+    (1,0,'password','salt',2,now(),false,'hetulliste','GAUTH',now());
+
+INSERT INTO google_auth_token (id, henkilo_id, registration_date, secret_key, salt, iv)
+VALUES
+    (1,2,now(),'secret','salt','iv');
+
 INSERT INTO organisaatiohenkilo (id, version, organisaatio_oid, henkilo_id, passivoitu)
 VALUES
     (1,0,'1.2.246.562.10.71948887212',1,false),

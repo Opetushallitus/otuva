@@ -3,9 +3,11 @@ package fi.vm.sade.kayttooikeus.service.it;
 import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
+import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
+import fi.vm.sade.kayttooikeus.repositories.GoogleAuthTokenRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
@@ -15,14 +17,19 @@ import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
@@ -34,7 +41,9 @@ import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-@ExtendWith(SpringExtension.class)
+@Sql("/truncate_tables.sql")
+@Sql("/test-data.sql")
+@SpringBootTest
 public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
@@ -42,6 +51,9 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private KayttajatiedotRepository kayttajatiedotRepository;
+
+    @Autowired
+    private GoogleAuthTokenRepository googleAuthTokenRepository;
 
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
@@ -52,9 +64,6 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @MockitoBean
     private IdentificationService identificationService;
 
-    @Autowired
-    private CommonProperties commonProperties;
-
     @MockitoBean
     private OrganisaatioClient organisaatioClient;
 
@@ -62,9 +71,7 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
     @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
     public void getByKayttajatunnus() {
         populate(kayttajatiedot(henkilo("oid1"), "user1"));
-
         HenkiloReadDto dto = henkiloService.getByKayttajatunnus("user1");
-
         assertThat(dto.getOid()).isEqualTo("oid1");
     }
 
@@ -93,6 +100,18 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         assertThat(henkilo.get(0).getMyonnettyKayttoOikeusRyhmas()).isEmpty();
         Optional<MyonnettyKayttoOikeusRyhmaTapahtuma> mkrt = this.myonnettyKayttoOikeusRyhmaTapahtumaRepository.findById(myonnettyKayttoOikeusRyhmaTapahtuma.getId());
         assertThat(mkrt).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
+    public void passivoiHenkiloRemovesGauthToken() {
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "Käsittelijä"));
+        Function<String, Optional<GoogleAuthToken>> findTokenByOid = oid -> StreamSupport.stream(googleAuthTokenRepository.findAll().spliterator(), false)
+                .filter(t -> t.getHenkilo().getOidHenkilo().equals("1.2.246.562.24.67357428459"))
+                .findFirst();
+        assertThat(findTokenByOid.apply("1.2.246.562.24.67357428459")).isNotEmpty();
+        henkiloService.passivoi("1.2.246.562.24.67357428459", "1.2.3.4.1");
+        assertThat(findTokenByOid.apply("1.2.246.562.24.67357428459")).isEmpty();
     }
 
     @Test
