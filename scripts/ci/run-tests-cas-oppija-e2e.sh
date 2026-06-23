@@ -67,17 +67,15 @@ function stop_mock_substance_service {
 function wait_for_backend_to_be_healthy {
   local name=$1
   local port=$2
-info "Waiting for backend ${name} to start on port ${port}"
-  local -r max_wait=120
-  local waited=0
-  until curl -sf "http://localhost:${port}/${name}/actuator/health" >/dev/null 2>&1; do
-    if [ $waited -ge $max_wait ]; then
-      fatal "Backend ${name} did not start within ${max_wait}s"
-    fi
-    sleep 2
-    waited=$((waited + 2))
-  done
+  info "Waiting for backend ${name} to start on port ${port}"
+  retry_until_seconds_passed 120 is_backend_healthy "${name}" "${port}"
   info "Backend ${name} is ready"
+}
+
+function is_backend_healthy {
+  local -r name=$1
+  local -r port=$2
+  curl -sf "http://localhost:${port}/${name}/actuator/health" >/dev/null 2>&1
 }
 
 function stop_kayttooikeus {
