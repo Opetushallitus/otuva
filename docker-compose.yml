@@ -2,7 +2,7 @@ services:
   # kayttooikeus-service
   kayttooikeus-db:
     container_name: kayttooikeus-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     environment:
       - POSTGRES_DB=kayttooikeus
       - POSTGRES_USER=oph
@@ -17,7 +17,7 @@ services:
       retries: 5
   kayttooikeus-test-db:
     container_name: kayttooikeus-test-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     environment:
       - POSTGRES_DB=kayttooikeus
       - POSTGRES_USER=app
@@ -29,7 +29,7 @@ services:
   # cas-virkailija
   cas-virkailija-db:
     container_name: cas-virkailija-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     ports:
       - 5080:5432
     environment:
@@ -46,7 +46,7 @@ services:
   # cas-oppija
   cas-oppija-db:
     container_name: cas-oppija-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     ports:
       - 5081:5432
     environment:
@@ -61,7 +61,7 @@ services:
 
   keycloak-db:
     container_name: cas-oppija-keycloak-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -98,7 +98,7 @@ services:
 
   mock-substance-service-db:
     container_name: otuva-mock-substance-service-db
-    image: postgres:16.4@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+    image: postgres:16.14@sha256:fe03a7605299a34ddf5e4f285dff78c3d7190a576b3c6b46f2fcff69f4bffd54
     ports:
       - "5440:5432"
     environment:
