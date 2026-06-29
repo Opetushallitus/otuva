@@ -69,7 +69,7 @@ cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: https://static
 cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[0].sign-authn-request: true
-cas.authn.pac4j.saml[0].wants-assertions-signed: true
+cas.authn.pac4j.saml[0].wants-assertions-signed: false
 cas.authn.pac4j.saml[0].wants-responses-signed: true
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
