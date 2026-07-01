@@ -11,7 +11,11 @@ import org.apereo.cas.interrupt.InterruptInquiryExecutionPlanConfigurer;
 import org.apereo.cas.jpa.JpaBeanFactory;
 import org.apereo.cas.logout.slo.SingleLogoutRequestExecutor;
 import org.apereo.cas.pac4j.client.DelegatedClientIdentityProviderRedirectionStrategy;
+import org.apereo.cas.pac4j.client.DelegatedClientNameExtractor;
+import org.apereo.cas.pac4j.client.DelegatedIdentityProviderFactory;
+import org.apereo.cas.pac4j.client.DelegatedIdentityProviders;
 import org.apereo.cas.ticket.TicketCatalog;
+import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.CoreTicketUtils;
@@ -126,5 +130,18 @@ public class CasOphConfiguration {
             .withId(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION_SAML2_CLIENT_LOGOUT)
             .build()
             .get();
+    }
+
+    @Bean
+    public DelegatedClientNameExtractor pac4jDelegatedClientNameExtractor(
+        @Qualifier(TicketRegistry.BEAN_NAME) final TicketRegistry ticketRegistry) {
+        return new OtuvaRelayStateAwareClientNameExtractor(ticketRegistry);
+    }
+
+    @Bean
+    public DelegatedIdentityProviders delegatedIdentityProviders(
+        @Qualifier("pac4jDelegatedClientFactory")
+        final DelegatedIdentityProviderFactory pac4jDelegatedIdentityProviderFactory) {
+        return new OtuvaSaml2ContextProviderFixingDelegatedIdentityProviders(pac4jDelegatedIdentityProviderFactory);
     }
 }

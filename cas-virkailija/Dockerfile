@@ -1,4 +1,4 @@
-FROM amazoncorretto:21 AS build
+FROM amazoncorretto:25 AS build
 WORKDIR /app
 
 COPY gradle ./gradle
@@ -6,13 +6,13 @@ COPY gradlew .
 COPY gradle.properties .
 COPY settings.gradle .
 COPY build.gradle .
-COPY gradle.lockfile .
 
 COPY lombok.config .
 COPY src ./src
+RUN yum install -y findutils
 RUN ./gradlew clean build -x test
 
-FROM amazoncorretto:21
+FROM amazoncorretto:25
 
 WORKDIR /app
 COPY services ./services
