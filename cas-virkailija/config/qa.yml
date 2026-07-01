@@ -70,7 +70,7 @@ cas.authn.pac4j.saml[0].destination-binding: urn:oasis:names:tc:SAML:2.0:binding
 cas.authn.pac4j.saml[0].logout-response-binding-type: urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 cas.authn.pac4j.saml[0].sign-authn-request: true
 cas.authn.pac4j.saml[0].wants-assertions-signed: false
-cas.authn.pac4j.saml[0].wants-responses-signed: true
+cas.authn.pac4j.saml[0].wants-responses-signed: false
 cas.authn.pac4j.saml[0].sign-service-provider-logout-request: true
 cas.authn.pac4j.saml[0].use-name-qualifier: false
 cas.authn.pac4j.saml[0].requested-attributes[0].name: urn:oid:1.2.246.21
