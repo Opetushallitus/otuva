@@ -43,7 +43,7 @@ export class HakaMetadataCertificateValidityLeftInDaysLambdaStack
         ),
         bundling: { sourceMap: true },
         runtime: lambda.Runtime.NODEJS_24_X,
-        architecture: lambda.Architecture.X86_64,
+        architecture: lambda.Architecture.ARM_64,
         timeout: cdk.Duration.seconds(30),
         vpc: ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME }),
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
