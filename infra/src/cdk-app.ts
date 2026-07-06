@@ -282,6 +282,7 @@ class ApplicationStack extends cdk.Stack {
     if (config.lampiExport) {
       this.exportFailureAlarm(logGroup, props.alarmTopic);
     }
+    this.auditCleanupFailureAlarm(logGroup, props.alarmTopic);
 
     new AuditLogExport(this, "AuditLogExport", { logGroup });
 
@@ -534,6 +535,34 @@ class ApplicationStack extends cdk.Stack {
         cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
       threshold: 0,
       evaluationPeriods: 8,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+    });
+    alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
+    alarm.addAlarmAction(new cloudwatch_actions.SnsAction(alarmTopic));
+  }
+
+  auditCleanupFailureAlarm(logGroup: logs.LogGroup, alarmTopic: sns.ITopic) {
+    const metricFilter = logGroup.addMetricFilter(
+      "AuditCleanupTaskSuccessMetricFilter",
+      {
+        filterPattern: logs.FilterPattern.literal(
+          '"Kayttooikeus audit cleanup task completed"',
+        ),
+        metricName: prefix("KayttooikeusAuditCleanupTaskSuccess"),
+        metricNamespace: "Otuva",
+        metricValue: "1",
+      },
+    );
+    const alarm = new cloudwatch.Alarm(this, "AuditCleanupFailingAlarm", {
+      alarmName: prefix("KayttooikeusAuditCleanupFailing"),
+      metric: metricFilter.metric({
+        statistic: "Sum",
+        period: cdk.Duration.hours(1),
+      }),
+      comparisonOperator:
+        cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+      threshold: 0,
+      evaluationPeriods: 25,
       treatMissingData: cloudwatch.TreatMissingData.BREACHING,
     });
     alarm.addOkAction(new cloudwatch_actions.SnsAction(alarmTopic));
