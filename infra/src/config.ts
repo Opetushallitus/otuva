@@ -11,11 +11,17 @@ export type Config = {
     enabled: boolean;
     bucketName: string;
   };
+  auditCleanup: {
+    enabled: boolean;
+  };
   oppijanumerorekisteriBaseUrl: string;
 };
 const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
+  auditCleanup: {
+    enabled: false,
+  },
 };
 
 export function getEnvironment(): EnvironmentName {
@@ -44,6 +50,9 @@ export const hahtuva: Config = {
   opintopolkuHost: "hahtuvaopintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
+  auditCleanup: {
+    enabled: true,
+  },
   oppijanumerorekisteriBaseUrl:
     "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
 };

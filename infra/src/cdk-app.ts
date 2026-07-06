@@ -331,6 +331,12 @@ class ApplicationStack extends cdk.Stack {
           }
         : {};
 
+    const auditCleanupProperties: ecs.ContainerDefinitionProps["environment"] =
+      {
+        "kayttooikeus.tasks.audit-cleanup.enabled":
+          config.auditCleanup.enabled.toString(),
+      };
+
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
       image: ecs.ContainerImage.fromDockerImageAsset(dockerImage),
@@ -342,6 +348,7 @@ class ApplicationStack extends cdk.Stack {
         postgres_database: "kayttooikeus",
         export_bucket_name: exportBucket.bucketName,
         ...lampiProperties,
+        ...auditCleanupProperties,
         "oppijanumerorekisteri.baseurl": config.oppijanumerorekisteriBaseUrl,
       },
       secrets: {
