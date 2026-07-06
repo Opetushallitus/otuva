@@ -39,7 +39,19 @@ public class KayttooikeusProperties {
             private Integer disableInactiveServiceUsersHour = 7;
             private Integer disableInactiveServiceUsersMinute = 15;
             private String disableInactiveServiceUsersThreshold = "P1Y";
-        }
+            private AuditCleanup auditCleanup = new AuditCleanup();
 
+            @Getter
+            @Setter
+            public static class AuditCleanup {
+                private final int FIVE_YEARS_IN_DAYS = 365 * 5;
+
+                private boolean enabled = false;
+                private int retentionDays = FIVE_YEARS_IN_DAYS;
+                private int batchSize = 10_000;
+                private int hour = 3;
+                private int minute = 30;
+            }
+        }
     }
 }

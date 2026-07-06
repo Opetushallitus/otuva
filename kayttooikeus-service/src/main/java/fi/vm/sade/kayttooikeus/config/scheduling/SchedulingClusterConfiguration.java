@@ -14,12 +14,7 @@ import fi.vm.sade.kayttooikeus.export.ExportTask;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
-import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
-import fi.vm.sade.kayttooikeus.service.KutsuService;
-import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
-import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
-import fi.vm.sade.kayttooikeus.service.QueueingEmailService;
-import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
+import fi.vm.sade.kayttooikeus.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +49,7 @@ public class SchedulingClusterConfiguration {
     private final DiscardExpiredInvitationsTask discardExpiredInvitationsTask;
     private final DisableInactiveServiceUsersTask disableInactiveServiceUsersTask;
     private final ExportTask exportTask;
+    private final AuditCleanupService auditCleanupService;
 
     @Bean
     Task<Void> lahetaUusienAnomuksienIlmoituksetTask() {
@@ -163,5 +159,18 @@ public class SchedulingClusterConfiguration {
         return Tasks
                 .recurring(TaskDescriptor.of("EmailRetryTask"), FixedDelay.of(Duration.ofMinutes(5)))
                 .execute((instance, ctx) -> queueingEmailService.emailRetryTask());
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "kayttooikeus.tasks.audit-cleanup.enabled", matchIfMissing = false)
+    Task<Void> auditCleanupTask() {
+        var config = kayttooikeusProperties.getScheduling().getConfiguration().getAuditCleanup();
+        return Tasks
+                .recurring(TaskDescriptor.of("AuditCleanupTask"),
+                        new Daily(LocalTime.of(config.getHour(), config.getMinute())))
+                .execute((instance, ctx) -> {
+                    auditCleanupService.cleanup();
+                    log.info("Kayttooikeus audit cleanup task completed");
+                });
     }
 }
