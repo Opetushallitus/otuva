@@ -33,6 +33,7 @@ import {
 import { getConfig, getEnvironment } from "./config";
 import { createHealthCheckStacks } from "./health-check";
 import { ResponseAlarms } from "./response-alarms";
+import { HakaMetadataCertificateValidityLeftInDaysLambdaStack } from "./haka-metadata-certificate-lambda";
 
 class CdkApp extends cdk.App {
   constructor(props: cdk.AppProps) {
@@ -91,6 +92,16 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
       },
     );
+    if (getConfig().hakaMetadataCertificateAlarmEnabled) {
+      new HakaMetadataCertificateValidityLeftInDaysLambdaStack(
+        this,
+        prefix("HakaMetadataCertificateValidityLeftInDaysLambda"),
+        {
+          ...stackProps,
+          alarmTopic,
+        },
+      );
+    }
 
     createHealthCheckStacks(this, alarmsToSlackLambda, [
       {
