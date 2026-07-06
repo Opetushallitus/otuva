@@ -23,7 +23,7 @@ const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
   auditCleanup: {
-    enabled: false,
+    enabled: true,
   },
   hakaMetadataCertificateAlarmThresholdDays: 30,
 };
@@ -54,9 +54,6 @@ export const hahtuva: Config = {
   opintopolkuHost: "hahtuvaopintopolku.fi",
   minCapacity: 2,
   maxCapacity: 8,
-  auditCleanup: {
-    enabled: true,
-  },
   oppijanumerorekisteriBaseUrl:
     "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
   hakaMetadataUrl:
