@@ -61,7 +61,7 @@ export const hahtuva: Config = {
     "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
   hakaMetadataUrl:
     "https://haka.funet.fi/metadata/haka_test_metadata_signed.xml",
-  hakaMetadataCertificateAlarmEnabled: true,
+  hakaMetadataCertificateAlarmEnabled: false,
 };
 
 export const dev: Config = {
@@ -77,7 +77,7 @@ export const dev: Config = {
   oppijanumerorekisteriBaseUrl:
     "https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
   hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v9.xml",
-  hakaMetadataCertificateAlarmEnabled: false,
+  hakaMetadataCertificateAlarmEnabled: true,
 };
 
 export const qa: Config = {
