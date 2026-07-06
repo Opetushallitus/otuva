@@ -1,3 +1,4 @@
+import { XMLParser } from "fast-xml-parser";
 import { X509Certificate } from "node:crypto";
 
 const hakaMetadataUrl: string = process.env.HAKA_METADATA_URL!;
@@ -39,50 +40,35 @@ async function fetchMetadataXml() {
 }
 
 function extractSignatureX509Cert(xml: string): string {
-  const elementsBeforeEntityDescriptors =
-    getElementsBeforeEntityDescriptors(xml);
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    removeNSPrefix: true, // normalizes ds:Signature -> Signature, ds:X509Certificate -> X509Certificate, etc.
+  });
 
-  if (!/<(?:[\w.-]+:)?Signature\b/.test(elementsBeforeEntityDescriptors)) {
-    throw new Error(
-      "Root <EntitiesDescriptor> has no direct <Signature> child",
-    );
-  }
+  const doc = parser.parse(xml);
+  const root = doc.EntitiesDescriptor;
 
-  const signatureX509CertMatch = elementsBeforeEntityDescriptors.match(
-    /<(?:[\w.-]+:)?X509Certificate\b[^>]*>([^<]+)</,
-  );
-  if (!signatureX509CertMatch) {
-    throw new Error(
-      "Could not find X509Certificate under root Signature/KeyInfo/X509Data",
-    );
-  }
-
-  return signatureX509CertMatch[1].replace(/\s+/g, "");
-}
-
-function getElementsBeforeEntityDescriptors(xml: string) {
-  const rootOpenTagMatch = xml.match(
-    /<(?:[\w.-]+:)?EntitiesDescriptor\b[^>]*>/,
-  );
-  if (!rootOpenTagMatch || rootOpenTagMatch.index === undefined) {
+  if (!root) {
     throw new Error(
       "Unexpected XML format, XML root level element was not <EntitiesDescriptor>",
     );
   }
 
-  const afterRootOpenTagIndex =
-    rootOpenTagMatch.index + rootOpenTagMatch[0].length;
+  const signature = root.Signature;
+  if (!signature) {
+    throw new Error(
+      "Root <EntitiesDescriptor> has no direct <Signature> child",
+    );
+  }
 
-  const firstEntityDescriptorMatch = xml
-    .slice(afterRootOpenTagIndex)
-    .match(/<(?:[\w.-]+:)?EntityDescriptor\b/);
+  const signatureX509Cert = signature?.KeyInfo?.X509Data?.X509Certificate;
+  if (!signatureX509Cert || typeof signatureX509Cert !== "string") {
+    throw new Error(
+      "Could not find X509Certificate under root Signature/KeyInfo/X509Data",
+    );
+  }
 
-  const lastIndexBeforeEntityDescriptors =
-    firstEntityDescriptorMatch && firstEntityDescriptorMatch.index !== undefined
-      ? afterRootOpenTagIndex + firstEntityDescriptorMatch.index
-      : xml.length; // no EntityDescriptor children at all - scan to end of document
-
-  return xml.slice(afterRootOpenTagIndex, lastIndexBeforeEntityDescriptors);
+  return signatureX509Cert.replace(/\s+/g, "");
 }
 
 function toPem(base64Cert: string): string {
