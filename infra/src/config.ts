@@ -15,9 +15,10 @@ export type Config = {
     enabled: boolean;
   };
   oppijanumerorekisteriBaseUrl: string;
-  hakaMetadataCertificateAlarmEnabled: boolean;
-  hakaMetadataCertificateAlarmThresholdDays: number;
-  hakaMetadataUrl: string;
+  hakaMetadataCertificateValidDaysAlarm: {
+    thresholdDays: number;
+    hakaMetadataUrl: string;
+  };
 };
 const defaultConfig = {
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
@@ -25,7 +26,10 @@ const defaultConfig = {
   auditCleanup: {
     enabled: true,
   },
-  hakaMetadataCertificateAlarmThresholdDays: 30,
+  hakaMetadataCertificateValidDaysAlarm: {
+    thresholdDays: 30,
+    hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v10.xml",
+  },
 };
 
 export function getEnvironment(): EnvironmentName {
@@ -56,9 +60,11 @@ export const hahtuva: Config = {
   maxCapacity: 8,
   oppijanumerorekisteriBaseUrl:
     "https://hahtuva.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
-  hakaMetadataUrl:
-    "https://haka.funet.fi/metadata/haka_test_metadata_signed.xml",
-  hakaMetadataCertificateAlarmEnabled: false,
+  hakaMetadataCertificateValidDaysAlarm: {
+    hakaMetadataUrl:
+      "https://haka.funet.fi/metadata/haka_test_metadata_signed.xml",
+    thresholdDays: 30,
+  },
 };
 
 export const dev: Config = {
@@ -73,8 +79,10 @@ export const dev: Config = {
   },
   oppijanumerorekisteriBaseUrl:
     "https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
-  hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v9.xml",
-  hakaMetadataCertificateAlarmEnabled: true,
+  hakaMetadataCertificateValidDaysAlarm: {
+    hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v9.xml",
+    thresholdDays: 30,
+  },
 };
 
 export const qa: Config = {
@@ -89,8 +97,10 @@ export const qa: Config = {
   },
   oppijanumerorekisteriBaseUrl:
     "https://qa.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
-  hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v9.xml",
-  hakaMetadataCertificateAlarmEnabled: false,
+  hakaMetadataCertificateValidDaysAlarm: {
+    hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v9.xml",
+    thresholdDays: 30,
+  },
 };
 
 export const prod: Config = {
@@ -105,6 +115,8 @@ export const prod: Config = {
   },
   oppijanumerorekisteriBaseUrl:
     "https://prod.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service",
-  hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v10.xml",
-  hakaMetadataCertificateAlarmEnabled: false,
+  hakaMetadataCertificateValidDaysAlarm: {
+    hakaMetadataUrl: "https://haka.funet.fi/metadata/haka-metadata-v10.xml",
+    thresholdDays: 30,
+  },
 };

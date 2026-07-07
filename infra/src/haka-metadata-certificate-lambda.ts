@@ -29,8 +29,9 @@ export class HakaMetadataCertificateValidityLeftInDaysLambdaStack
   ) {
     super(scope, id, props);
 
-    const { hakaMetadataUrl, hakaMetadataCertificateAlarmThresholdDays } =
-      getConfig();
+    const {
+      hakaMetadataCertificateValidDaysAlarm: { hakaMetadataUrl, thresholdDays },
+    } = getConfig();
 
     const lambdaFn = new lambda_nodejs.NodejsFunction(
       this,
@@ -94,14 +95,14 @@ export class HakaMetadataCertificateValidityLeftInDaysLambdaStack
       "HakaMetadataCertificateValidDaysLeftAlarm",
       {
         alarmName: "HakaMetadataCertificateValidDaysLeftAlarm",
-        alarmDescription: `Hakan Idp metadatan X509 sertifikaatti vanhenee alle ${hakaMetadataCertificateAlarmThresholdDays} päivän päästä. Päivitä cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path arvo cas-virkailijassa. Tarkista https://wiki.eduuni.fi/spaces/CSCHAKA/pages/27297775/Metadata onko uutta metadataa tarjolla.`,
+        alarmDescription: `Hakan metadatan (osoitteesta ${hakaMetadataUrl}) X509 sertifikaatti vanhenee alle ${thresholdDays} päivän päästä. Päivitä cas.authn.pac4j.saml[1].metadata.identity-provider-metadata-path arvo cas-virkailijassa. Tarkista https://wiki.eduuni.fi/spaces/CSCHAKA/pages/27297775/Metadata onko uutta metadataa tarjolla.`,
         metric: metricFilter.metric().with({
           statistic: "Minimum",
           period: cdk.Duration.hours(24),
         }),
         comparisonOperator:
           cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-        threshold: hakaMetadataCertificateAlarmThresholdDays,
+        threshold: thresholdDays,
         evaluationPeriods: 1,
         treatMissingData: cloudwatch.TreatMissingData.BREACHING,
       },

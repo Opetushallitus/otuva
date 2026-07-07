@@ -92,16 +92,14 @@ class CdkApp extends cdk.App {
         ecsCluster: ecsStack.cluster,
       },
     );
-    if (getConfig().hakaMetadataCertificateAlarmEnabled) {
-      new HakaMetadataCertificateValidityLeftInDaysLambdaStack(
-        this,
-        prefix("HakaMetadataCertificateValidityLeftInDaysLambda"),
-        {
-          ...stackProps,
-          alarmTopic,
-        },
-      );
-    }
+    new HakaMetadataCertificateValidityLeftInDaysLambdaStack(
+      this,
+      prefix("HakaMetadataCertificateValidityLeftInDaysLambda"),
+      {
+        ...stackProps,
+        alarmTopic,
+      },
+    );
 
     createHealthCheckStacks(this, alarmsToSlackLambda, [
       {
