@@ -3,6 +3,7 @@ package fi.vm.sade.kayttooikeus.config.scheduling;
 import com.github.kagkarlsson.scheduler.task.Task;
 import com.github.kagkarlsson.scheduler.task.TaskDescriptor;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
+import com.github.kagkarlsson.scheduler.task.schedule.CronSchedule;
 import com.github.kagkarlsson.scheduler.task.schedule.Daily;
 import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay;
 
@@ -14,7 +15,14 @@ import fi.vm.sade.kayttooikeus.export.ExportTask;
 import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.repositories.HenkiloDataRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
-import fi.vm.sade.kayttooikeus.service.*;
+import fi.vm.sade.kayttooikeus.service.AuditCleanupService;
+import fi.vm.sade.kayttooikeus.service.EmailService;
+import fi.vm.sade.kayttooikeus.service.KayttooikeusAnomusService;
+import fi.vm.sade.kayttooikeus.service.KutsuService;
+import fi.vm.sade.kayttooikeus.service.MyonnettyKayttoOikeusService;
+import fi.vm.sade.kayttooikeus.service.OrganisaatioHenkiloService;
+import fi.vm.sade.kayttooikeus.service.QueueingEmailService;
+import fi.vm.sade.kayttooikeus.service.TaskExecutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +58,7 @@ public class SchedulingClusterConfiguration {
     private final DisableInactiveServiceUsersTask disableInactiveServiceUsersTask;
     private final ExportTask exportTask;
     private final AuditCleanupService auditCleanupService;
+    private final EmailService emailService;
 
     @Bean
     Task<Void> lahetaUusienAnomuksienIlmoituksetTask() {
@@ -172,5 +181,13 @@ public class SchedulingClusterConfiguration {
                     auditCleanupService.cleanup();
                     log.info("Kayttooikeus audit cleanup task completed");
                 });
+    }
+
+    @Bean
+    Task<Void> sendOrganisationReminderToVastuukayttajaTask() {
+        return Tasks
+                .recurring(TaskDescriptor.of("send organisation reminder to vastuukayttaja task"),
+                        new CronSchedule("0 30 4 2 1,8 *")) // 2nd of January and August at 04.30
+                .execute((instance, ctx) -> emailService.sendOrganisationReminders());
     }
 }

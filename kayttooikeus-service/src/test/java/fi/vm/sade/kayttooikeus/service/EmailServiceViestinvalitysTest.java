@@ -7,23 +7,25 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.QueueingEmailService.QueuedEmail;
+import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.service.external.*;
 import fi.vm.sade.kayttooikeus.service.impl.EmailServiceViestinvalitysImpl;
 import fi.vm.sade.kayttooikeus.util.CreateUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,8 +36,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
+@SpringBootTest
+public class EmailServiceViestinvalitysTest {
 
     private static final String HENKILO_OID = "1.2.3.4.5";
     private static final String WORK_EMAIL = "testi@example.com";
@@ -129,6 +131,68 @@ public class EmailServiceViestinvalitysTest extends AbstractServiceTest {
                         .build()))
                 .build()));
         return henkiloDto;
+    }
+
+    @Test
+    @Sql({"/truncate_tables.sql", "/email-service-organisation-reminders.sql"})
+    @Sql(scripts = "/truncate_tables.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void sendOrganisationRemindersQueuesOneEmailPerLanguage() {
+        String fiOid = "1.2.246.562.24.fi";
+        String svOid = "1.2.246.562.24.sv";
+        String duplicateFiOid = "1.2.246.562.24.duplicate";
+        given(oppijanumerorekisteriClient.listYhteystiedot(any())).willReturn(List.of(
+                henkiloYhteystiedot(fiOid, "fi", "fi.vastuukayttaja@example.com"),
+                henkiloYhteystiedot(svOid, "sv", "sv.vastuukayttaja@example.com"),
+                henkiloYhteystiedot(duplicateFiOid, "fi", "fi.vastuukayttaja@example.com")));
+        given(queueingEmailService.queueEmail(any())).willReturn("fi-email-id", "sv-email-id");
+
+        emailService.sendOrganisationReminders();
+
+        ArgumentCaptor<HenkiloHakuCriteria> onrCriteriaCaptor = ArgumentCaptor.forClass(HenkiloHakuCriteria.class);
+        verify(oppijanumerorekisteriClient).listYhteystiedot(onrCriteriaCaptor.capture());
+        assertThat(onrCriteriaCaptor.getValue().getHenkiloOids()).containsExactlyInAnyOrder(fiOid, svOid, duplicateFiOid);
+
+        ArgumentCaptor<QueuedEmail> emailCaptor = ArgumentCaptor.forClass(QueuedEmail.class);
+        verify(queueingEmailService, times(2)).queueEmail(emailCaptor.capture());
+        verify(queueingEmailService).attemptSendingEmail("fi-email-id");
+        verify(queueingEmailService).attemptSendingEmail("sv-email-id");
+
+        assertThat(emailCaptor.getAllValues())
+                .filteredOn(email -> email.getSubject().equals("Virkailijan opintopolku: Tarkista organisaation yhteystiedot!"))
+                .singleElement()
+                .satisfies(email -> {
+                    assertThat(email.getRecipients()).containsExactly("fi.vastuukayttaja@example.com");
+                    assertThat(email.getBody()).contains("<html lang=\"fi\">");
+                    assertThat(email.getBody()).contains("Tarkista, että organisaationne");
+                    assertThat(email.getBody()).contains("https://localhost:9090/organisaatio-service/organisaatiot");
+                });
+        assertThat(emailCaptor.getAllValues())
+                .filteredOn(email -> email.getSubject().equals("Studieinfo för administratörer: Kontrollera organisationens kontaktinformation"))
+                .singleElement()
+                .satisfies(email -> {
+                    assertThat(email.getRecipients()).containsExactly("sv.vastuukayttaja@example.com");
+                    assertThat(email.getBody()).contains("<html lang=\"sv\">");
+                    assertThat(email.getBody()).contains("Kontrollera att kontaktuppgifterna");
+                    assertThat(email.getBody()).contains("https://localhost:9090/organisaatio-service/organisaatiot");
+                });
+    }
+
+    private HenkiloYhteystiedotDto henkiloYhteystiedot(String oid, String asiointikieli, String email) {
+        HenkiloYhteystiedotDto henkilo = new HenkiloYhteystiedotDto();
+        henkilo.setOidHenkilo(oid);
+        henkilo.setAsiointikieli(asiointikieli);
+        henkilo.setYhteystiedotRyhma(List.of(YhteystiedotRyhmaDto.builder()
+                .yhteystieto(Set.of(
+                        YhteystietoDto.builder()
+                                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                                .yhteystietoArvo(email)
+                                .build(),
+                        YhteystietoDto.builder()
+                                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_PUHELINNUMERO)
+                                .yhteystietoArvo("029 533 1000")
+                                .build()))
+                .build()));
+        return henkilo;
     }
 
     @Test

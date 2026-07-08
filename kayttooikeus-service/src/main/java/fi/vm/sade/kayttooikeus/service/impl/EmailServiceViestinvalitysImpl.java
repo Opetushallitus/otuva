@@ -5,11 +5,13 @@ import fi.vm.sade.kayttooikeus.model.Anomus;
 import fi.vm.sade.kayttooikeus.model.KayttoOikeusRyhma;
 import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.model.KutsuOrganisaatio;
+import fi.vm.sade.kayttooikeus.repositories.HenkiloHibernateRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttoOikeusRyhmaRepository;
 import fi.vm.sade.kayttooikeus.repositories.dto.ExpiringKayttoOikeusDto;
 import fi.vm.sade.kayttooikeus.service.EmailService;
 import fi.vm.sade.kayttooikeus.service.QueueingEmailService;
 import fi.vm.sade.kayttooikeus.service.QueueingEmailService.QueuedEmail;
+import fi.vm.sade.kayttooikeus.service.dto.HenkiloYhteystiedotDto;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
@@ -17,6 +19,9 @@ import fi.vm.sade.kayttooikeus.util.LocalisationUtils;
 import fi.vm.sade.kayttooikeus.util.UserDetailsUtil;
 import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
 import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloHakuCriteria;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
+import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.Builder;
@@ -37,6 +42,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
@@ -53,6 +59,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
     private final QueueingEmailService queueingEmailService;
     private final OrganisaatioClient organisaatioClient;
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
+    private final HenkiloHibernateRepository henkiloHibernateRepository;
     private final Configuration freemarker;
 
     @Value("${url-virkailija}")
@@ -61,6 +68,9 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
     private String casOppijaLogin;
     @Value("${feature.cas-virkailija-registration}")
     private boolean casVirkailijaRegistration;
+
+    @Value("${opintopolun-vastuukayttaja.kayttooikeusryhma-id}")
+    private Long vastuukayttajaKayttooikeusryhmaId;
 
     @Data
     @Builder
@@ -374,5 +384,72 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
         return language != null && SUPPORTED_ASIOINTIKIELI.contains(language.toLowerCase())
             ? language.toLowerCase()
             : DEFAULT_LANGUAGE_CODE;
+    }
+
+    @Override
+    public void sendOrganisationReminders() {
+        HenkilohakuCriteria criteria = new HenkilohakuCriteria();
+        criteria.setKayttooikeusryhmaId(vastuukayttajaKayttooikeusryhmaId);
+        Set<String> henkiloOids = henkiloHibernateRepository.findHenkiloByCriteria(criteria, KayttajaTyyppi.VIRKAILIJA)
+                .stream()
+                .map((h) -> h.getOidHenkilo())
+                .collect(toSet());
+        log.info("Found {} vastuukayttajas for the organisation reminder email", henkiloOids.size());
+        if (henkiloOids.isEmpty()) {
+            return;
+        }
+
+        HenkiloHakuCriteria oppijanumerorekisteriCriteria = new HenkiloHakuCriteria();
+        oppijanumerorekisteriCriteria.setHenkiloOids(henkiloOids);
+        Map<String, Set<String>> emailsByLanguage = parseUniqueEmailsByLanguage(
+                oppijanumerorekisteriClient.listYhteystiedot(oppijanumerorekisteriCriteria));
+        emailsByLanguage.forEach((language, emails) ->
+                log.info("Found {} unique vastuukayttaja emails for {} organisation reminders", emails.size(), language));
+
+        emailsByLanguage.forEach((language, emails) -> {
+            if (emails.isEmpty()) {
+                return;
+            }
+            sendOrganisationRemindersByLanguage(language, emails.stream().toList());
+        });
+    }
+
+    private Map<String, Set<String>> parseUniqueEmailsByLanguage(Collection<HenkiloYhteystiedotDto> yhteystiedot) {
+        return yhteystiedot.stream()
+                .collect(groupingBy(
+                        henkilo -> validateLanguage(henkilo.getAsiointikieli()),
+                        flatMapping(henkilo -> henkilo.getYhteystiedotRyhma().stream()
+                                        .map(YhteystiedotRyhmaDto::getYhteystieto)
+                                        .flatMap(Collection::stream)
+                                        .filter(yhteystieto -> yhteystieto.getYhteystietoTyyppi() == YHTEYSTIETO_SAHKOPOSTI)
+                                        .map(YhteystietoDto::getYhteystietoArvo),
+                                toSet())));
+    }
+
+    @Data
+    @Builder
+    public static class OrganisationReminder {
+        String subject;
+        String linkki;
+    };
+
+    private void sendOrganisationRemindersByLanguage(String language, List<String> emails) {
+        try {
+            String subject = "sv".equals(language)
+                ? "Studieinfo för administratörer: Kontrollera organisationens kontaktinformation"
+                : "Virkailijan opintopolku: Tarkista organisaation yhteystiedot!";
+
+            Template template = freemarker.getTemplate("emails/organisationreminder_" + language + ".ftl");
+            QueuedEmail email = QueuedEmail.builder()
+                .subject(subject)
+                .recipients(emails)
+                .body(processTemplateIntoString(template, new OrganisationReminder(subject, urlVirkailija + "/organisaatio-service/organisaatiot")))
+                .build();
+
+            String emailId = queueingEmailService.queueEmail(email);
+            queueingEmailService.attemptSendingEmail(emailId);
+        } catch (Exception e) {
+            log.error("Error sending organisation reminders for language " + language, e);
+        }
     }
 }

@@ -77,6 +77,7 @@ kayttooikeus:
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 kayttooikeus.mfa.setup.require-suomifi: true
 kayttooikeus.registration.allow-test-suomifi: false
+opintopolun-vastuukayttaja.kayttooikeusryhma-id: -1
 
 auth.crypto-service.static-salt: mock
 

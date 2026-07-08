@@ -24,4 +24,6 @@ public interface EmailService {
     void sendDiscardNotification(Kutsu invitation);
 
     void sendDiscardNotification(Anomus application);
+
+    void sendOrganisationReminders();
 }
