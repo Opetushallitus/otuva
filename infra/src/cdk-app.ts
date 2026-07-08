@@ -286,7 +286,7 @@ class ApplicationStack extends cdk.Stack {
 
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: "kayttooikeus",
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.FIVE_YEARS,
     });
     if (config.lampiExport) {
       this.exportFailureAlarm(logGroup, props.alarmTopic);
@@ -732,7 +732,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
 
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: prefix("/cas-oppija"),
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.FIVE_YEARS,
     });
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
@@ -983,7 +983,7 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
 
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: prefix("/cas-virkailija"),
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.FIVE_YEARS,
     });
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
@@ -1232,7 +1232,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
       logGroupName: prefix("/service-provider"),
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.FIVE_YEARS,
     });
 
     const dockerImage = new ecr_assets.DockerImageAsset(this, "AppImage", {
