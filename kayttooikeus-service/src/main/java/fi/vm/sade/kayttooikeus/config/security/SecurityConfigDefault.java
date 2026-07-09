@@ -176,7 +176,7 @@ public class SecurityConfigDefault {
     }
 
     @Bean
-    @Order(4)
+    @Order(3)
     SecurityFilterChain oauth2RestApiFilterChain(HttpSecurity http) throws Exception {
         return http
             .headers(headers -> headers.disable())
@@ -194,7 +194,7 @@ public class SecurityConfigDefault {
     }
 
     @Bean
-    @Order(5)
+    @Order(4)
     SecurityFilterChain casRestApiFilterChain(HttpSecurity http, CasAuthenticationFilter casAuthenticationFilter,
             AuthenticationEntryPoint authenticationEntryPoint, SecurityContextRepository securityContextRepository) throws Exception {
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
@@ -216,7 +216,6 @@ public class SecurityConfigDefault {
                     .requestMatchers("/cas/emailverification/*").permitAll()
                     .requestMatchers("/cas/emailverification/loginTokenValidation/*").permitAll()
                     .requestMatchers("/cas/salasananvaihto").permitAll()
-                    .requestMatchers("/cas/tunnistus").permitAll()
                     .requestMatchers("/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers("/oauth2", "/oauth2/*", "/oauth2/**").permitAll()
                     .requestMatchers("/.well-known/**").permitAll()

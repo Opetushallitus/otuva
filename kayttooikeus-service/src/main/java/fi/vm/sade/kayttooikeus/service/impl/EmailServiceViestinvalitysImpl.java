@@ -64,10 +64,6 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
 
     @Value("${url-virkailija}")
     private String urlVirkailija;
-    @Value("${cas.oppija.login}")
-    private String casOppijaLogin;
-    @Value("${feature.cas-virkailija-registration}")
-    private boolean casVirkailijaRegistration;
 
     @Value("${opintopolun-vastuukayttaja.kayttooikeusryhma-id}")
     private Long vastuukayttajaKayttooikeusryhmaId;
@@ -253,16 +249,14 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
 
             KutsuEmail VanhenemisMuistutus = KutsuEmail.builder()
                 .kutsu(kutsu)
-                .linkki(casVirkailijaRegistration ? getCasVirkailijaRegistrationLink(kutsu) : getKutsuLink(kutsu))
+                .linkki(getCasVirkailijaRegistrationLink(kutsu))
                 .kutsuja(inviterOverride.orElseGet(() -> resolveInviterName(kutsu)))
                 .voimassa(kutsu.getAikaleima().plusMonths(1).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
                 .organisaatiot(organisaatiot)
                 .subject(subject)
                 .build();
 
-            Template template = casVirkailijaRegistration
-                ? freemarker.getTemplate("emails/kutsu2_" + language + ".ftl")
-                : freemarker.getTemplate("emails/kutsu_" + language + ".ftl");
+            Template template = freemarker.getTemplate("emails/kutsu2_" + language + ".ftl");
             QueuedEmail email = QueuedEmail.builder()
                 .subject(subject)
                 .recipients(List.of(kutsu.getSahkoposti()))
@@ -275,20 +269,6 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
         } catch (Exception e) {
             log.error("Error on kutsu email", e);
         }
-    }
-
-    private String getKutsuLink(Kutsu kutsu) {
-        String language = kutsu.getKieliKoodi().toLowerCase();
-        String targetUri = UriComponentsBuilder.fromUriString(urlVirkailija + "/kayttooikeus-service/cas/tunnistus")
-                .queryParam("kutsuToken", kutsu.getSalaisuus())
-                .queryParam("locale", language)
-                .build()
-                .toUriString();
-        return UriComponentsBuilder.fromUriString(casOppijaLogin)
-                .queryParam("service", URLEncoder.encode(targetUri, StandardCharsets.UTF_8))
-                .queryParam("locale", language.toUpperCase())
-                .build()
-                .toUriString();
     }
 
     private String getCasVirkailijaRegistrationLink(Kutsu kutsu) {
@@ -401,17 +381,14 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
 
         HenkiloHakuCriteria oppijanumerorekisteriCriteria = new HenkiloHakuCriteria();
         oppijanumerorekisteriCriteria.setHenkiloOids(henkiloOids);
-        Map<String, Set<String>> emailsByLanguage = parseUniqueEmailsByLanguage(
-                oppijanumerorekisteriClient.listYhteystiedot(oppijanumerorekisteriCriteria));
-        emailsByLanguage.forEach((language, emails) ->
-                log.info("Found {} unique vastuukayttaja emails for {} organisation reminders", emails.size(), language));
-
-        emailsByLanguage.forEach((language, emails) -> {
-            if (emails.isEmpty()) {
-                return;
-            }
-            sendOrganisationRemindersByLanguage(language, emails.stream().toList());
-        });
+        parseUniqueEmailsByLanguage(oppijanumerorekisteriClient.listYhteystiedot(oppijanumerorekisteriCriteria))
+                .forEach((language, emails) -> {
+                    log.info("Found {} unique vastuukayttaja emails for {} organisation reminders", emails.size(), language);
+                    if (emails.isEmpty()) {
+                        return;
+                    }
+                    sendOrganisationRemindersByLanguage(language, emails.stream().toList());
+                });
     }
 
     private Map<String, Set<String>> parseUniqueEmailsByLanguage(Collection<HenkiloYhteystiedotDto> yhteystiedot) {

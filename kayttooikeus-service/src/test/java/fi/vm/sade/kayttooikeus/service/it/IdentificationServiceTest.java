@@ -1,10 +1,8 @@
 package fi.vm.sade.kayttooikeus.service.it;
 
-import fi.vm.sade.kayttooikeus.controller.KutsuPopulator;
 import fi.vm.sade.kayttooikeus.dto.KayttajaTyyppi;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
-import fi.vm.sade.kayttooikeus.model.Kutsu;
 import fi.vm.sade.kayttooikeus.repositories.IdentificationRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -20,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +28,6 @@ import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_I
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.henkilo;
 import static fi.vm.sade.kayttooikeus.repositories.populate.HenkiloPopulator.virkailija;
 import static fi.vm.sade.kayttooikeus.repositories.populate.IdentificationPopulator.identification;
-import static fi.vm.sade.kayttooikeus.repositories.populate.KayttajatiedotPopulator.kayttajatiedot;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -147,31 +143,6 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    public void updateIdentificationAndGenerateTokenForHenkiloByHetuNotFoundTest() {
-        Throwable exception = assertThrows(NotFoundException.class, () ->
-            identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid("1.2.3"));
-        assertTrue(exception.getMessage().contains("Henkilo not found with oid 1.2.3"));
-    }
-
-    @Test
-    public void updateIdentificationAndGenerateTokenForHenkiloByOid() {
-        String oid = "oid1";
-        populate(kayttajatiedot(henkilo(oid), "user1"));
-
-        String token1 = identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(oid);
-        assertThat(identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, "vetuma"))
-                .extracting(Identification::getIdentifier)
-                .containsExactly("user1");
-
-        String token2 = identificationService.updateIdentificationAndGenerateTokenForHenkiloByOid(oid);
-        assertThat(identificationRepository.findByHenkiloOidHenkiloAndIdpEntityId(oid, "vetuma"))
-                .extracting(Identification::getIdentifier)
-                .containsExactly("user1");
-
-        assertThat(token2).isNotEqualTo(token1);
-    }
-
-    @Test
     public void updateHakatunnuksetByHenkiloAndIdp() {
         String oid = "1.2.3.4.5";
         populate(identification("email", "test@example.com", henkilo(oid)));
@@ -265,19 +236,5 @@ public class IdentificationServiceTest extends AbstractServiceIntegrationTest {
 
             identificationService.getHenkiloOidByIdpAndIdentifier("mpassid", duplikaattiOid);
         });
-    }
-
-    @Test
-    public void updateKutsuAndGenerateTemporaryKutsuToken() {
-        Kutsu kutsu = populate(KutsuPopulator.kutsu("arpa", "kuutio", "arpa@kuutio.fi").salaisuus("123"));
-        String temporaryToken = this.identificationService
-                .updateKutsuAndGenerateTemporaryKutsuToken("123", "hetu", "arpa arpa2", "kuutio").get();
-        assertThat(kutsu.getEtunimi()).isEqualTo("arpa arpa2");
-        assertThat(kutsu.getSukunimi()).isEqualTo("kuutio");
-        assertThat(kutsu.getSahkoposti()).isEqualTo("arpa@kuutio.fi");
-        assertThat(kutsu.getKieliKoodi()).isEqualTo("fi");
-        assertThat(kutsu.getHetu()).isEqualTo("hetu");
-        assertThat(kutsu.getTemporaryToken()).isEqualTo(temporaryToken);
-        assertThat(kutsu.getTemporaryTokenCreated()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 }

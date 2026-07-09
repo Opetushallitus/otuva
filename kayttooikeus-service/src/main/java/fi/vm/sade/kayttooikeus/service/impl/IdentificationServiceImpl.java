@@ -37,7 +37,6 @@ public class IdentificationServiceImpl implements IdentificationService {
 
     private final IdentificationRepository identificationRepository;
     private final HenkiloDataRepository henkiloDataRepository;
-    private final KutsuRepository kutsuRepository;
     private final TunnistusTokenDataRepository tunnistusTokenDataRepository;
 
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
@@ -97,14 +96,6 @@ public class IdentificationServiceImpl implements IdentificationService {
     }
 
     @Override
-    @Transactional
-    public String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo) {
-        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(oidHenkilo)
-                .orElseThrow(() -> new NotFoundException("Henkilo not found with oid " + oidHenkilo));
-        return generateAuthTokenForHenkilo(henkilo, STRONG_AUTHENTICATION_IDP, henkilo.getKayttajatiedot().getUsername());
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public Set<String> getTunnisteetByHenkiloAndIdp(String identityProvider, String oid) {
         validateLinkitettyIdentityProvider(identityProvider);
@@ -151,22 +142,6 @@ public class IdentificationServiceImpl implements IdentificationService {
         if (!validIdentityProviders.contains(identityProvider)) {
             throw new ValidationException(String.format("IdP '%s' ei ole tunnettu", identityProvider));
         }
-    }
-
-    @Override
-    @Transactional
-    public Optional<String> updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi) {
-        return this.kutsuRepository.findBySalaisuusIsValid(kutsuToken)
-                .map(kutsu -> updateKutsuAndGenerateTemporaryKutsuToken(kutsu, hetu, etunimet, sukunimi));
-    }
-
-    private String updateKutsuAndGenerateTemporaryKutsuToken(Kutsu kutsu, String hetu, String etunimet, String sukunimi) {
-        kutsu.setHetu(hetu);
-        kutsu.setEtunimi(etunimet);
-        kutsu.setSukunimi(sukunimi);
-        kutsu.setTemporaryToken(this.generateToken());
-        kutsu.setTemporaryTokenCreated(LocalDateTime.now());
-        return kutsu.getTemporaryToken();
     }
 
     @Override

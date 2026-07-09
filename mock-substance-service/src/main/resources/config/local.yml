@@ -3,7 +3,6 @@
 host.cas-oppija: localhost:8081
 cas.oppija.url: http://${host.cas-oppija}/cas-oppija
 cas.oppija.login: ${cas.oppija.url}/login
-cas.oppija.logout: ${cas.oppija.url}/logout
 
 mock-substance-service.cas-oppija.server-url: http://localhost:8081/cas-oppija
 mock-substance-service.cas-oppija.service-base-url: http://localhost:8180/mock-substance-service

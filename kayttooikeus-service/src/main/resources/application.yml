@@ -76,7 +76,6 @@ kayttooikeus:
       lampi-external-id: none
 kayttooikeus.kutsu.allowlist-oids: 1.2.3.4.6
 kayttooikeus.mfa.setup.require-suomifi: true
-kayttooikeus.registration.allow-test-suomifi: false
 opintopolun-vastuukayttaja.kayttooikeusryhma-id: -1
 
 auth.crypto-service.static-salt: mock
@@ -97,8 +96,6 @@ cas.url: https://${host-cas}/cas
 cas.login: https://${host-cas}/cas/login
 cas.oppija.url: https://${host-oppija}/cas-oppija
 cas.oppija.login: ${cas.oppija.url}/login
-cas.oppija.logout: ${cas.oppija.url}/logout
 virkailijan-tyopoyta: ${url-virkailija}/virkailijan-tyopoyta
 
 feature.local-authentication: false
-feature.cas-virkailija-registration: true

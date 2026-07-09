@@ -1,8 +1,6 @@
 package fi.vm.sade.kayttooikeus.controller;
 
 import fi.vm.sade.kayttooikeus.CasUserAttributes;
-import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiAuthenticationDetails;
-import fi.vm.sade.kayttooikeus.config.security.casoppija.SuomiFiUserDetails;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LogInRedirectType;
 import fi.vm.sade.kayttooikeus.dto.enumeration.LoginTokenValidationCode;
@@ -20,30 +18,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import static fi.vm.sade.kayttooikeus.service.external.impl.HttpClientUtil.noContentOrNotFoundException;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -58,13 +43,6 @@ public class CasController {
     private final KayttajatiedotService kayttajatiedotService;
     private final VirkailijaService virkailijaService;
     private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
-
-    @Value("${kayttooikeus.registration.allow-test-suomifi:false}")
-    private String allowTestSuomifi;
-    @Value("${url-virkailija}")
-    private String urlVirkailija;
-    @Value("${cas.oppija.logout}")
-    private String casOppijaLogout;
 
     @Operation(summary = "Generoi autentikointitokenin henkilölle.",
             description = "Generoi tokenin CAS autentikointia varten henkilölle annettujen IdP tunnisteiden pohjalta.")
@@ -180,50 +158,6 @@ public class CasController {
         return CasUserAttributes.fromKayttajatiedotReadDto(oid, kayttaja, roles);
     }
 
-    @Operation(summary = "Virkailijan hetu-tunnistuksen jälkeinen käsittely. (rekisteröinti, hetu tunnistuksen pakotus, " +
-            "mahdollinen kirjautuminen suomi.fi:n kautta.)")
-    @RequestMapping(value = "/tunnistus", method = RequestMethod.GET)
-    public void requestGet(HttpServletRequest request, HttpServletResponse response,
-                           Principal principal,
-                           @RequestParam(required = false) String kutsuToken,
-                           @RequestParam(value = "locale", required = false) String kielisyys)
-            throws IOException {
-        SuomiFiUserDetails details = getSuomiFiAuthenticationDetails(principal);
-        // kirjataan ulos, jotta virkailija-CAS ei hämmenny
-        handleOppijaLogout(request, response);
-        if (StringUtils.hasLength(kutsuToken)) {
-            // Vaihdetaan kutsuToken väliaikaiseen ja tallennetaan tiedot vetumasta
-            String originalUrl = identificationService.updateKutsuAndGenerateTemporaryKutsuToken(kutsuToken, details.hetu, details.etunimet, details.sukunimi)
-                    .map(token -> urlVirkailija + "/henkilo-ui/kayttaja/rekisteroidy?temporaryKutsuToken=" + token)
-                    .orElseGet(() -> urlVirkailija + "/henkilo-ui/kayttaja/kutsu/vanhentunut/" + kielisyys);
-            response.sendRedirect(getRedirectViaLoginUrl(originalUrl));
-        }
-    }
-
-    private SuomiFiUserDetails getSuomiFiAuthenticationDetails(Principal principal) {
-        assert(principal != null);
-        assert(principal instanceof PreAuthenticatedAuthenticationToken);
-        PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken) principal;
-        SuomiFiAuthenticationDetails details = (SuomiFiAuthenticationDetails) token.getDetails();
-        if ("true".equals(allowTestSuomifi)) {
-            return new SuomiFiUserDetails(
-                details.hetu,
-                details.sukunimi == null ? "Testinen" : details.sukunimi,
-                details.etunimet == null ? "Testi" : details.etunimet
-            );
-        }
-        return details.getSuomiFiUserDetails();
-    }
-
-    private String getRedirectViaLoginUrl(String originalUrl) {
-        // kierrätetään CAS-oppijan logoutista, jotta CAS-virkailijaa ei hämmennetä
-        // sen sessiolla, tiketeillä tms.
-        return UriComponentsBuilder.fromUriString(casOppijaLogout)
-                .queryParam("service", URLEncoder.encode(originalUrl, StandardCharsets.UTF_8))
-                .build()
-                .toUriString();
-    }
-
     @Operation(summary = "Auttaa CAS session avaamisessa käyttöoikeuspalveluun.",
             description = "Jos kutsuja haluaa tehdä useita rinnakkaisia kutsuja eikä CAS sessiota ole vielä avattu, täytyy tätä kutsua ensin.")
     @PreAuthorize("isAuthenticated()")
@@ -280,13 +214,5 @@ public class CasController {
     @RequestMapping(value = "/myroles", method = RequestMethod.GET)
     public List<String> getMyroles() {
         return this.henkiloService.getMyRoles();
-    }
-
-    private void handleOppijaLogout(HttpServletRequest request, HttpServletResponse response) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null){
-            new SecurityContextLogoutHandler().logout(request, response, auth);
-        }
-        SecurityContextHolder.getContext().setAuthentication(null);
     }
 }

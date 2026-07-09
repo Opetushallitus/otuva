@@ -387,37 +387,27 @@ public class EmailServiceViestinvalitysTest {
         assertThat(email.getRecipients().size()).isEqualTo(1);
         assertThat(email.getRecipients().get(0)).isEqualTo("arpa@kuutio.fi");
         assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <h3>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h3>
+<body>
+    <div class="box">
+        <h1>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h1>
         <p>
             Hei arpa kuutio,
         </p>
         <p>
-            sinut on kutsuttu virkailijaksi Opetushallinnon palvelukokonaisuuteen. Sinulle on annettu käyttöoikeudet alla olevan mukaisesti.
+            sinut on kutsuttu Virkailijan opintopolkuun. Sinulle on annettu seuraavat käyttöoikeudet:
         </p>
-        <p>
                 <p>
-                            <strong>suomenkielinennimi</strong>
+                    <strong>suomenkielinennimi</strong>
                 </p>
-
         <p>
-            Päästäksesi käyttämään palvelua, sinun tulee rekisteröityä alla olevan linkin kautta ja tunnistautua vahvasti mobiilivarmenteen, pankkitunnusten tai varmennekortin avulla.
+            Rekisteröidy käyttäjäksi alla olevan linkin kautta. Rekisteröityminen vaatii vahvan tunnistautumisen.
+        </p>
+        <p>
+            <a href="https://localhost:9090/cas/login?service=https%3A%2F%2Flocalhost%3A9090%2Fhenkilo-ui%2Frekisteroityminen%3FvirkailijaRegistrationToken%3Dsalaisuushash&locale=FI">Linkki rekisteröitymiseen</a>
+        </p>
+        <p>
+            Kutsun lähetti: kutsun kutsuja
         </p>""");
-        assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <p>
-            Rekisteröitymisen jälkeen palveluun kirjaudutaan osoitteessa <a href="https://virkailija.opintopolku.fi">https://virkailija.opintopolku.fi</a>.
-        </p>
-        <p>
-            Kutsun lähetti kutsun kutsuja
-        </p>
-        <p>
-            Kutsu on voimassa 16.11.2024 asti
-        </p>
-    </div>
-    <div class="box" style="text-align: right;">
-        <img src="https://virkailija.opintopolku.fi/cas/images/logo_oph.svg" alt="Opetushallitus" />
-    </div>
-</body>
-</html>""");
     }
 
     @Test
@@ -454,30 +444,39 @@ public class EmailServiceViestinvalitysTest {
         assertThat(email.getRecipients().size()).isEqualTo(1);
         assertThat(email.getRecipients().get(0)).isEqualTo("arpa@kuutio.fi");
         assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <h3>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h3>
+<body>
+    <div class="box">
+        <h1>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h1>
         <p>
             Hei arpa kuutio,
         </p>
         <p>
-            sinut on kutsuttu virkailijaksi Opetushallinnon palvelukokonaisuuteen. Sinulle on annettu käyttöoikeudet alla olevan mukaisesti.
+            sinut on kutsuttu Virkailijan opintopolkuun. Sinulle on annettu seuraavat käyttöoikeudet:
         </p>
-        <p>
                 <p>
-                            <strong>suomenkielinennimi</strong>
+                    <strong>suomenkielinennimi</strong>
                 </p>
-
         <p>
-            Päästäksesi käyttämään palvelua, sinun tulee rekisteröityä alla olevan linkin kautta ja tunnistautua vahvasti mobiilivarmenteen, pankkitunnusten tai varmennekortin avulla.
-        </p>""");
-        assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <p>
-            Rekisteröitymisen jälkeen palveluun kirjaudutaan osoitteessa <a href="https://virkailija.opintopolku.fi">https://virkailija.opintopolku.fi</a>.
+            Rekisteröidy käyttäjäksi alla olevan linkin kautta. Rekisteröityminen vaatii vahvan tunnistautumisen.
         </p>
         <p>
-            Kutsun lähetti kutsun kutsuja
+            <a href="https://localhost:9090/cas/login?service=https%3A%2F%2Flocalhost%3A9090%2Fhenkilo-ui%2Frekisteroityminen%3FvirkailijaRegistrationToken%3Dsalaisuushash&locale=EN">Linkki rekisteröitymiseen</a>
+        </p>
+        <p>
+            Kutsun lähetti: kutsun kutsuja
         </p>
         <p>
             Kutsu on voimassa 16.11.2024 asti
+        </p>
+        <p>
+            Lisätietoa Virkailijan opintopolusta:
+            <ul>
+                <li>Virkailijan opintopolun osoite <a href="https://virkailija.opintopolku.fi">https://virkailija.opintopolku.fi</a>.</li>
+                <li>Ohjeet: <a href="https://wiki.eduuni.fi/x/f5vTGg">https://wiki.eduuni.fi/x/f5vTGg</a></li>
+            </ul>
+        </p>
+        <p>
+            Virkailijan opintopolun käyttäjien henkilötiedot tallennetaan oppijanumerorekisteriin ja niitä käsitellään tietosuojaselosteen mukaisesti: <a href="https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet">https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet</a>
         </p>
     </div>
     <div class="box" style="text-align: right;">
@@ -523,37 +522,45 @@ public class EmailServiceViestinvalitysTest {
         assertThat(email.getRecipients().size()).isEqualTo(1);
         assertThat(email.getRecipients().get(0)).isEqualTo("arpa@kuutio.fi");
         assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <h3>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h3>
+<body>
+    <div class="box">
+        <h1>Virkailijan Opintopolku: kutsu palvelun käyttäjäksi</h1>
         <p>
             Hei arpa kuutio,
         </p>
         <p>
-            sinut on kutsuttu virkailijaksi Opetushallinnon palvelukokonaisuuteen. Sinulle on annettu käyttöoikeudet alla olevan mukaisesti.
+            sinut on kutsuttu Virkailijan opintopolkuun. Sinulle on annettu seuraavat käyttöoikeudet:
         </p>
-        <p>
                 <p>
-                            <strong>suomenkielinennimi</strong>
+                    <strong>suomenkielinennimi</strong>
                 </p>
-
         <p>
-            Päästäksesi käyttämään palvelua, sinun tulee rekisteröityä alla olevan linkin kautta ja tunnistautua vahvasti mobiilivarmenteen, pankkitunnusten tai varmennekortin avulla.
-        </p>""");
-        assertThat(email.getBody()).containsIgnoringWhitespaces("""
-        <p>
-            Rekisteröitymisen jälkeen palveluun kirjaudutaan osoitteessa <a href="https://virkailija.opintopolku.fi">https://virkailija.opintopolku.fi</a>.
+            Rekisteröidy käyttäjäksi alla olevan linkin kautta. Rekisteröityminen vaatii vahvan tunnistautumisen.
         </p>
         <p>
-            Kutsun lähetti Varda Info
+            <a href="https://localhost:9090/cas/login?service=https%3A%2F%2Flocalhost%3A9090%2Fhenkilo-ui%2Frekisteroityminen%3FvirkailijaRegistrationToken%3Dsalaisuushash&locale=FI">Linkki rekisteröitymiseen</a>
+        </p>
+        <p>
+            Kutsun lähetti: Varda Info
         </p>
         <p>
             Kutsu on voimassa 16.12.2024 asti
+        </p>
+        <p>
+            Lisätietoa Virkailijan opintopolusta:
+            <ul>
+                <li>Virkailijan opintopolun osoite <a href="https://virkailija.opintopolku.fi">https://virkailija.opintopolku.fi</a>.</li>
+                <li>Ohjeet: <a href="https://wiki.eduuni.fi/x/f5vTGg">https://wiki.eduuni.fi/x/f5vTGg</a></li>
+            </ul>
+        </p>
+        <p>
+            Virkailijan opintopolun käyttäjien henkilötiedot tallennetaan oppijanumerorekisteriin ja niitä käsitellään tietosuojaselosteen mukaisesti: <a href="https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet">https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet</a>
         </p>
     </div>
     <div class="box" style="text-align: right;">
         <img src="https://virkailija.opintopolku.fi/cas/images/logo_oph.svg" alt="Opetushallitus" />
     </div>
-</body>
-</html>""");
+</body>""");
     }
 
     @Test

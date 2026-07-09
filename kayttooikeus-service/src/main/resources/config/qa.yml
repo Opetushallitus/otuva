@@ -28,7 +28,6 @@ kayttooikeus.jwt.issuer-uri: https://qa.otuva.opintopolku.fi/kayttooikeus-servic
 common.admin-oid: "1.2.246.562.24.00000000001"
 common.crypto-password: ${ssm_kayttooikeus_crypto_password}
 
-kayttooikeus.registration.allow-test-suomifi: true
 kayttooikeus.uses-ssl-proxy: true
 kayttooikeus.disable-same-site-cookie: false
 kayttooikeus.scheduling.enabled: true
@@ -40,5 +39,3 @@ opintopolun-vastuukayttaja.kayttooikeusryhma-id: 176282
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
 
 viestinvalitys.baseurl: https://viestinvalitys.testiopintopolku.fi/lahetys
-
-feature.cas-virkailija-registration: true

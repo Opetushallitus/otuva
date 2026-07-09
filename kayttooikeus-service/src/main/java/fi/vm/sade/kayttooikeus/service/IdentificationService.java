@@ -4,7 +4,6 @@ import fi.vm.sade.kayttooikeus.model.Henkilo;
 import fi.vm.sade.kayttooikeus.model.Identification;
 import fi.vm.sade.kayttooikeus.model.TunnistusToken;
 
-import java.util.Optional;
 import java.util.Set;
 
 public interface IdentificationService {
@@ -16,12 +15,8 @@ public interface IdentificationService {
 
     Identification findByTokenAndInvalidateToken(String authToken);
 
-    String updateIdentificationAndGenerateTokenForHenkiloByOid(String oidHenkilo);
-
     Set<String> getTunnisteetByHenkiloAndIdp(String identityProvider, String oid);
     Set<String> updateTunnisteetByHenkiloAndIdp(String identityProvider, String oid, Set<String> hakatunnisteet);
-
-    Optional<String> updateKutsuAndGenerateTemporaryKutsuToken(String kutsuToken, String hetu, String etunimet, String sukunimi);
 
     String createLoginToken(String oidHenkilo, Boolean salasananVaihto, String hetu);
 

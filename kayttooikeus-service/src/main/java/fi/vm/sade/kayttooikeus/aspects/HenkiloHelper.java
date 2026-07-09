@@ -4,12 +4,9 @@ import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.Target;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotCreateDto;
 import fi.vm.sade.kayttooikeus.dto.KayttajatiedotUpdateDto;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -61,19 +58,6 @@ public class HenkiloHelper {
         Changes changes = new Changes.Builder()
                 .build();
         auditLogger.log(KayttooikeusOperation.UPDATE_KAYTTAJATIEDOT, target, changes);
-    }
-
-    void logCreateHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Object result) {
-        Target.Builder targetBuilder = new Target.Builder();
-        Optional.ofNullable(result)
-                .filter(HenkiloUpdateDto.class::isInstance)
-                .map(HenkiloUpdateDto.class::cast)
-                .map(HenkiloUpdateDto::getOidHenkilo)
-                .ifPresent(oid -> targetBuilder.setField("oid", oid));
-        Target target = targetBuilder.build();
-        Changes changes = new Changes.Builder()
-                .build();
-        auditLogger.log(KayttooikeusOperation.CREATE_HENKILO_BY_KUTSU, target, changes);
     }
 
     public void logEnableGauthMfa(String henkiloOid) {

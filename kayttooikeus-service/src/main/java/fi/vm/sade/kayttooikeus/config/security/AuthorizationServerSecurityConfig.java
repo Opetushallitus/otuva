@@ -49,7 +49,7 @@ public class AuthorizationServerSecurityConfig {
     RSAPrivateKey privateKey;
 
     @Bean
-    @Order(3)
+    @Order(2)
     SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
             .oauth2AuthorizationServer((authorizationServer) -> {

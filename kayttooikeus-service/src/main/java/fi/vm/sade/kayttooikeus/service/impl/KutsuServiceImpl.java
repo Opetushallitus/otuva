@@ -1,6 +1,5 @@
 package fi.vm.sade.kayttooikeus.service.impl;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.kayttooikeus.config.OrikaBeanMapper;
 import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
@@ -10,25 +9,14 @@ import fi.vm.sade.kayttooikeus.model.*;
 import fi.vm.sade.kayttooikeus.repositories.*;
 import fi.vm.sade.kayttooikeus.repositories.criteria.KutsuCriteria;
 import fi.vm.sade.kayttooikeus.repositories.criteria.MyontooikeusCriteria;
-import fi.vm.sade.kayttooikeus.repositories.dto.HenkiloCreateByKutsuDto;
 import fi.vm.sade.kayttooikeus.service.*;
 import fi.vm.sade.kayttooikeus.service.exception.DataInconsistencyException;
 import fi.vm.sade.kayttooikeus.service.exception.ForbiddenException;
 import fi.vm.sade.kayttooikeus.service.exception.NotFoundException;
 import fi.vm.sade.kayttooikeus.service.exception.ValidationException;
-import fi.vm.sade.kayttooikeus.service.external.OppijanumerorekisteriClient;
 import fi.vm.sade.kayttooikeus.service.external.OrganisaatioClient;
 import fi.vm.sade.kayttooikeus.service.validators.KutsujaValidator;
 import fi.vm.sade.kayttooikeus.util.OrganisaatioMyontoPredicate;
-import fi.vm.sade.kayttooikeus.util.YhteystietoUtil;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloCreateDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.HenkiloUpdateDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.KielisyysDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystiedotRyhmaDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoDto;
-import fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -36,16 +24,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.kayttooikeus.dto.KutsunTila.AVOIN;
-import static fi.vm.sade.kayttooikeus.model.Identification.HAKA_AUTHENTICATION_IDP;
 import static fi.vm.sade.kayttooikeus.service.impl.PermissionCheckerServiceImpl.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -60,17 +45,11 @@ public class KutsuServiceImpl implements KutsuService {
 
     private final EmailService emailService;
     private final LocalizationService localizationService;
-    private final CryptoService cryptoService;
-    private final KayttajatiedotService kayttajatiedotService;
-    private final KayttooikeusAnomusService kayttooikeusAnomusService;
-    private final IdentificationService identificationService;
     private final PermissionCheckerService permissionCheckerService;
 
-    private final OppijanumerorekisteriClient oppijanumerorekisteriClient;
     private final OrganisaatioClient organisaatioClient;
 
     private final MyonnettyKayttoOikeusRyhmaTapahtumaRepository myonnettyKayttoOikeusRyhmaTapahtumaRepository;
-    private final IdentificationRepository identificationRepository;
     private final KutsujaValidator kutsujaValidator;
 
     private final CommonProperties commonProperties;
@@ -258,27 +237,6 @@ public class KutsuServiceImpl implements KutsuService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public KutsuReadDto getKutsu(Long id) {
-        Kutsu kutsu = kutsuRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Kutsu not found"));
-        KutsuReadDto kutsuReadDto = mapper.map(kutsu, KutsuReadDto.class);
-        this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
-        return kutsuReadDto;
-    }
-
-    @Override
-    @Transactional
-    public Optional<Kutsu> getHakaKutsu(String temporaryToken) {
-        var kutsu = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken);
-        if (kutsu.isPresent() && kutsu.get().getHakaIdentifier() != null) {
-            return kutsu;
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    @Override
     @Transactional
     public void renewKutsu(long id) {
         Kutsu kutsuToRenew = kutsuRepository.findById(id)
@@ -310,196 +268,6 @@ public class KutsuServiceImpl implements KutsuService {
                     .map(KutsuOrganisaatio::getOrganisaatioOid)
                     .collect(Collectors.toSet()));
         }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public KutsuReadDto getByTemporaryToken(String temporaryToken) {
-        Kutsu kutsuByToken = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        KutsuReadDto kutsuReadDto = this.mapper.map(kutsuByToken, KutsuReadDto.class);
-        this.localizationService.localizeOrgs(kutsuReadDto.getOrganisaatiot());
-        return kutsuReadDto;
-    }
-
-    @Override
-    @Transactional
-    public HenkiloUpdateDto createHenkiloWithHakaIdentifier(String temporaryToken, String hakaIdentifier) {
-        Kutsu kutsu = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        kutsu.setHakaIdentifier(hakaIdentifier);
-        Optional<HenkiloDto> henkiloByHetu = oppijanumerorekisteriClient.getHenkiloByHetu(kutsu.getHetu());
-        return createHenkilo(kutsu, getHakaHenkiloCreateByKutsuDto(kutsu, hakaIdentifier), henkiloByHetu);
-    }
-
-    private HenkiloCreateByKutsuDto getHakaHenkiloCreateByKutsuDto(Kutsu kutsu, String hakaIdentifier) {
-        String kutsumanimi = kutsu.getEtunimi().contains(" ") ? kutsu.getEtunimi().split(" ")[0] : kutsu.getEtunimi();
-        String parsedIdentifier = kutsu.getHakaIdentifier().replaceAll("[^A-Za-z0-9]", "");
-        String username = parsedIdentifier + (new Random().nextInt(900) + 100); // 100-999
-        KielisyysDto kielisyys = KielisyysDto.builder().kieliKoodi(kutsu.getKieliKoodi()).build();
-        return new HenkiloCreateByKutsuDto(kutsumanimi, kielisyys, username, null);
-    }
-
-    @Override
-    @Transactional
-    public HenkiloUpdateDto createHenkilo(String temporaryToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto) {
-        Kutsu kutsuByToken = kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        Optional<HenkiloDto> henkiloByHetu = oppijanumerorekisteriClient.getHenkiloByHetu(kutsuByToken.getHetu());
-        cryptoService.throwIfNotStrongPassword(henkiloCreateByKutsuDto.getPassword());
-        kayttajatiedotService.throwIfUsernameExists(henkiloCreateByKutsuDto.getKayttajanimi(), henkiloByHetu.map(HenkiloDto::getOidHenkilo));
-        kayttajatiedotService.throwIfUsernameIsNotValid(henkiloCreateByKutsuDto.getKayttajanimi());
-        return createHenkilo(kutsuByToken, henkiloCreateByKutsuDto, henkiloByHetu);
-    }
-
-    private HenkiloUpdateDto createHenkilo(Kutsu kutsuByToken, HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Optional<HenkiloDto> henkiloByHetu) {
-        // Search for existing henkilo by hetu and create new if not found
-        boolean isNewHenkilo = !henkiloByHetu.isPresent();
-        String henkiloOid;
-        if (isNewHenkilo) {
-            HenkiloCreateDto henkiloCreateDto = this.getHenkiloCreateDto(henkiloCreateByKutsuDto, kutsuByToken);
-            henkiloOid = this.oppijanumerorekisteriClient.createHenkilo(henkiloCreateDto);
-        } else {
-            henkiloOid = henkiloByHetu.get().getOidHenkilo();
-        }
-
-        // Set henkilo strongly identified
-        Henkilo henkilo = this.henkiloDataRepository.findByOidHenkilo(henkiloOid)
-                .orElseGet(() -> this.henkiloDataRepository.save(Henkilo.builder().oidHenkilo(henkiloOid).build()));
-        henkilo.setKayttajaTyyppi(KayttajaTyyppi.VIRKAILIJA);
-        henkilo.setVahvastiTunnistettu(true);
-
-        // Create or update credentials and add privileges if hetu not same as kutsu creator
-        final String kutsujaOid = kutsuByToken.getKutsuja();
-        HenkiloPerustietoDto kutsuja = this.oppijanumerorekisteriClient.getHenkilonPerustiedot(kutsujaOid)
-                .orElseThrow(() -> new DataInconsistencyException("Current user not found with oid " + kutsujaOid));
-        if (!StringUtils.hasLength(kutsuja.getHetu()) || !kutsuByToken.getHetu().equals(kutsuja.getHetu())) {
-            this.createOrUpdateCredentialsAndPrivileges(henkiloCreateByKutsuDto, kutsuByToken, henkiloOid);
-        }
-
-        // Update kutsu
-        kutsuByToken.setKaytetty(LocalDateTime.now());
-        kutsuByToken.setTemporaryToken(null);
-        kutsuByToken.setLuotuHenkiloOid(henkiloOid);
-        kutsuByToken.setTila(KutsunTila.KAYTETTY);
-
-        // Set henkilo to VIRKAILIJA since we don't know if he was OPPIJA before
-        HenkiloUpdateDto henkiloUpdateDto = new HenkiloUpdateDto();
-        henkiloUpdateDto.setOidHenkilo(henkiloOid);
-        henkiloUpdateDto.setPassivoitu(false);
-
-        // In case henkilo already exists
-        henkiloUpdateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
-
-        if (isNewHenkilo) {
-            addEmailToNewHenkiloUpdateDto(henkiloUpdateDto, kutsuByToken.getSahkoposti());
-        } else {
-            addEmailToExistingHenkiloUpdateDto(henkiloOid, kutsuByToken.getSahkoposti(), henkiloUpdateDto);
-        }
-
-        return henkiloUpdateDto;
-    }
-
-
-    public void addEmailToExistingHenkiloUpdateDto(String henkiloOid, String kutsuSahkoposti, HenkiloUpdateDto henkiloUpdateDto) {
-        HenkiloDto henkiloDto = this.oppijanumerorekisteriClient.getHenkiloByOid(henkiloOid);
-        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
-
-        // add existing henkilos yhteystiedot to henkiloupdate
-        yhteystiedotRyhma.addAll(henkiloDto.getYhteystiedotRyhma());
-
-        boolean missingKutsusahkoposti = henkiloDto.getYhteystiedotRyhma().stream()
-                .flatMap(yhteystiedotRyhmaDto -> yhteystiedotRyhmaDto.getYhteystieto().stream())
-                .map(YhteystietoDto::getYhteystietoArvo)
-                .noneMatch(kutsuSahkoposti::equals);
-
-        if (missingKutsusahkoposti) { // add kutsuemail if it doesn't exist in henkilos yhteystiedot
-            YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
-            Set<YhteystietoDto> yhteystietoDtos = new HashSet<>();
-            yhteystietoDtos.add(yhteystietoDto);
-            yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
-        }
-
-        henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
-    }
-
-    public void addEmailToNewHenkiloUpdateDto(HenkiloUpdateDto henkiloUpdateDto, String kutsuSahkoposti) {
-        // Initiate new YhteystiedotRyhma with email in kutsu
-        YhteystietoDto yhteystietoDto = new YhteystietoDto(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI, kutsuSahkoposti);
-        HashSet<YhteystietoDto> yhteystietoDtos = new HashSet<>();
-        yhteystietoDtos.add(yhteystietoDto);
-        Set<YhteystiedotRyhmaDto> yhteystiedotRyhma = new HashSet<>();
-        yhteystiedotRyhma.add(new YhteystiedotRyhmaDto(null, YhteystietoUtil.TYOOSOITE, "alkupera6", false, yhteystietoDtos));
-        henkiloUpdateDto.setYhteystiedotRyhma(yhteystiedotRyhma);
-    }
-
-    private void createOrUpdateCredentialsAndPrivileges(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken, String henkiloOid) {
-        // Create username/password and haka identifier if provided
-        if (StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
-            // haka-tunniste tulee olla uniikki
-            identificationRepository.findByidpEntityIdAndIdentifier(HAKA_AUTHENTICATION_IDP, kutsuByToken.getHakaIdentifier()).ifPresent(identification -> {
-                String oidByIdentification = identification.getHenkilo().getOidHenkilo();
-                if (!henkiloOid.equals(oidByIdentification)) {
-                    // yhdistetään henkilöt
-                    oppijanumerorekisteriClient.yhdistaHenkilot(henkiloOid, asList(oidByIdentification));
-
-                    // poistetaan duplikaatilta haka-tunniste
-                    Set<String> identifications = identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oidByIdentification);
-                    identifications.remove(kutsuByToken.getHakaIdentifier());
-                    identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, oidByIdentification, identifications);
-                }
-            });
-            // If haka identifier is provided add it to henkilo identifiers
-            Set<String> hakaIdentifiers = this.identificationService.getTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid);
-            hakaIdentifiers.add(kutsuByToken.getHakaIdentifier());
-            this.identificationService.updateTunnisteetByHenkiloAndIdp(HAKA_AUTHENTICATION_IDP, henkiloOid, hakaIdentifiers);
-        }
-        this.kayttajatiedotService.createOrUpdateUsername(henkiloOid, henkiloCreateByKutsuDto.getKayttajanimi());
-        if (!StringUtils.hasLength(kutsuByToken.getHakaIdentifier())) {
-            this.kayttajatiedotService.changePasswordAsAdmin(henkiloOid, henkiloCreateByKutsuDto.getPassword());
-        }
-
-        kutsuByToken.getOrganisaatiot().forEach(kutsuOrganisaatio -> {
-            // Filtteröidään ei sallitut käyttöoikeusryhmät. Virkailija voi anoa tarvitsemiaan oikeuksia päästyään palveluun.
-            Set<KayttoOikeusRyhma> kayttooikeusRyhmas = kutsuOrganisaatio.getRyhmat().stream()
-                    .filter(kayttoOikeusRyhma -> kayttoOikeusRyhma.isSallittuKayttajatyypilla(KayttajaTyyppi.VIRKAILIJA))
-                    .filter(kayttoOikeusRyhma -> !kayttoOikeusRyhma.isPassivoitu())
-                    .collect(Collectors.toSet());
-            this.kayttooikeusAnomusService.grantPreValidatedKayttooikeusryhma(
-                    henkiloOid,
-                    kutsuOrganisaatio.getOrganisaatioOid(),
-                    Optional.ofNullable(kutsuOrganisaatio.getVoimassaLoppuPvm())
-                            .orElseGet(() -> LocalDate.now().plusYears(1)),
-                    kayttooikeusRyhmas,
-                    kutsuByToken.getKutsuja());
-        });
-
-    }
-
-    private HenkiloCreateDto getHenkiloCreateDto(HenkiloCreateByKutsuDto henkiloCreateByKutsuDto, Kutsu kutsuByToken) {
-        HenkiloCreateDto henkiloCreateDto = new HenkiloCreateDto();
-        henkiloCreateDto.setHetu(kutsuByToken.getHetu());
-        henkiloCreateDto.setAsiointiKieli(henkiloCreateByKutsuDto.getAsiointiKieli());
-        henkiloCreateDto.setEtunimet(kutsuByToken.getEtunimi());
-        henkiloCreateDto.setSukunimi(kutsuByToken.getSukunimi());
-        henkiloCreateDto.setKutsumanimi(henkiloCreateByKutsuDto.getKutsumanimi());
-        henkiloCreateDto.setYhteystiedotRyhma(Sets.newHashSet(YhteystiedotRyhmaDto.builder()
-                .ryhmaAlkuperaTieto(this.commonProperties.getYhteystiedotRyhmaAlkuperaVirkailijaUi())
-                .ryhmaKuvaus(this.commonProperties.getYhteystiedotRyhmaKuvausTyoosoite())
-                .yhteystieto(Set.of(YhteystietoDto.builder()
-                        .yhteystietoArvo(kutsuByToken.getSahkoposti())
-                        .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
-                        .build())).build()));
-        return henkiloCreateDto;
-    }
-
-    @Override
-    @Transactional
-    // Nulls are not mapped for KutsuUpdateDto -> Kutsu
-    public void updateHakaIdentifierToKutsu(String temporaryToken, KutsuUpdateDto kutsuUpdateDto) {
-        Kutsu kutsu = this.kutsuRepository.findByTemporaryTokenIsValidIsActive(temporaryToken)
-                .orElseThrow(() -> new NotFoundException("Could not find kutsu by token " + temporaryToken + " or token is invalid"));
-        this.mapper.map(kutsuUpdateDto, kutsu);
     }
 
     @Override
