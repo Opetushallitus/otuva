@@ -35,7 +35,7 @@ kayttooikeus.scheduling.enabled: true
 kayttooikeus.kutsu.allowlist-oids: ${ssm_kayttooikeus_kutsu_allowlist}
 kayttooikeus.oauth2.publickey: ${ssm_kayttooikeus_oauth2_publickey}
 kayttooikeus.oauth2.privatekey: ${ssm_kayttooikeus_oauth2_privatekey}
-opintopolun-vastuukayttaja.kayttooikeusryhma-id: 107212959
+opintopolun-vastuukayttaja.kayttooikeusryhma-id: 1216
 
 auth.crypto-service.static-salt: ${ssm_auth_cryptoservice_static_salt}
 
