@@ -18,30 +18,22 @@
     <div class="box">
         <h3>${subject}</h3>
         <p>
-            Tarkista, että organisaationne ja siihen liittyvien kaikkien oppilaitosten yhteystiedot
-            sekä sähköpostiosoitteet ovat ajan tasalla.
+            Hei Opintopolun vastuukäyttäjä,
         </p>
         <p>
-            Sähköpostiosoite löytyy Virkailijan Opintopolusta (<a href="${linkki}">${linkki}</a>)
-            kohdasta <b>Organisaation tiedot → Yhteystiedot → Jaettu sähköpostiosoite</b>.
-        </p>
-        <p>
-            Opintopolun vastuukäyttäjät ylläpitävät oppilaitosten yhteystietoja.
-        </p>
-        <p>
-            Opetushallitus ja Opetus- ja kulttuuriministeriö käyttävät organisaatioiden
-            sähköpostiosoitteita virallisessa viestinnässä.
-        </p>
-        <p>
-            Yhteystietoja käytetään esimerkiksi seuraavissa tiedotteissa:
+            Tarkista, että oppilaitosten yhteystiedot ovat ajan tasalla Virkailijan Opintopolussa (<a href="${linkki}">${linkki}</a>).
         </p>
         <ul>
-            <li>KOSKI- ja Varda-määräykset</li>
-            <li>Move-mittaukset</li>
-            <li>kriisiviestintä</li>
+            <li>Sähköpostiosoitteen löydät kohdasta <b>"Yhteystiedot" → "Jaettu sähköpostiosoite".</b></li>
         </ul>
         <p>
-            Opetushallitus
+            Opetushallitus ja Opetus- ja kulttuuriministeriö käyttävät yhteystietoja virallisessa viestinnässä.
+        </p>
+        <p>
+            Koulutustoimijaan liittyvät tiedot päivitetään YTJ:n rekisteriin.
+        </p>
+        <p>
+            Ystävällisesti, Opetushallitus
         </p>
     </div>
     <div class="box" style="text-align: right;">

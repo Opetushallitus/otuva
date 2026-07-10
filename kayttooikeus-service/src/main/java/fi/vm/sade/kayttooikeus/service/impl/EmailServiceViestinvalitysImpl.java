@@ -42,6 +42,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static fi.vm.sade.kayttooikeus.util.YhteystietoUtil.TYOOSOITE;
 import static fi.vm.sade.oppijanumerorekisteri.dto.YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -396,6 +397,7 @@ public class EmailServiceViestinvalitysImpl implements EmailService {
                 .collect(groupingBy(
                         henkilo -> validateLanguage(henkilo.getAsiointikieli()),
                         flatMapping(henkilo -> henkilo.getYhteystiedotRyhma().stream()
+                                        .filter(y -> TYOOSOITE.equals(y.getRyhmaKuvaus()))
                                         .map(YhteystiedotRyhmaDto::getYhteystieto)
                                         .flatMap(Collection::stream)
                                         .filter(yhteystieto -> yhteystieto.getYhteystietoTyyppi() == YHTEYSTIETO_SAHKOPOSTI)

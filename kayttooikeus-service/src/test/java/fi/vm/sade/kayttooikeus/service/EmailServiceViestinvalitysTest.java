@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static fi.vm.sade.kayttooikeus.util.YhteystietoUtil.TYOOSOITE;
 import static java.util.Collections.singleton;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -163,7 +164,7 @@ public class EmailServiceViestinvalitysTest {
                 .satisfies(email -> {
                     assertThat(email.getRecipients()).containsExactly("fi.vastuukayttaja@example.com");
                     assertThat(email.getBody()).contains("<html lang=\"fi\">");
-                    assertThat(email.getBody()).contains("Tarkista, että organisaationne");
+                    assertThat(email.getBody()).contains("Tarkista, että oppilaitosten yhteystiedot ovat ajan tasalla Virkailijan Opintopolussa");
                     assertThat(email.getBody()).contains("https://localhost:9090/organisaatio-service/organisaatiot");
                 });
         assertThat(emailCaptor.getAllValues())
@@ -172,7 +173,7 @@ public class EmailServiceViestinvalitysTest {
                 .satisfies(email -> {
                     assertThat(email.getRecipients()).containsExactly("sv.vastuukayttaja@example.com");
                     assertThat(email.getBody()).contains("<html lang=\"sv\">");
-                    assertThat(email.getBody()).contains("Kontrollera att kontaktuppgifterna");
+                    assertThat(email.getBody()).contains("Kontrollera att läroanstalternas kontaktuppgifter är aktuella i Studieinfo för administratörer");
                     assertThat(email.getBody()).contains("https://localhost:9090/organisaatio-service/organisaatiot");
                 });
     }
@@ -181,7 +182,9 @@ public class EmailServiceViestinvalitysTest {
         HenkiloYhteystiedotDto henkilo = new HenkiloYhteystiedotDto();
         henkilo.setOidHenkilo(oid);
         henkilo.setAsiointikieli(asiointikieli);
-        henkilo.setYhteystiedotRyhma(List.of(YhteystiedotRyhmaDto.builder()
+        henkilo.setYhteystiedotRyhma(List.of(
+            YhteystiedotRyhmaDto.builder()
+                .ryhmaKuvaus(TYOOSOITE)
                 .yhteystieto(Set.of(
                         YhteystietoDto.builder()
                                 .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
@@ -190,6 +193,14 @@ public class EmailServiceViestinvalitysTest {
                         YhteystietoDto.builder()
                                 .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_PUHELINNUMERO)
                                 .yhteystietoArvo("029 533 1000")
+                                .build()))
+                .build(),
+            YhteystiedotRyhmaDto.builder()
+                .ryhmaKuvaus("yhteystietotyyppi1")
+                .yhteystieto(Set.of(
+                        YhteystietoDto.builder()
+                                .yhteystietoTyyppi(YhteystietoTyyppi.YHTEYSTIETO_SAHKOPOSTI)
+                                .yhteystietoArvo("fake@email.com")
                                 .build()))
                 .build()));
         return henkilo;

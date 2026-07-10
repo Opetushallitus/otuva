@@ -18,30 +18,21 @@
     <div class="box">
         <h3>${subject}</h3>
         <p>
-            Kontrollera att kontaktuppgifterna för er organisation och de tillhörande läroanstalterna,
-            inklusive e‑postadresser, är uppdaterade.
+            Hej Ansvarig användare i Studieinfo,
         </p>
         <p>
-            E‑postadressen finns i Studieinfo för administratörer (<a href="${linkki}">${linkki}</a>)
-            under <b>Organisationens uppgifter → Kontaktinformation → Delad e-post</b>.
-        </p>
-        <p>
-            Den ansvariga användaren för Studieinfo upprätthåller läroanstalternas kontaktuppgifter.
-        </p>
-        <p>
-            Utbildningsstyrelsen och Undervisnings- och kulturministeriet använder organisationernas
-            e‑postadresser i officiell kommunikation.
-        </p>
-        <p>
-            E‑postadressen används också:
+            Kontrollera att läroanstalternas kontaktuppgifter är aktuella i Studieinfo för administratörer (<a href="${linkki}">${linkki}</a>).
         </p>
         <ul>
-            <li>KOSKI och Varda föreskrift</li>
-            <li>Move-mätningsresultaten</li>
-            <li>kriskommunikation</li>
+            <li>E-postadressen hittar du under <b>"Kontaktinformation" → "Delad e-post".</b></li>
         </ul>
         <p>
-            Utbildningsstyrelsen
+            Utbildningsstyrelsen och undervisnings- och kulturministeriet använder kontaktuppgifterna i sin officiella kommunikation.
+        <p>
+            Uppgifter som gäller utbildningsaktör uppdateras i YTJ-registret.
+        </p>
+        <p>
+            Med vänliga hälsningar, Utbildningsstyrelsen
         </p>
     </div>
     <div class="box" style="text-align: right;">
