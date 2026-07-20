@@ -1,6 +1,6 @@
 {
   "@class": "org.apereo.cas.services.CasRegisteredService",
-  "serviceId": "^https://dev\\.viestinvalitys\\.opintopolku\\.fi(/.*)?$",
+  "serviceId": "^https://virkailija\\.untuvaopintopolku\\.fi/viestinvalityspalvelu(/.*)?$",
   "name": "viestinvalityspalvelu",
   "description": "Viestinvälityspalvelu (2026), Next.js:tön frontend",
   "id": 8,
