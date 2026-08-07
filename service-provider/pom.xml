@@ -61,8 +61,6 @@ buildTtime=${maven.build.timestamp}
         <slf4j.version>1.7.36</slf4j.version>
         <spring-security.version>3.2.10.RELEASE</spring-security.version>
         <spring.version>5.3.31</spring.version>
-        <java-utils-properties.version>0.1.0-SNAPSHOT</java-utils-properties.version>
-        <java-utils-http.version>0.5.0-SNAPSHOT</java-utils-http.version>
         <webapp.port>8180</webapp.port>
     </properties>
 
@@ -197,21 +195,18 @@ buildTtime=${maven.build.timestamp}
             <scope>test</scope>
         </dependency>
 
+        <!-- Vendored fi.vm.sade.properties and fi.vm.sade.javautils.http sources
+             (from Opetushallitus/java-utils) need commons-lang3 and lombok -->
         <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-properties</artifactId>
-            <version>${java-utils-properties.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-http</artifactId>
-            <version>${java-utils-http.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
