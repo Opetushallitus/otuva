@@ -358,6 +358,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.springframework:spring-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Postgres
     implementation "org.apereo.cas:cas-server-support-jpa-ticket-registry"
     implementation "org.apereo.cas:cas-server-support-session-jdbc"
