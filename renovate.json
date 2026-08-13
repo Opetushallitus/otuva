@@ -16,6 +16,11 @@
       "enabled": false
     },
     {
+      "matchFileNames": ["cas-oppija/Dockerfile", "cas-virkailija/Dockerfile"],
+      "matchManagers": ["dockerfile"],
+      "enabled": true
+    },
+    {
       "matchPackageNames": ["aws-cdk", "aws-cdk-lib", "constructs"],
       "automerge": true
     }
