@@ -1,6 +1,8 @@
 FROM amazoncorretto:21 AS build
 WORKDIR /app
 
+RUN yum install -y findutils && yum clean all
+
 COPY gradle ./gradle
 COPY gradlew .
 COPY gradle.properties .
