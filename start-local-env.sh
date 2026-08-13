@@ -12,7 +12,6 @@ function main {
   commands=(
     "$repo/scripts/run-docker-compose.sh"
     "$repo/scripts/run-cas-virkailija.sh"
-    "$repo/scripts/run-cas-virkailija.sh"
     "$repo/scripts/run-cas-oppija.sh"
     "$repo/scripts/run-kayttooikeus.sh"
     "$repo/scripts/run-mock-substance-service.sh"
