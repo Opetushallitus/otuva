@@ -18,7 +18,7 @@ function wait_for_database {
 }
 
 function use_correct_jvm_version {
-  JAVA_HOME="$( /usr/libexec/java_home -v "21" )"
+  JAVA_HOME="$( /usr/libexec/java_home -v "25" )"
   export JAVA_HOME
 }
 
