@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
-readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+source "$( dirname "${BASH_SOURCE[0]}" )/lib/common-functions.sh"
 
 function main {
   cd "$repo/cas-oppija"
 
-  use_correct_jvm_version
+  select_java_version "21"
   wait_for_database
   ./gradlew clean run -Dcas.standalone.configurationFile=config/local.yml
 }
@@ -15,11 +15,6 @@ function wait_for_database {
     >&2 echo "Waiting for database to start..."
     sleep 1
   done
-}
-
-function use_correct_jvm_version {
-  JAVA_HOME="$( /usr/libexec/java_home -v "21" )"
-  export JAVA_HOME
 }
 
 main "$@"
