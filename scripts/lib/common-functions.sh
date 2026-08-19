@@ -120,11 +120,44 @@ function select_java_version {
       fatal "Java version $1 not found. Available JAVA_HOME_* variables: $(env | grep JAVA_HOME_ || true)"
     fi
   else
-    info "Switching to Java $1"
-    JAVA_HOME="$(/usr/libexec/java_home -v "${java_version}")"
+    info "Switching to Java $java_version"
+    case "$(uname -s)" in
+      Darwin)
+        JAVA_HOME="$(/usr/libexec/java_home -v "${java_version}")"
+        ;;
+      Linux)
+        select_latest_sdkman_corretto_java_version "${java_version}"
+        ;;
+      *)
+        fatal "Unsupported operating system: $(uname -s)"
+        return 1
+        ;;
+    esac
     export JAVA_HOME
   fi
   java -version
+}
+
+function select_latest_sdkman_corretto_java_version {
+  local -r java_version="$1"
+  local -r shell_options="$-"
+  local latest_java_version
+
+  set +u # SDKMAN's initialization script is not compatible with nounset mode.
+  source "${SDKMAN_DIR:-${HOME}/.sdkman}/bin/sdkman-init.sh"; 
+  # SDKMAN requires specific identifiers with major, minor, and patch versions to be used,
+  # so get the latest Corretto version and use that
+  latest_java_version="$(
+    sdk list java \
+      | sed $'s/\033\\[[0-9;]*[[:alpha:]]//g' \
+      | grep -oE '[0-9]+(\.[0-9]+)+-amzn' \
+      | grep -E "^${java_version}\\." \
+      | sort -Vu \
+      | tail -n 1
+  )"
+  sdk install java "${latest_java_version}"
+  sdk use java "${latest_java_version}"
+  set -u
 }
 
 function retry_until_seconds_passed {
