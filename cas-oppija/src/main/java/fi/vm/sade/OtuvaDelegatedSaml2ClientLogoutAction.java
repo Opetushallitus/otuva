@@ -29,14 +29,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * The original DelegatedSaml2ClientLogoutAction class in CAS fails to get tickets with sessionindex
  */
 @Slf4j
-@Transactional
+@Transactional(transactionManager = "ticketTransactionManager")
 @RequiredArgsConstructor
 public class OtuvaDelegatedSaml2ClientLogoutAction extends BaseCasWebflowAction {
     private final OtuvaJpaTicketRegistry ticketRegistry;
     private final SingleLogoutRequestExecutor singleLogoutRequestExecutor;
 
     @Override
-    @Transactional
     public Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         val clientCredential = WebUtils.getCredential(requestContext, ClientCredential.class);
