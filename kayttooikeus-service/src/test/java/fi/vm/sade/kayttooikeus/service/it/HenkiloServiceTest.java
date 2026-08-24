@@ -5,11 +5,13 @@ import fi.vm.sade.kayttooikeus.config.properties.CommonProperties;
 import fi.vm.sade.kayttooikeus.dto.*;
 import fi.vm.sade.kayttooikeus.model.GoogleAuthToken;
 import fi.vm.sade.kayttooikeus.model.Kayttajatiedot;
+import fi.vm.sade.kayttooikeus.model.Oauth2Client;
 import fi.vm.sade.kayttooikeus.model.MyonnettyKayttoOikeusRyhmaTapahtuma;
 import fi.vm.sade.kayttooikeus.model.OrganisaatioHenkilo;
 import fi.vm.sade.kayttooikeus.repositories.GoogleAuthTokenRepository;
 import fi.vm.sade.kayttooikeus.repositories.KayttajatiedotRepository;
 import fi.vm.sade.kayttooikeus.repositories.MyonnettyKayttoOikeusRyhmaTapahtumaRepository;
+import fi.vm.sade.kayttooikeus.repositories.Oauth2ClientRepository;
 import fi.vm.sade.kayttooikeus.repositories.OrganisaatioHenkiloRepository;
 import fi.vm.sade.kayttooikeus.service.HenkiloService;
 import fi.vm.sade.kayttooikeus.service.IdentificationService;
@@ -25,8 +27,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -54,6 +58,9 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private GoogleAuthTokenRepository googleAuthTokenRepository;
+
+    @Autowired
+    private Oauth2ClientRepository oauth2ClientRepository;
 
     @Autowired
     private OrganisaatioHenkiloRepository organisaatioHenkiloRepository;
@@ -112,6 +119,29 @@ public class HenkiloServiceTest extends AbstractServiceIntegrationTest {
         assertThat(findTokenByOid.apply("1.2.246.562.24.67357428459")).isNotEmpty();
         henkiloService.passivoi("1.2.246.562.24.67357428459", "1.2.3.4.1");
         assertThat(findTokenByOid.apply("1.2.246.562.24.67357428459")).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(value = "1.2.3.4.1", authorities = {"ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA", "ROLE_APP_KAYTTOOIKEUS_REKISTERINPITAJA_1.2.246.562.10.00000000001"})
+    public void passivoiHenkiloRemovesOauth2Client() {
+        populate(kayttajatiedot(henkilo("1.2.3.4.1"), "Käsittelijä"));
+        Kayttajatiedot kayttajatiedot = populate(kayttajatiedot(henkilo("1.2.3.4.5"), "mirrimau"));
+        em.persist(Oauth2Client.builder()
+                .id(kayttajatiedot.getUsername())
+                .secret("secret")
+                .uuid(UUID.randomUUID())
+                .created(LocalDateTime.now())
+                .updated(LocalDateTime.now())
+                .build());
+        em.flush();
+        assertThat(oauth2ClientRepository.findById("mirrimau")).isPresent();
+
+        henkiloService.passivoi("1.2.3.4.5", "1.2.3.4.1");
+        em.flush();
+
+        assertThat(oauth2ClientRepository.findById("mirrimau")).isNotPresent();
+        assertThat(kayttajatiedotRepository.findByHenkiloOidHenkilo("1.2.3.4.5")).isNotPresent();
     }
 
     @Test

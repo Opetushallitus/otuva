@@ -49,6 +49,7 @@ public class HenkiloServiceImpl implements HenkiloService {
     private final HenkiloDataRepository henkiloDataRepository;
     private final KayttajatiedotRepository kayttajatiedotRepository;
     private final GoogleAuthTokenRepository googleAuthTokenRepository;
+    private final Oauth2ClientRepository oauth2ClientRepository;
     private final KayttoOikeusRyhmaRepository kayttoOikeusRyhmaRepository;
     private final IdentificationService identificationService;
 
@@ -116,6 +117,9 @@ public class HenkiloServiceImpl implements HenkiloService {
 
     private void poistaKayttajatiedot(Henkilo henkilo) {
         googleAuthTokenRepository.deleteByHenkilo(henkilo);
+        Optional.ofNullable(henkilo.getKayttajatiedot())
+                .map(Kayttajatiedot::getUsername)
+                .ifPresent(oauth2ClientRepository::deleteById);
         henkilo.setKayttajatiedot(null);
         kayttajatiedotRepository.deleteByHenkilo(henkilo);
     }
