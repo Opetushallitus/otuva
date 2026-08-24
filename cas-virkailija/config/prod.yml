@@ -16,8 +16,8 @@ cas.interrupt.cookie.crypto.signing.key: ${cas_interrupt_cookie_signing_key}
 cas.view.default-redirect-url: https://virkailija.opintopolku.fi/virkailijan-tyopoyta
 
 cas.authn.mfa.triggers.rest.url: https://prod.otuva.opintopolku.fi/kayttooikeus-service/mfa/trigger
-cas.authn.mfa.triggers.rest.headers.Caller-Id: '1.2.246.562.10.00000000001.cas'
-cas.authn.mfa.triggers.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
+cas.authn.mfa.triggers.rest.headers.Caller-Id: "1.2.246.562.10.00000000001.cas"
+cas.authn.mfa.triggers.rest.headers.CSRF: "1.2.246.562.10.00000000001.cas"
 cas.authn.mfa.triggers.rest.method: POST
 cas.authn.mfa.triggers.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.triggers.rest.basic-auth-password: ${cas_mfa_password}
@@ -28,12 +28,12 @@ cas.authn.mfa.gauth.crypto.encryption.key: ${cas_gauth_encryption_key}
 cas.authn.mfa.gauth.crypto.signing.key: ${cas_gauth_signing_key}
 cas.authn.mfa.gauth.rest.token-url: https://prod.otuva.opintopolku.fi/kayttooikeus-service/mfa/token
 cas.authn.mfa.gauth.rest.url: https://prod.otuva.opintopolku.fi/kayttooikeus-service/mfa/token
-cas.authn.mfa.gauth.rest.headers.Caller-Id: '1.2.246.562.10.00000000001.cas'
-cas.authn.mfa.gauth.rest.headers.CSRF: '1.2.246.562.10.00000000001.cas'
+cas.authn.mfa.gauth.rest.headers.Caller-Id: "1.2.246.562.10.00000000001.cas"
+cas.authn.mfa.gauth.rest.headers.CSRF: "1.2.246.562.10.00000000001.cas"
 cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
-cas.custom.properties.uusHakaEnabled: false
+cas.custom.properties.uusHakaEnabled: true
 cas.custom.properties.hakaUrl: https://virkailija.opintopolku.fi/service-provider-app/saml/login/alias/hakasp
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet
 

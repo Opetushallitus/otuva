@@ -12,7 +12,7 @@ server.tomcat.accesslog.prefix: stdout
 server.tomcat.accesslog.buffered: false
 server.tomcat.accesslog.suffix:
 server.tomcat.accesslog.file-date-format:
-server.tomcat.accesslog.pattern: "{\"timestamp\": \"%{yyyy-MM-dd'T'HH:mm:ss.SSSZ}t\", \"responseCode\": \"%s\", \"request\": \"%r\", \"responseTime\": \"%D\", \"requestMethod\": \"%m\", \"user-agent\": \"%{User-Agent}i\", \"caller-id\": \"%{Caller-Id}i\", \"x-forwarded-for\": \"%{X-Forwarded-For}i\", \"x-real-ip\": \"%{X-Real-IP}i\", \"remote-ip\": \"%a\", \"response-size\": \"%B\", \"referer\": \"%{Referer}i\"}"
+server.tomcat.accesslog.pattern: '{"timestamp": "%{yyyy-MM-dd''T''HH:mm:ss.SSSZ}t", "responseCode": "%s", "request": "%r", "responseTime": "%D", "requestMethod": "%m", "user-agent": "%{User-Agent}i", "caller-id": "%{Caller-Id}i", "x-forwarded-for": "%{X-Forwarded-For}i", "x-real-ip": "%{X-Real-IP}i", "remote-ip": "%a", "response-size": "%B", "referer": "%{Referer}i"}'
 server.tomcat.accesslog.request-attributes-enabled: true
 server.tomcat.max-http-response-header-size: 64KB
 
@@ -63,14 +63,18 @@ cas.view.default-redirect-url: http://localhost:8080
 cas.sso.services.allow-missing-service-parameter: false
 cas.service-registry.core.init-from-json: true
 
-cas.custom.properties.uusHakaEnabled: false
+cas.custom.properties.uusHakaEnabled: true
 cas.custom.properties.loginTietosuojaselosteUrl: http://localhost:8080/tietosuojaseloste/
 cas.custom.properties.arvo: https://arvo.csc.fi/
 cas.custom.properties.oiva: https://oiva.okm.fi/
 cas.custom.properties.valssi: https://valssi.karvi.fi/virkailija-ui/
 
 cas.authn.mfa.triggers.rest.url: http://localhost:8101/kayttooikeus-service/mfa/trigger
-cas.authn.mfa.triggers.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}
+cas.authn.mfa.triggers.rest.headers:
+  {
+    "Caller-Id": "1.2.246.562.10.00000000001.cas",
+    "CSRF": "1.2.246.562.10.00000000001.cas",
+  }
 cas.authn.mfa.triggers.rest.method: POST
 cas.authn.mfa.triggers.rest.basic-auth-username: cas
 cas.authn.mfa.triggers.rest.basic-auth-password: mfa
@@ -83,7 +87,11 @@ cas.authn.mfa.gauth.crypto.encryption.key: LNLuxm3B5mQiIwggT9vPewkGM7JeDebZWCBjd
 cas.authn.mfa.gauth.crypto.signing.key: zMpvJwj7bEMW41YMJbAJzXHaSSH3A1JjzLfwXMSWth9yTFM3Ny3eHXmm9r5AEzU83rYNwGT__SicfrA-7ygRdA
 cas.authn.mfa.gauth.rest.token-url: http://localhost:8101/kayttooikeus-service/mfa/token
 cas.authn.mfa.gauth.rest.url: http://localhost:8101/kayttooikeus-service/mfa/token
-cas.authn.mfa.gauth.rest.headers: {'Caller-Id': '1.2.246.562.10.00000000001.cas', 'CSRF': '1.2.246.562.10.00000000001.cas'}
+cas.authn.mfa.gauth.rest.headers:
+  {
+    "Caller-Id": "1.2.246.562.10.00000000001.cas",
+    "CSRF": "1.2.246.562.10.00000000001.cas",
+  }
 cas.authn.mfa.gauth.rest.basic-auth-username: cas
 cas.authn.mfa.gauth.rest.basic-auth-password: mfa
 
