@@ -1,0 +1,2 @@
+SELECT insertkayttooikeus('OVARA-VIRKAILIJA', 'OILI', 'Korkeakoulujen hakeneet ja paikan vastaanottaneet -raportti lukuoikeus');
+SELECT insertkayttooikeus('VALINTATULOSSERVICE', 'OILI', '	OILI-rajapinnan ja ilmoittautumisien tuontirajapinnan luku-ja muokkaus');
