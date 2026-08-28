@@ -2,6 +2,10 @@ const environments = ["hahtuva", "dev", "qa", "prod"] as const;
 type EnvironmentName = (typeof environments)[number];
 
 export type Config = {
+  kayttooikeusTaskCpu: number;
+  kayttooikeusTaskMemoryMiB: number;
+  serviceProviderTaskCpu: number;
+  serviceProviderTaskMemoryMiB: number;
   otuvaDomain: string;
   opintopolkuHost: string;
   minCapacity: number;
@@ -21,6 +25,10 @@ export type Config = {
   };
 };
 const defaultConfig = {
+  kayttooikeusTaskCpu: 1024,
+  kayttooikeusTaskMemoryMiB: 4096,
+  serviceProviderTaskCpu: 1024,
+  serviceProviderTaskMemoryMiB: 2048,
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
   auditCleanup: {
@@ -105,6 +113,10 @@ export const qa: Config = {
 
 export const prod: Config = {
   ...defaultConfig,
+  kayttooikeusTaskCpu: 2048,
+  kayttooikeusTaskMemoryMiB: 4096,
+  serviceProviderTaskCpu: 2048,
+  serviceProviderTaskMemoryMiB: 5120,
   otuvaDomain: "prod.otuva.opintopolku.fi",
   opintopolkuHost: "opintopolku.fi",
   minCapacity: 2,
