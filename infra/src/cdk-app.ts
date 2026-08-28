@@ -305,8 +305,8 @@ class ApplicationStack extends cdk.Stack {
       this,
       "TaskDefinition",
       {
-        cpu: 2048,
-        memoryLimitMiB: 4096,
+        cpu: config.kayttooikeusTaskCpu,
+        memoryLimitMiB: config.kayttooikeusTaskMemoryMiB,
         runtimePlatform: {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
@@ -1245,8 +1245,8 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       this,
       "TaskDefinition",
       {
-        cpu: 2048,
-        memoryLimitMiB: 5120,
+        cpu: config.serviceProviderTaskCpu,
+        memoryLimitMiB: config.serviceProviderTaskMemoryMiB,
         runtimePlatform: {
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
           cpuArchitecture: ecs.CpuArchitecture.ARM64,
