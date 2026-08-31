@@ -1228,6 +1228,7 @@ class ServiceProviderApplicationStack extends cdk.Stack {
     props: ServiceProviderApplicationStackProps,
   ) {
     super(scope, id, props);
+    const config = getConfig();
 
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
     const logGroup = new logs.LogGroup(this, "AppLogGroup", {
@@ -1297,7 +1298,6 @@ class ServiceProviderApplicationStack extends cdk.Stack {
       ],
     });
 
-    const config = getConfig();
     const service = new ecs.FargateService(this, "Service", {
       cluster: props.ecsCluster,
       taskDefinition,
