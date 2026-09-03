@@ -1,0 +1,16 @@
+{
+  "@class": "org.apereo.cas.services.CasRegisteredService",
+  "serviceId": "^https://virkailija\\.opintopolku\\.fi/viestinvalityspalvelu(/.*)?$",
+  "name": "viestinvalityspalvelu",
+  "description": "Viestinvälityspalvelu (2026), Next.js:tön frontend",
+  "id": 8,
+  "evaluationOrder": 0,
+  "attributeReleasePolicy": {
+    "@class": "org.apereo.cas.services.ReturnAllAttributeReleasePolicy",
+    "authorizedToReleaseAuthenticationAttributes": false
+  },
+  "proxyPolicy": {
+    "@class": "org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicy",
+    "pattern": "^https?://.*"
+  }
+}
