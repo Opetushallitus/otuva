@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
-source "$( dirname "${BASH_SOURCE[0]}" )/lib/common-functions.sh"
+readonly repo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 function main {
-  select_java_version "25"
+  use_java_version 21
   cd "${repo}/cas-oppija"
   ./gradlew dependencies --write-locks
 
+  use_java_version 25
   cd "${repo}/cas-virkailija"
   ./gradlew dependencies --write-locks
+}
+
+function use_java_version {
+  JAVA_HOME="$( /usr/libexec/java_home -v "$1" )"
+  export JAVA_HOME
 }
 
 main "$@"

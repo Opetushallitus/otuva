@@ -25,7 +25,7 @@ cas.authn.pac4j.saml[0].keystore-path: keycloak/localkeystore.jks
 cas.authn.pac4j.saml[0].service-provider-entity-id: http://localhost:8081/cas-oppija
 cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location: keycloak/sp-metadata.xml
 cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path: http://localhost:8083/realms/test/protocol/saml/descriptor
-cas.authn.pac4j.saml[0].principal-id-attribute: nationalIdentificationNumber
+cas.authn.pac4j.saml[0].principal-attribute-id: nationalIdentificationNumber
 cas.authn.pac4j.saml[0].requested-attributes[0].name: urn:oid:1.2.246.21
 cas.authn.pac4j.saml[0].requested-attributes[0].friendly-name: nationalIdentificationNumber
 cas.authn.pac4j.saml[0].requested-attributes[0].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri

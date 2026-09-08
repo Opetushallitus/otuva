@@ -2,6 +2,7 @@ import org.apache.tools.ant.taskdefs.condition.*
 import org.gradle.internal.logging.text.*
 import org.apereo.cas.metadata.*
 import java.nio.file.*
+import java.lang.reflect.*
 import org.gradle.internal.logging.text.*
 import static org.gradle.internal.logging.text.StyledTextOutput.Style
 
@@ -14,19 +15,19 @@ dependencyLocking {
 buildscript {
     repositories {
         if (project.privateRepoUrl) {
-            maven {
-                url project.privateRepoUrl
-                credentials {
-                    username = project.privateRepoUsername
-                    password = System.env.PRIVATE_REPO_TOKEN
-                }
+          maven {
+            url project.privateRepoUrl
+            credentials {
+              username = project.privateRepoUsername
+              password = System.env.PRIVATE_REPO_TOKEN
             }
+          }
         }
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
         maven {
-            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots'
             mavenContent { snapshotsOnly() }
         }
         maven {
@@ -40,7 +41,6 @@ buildscript {
         classpath "io.freefair.gradle:lombok-plugin:${project.gradleFreeFairPluginVersion}"
         classpath "com.google.cloud.tools:jib-gradle-plugin:${project.jibVersion}"
         classpath "com.bmuschko:gradle-docker-plugin:${project.gradleDockerPluginVersion}"
-        classpath "org.cyclonedx:cyclonedx-gradle-plugin:${project.gradleCyclonePluginVersion}"
         classpath "de.undercouch:gradle-download-task:${project.gradleDownloadTaskVersion}"
         classpath "org.apereo.cas:cas-server-core-api-configuration-model:${project.'cas.version'}"
         classpath "org.apereo.cas:cas-server-support-configuration-metadata-repository:${project.'cas.version'}"
@@ -49,19 +49,19 @@ buildscript {
 
 repositories {
     if (project.privateRepoUrl) {
-        maven {
-            url project.privateRepoUrl
-            credentials {
-                username = project.privateRepoUsername
-                password = System.env.PRIVATE_REPO_TOKEN
-            }
+      maven {
+        url project.privateRepoUrl
+        credentials {
+          username = project.privateRepoUsername
+          password = System.env.PRIVATE_REPO_TOKEN
         }
+      }
     }
     mavenLocal()
     mavenCentral()
     maven { url = 'https://oss.sonatype.org/content/repositories/releases' }
     maven {
-        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots'
         mavenContent { snapshotsOnly() }
     }
     maven {
@@ -80,16 +80,6 @@ repositories {
         url = "https://repo.spring.io/milestone"
         mavenContent { releasesOnly() }
     }
-    // <custom>
-    maven {
-        url = "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local"
-        mavenContent { snapshotsOnly() }
-    }
-    maven {
-        url = "https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local"
-        mavenContent { releasesOnly() }
-    }
-    // </custom>
 }
 
 apply plugin: "io.freefair.war-overlay"
@@ -100,9 +90,6 @@ apply plugin: "io.freefair.lombok"
 lombok {
     version = "${project.lombokVersion}"
 }
-
-apply plugin: "org.cyclonedx.bom"
-
 
 apply from: rootProject.file("gradle/springboot.gradle")
 apply plugin: "com.google.cloud.tools.jib"
@@ -139,6 +126,12 @@ configurations {
         exclude(group: "org.slf4j", module: "jcl-over-slf4j")
         exclude(group: "org.apache.logging.log4j", module: "log4j-to-slf4j")
     }
+
+    // <custom>
+    testRuntimeClasspath {
+        resolutionStrategy.deactivateDependencyLocking()
+    }
+    // </custom>
 }
 
 war {
@@ -149,11 +142,14 @@ war {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(project.targetCompatibility)
-
         def chosenJvmVendor = null
-        if (project.jvmVendor != null) {
-            out.withStyle(Style.Info).println("JVM vendor ${project.jvmVendor} is requested for the Java toolchain")
-            chosenJvmVendor = JvmVendorSpec.of(project.jvmVendor?.toUpperCase())
+        JvmVendorSpec.declaredFields.each { field ->
+            if (field.type == JvmVendorSpec && Modifier.isStatic(field.getModifiers())) {
+                if (field.name == project.jvmVendor?.toUpperCase()) {
+                    chosenJvmVendor = field.get(null)
+                    return
+                }
+            }
         }
         if (chosenJvmVendor != null) {
             vendor = chosenJvmVendor
@@ -174,10 +170,6 @@ bootBuildImage {
         it.notCompatibleWithConfigurationCache("Jib is not compatible with configuration cache");
         it.enabled = !configurationCacheRequested
     })
-}
-
-tasks.named("jibBuildTar") {
-    dependsOn(tasks.named("jar"))
 }
 
 def imagePlatforms = project.dockerImagePlatform.split(",")
@@ -207,9 +199,9 @@ jib {
     to {
         image = "${project.'containerImageOrg'}/${project.'containerImageName'}:${project.version}"
         /**
-         ecr-login: Amazon Elastic Container Registry (ECR)
-         gcr: Google Container Registry (GCR)
-         osxkeychain: Docker Hub
+             ecr-login: Amazon Elastic Container Registry (ECR)
+             gcr: Google Container Registry (GCR)
+             osxkeychain: Docker Hub
          */
         credHelper = "osxkeychain"
         if (dockerUsername != null && dockerPassword != null) {
@@ -229,20 +221,20 @@ jib {
     }
     extraDirectories {
         paths {
-            path {
-                from = file('src/main/jib')
-            }
-            path {
-                from = file('etc/cas')
-                into = '/etc/cas'
-            }
-            path {
-                from = file("build/libs")
-                into = "/docker/cas/war"
-            }
+          path {
+            from = file('src/main/jib')
+          }
+          path {
+            from = file('etc/cas')
+            into = '/etc/cas'
+          }
+          path {
+            from = file("build/libs")
+            into = "/docker/cas/war"
+          }
         }
         permissions = [
-                '/docker/entrypoint.sh': '755'
+            '/docker/entrypoint.sh': '755'
         ]
     }
     allowInsecureRegistries = project.allowInsecureRegistries
@@ -291,8 +283,8 @@ if (project.hasProperty("appServer")) {
 
 dependencies {
     /**
-     * Do NOT modify the lines below or else you will risk breaking dependency management.
-     **/
+    * Do NOT modify the lines below or else you will risk breaking dependency management.
+    **/
     implementation enforcedPlatform("org.apereo.cas:cas-server-support-bom:${project.'cas.version'}")
     implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
 
@@ -319,17 +311,12 @@ dependencies {
     implementation "org.apereo.cas:cas-server-support-rest"
 
     // <custom>
-    compileOnly 'org.projectlombok:lombok'
-    compileOnly 'org.webjars:bootstrap'
     compileOnly 'jakarta.persistence:jakarta.persistence-api'
     compileOnly "org.apache.tomcat.embed:tomcat-embed-core"
     implementation "com.google.code.gson:gson"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     implementation "org.apereo.cas:cas-server-core-api-configuration-model"
     implementation "org.apereo.cas:cas-server-core-authentication-api"
     implementation "org.apereo.cas:cas-server-core-authentication-attributes"
-    implementation "org.apereo.cas:cas-server-core-authentication-mfa"
-    implementation "org.apereo.cas:cas-server-core-authentication-mfa-api"
     implementation "org.apereo.cas:cas-server-core-services-api"
     implementation "org.apereo.cas:cas-server-core-services-authentication"
     implementation "org.apereo.cas:cas-server-core-tickets-api"
@@ -344,7 +331,6 @@ dependencies {
     implementation "org.apereo.cas:cas-server-support-pac4j-saml"
     implementation "org.apereo.cas:cas-server-support-pac4j-webflow"
     implementation "org.apereo.cas:cas-server-support-saml-core-api"
-    implementation "org.apereo.cas:cas-server-support-gauth"
     implementation "org.apereo.cas:cas-server-support-interrupt-api"
     implementation "org.apereo.cas:cas-server-support-interrupt-core"
     implementation "org.apereo.cas:cas-server-support-interrupt-webflow"
@@ -355,25 +341,11 @@ dependencies {
     implementation "org.apereo.cas:cas-server-webapp-init"
     implementation "org.pac4j:pac4j-saml"
     implementation "org.springframework.security:spring-security-config"
-    testImplementation "org.apereo.cas:cas-server-core-services-registry"
-    testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.mockito:mockito-core'
-    testImplementation 'org.springframework:spring-test'
     // Postgres
     implementation "org.apereo.cas:cas-server-support-jpa-ticket-registry"
     implementation "org.apereo.cas:cas-server-support-session-jdbc"
-    implementation "org.springframework.boot:spring-boot-starter-flyway"
     implementation "org.flywaydb:flyway-core"
     implementation "org.flywaydb:flyway-database-postgresql"
     runtimeOnly "org.postgresql:postgresql"
     // </custom>
-
-
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
 }
-
-// <custom>
-tasks.named("test") {
-    useJUnitPlatform()
-}
-// </custom>

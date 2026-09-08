@@ -85,7 +85,7 @@ function stop_kayttooikeus {
 cas_oppija_backend_pid=""
 
 function start_cas_oppija {
-  select_java_version "25"
+  select_java_version "21"
   cd "$repo"/cas-oppija
 
   ./gradlew --no-daemon clean build
