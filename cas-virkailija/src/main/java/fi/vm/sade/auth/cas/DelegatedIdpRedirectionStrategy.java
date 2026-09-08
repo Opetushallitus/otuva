@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DelegatedIdpRedirectionStrategy implements DelegatedClientIdentityProviderRedirectionStrategy {
     @Override
     public Optional<DelegatedClientIdentityProviderConfiguration> select(RequestContext context,
-            WebApplicationService service, Set<DelegatedClientIdentityProviderConfiguration> provider)
+                                                                         WebApplicationService service, Set<DelegatedClientIdentityProviderConfiguration> provider)
             throws Throwable {
         if (service.getOriginalUrl().contains("virkailijaRegistrationToken")) {
             return provider.stream()
