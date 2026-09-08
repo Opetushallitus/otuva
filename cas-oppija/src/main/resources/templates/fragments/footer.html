@@ -4,8 +4,8 @@
     <span class="oph-brand mx-auto">
         <a href="http://opetushallitus.fi">
             <img id="oph-logo" class="oph-logo"
-                    th:title="${#strings.defaultString(#themes.code('cas.theme.name'), 'Opetushallitus')}"
-                    th:src="@{${#strings.defaultString(#themes.code('cas.logo.oph.file'), '/images/oph_logo_vaaka.svg')}}"
+                    th:title="${#strings.defaultString(#cas.theme('cas.theme.name'), 'Opetushallitus')}"
+                    th:src="@{${#strings.defaultString(#cas.theme('cas.logo.oph.file'), '/images/oph_logo_vaaka.svg')}}"
             />
         </a>
     </span>
