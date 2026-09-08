@@ -30,6 +30,7 @@ async function navigateAndRetryUntilRedirectedToDelegatedIdp(page: Page, url: st
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         await page.goto(url);
         try {
+            console.log(url);
             await page.waitForURL((url) => isAtDelegatedIdp(url), { timeout: 5000 });
             return;
         } catch {

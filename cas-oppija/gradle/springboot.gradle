@@ -81,16 +81,18 @@ springBoot {
     mainClass = "org.apereo.cas.web.CasWebApplication"
     
 }
+def wireOverlayDependency = { Task t ->
+    ["extractCasBootWarOverlay", "processTestResources", "compileJava", "compileGraalJava"]
+            .collect { tasks.findByName(it) }
+            .findAll { it != null }
+            .each { t.dependsOn(it) }
+}
+tasks.named("cyclonedxBom").configure { wireOverlayDependency(delegate) }
+tasks.named("cyclonedxDirectBom").configure { wireOverlayDependency(delegate) }
 
 
 bootWar {
-    def executable = project.hasProperty("executable") && Boolean.valueOf(project.getProperty("executable"))
-    if (executable) {
-        logger.info "Including launch script for executable WAR artifact"
-        launchScript()
-    } else {
-        logger.info "WAR artifact is not marked as an executable"
-    }
+    dependsOn cyclonedxBom
 
     archiveFileName = "cas.war"
     archiveBaseName = "cas"
