@@ -809,7 +809,7 @@ class CasOppijaApplicationStack extends cdk.Stack {
           secretsmanager.Secret.fromSecretNameV2(
             this,
             "keystore",
-            "/cas-oppija/keystore"
+            "/cas-oppija/keystore",
           ),
         ),
         registered_service_1: this.ssmSecret("RegisteredService1"),
