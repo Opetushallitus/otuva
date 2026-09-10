@@ -805,7 +805,13 @@ class CasOppijaApplicationStack extends cdk.Stack {
         cas_oppija_service_user_username: this.ssmSecret("ServiceUserUsername"),
         cas_oppija_service_user_password: this.ssmSecret("ServiceUserPassword"),
         cas_oppija_oauth2_client_secret: this.ssmSecret("Oauth2ClientSecret"),
-        keystore_base64: this.ssmSecret("keystore"),
+        keystore_base64: ecs.Secret.fromSecretsManager(
+          secretsmanager.Secret.fromSecretNameV2(
+            this,
+            "keystore",
+            "/cas-oppija/keystore"
+          ),
+        ),
         registered_service_1: this.ssmSecret("RegisteredService1"),
         registered_service_2: this.ssmSecret("RegisteredService2"),
         registered_service_tiedotuspalvelu: this.ssmSecret(
