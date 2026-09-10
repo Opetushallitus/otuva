@@ -75,7 +75,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       {
         owner: "Opetushallitus",
         name: "otuva",
-        branch: "green-hahtuva",
+        branch: "feat/OPHYKPALVELUT-44-CAS-oppija-7.3.x",
       },
       dependencyManagement,
       props,
@@ -85,7 +85,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("QaContinuousDeploymentPipeline"),
       connection,
       "qa",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-hahtuva" },
       dependencyManagement,
       props,
     );
@@ -94,7 +94,7 @@ class ContinousDeploymentStack extends cdk.Stack {
       legacyPrefix("ProdContinuousDeploymentPipeline"),
       connection,
       "prod",
-      { owner: "Opetushallitus", name: "otuva", branch: "green-qa" },
+      { owner: "Opetushallitus", name: "otuva", branch: "green-dev" },
       dependencyManagement,
       props,
     );
@@ -157,7 +157,7 @@ class ContinousDeploymentPipelineStack extends cdk.Stack {
     const sourceStage = pipeline.addStage({ stageName: "Source" });
     sourceStage.addAction(sourceAction);
 
-    const runTests = env === "hahtuva";
+    const runTests = env === "hahtuva" || env === "dev";
     if (runTests) {
       const testStage = pipeline.addStage({ stageName: "Test" });
       testStage.addAction(
