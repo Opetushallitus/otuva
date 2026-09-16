@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('KIELITUTKINTOREKISTERI', 'YKI_ARVIOIJAREKISTERI_KIRJOITUS', 'Yleisen kielitutkinnon arvioijien luku ja muokkaus');
