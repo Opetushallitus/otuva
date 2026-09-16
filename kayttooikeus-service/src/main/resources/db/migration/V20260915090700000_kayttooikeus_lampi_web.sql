@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('LAMPI', 'LAMPI_WEB_KATSELU', 'Lampi web-käyttöliittymän käyttöoikeus');
