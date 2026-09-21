@@ -69,7 +69,7 @@ services:
 
   keycloak:
     container_name: cas-oppija-keycloak
-    image: quay.io/keycloak/keycloak:26.6.4@sha256:0aae0de7fca85525f727d3354df17896092de8bb26ae4c12d89c77e5df8cbce4
+    image: quay.io/keycloak/keycloak:26.7.4@sha256:82a77884f3af238beab1e7afd63b5f530e1b5c0590bd7aa60b40a40463e29b2c
     command: ["start-dev", "--import-realm", "--health-enabled=true"]
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000"]
