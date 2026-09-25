@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('VARDA', 'VARDA_RAPORTTIEN_KATSELIJA', 'Varda-raportit');
