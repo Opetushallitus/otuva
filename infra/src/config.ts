@@ -25,10 +25,10 @@ export type Config = {
   };
 };
 const defaultConfig = {
-  kayttooikeusTaskCpu: 1024,
+  kayttooikeusTaskCpu: 512,
   kayttooikeusTaskMemoryMiB: 4096,
-  serviceProviderTaskCpu: 1024,
-  serviceProviderTaskMemoryMiB: 2048,
+  serviceProviderTaskCpu: 512,
+  serviceProviderTaskMemoryMiB: 1024,
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
   auditCleanup: {
