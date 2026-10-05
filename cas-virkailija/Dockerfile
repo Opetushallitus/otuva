@@ -1,4 +1,4 @@
-FROM amazoncorretto:25 AS build
+FROM amazoncorretto:25@sha256:06f99cdfd01c26ed2a5b03dc85385d36c17aa81ddfcaf8500f641ab556a985d6 AS build
 WORKDIR /app
 
 RUN yum install -y findutils && yum clean all
@@ -14,7 +14,7 @@ COPY src ./src
 RUN yum install -y findutils
 RUN ./gradlew clean build -x test
 
-FROM amazoncorretto:25
+FROM amazoncorretto:25@sha256:06f99cdfd01c26ed2a5b03dc85385d36c17aa81ddfcaf8500f641ab556a985d6
 
 WORKDIR /app
 COPY services ./services
