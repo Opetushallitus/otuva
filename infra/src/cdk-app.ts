@@ -318,33 +318,33 @@ class ApplicationStack extends cdk.Stack {
     const lampiProperties: ecs.ContainerDefinitionProps["environment"] =
       config.lampiExport
         ? {
-            "kayttooikeus.tasks.export.enabled":
-              config.lampiExport.enabled.toString(),
-            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
-            "kayttooikeus.tasks.export.lampi-bucket-name":
-              config.lampiExport.bucketName,
-            "kayttooikeus.tasks.export.copy-to-lampi": "true",
-          }
+          "kayttooikeus.tasks.export.enabled":
+            config.lampiExport.enabled.toString(),
+          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+          "kayttooikeus.tasks.export.lampi-bucket-name":
+            config.lampiExport.bucketName,
+          "kayttooikeus.tasks.export.copy-to-lampi": "true",
+        }
         : {
-            "kayttooikeus.tasks.export.enabled": "false",
-            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
-          };
+          "kayttooikeus.tasks.export.enabled": "false",
+          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+        };
 
     const lampiSecrets: ecs.ContainerDefinitionProps["secrets"] =
       config.lampiExport
         ? {
-            "kayttooikeus.tasks.export.lampi-role-arn":
-              this.ssmString("LampiRoleArn2"),
-            "kayttooikeus.tasks.export.lampi-external-id":
-              this.ssmSecret("LampiExternalId"),
-          }
+          "kayttooikeus.tasks.export.lampi-role-arn":
+            this.ssmString("LampiRoleArn2"),
+          "kayttooikeus.tasks.export.lampi-external-id":
+            this.ssmSecret("LampiExternalId"),
+        }
         : {};
 
     const auditCleanupProperties: ecs.ContainerDefinitionProps["environment"] =
-      {
-        "kayttooikeus.tasks.audit-cleanup.enabled":
-          config.auditCleanup.enabled.toString(),
-      };
+    {
+      "kayttooikeus.tasks.audit-cleanup.enabled":
+        config.auditCleanup.enabled.toString(),
+    };
 
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
@@ -596,6 +596,32 @@ class ApplicationStack extends cdk.Stack {
   ipRestrictions(alb: elasticloadbalancingv2.ApplicationLoadBalancer) {
     const config = getConfig();
 
+    const blockedIpSet = new wafv2.CfnIPSet(this, "BlockedIpSet", {
+      ipAddressVersion: "IPV4",
+      scope: "REGIONAL",
+      addresses: [
+        "109.70.164.254/32",
+      ],
+    });
+
+    const blockIpRule: wafv2.CfnWebACL.RuleProperty = {
+      name: "BlockIpRule",
+      priority: 0,
+      action: {
+        block: {},
+      },
+      statement: {
+        ipSetReferenceStatement: {
+          arn: blockedIpSet.attrArn,
+        },
+      },
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: true,
+        metricName: "BlockIpRule",
+        sampledRequestsEnabled: true,
+      },
+    };
+
     const ipSet = new wafv2.CfnIPSet(this, "UserDetailsIPSet", {
       ipAddressVersion: "IPV4",
       scope: "REGIONAL",
@@ -658,7 +684,7 @@ class ApplicationStack extends cdk.Stack {
         allow: {},
       },
       scope: "REGIONAL",
-      rules: [denyAccessRule],
+      rules: [blockIpRule, denyAccessRule],
       visibilityConfig: {
         cloudWatchMetricsEnabled: false,
         metricName: "UserDetailsWebACL",
