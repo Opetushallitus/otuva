@@ -318,33 +318,33 @@ class ApplicationStack extends cdk.Stack {
     const lampiProperties: ecs.ContainerDefinitionProps["environment"] =
       config.lampiExport
         ? {
-          "kayttooikeus.tasks.export.enabled":
-            config.lampiExport.enabled.toString(),
-          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
-          "kayttooikeus.tasks.export.lampi-bucket-name":
-            config.lampiExport.bucketName,
-          "kayttooikeus.tasks.export.copy-to-lampi": "true",
-        }
+            "kayttooikeus.tasks.export.enabled":
+              config.lampiExport.enabled.toString(),
+            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+            "kayttooikeus.tasks.export.lampi-bucket-name":
+              config.lampiExport.bucketName,
+            "kayttooikeus.tasks.export.copy-to-lampi": "true",
+          }
         : {
-          "kayttooikeus.tasks.export.enabled": "false",
-          "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
-        };
+            "kayttooikeus.tasks.export.enabled": "false",
+            "kayttooikeus.tasks.export.bucket-name": exportBucket.bucketName,
+          };
 
     const lampiSecrets: ecs.ContainerDefinitionProps["secrets"] =
       config.lampiExport
         ? {
-          "kayttooikeus.tasks.export.lampi-role-arn":
-            this.ssmString("LampiRoleArn2"),
-          "kayttooikeus.tasks.export.lampi-external-id":
-            this.ssmSecret("LampiExternalId"),
-        }
+            "kayttooikeus.tasks.export.lampi-role-arn":
+              this.ssmString("LampiRoleArn2"),
+            "kayttooikeus.tasks.export.lampi-external-id":
+              this.ssmSecret("LampiExternalId"),
+          }
         : {};
 
     const auditCleanupProperties: ecs.ContainerDefinitionProps["environment"] =
-    {
-      "kayttooikeus.tasks.audit-cleanup.enabled":
-        config.auditCleanup.enabled.toString(),
-    };
+      {
+        "kayttooikeus.tasks.audit-cleanup.enabled":
+          config.auditCleanup.enabled.toString(),
+      };
 
     const appPort = 8080;
     taskDefinition.addContainer("AppContainer", {
@@ -599,9 +599,7 @@ class ApplicationStack extends cdk.Stack {
     const blockedIpSet = new wafv2.CfnIPSet(this, "BlockedIpSet", {
       ipAddressVersion: "IPV4",
       scope: "REGIONAL",
-      addresses: [
-        "109.70.164.254/32",
-      ],
+      addresses: ["109.70.164.254/32"],
     });
 
     const blockIpRule: wafv2.CfnWebACL.RuleProperty = {
