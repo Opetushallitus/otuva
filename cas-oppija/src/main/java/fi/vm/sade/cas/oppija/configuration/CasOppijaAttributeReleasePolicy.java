@@ -26,6 +26,7 @@ public class CasOppijaAttributeReleasePolicy extends ReturnAllAttributeReleasePo
         "personOid",
         "sn",
         "TurvakieltoTieto",
+        "SuomenKansalaisuusTietokoodi",
         "VakinainenKotimainenLahiosoitePostinumero",
         "VakinainenKotimainenLahiosoitePostitoimipaikkaR",
         "VakinainenKotimainenLahiosoitePostitoimipaikkaS",
