@@ -34,7 +34,7 @@ cas.authn.pac4j.saml[0].requested-attributes[1].name: urn:oid:2.5.4.3
 cas.authn.pac4j.saml[0].requested-attributes[1].friendly-name: cn
 cas.authn.pac4j.saml[0].requested-attributes[1].name-format: urn:oasis:names:tc:SAML:2.0:attrname-format:uri
 cas.authn.pac4j.saml[0].requested-attributes[1].required: true
-cas.authn.pac4j.saml[0].mapped-attributes[0]: personName->urn:oid:2.5.4.3
+cas.authn.pac4j.saml[0].mapped-attributes[0]: urn:oid:2.5.4.3->personName
 
 cas.monitor.endpoints.endpoint.springWebflow.access: PERMIT
 cas.logout.follow-service-redirects: true
