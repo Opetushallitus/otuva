@@ -599,7 +599,7 @@ class ApplicationStack extends cdk.Stack {
     const blockedIpSet = new wafv2.CfnIPSet(this, "BlockedIpSet", {
       ipAddressVersion: "IPV4",
       scope: "REGIONAL",
-      addresses: ["109.70.164.254/32"],
+      addresses: [...this.getIpAddresses("blockedIpAddresses")],
     });
 
     const blockIpRule: wafv2.CfnWebACL.RuleProperty = {
