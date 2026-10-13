@@ -596,6 +596,30 @@ class ApplicationStack extends cdk.Stack {
   ipRestrictions(alb: elasticloadbalancingv2.ApplicationLoadBalancer) {
     const config = getConfig();
 
+    const blockedIpSet = new wafv2.CfnIPSet(this, "BlockedIpSet", {
+      ipAddressVersion: "IPV4",
+      scope: "REGIONAL",
+      addresses: [...this.getIpAddresses("blockedIpAddresses")],
+    });
+
+    const blockIpRule: wafv2.CfnWebACL.RuleProperty = {
+      name: "BlockIpRule",
+      priority: 0,
+      action: {
+        block: {},
+      },
+      statement: {
+        ipSetReferenceStatement: {
+          arn: blockedIpSet.attrArn,
+        },
+      },
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: true,
+        metricName: "BlockIpRule",
+        sampledRequestsEnabled: true,
+      },
+    };
+
     const ipSet = new wafv2.CfnIPSet(this, "UserDetailsIPSet", {
       ipAddressVersion: "IPV4",
       scope: "REGIONAL",
@@ -658,7 +682,7 @@ class ApplicationStack extends cdk.Stack {
         allow: {},
       },
       scope: "REGIONAL",
-      rules: [denyAccessRule],
+      rules: [blockIpRule, denyAccessRule],
       visibilityConfig: {
         cloudWatchMetricsEnabled: false,
         metricName: "UserDetailsWebACL",
