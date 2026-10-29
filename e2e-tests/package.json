@@ -16,7 +16,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "1.61.1",
-    "@types/node": "25.9.4",
+    "@types/node": "25.9.9",
     "eslint": "10.6.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.6",
