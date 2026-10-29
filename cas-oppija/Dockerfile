@@ -1,4 +1,4 @@
-FROM amazoncorretto:25 AS build
+FROM amazoncorretto:25@sha256:be686934052c72a4ff4b087a504af6bf4fb8576eaf4a7bfb7f61b698269abc32 AS build
 WORKDIR /app
 
 RUN yum install -y findutils && yum clean all
@@ -14,7 +14,7 @@ COPY lombok.config .
 COPY src ./src
 RUN ./gradlew clean build -x test
 
-FROM amazoncorretto:25
+FROM amazoncorretto:25@sha256:be686934052c72a4ff4b087a504af6bf4fb8576eaf4a7bfb7f61b698269abc32
 
 WORKDIR /app
 COPY services ./services
