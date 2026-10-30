@@ -28,9 +28,9 @@
                     <div class="row">
                         <span class="title-backline"><span th:text="#{login.muutKirjautumistavat}"></span></span>
                     </div>
-                    <div class="row">
+                    <div class="row justify-content-center align-items-center">
                         <div th:each="provider : ${delegatedAuthenticationProviderConfigurations}"
-                             th:if="${provider.name.equals('haka') || provider.name.equals('mpassid') || provider.name.equals('suomifi')}"
+                             th:if="${provider.name.equals('mpassid') || provider.name.equals('suomifi')}"
                              class="kirjautumistapa col-md-4">
                             <form th:if="${provider.name.equals('haka') && cas.custom.properties['uusHakaEnabled']}" method="post" th:id="${'form' + provider.name}" th:action="@{/login}">
                                 <input name="submitButton"
@@ -84,7 +84,7 @@
                     </div>
                     <div th:if="${cas.custom.properties['uusHakaEnabled'] && #lists.size(delegatedAuthenticationProviderConfigurations) > 6}" class="row">
                         <div class="haka-select-wrapper">
-                            <img src="/cas/images/haka.png" style="height: 32px;">
+                            <img src="/cas/images/Haka_rgb.png" style="height: 32px;">
                             <select id="identityProviderOptions">
                                 <option th:each="entry : ${delegatedAuthenticationProviderConfigurations}"
                                         th:if="${entry.name.startsWith('haka')}"

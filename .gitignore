@@ -22,3 +22,5 @@ infra/cdk.context.json
 **/localkeystore.jks
 
 *.code-workspace
+
+*.out

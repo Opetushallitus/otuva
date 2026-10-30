@@ -43,3 +43,4 @@ bin/
 *.log
 tmp/
 ./apache-tomcat
+*.out
