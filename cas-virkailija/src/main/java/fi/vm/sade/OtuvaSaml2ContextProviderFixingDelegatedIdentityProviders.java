@@ -6,6 +6,9 @@ import org.apereo.cas.pac4j.client.DelegatedIdentityProviderFactory;
 import org.apereo.cas.pac4j.client.DelegatedIdentityProviders;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.saml.ext.saml2mdui.UIInfo;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.saml.client.SAML2Client;
@@ -61,6 +64,25 @@ public class OtuvaSaml2ContextProviderFixingDelegatedIdentityProviders implement
             // been nulled and getIdentityProviderMetadataResolver() falls back to the aggregate
             // default supplier, which returns the FIRST entity in the merged metadata.
             val clientResolver = saml2Client.getIdentityProviderMetadataResolver();
+
+            // Prioritize the organizations Finnish name when showing haka organizations
+            if(saml2Client.getName().startsWith("haka-")
+                    && clientResolver.getEntityDescriptorElement() instanceof EntityDescriptor entity) {
+                var idp = entity.getIDPSSODescriptor("urn:oasis:names:tc:SAML:2.0:protocol");
+                if(idp != null && idp.getExtensions() != null) {
+                    idp.getExtensions()
+                            .getUnknownXMLObjects(UIInfo.DEFAULT_ELEMENT_NAME)
+                            .stream()
+                            .filter(UIInfo.class::isInstance)
+                            .map(UIInfo.class::cast)
+                            .flatMap(ui -> ui.getDisplayNames().stream())
+                            .filter(name -> "fi".equalsIgnoreCase(name.getXMLLang()))
+                            .map(XSString::getValue)
+                            .filter(value -> value != null && !value.isBlank())
+                            .findFirst()
+                            .ifPresent(value -> saml2Client.getCustomProperties().put("displayName", value));
+                }
+            }
             val priorContextProvider = saml2Client.getContextProvider();
 
             // 1) Install a contextProvider built from this client's per-IdP resolver.
