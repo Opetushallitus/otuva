@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -s ./codebuild-mvn-settings.xml -DskipTests
 
-FROM amazoncorretto:21.0.13@sha256:1a307926702559b0086a5c4d339eaafa9c992b3e8ba54201ac8ebbde31d22f0b
+FROM amazoncorretto:25.0.5@sha256:8806f69d6997672a37569da54378d13ff2cd613f9abb151c493f5a359a0a8676
 
 WORKDIR /app
 COPY --from=build /app/target/kayttooikeus.jar .
