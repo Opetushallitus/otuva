@@ -85,7 +85,7 @@
                     <div th:if="${cas.custom.properties['uusHakaEnabled'] && #lists.size(delegatedAuthenticationProviderConfigurations) > 6}" class="row">
                         <div class="haka-select-wrapper">
                             <img src="/cas/images/Haka_rgb.png" style="height: 32px;">
-                            <select id="identityProviderOptions">
+                            <select id="identityProviderOptions" autocomplete="off">
                                 <option th:each="entry : ${delegatedAuthenticationProviderConfigurations}"
                                         th:if="${entry.name.startsWith('haka')}"
                                         th:title="${#strings.defaultString(entry.title,entry.name)}"
@@ -104,17 +104,18 @@
                             const sorted = options.toArray().sort((a, b) => $(a).text().localeCompare($(b).text()));
                             identityProviderOptions.empty()
                                 .append($('<option></option>')
-                                    .attr({ value: undefined, disabled: true })
+                                    .attr({ value: "", disabled: true })
                                     .text($("#hakaplaceholder").text()))
                                 .append(sorted);
 
                             const hakaOrganisation = window.localStorage.getItem("hakaOrganisation");
                             if (hakaOrganisation) {
-                                identityProviderOptions.find(`option[value="${hakaOrganisation}"]`).attr({ selected: true });
-                                $("#haka-login").attr({ disabled: false });
-                            } else {
+                                identityProviderOptions.val(hakaOrganisation);
+                            }
+                            if (!hakaOrganisation || identityProviderOptions.val() === null) {
                                 identityProviderOptions.prop("selectedIndex", 0);
                             }
+                            $("#haka-login").prop("disabled", !identityProviderOptions.val());
 
                             const hakaLogin = () => {
                                 const selectedValue = identityProviderOptions.val();
