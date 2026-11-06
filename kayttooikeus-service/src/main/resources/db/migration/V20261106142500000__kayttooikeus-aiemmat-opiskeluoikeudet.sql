@@ -1,0 +1,1 @@
+SELECT insertkayttooikeus('KOSKI', 'AIEMMAT_OPISKELUOIKEUDET', 'Saa tehdä aiemmat opiskeluoikeudet -haun organisaatiorajojen yli');
