@@ -1,6 +1,7 @@
 package fi.vm.sade.kayttooikeus.repositories.criteria;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import fi.vm.sade.kayttooikeus.dto.KutsunTila;
 import fi.vm.sade.kayttooikeus.dto.enumeration.KutsuView;
 import fi.vm.sade.kayttooikeus.enumeration.KayttooikeusRooli;
@@ -45,8 +46,10 @@ public class KutsuCriteria extends BaseCriteria {
         if (used(sahkoposti)) {
             builder.and(kutsu.sahkoposti.eq(sahkoposti));
         }
-        if (!CollectionUtils.isEmpty(this.organisaatioOids)) {
-            builder.and(kutsuOrganisaatio.organisaatioOid.in(this.organisaatioOids));
+        if (this.organisaatioOids != null) {
+            builder.and(this.organisaatioOids.isEmpty()
+                    ? Expressions.FALSE
+                    : kutsuOrganisaatio.organisaatioOid.in(this.organisaatioOids));
         }
         if (StringUtils.hasLength(this.kutsujaOrganisaatioOid)) {
             builder.and(organisaatioHenkilo.organisaatioOid.eq(this.kutsujaOrganisaatioOid));
