@@ -81,43 +81,45 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     private EmailService emailService;
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = "ROLE_APP_KAYTTOOIKEUS_CRUD")
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD",
+            "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.5",
+            "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.6"})
     public void listAvoinKutsus() {
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.3.4.6"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.246.562.10.6"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any())).willReturn(singleton("1.2.3.4.5"));
-        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.6"), any())).willReturn(singleton("1.2.3.4.6"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.5"), any())).willReturn(singleton("1.2.246.562.10.5"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.6"), any())).willReturn(singleton("1.2.246.562.10.6"));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1"))
                 ));
         Kutsu kutsu2 = populate(kutsu("Matti", "Meikäläinen", "b@eaxmple.com")
                 .kutsuja("1.2.4").aikaleima(LocalDateTime.of(2016, 2, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA2")))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.6")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.6")
                         .ryhma(kayttoOikeusRyhma("RYHMA3")))
         );
         populate(kutsu("Eero", "Esimerkki", "c@eaxmple.com")
                 .tila(KutsunTila.POISTETTU)
                 .kutsuja("1.2.4").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5").ryhma(kayttoOikeusRyhma("RYHMA1"))
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5").ryhma(kayttoOikeusRyhma("RYHMA1"))
                 ));
 
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
-        org1.setOid("1.2.3.4.5");
+        org1.setOid("1.2.246.562.10.5");
         org1.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
         OrganisaatioPerustieto org2 = new OrganisaatioPerustieto();
-        org2.setOid("1.2.3.4.6");
+        org2.setOid("1.2.246.562.10.6");
         org2.setNimi(new TextGroupMapDto().put("fi", "Nimi1").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.5")))
                 .willReturn(Optional.of(org1));
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.6")))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.6")))
                 .willReturn(Optional.of(org2));
 
         List<KutsuReadDto> kutsus = kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA, Sort.Direction.ASC, KutsuCriteria.builder().searchTerm("matti meikäläinen").build(), null, null);
@@ -128,7 +130,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertEquals(2, kutsus.get(0).getOrganisaatiot().size());
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .extracting(KutsuReadDto.KutsuOrganisaatioReadDto::getOrganisaatioOid)
-                .containsExactlyInAnyOrder("1.2.3.4.5", "1.2.3.4.6");
+                .containsExactlyInAnyOrder("1.2.246.562.10.5", "1.2.246.562.10.6");
         assertThat(kutsus).extracting(KutsuReadDto::getEtunimi).containsExactlyInAnyOrder("Matti");
         assertThat(kutsus).extracting(KutsuReadDto::getSukunimi).containsExactlyInAnyOrder("Meikäläinen");
         assertThat(kutsus).flatExtracting(KutsuReadDto::getOrganisaatiot)
@@ -167,21 +169,21 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.3.4.5"})
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.5"})
     public void listAvoinKutsusWithMiniAdminAndKayttooikeusryhmaView() {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma = populate(
-                myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
+                myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.246.562.10.5"),
                         kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)))));
         OrganisaatioPerustieto org1 = new OrganisaatioPerustieto();
-        org1.setOid("1.2.3.4.5");
+        org1.setOid("1.2.246.562.10.5");
         org1.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.5")))
                 .willReturn(Optional.of(org1));
-        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any())).willReturn(singleton("1.2.3.4.5"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.5"), any())).willReturn(singleton("1.2.246.562.10.5"));
 
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
                 Sort.Direction.ASC,
@@ -196,26 +198,26 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.3.4.5"})
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.5"})
     public void listAvoinKutsusWithNormalUserAndOrganisationIsForced() {
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.3.4.5"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.3", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)))));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("1.2.3").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.246.562.10.00000000001")
                         .ryhma(kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)))));
         given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.00000000001"), any())).willReturn(singleton("1.2.246.562.10.00000000001"));
-        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any())).willReturn(singleton("1.2.3.4.5"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.5"), any())).willReturn(singleton("1.2.246.562.10.5"));
         OrganisaatioPerustieto org = new OrganisaatioPerustieto();
-        org.setOid("1.2.3.4.5");
+        org.setOid("1.2.246.562.10.5");
         org.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.5")))
                 .willReturn(Optional.of(org));
 
         List<KutsuReadDto> kutsuList = this.kutsuService.listKutsus(KutsuOrganisaatioOrder.AIKALEIMA,
@@ -226,30 +228,30 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsuList)
                 .flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .flatExtracting(KutsuReadDto.KutsuOrganisaatioReadDto::getOrganisaatioOid)
-                .containsExactly("1.2.3.4.5");
+                .containsExactly("1.2.246.562.10.5");
     }
 
     @Test
-    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.3.4.5"})
+    @WithMockUser(username = "1.2.4", authorities = {"ROLE_APP_KAYTTOOIKEUS_CRUD", "ROLE_APP_KAYTTOOIKEUS_CRUD_1.2.246.562.10.5"})
     public void listAvoinKutsusWithNormalUserByKayttooikeusryhmaId() {
         MyonnettyKayttoOikeusRyhmaTapahtuma myonnettyKayttoOikeusRyhmaTapahtuma
-                = populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.3.4.5"),
+                = populate(myonnettyKayttoOikeus(organisaatioHenkilo("1.2.4", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
-        populate(myonnettyKayttoOikeus(organisaatioHenkilo("kutsujaOid", "1.2.3.4.5"),
+        populate(myonnettyKayttoOikeus(organisaatioHenkilo("kutsujaOid", "1.2.246.562.10.5"),
                 kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD))));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("kutsujaOid").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
-                .organisaatio(kutsuOrganisaatio("1.2.3.4.5")
+                .organisaatio(kutsuOrganisaatio("1.2.246.562.10.5")
                         .ryhma(kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)))));
         populate(kutsu("Essi", "Esimerkki", "a@eaxmple.com")
                 .kutsuja("kutsujaOid").aikaleima(LocalDateTime.of(2016, 1, 1, 0, 0, 0, 0))
                 .organisaatio(kutsuOrganisaatio("1.2.246.562.10.00000000001")
                         .ryhma(kayttoOikeusRyhma("RYHMA1").withOikeus(oikeus(PALVELU_KAYTTOOIKEUS, ROLE_CRUD)))));
-        given(this.organisaatioClient.listWithChildOids(eq("1.2.3.4.5"), any())).willReturn(singleton("1.2.3.4.5"));
+        given(this.organisaatioClient.listWithChildOids(eq("1.2.246.562.10.5"), any())).willReturn(singleton("1.2.246.562.10.5"));
         OrganisaatioPerustieto org = new OrganisaatioPerustieto();
-        org.setOid("1.2.3.4.5");
+        org.setOid("1.2.246.562.10.5");
         org.setNimi(new TextGroupMapDto().put("fi", "Nimi2").asMap());
-        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.3.4.5")))
+        given(this.organisaatioClient.getOrganisaatioPerustiedotCached(eq("1.2.246.562.10.5")))
                 .willReturn(Optional.of(org));
 
         // Ryhmä user has not rights to will be set to all his ryhmas
@@ -261,7 +263,7 @@ public class KutsuServiceTest extends AbstractServiceIntegrationTest {
         assertThat(kutsuList)
                 .flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .flatExtracting(KutsuReadDto.KutsuOrganisaatioReadDto::getOrganisaatioOid)
-                .containsExactly("1.2.3.4.5");
+                .containsExactly("1.2.246.562.10.5");
         assertThat(kutsuList)
                 .flatExtracting(KutsuReadDto::getOrganisaatiot)
                 .flatExtracting(KutsuReadDto.KutsuOrganisaatioReadDto::getKayttoOikeusRyhmat)
