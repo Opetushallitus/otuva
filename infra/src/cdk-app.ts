@@ -982,6 +982,8 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
   ) {
     super(scope, id, props);
 
+    const config = getConfig();
+
     const vpc = ec2.Vpc.fromLookup(this, "Vpc", { vpcName: VPC_NAME });
 
     const heapDumpBucket = new s3.Bucket(
@@ -1087,14 +1089,20 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
           "CasGauthSigningKey",
           "kayttooikeus",
         ),
-        serviceprovider_app_username_to_usermanagement: this.ssmSecret(
-          "AppUsernameToUserManagement",
-          "service-provider",
-        ),
-        serviceprovider_app_password_to_usermanagement: this.ssmSecret(
-          "AppPasswordToUserManagement",
-          "service-provider",
-        ),
+        ...(config.casVirkailijaUsesOwnOAuth2ClientId
+          ? {
+              cas_virkailija_oauth2_client_id: this.ssmSecret("Oauth2ClientId"),
+            }
+          : {
+              serviceprovider_app_username_to_usermanagement: this.ssmSecret(
+                "AppUsernameToUserManagement",
+                "service-provider",
+              ),
+              serviceprovider_app_password_to_usermanagement: this.ssmSecret(
+                "AppPasswordToUserManagement",
+                "service-provider",
+              ),
+            }),
         cas_virkailija_oauth2_client_secret:
           this.ssmSecret("Oauth2ClientSecret"),
         haka_keystore_base64: ecs.Secret.fromSecretsManager(
@@ -1142,7 +1150,6 @@ class CasVirkailijaApplicationStack extends cdk.Stack {
       ],
     });
 
-    const config = getConfig();
     const service = new ecs.FargateService(this, "Service", {
       cluster: props.ecsCluster,
       taskDefinition,

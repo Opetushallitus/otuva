@@ -34,7 +34,6 @@ cas.authn.mfa.gauth.rest.basic-auth-username: ${cas_mfa_username}
 cas.authn.mfa.gauth.rest.basic-auth-password: ${cas_mfa_password}
 
 cas.custom.properties.uusHakaEnabled: true
-cas.custom.properties.hakaUrl: https://virkailija.untuvaopintopolku.fi/service-provider-app/saml/login/alias/hakasp
 cas.custom.properties.loginTietosuojaselosteUrl: https://opintopolku.fi/konfo/fi/sivu/tietosuojaselosteet-ja-evasteet
 
 cas.service-registry.json.location: file:///app/services/dev
@@ -105,7 +104,7 @@ email-verification-enabled.usernamelist: ""
 kayttooikeus-service.baseurl: https://dev.otuva.opintopolku.fi/kayttooikeus-service/
 oppijanumerorekisteri-service.baseurl: https://dev.oppijanumerorekisteri.opintopolku.fi/oppijanumerorekisteri-service/
 henkilo-ui.baseurl: https://virkailija.untuvaopintopolku.fi/henkilo-ui/
-oauth2.client-id: ${serviceprovider_app_username_to_usermanagement}
+oauth2.client-id: ${cas_virkailija_oauth2_client_id}
 oauth2.client-secret: ${cas_virkailija_oauth2_client_secret}
 
 registration.enabled: true
