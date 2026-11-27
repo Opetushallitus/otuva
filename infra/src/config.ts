@@ -6,6 +6,7 @@ export type Config = {
   kayttooikeusTaskMemoryMiB: number;
   serviceProviderTaskCpu: number;
   serviceProviderTaskMemoryMiB: number;
+  casVirkailijaUsesOwnOAuth2ClientId: boolean;
   otuvaDomain: string;
   opintopolkuHost: string;
   minCapacity: number;
@@ -29,6 +30,7 @@ const defaultConfig = {
   kayttooikeusTaskMemoryMiB: 4096,
   serviceProviderTaskCpu: 512,
   serviceProviderTaskMemoryMiB: 1024,
+  casVirkailijaUsesOwnOAuth2ClientId: false,
   // service-provider should run only single instance because it contains in-memory state for SAML message identifiers
   serviceProviderCapacity: 1,
   auditCleanup: {
@@ -62,6 +64,7 @@ export function getConfig(): Config {
 
 export const hahtuva: Config = {
   ...defaultConfig,
+  casVirkailijaUsesOwnOAuth2ClientId: true,
   otuvaDomain: "hahtuva.otuva.opintopolku.fi",
   opintopolkuHost: "hahtuvaopintopolku.fi",
   minCapacity: 2,
@@ -77,6 +80,7 @@ export const hahtuva: Config = {
 
 export const dev: Config = {
   ...defaultConfig,
+  casVirkailijaUsesOwnOAuth2ClientId: true,
   otuvaDomain: "dev.otuva.opintopolku.fi",
   opintopolkuHost: "untuvaopintopolku.fi",
   minCapacity: 2,
